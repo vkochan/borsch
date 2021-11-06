@@ -183,17 +183,10 @@ typedef struct {
  #define debug eprint
 #endif
 
-#ifdef SCHEME
-int scheme_init(void);
-void scheme_uninit(void);
-int scheme_event_handle(event_t evt);
-int scheme_eval_file(const char *scm_in, const char *out);
-#else
-int scheme_init(void) { return 0; }
-void scheme_uninit(void) { }
-int scheme_event_handle(event_t evt) { return 0; }
-int scheme_eval_file(const char *scm_in, const char *out) { return 0; }
-#endif
+extern int scheme_init(void);
+extern void scheme_uninit(void);
+extern int scheme_event_handle(event_t evt);
+extern int scheme_eval_file(const char *scm_in, const char *out);
 
 /* commands for use by keybindings */
 static void create(const char *args[]);
@@ -1137,13 +1130,10 @@ static KeyBinding*
 keybinding(KeyCombo keys, unsigned int keycount) {
 	KeyBinding *keyb = NULL;
 
-#ifndef SCHEME
 	if (modkeyb)
 		keyb = keybindmatch(modkeyb, modkeybn, keys, keycount);
 	if (!keyb)
-#else
 		keyb = keybindmatch(scmkeyb, scmkeybn, keys, keycount);
-#endif
 	return keyb;
 }
 

@@ -2,20 +2,19 @@ include config.mk
 
 SRC = dvtm.c vt.c
 
-ifeq ($(SCHEME),y)
-    SCH_VERSION := $(shell echo "(scheme-version)" | scheme -q | sed -e 's|"||g' | cut -d ' ' -f4)
-    SCH_MACHINE := $(shell echo "(machine-type)" | scheme -q)
-    SCH_PREFIX ?= /usr
-    SCH_PATH = $(SCH_PREFIX)/lib/csv$(SCH_VERSION)/$(SCH_MACHINE)
-    LIBS += -lpthread -luuid -ldl -lm
-    OBJS += $(SCH_PATH)/kernel.o
-    BIN += dvtm-eval
-    SRC += scheme.c
+SCH_VERSION := $(shell echo "(scheme-version)" | scheme -q | sed -e 's|"||g' | cut -d ' ' -f4)
+SCH_MACHINE := $(shell echo "(machine-type)" | scheme -q)
+SCH_PREFIX ?= /usr
+SCH_PATH = $(SCH_PREFIX)/lib/csv$(SCH_VERSION)/$(SCH_MACHINE)
+LIBS += -lpthread -luuid -ldl -lm
+OBJS += $(SCH_PATH)/kernel.o
+BIN += dvtm-eval
+SRC += scheme.c
 
-    SCH_SCRIPTS = scheme.ss
+SCH_SCRIPTS = scheme.ss
 
-    CFLAGS += -I$(SCH_PATH) -DSCHEME \
-	      -DLIB_PATH='"'"${DESTDIR}${LIB_PREFIX}"'"'
+CFLAGS += -I$(SCH_PATH) \
+   -DLIB_PATH='"'"${DESTDIR}${LIB_PREFIX}"'"'
 
 define install_scheme
 	@echo installing scheme scripts
@@ -33,8 +32,6 @@ define uninstall_scheme
 		rm -rf "${DESTDIR}${LIB_PREFIX}/$$s"; \
 	done
 endef
-
-endif
 
 BIN += dvtm dvtm-editor dvtm-pager
 MANUALS = dvtm.1 dvtm-editor.1 dvtm-pager.1
