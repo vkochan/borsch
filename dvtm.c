@@ -198,7 +198,6 @@ static void focusprevnm(const char *args[]);
 static void focuslast(const char *args[]);
 static void killclient(const char *args[]);
 static void killother(const char *args[]);
-static void paste(const char *args[]);
 static void quit(const char *args[]);
 static void redraw(const char *args[]);
 static void scrollback(const char *args[]);
@@ -426,7 +425,6 @@ static StatusBar bar = { .fd = -1,
 static Fifo cmdfifo = { .fd = -1 };
 static Fifo retfifo = { .fd = -1 };
 
-static Fifo cpyfifo = { .fd = -1 };
 static const char *shell;
 static Register copyreg;
 static volatile sig_atomic_t running = true;
@@ -1389,10 +1387,6 @@ cleanup(void) {
 		close(cmdfifo.fd);
 	if (cmdfifo.file)
 		unlink(cmdfifo.file);
-	if (cpyfifo.fd > 0)
-		close(cpyfifo.fd);
-	if (cpyfifo.file)
-		unlink(cpyfifo.file);
 	if (retfifo.fd > 0)
 		close(retfifo.fd);
 	if (retfifo.file)
@@ -1696,12 +1690,6 @@ static void killother(const char *args[]) {
 			continue;
 		kill(-c->pid, SIGKILL);
 	}
-}
-
-static void
-paste(const char *args[]) {
-	if (sel && copyreg.data)
-		vt_write(sel->term, copyreg.data, copyreg.len);
 }
 
 static void
