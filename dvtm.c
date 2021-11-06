@@ -209,7 +209,6 @@ static void paste(const char *args[]);
 static void quit(const char *args[]);
 static void redraw(const char *args[]);
 static void scrollback(const char *args[]);
-static void send(const char *args[]);
 static void setlayout(const char *args[]);
 static void togglemaximize(const char *args[]);
 static int getnmaster(void);
@@ -1819,12 +1818,6 @@ scrollback(const char *args[]) {
 
 	draw(sel);
 	curs_set(vt_cursor_visible(sel->term));
-}
-
-static void
-send(const char *args[]) {
-	if (sel && args && args[0])
-		vt_write(sel->term, args[0], strlen(args[0]));
 }
 
 static void
