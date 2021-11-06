@@ -275,9 +275,6 @@ static bool show_tagnamebycwd = false;
 static KeyBinding *scmkeyb = NULL;
 static int scmkeybn;
 
-static KeyBinding *cmdkeyb = NULL;
-static int cmdkeybn;
-
 static KeyBinding *modkeyb = NULL;
 static int modkeybn;
 
@@ -999,14 +996,11 @@ keybindmatch(KeyBinding *keyb, unsigned int keybn, KeyCombo keys, unsigned int k
 
 static KeyBinding*
 keybinding(KeyCombo keys, unsigned int keycount) {
-	KeyBinding *keyb;
+	KeyBinding *keyb = NULL;
 
 #ifndef SCHEME
-	keyb = keybindmatch(bindings, LENGTH(bindings), keys, keycount);
-	if (!keyb && modkeyb)
+	if (modkeyb)
 		keyb = keybindmatch(modkeyb, modkeybn, keys, keycount);
-	if (!keyb)
-		keyb = keybindmatch(cmdkeyb, cmdkeybn, keys, keycount);
 	if (!keyb)
 #else
 		keyb = keybindmatch(scmkeyb, scmkeybn, keys, keycount);
@@ -1399,9 +1393,6 @@ cleanup(void) {
 		free(pertag.name[i]);
 		free(pertag.cwd[i]);
 	}
-	for(i=0; i < cmdkeybn; i++)
-		free((char *) cmdkeyb[i].action.args[0]);
-	free(cmdkeyb);
 }
 
 static char *getcwd_by_pid(Client *c) {
@@ -2539,66 +2530,6 @@ usage(void) {
 	exit(EXIT_FAILURE);
 }
 
-static void
-addusrkeyb(char *map)
-{
-	char *keystr, *typestr, *valstr;
-	KeyBinding *key;
-	char *keybval;
-	size_t vlen;
-	int i;
-
-	keystr = map;
-
-	typestr = strchr(keystr, ':');
-	if (!typestr)
-		error("missing key-bind type %s\n", map);
-	*typestr = '\0';
-	typestr++;
-
-	valstr = strchr(typestr, ':');
-	if (!valstr)
-		error("missing key-bind value %s\n", map);
-	*valstr = '\0';
-	valstr++;
-
-	if (strcmp(typestr, "m") != 0 && strcmp(typestr, "x") != 0 && strcmp(typestr, "c") != 0)
-		error("invalid key-bind type %s\n", typestr);
-	if (strlen(valstr) == 0)
-		error("key-bind value is empty\n");
-
-	cmdkeybn++;
-	cmdkeyb = realloc(cmdkeyb, sizeof(*cmdkeyb) * cmdkeybn);
-	if (!cmdkeyb)
-		error("fail on cmdkeyb realloc\n");
-
-	key = &cmdkeyb[cmdkeybn - 1];
-	memset(key, 0, sizeof(*key));
-
-	for (i = 0; i < MAX_KEYS; i++) {
-		key->keys[i] = *keystr++;
-		if (key->keys[i] == '^') {
-			key->keys[i] = CTRL(*keystr);
-			keystr++;
-		}
-	}
-	keybval = strdup(valstr);
-	if (!keybval)
-		error("fail on key-bind value dup\n");
-	vlen = strlen(keybval);
-	key->action.args[0] = keybval;
-	if (strcmp(typestr, "m") == 0) {
-		key->action.args[1] = (const char *)(vlen + 1);
-		key->action.cmd = senduserevt;
-		keybval[vlen] = '\n';
-	} else if (strcmp(typestr, "x") == 0) {
-		key->action.cmd = create;
-	} else if (strcmp(typestr, "c") == 0) {
-		key->action.cmd = docmd;
-		keybval[vlen] = '\n';
-	}
-}
-
 static bool
 parse_args(int argc, char *argv[]) {
 	bool init = false;
@@ -2685,9 +2616,6 @@ parse_args(int argc, char *argv[]) {
 				setenv("DVTM_RET_FIFO", fifo, 1);
 				break;
 			}
-			case 'b':
-				addusrkeyb(argv[++arg]);
-				break;
 			default:
 				usage();
 		}
