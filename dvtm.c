@@ -193,16 +193,9 @@ static void create(const char *args[]);
 static void editor(const char *args[]);
 static void copymode(const char *args[]);
 static void focusn(const char *args[]);
-static void focusnext(const char *args[]);
 static void focusnextnm(const char *args[]);
-static void focusprev(const char *args[]);
 static void focusprevnm(const char *args[]);
 static void focuslast(const char *args[]);
-static void focusup(const char *args[]);
-static void focusdown(const char *args[]);
-static void focusleft(const char *args[]);
-static void focusright(const char *args[]);
-static void togglesticky(const char *args[]);
 static void killclient(const char *args[]);
 static void killother(const char *args[]);
 static void paste(const char *args[]);
@@ -1638,18 +1631,6 @@ __focusid(int win_id) {
 }
 
 static void
-focusnext(const char *args[]) {
-	Client *c;
-	if (!sel)
-		return;
-	for (c = sel->next; c && !isvisible(c); c = c->next);
-	if (!c)
-		for (c = clients; c && !isvisible(c); c = c->next);
-	if (c)
-		focus(c);
-}
-
-static void
 focusnextnm(const char *args[]) {
 	if (!sel)
 		return;
@@ -1660,20 +1641,6 @@ focusnextnm(const char *args[]) {
 			c = nextvisible(clients);
 	} while (c->minimized && c != sel);
 	focus(c);
-}
-
-static void
-focusprev(const char *args[]) {
-	Client *c;
-	if (!sel)
-		return;
-	for (c = sel->prev; c && !isvisible(c); c = c->prev);
-	if (!c) {
-		for (c = clients; c && c->next; c = c->next);
-		for (; c && !isvisible(c); c = c->prev);
-	}
-	if (c)
-		focus(c);
 }
 
 static void
@@ -1695,57 +1662,6 @@ static void
 focuslast(const char *args[]) {
 	if (lastsel)
 		focus(lastsel);
-}
-
-static void
-focusup(const char *args[]) {
-	if (!sel)
-		return;
-	/* avoid vertical separator, hence +1 in x direction */
-	Client *c = get_client_by_coord(sel->x + 1, sel->y - 1);
-	if (c)
-		focus(c);
-	else
-		focusprev(args);
-}
-
-static void
-focusdown(const char *args[]) {
-	if (!sel)
-		return;
-	Client *c = get_client_by_coord(sel->x, sel->y + sel->h);
-	if (c)
-		focus(c);
-	else
-		focusnext(args);
-}
-
-static void
-focusleft(const char *args[]) {
-	if (!sel)
-		return;
-	Client *c = get_client_by_coord(sel->x - 2, sel->y);
-	if (c)
-		focus(c);
-	else
-		focusprev(args);
-}
-
-static void
-focusright(const char *args[]) {
-	if (!sel)
-		return;
-	Client *c = get_client_by_coord(sel->x + sel->w + 1, sel->y);
-	if (c)
-		focus(c);
-	else
-		focusnext(args);
-}
-
-static void
-togglesticky(const char *args[]) {
-	pertag.msticky[pertag.curtag] = !pertag.msticky[pertag.curtag];
-	draw_all();
 }
 
 static void
