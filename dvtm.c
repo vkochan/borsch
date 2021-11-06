@@ -216,7 +216,6 @@ static void togglerunall(const char *args[]);
 static void toggletag(const char *args[]);
 static void toggleview(const char *args[]);
 static void viewprevtag(const char *args[]);
-static void view(const char *args[]);
 static void zoom(const char *args[]);
 static void doeval(const char *args[]);
 static void setminimized(const char *args[]);
@@ -441,7 +440,6 @@ static Cmd commands[] = {
 	/* change layout by name or select next */
 	{ "setlayout", { setlayout, { NULL } } },
 	{ "setminimized", { setminimized, { NULL } } },
-	{ "view", { view, { NULL } } },
 	{ "kill", { killclient, { NULL } } },
 	{ "eval", { doeval, { NULL } } },
 };
@@ -1163,26 +1161,6 @@ toggleview(const char *args[]) {
 		} else if(!(newtagset & 1 << (pertag.curtag - 1))) {
 			pertag.prevtag = pertag.curtag;
 			for (i=0; !(newtagset &1 << i); i++) ;
-			pertag.curtag = i + 1;
-		}
-		setpertag();
-		tagset[seltags] = newtagset;
-		tagschanged();
-	}
-}
-
-static void
-view(const char *args[]) {
-	int i;
-
-	unsigned int newtagset = bitoftag(args[0]) & TAGMASK;
-	if (tagset[seltags] != newtagset && newtagset) {
-		seltags ^= 1; /* toggle sel tagset */
-		pertag.prevtag = pertag.curtag;
-		if(args[0] == NULL)
-			pertag.curtag = 0;
-		else {
-			for (i = 0; (i < LENGTH(tags)) && strcmp(tags[i], args[0]); i++) ;
 			pertag.curtag = i + 1;
 		}
 		setpertag();
