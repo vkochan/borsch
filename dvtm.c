@@ -227,8 +227,6 @@ static void toggleview(const char *args[]);
 static void viewprevtag(const char *args[]);
 static void view(const char *args[]);
 static void zoom(const char *args[]);
-static void senduserevt(const char *args[]);
-static void sendevtfmt(const char *fmt, ... );
 static void doeval(const char *args[]);
 static void setminimized(const char *args[]);
 
@@ -436,7 +434,6 @@ static StatusBar bar = { .fd = -1,
 static Fifo cmdfifo = { .fd = -1 };
 static Fifo retfifo = { .fd = -1 };
 
-static Fifo evtfifo = { .fd = -1 };
 static Fifo cpyfifo = { .fd = -1 };
 static const char *shell;
 static Register copyreg;
@@ -1162,8 +1159,6 @@ setpertag(void) {
 	evt.eid = EVT_VIEW_SELECTED;
 	evt.oid = pertag.curtag;
 	scheme_event_handle(evt);
-
-	sendevtfmt("curtag %d\n", pertag.curtag);
 }
 
 static void
@@ -1402,10 +1397,6 @@ cleanup(void) {
 		close(cmdfifo.fd);
 	if (cmdfifo.file)
 		unlink(cmdfifo.file);
-	if (evtfifo.fd > 0)
-		close(evtfifo.fd);
-	if (evtfifo.file)
-		unlink(evtfifo.file);
 	if (cpyfifo.fd > 0)
 		close(cpyfifo.fd);
 	if (cpyfifo.file)
@@ -2013,28 +2004,6 @@ zoom(const char *args[]) {
 	if (c->minimized)
 		toggleminimize(NULL);
 	arrange();
-}
-
-static void senduserevt(const char *args[]) {
-	if (!args || !args[0] || !args[1])
-		return;
-
-	write(evtfifo.fd, args[0], (size_t)args[1]);
-}
-
-void sendevtfmt(const char *fmt, ... )
-{
-	char buf[256];
-	va_list args;
-	int len;
-
-	if (evtfifo.fd == -1)
-		return;
-
-	va_start (args, fmt);
-	len = vsnprintf(buf, sizeof(buf), fmt, args);
-	write(evtfifo.fd, buf, len);
-	va_end (args);
 }
 
 /* commands for use by mouse bindings */
