@@ -206,7 +206,6 @@ static void togglemaximize(const char *args[]);
 static int getnmaster(void);
 static float getmfact(void);
 static void startup(const char *args[]);
-static void tag(const char *args[]);
 static void togglebar(const char *args[]);
 static void togglebarpos(const char *args[]);
 static void toggleminimize(const char *args[]);
@@ -1111,14 +1110,6 @@ tagschanged() {
 		toggleminimize(NULL);
 	}
 	arrange();
-}
-
-static void
-tag(const char *args[]) {
-	if (!sel)
-		return;
-	sel->tags = bitoftag(args[0]) & TAGMASK;
-	tagschanged();
 }
 
 static void
