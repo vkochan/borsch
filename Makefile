@@ -36,7 +36,7 @@ endef
 
 endif
 
-BIN += dvtm dvtm-status dvtm-editor dvtm-pager dvtm-cmd
+BIN += dvtm dvtm-editor dvtm-pager
 MANUALS = dvtm.1 dvtm-editor.1 dvtm-pager.1
 
 VERSION = $(shell git describe --always --dirty 2>/dev/null || echo "0.15-git")
