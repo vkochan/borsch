@@ -229,9 +229,7 @@ static void view(const char *args[]);
 static void zoom(const char *args[]);
 static void senduserevt(const char *args[]);
 static void sendevtfmt(const char *fmt, ... );
-static void docmd(const char *args[]);
 static void doeval(const char *args[]);
-static void doret(const char *msg, size_t len);
 static void setminimized(const char *args[]);
 
 /* commands for use by mouse bindings */
@@ -2176,16 +2174,6 @@ handle_cmdfifo(void) {
 	handle_cmd(cmdbuf);
 }
 
-static void docmd(const char *args[]) {
-	char cmdbuf[512];
-
-	if (!args || !args[0])
-		return;
-
-	strncpy(cmdbuf, args[0], sizeof(cmdbuf) - 1);
-	handle_cmd(cmdbuf);
-}
-
 static void doeval(const char *args[]) {
 	char tmp[10];
 	int ret;
@@ -2196,24 +2184,6 @@ static void doeval(const char *args[]) {
 	ret = scheme_eval_file(args[0], args[1]);
 
 	write(retfifo.fd, tmp, snprintf(tmp, sizeof(tmp), "%u\n", ret));
-}
-
-static void doret(const char *msg, size_t len) {
-    char tmp[10] = { '\n' };
-    unsigned int lines = 1;
-    const char *ptr = msg;
-    int i;
-
-    if (retfifo.fd <= 0)
-	    return;
-
-    for (i = 0; i < len; i++, ptr++)
-	    if (*ptr == '\n')
-		    lines++;
-
-    write(retfifo.fd, tmp, snprintf(tmp, sizeof(tmp), "%u\n", lines));
-    write(retfifo.fd, msg, len);
-    write(retfifo.fd, "\n", 1);
 }
 
 static void setminimized(const char *args[]) {
