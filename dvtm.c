@@ -192,11 +192,7 @@ extern int scheme_eval_file(const char *scm_in, const char *out);
 static void create(const char *args[]);
 static void editor(const char *args[]);
 static void copymode(const char *args[]);
-static void copybuf(const char *args[]);
-static void sendtext(const char *args[]);
-static void capture(const char *args[]);
 static void focusn(const char *args[]);
-static void focusid(const char *args[]);
 static void focusnext(const char *args[]);
 static void focusnextnm(const char *args[]);
 static void focusprev(const char *args[]);
@@ -207,7 +203,6 @@ static void focusdown(const char *args[]);
 static void focusleft(const char *args[]);
 static void focusright(const char *args[]);
 static void togglesticky(const char *args[]);
-static void setsticky(const char *args[]);
 static void killclient(const char *args[]);
 static void killother(const char *args[]);
 static void paste(const char *args[]);
@@ -217,15 +212,10 @@ static void scrollback(const char *args[]);
 static void send(const char *args[]);
 static void setlayout(const char *args[]);
 static void togglemaximize(const char *args[]);
-static void incnmaster(const char *args[]);
 static int getnmaster(void);
-static void setmfact(const char *args[]);
 static float getmfact(void);
 static void startup(const char *args[]);
 static void tag(const char *args[]);
-static void tagid(const char *args[]);
-static void tagname(const char *args[]);
-static void tagnamebycwd(const char *args[]);
 static void togglebar(const char *args[]);
 static void togglebarpos(const char *args[]);
 static void toggleminimize(const char *args[]);
@@ -237,14 +227,11 @@ static void toggleview(const char *args[]);
 static void viewprevtag(const char *args[]);
 static void view(const char *args[]);
 static void zoom(const char *args[]);
-static void setcwd(const char *args[]);
 static void senduserevt(const char *args[]);
 static void sendevtfmt(const char *fmt, ... );
 static void docmd(const char *args[]);
-static void doexec(const char *args[]);
 static void doeval(const char *args[]);
 static void doret(const char *msg, size_t len);
-static void setstatus(const char *args[]);
 static void setminimized(const char *args[]);
 
 /* commands for use by mouse bindings */
@@ -463,33 +450,14 @@ static int min_align = MIN_ALIGN_HORIZ;
 static Cmd commands[] = {
 	/* create [cmd]: create a new window, run `cmd` in the shell if specified */
 	{ "create", { create,	{ NULL } } },
-	/* focus <win_id>: focus the window whose `DVTM_WINDOW_ID` is `win_id` */
-	{ "focus",  { focusid,	{ NULL } } },
-	/* tag <win_id> <tag> [tag ...]: add +tag, remove -tag or set tag of the window with the given identifier */
-	{ "tag",    { tagid,	{ NULL } } },
-	/* set master sticky mode on/off */
-	{ "setsticky",    { setsticky,	{ NULL } } },
-	/* increase/decrease the number of windows in master area */
-	{ "incnmaster", { incnmaster, { NULL } } },
-	/* increase/decrease the size of master area */
-	{ "setmfact", { setmfact, { NULL } } },
 	/* put/get window to/from master area */
 	{ "zoom", { zoom, { NULL } } },
 	/* set cwd per tag or for current */
-	{ "setcwd", { setcwd, { NULL } } },
 	/* change layout by name or select next */
 	{ "setlayout", { setlayout, { NULL } } },
-	/* status bar */
-	{ "setstatus", { setstatus, { NULL } } },
 	{ "setminimized", { setminimized, { NULL } } },
-	{ "tagname", { tagname, { NULL } } },
-	{ "tagnamebycwd", { tagnamebycwd, { NULL } } },
 	{ "view", { view, { NULL } } },
 	{ "kill", { killclient, { NULL } } },
-	{ "copybuf", { copybuf, { NULL } } },
-	{ "sendtext", { sendtext, { NULL } } },
-	{ "capture", { capture, { NULL } } },
-	{ "exec", { doexec, { NULL } } },
 	{ "eval", { doeval, { NULL } } },
 };
 
@@ -1171,76 +1139,6 @@ tag(const char *args[]) {
 }
 
 static void
-tagid(const char *args[]) {
-	if (!args[0] || !args[1])
-		return;
-
-	const int win_id = atoi(args[0]);
-	for (Client *c = clients; c; c = c->next) {
-		if (c->id == win_id) {
-			unsigned int ntags = c->tags;
-			for (unsigned int i = 1; i < MAX_ARGS && args[i]; i++) {
-				if (args[i][0] == '+')
-					ntags |= bitoftag(args[i]+1);
-				else if (args[i][0] == '-')
-					ntags &= ~bitoftag(args[i]+1);
-				else
-					ntags = bitoftag(args[i]);
-			}
-			ntags &= TAGMASK;
-			if (ntags) {
-				c->tags = ntags;
-				tagschanged();
-			}
-			return;
-		}
-	}
-}
-
-static void
-tagname(const char *args[]) {
-	unsigned int tag_id;
-	const char *name;
-
-	if (!args[0])
-		return;
-
-	if (args[0] && args[1]) {
-		tag_id = atoi(args[0]);
-		if (tag_id >= LENGTH(tags))
-			return;
-	} else {
-		tag_id = pertag.curtag;
-	}
-
-	free(pertag.name[tag_id]);
-	pertag.name[tag_id] = NULL;
-
-	name = args[0];
-	if (args[1])
-		name = args[1];
-
-	if (name && strlen(name))
-		pertag.name[tag_id] = strdup(name);
-	drawbar();
-}
-
-static void
-tagnamebycwd(const char *args[]) {
-	if (!args || !args[0])
-		return;
-
-	if (strcmp(args[0], "on") == 0)
-		show_tagnamebycwd = true;
-	else if (strcmp(args[0], "off") == 0)
-		show_tagnamebycwd = true;
-	else
-		return;
-
-	drawbar();
-}
-
-static void
 toggletag(const char *args[]) {
 	if (!sel)
 		return;
@@ -1724,76 +1622,6 @@ copymode(const char *args[]) {
 }
 
 static void
-copybuf(const char *args[]) {
-	char buf[1024];
-	int offs = 0;
-	int len;
-
-	if (!args || !args[0])
-		return;
-
-	if (strcmp(args[0], "put") == 0) {
-		copyreg.len = 0;
-
-		do {
-			len = read(cpyfifo.fd, buf, sizeof(buf));
-			if (len <= 0)
-				break;
-
-			if (!copyreg.data) {
-				copyreg.data = malloc(sizeof(buf));
-				copyreg.size = sizeof(buf);
-			}
-
-			copyreg.len += len;
-
-			if (copyreg.len > copyreg.size) {
-				copyreg.data = realloc(copyreg.data, copyreg.len);
-				copyreg.size = copyreg.len;
-			}
-
-			memcpy(copyreg.data + offs, buf, len);
-			offs += len;
-		} while (len == sizeof(buf));
-	} else if (strcmp(args[0], "get") == 0) {
-		doret(copyreg.data, copyreg.len);
-	}
-}
-
-static void
-sendtext(const char *args[]) {
-	char buf[512];
-	int len;
-
-	if (!sel || !args || !args[0])
-		return;
-
-	if (strcmp(args[0], "-") == 0) {
-		do {
-			len = read(cpyfifo.fd, buf, sizeof(buf));
-			if (len <= 0)
-				break;
-
-			vt_write(sel->app, buf, len);
-		} while (len == sizeof(buf));
-	} else {
-	    vt_write(sel->app, args[0], strlen(args[0]));
-	}
-}
-
-static void
-capture(const char *args[]) {
-	char *buf = NULL;
-	size_t len;
-
-	if (!sel)
-		return;
-
-	len = vt_content_get(sel->app, &buf, false);
-	doret(buf, len);
-}
-
-static void
 focusn(const char *args[]) {
 	for (Client *c = nextvisible(clients); c; c = nextvisible(c->next)) {
 		if (c->order == atoi(args[0])) {
@@ -1819,14 +1647,6 @@ __focusid(int win_id) {
 			return;
 		}
 	}
-}
-
-static void
-focusid(const char *args[]) {
-	if (!args[0])
-		return;
-
-	__focusid(atoi(args[0]));
 }
 
 static void
@@ -1937,25 +1757,6 @@ focusright(const char *args[]) {
 static void
 togglesticky(const char *args[]) {
 	pertag.msticky[pertag.curtag] = !pertag.msticky[pertag.curtag];
-	draw_all();
-}
-
-void static
-setsticky(const char *args[]) {
-	int tag = pertag.curtag;
-	bool on = true;
-
-	if (args && args[0]) {
-		if (strncmp("on", args[0], 2) == 0)
-			on = true;
-		else if (strncmp("off", args[0], 3) == 0)
-			on = false;
-	}
-	if (args && args[1]) {
-		tag = bitoftag(args[1]) & TAGMASK;
-	}
-
-	pertag.msticky[tag] = on;
 	draw_all();
 }
 
@@ -2077,60 +1878,9 @@ togglemaximize(const char *args[]) {
 	}
 }
 
-static void
-incnmaster(const char *args[]) {
-	int delta, nmaster;
-
-	if (isarrange(fullscreen) || isarrange(grid))
-		return;
-
-	nmaster = pertag.nmaster[pertag.curtag];
-
-	/* arg handling, manipulate nmaster */
-	if (args[0] == NULL) {
-		nmaster = NMASTER;
-	} else if (sscanf(args[0], "%d", &delta) == 1) {
-		if (args[0][0] == '+' || args[0][0] == '-')
-			nmaster += delta;
-		else
-			nmaster = delta;
-		if (nmaster < 1)
-			nmaster = 1;
-	}
-	pertag.nmaster[pertag.curtag] = nmaster;
-	arrange();
-}
-
 static int
 getnmaster(void) {
 	return pertag.nmaster[pertag.curtag];
-}
-
-static void
-setmfact(const char *args[]) {
-	float delta, mfact;
-
-	if (isarrange(fullscreen) || isarrange(grid))
-		return;
-
-	mfact = pertag.mfact[pertag.curtag];
-
-	/* arg handling, manipulate mfact */
-	if (args[0] == NULL) {
-		mfact = MFACT;
-	} else if (sscanf(args[0], "%f", &delta) == 1) {
-		if (args[0][0] == '+' || args[0][0] == '-')
-			mfact += delta;
-		else
-			mfact = delta;
-		if (mfact < 0.1)
-			mfact = 0.1;
-		else if (mfact > 0.9)
-			mfact = 0.9;
-	}
-
-	pertag.mfact[pertag.curtag] = mfact;
-	arrange();
 }
 
 static float
@@ -2265,21 +2015,6 @@ zoom(const char *args[]) {
 	if (c->minimized)
 		toggleminimize(NULL);
 	arrange();
-}
-
-static void
-setcwd(const char *args[]) {
-	int tag = pertag.curtag;
-
-	if (!args || !args[0])
-		return;
-	if (args && args[1])
-		tag = atoi(args[0]);
-
-	strncpy(pertag.cwd[tag], args[0], CWD_MAX - 1);
-
-	/* in case tagnamebydir is set */
-	drawbar();
 }
 
 static void senduserevt(const char *args[]) {
@@ -2451,22 +2186,6 @@ static void docmd(const char *args[]) {
 	handle_cmd(cmdbuf);
 }
 
-static void doexec(const char *args[]) {
-	if (!args || !args[0] || sel->overlay)
-		return;
-
-	if (!(sel->overlay = vt_create(sel->h - sel->has_title_line, sel->w, 0)))
-		return;
-
-	if (vt_forkpty(sel->overlay, args[0], args, NULL, NULL, NULL, NULL) < 0) {
-		vt_destroy(sel->overlay);
-		sel->overlay = NULL;
-		return;
-	}
-
-	sel->term = sel->overlay;
-}
-
 static void doeval(const char *args[]) {
 	char tmp[10];
 	int ret;
@@ -2495,18 +2214,6 @@ static void doret(const char *msg, size_t len) {
     write(retfifo.fd, tmp, snprintf(tmp, sizeof(tmp), "%u\n", lines));
     write(retfifo.fd, msg, len);
     write(retfifo.fd, "\n", 1);
-}
-
-static void setstatus(const char *args[]) {
-	if (!args || !args[0] || !args[1])
-		return;
-
-	if (strcmp("align", args[0]) == 0) {
-		if (strcmp("left", args[1]) == 0)
-			bar.align = BAR_LEFT;
-		else if (strcmp("right", args[1]) == 0)
-			bar.align = BAR_RIGHT;
-	}
 }
 
 static void setminimized(const char *args[]) {
