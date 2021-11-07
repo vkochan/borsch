@@ -622,6 +622,12 @@
    )
 )
 
+(define window-eval
+   (lambda ()
+      (window-exec "dvtm-eval -i")
+   )
+)
+
 (define window-copy
    (case-lambda
       [()
@@ -1072,6 +1078,7 @@
 ;; Default key bindings
 ;;;;;;;;;;;;;;;;;;;;;;;
 (bind-key "C-g c"       window-exec)
+(bind-key "C-g C-x"     window-eval)
 (bind-key "C-g x x"     window-delete)
 (bind-key "M-h"         window-select-left)
 (bind-key "C-g h"       window-select-left)
