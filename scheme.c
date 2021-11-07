@@ -163,9 +163,9 @@ void scheme_win_del(int wid)
 	return win_del(wid);
 }
 
-char *scheme_win_title_get(int wid)
+ptr scheme_win_title_get(int wid)
 {
-	return win_title_get(wid);
+	return Sstring(win_title_get(wid));
 }
 
 int scheme_win_title_set(int wid, char *title)

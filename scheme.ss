@@ -208,7 +208,7 @@
 (define __cs_win_current_set (foreign-procedure __collect_safe "cs_win_current_set" (int) int))
 (define __cs_win_create (foreign-procedure "cs_win_create" (string) scheme-object))
 (define __cs_win_del (foreign-procedure __collect_safe "cs_win_del" (int) int))
-(define __cs_win_title_get (foreign-procedure __collect_safe "cs_win_title_get" (int) string))
+(define __cs_win_title_get (foreign-procedure __collect_safe "cs_win_title_get" (int) scheme-object))
 (define __cs_win_title_set (foreign-procedure "cs_win_title_set" (int string) int))
 (define __cs_win_tag_set (foreign-procedure __collect_safe "cs_win_tag_set" (int int) int))
 (define __cs_win_tag_toggle (foreign-procedure __collect_safe "cs_win_tag_toggle" (int int) int))
