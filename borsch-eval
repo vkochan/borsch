@@ -33,10 +33,10 @@ do_repl() {
 }
 
 usage() {
-    echo "usage: dvtm-eval [OPTIONS] EXPR"
+    echo "usage: borsch-eval [OPTIONS] EXPR"
     echo "OPTIONS:"
-    echo "   -c PATH         PATH to CMD FIFO (default is \$DVTM_CMD_FIFO)"
-    echo "   -r PATH         PATH to RET FIFO (default is \$DVTM_RET_FIFO)"
+    echo "   -c PATH         PATH to CMD FIFO (default is \$BORSCH_CMD_FIFO)"
+    echo "   -r PATH         PATH to RET FIFO (default is \$BORSCH_RET_FIFO)"
     echo "   -i              Enter interactive mode"
 }
 
@@ -74,8 +74,8 @@ EVAL_OUT=$(mktemp)
 
 trap do_exit EXIT
 
-[ -z "${FIFO_CMD}" ] && FIFO_CMD=${DVTM_CMD_FIFO}
-[ -z "${FIFO_RET}" ] && FIFO_RET=${DVTM_RET_FIFO}
+[ -z "${FIFO_CMD}" ] && FIFO_CMD=${BORSCH_CMD_FIFO}
+[ -z "${FIFO_RET}" ] && FIFO_RET=${BORSCH_RET_FIFO}
 
 if [ ! -e "${FIFO_CMD}" ]; then
     echo "error: cmd fifo does not exist"

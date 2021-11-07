@@ -42,9 +42,9 @@ int main(int argc, char *argv[])
 	int exit_status = EXIT_FAILURE, tmp_write = -1;
 	const char *editor;
 
-	editor = getenv("DVTM_COPY_EDITOR");
+	editor = getenv("BORSCH_COPY_EDITOR");
 	if (!editor)
-		editor = getenv("DVTM_EDITOR");
+		editor = getenv("BORSCH_EDITOR");
 	if (!editor)
 		editor = getenv("VISUAL");
 	if (!editor)
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 	if (!editor)
 		editor = "vi";
 
-	char tempname[] = "/tmp/dvtm-editor.XXXXXX";
+	char tempname[] = "/tmp/borsch-editor.XXXXXX";
 	if ((tmp_write = mkstemp(tempname)) == -1) {
 		error("failed to open temporary file `%s'", tempname);
 		goto err;

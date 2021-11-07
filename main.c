@@ -1425,7 +1425,7 @@ int __create(const char *args[]) {
 	const char *pargs[4] = { shell, NULL };
 	char buf[8], *cwd = NULL;
 	const char *env[] = {
-		"DVTM_WINDOW_ID", buf,
+		"BORSCH_WINDOW_ID", buf,
 		NULL
 	};
 	event_t evt;
@@ -1507,7 +1507,7 @@ static void
 editor(const char *args[]) {
 	const char *editor[3] = { NULL };
 
-	editor[0] = getenv("DVTM_EDITOR");
+	editor[0] = getenv("BORSCH_EDITOR");
 	if (!editor[0])
 		editor[0] = getenv("VISUAL");
 	if (!editor[0])
@@ -2195,7 +2195,7 @@ main(int argc, char *argv[]) {
 	memset(keys, 0, sizeof(keys));
 	sigset_t emptyset, blockset;
 
-	setenv("DVTM", VERSION, 1);
+	setenv("BORSCH", VERSION, 1);
 	if (!parse_args(argc, argv)) {
 		setup();
 		startup(NULL);
@@ -3059,8 +3059,8 @@ int fifo_create(void)
 	}
 	bar.file = strdup(sta);
 
-	setenv("DVTM_CMD_FIFO", cmd, 1);
-	setenv("DVTM_RET_FIFO", ret, 1);
+	setenv("BORSCH_CMD_FIFO", cmd, 1);
+	setenv("BORSCH_RET_FIFO", ret, 1);
 
 	return 0;
 }
