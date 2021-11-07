@@ -2399,7 +2399,10 @@ int win_next_get(int wid)
 	Client *c = client_get_by_id(wid);
 	Client *n;
 
-	for (n = n->next; n && !isvisible(n); n = n->next);
+	if (!c)
+		return 0;
+
+	for (n = c->next; n && !isvisible(n); n = n->next);
 
 	if (n && isvisible(n))
 		return n->id;
