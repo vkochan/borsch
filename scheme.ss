@@ -346,7 +346,7 @@
    )
 )
 
-(define current-window
+(define window-current
    (lambda ()
       (__cs_win_current_get)
    )
@@ -652,7 +652,7 @@
    )
 )
 
-(define current-view
+(define view-current
    (lambda ()
       (__cs_view_current_get)
    )
@@ -775,7 +775,7 @@
    )
 )
 
-(define current-layout
+(define layout-current
    (case-lambda
         [()
          (layout->symb (__cs_layout_current_get (__cs_view_current_get)))]
@@ -849,40 +849,40 @@
 (define layout-is-tiled?
    (case-lambda
         [()
-         (equal? 'tiled (current-layout))]
+         (equal? 'tiled (layout-current))]
 
         [(tag)
-         (equal? 'tiled (current-layout tag))]
+         (equal? 'tiled (layout-current tag))]
    )
 )
 
 (define layout-is-grid?
    (case-lambda
         [()
-         (equal? 'grid (current-layout))]
+         (equal? 'grid (layout-current))]
 
         [(tag)
-         (equal? 'grid (current-layout tag))]
+         (equal? 'grid (layout-current tag))]
    )
 )
 
 (define layout-is-bstack?
    (case-lambda
         [()
-         (equal? 'bstack (current-layout))]
+         (equal? 'bstack (layout-current))]
 
         [(tag)
-         (equal? 'bstack (current-layout tag))]
+         (equal? 'bstack (layout-current tag))]
    )
 )
 
 (define layout-is-maximized?
    (case-lambda
         [()
-         (equal? 'maximized (current-layout))]
+         (equal? 'maximized (layout-current))]
 
         [(tag)
-         (equal? 'maximized (current-layout tag))]
+         (equal? 'maximized (layout-current tag))]
    )
 )
 
