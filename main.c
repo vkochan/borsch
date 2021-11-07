@@ -1,5 +1,9 @@
 /*
- * The initial "port" of dwm to curses was done by
+ * Borsch is based on dvtm implementation with ChezScheme glue
+ *
+ * © 2021      Vadym Kochan <vadim4j@gmail.com>
+ *
+ * dvtm code is implemented by
  *
  * © 2007-2016 Marc André Tanner <mat at brain-dump dot org>
  *

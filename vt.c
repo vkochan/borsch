@@ -2,6 +2,7 @@
  * Copyright © 2004 Bruno T. C. de Oliveira
  * Copyright © 2006 Pierre Habouzit
  * Copyright © 2008-2016 Marc André Tanner
+ * Copyright © 2021      Vadym Kochan
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
