@@ -382,7 +382,7 @@
    )
 )
 
-(define create-window
+(define window-exec
    (case-lambda
       [()
        (__cs_win_create #f)]
@@ -1071,7 +1071,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Default key bindings
 ;;;;;;;;;;;;;;;;;;;;;;;
-(bind-key "C-g c"       create-window)
+(bind-key "C-g c"       window-exec)
 (bind-key "C-g x x"     window-delete)
 (bind-key "M-h"         window-select-left)
 (bind-key "C-g h"       window-select-left)
