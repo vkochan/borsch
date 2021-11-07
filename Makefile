@@ -1,6 +1,6 @@
 include config.mk
 
-SRC = ${PROGNAME}.c vt.c
+SRC = main.c vt.c
 
 SCH_VERSION := $(shell echo "(scheme-version)" | scheme -q | sed -e 's|"||g' | cut -d ' ' -f4)
 SCH_MACHINE := $(shell echo "(machine-type)" | scheme -q)
