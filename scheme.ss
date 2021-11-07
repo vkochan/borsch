@@ -133,27 +133,6 @@
    )
 )
 
-(define __do-eval-pipe-fd
-   (lambda (in-fd out-fd)
-      (let* ([ip (open-fd-input-port in-fd (buffer-mode block) (native-transcoder))]
-            [op (open-fd-output-port out-fd (buffer-mode block) (native-transcoder))]
-            [exp (read ip)]
-            [ret '()]
-            [val ""])
-
-         (set! ret (try eval->str exp))
-
-         (set! val (string-append val (second ret) "\n"))
-
-         (put-string op (fmt "~d\n" (first ret)))
-         (put-string op (fmt "~s\n" (lines-count val)))
-         (put-string op val)
-
-	 (flush-output-port op)
-      )
-   )
-)
-
 (define __do-eval-file
    (lambda (in out)
       (let* ([ip (open-input-file in)]
