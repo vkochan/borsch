@@ -615,7 +615,7 @@
 
 (define window-eval
    (lambda ()
-      (window-exec "dvtm-eval -i")
+      (window-exec "borsch-eval -i")
    )
 )
 
