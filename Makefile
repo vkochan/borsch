@@ -1,6 +1,6 @@
 include config.mk
 
-SRC = dvtm.c vt.c
+SRC = ${PROGNAME}.c vt.c
 
 SCH_VERSION := $(shell echo "(scheme-version)" | scheme -q | sed -e 's|"||g' | cut -d ' ' -f4)
 SCH_MACHINE := $(shell echo "(machine-type)" | scheme -q)
@@ -8,12 +8,13 @@ SCH_PREFIX ?= /usr
 SCH_PATH = $(SCH_PREFIX)/lib/csv$(SCH_VERSION)/$(SCH_MACHINE)
 LIBS += -lpthread -luuid -ldl -lm
 OBJS += $(SCH_PATH)/kernel.o
-BIN += dvtm-eval
+BIN += ${PROGNAME}-eval
 SRC += scheme.c
 
 SCH_SCRIPTS = scheme.ss
 
 CFLAGS += -I$(SCH_PATH) \
+   -DPROGNAME='"${PROGNAME}"' \
    -DLIB_PATH='"'"${DESTDIR}${LIB_PREFIX}"'"'
 
 define install_scheme
@@ -33,19 +34,19 @@ define uninstall_scheme
 	done
 endef
 
-BIN += dvtm dvtm-editor dvtm-pager
-MANUALS = dvtm.1 dvtm-editor.1 dvtm-pager.1
+BIN += ${PROGNAME} ${PROGNAME}-editor ${PROGNAME}-pager
+MANUALS = ${PROGNAME}.1 ${PROGNAME}-editor.1 ${PROGNAME}-pager.1
 
 VERSION = $(shell git describe --always --dirty 2>/dev/null || echo "0.15-git")
 CFLAGS += -DVERSION=\"${VERSION}\"
 DEBUG_CFLAGS = ${CFLAGS} -UNDEBUG -O0 -g -ggdb -Wall -Wextra -Wno-unused-parameter
 
-all: dvtm dvtm-editor
+all: ${PROGNAME} ${PROGNAME}-editor
 
-dvtm: config.mk *.c *.h
+${PROGNAME}: config.mk *.c *.h
 	${CC} ${CFLAGS} ${SRC} ${LDFLAGS} ${OBJS} ${LIBS} -o $@
 
-dvtm-editor: dvtm-editor.c
+${PROGNAME}-editor: ${PROGNAME}-editor.c
 	${CC} ${CFLAGS} $^ ${LDFLAGS} -o $@
 
 man:
@@ -59,12 +60,12 @@ debug: clean
 
 clean:
 	@echo cleaning
-	@rm -f dvtm
-	@rm -f dvtm-editor
+	@rm -f ${PROGNAME} 
+	@rm -f ${PROGNAME}-editor
 
 dist: clean
 	@echo creating dist tarball
-	@git archive --prefix=dvtm-${VERSION}/ -o dvtm-${VERSION}.tar.gz HEAD
+	@git archive --prefix=${PROGNAME}-${VERSION}/ -o ${PROGNAME}-${VERSION}.tar.gz HEAD
 
 install: all
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
@@ -81,7 +82,7 @@ install: all
 		chmod 644 "${DESTDIR}${MANPREFIX}/man1/$$m"; \
 	done
 	@echo installing terminfo description
-	@TERMINFO=${TERMINFO} tic -s dvtm.info
+	@TERMINFO=${TERMINFO} tic -s ${PROGNAME}.info
 
 uninstall:
 	@for b in ${BIN}; do \
@@ -90,6 +91,6 @@ uninstall:
 	done
 	$(uninstall_scheme)
 	@echo removing manual page from ${DESTDIR}${MANPREFIX}/man1
-	@rm -f ${DESTDIR}${MANPREFIX}/man1/dvtm.1
+	@rm -f ${DESTDIR}${MANPREFIX}/man1/${PROGNAME}.1
 
 .PHONY: all clean dist install uninstall debug

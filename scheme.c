@@ -15,7 +15,7 @@
  * only once. */
 static int scheme_initialized = 0;
 
-#define SCHEME_INIT_SCRIPT "/.dvtm/init.ss"
+#define SCHEME_INIT_SCRIPT "/."PROGNAME"/init.ss"
 
 static int scheme_run_script(const char *path)
 {

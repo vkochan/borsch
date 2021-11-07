@@ -33,6 +33,7 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <pwd.h>
+
 #if defined __CYGWIN__ || defined __sun
 # include <termios.h>
 #endif
@@ -375,7 +376,7 @@ static Button buttons[] = {
 };
 #endif /* CONFIG_MOUSE */
 
-/* gets executed when dvtm is started */
+/* gets executed when app is started */
 static Action actions[] = {
 	{ create, { NULL } },
 };
@@ -401,7 +402,7 @@ typedef struct {
 } Pertag;
 
 /* global variables */
-static const char *dvtm_name = "dvtm";
+static const char *prog_name = PROGNAME;
 Screen screen = { .history = SCROLL_HISTORY };
 static Pertag pertag;
 static Client *stack = NULL;
@@ -1243,7 +1244,7 @@ static bool
 checkshell(const char *shell) {
 	if (shell == NULL || *shell == '\0' || *shell != '/')
 		return false;
-	if (!strcmp(strrchr(shell, '/')+1, dvtm_name))
+	if (!strcmp(strrchr(shell, '/')+1, prog_name))
 		return false;
 	if (access(shell, X_OK))
 		return false;
@@ -2166,7 +2167,7 @@ open_or_create_fifo(const char *name, const char **name_created) {
 static void
 usage(void) {
 	cleanup();
-	eprint("usage: dvtm [-v] [-M] [-m mod] [-d delay] [-h lines] [-t title] "
+	eprint("usage: "PROGNAME" [-v] [-M] [-m mod] [-d delay] [-h lines] [-t title] "
 	       "[-s status-fifo] [-c cmd-fifo] [cmd...]\n");
 	exit(EXIT_FAILURE);
 }
@@ -2177,7 +2178,7 @@ parse_args(int argc, char *argv[]) {
 	const char *name = argv[0];
 
 	if (name && (name = strrchr(name, '/')))
-		dvtm_name = name + 1;
+		prog_name = name + 1;
 	if (!getenv("ESCDELAY"))
 		set_escdelay(100);
 	return init;
@@ -2717,7 +2718,7 @@ int win_text_send(int wid, char *text)
 
 int win_pager_mode(int wid)
 {
-	const char *args[] = {"dvtm-pager", NULL};
+	const char *args[] = {PROGNAME"-pager", NULL};
 	Client *c = client_get_by_id(wid);
 	Client *tmp = sel;
 
@@ -2733,7 +2734,7 @@ int win_pager_mode(int wid)
 
 int win_copy_mode(int wid)
 {
-	const char *args[] = {"dvtm-editor", NULL};
+	const char *args[] = {PROGNAME"-editor", NULL};
 	Client *c = client_get_by_id(wid);
 	Client *tmp = sel;
 
@@ -3017,7 +3018,7 @@ int fifo_create(void)
 	char tmp[128];
 	pid_t pid;
 
-	snprintf(rundir, sizeof(rundir), "/run/user/%d/dvtm", getuid());
+	snprintf(rundir, sizeof(rundir), "/run/user/%d/"PROGNAME, getuid());
 
 	if (stat(rundir, &st)) {
 		if (mkdir(rundir, 0777)) {
@@ -3028,13 +3029,13 @@ int fifo_create(void)
 
 	pid = getpid();
 
-	snprintf(tmp, sizeof(tmp), "%s/dvtm-cmd-fifo-%d", rundir, pid);
+	snprintf(tmp, sizeof(tmp), "%s/"PROGNAME"-cmd-fifo-%d", rundir, pid);
 	cmdfifo.fd = open_or_create_fifo(tmp, &cmdfifo.file);
 	if (!(cmd = realpath(tmp, NULL)))
 		return -1;
 	cmdfifo.file = strdup(cmd);
 
-	snprintf(tmp, sizeof(tmp), "%s/dvtm-ret-fifo-%d", rundir, pid);
+	snprintf(tmp, sizeof(tmp), "%s/"PROGNAME"-ret-fifo-%d", rundir, pid);
 	retfifo.fd = __open_or_create_fifo(tmp, &retfifo.file, O_RDWR);
 	if (!(ret = realpath(tmp, NULL))) {
 		close(cmdfifo.fd);
@@ -3043,7 +3044,7 @@ int fifo_create(void)
 	}
 	retfifo.file = strdup(ret);
 
-	snprintf(tmp, sizeof(tmp), "%s/dvtm-status-fifo-%d", rundir, pid);
+	snprintf(tmp, sizeof(tmp), "%s/"PROGNAME"-status-fifo-%d", rundir, pid);
 	bar.fd = __open_or_create_fifo(tmp, &bar.file, O_RDWR);
 	if (!(sta = realpath(tmp, NULL))) {
 		close(cmdfifo.fd);
