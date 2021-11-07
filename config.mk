@@ -1,6 +1,6 @@
 # Customize below to fit your system
 
-PROGNAME = dvtm
+PROGNAME = borsch
 
 PREFIX ?= /usr/local
 MANPREFIX = ${PREFIX}/share/man
