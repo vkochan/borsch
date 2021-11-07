@@ -79,7 +79,15 @@
 
 (define eval-port->str
    (lambda (p)
-      (any->str (eval (read p)))
+      (let ([e (eval (read p))])
+         (if (and (not (equal? e #!eof))
+                  (not (equal? e (void)))
+		  )
+            (any->str e)
+            ;; else
+            ""
+         )
+      )
    )
 )
 
@@ -154,8 +162,12 @@
 
          (set! ret (try eval-port->str ip))
 
-         (put-string op (second ret))
-	 (put-string op "\n")
+         (if (> (string-length (second ret)) 0)
+            (begin
+               (put-string op (second ret))
+	       (put-string op "\n")
+            )
+         )
 
 	 (flush-output-port op)
 	 (close-port ip)
