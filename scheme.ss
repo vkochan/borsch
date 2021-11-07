@@ -612,7 +612,7 @@
    )
 )
 
-(define window-pager-mode
+(define window-pager
    (case-lambda
       [()
        (__cs_win_pager_mode (__cs_win_current_get))]
@@ -1084,6 +1084,7 @@
 (bind-key "C-g <Enter>" window-set-master)
 (bind-key "C-g y"       window-copy)
 (bind-key "C-g p"       window-paste)
+(bind-key "C-g /"       window-pager)
 
 (bind-key "M-1"     view-select-1)
 (bind-key "C-g v 1" view-select-1)
