@@ -48,9 +48,14 @@ static int scheme_run_init_script(void)
 }
 
 /* Scheme foreign interface */
-int scheme_win_get_by_coord(int x, int y)
+ptr scheme_win_get_by_coord(int x, int y)
 {
-	return win_get_by_coord(x, y);
+	int ret = win_get_by_coord(x, y);
+
+	if (ret)
+		return Sinteger(ret);
+
+	return Sfalse;
 }
 
 bool scheme_win_is_visible(int wid)
@@ -58,44 +63,84 @@ bool scheme_win_is_visible(int wid)
 	return win_is_visible(wid);
 }
 
-int scheme_win_first_get(int wid)
+ptr scheme_win_first_get(void)
 {
-	return win_first_get();
+	int ret = win_first_get();
+
+	if (ret)
+		return Sinteger(ret);
+
+	return Sfalse;
 }
 
-int scheme_win_prev_get(int wid)
+ptr scheme_win_prev_get(int wid)
 {
-	return win_prev_get(wid);
+	int ret = win_prev_get(wid);
+
+	if (ret)
+		return Sinteger(ret);
+
+	return Sfalse;
 }
 
-int scheme_win_next_get(int wid)
+ptr scheme_win_next_get(int wid)
 {
-	return win_next_get(wid);
+	int ret = win_next_get(wid);
+
+	if (ret)
+		return Sinteger(ret);
+
+	return Sfalse;
 }
 
-int scheme_win_upper_get(int wid)
+ptr scheme_win_upper_get(int wid)
 {
-	return win_upper_get(wid);
+	int ret = win_upper_get(wid);
+
+	if (ret)
+		return Sinteger(ret);
+
+	return Sfalse;
 }
 
-int scheme_win_lower_get(int wid)
+ptr scheme_win_lower_get(int wid)
 {
-	return win_lower_get(wid);
+	int ret = win_lower_get(wid);
+
+	if (ret)
+		return Sinteger(ret);
+
+	return Sfalse;
 }
 
-int scheme_win_right_get(int wid)
+ptr scheme_win_right_get(int wid)
 {
-	return win_right_get(wid);
+	int ret = win_right_get(wid);
+
+	if (ret)
+		return Sinteger(ret);
+
+	return Sfalse;
 }
 
-int scheme_win_left_get(int wid)
+ptr scheme_win_left_get(int wid)
 {
-	return win_left_get(wid);
+	int ret = win_left_get(wid);
+
+	if (ret)
+		return Sinteger(ret);
+
+	return Sfalse;
 }
 
-int scheme_win_current_get(void)
+ptr scheme_win_current_get(void)
 {
-	return win_current_get();
+	int ret = win_current_get();
+
+	if (ret)
+		return Sinteger(ret);
+
+	return Sfalse;
 }
 
 int scheme_win_current_set(int wid)
@@ -103,9 +148,14 @@ int scheme_win_current_set(int wid)
 	return win_current_set(wid);
 }
 
-int scheme_win_create(char *prog)
+ptr scheme_win_create(char *prog)
 {
-	return win_create(prog);
+	int ret = win_create(prog);
+
+	if (ret)
+		return Sinteger(ret);
+
+	return Sfalse;
 }
 
 void scheme_win_del(int wid)
