@@ -1,5 +1,5 @@
-#ifndef DVTM_H
-#define DVTM_H
+#ifndef API_H
+#define API_H
 
 #include <stdbool.h>
 
@@ -93,4 +93,4 @@ int tagbar_show(bool show);
 
 void do_quit(void);
 
-#endif /* DVTM_H */
+#endif /* API_H */
