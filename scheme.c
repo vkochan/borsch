@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
-#include "dvtm.h"
+#include "api.h"
 
 /* looks like cleanup() can ba called twice if
  * MOD-q-q was pressed, so use it to do deinit

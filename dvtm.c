@@ -37,7 +37,7 @@
 #if defined __CYGWIN__ || defined __sun
 # include <termios.h>
 #endif
-#include "dvtm.h"
+#include "api.h"
 #include "vt.h"
 
 #ifdef PDCURSES
