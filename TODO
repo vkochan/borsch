@@ -1,0 +1,5 @@
+* TODO Add support for popup window
+
+* TODO Add history support for eval window
+
+* TODO Implement Scheme (window-list)
