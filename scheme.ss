@@ -162,14 +162,14 @@
        (define __evt->symb
 	  (lambda (ev)
 	     (case ev
-	        [0  'win-created    ]
-		[1  'win-selected   ]
-		[2  'win-minimized  ]
-		[3  'win-maximized  ]
-		[4  'win-deleted    ]
-		[5  'win-copied     ]
-		[20 'view-selected  ]
-		[40 'layout-selected]
+	        [0  'win-create   ]
+		[1  'win-switch   ]
+		[2  'win-minimize ]
+		[3  'win-maximize ]
+		[4  'win-delete   ]
+		[5  'win-copy     ]
+		[20 'view-switch  ]
+		[40 'layout-switch]
 		[else #f]
              )
           )
@@ -343,33 +343,33 @@
    )
 )
 
-(define window-select
+(define window-switch
    (lambda (wid)
       (__cs_win_current_set wid)
    )
 )
 
-(define window-select-left
+(define window-switch-left
    (lambda ()
-      (window-select (window-left))
+      (window-switch (window-left))
    )
 )
 
-(define window-select-right
+(define window-switch-right
    (lambda ()
-      (window-select (window-right))
+      (window-switch (window-right))
    )
 )
 
-(define window-select-upper
+(define window-switch-upper
    (lambda ()
-      (window-select (window-upper))
+      (window-switch (window-upper))
    )
 )
 
-(define window-select-lower
+(define window-switch-lower
    (lambda ()
-      (window-select (window-lower))
+      (window-switch (window-lower))
    )
 )
 
@@ -655,69 +655,69 @@
    )
 )
 
-(define view-select
+(define view-switch
    (lambda (tag)
       (__cs_view_current_set tag)
    )
 )
 
-(define view-select-1
+(define view-switch-1
    (lambda ()
-      (view-select 1)
+      (view-switch 1)
    )
 )
 
-(define view-select-2
+(define view-switch-2
    (lambda ()
-      (view-select 2)
+      (view-switch 2)
    )
 )
 
-(define view-select-3
+(define view-switch-3
    (lambda ()
-      (view-select 3)
+      (view-switch 3)
    )
 )
 
-(define view-select-4
+(define view-switch-4
    (lambda ()
-      (view-select 4)
+      (view-switch 4)
    )
 )
 
-(define view-select-5
+(define view-switch-5
    (lambda ()
-      (view-select 5)
+      (view-switch 5)
    )
 )
 
-(define view-select-6
+(define view-switch-6
    (lambda ()
-      (view-select 6)
+      (view-switch 6)
    )
 )
 
-(define view-select-7
+(define view-switch-7
    (lambda ()
-      (view-select 7)
+      (view-switch 7)
    )
 )
 
-(define view-select-8
+(define view-switch-8
    (lambda ()
-      (view-select 8)
+      (view-switch 8)
    )
 )
 
-(define view-select-9
+(define view-switch-9
    (lambda ()
-      (view-select 9)
+      (view-switch 9)
    )
 )
 
-(define view-select-all
+(define view-switch-all
    (lambda ()
-      (view-select 0)
+      (view-switch 0)
    )
 )
 
@@ -793,7 +793,7 @@
    )
 )
 
-(define layout-select
+(define layout-switch
    (case-lambda
         [(l)
          (__cs_layout_current_set (__cs_view_current_get) (symb->layout l))]
@@ -803,7 +803,7 @@
    )
 )
 
-(define layout-select-tiled
+(define layout-switch-tiled
    (case-lambda
         [()
          (__cs_layout_current_set (__cs_view_current_get) (symb->layout 'tiled))]
@@ -813,7 +813,7 @@
    )
 )
 
-(define layout-select-grid
+(define layout-switch-grid
    (case-lambda
         [()
          (__cs_layout_current_set (__cs_view_current_get) (symb->layout 'grid))]
@@ -823,7 +823,7 @@
    )
 )
 
-(define layout-select-bstack
+(define layout-switch-bstack
    (case-lambda
         [()
          (__cs_layout_current_set (__cs_view_current_get) (symb->layout 'bstack))]
@@ -833,7 +833,7 @@
    )
 )
 
-(define layout-select-maximized
+(define layout-switch-maximized
    (case-lambda
         [()
          (__cs_layout_current_set (__cs_view_current_get) (symb->layout 'maximized))]
@@ -1071,48 +1071,48 @@
 (bind-key "C-g c"       window-exec)
 (bind-key "C-g C-x"     window-eval)
 (bind-key "C-g x x"     window-delete)
-(bind-key "M-h"         window-select-left)
-(bind-key "C-g h"       window-select-left)
-(bind-key "M-l"         window-select-right)
-(bind-key "C-g l"       window-select-right)
-(bind-key "M-j"         window-select-lower)
-(bind-key "C-g j"       window-select-lower)
-(bind-key "M-k"         window-select-upper)
-(bind-key "C-g k"       window-select-upper)
+(bind-key "M-h"         window-switch-left)
+(bind-key "C-g h"       window-switch-left)
+(bind-key "M-l"         window-switch-right)
+(bind-key "C-g l"       window-switch-right)
+(bind-key "M-j"         window-switch-lower)
+(bind-key "C-g j"       window-switch-lower)
+(bind-key "M-k"         window-switch-upper)
+(bind-key "C-g k"       window-switch-upper)
 (bind-key "C-g <Enter>" window-set-master)
 (bind-key "C-g y"       window-copy)
 (bind-key "C-g p"       window-paste)
 (bind-key "C-g /"       window-pager)
 
-(bind-key "M-1"     view-select-1)
-(bind-key "C-g v 1" view-select-1)
-(bind-key "M-2"     view-select-2)
-(bind-key "C-g v 2" view-select-2)
-(bind-key "M-3"     view-select-3)
-(bind-key "C-g v 3" view-select-3)
-(bind-key "M-4"     view-select-4)
-(bind-key "C-g v 4" view-select-4)
-(bind-key "M-5"     view-select-5)
-(bind-key "C-g v 5" view-select-5)
-(bind-key "M-6"     view-select-6)
-(bind-key "C-g v 6" view-select-6)
-(bind-key "M-7"     view-select-7)
-(bind-key "C-g v 7" view-select-7)
-(bind-key "M-8"     view-select-8)
-(bind-key "C-g v 8" view-select-8)
-(bind-key "M-9"     view-select-9)
-(bind-key "C-g v 9" view-select-9)
-(bind-key "M-0"     view-select-all)
-(bind-key "C-g v 0" view-select-all)
+(bind-key "M-1"     view-switch-1)
+(bind-key "C-g v 1" view-switch-1)
+(bind-key "M-2"     view-switch-2)
+(bind-key "C-g v 2" view-switch-2)
+(bind-key "M-3"     view-switch-3)
+(bind-key "C-g v 3" view-switch-3)
+(bind-key "M-4"     view-switch-4)
+(bind-key "C-g v 4" view-switch-4)
+(bind-key "M-5"     view-switch-5)
+(bind-key "C-g v 5" view-switch-5)
+(bind-key "M-6"     view-switch-6)
+(bind-key "C-g v 6" view-switch-6)
+(bind-key "M-7"     view-switch-7)
+(bind-key "C-g v 7" view-switch-7)
+(bind-key "M-8"     view-switch-8)
+(bind-key "C-g v 8" view-switch-8)
+(bind-key "M-9"     view-switch-9)
+(bind-key "C-g v 9" view-switch-9)
+(bind-key "M-0"     view-switch-all)
+(bind-key "C-g v 0" view-switch-all)
 
 (bind-key "C-g i"   layout-n-master+)
 (bind-key "C-g d"   layout-n-master-)
 (bind-key "C-g H"   layout-%-master-)
 (bind-key "C-g L"   layout-%-master+)
 (bind-key "C-g C-s" layout-toggle-sticky)
-(bind-key "C-g f"   layout-select-tiled)
-(bind-key "C-g g"   layout-select-grid)
-(bind-key "C-g b"   layout-select-bstack)
+(bind-key "C-g f"   layout-switch-tiled)
+(bind-key "C-g g"   layout-switch-grid)
+(bind-key "C-g b"   layout-switch-bstack)
 (bind-key "C-g m"   window-toggle-maximized)
 
 (bind-key "C-g q q" do-quit)
