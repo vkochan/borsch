@@ -210,7 +210,6 @@ static void setlayout(const char *args[]);
 static void togglemaximize(const char *args[]);
 static int getnmaster(void);
 static float getmfact(void);
-static void startup(const char *args[]);
 static void togglebar(const char *args[]);
 static void togglebarpos(const char *args[]);
 static void toggleminimize(const char *args[]);
@@ -379,11 +378,6 @@ static Button buttons[] = {
 	{ BUTTON3_CLICKED,        { mouse_minimize,   { NULL  } } },
 };
 #endif /* CONFIG_MOUSE */
-
-/* gets executed when app is started */
-static Action actions[] = {
-	{ create, { NULL } },
-};
 
 static char const * const keytable[] = {
 	/* add your custom key escape sequences */
@@ -1329,12 +1323,6 @@ destroy(Client *c) {
 	wnoutrefresh(c->window);
 	vt_destroy(c->term);
 	delwin(c->window);
-	if (!clients && LENGTH(actions)) {
-		if (!strcmp(c->cmd, shell))
-			quit(NULL);
-		else
-			create(NULL);
-	}
 
 	evt.eid = EVT_WIN_DELETED;
 	evt.oid = c->id;
@@ -1746,12 +1734,6 @@ getnmaster(void) {
 static float
 getmfact(void) {
 	return pertag.mfact[pertag.curtag];
-}
-
-static void
-startup(const char *args[]) {
-	for (unsigned int i = 0; i < LENGTH(actions); i++)
-		actions[i].cmd(actions[i].args);
 }
 
 static void
@@ -2198,7 +2180,6 @@ main(int argc, char *argv[]) {
 	setenv("BORSCH", VERSION, 1);
 	if (!parse_args(argc, argv)) {
 		setup();
-		startup(NULL);
 	}
 
 	sigemptyset(&emptyset);

@@ -1116,3 +1116,8 @@
 (bind-key "C-g m"   window-toggle-maximized)
 
 (bind-key "C-g q q" do-quit)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; start with a shell window
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(window-exec)
