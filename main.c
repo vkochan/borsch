@@ -194,7 +194,6 @@ extern int scheme_event_handle(event_t evt);
 extern int scheme_eval_file(const char *scm_in, const char *out);
 
 /* commands for use by keybindings */
-static void editor(const char *args[]);
 static void copymode(const char *args[]);
 static void focusn(const char *args[]);
 static void focusnextnm(const char *args[]);
@@ -1478,21 +1477,6 @@ int create(const char *prog, const char *title, const char *cwd) {
 	evt.oid = c->id;
 	scheme_event_handle(evt);
 	return c->id;
-}
-
-static void
-editor(const char *args[]) {
-	const char *editor;
-
-	editor = getenv("BORSCH_EDITOR");
-	if (!editor)
-		editor = getenv("VISUAL");
-	if (!editor)
-		editor = getenv("EDITOR");
-	if (!editor)
-		editor = "vi";
-
-	create(editor, NULL, NULL);
 }
 
 static void
