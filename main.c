@@ -1573,8 +1573,6 @@ __focusid(int win_id) {
 	for (Client *c = clients; c; c = c->next) {
 		if (c->id == win_id) {
 			focus(c);
-			if (c->minimized)
-				toggleminimize(NULL);
 			if (!isvisible(c)) {
 				c->tags |= tagset[seltags];
 				tagschanged();
