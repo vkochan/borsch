@@ -221,7 +221,6 @@ static void toggleview(const char *args[]);
 static void viewprevtag(const char *args[]);
 static void zoom(const char *args[]);
 static void doeval(const char *args[]);
-static void setminimized(const char *args[]);
 
 /* commands for use by mouse bindings */
 static void mouse_focus(const char *args[]);
@@ -437,7 +436,6 @@ static Cmd commands[] = {
 	/* set cwd per tag or for current */
 	/* change layout by name or select next */
 	{ "setlayout", { setlayout, { NULL } } },
-	{ "setminimized", { setminimized, { NULL } } },
 	{ "kill", { killclient, { NULL } } },
 	{ "eval", { doeval, { NULL } } },
 };
@@ -2006,18 +2004,6 @@ static void doeval(const char *args[]) {
 	ret = scheme_eval_file(args[0], args[1]);
 
 	write(retfifo.fd, tmp, snprintf(tmp, sizeof(tmp), "%u\n", ret));
-}
-
-static void setminimized(const char *args[]) {
-	if (!args || !args[0] || !args[1])
-		return;
-
-	if (strcmp("align", args[0]) == 0) {
-		if (strcmp("vert", args[1]) == 0)
-			min_align = MIN_ALIGN_VERT;
-		else if (strcmp("horiz", args[1]) == 0)
-			min_align = MIN_ALIGN_HORIZ;
-	}
 }
 
 static void
