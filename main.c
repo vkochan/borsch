@@ -194,7 +194,6 @@ extern int scheme_event_handle(event_t evt);
 extern int scheme_eval_file(const char *scm_in, const char *out);
 
 /* commands for use by keybindings */
-static void create(const char *args[]);
 static void editor(const char *args[]);
 static void copymode(const char *args[]);
 static void focusn(const char *args[]);
@@ -429,8 +428,6 @@ static bool runinall = false;
 static int min_align = MIN_ALIGN_HORIZ;
 
 static Cmd commands[] = {
-	/* create [cmd]: create a new window, run `cmd` in the shell if specified */
-	{ "create", { create,	{ NULL } } },
 	/* put/get window to/from master area */
 	{ "zoom", { zoom, { NULL } } },
 	/* set cwd per tag or for current */
@@ -1407,7 +1404,7 @@ done:
 	close(fd);
 }
 
-int __create(const char *args[]) {
+int create(const char *args[]) {
 	const char *pargs[4] = { shell, NULL };
 	char buf[8], *cwd = NULL;
 	const char *env[] = {
@@ -1483,10 +1480,6 @@ int __create(const char *args[]) {
 	evt.oid = c->id;
 	scheme_event_handle(evt);
 	return c->id;
-}
-
-static void create(const char *args[]) {
-	__create(args);
 }
 
 static void
@@ -2455,7 +2448,7 @@ int win_create(char *prog)
 	const char *args[3] = {NULL};
 
 	args[0] = prog;
-	return __create(args);
+	return create(args);
 }
 
 void win_del(int wid)
