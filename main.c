@@ -205,7 +205,6 @@ static void quit(const char *args[]);
 static void redraw(const char *args[]);
 static void scrollback(const char *args[]);
 static void setlayout(const char *args[]);
-static void togglemaximize(const char *args[]);
 static int getnmaster(void);
 static float getmfact(void);
 static void togglebar(const char *args[]);
@@ -1682,18 +1681,6 @@ setlayout(const char *args[]) {
 		evt.eid = EVT_WIN_MAXIMIZED;
 		evt.oid = sel->id;
 		scheme_event_handle(evt);
-	}
-}
-
-static void
-togglemaximize(const char *args[]) {
-	if (isarrange(fullscreen)) {
-		layout = pertag.layout_prev[pertag.curtag];
-		pertag.layout[pertag.curtag] = layout;
-		arrange();
-	} else {
-		const char *maxargs[] = { "[ ]" };
-		setlayout(maxargs);
 	}
 }
 
