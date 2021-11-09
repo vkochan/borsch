@@ -162,12 +162,12 @@
        (define __evt->symb
 	  (lambda (ev)
 	     (case ev
-	        [0  'win-create   ]
-		[1  'win-switch   ]
-		[2  'win-minimize ]
-		[3  'win-maximize ]
-		[4  'win-delete   ]
-		[5  'win-copy     ]
+	        [0  'window-create   ]
+		[1  'window-switch   ]
+		[2  'window-minimize ]
+		[3  'window-maximize ]
+		[4  'window-delete   ]
+		[5  'window-copy     ]
 		[20 'view-switch  ]
 		[40 'layout-switch]
 		[else #f]
