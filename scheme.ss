@@ -1080,6 +1080,7 @@
 (bind-key "M-k"         window-switch-upper)
 (bind-key "C-g k"       window-switch-upper)
 (bind-key "C-g <Enter>" window-set-master)
+(bind-key "C-g ."       window-set-minimized)
 (bind-key "C-g y"       window-copy)
 (bind-key "C-g p"       window-paste)
 (bind-key "C-g /"       window-pager)
