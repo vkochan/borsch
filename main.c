@@ -1354,12 +1354,12 @@ cleanup(void) {
 	}
 }
 
-static char *getcwd_by_pid(Client *c) {
+static char *getcwd_by_pid(Client *c, char *buf) {
 	if (!c)
 		return NULL;
-	char buf[32];
-	snprintf(buf, sizeof buf, "/proc/%d/cwd", c->pid);
-	return realpath(buf, NULL);
+	char tmp[32];
+	snprintf(tmp, sizeof(tmp), "/proc/%d/cwd", c->pid);
+	return realpath(tmp, buf);
 }
 
 static void
@@ -1404,18 +1404,19 @@ done:
 	close(fd);
 }
 
-int create(const char *args[]) {
+int create(const char *prog, const char *title, const char *cwd) {
 	const char *pargs[4] = { shell, NULL };
-	char buf[8], *cwd = NULL;
+	char buf[8];
 	const char *env[] = {
 		"BORSCH_WINDOW_ID", buf,
 		NULL
 	};
+	char tmppath[PATH_MAX];
 	event_t evt;
 
-	if (args && args[0]) {
+	if (prog) {
 		pargs[1] = "-c";
-		pargs[2] = args[0];
+		pargs[2] = prog;
 		pargs[3] = NULL;
 	}
 	Client *c = calloc(1, sizeof(Client));
@@ -1437,18 +1438,17 @@ int create(const char *args[]) {
 		return -1;
 	}
 
-	if (args && args[0]) {
-		c->cmd = args[0];
-		char name[PATH_MAX];
-		strncpy(name, args[0], sizeof(name));
-		name[sizeof(name)-1] = '\0';
-		strncpy(c->title, basename(name), sizeof(c->title));
+	if (prog) {
+		c->cmd = prog;
+		strncpy(tmppath, prog, sizeof(tmppath));
+		tmppath[sizeof(tmppath)-1] = '\0';
+		strncpy(c->title, basename(tmppath), sizeof(c->title));
 	} else {
 		c->cmd = shell;
 	}
 
-	if (args && args[1])
-		strncpy(c->title, args[1], sizeof(c->title));
+	if (title)
+		strncpy(c->title, title, sizeof(c->title));
 	c->title[sizeof(c->title)-1] = '\0';
 
 	if (strlen(c->title) == 0)
@@ -1456,14 +1456,12 @@ int create(const char *args[]) {
 	else
 		c->sync_title = false;
 
-	if (args && args[2])
-		cwd = !strcmp(args[2], "$CWD") ? getcwd_by_pid(sel) : (char*)args[2];
+	if (!cwd)
+		cwd = getcwd_by_pid(sel, tmppath);
 	else if (strlen(pertag.cwd[pertag.curtag]))
 		cwd = pertag.cwd[pertag.curtag];
 
 	c->pid = vt_forkpty(c->term, shell, pargs, cwd, env, NULL, NULL);
-	if (args && args[2] && !strcmp(args[2], "$CWD"))
-		free(cwd);
 
 	vt_data_set(c->term, c);
 	vt_title_handler_set(c->term, term_title_handler);
@@ -1484,17 +1482,17 @@ int create(const char *args[]) {
 
 static void
 editor(const char *args[]) {
-	const char *editor[3] = { NULL };
+	const char *editor;
 
-	editor[0] = getenv("BORSCH_EDITOR");
-	if (!editor[0])
-		editor[0] = getenv("VISUAL");
-	if (!editor[0])
-		editor[0] = getenv("EDITOR");
-	if (!editor[0])
-		editor[0] = "vi";
+	editor = getenv("BORSCH_EDITOR");
+	if (!editor)
+		editor = getenv("VISUAL");
+	if (!editor)
+		editor = getenv("EDITOR");
+	if (!editor)
+		editor = "vi";
 
-	create(editor);
+	create(editor, NULL, NULL);
 }
 
 static void
@@ -2445,10 +2443,7 @@ int win_current_set(int wid)
 
 int win_create(char *prog)
 {
-	const char *args[3] = {NULL};
-
-	args[0] = prog;
-	return create(args);
+	return create(prog, NULL, NULL);
 }
 
 void win_del(int wid)
