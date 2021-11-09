@@ -207,7 +207,6 @@ static void scrollback(const char *args[]);
 static void setlayout(const char *args[]);
 static int getnmaster(void);
 static float getmfact(void);
-static void togglebar(const char *args[]);
 static void togglebarpos(const char *args[]);
 static void toggleminimize(const char *args[]);
 static void minimizeother(const char *args[]);
@@ -1692,17 +1691,6 @@ getnmaster(void) {
 static float
 getmfact(void) {
 	return pertag.mfact[pertag.curtag];
-}
-
-static void
-togglebar(const char *args[]) {
-	if (bar.pos == BAR_OFF)
-		showbar();
-	else
-		hidebar();
-	bar.autohide = false;
-	updatebarpos();
-	redraw(NULL);
 }
 
 static void
