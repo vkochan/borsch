@@ -2603,7 +2603,7 @@ int win_state_set(int wid, win_state_t st)
 			win_current_set(wid);
 			toggleminimize(NULL);
 			/* switch to the original window */
-			if (orig)
+			if (orig != c)
 				win_current_set(orig->id);
 		}
 		break;
