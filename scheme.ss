@@ -77,7 +77,23 @@
          (if (and (not (equal? e #!eof))
                   (not (equal? e (void)))
 		  )
-            (any->str e)
+            (if (and (list? e) (not (null? e)) (list? (first e)))
+               (with-output-to-string
+                  (lambda ()
+                     (display "(\n")
+                     (for-each
+                        (lambda (i)
+                           (display "   ")
+                           (pretty-print i)
+                        )
+                        e
+                     )
+                     (display ")\n")
+		  )
+               )
+               ;; else
+               (any->str e)
+            )
             ;; else
             ""
          )
