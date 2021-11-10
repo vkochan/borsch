@@ -147,9 +147,17 @@
    (lambda (in out)
       (let* ([ip (open-input-file in)]
             [op (open-output-file out 'truncate)]
+            [out ""]
             [ret '()])
 
-         (set! ret (try eval-port->str ip))
+         (set! out (with-output-to-string
+                      (lambda ()
+                         (set! ret (try eval-port->str ip))
+                      )
+                   )
+         )
+
+	 (put-string op out)
 
          (put-string op (second ret))
 
