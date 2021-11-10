@@ -65,15 +65,9 @@
    (lambda (x)
       (call-with-string-output-port
          (lambda (p)
-            (display x p)
+            (pretty-print x p)
          )
       )
-   )
-)
-
-(define eval->str
-   (lambda (e)
-      (any->str (eval e))
    )
 )
 
@@ -141,11 +135,10 @@
 
          (set! ret (try eval-port->str ip))
 
-         (if (> (string-length (second ret)) 0)
-            (begin
-               (put-string op (second ret))
-	       (put-string op "\n")
-            )
+         (put-string op (second ret))
+
+         (if (not (= (first ret) 0))
+	    (put-string op "\n")
          )
 
 	 (flush-output-port op)
@@ -294,6 +287,25 @@
 
       [(wid)
        (__cs_win_prev_get wid)]
+   )
+)
+
+(define window-list
+   (lambda ()
+      (let ([win (window-first)]
+            [lst   '()]
+	   )
+
+         (while win
+            (set! lst (append lst (list
+                                    (list win (window-name win))
+				  )
+            )         )
+            (set! win (window-next win))
+         )
+
+	 lst
+      )
    )
 )
 
