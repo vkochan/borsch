@@ -38,6 +38,8 @@
 #include <errno.h>
 #include <pwd.h>
 
+#include "buffer.h"
+#include "view.h"
 #if defined __CYGWIN__ || defined __sun
 # include <termios.h>
 #endif
@@ -67,6 +69,9 @@ typedef struct {
 typedef struct Client Client;
 struct Client {
 	WINDOW *window;
+	Buffer *buf;
+	View *view;
+	UiWin *win;
 	Vt *term;
 	Vt *overlay, *app;
 	bool is_editor;
@@ -176,6 +181,8 @@ typedef struct {
 	bool filter;
 	bool color;
 } Editor;
+
+static Ui *ui;
 
 #define LENGTH(arr) (sizeof(arr) / sizeof((arr)[0]))
 #define MAX(x, y)   ((x) > (y) ? (x) : (y))
@@ -628,6 +635,8 @@ draw_border(Client *c) {
 	char t = '\0';
 
 
+	if (!c->pid)
+		return;
 	if (!show_border())
 		return;
 	if (sel != c && c->urgent)
@@ -642,8 +651,7 @@ draw_border(Client *c) {
 		mvwhline(c->window, 0, 0, ' ', c->w);
 	        wattrset(c->window, attrs);
 	} else {
-		mvwhline(c->window, 0, 0, ACS_HLINE, c->w);
-	}
+		mvwhline(c->window, 0, 0, ACS_HLINE, c->w); }
 	maxlen = c->w - 10;
 	if (maxlen < 0)
 		maxlen = 0;
@@ -665,11 +673,19 @@ draw_border(Client *c) {
 
 static void
 draw_content(Client *c) {
-	vt_draw(c->term, c->window, c->has_title_line, 0);
+	if (c->pid)
+		vt_draw(c->term, c->window, c->has_title_line, 0);
+	else
+		ui_window_draw(c->win);
 }
 
 static void
 draw(Client *c) {
+	if (!c->pid) {
+		draw_content(c);
+		return;
+	}
+
 	if (is_content_visible(c)) {
 		redrawwin(c->window);
 		draw_content(c);
@@ -866,23 +882,32 @@ focus(Client *c) {
 		lastsel->urgent = false;
 		if (!isarrange(fullscreen)) {
 			draw_border(lastsel);
-			wnoutrefresh(lastsel->window);
+			if (lastsel->pid)
+				wnoutrefresh(lastsel->window);
 		}
 	}
 
 	if (c) {
+		Selection *s;
+
 		detachstack(c);
 		attachstack(c);
 		settitle(c);
 		c->urgent = false;
 		if (isarrange(fullscreen)) {
 			draw(c);
-		} else {
+		} else if (c->pid) {
 			draw_border(c);
 			wnoutrefresh(c->window);
 		}
+
+		if (c->pid)
+			curs_set(c && !c->minimized && vt_cursor_visible(c->term));
+
+		s = view_selections_primary_get(c->view);
+		if (s)
+			buffer_cursor_set(c->buf, view_cursors_pos(s));
 	}
-	curs_set(c && !c->minimized && vt_cursor_visible(c->term));
 
 	if (c) {
 		event_t evt;
@@ -909,7 +934,7 @@ applycolorrules(Client *c) {
 		}
 	}
 
-	vt_default_colors_set(c->term, attrs, fg, bg);
+	ui_window_default_colors_set(c->win, attrs, fg, bg);
 }
 
 static void
@@ -940,6 +965,12 @@ static void
 move_client(Client *c, int x, int y) {
 	if (c->x == x && c->y == y)
 		return;
+	if (!c->pid) {
+		ui_window_move(c->win, x, y);
+		c->x = x;
+		c->y = y;
+		return;
+	}
 	debug("moving, x: %d y: %d\n", x, y);
 	if (mvwin(c->window, y, x) == ERR) {
 		eprint("error moving, x: %d y: %d\n", x, y);
@@ -954,6 +985,15 @@ resize_client(Client *c, int w, int h) {
 	bool has_title_line = show_border();
 	bool resize_window = c->w != w || c->h != h;
 	if (resize_window) {
+		if (!c->pid) {
+			ui_window_resize(c->win, w, h - has_title_line);
+			c->w = w;
+			c->h = h;
+			return;
+		}
+	}
+
+	if (resize_window) {
 		debug("resizing, w: %d h: %d\n", w, h);
 		if (wresize(c->window, h, w) == ERR) {
 			eprint("error resizing, w: %d h: %d\n", w, h);
@@ -964,7 +1004,8 @@ resize_client(Client *c, int w, int h) {
 	}
 	if (resize_window || c->has_title_line != has_title_line) {
 		c->has_title_line = has_title_line;
-		vt_resize(c->app, h - has_title_line, w);
+		if (c->pid)
+			vt_resize(c->app, h - has_title_line, w);
 		if (c->overlay)
 			vt_resize(c->overlay, h - has_title_line, w);
 	}
@@ -1183,7 +1224,7 @@ keypress(int code) {
 	}
 
 	for (Client *c = pertag.runinall[pertag.curtag] ? nextvisible(clients) : sel; c; c = nextvisible(c->next)) {
-		if (is_content_visible(c)) {
+		if (c->pid && is_content_visible(c)) {
 			c->urgent = false;
 			if (code == '\e')
 				vt_write(c->term, buf, len);
@@ -1257,13 +1298,12 @@ static void
 setup(void) {
 	shell = getshell();
 	setlocale(LC_CTYPE, "");
-	initscr();
-	start_color();
-	noecho();
-	nonl();
-	keypad(stdscr, TRUE);
+
+	ui = ui_term_new();
+	ui_init(ui);
+
 	mouse_setup();
-	raw();
+
 	vt_init();
 	vt_keytable_set(keytable, LENGTH(keytable));
 	for (unsigned int i = 0; i < LENGTH(colors); i++) {
@@ -1273,7 +1313,7 @@ setup(void) {
 			if (colors[i].bg256)
 				colors[i].bg = colors[i].bg256;
 		}
-		colors[i].pair = vt_color_reserve(colors[i].fg, colors[i].bg);
+		colors[i].pair = ui_color_make(ui, colors[i].fg, colors[i].bg);
 	}
 	initpertag();
 	resize_screen();
@@ -1311,10 +1351,16 @@ destroy(Client *c) {
 	}
 	if (lastsel == c)
 		lastsel = NULL;
-	werase(c->window);
-	wnoutrefresh(c->window);
-	vt_destroy(c->term);
-	delwin(c->window);
+	if (c->pid) {
+		werase(c->window);
+		wnoutrefresh(c->window);
+		vt_destroy(c->term);
+		delwin(c->window);
+	} else {
+		ui_window_free(c->win);
+	}
+	view_free(c->view);
+	buffer_del(c->buf);
 
 	evt.eid = EVT_WIN_DELETED;
 	evt.oid = c->id;
@@ -1331,7 +1377,7 @@ cleanup(void) {
 	while (clients)
 		destroy(clients);
 	vt_shutdown();
-	endwin();
+	ui_free(ui);
 	free(copyreg.data);
 	if (bar.fd > 0)
 		close(bar.fd);
@@ -1428,8 +1474,32 @@ int create(const char *prog, const char *title, const char *cwd) {
 		return -1;
 	}
 
-	c->term = c->app = vt_create(screen.h, screen.w, screen.history);
+	c->buf = buffer_new();
+	if (!c->buf) {
+		delwin(c->window);
+		free(c);
+		return -1;
+	}
+
+	c->view = view_new(buffer_text_get(c->buf));
+	if (!c->view) {
+		buffer_del(c->buf);
+		delwin(c->window);
+		free(c);
+	}
+
+	c->win = ui_window_new(ui, c->view);
+	if (!c->win) {
+		view_free(c->view);
+		buffer_del(c->buf);
+		free(c);
+		return -1;
+	}
+
+	c->term = c->app = vt_create(c->win, screen.h, screen.w, screen.history);
 	if (!c->term) {
+		view_free(c->view);
+		buffer_del(c->buf);
 		delwin(c->window);
 		free(c);
 		return -1;
@@ -1484,7 +1554,7 @@ copymode(const char *args[]) {
 
 	bool colored = strstr(args[0], "pager") != NULL;
 
-	if (!(sel->overlay = vt_create(sel->h - sel->has_title_line, sel->w, 0)))
+	if (!(sel->overlay = vt_create(sel->win, sel->h - sel->has_title_line, sel->w, 0)))
 		return;
 
 	int *to = &sel->editor_fds[0];
@@ -1633,9 +1703,13 @@ static void
 redraw(const char *args[]) {
 	for (Client *c = clients; c; c = c->next) {
 		if (!c->minimized) {
-			vt_dirty(c->term);
-			wclear(c->window);
-			wnoutrefresh(c->window);
+			if (c->pid) {
+				vt_dirty(c->term);
+				wclear(c->window);
+				wnoutrefresh(c->window);
+			} else {
+				ui_window_redraw(c->win);
+			}
 		}
 	}
 	resize_screen();
@@ -1646,13 +1720,15 @@ scrollback(const char *args[]) {
 	if (!is_content_visible(sel))
 		return;
 
-	if (!args[0] || atoi(args[0]) < 0)
-		vt_scroll(sel->term, -sel->h/2);
-	else
-		vt_scroll(sel->term,  sel->h/2);
+	if (sel->pid)
+		if (!args[0] || atoi(args[0]) < 0)
+			vt_scroll(sel->term, -sel->h/2);
+		else
+			vt_scroll(sel->term,  sel->h/2);
 
 	draw(sel);
-	curs_set(vt_cursor_visible(sel->term));
+	if (sel->pid)
+		curs_set(vt_cursor_visible(sel->term));
 }
 
 static void
@@ -1745,7 +1821,8 @@ toggleminimize(const char *args[]) {
 		for (c = nextvisible(clients); c && (t = nextvisible(c->next)) && !t->minimized; c = t);
 		attachafter(m, c);
 	} else { /* window is no longer minimized, move it to the master area */
-		vt_dirty(m->term);
+		if (m->pid)
+			vt_dirty(m->term);
 		detach(m);
 		attach(m);
 	}
@@ -1968,7 +2045,8 @@ handle_mouse(void) {
 
 	debug("mouse x:%d y:%d cx:%d cy:%d mask:%d\n", event.x, event.y, event.x - msel->x, event.y - msel->y, event.bstate);
 
-	vt_mouse(msel->term, event.x - msel->x, event.y - msel->y, event.bstate);
+	if (msel->pid)
+		vt_mouse(msel->term, event.x - msel->x, event.y - msel->y, event.bstate);
 
 	for (i = 0; i < LENGTH(buttons); i++) {
 		if (event.bstate & buttons[i].mask)
@@ -2153,9 +2231,11 @@ main(int argc, char *argv[]) {
 				c = t;
 				continue;
 			}
-			int pty = c->overlay ? vt_pty_get(c->overlay) : vt_pty_get(c->app);
-			FD_SET(pty, &rd);
-			nfds = MAX(nfds, pty);
+			if (c->pid) {
+				int pty = c->overlay ? vt_pty_get(c->overlay) : vt_pty_get(c->app);
+				FD_SET(pty, &rd);
+				nfds = MAX(nfds, pty);
+			}
 			c = c->next;
 		}
 
@@ -2215,34 +2295,40 @@ rescan:
 			handle_statusbar();
 
 		for (Client *c = clients; c; c = c->next) {
-			if (FD_ISSET(vt_pty_get(c->term), &rd)) {
-				if (vt_process(c->term) < 0 && errno == EIO) {
-					if (c->overlay)
-						c->overlay_died = true;
-					else
-						c->died = true;
-					continue;
+			if (c->pid) {
+				if (FD_ISSET(vt_pty_get(c->term), &rd)) {
+					if (vt_process(c->term) < 0 && errno == EIO) {
+						if (c->overlay)
+							c->overlay_died = true;
+						else
+							c->died = true;
+						continue;
+					}
 				}
 			}
 
 			if (is_content_visible(c)) {
-				if (c->sync_title)
+				if (c->pid && c->sync_title)
 					synctitle(c);
 				if (c != sel) {
 					draw_content(c);
-					wnoutrefresh(c->window);
+					if (c->pid)
+						wnoutrefresh(c->window);
 				}
 			} else if (!isarrange(fullscreen) && isvisible(c)
 					&& c->minimized) {
 				draw_border(c);
-				wnoutrefresh(c->window);
+				if (c->pid)
+					wnoutrefresh(c->window);
 			}
 		}
 
 		if (is_content_visible(sel)) {
 			draw_content(sel);
-			curs_set(vt_cursor_visible(sel->term));
-			wnoutrefresh(sel->window);
+			if (sel->pid) {
+				curs_set(vt_cursor_visible(sel->term));
+				wnoutrefresh(sel->window);
+			}
 		}
 	}
 
@@ -2405,13 +2491,63 @@ int win_create(char *prog)
 	return create(prog, NULL, NULL);
 }
 
+int win_new(void)
+{
+	Client *c = calloc(1, sizeof(Client));
+	event_t evt;
+
+	if (!c)
+		return -1;
+
+	c->tags = tagset[seltags];
+	c->id = ++cmdfifo.id;
+
+	c->buf = buffer_new();
+	if (!c->buf) {
+		free(c);
+		return -1;
+	}
+
+	c->view = view_new(buffer_text_get(c->buf));
+	if (!c->view) {
+		buffer_del(c->buf);
+		free(c);
+		return -1;
+	}
+
+	c->win = ui_window_new(ui, c->view);
+	if (!c->win) {
+		view_free(c->view);
+		buffer_del(c->buf);
+		free(c);
+		return -1;
+	}
+
+	ui_window_resize(c->win, waw, wah);
+	ui_window_move(c->win, wax, way);
+	applycolorrules(c);
+	c->x = wax;
+	c->y = way;
+
+	attach(c);
+	focus(c);
+	arrange();
+
+	evt.eid = EVT_WIN_CREATED;
+	evt.oid = c->id;
+	scheme_event_handle(evt);
+
+	return c->id;
+}
+
 void win_del(int wid)
 {
 	Client *c = client_get_by_id(wid);
 
-	if (c)
+	if (c && c->pid)
 		kill(-c->pid, SIGKILL);
-		/* destroy(c); */
+	else
+		destroy(c);
 }
 
 char *win_title_get(int wid)
@@ -2620,7 +2756,8 @@ int win_keys_send(int wid, char *keys)
 	if (!c)
 		return -1;
 
-	vt_write(c->term, keys, strlen(keys));
+	if (c->pid)
+		vt_write(c->term, keys, strlen(keys));
 	return 0;
 }
 
@@ -2631,7 +2768,8 @@ int win_text_send(int wid, char *text)
 	if (!c)
 		return -1;
 
-	vt_write(c->term, text, strlen(text));
+	if (c->pid)
+		vt_write(c->term, text, strlen(text));
 	return 0;
 }
 
@@ -2670,6 +2808,45 @@ int win_copy_mode(int wid)
 char *win_capture(int wid)
 {
 	return NULL;
+}
+
+int win_buf_get(int wid)
+{
+	Client *c = client_get_by_id(wid);
+
+	if (!c || !c->buf)
+		return -1;
+
+	return buffer_id_get(c->buf);
+}
+
+int buf_current_get(void)
+{
+	if (sel)
+		return buffer_id_get(sel->buf);
+
+	return 0;
+}
+
+void buf_text_insert(int bid, const char *text)
+{
+	Buffer *buf = buffer_by_id(bid);
+	size_t pos, len;
+	Text *txt;
+
+	if (buf) {
+		pos = buffer_cursor_get(buf);
+		txt = buffer_text_get(buf);
+		len = strlen(text);
+
+		text_insert(txt, pos, text, len);
+		buffer_cursor_set(buf, pos+len);
+
+		for (Client *c = clients; c; c = c->next) {
+			if (c->buf == buf)
+				ui_window_redraw(c->win);
+		}
+	}
 }
 
 int view_current_get(void)

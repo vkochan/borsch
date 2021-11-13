@@ -224,6 +224,7 @@
 (define __cs_win_current_get (foreign-procedure __collect_safe "cs_win_current_get" () scheme-object))
 (define __cs_win_current_set (foreign-procedure __collect_safe "cs_win_current_set" (int) int))
 (define __cs_win_create (foreign-procedure "cs_win_create" (string) scheme-object))
+(define __cs_win_new (foreign-procedure "cs_win_new" () scheme-object))
 (define __cs_win_del (foreign-procedure __collect_safe "cs_win_del" (int) int))
 (define __cs_win_title_get (foreign-procedure __collect_safe "cs_win_title_get" (int) scheme-object))
 (define __cs_win_title_set (foreign-procedure "cs_win_title_set" (int string) int))
@@ -239,6 +240,10 @@
 (define __cs_win_pager_mode (foreign-procedure __collect_safe "cs_win_pager_mode" (int) int))
 (define __cs_win_copy_mode (foreign-procedure __collect_safe "cs_win_copy_mode" (int) int))
 (define __cs_win_capture (foreign-procedure __collect_safe "cs_win_capture" (int) scheme-object))
+(define __cs_win_buf_get (foreign-procedure __collect_safe "cs_win_buf_get" (int) scheme-object))
+
+(define __cs_buf_current_get (foreign-procedure __collect_safe "cs_buf_current_get" () scheme-object))
+(define __cs_buf_text_insert (foreign-procedure "cs_buf_text_insert" (int string) void))
 
 (define __cs_view_current_get (foreign-procedure __collect_safe "cs_view_current_get" () int))
 (define __cs_view_current_set (foreign-procedure __collect_safe "cs_view_current_set" (int) int))
@@ -406,6 +411,12 @@
 (define window-switch-lower
    (lambda ()
       (window-switch (window-lower))
+   )
+)
+
+(define window-new
+   (lambda ()
+      (__cs_win_new)
    )
 )
 
@@ -682,6 +693,32 @@
 
       [(wid)
        (__cs_win_capture wid)]
+   )
+)
+
+(define window-buffer
+   (case-lambda
+      [()
+       (__cs_win_buf_get (__cs_win_current_get))]
+
+      [(wid)
+       (__cs_win_buf_get wid)]
+   )
+)
+
+(define buffer-current
+   (lambda ()
+      (__cs_buf_current_get)
+   )
+)
+
+(define text-insert
+   (case-lambda
+      [(t)
+      (__cs_buf_text_insert (__cs_buf_current_get) t)]
+
+      [(b t)
+      (__cs_buf_text_insert b t)]
    )
 )
 

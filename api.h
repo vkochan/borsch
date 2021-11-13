@@ -48,6 +48,7 @@ int win_left_get(int wid);
 int win_current_get(void);
 int win_current_set(int wid);
 int win_create(char *prog);
+int win_new(void);
 void win_del(int wid);
 char* win_title_get(int wid);
 int win_title_set(int wid, char *title);
@@ -63,6 +64,10 @@ int win_text_send(int wid, char *text);
 int win_pager_mode(int wid);
 int win_copy_mode(int wid);
 char *win_capture(int wid);
+int win_buf_get(int wid);
+
+int buf_current_get(void);
+void buf_text_insert(int bid, const char *text);
 
 int view_current_get(void);
 int view_current_set(int tag);

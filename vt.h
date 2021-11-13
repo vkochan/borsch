@@ -23,6 +23,8 @@
 #include <stdbool.h>
 #include <sys/types.h>
 
+#include "ui/ui.h"
+
 #ifndef NCURSES_MOUSE_VERSION
 #define mmask_t unsigned long
 #endif
@@ -35,13 +37,12 @@ void vt_init(void);
 void vt_shutdown(void);
 
 void vt_keytable_set(char const * const keytable_overlay[], int count);
-void vt_default_colors_set(Vt*, attr_t attrs, short fg, short bg);
 void vt_title_handler_set(Vt*, vt_title_handler_t);
 void vt_urgent_handler_set(Vt*, vt_urgent_handler_t);
 void vt_data_set(Vt*, void *);
 void *vt_data_get(Vt*);
 
-Vt *vt_create(int rows, int cols, int scroll_buf_sz);
+Vt *vt_create(UiWin *uiwin, int rows, int cols, int scroll_buf_sz);
 void vt_resize(Vt*, int rows, int cols);
 void vt_destroy(Vt*);
 pid_t vt_forkpty(Vt*, const char *p, const char *argv[], const char *cwd, const char *env[], int *to, int *from);
@@ -54,8 +55,6 @@ ssize_t vt_write(Vt*, const char *buf, size_t len);
 void vt_mouse(Vt*, int x, int y, mmask_t mask);
 void vt_dirty(Vt*);
 void vt_draw(Vt*, WINDOW *win, int startrow, int startcol);
-short vt_color_get(Vt*, short fg, short bg);
-short vt_color_reserve(short fg, short bg);
 
 void vt_scroll(Vt*, int rows);
 void vt_noscroll(Vt*);
