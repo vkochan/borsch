@@ -1,6 +1,6 @@
 include config.mk
 
-SRC = main.c vt.c
+SRC = main.c vt.c array.c view.c buffer.c
 
 SCH_VERSION := $(shell echo "(scheme-version)" | scheme -q | sed -e 's|"||g' | cut -d ' ' -f4)
 SCH_MACHINE := $(shell echo "(machine-type)" | scheme -q)
@@ -12,6 +12,9 @@ BIN += ${PROGNAME}-eval
 SRC += scheme.c
 
 SCH_SCRIPTS = scheme.ss
+
+LDFLAGS += -L ./text -L ./ui
+LIBS += -ltext -lui
 
 CFLAGS += -I$(SCH_PATH) \
    -DPROGNAME='"${PROGNAME}"' \
@@ -43,8 +46,14 @@ DEBUG_CFLAGS = ${CFLAGS} -UNDEBUG -O0 -g -ggdb -Wall -Wextra -Wno-unused-paramet
 
 all: ${PROGNAME} ${PROGNAME}-editor
 
-${PROGNAME}: config.mk *.c *.h
+${PROGNAME}: libui.a libtext.a config.mk *.c *.h
 	${CC} ${CFLAGS} ${SRC} ${LDFLAGS} ${OBJS} ${LIBS} -o $@
+
+libtext.a:
+	$(MAKE) -C text/
+
+libui.a:
+	$(MAKE) -C ui/
 
 ${PROGNAME}-editor: ${PROGNAME}-editor.c
 	${CC} ${CFLAGS} $^ ${LDFLAGS} -o $@
@@ -60,6 +69,8 @@ debug: clean
 
 clean:
 	@echo cleaning
+	@$(MAKE) -C text/ clean
+	@$(MAKE) -C ui/ clean
 	@rm -f ${PROGNAME} 
 	@rm -f ${PROGNAME}-editor
 

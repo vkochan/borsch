@@ -84,9 +84,7 @@
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define LENGTH(arr) (sizeof(arr) / sizeof((arr)[0]))
 
-static bool is_utf8, has_default_colors;
-static short color_pairs_reserved, color_pairs_max, color_pair_current;
-static short *color2palette, default_fg, default_bg;
+static bool is_utf8;
 static char vt_term[32];
 
 typedef struct {
@@ -94,14 +92,14 @@ typedef struct {
 	attr_t attr;
 	short fg;
 	short bg;
-} Cell;
+} VtCell;
 
 typedef struct {
-	Cell *cells;
+	VtCell *cells;
 	unsigned dirty:1;
-} Row;
+} VtRow;
 
-/* Buffer holding the current terminal window content (as an array) as well
+/* VtBuffer holding the current terminal window content (as an array) as well
  * as the scroll back buffer content (as a circular/ring buffer).
  *
  * If new content is added to terminal the view port slides down and the
@@ -147,11 +145,11 @@ typedef struct {
  *                                   <-    cols    ->
  */
 typedef struct {
-	Row *lines;            /* array of Row pointers of size 'rows' */
-	Row *curs_row;         /* row on which the cursor currently resides */
-	Row *scroll_buf;       /* a ring buffer holding the scroll back content */
-	Row *scroll_top;       /* row in lines where scrolling region starts */
-	Row *scroll_bot;       /* row in lines where scrolling region ends */
+	VtRow *lines;            /* array of VtRow pointers of size 'rows' */
+	VtRow *curs_row;         /* row on which the cursor currently resides */
+	VtRow *scroll_buf;       /* a ring buffer holding the scroll back content */
+	VtRow *scroll_top;       /* row in lines where scrolling region starts */
+	VtRow *scroll_bot;       /* row in lines where scrolling region ends */
 	bool *tabs;            /* a boolean flag for each column whether it is a tab */
 	int scroll_size;       /* maximal capacity of scroll back buffer (in lines) */
 	int scroll_index;      /* current index into the ring buffer */
@@ -164,14 +162,13 @@ typedef struct {
 	int curs_srow, curs_scol; /* saved cursor row/colmn (zero based) */
 	short curfg, curbg;    /* current fore and background colors */
 	short savfg, savbg;    /* saved colors */
-} Buffer;
+} VtBuffer;
 
 struct Vt {
-	Buffer buffer_normal;    /* normal screen buffer */
-	Buffer buffer_alternate; /* alternate screen buffer */
-	Buffer *buffer;          /* currently active buffer (one of the above) */
-	attr_t defattrs;         /* attributes to use for normal/empty cells */
-	short deffg, defbg;      /* colors to use for back normal/empty cells (white/black) */
+	UiWin *win;
+	VtBuffer buffer_normal;    /* normal screen buffer */
+	VtBuffer buffer_alternate; /* alternate screen buffer */
+	VtBuffer *buffer;          /* currently active buffer (one of the above) */
 	int pty;                 /* master side pty file descriptor */
 	pid_t pid;               /* process id of the process running in this vt */
 	/* flags */
@@ -263,9 +260,9 @@ static attr_t build_attrs(attr_t curattrs)
 	    >> NCURSES_ATTR_SHIFT;
 }
 
-static void row_set(Row *row, int start, int len, Buffer *t)
+static void row_set(VtRow *row, int start, int len, VtBuffer *t)
 {
-	Cell cell = {
+	VtCell cell = {
 		.text = L'\0',
 		.attr = t ? build_attrs(t->curattrs) : 0,
 		.fg = t ? t->curfg : -1,
@@ -277,7 +274,7 @@ static void row_set(Row *row, int start, int len, Buffer *t)
 	row->dirty = true;
 }
 
-static void row_roll(Row *start, Row *end, int count)
+static void row_roll(VtRow *start, VtRow *end, int count)
 {
 	int n = end - start;
 
@@ -286,18 +283,18 @@ static void row_roll(Row *start, Row *end, int count)
 		count += n;
 
 	if (count) {
-		char buf[count * sizeof(Row)];
-		memcpy(buf, start, count * sizeof(Row));
-		memmove(start, start + count, (n - count) * sizeof(Row));
-		memcpy(end - count, buf, count * sizeof(Row));
-		for (Row *row = start; row < end; row++)
+		char buf[count * sizeof(VtRow)];
+		memcpy(buf, start, count * sizeof(VtRow));
+		memmove(start, start + count, (n - count) * sizeof(VtRow));
+		memcpy(end - count, buf, count * sizeof(VtRow));
+		for (VtRow *row = start; row < end; row++)
 			row->dirty = true;
 	}
 }
 
-static void buffer_clear(Buffer *b)
+static void buffer_clear(VtBuffer *b)
 {
-	Cell cell = {
+	VtCell cell = {
 		.text = L'\0',
 		.attr = A_NORMAL,
 		.fg = -1,
@@ -305,7 +302,7 @@ static void buffer_clear(Buffer *b)
 	};
 
 	for (int i = 0; i < b->rows; i++) {
-		Row *row = b->lines + i;
+		VtRow *row = b->lines + i;
 		for (int j = 0; j < b->cols; j++) {
 			row->cells[j] = cell;
 			row->dirty = true;
@@ -313,7 +310,7 @@ static void buffer_clear(Buffer *b)
 	}
 }
 
-static void buffer_free(Buffer *b)
+static void buffer_free(VtBuffer *b)
 {
 	for (int i = 0; i < b->rows; i++)
 		free(b->lines[i].cells);
@@ -324,7 +321,7 @@ static void buffer_free(Buffer *b)
 	free(b->tabs);
 }
 
-static void buffer_scroll(Buffer *b, int s)
+static void buffer_scroll(VtBuffer *b, int s)
 {
 	/* work in screenfuls */
 	int ssz = b->scroll_bot - b->scroll_top;
@@ -345,7 +342,7 @@ static void buffer_scroll(Buffer *b, int s)
 
 	if (s > 0 && b->scroll_size) {
 		for (int i = 0; i < s; i++) {
-			Row tmp = b->scroll_top[i];
+			VtRow tmp = b->scroll_top[i];
 			b->scroll_top[i] = b->scroll_buf[b->scroll_index];
 			b->scroll_buf[b->scroll_index] = tmp;
 
@@ -361,7 +358,7 @@ static void buffer_scroll(Buffer *b, int s)
 			if (b->scroll_index == -1)
 				b->scroll_index = b->scroll_size - 1;
 
-			Row tmp = b->scroll_top[i];
+			VtRow tmp = b->scroll_top[i];
 			b->scroll_top[i] = b->scroll_buf[b->scroll_index];
 			b->scroll_buf[b->scroll_index] = tmp;
 			b->scroll_top[i].dirty = true;
@@ -369,9 +366,9 @@ static void buffer_scroll(Buffer *b, int s)
 	}
 }
 
-static void buffer_resize(Buffer *b, int rows, int cols)
+static void buffer_resize(VtBuffer *b, int rows, int cols)
 {
-	Row *lines = b->lines;
+	VtRow *lines = b->lines;
 
 	if (b->rows != rows) {
 		if (b->curs_row >= lines + rows) {
@@ -383,19 +380,19 @@ static void buffer_resize(Buffer *b, int rows, int cols)
 			b->rows--;
 		}
 
-		lines = realloc(lines, sizeof(Row) * rows);
+		lines = realloc(lines, sizeof(VtRow) * rows);
 	}
 
 	if (b->maxcols < cols) {
 		for (int row = 0; row < b->rows; row++) {
-			lines[row].cells = realloc(lines[row].cells, sizeof(Cell) * cols);
+			lines[row].cells = realloc(lines[row].cells, sizeof(VtCell) * cols);
 			if (b->cols < cols)
 				row_set(lines + row, b->cols, cols - b->cols, NULL);
 			lines[row].dirty = true;
 		}
-		Row *sbuf = b->scroll_buf;
+		VtRow *sbuf = b->scroll_buf;
 		for (int row = 0; row < b->scroll_size; row++) {
-			sbuf[row].cells = realloc(sbuf[row].cells, sizeof(Cell) * cols);
+			sbuf[row].cells = realloc(sbuf[row].cells, sizeof(VtCell) * cols);
 			if (b->cols < cols)
 				row_set(sbuf + row, b->cols, cols - b->cols, NULL);
 		}
@@ -413,7 +410,7 @@ static void buffer_resize(Buffer *b, int rows, int cols)
 	int deltarows = 0;
 	if (b->rows < rows) {
 		while (b->rows < rows) {
-			lines[b->rows].cells = calloc(b->maxcols, sizeof(Cell));
+			lines[b->rows].cells = calloc(b->maxcols, sizeof(VtCell));
 			row_set(lines + b->rows, 0, b->maxcols, b);
 			b->rows++;
 		}
@@ -438,20 +435,20 @@ static void buffer_resize(Buffer *b, int rows, int cols)
 	}
 }
 
-static bool buffer_init(Buffer *b, int rows, int cols, int scroll_size)
+static bool buffer_init(VtBuffer *b, int rows, int cols, int scroll_size)
 {
 	b->curattrs = A_NORMAL;	/* white text over black background */
 	b->curfg = b->curbg = -1;
 	if (scroll_size < 0)
 		scroll_size = 0;
-	if (scroll_size && !(b->scroll_buf = calloc(scroll_size, sizeof(Row))))
+	if (scroll_size && !(b->scroll_buf = calloc(scroll_size, sizeof(VtRow))))
 		return false;
 	b->scroll_size = scroll_size;
 	buffer_resize(b, rows, cols);
 	return true;
 }
 
-static void buffer_boundry(Buffer *b, Row **bs, Row **be, Row **as, Row **ae) {
+static void buffer_boundry(VtBuffer *b, VtRow **bs, VtRow **be, VtRow **as, VtRow **ae) {
 	if (bs)
 		*bs = NULL;
 	if (be)
@@ -477,26 +474,26 @@ static void buffer_boundry(Buffer *b, Row **bs, Row **be, Row **as, Row **ae) {
 	}
 }
 
-static Row *buffer_row_first(Buffer *b) {
-	Row *bstart;
+static VtRow *buffer_row_first(VtBuffer *b) {
+	VtRow *bstart;
 	if (!b->scroll_size || !b->scroll_above)
 		return b->lines;
 	buffer_boundry(b, &bstart, NULL, NULL, NULL);
 	return bstart;
 }
 
-static Row *buffer_row_last(Buffer *b) {
-	Row *aend;
+static VtRow *buffer_row_last(VtBuffer *b) {
+	VtRow *aend;
 	if (!b->scroll_size || !b->scroll_below)
 		return b->lines + b->rows - 1;
 	buffer_boundry(b, NULL, NULL, NULL, &aend);
 	return aend;
 }
 
-static Row *buffer_row_next(Buffer *b, Row *row)
+static VtRow *buffer_row_next(VtBuffer *b, VtRow *row)
 {
-	Row *before_start, *before_end, *after_start, *after_end;
-	Row *first = b->lines, *last = b->lines + b->rows - 1;
+	VtRow *before_start, *before_end, *after_start, *after_end;
+	VtRow *first = b->lines, *last = b->lines + b->rows - 1;
 
 	if (!row)
 		return NULL;
@@ -516,10 +513,10 @@ static Row *buffer_row_next(Buffer *b, Row *row)
 	return ++row;
 }
 
-static Row *buffer_row_prev(Buffer *b, Row *row)
+static VtRow *buffer_row_prev(VtBuffer *b, VtRow *row)
 {
-	Row *before_start, *before_end, *after_start, *after_end;
-	Row *first = b->lines, *last = b->lines + b->rows - 1;
+	VtRow *before_start, *before_end, *after_start, *after_end;
+	VtRow *first = b->lines, *last = b->lines + b->rows - 1;
 
 	if (!row)
 		return NULL;
@@ -541,8 +538,8 @@ static Row *buffer_row_prev(Buffer *b, Row *row)
 
 static void cursor_clamp(Vt *t)
 {
-	Buffer *b = t->buffer;
-	Row *lines = t->relposmode ? b->scroll_top : b->lines;
+	VtBuffer *b = t->buffer;
+	VtRow *lines = t->relposmode ? b->scroll_top : b->lines;
 	int rows = t->relposmode ? b->scroll_bot - b->scroll_top : b->rows;
 
 	if (b->curs_row < lines)
@@ -557,7 +554,7 @@ static void cursor_clamp(Vt *t)
 
 static void cursor_line_down(Vt *t)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 	row_set(b->curs_row, b->cols, b->maxcols - b->cols, NULL);
 	b->curs_row++;
 	if (b->curs_row < b->scroll_bot)
@@ -572,14 +569,14 @@ static void cursor_line_down(Vt *t)
 
 static void cursor_save(Vt *t)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 	b->curs_srow = b->curs_row - b->lines;
 	b->curs_scol = b->curs_col;
 }
 
 static void cursor_restore(Vt *t)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 	b->curs_row = b->lines + b->curs_srow;
 	b->curs_col = b->curs_scol;
 	cursor_clamp(t);
@@ -587,7 +584,7 @@ static void cursor_restore(Vt *t)
 
 static void attributes_save(Vt *t)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 	b->savattrs = b->curattrs;
 	b->savfg = b->curfg;
 	b->savbg = b->curbg;
@@ -596,7 +593,7 @@ static void attributes_save(Vt *t)
 
 static void attributes_restore(Vt *t)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 	b->curattrs = b->savattrs;
 	b->curfg = b->savfg;
 	b->curbg = b->savbg;
@@ -627,7 +624,7 @@ static bool is_valid_csi_ender(int c)
 /* interprets a 'set attribute' (SGR) CSI escape sequence */
 static void interpret_csi_sgr(Vt *t, int param[], int pcount)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 	if (pcount == 0) {
 		/* special case: reset attributes */
 		b->curattrs = A_NORMAL;
@@ -723,8 +720,8 @@ static void interpret_csi_sgr(Vt *t, int param[], int pcount)
 /* interprets an 'erase display' (ED) escape sequence */
 static void interpret_csi_ed(Vt *t, int param[], int pcount)
 {
-	Row *row, *start, *end;
-	Buffer *b = t->buffer;
+	VtRow *row, *start, *end;
+	VtBuffer *b = t->buffer;
 
 	attributes_save(t);
 	b->curattrs = A_NORMAL;
@@ -752,8 +749,8 @@ static void interpret_csi_ed(Vt *t, int param[], int pcount)
 /* interprets a 'move cursor' (CUP) escape sequence */
 static void interpret_csi_cup(Vt *t, int param[], int pcount)
 {
-	Buffer *b = t->buffer;
-	Row *lines = t->relposmode ? b->scroll_top : b->lines;
+	VtBuffer *b = t->buffer;
+	VtRow *lines = t->relposmode ? b->scroll_top : b->lines;
 
 	if (pcount == 0) {
 		b->curs_row = lines;
@@ -773,7 +770,7 @@ static void interpret_csi_cup(Vt *t, int param[], int pcount)
  * CPL, CHA, HPR, VPA, VPR, HPA */
 static void interpret_csi_c(Vt *t, char verb, int param[], int pcount)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 	int n = (pcount && param[0] > 0) ? param[0] : 1;
 
 	switch (verb) {
@@ -814,7 +811,7 @@ static void interpret_csi_c(Vt *t, char verb, int param[], int pcount)
 /* Interpret the 'erase line' escape sequence */
 static void interpret_csi_el(Vt *t, int param[], int pcount)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 	switch (pcount ? param[0] : 0) {
 	case 1:
 		row_set(b->curs_row, 0, b->curs_col + 1, b);
@@ -831,8 +828,8 @@ static void interpret_csi_el(Vt *t, int param[], int pcount)
 /* Interpret the 'insert blanks' sequence (ICH) */
 static void interpret_csi_ich(Vt *t, int param[], int pcount)
 {
-	Buffer *b = t->buffer;
-	Row *row = b->curs_row;
+	VtBuffer *b = t->buffer;
+	VtRow *row = b->curs_row;
 	int n = (pcount && param[0] > 0) ? param[0] : 1;
 
 	if (b->curs_col + n > b->cols)
@@ -847,8 +844,8 @@ static void interpret_csi_ich(Vt *t, int param[], int pcount)
 /* Interpret the 'delete chars' sequence (DCH) */
 static void interpret_csi_dch(Vt *t, int param[], int pcount)
 {
-	Buffer *b = t->buffer;
-	Row *row = b->curs_row;
+	VtBuffer *b = t->buffer;
+	VtRow *row = b->curs_row;
 	int n = (pcount && param[0] > 0) ? param[0] : 1;
 
 	if (b->curs_col + n > b->cols)
@@ -863,15 +860,15 @@ static void interpret_csi_dch(Vt *t, int param[], int pcount)
 /* Interpret an 'insert line' sequence (IL) */
 static void interpret_csi_il(Vt *t, int param[], int pcount)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 	int n = (pcount && param[0] > 0) ? param[0] : 1;
 
 	if (b->curs_row + n >= b->scroll_bot) {
-		for (Row *row = b->curs_row; row < b->scroll_bot; row++)
+		for (VtRow *row = b->curs_row; row < b->scroll_bot; row++)
 			row_set(row, 0, b->cols, b);
 	} else {
 		row_roll(b->curs_row, b->scroll_bot, -n);
-		for (Row *row = b->curs_row; row < b->curs_row + n; row++)
+		for (VtRow *row = b->curs_row; row < b->curs_row + n; row++)
 			row_set(row, 0, b->cols, b);
 	}
 }
@@ -879,15 +876,15 @@ static void interpret_csi_il(Vt *t, int param[], int pcount)
 /* Interpret a 'delete line' sequence (DL) */
 static void interpret_csi_dl(Vt *t, int param[], int pcount)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 	int n = (pcount && param[0] > 0) ? param[0] : 1;
 
 	if (b->curs_row + n >= b->scroll_bot) {
-		for (Row *row = b->curs_row; row < b->scroll_bot; row++)
+		for (VtRow *row = b->curs_row; row < b->scroll_bot; row++)
 			row_set(row, 0, b->cols, b);
 	} else {
 		row_roll(b->curs_row, b->scroll_bot, n);
-		for (Row *row = b->scroll_bot - n; row < b->scroll_bot; row++)
+		for (VtRow *row = b->scroll_bot - n; row < b->scroll_bot; row++)
 			row_set(row, 0, b->cols, b);
 	}
 }
@@ -895,7 +892,7 @@ static void interpret_csi_dl(Vt *t, int param[], int pcount)
 /* Interpret an 'erase characters' (ECH) sequence */
 static void interpret_csi_ech(Vt *t, int param[], int pcount)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 	int n = (pcount && param[0] > 0) ? param[0] : 1;
 
 	if (b->curs_col + n > b->cols)
@@ -907,7 +904,7 @@ static void interpret_csi_ech(Vt *t, int param[], int pcount)
 /* Interpret a 'set scrolling region' (DECSTBM) sequence */
 static void interpret_csi_decstbm(Vt *t, int param[], int pcount)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 	int new_top, new_bot;
 
 	switch (pcount) {
@@ -991,7 +988,7 @@ static void interpret_csi_priv_mode(Vt *t, int param[], int pcount, bool set)
 
 static void interpret_csi(Vt *t)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 	int csiparam[16];
 	unsigned int param_count = 0;
 	const char *p = t->ebuf + 1;
@@ -1110,7 +1107,7 @@ static void interpret_csi(Vt *t)
 /* Interpret an 'index' (IND) sequence */
 static void interpret_csi_ind(Vt *t)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 	if (b->curs_row < b->lines + b->rows - 1)
 		b->curs_row++;
 }
@@ -1118,7 +1115,7 @@ static void interpret_csi_ind(Vt *t)
 /* Interpret a 'reverse index' (RI) sequence */
 static void interpret_csi_ri(Vt *t)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 	if (b->curs_row > b->scroll_top)
 		b->curs_row--;
 	else {
@@ -1130,7 +1127,7 @@ static void interpret_csi_ri(Vt *t)
 /* Interpret a 'next line' (NEL) sequence */
 static void interpret_csi_nel(Vt *t)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 	if (b->curs_row < b->lines + b->rows - 1) {
 		b->curs_row++;
 		b->curs_col = 0;
@@ -1255,7 +1252,7 @@ handled:
 
 static void puttab(Vt *t, int count)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 	int direction = count >= 0 ? 1 : -1;
 	for (int col = b->curs_col + direction; count; col += direction) {
 		if (col < 0) {
@@ -1275,7 +1272,7 @@ static void puttab(Vt *t, int count)
 
 static void process_nonprinting(Vt *t, wchar_t wc)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 	switch (wc) {
 	case '\e': /* ESC */
 		new_escape_sequence(t);
@@ -1372,8 +1369,8 @@ static void put_wc(Vt *t, wchar_t wc)
 		} else if ((width = wcwidth(wc)) < 1) {
 			width = 1;
 		}
-		Buffer *b = t->buffer;
-		Cell blank_cell = { L'\0', build_attrs(b->curattrs), b->curfg, b->curbg };
+		VtBuffer *b = t->buffer;
+		VtCell blank_cell = { L'\0', build_attrs(b->curattrs), b->curfg, b->curbg };
 		if (width == 2 && b->curs_col == b->cols - 1) {
 			b->curs_row->cells[b->curs_col++] = blank_cell;
 			b->curs_row->dirty = true;
@@ -1385,8 +1382,8 @@ static void put_wc(Vt *t, wchar_t wc)
 		}
 
 		if (t->insert) {
-			Cell *src = b->curs_row->cells + b->curs_col;
-			Cell *dest = src + width;
+			VtCell *src = b->curs_row->cells + b->curs_col;
+			VtCell *dest = src + width;
 			size_t len = b->cols - b->curs_col - width;
 			memmove(dest, src, len * sizeof *dest);
 		}
@@ -1441,14 +1438,7 @@ int vt_process(Vt *t)
 	return 0;
 }
 
-void vt_default_colors_set(Vt *t, attr_t attrs, short fg, short bg)
-{
-	t->defattrs = attrs;
-	t->deffg = fg;
-	t->defbg = bg;
-}
-
-Vt *vt_create(int rows, int cols, int scroll_size)
+Vt *vt_create(UiWin *uiwin, int rows, int cols, int scroll_size)
 {
 	if (rows <= 0 || cols <= 0)
 		return NULL;
@@ -1457,8 +1447,8 @@ Vt *vt_create(int rows, int cols, int scroll_size)
 	if (!t)
 		return NULL;
 
+	t->win = uiwin;
 	t->pty = -1;
-	t->deffg = t->defbg = -1;
 	t->buffer = &t->buffer_normal;
 
 	if (!buffer_init(&t->buffer_normal, rows, cols, scroll_size) ||
@@ -1497,14 +1487,14 @@ void vt_destroy(Vt *t)
 
 void vt_dirty(Vt *t)
 {
-	Buffer *b = t->buffer;
-	for (Row *row = b->lines, *end = row + b->rows; row < end; row++)
+	VtBuffer *b = t->buffer;
+	for (VtRow *row = b->lines, *end = row + b->rows; row < end; row++)
 		row->dirty = true;
 }
 
 void vt_draw(Vt *t, WINDOW *win, int srow, int scol)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 
 	if (srow != t->srow || scol != t->scol) {
 		vt_dirty(t);
@@ -1513,27 +1503,27 @@ void vt_draw(Vt *t, WINDOW *win, int srow, int scol)
 	}
 
 	for (int i = 0; i < b->rows; i++) {
-		Row *row = b->lines + i;
+		VtRow *row = b->lines + i;
 
 		if (!row->dirty)
 			continue;
 
 		wmove(win, srow + i, scol);
-		Cell *cell = NULL;
+		VtCell *cell = NULL;
 		for (int j = 0; j < b->cols; j++) {
-			Cell *prev_cell = cell;
+			VtCell *prev_cell = cell;
 			cell = row->cells + j;
 			if (!prev_cell || cell->attr != prev_cell->attr
 			    || cell->fg != prev_cell->fg
 			    || cell->bg != prev_cell->bg) {
 				if (cell->attr == A_NORMAL)
-					cell->attr = t->defattrs;
+					cell->attr = ui_window_default_attrs_get(t->win);
 				if (cell->fg == -1)
-					cell->fg = t->deffg;
+					cell->fg = ui_window_default_fg_get(t->win);
 				if (cell->bg == -1)
-					cell->bg = t->defbg;
+					cell->bg = ui_window_default_bg_get(t->win);
 				wattrset(win, cell->attr << NCURSES_ATTR_SHIFT);
-				wcolor_set(win, vt_color_get(t, cell->fg, cell->bg), NULL);
+				wcolor_set(win, ui_window_color_get(t->win, cell->fg, cell->bg), NULL);
 			}
 
 			if (is_utf8 && cell->text >= 128) {
@@ -1563,7 +1553,7 @@ void vt_draw(Vt *t, WINDOW *win, int srow, int scol)
 
 void vt_scroll(Vt *t, int rows)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 	if (!b->scroll_size)
 		return;
 	if (rows < 0) { /* scroll back */
@@ -1679,7 +1669,7 @@ ssize_t vt_write(Vt *t, const char *buf, size_t len)
 
 static void send_curs(Vt *t)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 	char keyseq[16];
 	snprintf(keyseq, sizeof keyseq, "\e[%d;%dR", (int)(b->curs_row - b->lines), b->curs_col);
 	vt_write(t, keyseq, strlen(keyseq));
@@ -1751,97 +1741,8 @@ void vt_mouse(Vt *t, int x, int y, mmask_t mask)
 #endif /* NCURSES_MOUSE_VERSION */
 }
 
-static unsigned int color_hash(short fg, short bg)
-{
-	if (fg == -1)
-		fg = COLORS;
-	if (bg == -1)
-		bg = COLORS + 1;
-	return fg * (COLORS + 2) + bg;
-}
-
-short vt_color_get(Vt *t, short fg, short bg)
-{
-	if (fg >= COLORS)
-		fg = (t ? t->deffg : default_fg);
-	if (bg >= COLORS)
-		bg = (t ? t->defbg : default_bg);
-
-	if (!has_default_colors) {
-		if (fg == -1)
-			fg = (t && t->deffg != -1 ? t->deffg : default_fg);
-		if (bg == -1)
-			bg = (t && t->defbg != -1 ? t->defbg : default_bg);
-	}
-
-	if (!color2palette || (fg == -1 && bg == -1))
-		return 0;
-	unsigned int index = color_hash(fg, bg);
-	if (color2palette[index] == 0) {
-		short oldfg, oldbg;
-		for (;;) {
-			if (++color_pair_current >= color_pairs_max)
-				color_pair_current = color_pairs_reserved + 1;
-			pair_content(color_pair_current, &oldfg, &oldbg);
-			unsigned int old_index = color_hash(oldfg, oldbg);
-			if (color2palette[old_index] >= 0) {
-				if (init_pair(color_pair_current, fg, bg) == OK) {
-					color2palette[old_index] = 0;
-					color2palette[index] = color_pair_current;
-				}
-				break;
-			}
-		}
-	}
-
-	short color_pair = color2palette[index];
-	return color_pair >= 0 ? color_pair : -color_pair;
-}
-
-short vt_color_reserve(short fg, short bg)
-{
-	if (!color2palette || fg >= COLORS || bg >= COLORS)
-		return 0;
-	if (!has_default_colors && fg == -1)
-		fg = default_fg;
-	if (!has_default_colors && bg == -1)
-		bg = default_bg;
-	if (fg == -1 && bg == -1)
-		return 0;
-	unsigned int index = color_hash(fg, bg);
-	if (color2palette[index] >= 0) {
-		if (init_pair(color_pairs_reserved + 1, fg, bg) == OK)
-			color2palette[index] = -(++color_pairs_reserved);
-	}
-	short color_pair = color2palette[index];
-	return color_pair >= 0 ? color_pair : -color_pair;
-}
-
-static void init_colors(void)
-{
-	pair_content(0, &default_fg, &default_bg);
-	if (default_fg == -1)
-		default_fg = COLOR_WHITE;
-	if (default_bg == -1)
-		default_bg = COLOR_BLACK;
-	has_default_colors = (use_default_colors() == OK);
-	color_pairs_max = MIN(MAX_COLOR_PAIRS, SHRT_MAX);
-	if (COLORS)
-		color2palette = calloc((COLORS + 2) * (COLORS + 2), sizeof(short));
-	/*
-	 * XXX: On undefined color-pairs NetBSD curses pair_content() set fg
-	 *      and bg to default colors while ncurses set them respectively to
-	 *      0 and 0. Initialize all color-pairs in order to have consistent
-	 *      behaviour despite the implementation used.
-	 */
-	for (short i = 1; i < color_pairs_max; i++)
-		init_pair(i, 0, 0);
-	vt_color_reserve(COLOR_WHITE, COLOR_BLACK);
-}
-
 void vt_init(void)
 {
-	init_colors();
 	is_utf8_locale();
 	char *term = getenv("BORSCH_TERM");
 	if (!term)
@@ -1860,7 +1761,6 @@ void vt_keytable_set(const char * const keytable_overlay[], int count)
 
 void vt_shutdown(void)
 {
-	free(color2palette);
 }
 
 void vt_title_handler_set(Vt *t, vt_title_handler_t handler)
@@ -1895,7 +1795,7 @@ pid_t vt_pid_get(Vt *t)
 
 size_t vt_content_get(Vt *t, char **buf, bool colored)
 {
-	Buffer *b = t->buffer;
+	VtBuffer *b = t->buffer;
 	int lines = b->scroll_above + b->scroll_below + b->rows + 1;
 	size_t size = lines * ((b->cols + 1) * ((colored ? 64 : 0) + MB_CUR_MAX));
 	mbstate_t ps;
@@ -1905,13 +1805,13 @@ size_t vt_content_get(Vt *t, char **buf, bool colored)
 		return 0;
 
 	char *s = *buf;
-	Cell *prev_cell = NULL;
+	VtCell *prev_cell = NULL;
 
-	for (Row *row = buffer_row_first(b); row; row = buffer_row_next(b, row)) {
+	for (VtRow *row = buffer_row_first(b); row; row = buffer_row_next(b, row)) {
 		size_t len = 0;
 		char *last_non_space = s;
 		for (int col = 0; col < b->cols; col++) {
-			Cell *cell = row->cells + col;
+			VtCell *cell = row->cells + col;
 			if (colored) {
 				int esclen = 0;
 				if (!prev_cell || cell->attr != prev_cell->attr) {
