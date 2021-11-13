@@ -3,3 +3,18 @@
 * TODO Add support for hide/show window
 
 * TODO Add history support for eval window
+
+* TODO Add support of simple window text drawing w/o VT
+
+   Allow to create window w/o VT but with buffering support,
+   probably use some code from vis project.
+
+   Add separate UI layer for window text drawing
+
+* TODO Use same UI and buffer drawing for VT and edited window
+
+   Probably introduce window modality for "text" and "term" modes.
+
+* TODO Integrate autocomplete from fzy project
+
+* TODO Implement editing of window text buffer
