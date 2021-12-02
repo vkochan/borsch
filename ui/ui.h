@@ -94,6 +94,7 @@ struct Ui {
 	short (*window_color_get)(UiWin *win, short fg, short bg);
 	void (*arrange)(Ui*, enum UiLayout);
 	void (*draw)(Ui*);
+	void (*draw_char)(Ui *ui, int x, int y, unsigned int ch, int n);
 	void (*redraw)(Ui*);
 	void (*suspend)(Ui*);
 	void (*resume)(Ui*);
@@ -122,6 +123,7 @@ Ui *ui_term_new(void);
 int ui_init(Ui *ui);
 void ui_free(Ui *ui);
 short ui_color_make(Ui *ui, short fg, short bg);
+void ui_draw_char(Ui *ui, int x, int y, unsigned int ch, int n);
 UiWin *ui_window_new(Ui *ui, View *view);
 void ui_window_free(UiWin *win);
 void ui_window_draw(UiWin *win);

@@ -26,6 +26,12 @@ short ui_color_make(Ui *ui, short fg, short bg)
 		return -1;
 }
 
+void ui_draw_char(Ui *ui, int x, int y, unsigned int ch, int n)
+{
+	if (ui->draw_char)
+		ui->draw_char(ui, x, y, ch, n);
+}
+
 UiWin *ui_window_new(Ui *ui, View *view)
 {
 	UiWin *win = NULL;

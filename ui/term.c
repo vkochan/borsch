@@ -155,6 +155,11 @@ static void term_free(Ui *ui)
 	free(ui);
 }
 
+static void term_draw_char(Ui *ui, int x, int y, unsigned int ch, int n)
+{
+	mvvline(y, x, ch, n);
+}
+
 static UiWin *term_window_new(Ui *ui, View *view)
 {
 	WinTerm *twin;
@@ -234,6 +239,7 @@ Ui *ui_term_new(void)
 	tui->ui.init = term_init;
 	tui->ui.free = term_free;
 	tui->ui.color_make = term_color_make;
+	tui->ui.draw_char = term_draw_char;
 	tui->ui.window_new = term_window_new;
 	tui->ui.window_free = term_window_free;
 	tui->ui.window_draw = term_window_draw;
