@@ -32,16 +32,16 @@ static void grid(void)
 		else
 			aw = ((i + 1) % cols == 0) ? waw - nw * cols : 0;
 		if (i % cols) {
-			mvvline(ny, nx, ACS_VLINE, nh + ah);
+			ui_draw_char(ui, nx, ny, ACS_VLINE, nh + ah);
 			/* if we are on the first row, or on the last one and there are fewer clients
 			 * than normal whose border does not match the line above, print a top tree char
 			 * otherwise a plus sign. */
 			if (i <= cols
 			    || (i >= rows * cols - cols && n % cols
 				&& (cols - (n % cols)) % 2))
-				mvaddch(ny, nx, ACS_TTEE);
+				ui_draw_char(ui, nx, ny, ACS_TTEE, 1);
 			else
-				mvaddch(ny, nx, ACS_PLUS);
+				ui_draw_char(ui, nx, ny, ACS_PLUS, 1);
 			nx++, aw--;
 		}
 		resize(c, nx, ny, nw + aw, nh + ah);
