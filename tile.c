@@ -24,14 +24,14 @@ static void tile(void)
 			if (i == m) {
 				ny = way;
 				nx += mw;
-				mvvline(ny, nx, ACS_VLINE, wah);
-				mvaddch(ny, nx, ACS_TTEE);
+				ui_draw_char(ui, nx, ny, ACS_VLINE, wah);
+				ui_draw_char(ui, nx, ny, ACS_TTEE, 1);
 				nx++;
 				nw = waw - mw -1;
 			}
 			nh = (i < n - 1) ? th : (way + wah) - ny;
 			if (i > m)
-				mvaddch(ny, nx - 1, ACS_LTEE);
+				ui_draw_char(ui, nx - 1, ny, ACS_LTEE, 1);
 		}
 		resize(c, nx, ny, nw, nh);
 		ny += nh;
@@ -42,7 +42,7 @@ static void tile(void)
 	if (n > m) {
 		ny = way + mh;
 		for (i = 1; i < m; i++) {
-			mvaddch(ny, nx - 1, ((ny - 1) % th ? ACS_RTEE : ACS_PLUS));
+			ui_draw_char(ui, nx - 1, ny, ((ny - 1) % th ? ACS_RTEE : ACS_PLUS), 1);
 			ny += mh;
 		}
 	}
