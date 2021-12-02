@@ -1530,12 +1530,12 @@ void vt_draw(Vt *t, WINDOW *win, int srow, int scol)
 				char buf[MB_CUR_MAX + 1];
 				size_t len = wcrtomb(buf, cell->text, NULL);
 				if (len > 0) {
-					waddnstr(win, buf, len);
+					mvwaddnstr(win, srow + i, j, buf, len);
 					if (wcwidth(cell->text) > 1)
 						j++;
 				}
 			} else {
-				waddch(win, cell->text > ' ' ? cell->text : ' ');
+				mvwaddch(win, srow + i, j, cell->text > ' ' ? cell->text : ' ');
 			}
 		}
 
@@ -1543,7 +1543,7 @@ void vt_draw(Vt *t, WINDOW *win, int srow, int scol)
 		getyx(win, y, x);
 		(void)y;
 		if (x && x < b->cols - 1)
-			whline(win, ' ', b->cols - x);
+			mvwhline(win, x, y, ' ', b->cols - x);
 
 		row->dirty = false;
 	}
