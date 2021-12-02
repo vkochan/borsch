@@ -37,6 +37,7 @@ typedef struct {
 typedef struct {
 	UiWin win;
 	WINDOW *cwin;
+	int cur_x, cur_y;
 } WinTerm;
 
 static bool is_utf8, has_default_colors;
@@ -204,6 +205,51 @@ static void term_window_move(UiWin *win, int x, int y)
 	mvwin(twin->cwin, y, x);
 }
 
+void term_window_text_color_set(UiWin *win, short fg, short bg)
+{
+	WinTerm *twin = (WinTerm*)win;
+
+	wcolor_set(twin->cwin, ui_window_color_get(win, fg, bg), NULL);
+}
+
+void term_window_text_attr_set(UiWin *win, unsigned attrs)
+{
+	WinTerm *twin = (WinTerm*)win;
+
+	wattrset(twin->cwin, attrs);
+}
+
+void term_window_draw_char(UiWin *win, int x, int y, unsigned int ch, int n)
+{
+	WinTerm *twin = (WinTerm*)win;
+
+	mvwhline(twin->cwin, y, x, ch, n);
+}
+
+void term_window_draw_text(UiWin *win, int x, int y, const char *text, int n)
+{
+	WinTerm *twin = (WinTerm*)win;
+
+	mvwaddnstr(twin->cwin, y, x, text, n);
+}
+
+static void term_window_cursor_set(UiWin *win, int x, int y)
+{
+	WinTerm *twin = (WinTerm*)win;
+
+	wmove(twin->cwin, y, x);
+	twin->cur_x = x;
+	twin->cur_y = y;
+}
+
+static void term_window_cursor_get(UiWin *win, int *x, int *y)
+{
+	WinTerm *twin = (WinTerm*)win;
+
+	*x = twin->cur_x;
+	*y = twin->cur_y;
+}
+
 static void term_window_draw(UiWin *win)
 {
 	const Line *line = view_lines_first(win->view);
@@ -223,6 +269,13 @@ static void term_window_draw(UiWin *win)
 			waddnstr(twin->cwin, c->data, c->len);
 		}
 	}
+
+	wnoutrefresh(twin->cwin);
+}
+
+static void term_window_refresh(UiWin *win)
+{
+	WinTerm *twin = (WinTerm*)win;
 
 	wnoutrefresh(twin->cwin);
 }
@@ -248,10 +301,18 @@ Ui *ui_term_new(void)
 	tui->ui.draw_char_vert = term_draw_char_vert;
 	tui->ui.window_new = term_window_new;
 	tui->ui.window_free = term_window_free;
+	tui->ui.window_cursor_set = term_window_cursor_set;
+	tui->ui.window_cursor_get = term_window_cursor_get;
 	tui->ui.window_draw = term_window_draw;
 	tui->ui.window_redraw = term_window_redraw;
+	tui->ui.window_refresh = term_window_refresh;
 	tui->ui.window_resize = term_window_resize;
 	tui->ui.window_move = term_window_move;
+	tui->ui.window_text_color_set = term_window_text_color_set;
+	tui->ui.window_text_attr_set = term_window_text_attr_set;
+	tui->ui.window_draw_char = term_window_draw_char;
+	tui->ui.window_draw_text = term_window_draw_text;
+
 	tui->ui.window_color_get = term_window_color_get;
 
 	return tui;

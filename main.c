@@ -68,7 +68,6 @@ typedef struct {
 
 typedef struct Client Client;
 struct Client {
-	WINDOW *window;
 	Buffer *buf;
 	View *view;
 	UiWin *win;
@@ -632,11 +631,10 @@ static void
 draw_border(Client *c) {
 	int attrs_title = (COLOR(MAGENTA) | A_NORMAL);
 	int x, y, maxlen, attrs = NORMAL_ATTR;
+	char title[256];
+	size_t len;
 	char t = '\0';
 
-
-	if (!c->pid)
-		return;
 	if (!show_border())
 		return;
 	if (sel != c && c->urgent)
@@ -644,14 +642,14 @@ draw_border(Client *c) {
 	if (sel == c || (pertag.runinall[pertag.curtag] && !c->minimized))
 		attrs_title = attrs = SELECTED_ATTR;
 
-	wattrset(c->window, attrs);
-	getyx(c->window, y, x);
+	ui_window_text_attr_set(c->win, attrs);
+	ui_window_cursor_get(c->win, &x, &y);
 	if (c == sel) {
-	        wattrset(c->window, COLOR(BLUE_BG));
-		mvwhline(c->window, 0, 0, ' ', c->w);
-	        wattrset(c->window, attrs);
+		ui_window_text_attr_set(c->win, COLOR(BLUE_BG));
+		ui_window_draw_char(c->win, 0, 0, ' ', c->w);
+		ui_window_text_attr_set(c->win, attrs);
 	} else {
-		mvwhline(c->window, 0, 0, ACS_HLINE, c->w); }
+		ui_window_draw_char(c->win, 0, 0, ACS_HLINE, c->w); }
 	maxlen = c->w - 10;
 	if (maxlen < 0)
 		maxlen = 0;
@@ -660,39 +658,35 @@ draw_border(Client *c) {
 		c->title[maxlen] = '\0';
 	}
 
-	wattrset(c->window, attrs_title);
-	mvwprintw(c->window, 0, 2, "[%d|%s%s]",
-		  c->order,
-		  ismastersticky(c) ? "*" : "",
-	          *c->title ? c->title : "");
-	wattrset(c->window, attrs);
+	ui_window_text_attr_set(c->win, attrs_title);
+	len = snprintf(title, sizeof(title), "[%d|%s%s]",
+			c->order,
+			ismastersticky(c) ? "*" : "",
+			*c->title ? c->title : "");
+	ui_window_draw_text(c->win, 2, 0, title, len);
+	ui_window_text_attr_set(c->win, attrs);
 	if (t)
 		c->title[maxlen] = t;
-	wmove(c->window, y, x);
+	ui_window_cursor_set(c->win, x, y);
 }
 
 static void
 draw_content(Client *c) {
 	if (c->pid)
-		vt_draw(c->term, c->window, c->has_title_line, 0);
+		vt_draw(c->term, c->win, c->has_title_line, 0);
 	else
 		ui_window_draw(c->win);
 }
 
 static void
 draw(Client *c) {
-	if (!c->pid) {
-		draw_content(c);
-		return;
-	}
-
 	if (is_content_visible(c)) {
-		redrawwin(c->window);
+		ui_window_redraw(c->win);
 		draw_content(c);
 	}
 	if (!isarrange(fullscreen) || c == sel)
 		draw_border(c);
-	wnoutrefresh(c->window);
+	ui_window_refresh(c->win);
 }
 
 static void
@@ -882,8 +876,7 @@ focus(Client *c) {
 		lastsel->urgent = false;
 		if (!isarrange(fullscreen)) {
 			draw_border(lastsel);
-			if (lastsel->pid)
-				wnoutrefresh(lastsel->window);
+			ui_window_refresh(lastsel->win);
 		}
 	}
 
@@ -896,9 +889,10 @@ focus(Client *c) {
 		c->urgent = false;
 		if (isarrange(fullscreen)) {
 			draw(c);
-		} else if (c->pid) {
+		/* } else if (c->pid) { */
+		} else {
 			draw_border(c);
-			wnoutrefresh(c->window);
+			ui_window_refresh(c->win);
 		}
 
 		if (c->pid)
@@ -965,19 +959,9 @@ static void
 move_client(Client *c, int x, int y) {
 	if (c->x == x && c->y == y)
 		return;
-	if (!c->pid) {
-		ui_window_move(c->win, x, y);
-		c->x = x;
-		c->y = y;
-		return;
-	}
-	debug("moving, x: %d y: %d\n", x, y);
-	if (mvwin(c->window, y, x) == ERR) {
-		eprint("error moving, x: %d y: %d\n", x, y);
-	} else {
-		c->x = x;
-		c->y = y;
-	}
+	ui_window_move(c->win, x, y);
+	c->x = x;
+	c->y = y;
 }
 
 static void
@@ -985,22 +969,9 @@ resize_client(Client *c, int w, int h) {
 	bool has_title_line = show_border();
 	bool resize_window = c->w != w || c->h != h;
 	if (resize_window) {
-		if (!c->pid) {
-			ui_window_resize(c->win, w, h - has_title_line);
+			ui_window_resize(c->win, w, h);
 			c->w = w;
 			c->h = h;
-			return;
-		}
-	}
-
-	if (resize_window) {
-		debug("resizing, w: %d h: %d\n", w, h);
-		if (wresize(c->window, h, w) == ERR) {
-			eprint("error resizing, w: %d h: %d\n", w, h);
-		} else {
-			c->w = w;
-			c->h = h;
-		}
 	}
 	if (resize_window || c->has_title_line != has_title_line) {
 		c->has_title_line = has_title_line;
@@ -1351,14 +1322,9 @@ destroy(Client *c) {
 	}
 	if (lastsel == c)
 		lastsel = NULL;
-	if (c->pid) {
-		werase(c->window);
-		wnoutrefresh(c->window);
+	if (c->pid)
 		vt_destroy(c->term);
-		delwin(c->window);
-	} else {
-		ui_window_free(c->win);
-	}
+	ui_window_free(c->win);
 	view_free(c->view);
 	buffer_del(c->buf);
 
@@ -1469,14 +1435,8 @@ int create(const char *prog, const char *title, const char *cwd) {
 	c->id = ++cmdfifo.id;
 	snprintf(buf, sizeof buf, "%d", c->id);
 
-	if (!(c->window = newwin(wah, waw, way, wax))) {
-		free(c);
-		return -1;
-	}
-
 	c->buf = buffer_new();
 	if (!c->buf) {
-		delwin(c->window);
 		free(c);
 		return -1;
 	}
@@ -1484,7 +1444,6 @@ int create(const char *prog, const char *title, const char *cwd) {
 	c->view = view_new(buffer_text_get(c->buf));
 	if (!c->view) {
 		buffer_del(c->buf);
-		delwin(c->window);
 		free(c);
 	}
 
@@ -1495,12 +1454,13 @@ int create(const char *prog, const char *title, const char *cwd) {
 		free(c);
 		return -1;
 	}
+	ui_window_resize(c->win, waw, wah);
+	ui_window_move(c->win, wax, way);
 
 	c->term = c->app = vt_create(c->win, screen.h, screen.w, screen.history);
 	if (!c->term) {
 		view_free(c->view);
 		buffer_del(c->buf);
-		delwin(c->window);
 		free(c);
 		return -1;
 	}
@@ -1703,13 +1663,9 @@ static void
 redraw(const char *args[]) {
 	for (Client *c = clients; c; c = c->next) {
 		if (!c->minimized) {
-			if (c->pid) {
+			if (c->pid)
 				vt_dirty(c->term);
-				wclear(c->window);
-				wnoutrefresh(c->window);
-			} else {
-				ui_window_redraw(c->win);
-			}
+			ui_window_redraw(c->win);
 		}
 	}
 	resize_screen();
@@ -2132,7 +2088,7 @@ handle_overlay(Client *c) {
 	c->term = c->app;
 	vt_dirty(c->term);
 	draw_content(c);
-	wnoutrefresh(c->window);
+	ui_window_refresh(c->win);
 }
 
 static int
@@ -2312,14 +2268,12 @@ rescan:
 					synctitle(c);
 				if (c != sel) {
 					draw_content(c);
-					if (c->pid)
-						wnoutrefresh(c->window);
+					ui_window_refresh(c->win);
 				}
 			} else if (!isarrange(fullscreen) && isvisible(c)
 					&& c->minimized) {
 				draw_border(c);
-				if (c->pid)
-					wnoutrefresh(c->window);
+				ui_window_refresh(c->win);
 			}
 		}
 
@@ -2327,7 +2281,7 @@ rescan:
 			draw_content(sel);
 			if (sel->pid) {
 				curs_set(vt_cursor_visible(sel->term));
-				wnoutrefresh(sel->window);
+				ui_window_refresh(sel->win);
 			}
 		}
 	}

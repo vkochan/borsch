@@ -1492,9 +1492,10 @@ void vt_dirty(Vt *t)
 		row->dirty = true;
 }
 
-void vt_draw(Vt *t, WINDOW *win, int srow, int scol)
+void vt_draw(Vt *t, UiWin *win, int srow, int scol)
 {
 	VtBuffer *b = t->buffer;
+	int i, j;
 
 	if (srow != t->srow || scol != t->scol) {
 		vt_dirty(t);
@@ -1502,15 +1503,15 @@ void vt_draw(Vt *t, WINDOW *win, int srow, int scol)
 		t->scol = scol;
 	}
 
-	for (int i = 0; i < b->rows; i++) {
+	for (i = 0; i < b->rows; i++) {
 		VtRow *row = b->lines + i;
 
 		if (!row->dirty)
 			continue;
 
-		wmove(win, srow + i, scol);
+		ui_window_cursor_set(win, scol, srow + i);
 		VtCell *cell = NULL;
-		for (int j = 0; j < b->cols; j++) {
+		for (j = 0; j < b->cols; j++) {
 			VtCell *prev_cell = cell;
 			cell = row->cells + j;
 			if (!prev_cell || cell->attr != prev_cell->attr
@@ -1522,33 +1523,30 @@ void vt_draw(Vt *t, WINDOW *win, int srow, int scol)
 					cell->fg = ui_window_default_fg_get(t->win);
 				if (cell->bg == -1)
 					cell->bg = ui_window_default_bg_get(t->win);
-				wattrset(win, cell->attr << NCURSES_ATTR_SHIFT);
-				wcolor_set(win, ui_window_color_get(t->win, cell->fg, cell->bg), NULL);
+				ui_window_text_attr_set(win, cell->attr << NCURSES_ATTR_SHIFT);
+				ui_window_text_color_set(win, cell->fg, cell->bg);
 			}
 
 			if (is_utf8 && cell->text >= 128) {
 				char buf[MB_CUR_MAX + 1];
 				size_t len = wcrtomb(buf, cell->text, NULL);
 				if (len > 0) {
-					mvwaddnstr(win, srow + i, j, buf, len);
+					ui_window_draw_text(win, j, srow + i, buf, len);
 					if (wcwidth(cell->text) > 1)
 						j++;
 				}
 			} else {
-				mvwaddch(win, srow + i, j, cell->text > ' ' ? cell->text : ' ');
+				ui_window_draw_char(win, j, srow + i, cell->text > ' ' ? cell->text : ' ', 1);
 			}
 		}
 
-		int x, y;
-		getyx(win, y, x);
-		(void)y;
-		if (x && x < b->cols - 1)
-			mvwhline(win, x, y, ' ', b->cols - x);
+		if (j && j < b->cols - 1)
+			ui_window_draw_char(win, j, srow + i, ' ', b->cols - j);
 
 		row->dirty = false;
 	}
 
-	wmove(win, srow + b->curs_row - b->lines, scol + b->curs_col);
+	ui_window_cursor_set(win, scol + b->curs_col, srow + b->curs_row - b->lines);
 }
 
 void vt_scroll(Vt *t, int rows)

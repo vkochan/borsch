@@ -63,6 +63,18 @@ void ui_window_free(UiWin *win)
 		free(win);
 }
 
+void ui_window_cursor_set(UiWin *win, int x, int y)
+{
+	if (win->ui->window_cursor_set)
+		win->ui->window_cursor_set(win, x, y);
+}
+
+void ui_window_cursor_get(UiWin *win, int *x, int *y)
+{
+	if (win->ui->window_cursor_get)
+		win->ui->window_cursor_get(win, x, y);
+}
+
 void ui_window_draw(UiWin *win)
 {
 	view_draw(win->view);
@@ -75,6 +87,12 @@ void ui_window_redraw(UiWin *win)
 {
 	if (win->ui->window_redraw)
 		win->ui->window_redraw(win);
+}
+
+void ui_window_refresh(UiWin *win)
+{
+	if (win->ui->window_refresh)
+		win->ui->window_refresh(win);
 }
 
 void ui_window_resize(UiWin *win, int width, int height)
@@ -92,6 +110,30 @@ void ui_window_move(UiWin *win, int x, int y)
 
 	if (win->ui->window_move)
 		win->ui->window_move(win, x, y);
+}
+
+void ui_window_text_color_set(UiWin *win, short fg, short bg)
+{
+	if (win->ui->window_text_color_set)
+		win->ui->window_text_color_set(win, fg, bg);
+}
+
+void ui_window_text_attr_set(UiWin *win, unsigned attrs)
+{
+	if (win->ui->window_text_attr_set)
+		win->ui->window_text_attr_set(win, attrs);
+}
+
+void ui_window_draw_char(UiWin *win, int x, int y, unsigned int ch, int n)
+{
+	if (win->ui->window_draw_char)
+		win->ui->window_draw_char(win, x, y, ch, n);
+}
+
+void ui_window_draw_text(UiWin *win, int x, int y, const char *text, int n)
+{
+	if (win->ui->window_draw_text)
+		win->ui->window_draw_text(win, x, y, text, n);
 }
 
 short ui_window_color_get(UiWin *win, short fg, short bg)
