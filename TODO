@@ -1,11 +1,3 @@
-* TODO Move layout drawing to ui/term.c
-   
-   1) Extend UI API to support cell drawing
-
-   2) Implement it in term.c
-
-   3) Use it in tile.c, btstack.c, grid.c
-
 * TODO Introduce initial buffer modality support
 
 * TODO Add support of key-binding per buffer
