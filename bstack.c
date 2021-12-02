@@ -19,8 +19,8 @@ static void bstack(void)
 			continue;
 		if (i < m) {	/* master */
 			if (i > 0) {
-				mvvline(ny, nx, ACS_VLINE, nh);
-				mvaddch(ny, nx, ACS_TTEE);
+				ui_draw_char(ui, nx, ny, ACS_VLINE, nh);
+				ui_draw_char(ui, nx, ny, ACS_TTEE, 1);
 				nx++;
 			}
 			nh = mh;
@@ -32,8 +32,8 @@ static void bstack(void)
 				nh = (way + wah) - ny;
 			}
 			if (i > m) {
-				mvvline(ny, nx, ACS_VLINE, nh);
-				mvaddch(ny, nx, ACS_TTEE);
+				ui_draw_char(ui, nx, ny, ACS_VLINE, nh);
+				ui_draw_char(ui, nx, ny, ACS_TTEE, 1);
 				nx++;
 			}
 			nw = (i < n - 1) ? tw : (wax + waw) - nx;
@@ -48,7 +48,7 @@ static void bstack(void)
 		nx = wax;
 		for (i = 0; i < m; i++) {
 			if (i > 0) {
-				mvaddch(ny, nx, ACS_PLUS);
+				ui_draw_char(ui, nx, ny, ACS_PLUS, 1);
 				nx++;
 			}
 			nw = (i < m - 1) ? mw : (wax + waw) - nx;
