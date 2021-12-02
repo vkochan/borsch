@@ -157,6 +157,11 @@ static void term_free(Ui *ui)
 
 static void term_draw_char(Ui *ui, int x, int y, unsigned int ch, int n)
 {
+	mvhline(y, x, ch, n);
+}
+
+static void term_draw_char_vert(Ui *ui, int x, int y, unsigned int ch, int n)
+{
 	mvvline(y, x, ch, n);
 }
 
@@ -240,6 +245,7 @@ Ui *ui_term_new(void)
 	tui->ui.free = term_free;
 	tui->ui.color_make = term_color_make;
 	tui->ui.draw_char = term_draw_char;
+	tui->ui.draw_char_vert = term_draw_char_vert;
 	tui->ui.window_new = term_window_new;
 	tui->ui.window_free = term_window_free;
 	tui->ui.window_draw = term_window_draw;

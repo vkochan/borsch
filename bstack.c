@@ -19,7 +19,7 @@ static void bstack(void)
 			continue;
 		if (i < m) {	/* master */
 			if (i > 0) {
-				ui_draw_char(ui, nx, ny, ACS_VLINE, nh);
+				ui_draw_char_vert(ui, nx, ny, ACS_VLINE, nh);
 				ui_draw_char(ui, nx, ny, ACS_TTEE, 1);
 				nx++;
 			}
@@ -32,7 +32,7 @@ static void bstack(void)
 				nh = (way + wah) - ny;
 			}
 			if (i > m) {
-				ui_draw_char(ui, nx, ny, ACS_VLINE, nh);
+				ui_draw_char_vert(ui, nx, ny, ACS_VLINE, nh);
 				ui_draw_char(ui, nx, ny, ACS_TTEE, 1);
 				nx++;
 			}

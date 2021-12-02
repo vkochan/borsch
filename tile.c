@@ -24,7 +24,7 @@ static void tile(void)
 			if (i == m) {
 				ny = way;
 				nx += mw;
-				ui_draw_char(ui, nx, ny, ACS_VLINE, wah);
+				ui_draw_char_vert(ui, nx, ny, ACS_VLINE, wah);
 				ui_draw_char(ui, nx, ny, ACS_TTEE, 1);
 				nx++;
 				nw = waw - mw -1;
