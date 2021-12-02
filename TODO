@@ -12,10 +12,6 @@
 
 * TODO Add history support for eval window
 
-* TODO Use same UI and buffer drawing for VT and edited window
-
-   Probably introduce window modality for "text" and "term" modes.
-
 * TODO Integrate autocomplete from fzy project
 
 * TODO Implement editing of window text buffer
