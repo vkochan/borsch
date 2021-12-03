@@ -39,6 +39,7 @@
 #include <pwd.h>
 
 #include "buffer.h"
+#include "keymap.h"
 #include "view.h"
 #if defined __CYGWIN__ || defined __sun
 # include <termios.h>
@@ -132,11 +133,6 @@ typedef struct {
 typedef unsigned int KeyCombo[MAX_KEYS];
 
 typedef struct {
-	KeyCombo keys;
-	Action action;
-} KeyBinding;
-
-typedef struct {
 	mmask_t mask;
 	Action action;
 } Button;
@@ -205,7 +201,7 @@ static void focusn(const char *args[]);
 static void focusnextnm(const char *args[]);
 static void focusprevnm(const char *args[]);
 static void focuslast(const char *args[]);
-static void killclient(const char *args[]);
+static void killclient(void);
 static void killother(const char *args[]);
 static void quit(const char *args[]);
 static void redraw(const char *args[]);
@@ -214,7 +210,7 @@ static void setlayout(const char *args[]);
 static int getnmaster(void);
 static float getmfact(void);
 static void togglebarpos(const char *args[]);
-static void toggleminimize(const char *args[]);
+static void toggleminimize(void);
 static void minimizeother(const char *args[]);
 static void togglemouse(const char *args[]);
 static void togglerunall(const char *args[]);
@@ -241,11 +237,9 @@ static Client *clients = NULL;
 static char *title;
 static bool show_tagnamebycwd = false;
 
-static KeyBinding *scmkeyb = NULL;
-static int scmkeybn;
-
-static KeyBinding *modkeyb = NULL;
-static int modkeybn;
+static KeyMap *win_min_kmap;
+static KeyMap *global_kmap;
+static KeyMap *curr_kmap;
 
 /* valid curses attributes are listed below they can be ORed
  *
@@ -322,14 +316,6 @@ static Layout layouts[] = {
 	{ "+++", grid },
 	{ "TTT", bstack },
 	{ "[ ]", fullscreen },
-};
-
-#define MOD  CTRL('g')
-
-static KeyBinding min_bindings[] = {
-	{ { '\n',   }, { toggleminimize,   { NULL }   } },
-	{ { '\r',   }, { toggleminimize,   { NULL }   } },
-	{ { 'x',    }, { killclient,       { NULL }   } },
 };
 
 static const ColorRule colorrules[] = {
@@ -431,12 +417,6 @@ static bool runinall = false;
 static int min_align = MIN_ALIGN_HORIZ;
 
 static Cmd commands[] = {
-	/* put/get window to/from master area */
-	{ "zoom", { zoom, { NULL } } },
-	/* set cwd per tag or for current */
-	/* change layout by name or select next */
-	{ "setlayout", { setlayout, { NULL } } },
-	{ "kill", { killclient, { NULL } } },
 	{ "eval", { doeval, { NULL } } },
 };
 
@@ -859,13 +839,10 @@ focus(Client *c) {
 		for (c = stack; c && !isvisible(c); c = c->snext);
 
 	if (c) {
-		if (c->minimized) {
-			modkeybn = LENGTH(min_bindings);
-			modkeyb = min_bindings;
-		} else {
-			modkeybn = 0;
-			modkeyb = NULL;
-		}
+		if (c->minimized)
+			curr_kmap = win_min_kmap;
+		else
+			curr_kmap = global_kmap;
 	}
 
 	if (sel == c)
@@ -1066,30 +1043,6 @@ resize_screen(void) {
 	arrange();
 }
 
-static KeyBinding*
-keybindmatch(KeyBinding *keyb, unsigned int keybn, KeyCombo keys, unsigned int keycount) {
-	for (unsigned int b = 0; b < keybn; b++) {
-		for (unsigned int k = 0; k < keycount; k++) {
-			if (keys[k] != keyb[b].keys[k])
-				break;
-			if (k == keycount - 1)
-				return &keyb[b];
-		}
-	}
-	return NULL;
-}
-
-static KeyBinding*
-keybinding(KeyCombo keys, unsigned int keycount) {
-	KeyBinding *keyb = NULL;
-
-	if (modkeyb)
-		keyb = keybindmatch(modkeyb, modkeybn, keys, keycount);
-	if (!keyb)
-		keyb = keybindmatch(scmkeyb, scmkeybn, keys, keycount);
-	return keyb;
-}
-
 static unsigned int
 bitoftag(const char *tag) {
 	unsigned int i;
@@ -1110,7 +1063,7 @@ tagschanged() {
 	}
 	if (allminimized && nextvisible(clients)) {
 		focus(NULL);
-		toggleminimize(NULL);
+		toggleminimize();
 	}
 	arrange();
 }
@@ -1265,6 +1218,16 @@ getshell(void) {
 	return "/bin/sh";
 }
 
+static void init_default_keymap(void)
+{
+	global_kmap = keymap_new(NULL);
+	curr_kmap = global_kmap;
+
+	win_min_kmap = keymap_new(global_kmap);
+	keymap_bind(win_min_kmap, "<Enter>", toggleminimize, NULL);
+	keymap_bind(win_min_kmap, "x", killclient, NULL);
+}
+
 static void
 setup(void) {
 	shell = getshell();
@@ -1272,6 +1235,8 @@ setup(void) {
 
 	ui = ui_term_new();
 	ui_init(ui);
+
+	init_default_keymap();
 
 	mouse_setup();
 
@@ -1315,7 +1280,7 @@ destroy(Client *c) {
 		Client *next = nextvisible(clients);
 		if (next) {
 			focus(next);
-			toggleminimize(NULL);
+			toggleminimize();
 		} else {
 			sel = NULL;
 		}
@@ -1342,6 +1307,8 @@ cleanup(void) {
 	scheme_uninit();
 	while (clients)
 		destroy(clients);
+	keymap_free(win_min_kmap);
+	keymap_free(global_kmap);
 	vt_shutdown();
 	ui_free(ui);
 	free(copyreg.data);
@@ -1565,7 +1532,7 @@ focusn(const char *args[]) {
 		if (c->order == atoi(args[0])) {
 			focus(c);
 			if (c->minimized)
-				toggleminimize(NULL);
+				toggleminimize();
 			return;
 		}
 	}
@@ -1620,20 +1587,8 @@ focuslast(const char *args[]) {
 }
 
 static void
-killclient(const char *args[]) {
+killclient(void) {
 	Client *target = sel;
-
-	if (args && args[0]) {
-		int order = atoi(args[0]);
-		Client *c;
-
-		for (c = nextvisible(clients); c; c = nextvisible(c->next)) {
-			if (c->order == order) {
-				target = c;
-				break;
-			}
-		}
-	}
 
 	if (!target)
 		return;
@@ -1740,7 +1695,8 @@ togglebarpos(const char *args[]) {
 }
 
 static void
-toggleminimize(const char *args[]) {
+toggleminimize(void)
+{
 	Client *c, *m, *t;
 	unsigned int n;
 	event_t evt;
@@ -1834,7 +1790,7 @@ zoom(const char *args[]) {
 	attachfirst(c);
 	focus(c);
 	if (c->minimized)
-		toggleminimize(NULL);
+		toggleminimize();
 	arrange();
 }
 
@@ -1843,7 +1799,7 @@ static void
 mouse_focus(const char *args[]) {
 	focus(msel);
 	if (msel->minimized)
-		toggleminimize(NULL);
+		toggleminimize();
 }
 
 static void
@@ -1855,7 +1811,7 @@ mouse_fullscreen(const char *args[]) {
 static void
 mouse_minimize(const char *args[]) {
 	focus(msel);
-	toggleminimize(NULL);
+	toggleminimize();
 }
 
 static void
@@ -2206,17 +2162,24 @@ main(int argc, char *argv[]) {
 		}
 
 		if (FD_ISSET(STDIN_FILENO, &rd)) {
+reenter:
 			int code = getch();
 rescan:
 			if (code >= 0) {
 				keys[key_index++] = code;
-				KeyBinding *binding = NULL;
+				KeyBinding *kbd = NULL;
 				if (code == KEY_MOUSE) {
 					key_index = 0;
 					handle_mouse();
-				} else if ((binding = keybinding(keys, key_index))) {
-					unsigned int key_length = MAX_KEYS;
+				} else if ((kbd = keymap_match(curr_kmap, keys, key_index))) {
 					int alt_code;
+
+					if (keymap_kbd_is_map(kbd)) {
+						curr_kmap = keymap_kbd_map_get(kbd);
+						memset(keys, 0, sizeof(keys));
+						key_index = 0;
+						goto reenter;
+					}
 
 					if (code == ALT) {
 						nodelay(stdscr, TRUE);
@@ -2227,12 +2190,10 @@ rescan:
 						goto rescan;
 					}
 
-					while (key_length > 1 && !binding->keys[key_length-1])
-						key_length--;
-					if (key_index == key_length) {
-						binding->action.cmd(binding->action.args);
-						key_index = 0;
+					if (keymap_kbd_len(kbd) == key_index) {
+						keymap_kbd_action(kbd);
 						memset(keys, 0, sizeof(keys));
+						key_index = 0;
 					}
 				} else {
 					key_index = 0;
@@ -2636,7 +2597,7 @@ int win_state_set(int wid, win_state_t st)
 	case WIN_STATE_MINIMIZED:
 		if (!c->minimized) {
 			win_current_set(wid);
-			toggleminimize(NULL);
+			toggleminimize();
 			/* switch to the original window */
 			if (orig != c)
 				win_current_set(orig->id);
@@ -2654,7 +2615,7 @@ int win_state_set(int wid, win_state_t st)
 		attachfirst(c);
 		focus(c);
 		if (c->minimized)
-			toggleminimize(NULL);
+			toggleminimize();
 		arrange();
 		/* switch to the original window */
 		if (orig)
@@ -2681,7 +2642,7 @@ int win_state_toggle(int wid, win_state_t st)
 	switch (st) {
 	case WIN_STATE_MINIMIZED:
 		win_current_set(wid);
-		toggleminimize(NULL);
+		toggleminimize();
 		/* switch to the original window */
 		if (orig)
 			win_current_set(orig->id);
@@ -2921,112 +2882,14 @@ int layout_sticky_set(int tag, bool is_sticky)
 	return 0;
 }
 
-static void bind_key_cmd(const char *args[]) {
-	bind_key_cb_t cb = (bind_key_cb_t) args[0];
-
-	cb();
+int bind_key(char *key, void (*act)(void))
+{
+	return keymap_bind(global_kmap, key, act, NULL);
 }
 
-static int parse_key(KeyBinding *key, char *str)
+int unbind_key(char *key)
 {
-	char *tok_ptr = str;
-	char tmp[60] = {0};
-	char *tok;
-	int i;
-
-	strncpy(tmp, str, sizeof(tmp)-1);
-
-	tok = strtok_r(tmp, " ", &tok_ptr);
-
-	for (i = 0; i < MAX_KEYS && tok; i++) {
-		if (strlen(tok) == 3 && tok[0] == 'C' && tok[1] == '-') {
-			key->keys[i] = CTRL(tok[2]);
-		} else if (strlen(tok) == 3 && tok[0] == 'M' && tok[1] == '-') {
-			key->keys[i++] = ALT;
-			key->keys[i] = tok[2];
-		} else if (strcmp(tok, "<Space>") == 0) {
-			key->keys[i] = ' ';
-		} else if (strcmp(tok, "<Enter>") == 0) {
-			key->keys[i] = '\r';
-		} else if (strcmp(tok, "<Tab>") == 0) {
-			key->keys[i] = '\t';
-		} else {
-			key->keys[i] = tok[0];
-		}
-
-		tok = strtok_r(NULL, " ", &tok_ptr);
-	}
-
-	return 0;
-}
-
-static KeyBinding *find_key(char *str)
-{
-	KeyBinding *it = NULL, key;
-	int i, j;
-
-	parse_key(&key, str);
-
-	for (i = 0; i < scmkeybn; i++) {
-		it = &scmkeyb[i];
-
-		for (j = 0; j < MAX_KEYS; j++) {
-			if (it->keys[j] != key.keys[j]) {
-				it = NULL;
-				break;
-			}
-		}
-
-		if (it)
-			break;
-	}
-
-	return it;
-}
-
-int bind_key(char *map, bind_key_cb_t cb)
-{
-	KeyBinding *key;
-
-	key = find_key(map);
-	if (!key) {
-		scmkeybn++;
-		scmkeyb = realloc(scmkeyb, sizeof(*scmkeyb) * scmkeybn);
-		if (!scmkeyb)
-			error("fail on scmkeyb realloc\n");
-
-		key = &scmkeyb[scmkeybn - 1];
-		memset(key, 0, sizeof(*key));
-
-		parse_key(key, map);
-	}
-
-	key->action.args[0] = (const char *) cb;
-	key->action.cmd = bind_key_cmd;
-
-	return 0;
-}
-
-int unbind_key(char *map)
-{
-	KeyBinding key, *it = NULL, tmp;
-	int i, j;
-
-	parse_key(&key, map);
-
-	it = find_key(map);
-	if (it) {
-		tmp = scmkeyb[scmkeybn-1];
-		scmkeyb[scmkeybn-1] = *it;
-		*it = tmp;
-	}
-
-	scmkeybn--;
-	scmkeyb = realloc(scmkeyb, sizeof(*scmkeyb) * scmkeybn);
-	if (!scmkeyb)
-		error("fail on scmkeyb realloc\n");
-
-	return 0;
+	return keymap_unbind(global_kmap, key);
 }
 
 char *copy_buf_get(size_t *len)
