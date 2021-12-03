@@ -315,5 +315,5 @@ Ui *ui_term_new(void)
 
 	tui->ui.window_color_get = term_window_color_get;
 
-	return tui;
+	return (Ui *)tui;
 }
