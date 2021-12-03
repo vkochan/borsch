@@ -136,14 +136,6 @@ void ui_window_draw_text(UiWin *win, int x, int y, const char *text, int n)
 		win->ui->window_draw_text(win, x, y, text, n);
 }
 
-short ui_window_color_get(UiWin *win, short fg, short bg)
-{
-	if (win->ui->window_color_get)
-		return win->ui->window_color_get(win, fg, bg);
-	else
-		return -1;
-}
-
 void ui_window_default_colors_set(UiWin *win, unsigned attrs, short fg, short bg)
 {
 	win->defattrs = attrs;

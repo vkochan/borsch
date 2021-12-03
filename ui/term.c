@@ -209,7 +209,7 @@ void term_window_text_color_set(UiWin *win, short fg, short bg)
 {
 	WinTerm *twin = (WinTerm*)win;
 
-	wcolor_set(twin->cwin, ui_window_color_get(win, fg, bg), NULL);
+	wcolor_set(twin->cwin, term_window_color_get(win, fg, bg), NULL);
 }
 
 void term_window_text_attr_set(UiWin *win, unsigned attrs)
@@ -312,8 +312,6 @@ Ui *ui_term_new(void)
 	tui->ui.window_text_attr_set = term_window_text_attr_set;
 	tui->ui.window_draw_char = term_window_draw_char;
 	tui->ui.window_draw_text = term_window_draw_text;
-
-	tui->ui.window_color_get = term_window_color_get;
 
 	return (Ui *)tui;
 }
