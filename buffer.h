@@ -7,6 +7,8 @@ typedef struct Buffer Buffer;
 
 Buffer *buffer_new(const char *name);
 void buffer_del(Buffer *buf);
+Buffer *buffer_first_get(void);
+Buffer *buffer_next_get(Buffer *buf);
 Text *buffer_text_get(Buffer *buf);
 int buffer_id_get(Buffer *buf);
 Buffer *buffer_by_id(int bid);

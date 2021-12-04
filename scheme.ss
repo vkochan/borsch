@@ -243,6 +243,8 @@
 (define __cs_win_buf_get (foreign-procedure __collect_safe "cs_win_buf_get" (int) scheme-object))
 
 (define __cs_buf_current_get (foreign-procedure __collect_safe "cs_buf_current_get" () scheme-object))
+(define __cs_buf_first_get (foreign-procedure __collect_safe "cs_buf_first_get" () scheme-object))
+(define __cs_buf_next_get (foreign-procedure __collect_safe "cs_buf_next_get" (int) scheme-object))
 (define __cs_buf_name_get (foreign-procedure __collect_safe "cs_buf_name_get" (int) scheme-object))
 (define __cs_buf_name_set (foreign-procedure "cs_buf_name_set" (int string) void))
 (define __cs_buf_by_name (foreign-procedure "cs_buf_by_name" (string) scheme-object))
@@ -741,6 +743,41 @@
 (define buffer-get
    (lambda (n)
       (__cs_buf_by_name n)
+   )
+)
+
+(define buffer-first
+   (lambda ()
+       (__cs_buf_first_get)
+   )
+)
+
+(define buffer-next
+   (case-lambda
+      [()
+       (__cs_buf_next_get (__cs_buf_current_get))]
+
+      [(bid)
+       (__cs_buf_next_get bid)]
+   )
+)
+
+(define buffer-list
+   (lambda ()
+      (let ([buf (buffer-first)]
+            [lst   '()]
+	   )
+
+         (while buf
+            (set! lst (append lst (list
+                                    (list buf (buffer-name buf))
+				  )
+            )         )
+            (set! buf (buffer-next buf))
+         )
+
+	 lst
+      )
    )
 )
 

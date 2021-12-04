@@ -92,6 +92,16 @@ void buffer_del(Buffer *buf)
 	free(buf);
 }
 
+Buffer *buffer_first_get(void)
+{
+	return buf_list.next;
+}
+
+Buffer *buffer_next_get(Buffer *buf)
+{
+	return buf->next;
+}
+
 Text *buffer_text_get(Buffer *buf)
 {
 	return buf->text;

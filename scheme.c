@@ -264,6 +264,26 @@ ptr scheme_buf_current_get(void)
 	return Sfalse;
 }
 
+ptr scheme_buf_first_get(void)
+{
+	int ret = buf_first_get();
+
+	if (ret)
+		return Sinteger(ret);
+
+	return Sfalse;
+}
+
+ptr scheme_buf_next_get(int bid)
+{
+	int ret = buf_next_get(bid);
+
+	if (ret)
+		return Sinteger(ret);
+
+	return Sfalse;
+}
+
 ptr scheme_buf_name_get(int bid)
 {
 	return Sstring(buf_name_get(bid));
@@ -438,6 +458,8 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_buf_get", scheme_win_buf_get);
 
 	Sregister_symbol("cs_buf_current_get", scheme_buf_current_get);
+	Sregister_symbol("cs_buf_first_get", scheme_buf_first_get);
+	Sregister_symbol("cs_buf_next_get", scheme_buf_next_get);
 	Sregister_symbol("cs_buf_name_get", scheme_buf_name_get);
 	Sregister_symbol("cs_buf_name_set", scheme_buf_name_set);
 	Sregister_symbol("cs_buf_by_name", scheme_buf_by_name);
