@@ -79,7 +79,6 @@ struct Client {
 	volatile sig_atomic_t overlay_died;
 	const char *cmd;
 	char title[255];
-	bool sync_title;
 	int order;
 	pid_t pid;
 	unsigned short int id;
@@ -491,6 +490,14 @@ static bool ismastersticky(Client *c) {
 	return false;
 }
 
+char *client_get_title(Client *c)
+{
+	if (strlen(c->title))
+		return c->title;
+
+	return buffer_name_get(c->buf);
+}
+
 static void
 updatebarpos(void) {
 	bar.y = 0;
@@ -612,8 +619,8 @@ draw_border(Client *c) {
 	int attrs_title = (COLOR(MAGENTA) | A_NORMAL);
 	int x, y, maxlen, attrs = NORMAL_ATTR;
 	char title[256];
+	char tmp[256];
 	size_t len;
-	char t = '\0';
 
 	if (!show_border())
 		return;
@@ -629,24 +636,24 @@ draw_border(Client *c) {
 		ui_window_draw_char(c->win, 0, 0, ' ', c->w);
 		ui_window_text_attr_set(c->win, attrs);
 	} else {
-		ui_window_draw_char(c->win, 0, 0, ACS_HLINE, c->w); }
+		ui_window_draw_char(c->win, 0, 0, ACS_HLINE, c->w);
+	}
+
 	maxlen = c->w - 10;
 	if (maxlen < 0)
 		maxlen = 0;
-	if ((size_t)maxlen < sizeof(c->title)) {
-		t = c->title[maxlen];
-		c->title[maxlen] = '\0';
+	strncpy(tmp, client_get_title(c), sizeof(tmp));
+	if ((size_t)maxlen < strlen(tmp)) {
+		tmp[maxlen] = '\0';
 	}
 
 	ui_window_text_attr_set(c->win, attrs_title);
 	len = snprintf(title, sizeof(title), "[%d|%s%s]",
 			c->order,
 			ismastersticky(c) ? "*" : "",
-			*c->title ? c->title : "");
+			tmp[0] ? tmp : "");
 	ui_window_draw_text(c->win, 2, 0, title, len);
 	ui_window_text_attr_set(c->win, attrs);
-	if (t)
-		c->title[maxlen] = t;
 	ui_window_cursor_set(c->win, x, y);
 }
 
@@ -818,8 +825,9 @@ detach(Client *c) {
 static void
 settitle(Client *c) {
 	char *term, *t = title;
-	if (!t && sel == c && *c->title)
-		t = c->title;
+	char *ctitle = client_get_title(c);
+	if (!t && sel == c && ctitle && strlen(ctitle))
+		t = ctitle;
 	if (t && (term = getenv("TERM")) && !strstr(term, "linux")) {
 		printf("\033]0;%s\007", t);
 		fflush(stdout);
@@ -913,7 +921,6 @@ term_title_handler(Vt *term, const char *title) {
 	/* if (title) */
 	/* 	strncpy(c->title, title, sizeof(c->title) - 1); */
 	/* c->title[title ? sizeof(c->title) - 1 : 0] = '\0'; */
-	/* c->sync_title = false; */
 	/* settitle(c); */
 	/* if (!isarrange(fullscreen)) */
 	/* 	draw_border(c); */
@@ -1370,7 +1377,7 @@ synctitle(Client *c)
 
 	buf[ret - 1] = '\0';
 
-	strncpy(c->title, basename(buf), ret);
+	buffer_name_set(c->buf, basename(buf));
 
 	settitle(c);
 	if (!isarrange(fullscreen) || sel == c)
@@ -1387,6 +1394,7 @@ int create(const char *prog, const char *title, const char *cwd) {
 		NULL
 	};
 	char tmppath[PATH_MAX];
+	char tmp[256];
 	event_t evt;
 
 	if (prog) {
@@ -1401,7 +1409,7 @@ int create(const char *prog, const char *title, const char *cwd) {
 	c->id = ++cmdfifo.id;
 	snprintf(buf, sizeof buf, "%d", c->id);
 
-	c->buf = buffer_new();
+	c->buf = buffer_new(title);
 	if (!c->buf) {
 		free(c);
 		return -1;
@@ -1435,19 +1443,12 @@ int create(const char *prog, const char *title, const char *cwd) {
 		c->cmd = prog;
 		strncpy(tmppath, prog, sizeof(tmppath));
 		tmppath[sizeof(tmppath)-1] = '\0';
-		strncpy(c->title, basename(tmppath), sizeof(c->title));
+		strncpy(tmp, basename(tmppath), sizeof(tmp));
+		if (!buffer_is_name_locked(c->buf))
+			buffer_name_set(c->buf, tmp);
 	} else {
 		c->cmd = shell;
 	}
-
-	if (title)
-		strncpy(c->title, title, sizeof(c->title));
-	c->title[sizeof(c->title)-1] = '\0';
-
-	if (strlen(c->title) == 0)
-		c->sync_title = true;
-	else
-		c->sync_title = false;
 
 	if (!cwd)
 		cwd = getcwd_by_pid(sel, tmppath);
@@ -2224,7 +2225,7 @@ rescan:
 			}
 
 			if (is_content_visible(c)) {
-				if (c->pid && c->sync_title)
+				if (c->pid && !buffer_is_name_locked(c->buf))
 					synctitle(c);
 				if (c != sel) {
 					draw_content(c);
@@ -2416,7 +2417,7 @@ int win_new(void)
 	c->tags = tagset[seltags];
 	c->id = ++cmdfifo.id;
 
-	c->buf = buffer_new();
+	c->buf = buffer_new("");
 	if (!c->buf) {
 		free(c);
 		return -1;
@@ -2480,7 +2481,6 @@ int win_title_set(int wid, char *title)
 
 	if (c) {
 		strncpy(c->title, title, sizeof(c->title) - 1);
-		c->sync_title = false;
 		settitle(c);
 		if (!isarrange(fullscreen))
 			draw_border(c);
@@ -2738,6 +2738,41 @@ int buf_current_get(void)
 {
 	if (sel)
 		return buffer_id_get(sel->buf);
+
+	return 0;
+}
+
+void buf_name_set(int bid, const char *name)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_name_lock(buf, true);
+		buffer_name_set(buf, name);
+
+		for (Client *c = clients; c; c = c->next) {
+			if (isvisible(c) && c->buf == buf)
+				draw_border(c);
+		}
+	}
+}
+
+char *buf_name_get(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		return buffer_name_get(buf);
+
+	return NULL;
+}
+
+int buf_by_name(const char *name)
+{
+	Buffer *buf = buffer_by_name(name);
+
+	if (buf)
+		return buffer_id_get(buf);
 
 	return 0;
 }

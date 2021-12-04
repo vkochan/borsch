@@ -67,6 +67,9 @@ char *win_capture(int wid);
 int win_buf_get(int wid);
 
 int buf_current_get(void);
+void buf_name_set(int bid, const char *name);
+char *buf_name_get(int bid);
+int buf_by_name(const char *name);
 void buf_text_insert(int bid, const char *text);
 
 int view_current_get(void);

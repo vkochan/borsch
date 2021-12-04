@@ -1,5 +1,7 @@
+#include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "view.h"
 #include "text/text.h"
@@ -10,6 +12,7 @@ typedef struct Buffer {
 	struct Buffer *prev;
 	size_t cursor;
 	Text *text;
+	bool is_name_locked;
 	char name[256];
 } Buffer;
 
@@ -53,7 +56,7 @@ static void buffer_list_del(Buffer *buf)
 	buf_count--;
 }
 
-Buffer *buffer_new(void)
+Buffer *buffer_new(const char *name)
 {
 	Buffer *buf;
 
@@ -67,7 +70,15 @@ Buffer *buffer_new(void)
 		return NULL;
 	}
 
+	buf_count++;
 	buf->buf_id = buffer_id_gen();
+
+	if (name && strlen(name)) {
+		strncpy(buf->name, name, sizeof(buf->name));
+		buf->is_name_locked = true;
+	} else {
+		snprintf(buf->name, sizeof(buf->name), "new%d", buf->buf_id);
+	}
 
 	buffer_list_add(&buf_list, buf);
 
@@ -114,8 +125,7 @@ size_t buffer_cursor_get(Buffer *buf)
 	return buf->cursor;
 }
 
-/*
-const char *buffer_name_get(Buffer *buf)
+char *buffer_name_get(Buffer *buf)
 {
 	return buf->name;
 }
@@ -125,8 +135,24 @@ void buffer_name_set(Buffer *buf, const char *name)
 	strncpy(buf->name, name, sizeof(buf->name));
 }
 
+void buffer_name_lock(Buffer *buf, bool lock)
+{
+	buf->is_name_locked = lock;
+}
+
+bool buffer_is_name_locked(Buffer *buf)
+{
+	return buf->is_name_locked;
+}
+
 Buffer *buffer_by_name(const char *name)
 {
+	Buffer *buf;
+
+	for (buf = buf_list.next; buf; buf = buf->next) {
+		if (strcmp(buf->name, name) == 0)
+			return buf;
+	}
+
 	return NULL;
 }
-*/
