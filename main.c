@@ -2470,7 +2470,7 @@ char *win_title_get(int wid)
 	Client *c = client_get_by_id(wid);
 
 	if (c)
-		return c->title;
+		return client_get_title(c);
 
 	return NULL;
 }
