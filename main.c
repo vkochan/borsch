@@ -2401,9 +2401,9 @@ int win_current_set(int wid)
 	return 0;
 }
 
-int win_create(char *prog)
+int win_create(char *prog, char *title)
 {
-	return create(prog, NULL, NULL);
+	return create(prog, title, NULL);
 }
 
 int win_new(void)

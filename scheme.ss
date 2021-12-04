@@ -223,7 +223,7 @@
 (define __cs_win_left_get (foreign-procedure __collect_safe "cs_win_left_get" (int) scheme-object))
 (define __cs_win_current_get (foreign-procedure __collect_safe "cs_win_current_get" () scheme-object))
 (define __cs_win_current_set (foreign-procedure __collect_safe "cs_win_current_set" (int) int))
-(define __cs_win_create (foreign-procedure "cs_win_create" (string) scheme-object))
+(define __cs_win_create (foreign-procedure "cs_win_create" (string string) scheme-object))
 (define __cs_win_new (foreign-procedure "cs_win_new" () scheme-object))
 (define __cs_win_del (foreign-procedure __collect_safe "cs_win_del" (int) int))
 (define __cs_win_title_get (foreign-procedure __collect_safe "cs_win_title_get" (int) scheme-object))
@@ -426,10 +426,13 @@
 (define window-exec
    (case-lambda
       [()
-       (__cs_win_create #f)]
+       (__cs_win_create #f "")]
 
       [(prog)
-       (__cs_win_create prog)]
+       (__cs_win_create prog "")]
+
+      [(prog title)
+       (__cs_win_create prog title)]
    )
 )
 
@@ -665,7 +668,7 @@
 
 (define window-eval
    (lambda ()
-      (window-exec "borsch-eval -i")
+      (window-exec "borsch-eval -i" "eval")
    )
 )
 

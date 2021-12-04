@@ -47,7 +47,7 @@ int win_right_get(int wid);
 int win_left_get(int wid);
 int win_current_get(void);
 int win_current_set(int wid);
-int win_create(char *prog);
+int win_create(char *prog, char *title);
 int win_new(void);
 void win_del(int wid);
 char* win_title_get(int wid);

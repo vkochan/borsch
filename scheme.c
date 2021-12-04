@@ -148,9 +148,9 @@ int scheme_win_current_set(int wid)
 	return win_current_set(wid);
 }
 
-ptr scheme_win_create(char *prog)
+ptr scheme_win_create(char *prog, char *title)
 {
-	int ret = win_create(prog);
+	int ret = win_create(prog, title);
 
 	if (ret)
 		return Sinteger(ret);
