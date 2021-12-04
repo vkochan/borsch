@@ -257,8 +257,6 @@ static void term_window_draw(UiWin *win)
 	WinTerm *twin = (WinTerm*)win;
 	int x=0, y = 1; /* TODO: consider if to show title */
 
-	mvwhline(twin->cwin, 0, 0, ACS_HLINE, view_width);
-
 	redrawwin(twin->cwin);
 
 	for (const Line *l = line; l; l = l->next, y++) {
