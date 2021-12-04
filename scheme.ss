@@ -330,7 +330,7 @@
 
          (while win
             (set! lst (append lst (list
-                                    (list win (window-name win))
+                                    (list win (window-name win) (window-buffer))
 				  )
             )         )
             (set! win (window-next win))
