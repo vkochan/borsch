@@ -866,7 +866,6 @@ focus(Client *c) {
 		c->urgent = false;
 		if (isarrange(fullscreen)) {
 			draw(c);
-		/* } else if (c->pid) { */
 		} else {
 			draw_border(c);
 			ui_window_refresh(c->win);
