@@ -2801,6 +2801,29 @@ int buf_by_name(const char *name)
 	return 0;
 }
 
+static void buf_update(Buffer *buf, size_t pos, size_t len)
+{
+	Selection *s;
+
+	buffer_cursor_set(buf, pos+len);
+
+	if (sel && sel->buf == buf) {
+		s = view_selections_primary_get(sel->view);
+		if (s) {
+			view_cursors_scroll_to(s, pos+len);
+			ui_window_cursor_set(sel->win,
+					view_cursors_col(s),
+					view_cursors_line(s));
+		}
+	}
+
+	for (Client *c = clients; c; c = c->next) {
+		if (c->buf == buf && is_content_visible(c)) {
+			ui_window_draw(c->win);
+		}
+	}
+}
+
 void buf_text_insert(int bid, const char *text)
 {
 	Buffer *buf = buffer_by_id(bid);
@@ -2813,12 +2836,8 @@ void buf_text_insert(int bid, const char *text)
 		len = strlen(text);
 
 		text_insert(txt, pos, text, len);
-		buffer_cursor_set(buf, pos+len);
 
-		for (Client *c = clients; c; c = c->next) {
-			if (c->buf == buf)
-				ui_window_redraw(c->win);
-		}
+		buf_update(buf, pos, len);
 	}
 }
 

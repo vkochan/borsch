@@ -178,6 +178,11 @@ static UiWin *term_window_new(Ui *ui, View *view)
 		return NULL;
 	}
 
+	twin->win.deffg = default_fg;
+	twin->win.defbg = default_bg;
+	twin->cur_x = 0;
+	twin->cur_y = 1;
+
 	return (UiWin*)twin;
 }
 
@@ -240,6 +245,7 @@ static void term_window_cursor_set(UiWin *win, int x, int y)
 	wmove(twin->cwin, y, x);
 	twin->cur_x = x;
 	twin->cur_y = y;
+	wnoutrefresh(twin->cwin);
 }
 
 static void term_window_cursor_get(UiWin *win, int *x, int *y)
@@ -256,8 +262,12 @@ static void term_window_draw(UiWin *win)
 	int view_width = view_width_get(win->view);
 	WinTerm *twin = (WinTerm*)win;
 	int x=0, y = 1; /* TODO: consider if to show title */
+	int sx, sy;
 
 	redrawwin(twin->cwin);
+	getyx(twin->cwin, sy, sx);
+
+	term_window_text_attr_set(win, term_color_make(win->ui, twin->win.deffg, twin->win.defbg));
 
 	for (const Line *l = line; l; l = l->next, y++) {
 		for (x = 0; x < view_width; x++) {
@@ -268,6 +278,7 @@ static void term_window_draw(UiWin *win)
 		}
 	}
 
+	wmove(twin->cwin, sy, sx);
 	wnoutrefresh(twin->cwin);
 }
 
