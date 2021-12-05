@@ -249,6 +249,7 @@
 (define __cs_buf_name_set (foreign-procedure "cs_buf_name_set" (int string) void))
 (define __cs_buf_by_name (foreign-procedure "cs_buf_by_name" (string) scheme-object))
 (define __cs_buf_text_insert (foreign-procedure "cs_buf_text_insert" (int string) void))
+(define __cs_buf_text_char_move (foreign-procedure "cs_buf_text_char_move" (int int) void))
 
 (define __cs_view_current_get (foreign-procedure __collect_safe "cs_view_current_get" () int))
 (define __cs_view_current_set (foreign-procedure __collect_safe "cs_view_current_set" (int) int))
@@ -788,6 +789,26 @@
 
       [(b t)
       (__cs_buf_text_insert b t)]
+   )
+)
+
+(define text-char-next
+   (case-lambda
+      [()
+      (__cs_buf_text_char_move (__cs_buf_current_get) 1)]
+
+      [(b)
+      (__cs_buf_text_char_move b 1)]
+   )
+)
+
+(define text-char-prev
+   (case-lambda
+      [()
+      (__cs_buf_text_char_move (__cs_buf_current_get) -1)]
+
+      [(b)
+      (__cs_buf_text_char_move b -1)]
    )
 )
 

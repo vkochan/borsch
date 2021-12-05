@@ -41,6 +41,7 @@
 #include "buffer.h"
 #include "keymap.h"
 #include "view.h"
+#include "text/text-motions.h"
 #if defined __CYGWIN__ || defined __sun
 # include <termios.h>
 #endif
@@ -2801,21 +2802,26 @@ int buf_by_name(const char *name)
 	return 0;
 }
 
-static void buf_update(Buffer *buf, size_t pos, size_t len)
+static void buf_cursor_update(Buffer *buf, size_t pos)
 {
 	Selection *s;
 
-	buffer_cursor_set(buf, pos+len);
+	buffer_cursor_set(buf, pos);
 
 	if (sel && sel->buf == buf) {
 		s = view_selections_primary_get(sel->view);
 		if (s) {
-			view_cursors_scroll_to(s, pos+len);
+			view_cursors_scroll_to(s, pos);
 			ui_window_cursor_set(sel->win,
-					view_cursors_col(s),
+					view_cursors_col(s)-1,
 					view_cursors_line(s));
 		}
 	}
+}
+
+static void buf_update(Buffer *buf, size_t pos, size_t len)
+{
+	buf_cursor_update(buf, pos+len);
 
 	for (Client *c = clients; c; c = c->next) {
 		if (c->buf == buf && is_content_visible(c)) {
@@ -2838,6 +2844,29 @@ void buf_text_insert(int bid, const char *text)
 		text_insert(txt, pos, text, len);
 
 		buf_update(buf, pos, len);
+	}
+}
+
+void buf_text_char_move(int bid, int n)
+{
+	size_t (*char_move)(Text *t, size_t pos);
+	Buffer *buf = buffer_by_id(bid);
+	size_t pos;
+	Text *txt;
+
+	if (buf) {
+		pos = buffer_cursor_get(buf);
+		txt = buffer_text_get(buf);
+
+		if (n >= 0)
+			char_move = text_char_next;
+		else
+			char_move = text_char_prev;
+
+		for (n = abs(n); n; n--)
+			pos = char_move(txt, pos);
+
+		buf_cursor_update(buf, pos);
 	}
 }
 
