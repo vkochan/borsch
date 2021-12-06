@@ -79,7 +79,6 @@ struct Client {
 	int editor_fds[2];
 	volatile sig_atomic_t overlay_died;
 	const char *cmd;
-	char title[255];
 	int order;
 	pid_t pid;
 	unsigned short int id;
@@ -493,8 +492,8 @@ static bool ismastersticky(Client *c) {
 
 char *client_get_title(Client *c)
 {
-	if (strlen(c->title))
-		return c->title;
+	if (strlen(ui_window_title_get(c->win)))
+		return ui_window_title_get(c->win);
 
 	return buffer_name_get(c->buf);
 }
@@ -905,7 +904,7 @@ applycolorrules(Client *c) {
 
 	for (unsigned int i = 1; i < LENGTH(colorrules); i++) {
 		r = &colorrules[i];
-		if (strstr(c->title, r->title)) {
+		if (strstr(ui_window_title_get(c->win), r->title)) {
 			attrs = r->attrs;
 			fg = r->color->fg;
 			bg = r->color->bg;
@@ -1348,7 +1347,7 @@ static char *getcwd_by_pid(Client *c, char *buf) {
 static void
 synctitle(Client *c)
 {
-	size_t len = sizeof(c->title);
+	size_t len = 256;
 	char buf[128];
 	char path[64];
 	size_t blen;
@@ -1370,7 +1369,7 @@ synctitle(Client *c)
 	if (fd == -1)
 		return;
 
-	blen = MIN(sizeof(buf), sizeof(c->title));
+	blen = MIN(sizeof(buf), len);
 
 	ret = read(fd, buf, blen);
 	if (ret <= 0)
@@ -2481,7 +2480,7 @@ int win_title_set(int wid, char *title)
 	Client *c = client_get_by_id(wid);
 
 	if (c) {
-		strncpy(c->title, title, sizeof(c->title) - 1);
+		ui_window_title_set(c->win, title);
 		settitle(c);
 		if (!isarrange(fullscreen))
 			draw_border(c);

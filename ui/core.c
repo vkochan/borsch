@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include "ui/ui.h"
 
@@ -157,4 +158,14 @@ short ui_window_default_fg_get(UiWin *win)
 short ui_window_default_bg_get(UiWin *win)
 {
 	return win->defbg;
+}
+
+void ui_window_title_set(UiWin *win, const char *title)
+{
+	strncpy(win->title, title, sizeof(win->title));
+}
+
+char *ui_window_title_get(UiWin *win)
+{
+	return win->title;
 }

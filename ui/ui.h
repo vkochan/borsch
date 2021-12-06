@@ -115,7 +115,7 @@ struct UiWin {
 	int x, y;
 	unsigned defattrs;
 	short deffg, defbg;
-	char title[255];
+	char title[256];
 	CellStyle (*style_get)(UiWin*, enum UiStyle);
 	void (*status)(UiWin*, const char *txt);
 	void (*options_set)(UiWin*, enum UiOption);
@@ -150,5 +150,7 @@ void ui_window_default_colors_set(UiWin *win, unsigned attrs, short fg, short bg
 unsigned ui_window_default_attrs_get(UiWin *win);
 short ui_window_default_fg_get(UiWin *win);
 short ui_window_default_bg_get(UiWin *win);
+void ui_window_title_set(UiWin *win, const char *title);
+char *ui_window_title_get(UiWin *win);
 
 #endif
