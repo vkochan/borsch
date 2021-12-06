@@ -191,7 +191,7 @@ int text_line_width_get(Text *txt, size_t pos) {
 	size_t bol = text_line_begin(txt, pos);
 	Iterator it = text_iterator_get(txt, bol);
 
-	while (it.pos < pos) {
+	while (it.pos <= pos) {
 		char buf[MB_LEN_MAX];
 		size_t len = text_bytes_get(txt, it.pos, sizeof buf, buf);
 		if (len == 0 || buf[0] == '\n')
