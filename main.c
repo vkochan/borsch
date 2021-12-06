@@ -2847,24 +2847,94 @@ void buf_text_insert(int bid, const char *text)
 	}
 }
 
-void buf_text_char_move(int bid, int n)
+void buf_text_obj_move(int bid, char obj, int n)
 {
-	size_t (*char_move)(Text *t, size_t pos);
+	size_t (*obj_move)(Text *t, size_t pos);
 	Buffer *buf = buffer_by_id(bid);
 	size_t pos;
 	Text *txt;
+
+	switch (obj) {
+	case 'c':
+		if (n >= 0)
+			obj_move = text_char_next;
+		else
+			obj_move = text_char_prev;
+		break;
+	case 'w':
+		if (n >= 0)
+			obj_move = text_word_start_next;
+		else
+			obj_move = text_word_start_prev;
+		break;
+	case 'e':
+		if (n >= 0)
+			obj_move = text_word_end_next;
+		else
+			obj_move = text_word_end_prev;
+		break;
+	case 'W':
+		if (n >= 0)
+			obj_move = text_longword_start_next;
+		else
+			obj_move = text_longword_start_prev;
+		break;
+	case 'E':
+		if (n >= 0)
+			obj_move = text_longword_end_next;
+		else
+			obj_move = text_longword_end_prev;
+		break;
+	case 'l':
+		if (n >= 0)
+			obj_move = text_line_down;
+		else
+			obj_move = text_line_up;
+		break;
+	case 'L':
+		if (n >= 0)
+			obj_move = text_line_next;
+		else
+			obj_move = text_line_prev;
+		break;
+	case '0':
+		if (n >= 0)
+			obj_move = text_line_finish;
+		else
+			obj_move = text_line_start;
+		break;
+	case '1':
+		if (n >= 0)
+			obj_move = text_line_end;
+		else
+			obj_move = text_line_begin;
+		break;
+	case 'p':
+		if (n >= 0)
+			obj_move = text_paragraph_next;
+		else
+			obj_move = text_paragraph_prev;
+		break;
+	case 's':
+		if (n >= 0)
+			obj_move = text_sentence_next;
+		else
+			obj_move = text_sentence_prev;
+		break;
+	case 'g':
+		if (n >= 0)
+			obj_move = text_begin;
+		else
+			obj_move = text_end;
+		break;
+	}
 
 	if (buf) {
 		pos = buffer_cursor_get(buf);
 		txt = buffer_text_get(buf);
 
-		if (n >= 0)
-			char_move = text_char_next;
-		else
-			char_move = text_char_prev;
-
 		for (n = abs(n); n; n--)
-			pos = char_move(txt, pos);
+			pos = obj_move(txt, pos);
 
 		buf_cursor_update(buf, pos);
 	}

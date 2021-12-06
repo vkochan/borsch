@@ -309,9 +309,9 @@ void scheme_buf_text_insert(int bid, const char *text)
 	buf_text_insert(bid, text);
 }
 
-void scheme_buf_text_char_move(int bid, int n)
+void scheme_buf_text_obj_move(int bid, char obj, int n)
 {
-	buf_text_char_move(bid, n);
+	buf_text_obj_move(bid, obj, n);
 }
 
 int scheme_view_current_get(void)
@@ -469,7 +469,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_name_set", scheme_buf_name_set);
 	Sregister_symbol("cs_buf_by_name", scheme_buf_by_name);
 	Sregister_symbol("cs_buf_text_insert", scheme_buf_text_insert);
-	Sregister_symbol("cs_buf_text_char_move", scheme_buf_text_char_move);
+	Sregister_symbol("cs_buf_text_obj_move", scheme_buf_text_obj_move);
 
 	Sregister_symbol("cs_view_current_get", scheme_view_current_get);
 	Sregister_symbol("cs_view_current_set", scheme_view_current_set);

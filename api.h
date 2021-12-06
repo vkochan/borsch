@@ -73,7 +73,7 @@ void buf_name_set(int bid, const char *name);
 char *buf_name_get(int bid);
 int buf_by_name(const char *name);
 void buf_text_insert(int bid, const char *text);
-void buf_text_char_move(int bid, int n);
+void buf_text_obj_move(int bid, char obj, int n);
 
 int view_current_get(void);
 int view_current_set(int tag);

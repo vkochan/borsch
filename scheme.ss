@@ -249,7 +249,7 @@
 (define __cs_buf_name_set (foreign-procedure "cs_buf_name_set" (int string) void))
 (define __cs_buf_by_name (foreign-procedure "cs_buf_by_name" (string) scheme-object))
 (define __cs_buf_text_insert (foreign-procedure "cs_buf_text_insert" (int string) void))
-(define __cs_buf_text_char_move (foreign-procedure "cs_buf_text_char_move" (int int) void))
+(define __cs_buf_text_obj_move (foreign-procedure "cs_buf_text_obj_move" (int char int) void))
 
 (define __cs_view_current_get (foreign-procedure __collect_safe "cs_view_current_get" () int))
 (define __cs_view_current_set (foreign-procedure __collect_safe "cs_view_current_set" (int) int))
@@ -795,20 +795,180 @@
 (define text-char-next
    (case-lambda
       [()
-      (__cs_buf_text_char_move (__cs_buf_current_get) 1)]
+      (__cs_buf_text_obj_move (__cs_buf_current_get) #\c 1)]
 
       [(b)
-      (__cs_buf_text_char_move b 1)]
+      (__cs_buf_text_obj_move b #\c 1)]
    )
 )
 
 (define text-char-prev
    (case-lambda
       [()
-      (__cs_buf_text_char_move (__cs_buf_current_get) -1)]
+      (__cs_buf_text_obj_move (__cs_buf_current_get) #\c -1)]
 
       [(b)
-      (__cs_buf_text_char_move b -1)]
+      (__cs_buf_text_obj_move b #\c -1)]
+   )
+)
+
+(define text-word-next
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_move (__cs_buf_current_get) #\w 1)]
+
+      [(b)
+      (__cs_buf_text_obj_move b #\w 1)]
+   )
+)
+
+(define text-word-prev
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_move (__cs_buf_current_get) #\w -1)]
+
+      [(b)
+      (__cs_buf_text_obj_move b #\w -1)]
+   )
+)
+
+(define text-word-end
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_move (__cs_buf_current_get) #\e 1)]
+
+      [(b)
+      (__cs_buf_text_obj_move b #\e 1)]
+   )
+)
+
+(define text-longword-next
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_move (__cs_buf_current_get) #\W 1)]
+
+      [(b)
+      (__cs_buf_text_obj_move b #\W 1)]
+   )
+)
+
+(define text-longword-prev
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_move (__cs_buf_current_get) #\W -1)]
+
+      [(b)
+      (__cs_buf_text_obj_move b #\W -1)]
+   )
+)
+
+(define text-longword-end
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_move (__cs_buf_current_get) #\E 1)]
+
+      [(b)
+      (__cs_buf_text_obj_move b #\E 1)]
+   )
+)
+
+(define text-line-up
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_move (__cs_buf_current_get) #\l -1)]
+
+      [(b)
+      (__cs_buf_text_obj_move b #\l -1)]
+   )
+)
+
+(define text-line-down
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_move (__cs_buf_current_get) #\l 1)]
+
+      [(b)
+      (__cs_buf_text_obj_move b #\l 1)]
+   )
+)
+
+(define text-line-next
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_move (__cs_buf_current_get) #\L 1)]
+
+      [(b)
+      (__cs_buf_text_obj_move b #\L 1)]
+   )
+)
+
+(define text-line-prev
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_move (__cs_buf_current_get) #\L -1)]
+
+      [(b)
+      (__cs_buf_text_obj_move b #\L -1)]
+   )
+)
+
+(define text-line-start
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_move (__cs_buf_current_get) #\0 -1)]
+
+      [(b)
+      (__cs_buf_text_obj_move b #\0 -1)]
+   )
+)
+
+(define text-line-finish
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_move (__cs_buf_current_get) #\0 1)]
+
+      [(b)
+      (__cs_buf_text_obj_move b #\0 1)]
+   )
+)
+
+(define text-line-begin
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_move (__cs_buf_current_get) #\0 -1)]
+
+      [(b)
+      (__cs_buf_text_obj_move b #\0 -1)]
+   )
+)
+
+(define text-line-end
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_move (__cs_buf_current_get) #\1 1)]
+
+      [(b)
+      (__cs_buf_text_obj_move b #\1 1)]
+   )
+)
+
+(define text-begin
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_move (__cs_buf_current_get) #\g 1)]
+
+      [(b)
+      (__cs_buf_text_obj_move b #\g 1)]
+   )
+)
+
+(define text-end
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_move (__cs_buf_current_get) #\g -1)]
+
+      [(b)
+      (__cs_buf_text_obj_move b #\g -1)]
    )
 )
 
