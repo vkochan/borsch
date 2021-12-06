@@ -2829,7 +2829,6 @@ static void buf_update(Buffer *buf, size_t pos, size_t len)
 	for (Client *c = clients; c; c = c->next) {
 		if (c->buf == buf && is_content_visible(c)) {
 			ui_window_draw(c->win);
-			draw_border(c);
 		}
 	}
 }
