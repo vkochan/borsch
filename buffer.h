@@ -19,5 +19,7 @@ void buffer_name_set(Buffer *buf, const char *name);
 void buffer_name_lock(Buffer *buf, bool lock);
 bool buffer_is_name_locked(Buffer *buf);
 Buffer *buffer_by_name(const char *name);
+void buffer_ref_get(Buffer *buf);
+void buffer_ref_put(Buffer *buf);
 
 #endif /* BUFFER_H */

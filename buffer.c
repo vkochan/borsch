@@ -14,6 +14,7 @@ typedef struct Buffer {
 	Text *text;
 	bool is_name_locked;
 	char name[256];
+	size_t ref_count;
 } Buffer;
 
 static Buffer buf_list;
@@ -69,6 +70,7 @@ Buffer *buffer_new(const char *name)
 		free(buf);
 		return NULL;
 	}
+	buf->ref_count = 1;
 
 	buf_count++;
 	buf->buf_id = buffer_id_gen();
@@ -87,9 +89,14 @@ Buffer *buffer_new(const char *name)
 
 void buffer_del(Buffer *buf)
 {
-	buffer_list_del(buf);
-	text_free(buf->text);
-	free(buf);
+	if (buf->ref_count)
+		buf->ref_count--;
+
+	if (!buf->ref_count) {
+		buffer_list_del(buf);
+		text_free(buf->text);
+		free(buf);
+	}
 }
 
 Buffer *buffer_first_get(void)
@@ -165,4 +172,15 @@ Buffer *buffer_by_name(const char *name)
 	}
 
 	return NULL;
+}
+
+void buffer_ref_get(Buffer *buf)
+{
+	buf->ref_count++;
+}
+
+void buffer_ref_put(Buffer *buf)
+{
+	if (buf->ref_count)
+		buf->ref_count--;
 }
