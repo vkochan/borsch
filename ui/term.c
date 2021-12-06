@@ -264,8 +264,8 @@ static void term_window_draw(UiWin *win)
 	int x=0, y = 1; /* TODO: consider if to show title */
 	int sx, sy;
 
-	redrawwin(twin->cwin);
 	getyx(twin->cwin, sy, sx);
+	wclear(twin->cwin);
 
 	term_window_text_attr_set(win, term_color_make(win->ui, twin->win.deffg, twin->win.defbg));
 

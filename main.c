@@ -2811,10 +2811,14 @@ static void buf_cursor_update(Buffer *buf, size_t pos)
 	if (sel && sel->buf == buf) {
 		s = view_selections_primary_get(sel->view);
 		if (s) {
+			int x, y;
+
 			view_cursors_scroll_to(s, pos);
-			ui_window_cursor_set(sel->win,
-					view_cursors_col(s)-1,
-					view_cursors_line(s));
+
+			if (!view_coord_get(sel->view, view_cursors_pos(s), NULL, &y, &x))
+				return;
+
+			ui_window_cursor_set(sel->win, x, y+1);
 		}
 	}
 }
@@ -2826,6 +2830,7 @@ static void buf_update(Buffer *buf, size_t pos, size_t len)
 	for (Client *c = clients; c; c = c->next) {
 		if (c->buf == buf && is_content_visible(c)) {
 			ui_window_draw(c->win);
+			draw_border(c);
 		}
 	}
 }
@@ -2936,7 +2941,7 @@ void buf_text_obj_move(int bid, char obj, int n)
 		for (n = abs(n); n; n--)
 			pos = obj_move(txt, pos);
 
-		buf_cursor_update(buf, pos);
+		buf_update(buf, pos, 0);
 	}
 }
 

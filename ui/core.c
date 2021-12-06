@@ -78,6 +78,7 @@ void ui_window_cursor_get(UiWin *win, int *x, int *y)
 void ui_window_draw(UiWin *win)
 {
 	view_draw(win->view);
+	view_update(win->view);
 
 	if (win->ui->window_draw)
 		win->ui->window_draw(win);
