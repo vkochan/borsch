@@ -122,8 +122,6 @@ struct UiWin {
 	void (*options_set)(UiWin*, enum UiOption);
 	enum UiOption (*options_get)(UiWin*);
 	bool (*style_define)(UiWin*, int id, const char *style);
-	int (*window_width)(UiWin*);
-	int (*window_height)(UiWin*);
 };
 
 bool is_default_color(CellColor c);
