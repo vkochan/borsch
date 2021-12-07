@@ -2803,22 +2803,16 @@ int buf_by_name(const char *name)
 
 static void buf_cursor_update(Buffer *buf, size_t pos)
 {
-	Selection *s;
-
 	buffer_cursor_set(buf, pos);
 
 	if (sel && sel->buf == buf) {
-		s = view_selections_primary_get(sel->view);
-		if (s) {
-			int x, y;
+		int x, y;
 
-			view_cursors_scroll_to(s, pos);
+		view_scroll_to(sel->view, pos);
+		if (!view_coord_get(sel->view, pos, NULL, &y, &x))
+			return;
 
-			if (!view_coord_get(sel->view, view_cursors_pos(s), NULL, &y, &x))
-				return;
-
-			ui_window_cursor_set(sel->win, x, y+1);
-		}
+		ui_window_cursor_set(sel->win, x, y+1);
 	}
 }
 
@@ -2890,9 +2884,9 @@ void buf_text_obj_move(int bid, char obj, int n)
 		break;
 	case 'l':
 		if (n >= 0)
-			obj_move = text_line_down;
+			obj_move = text_line_next;
 		else
-			obj_move = text_line_up;
+			obj_move = text_line_prev;
 		break;
 	case 'L':
 		if (n >= 0)
