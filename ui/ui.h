@@ -112,6 +112,7 @@ struct Ui {
 struct UiWin {
 	Ui *ui;
 	View *view;
+	void *priv;
 	int x, y;
 	int width, height;
 	unsigned defattrs;
@@ -122,6 +123,7 @@ struct UiWin {
 	void (*options_set)(UiWin*, enum UiOption);
 	enum UiOption (*options_get)(UiWin*);
 	bool (*style_define)(UiWin*, int id, const char *style);
+	void (*draw)(UiWin *);
 };
 
 bool is_default_color(CellColor c);
@@ -155,5 +157,8 @@ int ui_window_width_get(UiWin *win);
 int ui_window_height_get(UiWin *win);
 int ui_window_x_get(UiWin *win);
 int ui_window_y_get(UiWin *win);
+void ui_window_priv_set(UiWin *win, void *priv);
+void *ui_window_priv_get(UiWin *win);
+void ui_window_draw_set(UiWin *win, void (*fn)(UiWin *));
 
 #endif

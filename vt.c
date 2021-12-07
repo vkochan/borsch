@@ -252,6 +252,7 @@ static const char *keytable[KEY_MAX+1] = {
 static void puttab(Vt *t, int count);
 static void process_nonprinting(Vt *t, wchar_t wc);
 static void send_curs(Vt *t);
+static void vt_draw(UiWin *win);
 
 __attribute__ ((const))
 static attr_t build_attrs(attr_t curattrs)
@@ -1438,7 +1439,7 @@ int vt_process(Vt *t)
 	return 0;
 }
 
-Vt *vt_create(UiWin *uiwin, int rows, int cols, int scroll_size)
+Vt *vt_create(UiWin *win, int rows, int cols, int scroll_size)
 {
 	if (rows <= 0 || cols <= 0)
 		return NULL;
@@ -1447,7 +1448,7 @@ Vt *vt_create(UiWin *uiwin, int rows, int cols, int scroll_size)
 	if (!t)
 		return NULL;
 
-	t->win = uiwin;
+	t->win = win;
 	t->pty = -1;
 	t->buffer = &t->buffer_normal;
 
@@ -1456,6 +1457,9 @@ Vt *vt_create(UiWin *uiwin, int rows, int cols, int scroll_size)
 		free(t);
 		return NULL;
 	}
+
+	ui_window_draw_set(win, vt_draw);
+	ui_window_priv_set(win, t);
 
 	return t;
 }
@@ -1492,9 +1496,11 @@ void vt_dirty(Vt *t)
 		row->dirty = true;
 }
 
-void vt_draw(Vt *t, UiWin *win, int srow, int scol)
+static void vt_draw(UiWin *win)
 {
+	Vt *t = ui_window_priv_get(win);
 	VtBuffer *b = t->buffer;
+	int srow = 1, scol = 0;
 	int i, j;
 
 	if (srow != t->srow || scol != t->scol) {

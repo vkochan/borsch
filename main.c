@@ -648,10 +648,7 @@ draw_border(Client *c) {
 
 static void
 draw_content(Client *c) {
-	if (c->pid)
-		vt_draw(c->term, c->win, 1, 0);
-	else
-		ui_window_draw(c->win);
+	ui_window_draw(c->win);
 }
 
 static void

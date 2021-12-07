@@ -81,7 +81,9 @@ void ui_window_draw(UiWin *win)
 	view_draw(win->view);
 	view_update(win->view);
 
-	if (win->ui->window_draw)
+	if (win->draw)
+		win->draw(win);
+	else if (win->ui->window_draw)
 		win->ui->window_draw(win);
 }
 
@@ -196,4 +198,19 @@ int ui_window_x_get(UiWin *win)
 int ui_window_y_get(UiWin *win)
 {
 	return win->y;
+}
+
+void ui_window_priv_set(UiWin *win, void *priv)
+{
+	win->priv = priv;
+}
+
+void *ui_window_priv_get(UiWin *win)
+{
+	return win->priv;
+}
+
+void ui_window_draw_set(UiWin *win, void (*fn)(UiWin *))
+{
+	win->draw = fn;
 }
