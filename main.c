@@ -936,11 +936,6 @@ term_urgent_handler(Vt *term) {
 }
 
 static void
-move_client(Client *c, int x, int y) {
-	ui_window_move(c->win, x, y);
-}
-
-static void
 resize_client(Client *c, int w, int h) {
 	bool has_title_line = show_border();
 	bool resize_window = ui_window_width_get(c->win) != w ||
@@ -960,7 +955,7 @@ resize_client(Client *c, int w, int h) {
 static void
 resize(Client *c, int x, int y, int w, int h) {
 	resize_client(c, w, h);
-	move_client(c, x, y);
+	ui_window_move(c->win, x, y);
 }
 
 static Client*
