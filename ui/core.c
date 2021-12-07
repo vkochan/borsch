@@ -181,9 +181,19 @@ char *ui_window_title_get(UiWin *win)
 	return win->title;
 }
 
+void ui_window_width_set(UiWin *win, int width)
+{
+	win->width = width;
+}
+
 int ui_window_width_get(UiWin *win)
 {
 	return win->width;
+}
+
+void ui_window_height_set(UiWin *win, int height)
+{
+	win->height = height;
 }
 
 int ui_window_height_get(UiWin *win)
