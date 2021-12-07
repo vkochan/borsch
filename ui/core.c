@@ -99,10 +99,16 @@ void ui_window_refresh(UiWin *win)
 
 void ui_window_resize(UiWin *win, int width, int height)
 {
-	view_resize(win->view, width, height);
+	if (width != win->width || height != win->height) {
 
-	if (win->ui->window_resize)
-		win->ui->window_resize(win, width, height);
+		win->height = height;
+		win->width = width;
+
+		view_resize(win->view, width, height);
+
+		if (win->ui->window_resize)
+			win->ui->window_resize(win, width, height);
+	}
 }
 
 void ui_window_move(UiWin *win, int x, int y)
@@ -168,4 +174,14 @@ void ui_window_title_set(UiWin *win, const char *title)
 char *ui_window_title_get(UiWin *win)
 {
 	return win->title;
+}
+
+int ui_window_width_get(UiWin *win)
+{
+	return win->width;
+}
+
+int ui_window_height_get(UiWin *win)
+{
+	return win->height;
 }

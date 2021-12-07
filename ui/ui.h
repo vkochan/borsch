@@ -113,6 +113,7 @@ struct UiWin {
 	Ui *ui;
 	View *view;
 	int x, y;
+	int width, height;
 	unsigned defattrs;
 	short deffg, defbg;
 	char title[256];
@@ -152,5 +153,7 @@ short ui_window_default_fg_get(UiWin *win);
 short ui_window_default_bg_get(UiWin *win);
 void ui_window_title_set(UiWin *win, const char *title);
 char *ui_window_title_get(UiWin *win);
+int ui_window_width_get(UiWin *win);
+int ui_window_height_get(UiWin *win);
 
 #endif

@@ -84,8 +84,6 @@ struct Client {
 	unsigned short int id;
 	unsigned short int x;
 	unsigned short int y;
-	unsigned short int w;
-	unsigned short int h;
 	bool has_title_line;
 	bool minimized;
 	bool urgent;
@@ -618,6 +616,7 @@ static void
 draw_border(Client *c) {
 	int attrs_title = (COLOR(MAGENTA) | A_NORMAL);
 	int x, y, maxlen, attrs = NORMAL_ATTR;
+	int w_w = ui_window_width_get(c->win);
 	char title[256];
 	char tmp[256];
 	size_t len;
@@ -633,13 +632,13 @@ draw_border(Client *c) {
 	ui_window_cursor_get(c->win, &x, &y);
 	if (c == sel) {
 		ui_window_text_attr_set(c->win, COLOR(BLUE_BG));
-		ui_window_draw_char(c->win, 0, 0, ' ', c->w);
+		ui_window_draw_char(c->win, 0, 0, ' ', w_w);
 		ui_window_text_attr_set(c->win, attrs);
 	} else {
-		ui_window_draw_char(c->win, 0, 0, ACS_HLINE, c->w);
+		ui_window_draw_char(c->win, 0, 0, ACS_HLINE, w_w);
 	}
 
-	maxlen = c->w - 10;
+	maxlen = ui_window_width_get(c->win) - 10;
 	if (maxlen < 0)
 		maxlen = 0;
 	strncpy(tmp, client_get_title(c), sizeof(tmp));
@@ -950,11 +949,10 @@ move_client(Client *c, int x, int y) {
 static void
 resize_client(Client *c, int w, int h) {
 	bool has_title_line = show_border();
-	bool resize_window = c->w != w || c->h != h;
+	bool resize_window = ui_window_width_get(c->win) != w ||
+		ui_window_height_get(c->win) != h;
 	if (resize_window) {
 			ui_window_resize(c->win, w, h);
-			c->w = w;
-			c->h = h;
 	}
 	if (resize_window || c->has_title_line != has_title_line) {
 		c->has_title_line = has_title_line;
@@ -978,7 +976,10 @@ get_client_by_coord(unsigned int x, unsigned int y) {
 	if (isarrange(fullscreen))
 		return sel;
 	for (Client *c = nextvisible(clients); c; c = nextvisible(c->next)) {
-		if (x >= c->x && x < c->x + c->w && y >= c->y && y < c->y + c->h) {
+		int w_h = ui_window_height_get(c->win);
+		int w_w = ui_window_width_get(c->win);
+
+		if (x >= c->x && x < c->x + w_w && y >= c->y && y < c->y + w_h) {
 			debug("mouse event, x: %d y: %d client: %d\n", x, y, c->order);
 			return c;
 		}
@@ -1480,8 +1481,10 @@ copymode(const char *args[]) {
 		return;
 
 	bool colored = strstr(args[0], "pager") != NULL;
+	int w_h = ui_window_height_get(sel->win);
+	int w_w = ui_window_width_get(sel->win);
 
-	if (!(sel->overlay = vt_create(sel->win, sel->h - sel->has_title_line, sel->w, 0)))
+	if (!(sel->overlay = vt_create(sel->win, w_h - sel->has_title_line, w_w, 0)))
 		return;
 
 	int *to = &sel->editor_fds[0];
@@ -1628,14 +1631,16 @@ redraw(const char *args[]) {
 
 static void
 scrollback(const char *args[]) {
+	int w_h = ui_window_height_get(sel->win);
+
 	if (!is_content_visible(sel))
 		return;
 
 	if (sel->pid)
 		if (!args[0] || atoi(args[0]) < 0)
-			vt_scroll(sel->term, -sel->h/2);
+			vt_scroll(sel->term, -w_h/2);
 		else
-			vt_scroll(sel->term,  sel->h/2);
+			vt_scroll(sel->term,  w_h/2);
 
 	draw(sel);
 	if (sel->pid)
@@ -2350,7 +2355,7 @@ int win_lower_get(int wid)
 	if (!c)
 		return 0;
 
-	l = get_client_by_coord(c->x, c->y + c->h);
+	l = get_client_by_coord(c->x, c->y + ui_window_height_get(c->win));
 	if (l)
 		return l->id;
 
@@ -2380,7 +2385,7 @@ int win_right_get(int wid)
 	if (!c)
 		return 0;
 
-	r = get_client_by_coord(c->x + c->w + 1, c->y);
+	r = get_client_by_coord(c->x + ui_window_width_get(c->win) + 1, c->y);
 	if (r)
 		return r->id;
 
