@@ -57,11 +57,15 @@ int ESCDELAY;
 #endif
 
 typedef struct {
-	int history;
 	int w;
 	int h;
 	volatile sig_atomic_t need_resize;
 } Screen;
+
+/* scroll back buffer size in lines */
+#define SCROLL_HISTORY 500
+
+static int scr_history = SCROLL_HISTORY;
 
 typedef struct {
 	const char *symbol;
@@ -284,8 +288,6 @@ static Color colors[] = {
 #define MFACT 0.5
 /* number of clients in master area */
 #define NMASTER 1
-/* scroll back buffer size in lines */
-#define SCROLL_HISTORY 500
 /* printf format string for the tag in the status bar */
 #define TAG_SYMBOL   "[%s%s%s]"
 /* curses attributes for the currently selected tags */
@@ -382,7 +384,7 @@ typedef struct {
 
 /* global variables */
 static const char *prog_name = PROGNAME;
-Screen screen = { .history = SCROLL_HISTORY };
+Screen screen = { };
 static Pertag pertag;
 static Client *stack = NULL;
 static Client *sel = NULL;
@@ -1405,7 +1407,7 @@ int create(const char *prog, const char *title, const char *cwd) {
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
 
-	c->term = c->app = vt_create(c->win, screen.h, screen.w, screen.history);
+	c->term = c->app = vt_create(c->win, screen.h, screen.w, scr_history);
 	if (!c->term) {
 		view_free(c->view);
 		buffer_del(c->buf);
@@ -1980,8 +1982,8 @@ static void
 handle_editor(Client *c) {
 	event_t evt;
 
-	if (!copyreg.data && (copyreg.data = malloc(screen.history)))
-		copyreg.size = screen.history;
+	if (!copyreg.data && (copyreg.data = malloc(scr_history)))
+		copyreg.size = scr_history;
 	copyreg.len = 0;
 	while (c->editor_fds[1] != -1 && copyreg.len < copyreg.size) {
 		ssize_t len = read(c->editor_fds[1], copyreg.data + copyreg.len, copyreg.size - copyreg.len);
