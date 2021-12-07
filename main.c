@@ -56,12 +56,6 @@ int ESCDELAY;
 # define set_escdelay(d) (ESCDELAY = (d))
 #endif
 
-typedef struct {
-	int w;
-	int h;
-	volatile sig_atomic_t need_resize;
-} Screen;
-
 /* scroll back buffer size in lines */
 #define SCROLL_HISTORY 500
 
@@ -229,7 +223,6 @@ static Client* nextvisible(Client *c);
 
 static void focus(Client *c);
 static void resize(Client *c, int x, int y, int w, int h);
-extern Screen screen;
 static unsigned int waw, wah, wax, way;
 static Client *clients = NULL;
 static char *title;
@@ -384,7 +377,6 @@ typedef struct {
 
 /* global variables */
 static const char *prog_name = PROGNAME;
-Screen screen = { };
 static Pertag pertag;
 static Client *stack = NULL;
 static Client *sel = NULL;
@@ -500,8 +492,8 @@ updatebarpos(void) {
 	bar.y = 0;
 	wax = 0;
 	way = 0;
-	wah = screen.h;
-	waw = screen.w;
+	wah = ui_height_get(ui);
+	waw = ui_width_get(ui);
 	if (bar.pos == BAR_TOP) {
 		wah -= bar.h;
 		way += bar.h;
@@ -568,7 +560,7 @@ drawbar(void) {
 
 	getyx(stdscr, y, x);
 	(void)y;
-	int maxwidth = screen.w - x - 2;
+	int maxwidth = ui_width_get(ui) - x - 2;
 
 	addch(BAR_BEGIN);
 	attrset(BAR_ATTR);
@@ -600,7 +592,7 @@ drawbar(void) {
 	}
 
 	attrset(TAG_NORMAL);
-	mvaddch(bar.y, screen.w - 1, BAR_END);
+	mvaddch(bar.y, ui_width_get(ui) - 1, BAR_END);
 	attrset(NORMAL_ATTR);
 	move(sy, sx);
 	wnoutrefresh(stdscr);
@@ -996,33 +988,8 @@ sigchld_handler(int sig) {
 }
 
 static void
-sigwinch_handler(int sig) {
-	screen.need_resize = true;
-}
-
-static void
 sigterm_handler(int sig) {
 	running = false;
-}
-
-static void
-resize_screen(void) {
-	struct winsize ws;
-
-	if (ioctl(0, TIOCGWINSZ, &ws) == -1) {
-		getmaxyx(stdscr, screen.h, screen.w);
-	} else {
-		screen.w = ws.ws_col;
-		screen.h = ws.ws_row;
-	}
-
-	debug("resize_screen(), w: %d h: %d\n", screen.w, screen.h);
-
-	resizeterm(screen.h, screen.w);
-	wresize(stdscr, screen.h, screen.w);
-	updatebarpos();
-	clear();
-	arrange();
 }
 
 static unsigned int
@@ -1234,13 +1201,12 @@ setup(void) {
 		colors[i].pair = ui_color_make(ui, colors[i].fg, colors[i].bg);
 	}
 	initpertag();
-	resize_screen();
+	updatebarpos();
+	arrange();
 	struct sigaction sa;
 	memset(&sa, 0, sizeof sa);
 	sa.sa_flags = 0;
 	sigemptyset(&sa.sa_mask);
-	sa.sa_handler = sigwinch_handler;
-	sigaction(SIGWINCH, &sa, NULL);
 	sa.sa_handler = sigchld_handler;
 	sigaction(SIGCHLD, &sa, NULL);
 	sa.sa_handler = sigterm_handler;
@@ -1407,7 +1373,7 @@ int create(const char *prog, const char *title, const char *cwd) {
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
 
-	c->term = c->app = vt_create(c->win, screen.h, screen.w, scr_history);
+	c->term = c->app = vt_create(c->win, ui_height_get(ui), ui_width_get(ui), scr_history);
 	if (!c->term) {
 		view_free(c->view);
 		buffer_del(c->buf);
@@ -1601,7 +1567,9 @@ redraw(const char *args[]) {
 			ui_window_redraw(c->win);
 		}
 	}
-	resize_screen();
+	ui_redraw(ui);
+	updatebarpos();
+	arrange();
 }
 
 static void
@@ -2101,10 +2069,8 @@ main(int argc, char *argv[]) {
 		int r, nfds = 0;
 		fd_set rd;
 
-		if (screen.need_resize) {
-			resize_screen();
-			screen.need_resize = false;
-		}
+		ui_reset(ui);
+		updatebarpos();
 
 		FD_ZERO(&rd);
 		FD_SET(STDIN_FILENO, &rd);

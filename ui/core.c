@@ -19,6 +19,32 @@ void ui_free(Ui *ui)
 		free(ui);
 }
 
+void ui_redraw(Ui *ui)
+{
+	if (ui->redraw)
+		ui->redraw(ui);
+}
+
+void ui_reset(Ui *ui)
+{
+	if (ui->reset)
+		ui->reset(ui);
+}
+
+int ui_height_get(Ui *ui)
+{
+	if (ui->height_get)
+		return ui->height_get(ui);
+	return 0;
+}
+
+int ui_width_get(Ui *ui)
+{
+	if (ui->width_get)
+		return ui->width_get(ui);
+	return 0;
+}
+
 short ui_color_make(Ui *ui, short fg, short bg)
 {
 	if (ui->color_make)

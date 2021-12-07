@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <curses.h>
 #include <limits.h>
+#include <signal.h>
+#include <string.h>
+#include <sys/ioctl.h>
 
 #include "ui/ui.h"
 
@@ -43,6 +46,37 @@ typedef struct {
 static bool is_utf8, has_default_colors;
 static short color_pairs_reserved, color_pairs_max, color_pair_current;
 static short *color2palette, default_fg, default_bg;
+static volatile int scr_height, scr_width;
+volatile sig_atomic_t need_resize;
+
+static void term_sigwinch_handler(int sig) {
+	need_resize = true;
+}
+
+static int term_height_get(Ui *ui)
+{
+	return scr_height;
+}
+
+static int term_width_get(Ui *ui)
+{
+	return scr_width;
+}
+
+static void term_redraw(Ui *ui) {
+	struct winsize ws;
+
+	if (ioctl(0, TIOCGWINSZ, &ws) == -1) {
+		getmaxyx(stdscr, scr_height, scr_width);
+	} else {
+		scr_width = ws.ws_col;
+		scr_height = ws.ws_row;
+	}
+
+	resizeterm(scr_height, scr_width);
+	wresize(stdscr, scr_height, scr_width);
+	clear();
+}
 
 static unsigned int term_color_hash(short fg, short bg)
 {
@@ -137,6 +171,7 @@ static void term_init_colors(Ui *ui)
 static int term_init(Ui *ui)
 {
 	UiTerm *tui = (UiTerm*)ui;
+	struct sigaction sa;
 
 	initscr();
 	start_color();
@@ -147,6 +182,14 @@ static int term_init(Ui *ui)
 
 	term_init_colors(ui);
 
+	memset(&sa, 0, sizeof sa);
+	sa.sa_flags = 0;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_handler = term_sigwinch_handler;
+	sigaction(SIGWINCH, &sa, NULL);
+
+	term_redraw(ui);
+
 	return 0;
 }
 
@@ -154,6 +197,14 @@ static void term_free(Ui *ui)
 {
 	endwin();
 	free(ui);
+}
+
+static void term_reset(Ui *ui)
+{
+	if (need_resize) {
+		need_resize = false;
+		term_redraw(ui);
+	}
 }
 
 static void term_draw_char(Ui *ui, int x, int y, unsigned int ch, int n)
@@ -306,6 +357,10 @@ Ui *ui_term_new(void)
 
 	tui->ui.init = term_init;
 	tui->ui.free = term_free;
+	tui->ui.height_get = term_height_get;
+	tui->ui.width_get = term_width_get;
+	tui->ui.redraw = term_redraw;
+	tui->ui.reset = term_reset;
 	tui->ui.color_make = term_color_make;
 	tui->ui.draw_char = term_draw_char;
 	tui->ui.draw_char_vert = term_draw_char_vert;

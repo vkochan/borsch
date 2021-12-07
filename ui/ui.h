@@ -84,7 +84,8 @@ typedef struct {
 struct Ui {
 	int (*init)(Ui*);
 	void (*free)(Ui*);
-	void (*resize)(Ui*);
+	int (*height_get)(Ui*);
+	int (*width_get)(Ui*);
 	UiWin* (*window_new)(Ui*, View *view);
 	void (*window_free)(UiWin*);
 	void (*window_cursor_set)(UiWin*, int x, int y);
@@ -104,6 +105,7 @@ struct Ui {
 	void (*draw_char)(Ui *ui, int x, int y, unsigned int ch, int n);
 	void (*draw_char_vert)(Ui *ui, int x, int y, unsigned int ch, int n);
 	void (*redraw)(Ui*);
+	void (*reset)(Ui*);
 	void (*suspend)(Ui*);
 	void (*resume)(Ui*);
 	short (*color_make)(Ui *ui, short fg, short bg);
@@ -132,6 +134,10 @@ bool is_default_color(CellColor c);
 Ui *ui_term_new(void);
 int ui_init(Ui *ui);
 void ui_free(Ui *ui);
+void ui_redraw(Ui *ui);
+void ui_reset(Ui *ui);
+int ui_height_get(Ui *ui);
+int ui_width_get(Ui *ui);
 short ui_color_make(Ui *ui, short fg, short bg);
 void ui_draw_char(Ui *ui, int x, int y, unsigned int ch, int n);
 void ui_draw_char_vert(Ui *ui, int x, int y, unsigned int ch, int n);
