@@ -109,7 +109,9 @@ void ui_window_resize(UiWin *win, int width, int height)
 
 		view_resize(win->view, width, height);
 
-		if (win->ui->window_resize)
+		if (win->resize)
+			win->resize(win, width, height);
+		else if (win->ui->window_resize)
 			win->ui->window_resize(win, width, height);
 	}
 }
@@ -229,4 +231,14 @@ void ui_window_ops_draw_set(UiWin *win, void (*fn)(UiWin *))
 void *ui_window_ops_draw_get(UiWin *win)
 {
 	return win->draw;
+}
+
+void ui_window_ops_resize_set(UiWin *win, void (*fn)(UiWin *, int, int))
+{
+	win->resize = fn;
+}
+
+void *ui_window_ops_resize_get(UiWin *win)
+{
+	return win->resize;
 }

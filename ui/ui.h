@@ -123,6 +123,7 @@ struct UiWin {
 	void (*options_set)(UiWin*, enum UiOption);
 	enum UiOption (*options_get)(UiWin*);
 	bool (*style_define)(UiWin*, int id, const char *style);
+	void (*resize)(UiWin *, int, int);
 	void (*draw)(UiWin *);
 };
 
@@ -163,7 +164,7 @@ void ui_window_priv_set(UiWin *win, void *priv);
 void *ui_window_priv_get(UiWin *win);
 void ui_window_ops_draw_set(UiWin *win, void (*fn)(UiWin *));
 void *ui_window_ops_draw_get(UiWin *win);
-
-
+void ui_window_ops_resize_set(UiWin *win, void (*fn)(UiWin *, int, int));
+void *ui_window_ops_resize_get(UiWin *win);
 
 #endif
