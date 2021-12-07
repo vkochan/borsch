@@ -82,8 +82,6 @@ struct Client {
 	int order;
 	pid_t pid;
 	unsigned short int id;
-	unsigned short int x;
-	unsigned short int y;
 	bool has_title_line;
 	bool minimized;
 	bool urgent;
@@ -939,11 +937,7 @@ term_urgent_handler(Vt *term) {
 
 static void
 move_client(Client *c, int x, int y) {
-	if (c->x == x && c->y == y)
-		return;
 	ui_window_move(c->win, x, y);
-	c->x = x;
-	c->y = y;
 }
 
 static void
@@ -978,8 +972,10 @@ get_client_by_coord(unsigned int x, unsigned int y) {
 	for (Client *c = nextvisible(clients); c; c = nextvisible(c->next)) {
 		int w_h = ui_window_height_get(c->win);
 		int w_w = ui_window_width_get(c->win);
+		int w_y = ui_window_y_get(c->win);
+		int w_x = ui_window_x_get(c->win);
 
-		if (x >= c->x && x < c->x + w_w && y >= c->y && y < c->y + w_h) {
+		if (x >= w_x && x < w_x + w_w && y >= w_y && y < w_y + w_h) {
 			debug("mouse event, x: %d y: %d client: %d\n", x, y, c->order);
 			return c;
 		}
@@ -1461,9 +1457,9 @@ int create(const char *prog, const char *title, const char *cwd) {
 	vt_data_set(c->term, c);
 	vt_title_handler_set(c->term, term_title_handler);
 	vt_urgent_handler_set(c->term, term_urgent_handler);
+	ui_window_resize(c->win, waw, wah);
+	ui_window_move(c->win, wax, way);
 	applycolorrules(c);
-	c->x = wax;
-	c->y = way;
 	debug("client with pid %d forked\n", c->pid);
 	attach(c);
 	focus(c);
@@ -1951,19 +1947,24 @@ static void doeval(const char *args[]) {
 static void
 handle_mouse(void) {
 #ifdef CONFIG_MOUSE
-	MEVENT event;
 	unsigned int i;
+	MEVENT event;
+	int w_x, w_y;
+
 	if (getmouse(&event) != OK)
 		return;
-	msel = get_client_by_coord(event.x, event.y);
 
+	msel = get_client_by_coord(event.x, event.y);
 	if (!msel)
 		return;
 
-	debug("mouse x:%d y:%d cx:%d cy:%d mask:%d\n", event.x, event.y, event.x - msel->x, event.y - msel->y, event.bstate);
+	w_x = ui_window_x_get(msel->win);
+	w_y = ui_window_y_get(msel->win);
+
+	debug("mouse x:%d y:%d cx:%d cy:%d mask:%d\n", event.x, event.y, event.x - w_x, event.y - w_y, event.bstate);
 
 	if (msel->pid)
-		vt_mouse(msel->term, event.x - msel->x, event.y - msel->y, event.bstate);
+		vt_mouse(msel->term, event.x - w_x, event.y - w_y, event.bstate);
 
 	for (i = 0; i < LENGTH(buttons); i++) {
 		if (event.bstate & buttons[i].mask)
@@ -2334,13 +2335,17 @@ int win_next_get(int wid)
 int win_upper_get(int wid)
 {
 	Client *c = client_get_by_id(wid);
+	int w_x, w_y;
 	Client *u;
 
 	if (!c)
 		return 0;
 
+	w_x = ui_window_x_get(c->win);
+	w_y = ui_window_y_get(c->win);
+
 	/* avoid vertical separator, hence +1 in x direction */
-	u = get_client_by_coord(c->x + 1, c->y - 1);
+	u = get_client_by_coord(w_x + 1, w_y - 1);
 	if (u)
 		return u->id;
 
@@ -2350,12 +2355,16 @@ int win_upper_get(int wid)
 int win_lower_get(int wid)
 {
 	Client *c = client_get_by_id(wid);
+	int w_x, w_y;
 	Client *l;
 
 	if (!c)
 		return 0;
 
-	l = get_client_by_coord(c->x, c->y + ui_window_height_get(c->win));
+	w_x = ui_window_x_get(c->win);
+	w_y = ui_window_y_get(c->win);
+
+	l = get_client_by_coord(w_x, w_y + ui_window_height_get(c->win));
 	if (l)
 		return l->id;
 
@@ -2365,12 +2374,16 @@ int win_lower_get(int wid)
 int win_left_get(int wid)
 {
 	Client *c = client_get_by_id(wid);
+	int w_x, w_y;
 	Client *l;
 
 	if (!c)
 		return 0;
 
-	l = get_client_by_coord(c->x - 2, c->y);
+	w_x = ui_window_x_get(c->win);
+	w_y = ui_window_y_get(c->win);
+
+	l = get_client_by_coord(w_x - 2, w_y);
 	if (l)
 		return l->id;
 
@@ -2380,12 +2393,16 @@ int win_left_get(int wid)
 int win_right_get(int wid)
 {
 	Client *c = client_get_by_id(wid);
+	int w_x, w_y;
 	Client *r;
 
 	if (!c)
 		return 0;
 
-	r = get_client_by_coord(c->x + ui_window_width_get(c->win) + 1, c->y);
+	w_x = ui_window_x_get(c->win);
+	w_y = ui_window_y_get(c->win);
+
+	r = get_client_by_coord(w_x + ui_window_width_get(c->win) + 1, w_y);
 	if (r)
 		return r->id;
 
@@ -2446,8 +2463,6 @@ int win_new(void)
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
 	applycolorrules(c);
-	c->x = wax;
-	c->y = way;
 
 	attach(c);
 	focus(c);

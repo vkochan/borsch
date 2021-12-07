@@ -155,5 +155,7 @@ void ui_window_title_set(UiWin *win, const char *title);
 char *ui_window_title_get(UiWin *win);
 int ui_window_width_get(UiWin *win);
 int ui_window_height_get(UiWin *win);
+int ui_window_x_get(UiWin *win);
+int ui_window_y_get(UiWin *win);
 
 #endif

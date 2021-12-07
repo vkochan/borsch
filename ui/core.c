@@ -113,11 +113,13 @@ void ui_window_resize(UiWin *win, int width, int height)
 
 void ui_window_move(UiWin *win, int x, int y)
 {
-	win->x = x;
-	win->y = y;
+	if (x != win->x || y != win->y) {
+		win->x = x;
+		win->y = y;
 
-	if (win->ui->window_move)
-		win->ui->window_move(win, x, y);
+		if (win->ui->window_move)
+			win->ui->window_move(win, x, y);
+	}
 }
 
 void ui_window_text_color_set(UiWin *win, short fg, short bg)
@@ -184,4 +186,14 @@ int ui_window_width_get(UiWin *win)
 int ui_window_height_get(UiWin *win)
 {
 	return win->height;
+}
+
+int ui_window_x_get(UiWin *win)
+{
+	return win->x;
+}
+
+int ui_window_y_get(UiWin *win)
+{
+	return win->y;
 }
