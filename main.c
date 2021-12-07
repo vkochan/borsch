@@ -82,7 +82,6 @@ struct Client {
 	int order;
 	pid_t pid;
 	unsigned short int id;
-	bool has_title_line;
 	bool minimized;
 	bool urgent;
 	volatile sig_atomic_t died;
@@ -605,11 +604,6 @@ drawbar(void) {
 	wnoutrefresh(stdscr);
 }
 
-static int
-show_border(void) {
-	return (bar.pos != BAR_OFF) || (clients && clients->next);
-}
-
 static void
 draw_border(Client *c) {
 	int attrs_title = (COLOR(MAGENTA) | A_NORMAL);
@@ -619,8 +613,6 @@ draw_border(Client *c) {
 	char tmp[256];
 	size_t len;
 
-	if (!show_border())
-		return;
 	if (sel != c && c->urgent)
 		attrs = URGENT_ATTR;
 	if (sel == c || (pertag.runinall[pertag.curtag] && !c->minimized))
@@ -657,7 +649,7 @@ draw_border(Client *c) {
 static void
 draw_content(Client *c) {
 	if (c->pid)
-		vt_draw(c->term, c->win, c->has_title_line, 0);
+		vt_draw(c->term, c->win, 1, 0);
 	else
 		ui_window_draw(c->win);
 }
@@ -937,19 +929,12 @@ term_urgent_handler(Vt *term) {
 
 static void
 resize_client(Client *c, int w, int h) {
-	bool has_title_line = show_border();
-	bool resize_window = ui_window_width_get(c->win) != w ||
-		ui_window_height_get(c->win) != h;
-	if (resize_window) {
-			ui_window_resize(c->win, w, h);
-	}
-	if (resize_window || c->has_title_line != has_title_line) {
-		c->has_title_line = has_title_line;
-		if (c->pid)
-			vt_resize(c->app, h - has_title_line, w);
-		if (c->overlay)
-			vt_resize(c->overlay, h - has_title_line, w);
-	}
+	ui_window_resize(c->win, w, h);
+
+	if (c->pid)
+		vt_resize(c->app, h - 1, w);
+	if (c->overlay)
+		vt_resize(c->overlay, h - 1, w);
 }
 
 static void
@@ -1475,7 +1460,7 @@ copymode(const char *args[]) {
 	int w_h = ui_window_height_get(sel->win);
 	int w_w = ui_window_width_get(sel->win);
 
-	if (!(sel->overlay = vt_create(sel->win, w_h - sel->has_title_line, w_w, 0)))
+	if (!(sel->overlay = vt_create(sel->win, w_h - 1, w_w, 0)))
 		return;
 
 	int *to = &sel->editor_fds[0];
