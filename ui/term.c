@@ -345,8 +345,7 @@ static void term_window_redraw(UiWin *win)
 {
 	WinTerm *twin = (WinTerm*)win;
 
-	wclear(twin->cwin);
-	wnoutrefresh(twin->cwin);
+	redrawwin(twin->cwin);
 }
 
 Ui *ui_term_new(void)
