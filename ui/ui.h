@@ -89,7 +89,7 @@ struct Ui {
 	void (*window_free)(UiWin*);
 	void (*window_cursor_set)(UiWin*, int x, int y);
 	void (*window_cursor_get)(UiWin*, int *x, int *y);
-	void (*window_draw)(UiWin*);
+	void (*window_draw)(UiWin *);
 	void (*window_redraw)(UiWin*);
 	void (*window_refresh)(UiWin*);
 	void (*window_resize)(UiWin*, int width, int height);
@@ -159,6 +159,9 @@ int ui_window_x_get(UiWin *win);
 int ui_window_y_get(UiWin *win);
 void ui_window_priv_set(UiWin *win, void *priv);
 void *ui_window_priv_get(UiWin *win);
-void ui_window_draw_set(UiWin *win, void (*fn)(UiWin *));
+void ui_window_ops_draw_set(UiWin *win, void (*fn)(UiWin *));
+void *ui_window_ops_draw_get(UiWin *win);
+
+
 
 #endif

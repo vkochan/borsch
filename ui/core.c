@@ -46,6 +46,7 @@ UiWin *ui_window_new(Ui *ui, View *view)
 	if (ui->window_new) {
 		win = ui->window_new(ui, view);
 		if (win) {
+			win->draw = ui_window_draw;
 			win->deffg = -1;
 			win->defbg = -1;
 			win->view = view;
@@ -210,7 +211,12 @@ void *ui_window_priv_get(UiWin *win)
 	return win->priv;
 }
 
-void ui_window_draw_set(UiWin *win, void (*fn)(UiWin *))
+void ui_window_ops_draw_set(UiWin *win, void (*fn)(UiWin *))
 {
 	win->draw = fn;
+}
+
+void *ui_window_ops_draw_get(UiWin *win)
+{
+	return win->draw;
 }

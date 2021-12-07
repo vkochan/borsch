@@ -1458,7 +1458,7 @@ Vt *vt_create(UiWin *win, int rows, int cols, int scroll_size)
 		return NULL;
 	}
 
-	ui_window_draw_set(win, vt_draw);
+	ui_window_ops_draw_set(win, vt_draw);
 	ui_window_priv_set(win, t);
 
 	return t;
