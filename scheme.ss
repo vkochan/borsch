@@ -272,8 +272,8 @@
 (define __cs_tagbar_show (foreign-procedure __collect_safe "cs_tagbar_show" (boolean) int))
 (define __cs_tagbar_status_set (foreign-procedure "cs_tagbar_status_set" (string) int))
 
-(define __cs_bind_key (foreign-procedure "cs_bind_key" (string void*) int))
-(define __cs_unbind_key (foreign-procedure "cs_unbind_key" (string) int))
+(define __cs_bind_key (foreign-procedure "cs_bind_key" (string void* int) int))
+(define __cs_unbind_key (foreign-procedure "cs_unbind_key" (string int) int))
 
 (define __cs_copy_buf_get (foreign-procedure __collect_safe "cs_copy_buf_get" () scheme-object))
 (define __cs_copy_buf_set (foreign-procedure "cs_copy_buf_set" (string) int))
@@ -284,13 +284,13 @@
 ;; Public API
 (define bind-key
    (lambda (k p)
-      (__cs_bind_key k (key-cb p))
+      (__cs_bind_key k (key-cb p) 0)
    )
 )
 
 (define unbind-key
    (lambda (k)
-      (__cs_unbind_key k)
+      (__cs_unbind_key k 0)
    )
 )
 
@@ -719,6 +719,26 @@
 (define buffer-current
    (lambda ()
       (__cs_buf_current_get)
+   )
+)
+
+(define buffer-bind-key
+   (case-lambda
+     [(k p)
+      (__cs_bind_key k (key-cb p) (__cs_buf_current_get))]
+
+     [(b k p)
+      (__cs_bind_key k (key-cb p) b)]
+   )
+)
+
+(define buffer-unbind-key
+   (case-lambda
+     [(k)
+      (__cs_unbind_key k (__cs_buf_current_get))]
+
+     [(b k)
+      (__cs_unbind_key k b)]
    )
 )
 

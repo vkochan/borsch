@@ -1356,6 +1356,7 @@ int create(const char *prog, const char *title, const char *cwd) {
 		free(c);
 		return -1;
 	}
+	keymap_parent_set(buffer_keymap_get(c->buf), global_kmap);
 
 	c->view = view_new(buffer_text_get(c->buf));
 	if (!c->view) {
@@ -2113,6 +2114,8 @@ main(int argc, char *argv[]) {
 		}
 
 		if (FD_ISSET(STDIN_FILENO, &rd)) {
+			if (sel && !sel->minimized)
+				curr_kmap = buffer_keymap_get(sel->buf);
 reenter:
 			int code = getch();
 rescan:
@@ -2389,6 +2392,7 @@ int win_new(void)
 		free(c);
 		return -1;
 	}
+	keymap_parent_set(buffer_keymap_get(c->buf), global_kmap);
 
 	c->view = view_new(buffer_text_get(c->buf));
 	if (!c->view) {
@@ -3065,14 +3069,34 @@ int layout_sticky_set(int tag, bool is_sticky)
 	return 0;
 }
 
-int bind_key(char *key, void (*act)(void))
+int bind_key(char *key, void (*act)(void), int bid)
 {
-	return keymap_bind(global_kmap, key, act, NULL);
+	KeyMap *kmap = global_kmap;
+
+	if (bid) {
+		Buffer *buf = buffer_by_id(bid);
+		if (buf)
+			kmap = buffer_keymap_get(buf);
+		else
+			return -1;
+	}
+
+	return keymap_bind(kmap, key, act, NULL);
 }
 
-int unbind_key(char *key)
+int unbind_key(char *key, int bid)
 {
-	return keymap_unbind(global_kmap, key);
+	KeyMap *kmap = global_kmap;
+
+	if (bid) {
+		Buffer *buf = buffer_by_id(bid);
+		if (buf)
+			kmap = buffer_keymap_get(buf);
+		else
+			return -1;
+	}
+
+	return keymap_unbind(kmap, key);
 }
 
 char *copy_buf_get(size_t *len)

@@ -420,14 +420,23 @@ int scheme_tagbar_show(bool show)
 	return tagbar_show(show);
 }
 
-int scheme_bind_key(char *key, bind_key_cb_t cb)
+ptr scheme_bind_key(char *key, bind_key_cb_t cb, int bid)
 {
-	return bind_key(key, cb);
+	int ret = bind_key(key, cb, bid);
+
+	if (ret)
+		return Sinteger(ret);
+
+	return Sfalse;
 }
 
-int scheme_unbind_key(char *key)
+ptr scheme_unbind_key(char *key, int bid)
 {
-	return unbind_key(key);
+	int ret = unbind_key(key, bid);
+	if (ret)
+		return Sinteger(ret);
+
+	return Sfalse;
 }
 
 ptr scheme_copy_buf_get(void)

@@ -4,6 +4,7 @@
 #include <text/text.h>
 
 typedef struct Buffer Buffer;
+typedef struct KeyMap KeyMap;
 
 Buffer *buffer_new(const char *name);
 void buffer_del(Buffer *buf);
@@ -21,5 +22,6 @@ bool buffer_is_name_locked(Buffer *buf);
 Buffer *buffer_by_name(const char *name);
 void buffer_ref_get(Buffer *buf);
 void buffer_ref_put(Buffer *buf);
+KeyMap *buffer_keymap_get(Buffer *buf);
 
 #endif /* BUFFER_H */

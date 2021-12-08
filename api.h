@@ -91,8 +91,8 @@ int layout_fmaster_set(int tag, float f);
 bool layout_sticky_get(int tag);
 int layout_sticky_set(int tag, bool is_sticky);
 
-int bind_key(char *map, bind_key_cb_t cb);
-int unbind_key(char *map);
+int bind_key(char *map, bind_key_cb_t cb, int bid);
+int unbind_key(char *map, int bid);
 
 char *copy_buf_get(size_t *len);
 int copy_buf_set(char *str);

@@ -4,12 +4,14 @@
 #include <stdio.h>
 
 #include "view.h"
+#include "keymap.h"
 #include "text/text.h"
 
 typedef struct Buffer {
 	int buf_id;
 	struct Buffer *next;
 	struct Buffer *prev;
+	KeyMap *keymap;
 	size_t cursor;
 	Text *text;
 	bool is_name_locked;
@@ -71,6 +73,13 @@ Buffer *buffer_new(const char *name)
 		return NULL;
 	}
 	buf->ref_count = 1;
+
+	buf->keymap = keymap_new(NULL);
+	if (!buf->keymap) {
+		text_free(buf->text);
+		free(buf);
+		return NULL;
+	}
 
 	buf_count++;
 	buf->buf_id = buffer_id_gen();
@@ -183,4 +192,9 @@ void buffer_ref_put(Buffer *buf)
 {
 	if (buf->ref_count)
 		buf->ref_count--;
+}
+
+KeyMap *buffer_keymap_get(Buffer *buf)
+{
+	return buf->keymap;
 }

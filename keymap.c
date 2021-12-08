@@ -92,6 +92,8 @@ KeyBinding *keymap_find(KeyMap *map, char *key)
 	return NULL;
 }
 
+/* TODO: optimize to store found map for next matching to do not run over all
+ *       parents */
 KeyBinding *keymap_match(KeyMap *map, int *key, int len)
 {
 	KeyBinding *it;
@@ -218,4 +220,14 @@ KeyMap *keymap_by_id(int kid)
 	}
 
 	return NULL;
+}
+
+KeyMap *keymap_parent_get(KeyMap *map)
+{
+	return map->parent;
+}
+
+void keymap_parent_set(KeyMap *map, KeyMap *parent)
+{
+	map->parent = parent;
 }
