@@ -250,6 +250,7 @@
 (define __cs_buf_by_name (foreign-procedure "cs_buf_by_name" (string) scheme-object))
 (define __cs_buf_text_insert (foreign-procedure "cs_buf_text_insert" (int string) scheme-object))
 (define __cs_buf_text_obj_move (foreign-procedure "cs_buf_text_obj_move" (int char int) scheme-object))
+(define __cs_buf_text_obj_del (foreign-procedure "cs_buf_text_obj_del" (int char int) scheme-object))
 
 (define __cs_view_current_get (foreign-procedure __collect_safe "cs_view_current_get" () int))
 (define __cs_view_current_set (foreign-procedure __collect_safe "cs_view_current_set" (int) int))
@@ -969,6 +970,166 @@
 
       [(b)
       (__cs_buf_text_obj_move b #\g -1)]
+   )
+)
+
+(define buffer-char-next-delete
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_del (__cs_buf_current_get) #\c 1)]
+
+      [(b)
+      (__cs_buf_text_obj_del b #\c 1)]
+   )
+)
+
+(define buffer-char-prev-delete
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_del (__cs_buf_current_get) #\c -1)]
+
+      [(b)
+      (__cs_buf_text_obj_del b #\c -1)]
+   )
+)
+
+(define buffer-word-next-delete
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_del (__cs_buf_current_get) #\w 1)]
+
+      [(b)
+      (__cs_buf_text_obj_del b #\w 1)]
+   )
+)
+
+(define buffer-word-prev-delete
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_move (__cs_buf_current_get) #\w -1)]
+
+      [(b)
+      (__cs_buf_text_obj_move b #\w -1)]
+   )
+)
+
+(define buffer-word-end-delete
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_del (__cs_buf_current_get) #\e 1)]
+
+      [(b)
+      (__cs_buf_text_obj_del b #\e 1)]
+   )
+)
+
+(define buffer-longword-next-delete
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_del (__cs_buf_current_get) #\W 1)]
+
+      [(b)
+      (__cs_buf_text_obj_del b #\W 1)]
+   )
+)
+
+(define buffer-longword-prev-delete
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_del (__cs_buf_current_get) #\W -1)]
+
+      [(b)
+      (__cs_buf_text_obj_del b #\W -1)]
+   )
+)
+
+(define buffer-longword-end-delete
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_del (__cs_buf_current_get) #\E 1)]
+
+      [(b)
+      (__cs_buf_text_obj_del b #\E 1)]
+   )
+)
+
+(define buffer-line-next-delete
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_del (__cs_buf_current_get) #\L 1)]
+
+      [(b)
+      (__cs_buf_text_obj_del b #\L 1)]
+   )
+)
+
+(define buffer-line-prev-delete
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_del (__cs_buf_current_get) #\L -1)]
+
+      [(b)
+      (__cs_buf_text_obj_del b #\L -1)]
+   )
+)
+
+(define buffer-line-start-delete
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_del (__cs_buf_current_get) #\0 -1)]
+
+      [(b)
+      (__cs_buf_text_obj_del b #\0 -1)]
+   )
+)
+
+(define buffer-line-finish-delete
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_del (__cs_buf_current_get) #\0 1)]
+
+      [(b)
+      (__cs_buf_text_obj_del b #\0 1)]
+   )
+)
+
+(define buffer-line-begin-delete
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_del (__cs_buf_current_get) #\0 -1)]
+
+      [(b)
+      (__cs_buf_text_obj_del b #\0 -1)]
+   )
+)
+
+(define buffer-line-end-delete
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_move (__cs_buf_current_get) #\1 1)]
+
+      [(b)
+      (__cs_buf_text_obj_move b #\1 1)]
+   )
+)
+
+(define buffer-begin-delete
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_del (__cs_buf_current_get) #\g 1)]
+
+      [(b)
+      (__cs_buf_text_obj_del b #\g 1)]
+   )
+)
+
+(define buffer-end-delete
+   (case-lambda
+      [()
+      (__cs_buf_text_obj_del (__cs_buf_current_get) #\g -1)]
+
+      [(b)
+      (__cs_buf_text_obj_del b #\g -1)]
    )
 )
 
