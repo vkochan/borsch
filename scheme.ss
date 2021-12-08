@@ -250,6 +250,7 @@
 (define __cs_buf_by_name (foreign-procedure "cs_buf_by_name" (string) scheme-object))
 (define __cs_buf_text_insert (foreign-procedure "cs_buf_text_insert" (int string) scheme-object))
 (define __cs_buf_text_obj_move (foreign-procedure "cs_buf_text_obj_move" (int char int) scheme-object))
+(define __cs_buf_text_range_del (foreign-procedure "cs_buf_text_range_del" (int int int) scheme-object))
 (define __cs_buf_text_obj_del (foreign-procedure "cs_buf_text_obj_del" (int char int) scheme-object))
 (define __cs_buf_cursor_get (foreign-procedure __collect_safe "cs_buf_cursor_get" (int) scheme-object))
 
@@ -1001,6 +1002,16 @@
 
       [(b)
       (__cs_buf_text_obj_move b #\g -1)]
+   )
+)
+
+(define buffer-range-delete
+   (case-lambda
+      [(s e)
+      (__cs_buf_text_range_del (__cs_buf_current_get) s e)]
+
+      [(b s e)
+      (__cs_buf_text_range_del b s e)]
    )
 )
 

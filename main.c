@@ -2951,6 +2951,28 @@ size_t buf_text_obj_del(int bid, char obj, int n)
 	return start;
 }
 
+size_t buf_text_range_del(int bid, int start, int end)
+{
+	Buffer *buf = buffer_by_id(bid);
+	size_t tmp;
+	Text *txt;
+
+	if (buf) {
+		txt = buffer_text_get(buf);
+
+		if (start > end) {
+			tmp = end;
+			end = start;
+			start = tmp;
+		}
+
+		if (end - start && text_delete(txt, start, end - start))
+			buf_update(buf, start, 0);
+	}
+
+	return start;
+}
+
 size_t buf_cursor_get(int bid)
 {
 	Buffer *buf = buffer_by_id(bid);

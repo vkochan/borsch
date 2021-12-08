@@ -74,6 +74,7 @@ char *buf_name_get(int bid);
 int buf_by_name(const char *name);
 size_t buf_text_insert(int bid, const char *text);
 size_t buf_text_obj_move(int bid, char obj, int n);
+size_t buf_text_range_del(int bid, int start, int end);
 size_t buf_text_obj_del(int bid, char obj, int n);
 size_t buf_cursor_get(int bid);
 
