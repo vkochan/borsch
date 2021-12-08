@@ -288,7 +288,7 @@ size_t text_line_down(Text *txt, size_t pos) {
 	int width = text_line_width_get(txt, pos);
 	size_t next = text_line_next(txt, pos);
 	if (next == text_size(txt))
-		return pos;
+		return next;
 	return text_line_width_set(txt, next, width);
 }
 
