@@ -660,7 +660,7 @@ static void
 draw_all(void) {
 	if (!nextvisible(clients)) {
 		sel = NULL;
-		curs_set(0);
+		ui_cursor_enable(ui, false);
 		erase();
 		drawbar();
 		doupdate();
@@ -860,7 +860,7 @@ focus(Client *c) {
 		}
 
 		if (c->pid)
-			curs_set(c && !c->minimized && vt_cursor_visible(c->term));
+			ui_cursor_enable(ui, c && !c->minimized && vt_cursor_visible(c->term));
 
 		s = view_selections_primary_get(c->view);
 		if (s)
@@ -1587,7 +1587,7 @@ scrollback(const char *args[]) {
 
 	draw(sel);
 	if (sel->pid)
-		curs_set(vt_cursor_visible(sel->term));
+		ui_cursor_enable(ui, vt_cursor_visible(sel->term));
 }
 
 static void
@@ -2192,7 +2192,7 @@ rescan:
 		if (is_content_visible(sel)) {
 			draw_content(sel);
 			if (sel->pid) {
-				curs_set(vt_cursor_visible(sel->term));
+				ui_cursor_enable(ui, vt_cursor_visible(sel->term));
 				ui_window_refresh(sel->win);
 			}
 		}

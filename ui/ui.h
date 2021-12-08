@@ -108,6 +108,7 @@ struct Ui {
 	void (*reset)(Ui*);
 	void (*suspend)(Ui*);
 	void (*resume)(Ui*);
+	void (*cursor_enable)(Ui*, bool enable);
 	short (*color_make)(Ui *ui, short fg, short bg);
 };
 
@@ -172,5 +173,6 @@ void ui_window_ops_draw_set(UiWin *win, void (*fn)(UiWin *));
 void *ui_window_ops_draw_get(UiWin *win);
 void ui_window_ops_resize_set(UiWin *win, void (*fn)(UiWin *, int, int));
 void *ui_window_ops_resize_get(UiWin *win);
+void ui_cursor_enable(Ui*, bool enable);
 
 #endif

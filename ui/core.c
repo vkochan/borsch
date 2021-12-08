@@ -267,3 +267,9 @@ void *ui_window_ops_resize_get(UiWin *win)
 {
 	return win->resize;
 }
+
+void ui_cursor_enable(Ui *ui, bool enable)
+{
+	if (ui->cursor_enable)
+		ui->cursor_enable(ui, enable);
+}
