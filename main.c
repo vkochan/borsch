@@ -2812,12 +2812,9 @@ size_t buf_text_insert(int bid, const char *text)
 	return pos;
 }
 
-size_t buf_text_obj_move(int bid, char obj, int n)
+void *text_move_fn_get(char obj, int n)
 {
 	size_t (*obj_move)(Text *t, size_t pos);
-	Buffer *buf = buffer_by_id(bid);
-	size_t pos = EPOS;
-	Text *txt;
 
 	switch (obj) {
 	case 'c':
@@ -2892,9 +2889,23 @@ size_t buf_text_obj_move(int bid, char obj, int n)
 		else
 			obj_move = text_end;
 		break;
+	default:
+		return NULL;
 	}
 
-	if (buf) {
+	return obj_move;
+}
+
+size_t buf_text_obj_move(int bid, char obj, int n)
+{
+	size_t (*obj_move)(Text *t, size_t pos);
+	Buffer *buf = buffer_by_id(bid);
+	size_t pos = EPOS;
+	Text *txt;
+
+	obj_move = text_move_fn_get(obj, n);
+
+	if (obj_move && buf) {
 		pos = buffer_cursor_get(buf);
 		txt = buffer_text_get(buf);
 
