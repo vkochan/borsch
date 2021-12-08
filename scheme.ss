@@ -1024,6 +1024,7 @@
       (__cs_buf_text_obj_del b #\c 1)]
    )
 )
+(define buffer-char-delete buffer-char-next-delete)
 
 (define buffer-char-prev-delete
    (case-lambda
@@ -1044,6 +1045,7 @@
       (__cs_buf_text_obj_del b #\w 1)]
    )
 )
+(define buffer-word-delete buffer-word-next-delete)
 
 (define buffer-word-prev-delete
    (case-lambda
@@ -1074,6 +1076,7 @@
       (__cs_buf_text_obj_del b #\W 1)]
    )
 )
+(define buffer-longword-delete buffer-longword-next-delete)
 
 (define buffer-longword-prev-delete
    (case-lambda
