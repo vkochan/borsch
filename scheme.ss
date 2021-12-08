@@ -248,7 +248,7 @@
 (define __cs_buf_name_get (foreign-procedure __collect_safe "cs_buf_name_get" (int) scheme-object))
 (define __cs_buf_name_set (foreign-procedure "cs_buf_name_set" (int string) void))
 (define __cs_buf_by_name (foreign-procedure "cs_buf_by_name" (string) scheme-object))
-(define __cs_buf_text_insert (foreign-procedure "cs_buf_text_insert" (int string) void))
+(define __cs_buf_text_insert (foreign-procedure "cs_buf_text_insert" (int string) scheme-object))
 (define __cs_buf_text_obj_move (foreign-procedure "cs_buf_text_obj_move" (int char int) scheme-object))
 
 (define __cs_view_current_get (foreign-procedure __collect_safe "cs_view_current_get" () int))

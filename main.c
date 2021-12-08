@@ -2792,10 +2792,10 @@ static void buf_update(Buffer *buf, size_t pos, size_t len)
 	}
 }
 
-void buf_text_insert(int bid, const char *text)
+size_t buf_text_insert(int bid, const char *text)
 {
 	Buffer *buf = buffer_by_id(bid);
-	size_t pos, len;
+	size_t pos = EPOS, len;
 	Text *txt;
 
 	if (buf) {
@@ -2803,10 +2803,13 @@ void buf_text_insert(int bid, const char *text)
 		txt = buffer_text_get(buf);
 		len = strlen(text);
 
-		text_insert(txt, pos, text, len);
-
-		buf_update(buf, pos, len);
+		if (text_insert(txt, pos, text, len)) {
+			buf_update(buf, pos, len);
+			pos += len;
+		}
 	}
+
+	return pos;
 }
 
 size_t buf_text_obj_move(int bid, char obj, int n)

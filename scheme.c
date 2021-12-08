@@ -305,14 +305,19 @@ ptr scheme_buf_by_name(const char *name)
 	return Sfalse;
 }
 
-void scheme_buf_text_insert(int bid, const char *text)
+ptr scheme_buf_text_insert(int bid, const char *text)
 {
-	buf_text_insert(bid, text);
+	size_t pos = buf_text_insert(bid, text);
+
+	if (pos != EPOS)
+		return Sinteger(pos);
+
+	return Sfalse;
 }
 
 ptr scheme_buf_text_obj_move(int bid, char obj, int n)
 {
-	int pos = buf_text_obj_move(bid, obj, n);
+	size_t pos = buf_text_obj_move(bid, obj, n);
 
 	if (pos != EPOS)
 		return Sinteger(pos);
