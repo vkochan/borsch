@@ -2849,9 +2849,9 @@ void buf_text_obj_move(int bid, char obj, int n)
 		break;
 	case 'l':
 		if (n >= 0)
-			obj_move = text_line_next;
+			obj_move = text_line_down;
 		else
-			obj_move = text_line_prev;
+			obj_move = text_line_up;
 		break;
 	case 'L':
 		if (n >= 0)
