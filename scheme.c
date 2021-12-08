@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+#include "text/text.h"
 #include "api.h"
 
 /* looks like cleanup() can ba called twice if
@@ -309,9 +310,14 @@ void scheme_buf_text_insert(int bid, const char *text)
 	buf_text_insert(bid, text);
 }
 
-void scheme_buf_text_obj_move(int bid, char obj, int n)
+ptr scheme_buf_text_obj_move(int bid, char obj, int n)
 {
-	buf_text_obj_move(bid, obj, n);
+	int pos = buf_text_obj_move(bid, obj, n);
+
+	if (pos != EPOS)
+		return Sinteger(pos);
+
+	return Sfalse;
 }
 
 int scheme_view_current_get(void)

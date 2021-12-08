@@ -2809,11 +2809,11 @@ void buf_text_insert(int bid, const char *text)
 	}
 }
 
-void buf_text_obj_move(int bid, char obj, int n)
+size_t buf_text_obj_move(int bid, char obj, int n)
 {
 	size_t (*obj_move)(Text *t, size_t pos);
 	Buffer *buf = buffer_by_id(bid);
-	size_t pos;
+	size_t pos = EPOS;
 	Text *txt;
 
 	switch (obj) {
@@ -2900,6 +2900,8 @@ void buf_text_obj_move(int bid, char obj, int n)
 
 		buf_update(buf, pos, 0);
 	}
+
+	return pos;
 }
 
 int view_current_get(void)
