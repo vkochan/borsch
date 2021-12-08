@@ -335,6 +335,16 @@ ptr scheme_buf_text_obj_del(int bid, char obj, int n)
 	return Sfalse;
 }
 
+ptr scheme_buf_cursor_get(int bid)
+{
+	size_t pos = buf_cursor_get(bid);
+
+	if (pos != EPOS)
+		return Sinteger(pos);
+
+	return Sfalse;
+}
+
 int scheme_view_current_get(void)
 {
 	return view_current_get();
@@ -501,6 +511,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_text_insert", scheme_buf_text_insert);
 	Sregister_symbol("cs_buf_text_obj_move", scheme_buf_text_obj_move);
 	Sregister_symbol("cs_buf_text_obj_del", scheme_buf_text_obj_del);
+	Sregister_symbol("cs_buf_cursor_get", scheme_buf_cursor_get);
 
 	Sregister_symbol("cs_view_current_get", scheme_view_current_get);
 	Sregister_symbol("cs_view_current_set", scheme_view_current_set);

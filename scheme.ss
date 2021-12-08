@@ -251,6 +251,7 @@
 (define __cs_buf_text_insert (foreign-procedure "cs_buf_text_insert" (int string) scheme-object))
 (define __cs_buf_text_obj_move (foreign-procedure "cs_buf_text_obj_move" (int char int) scheme-object))
 (define __cs_buf_text_obj_del (foreign-procedure "cs_buf_text_obj_del" (int char int) scheme-object))
+(define __cs_buf_cursor_get (foreign-procedure __collect_safe "cs_buf_cursor_get" (int) scheme-object))
 
 (define __cs_view_current_get (foreign-procedure __collect_safe "cs_view_current_get" () int))
 (define __cs_view_current_set (foreign-procedure __collect_safe "cs_view_current_set" (int) int))
@@ -719,6 +720,16 @@
 (define buffer-current
    (lambda ()
       (__cs_buf_current_get)
+   )
+)
+
+(define buffer-cursor
+   (case-lambda
+     [()
+      (__cs_buf_cursor_get (__cs_buf_current_get))]
+
+     [(b)
+      (__cs_buf_cursor_get b)]
    )
 )
 

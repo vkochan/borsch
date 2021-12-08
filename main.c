@@ -2951,6 +2951,16 @@ size_t buf_text_obj_del(int bid, char obj, int n)
 	return start;
 }
 
+size_t buf_cursor_get(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		return buffer_cursor_get(buf);
+
+	return EPOS;
+}
+
 int view_current_get(void)
 {
 	return pertag.curtag;
