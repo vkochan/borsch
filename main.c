@@ -2785,9 +2785,9 @@ static void buf_cursor_update(Buffer *buf, size_t pos)
 	}
 }
 
-static void buf_update(Buffer *buf, size_t pos, size_t len)
+static void buf_update(Buffer *buf, size_t pos)
 {
-	buf_cursor_update(buf, pos+len);
+	buf_cursor_update(buf, pos);
 
 	for (Client *c = clients; c; c = c->next) {
 		if (c->buf == buf && is_content_visible(c)) {
@@ -2799,18 +2799,11 @@ static void buf_update(Buffer *buf, size_t pos, size_t len)
 size_t buf_text_insert(int bid, const char *text)
 {
 	Buffer *buf = buffer_by_id(bid);
-	size_t pos = EPOS, len;
-	Text *txt;
+	size_t pos = EPOS;
 
 	if (buf) {
-		pos = buffer_cursor_get(buf);
-		txt = buffer_text_get(buf);
-		len = strlen(text);
-
-		if (text_insert(txt, pos, text, len)) {
-			buf_update(buf, pos, len);
-			pos += len;
-		}
+		pos = buffer_text_insert(buf, buffer_cursor_get(buf), text);
+		buf_update(buf, pos);
 	}
 
 	return pos;
@@ -2916,7 +2909,7 @@ size_t buf_text_obj_move(int bid, char obj, int n)
 		for (n = abs(n); n; n--)
 			pos = obj_move(txt, pos);
 
-		buf_update(buf, pos, 0);
+		buf_update(buf, pos);
 	}
 
 	return pos;
@@ -2925,20 +2918,10 @@ size_t buf_text_obj_move(int bid, char obj, int n)
 size_t buf_text_range_del(int bid, int start, int end)
 {
 	Buffer *buf = buffer_by_id(bid);
-	size_t tmp;
-	Text *txt;
 
 	if (buf) {
-		txt = buffer_text_get(buf);
-
-		if (start > end) {
-			tmp = end;
-			end = start;
-			start = tmp;
-		}
-
-		if (end - start && text_delete(txt, start, end - start))
-			buf_update(buf, start, 0);
+		start = buffer_text_delete(buf, start, end);
+		buf_update(buf, start);
 	}
 
 	return start;

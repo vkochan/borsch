@@ -23,5 +23,7 @@ Buffer *buffer_by_name(const char *name);
 void buffer_ref_get(Buffer *buf);
 void buffer_ref_put(Buffer *buf);
 KeyMap *buffer_keymap_get(Buffer *buf);
+size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text);
+size_t buffer_text_delete(Buffer *buf, size_t start, size_t end);
 
 #endif /* BUFFER_H */

@@ -198,3 +198,36 @@ KeyMap *buffer_keymap_get(Buffer *buf)
 {
 	return buf->keymap;
 }
+
+size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text)
+{
+	size_t len;
+
+	len = strlen(text);
+
+	if (text_insert(buf->text, pos, text, len)) {
+		buf->cursor = pos + len;
+		pos += len;
+	} else {
+		pos = EPOS;
+	}
+
+	return pos;
+}
+
+size_t buffer_text_delete(Buffer *buf, size_t start, size_t end)
+{
+	size_t tmp;
+	Text *txt;
+
+	if (start > end) {
+		tmp = end;
+		end = start;
+		start = tmp;
+	}
+
+	if (text_delete(buf->text, start, end - start))
+		buf->cursor = start;
+
+	return start;
+}
