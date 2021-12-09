@@ -641,15 +641,10 @@ draw_border(Client *c) {
 }
 
 static void
-draw_content(Client *c) {
-	ui_window_draw(c->win);
-}
-
-static void
 draw(Client *c) {
 	if (is_content_visible(c)) {
 		ui_window_redraw(c->win);
-		draw_content(c);
+		ui_window_draw(c->win);
 	}
 	if (!isarrange(fullscreen) || c == sel)
 		draw_border(c);
@@ -1997,7 +1992,7 @@ handle_overlay(Client *c) {
 	c->overlay = NULL;
 	c->term = c->app;
 	vt_dirty(c->term);
-	draw_content(c);
+	ui_window_draw(c->win);
 	ui_window_refresh(c->win);
 }
 
@@ -2182,7 +2177,7 @@ rescan:
 				if (c->pid && !buffer_is_name_locked(c->buf))
 					synctitle(c);
 				if (c != sel) {
-					draw_content(c);
+					ui_window_draw(c->win);
 					ui_window_refresh(c->win);
 				}
 			} else if (!isarrange(fullscreen) && isvisible(c)
@@ -2193,7 +2188,7 @@ rescan:
 		}
 
 		if (is_content_visible(sel)) {
-			draw_content(sel);
+			ui_window_draw(sel->win);
 			if (sel->pid) {
 				ui_cursor_enable(ui, vt_cursor_visible(sel->term));
 				ui_window_refresh(sel->win);
