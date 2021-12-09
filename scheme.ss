@@ -251,7 +251,6 @@
 (define __cs_buf_text_insert (foreign-procedure "cs_buf_text_insert" (int string) scheme-object))
 (define __cs_buf_text_obj_move (foreign-procedure "cs_buf_text_obj_move" (int char int) scheme-object))
 (define __cs_buf_text_range_del (foreign-procedure "cs_buf_text_range_del" (int int int) scheme-object))
-(define __cs_buf_text_obj_del (foreign-procedure "cs_buf_text_obj_del" (int char int) scheme-object))
 (define __cs_buf_cursor_get (foreign-procedure __collect_safe "cs_buf_cursor_get" (int) scheme-object))
 
 (define __cs_view_current_get (foreign-procedure __collect_safe "cs_view_current_get" () int))
@@ -1015,13 +1014,32 @@
    )
 )
 
+(define buffer-obj-delete
+   (case-lambda
+      [(fn)
+      (let (
+            [end (fn)]
+            [start (buffer-cursor)]
+           )
+           (buffer-range-delete start end)
+      )]
+
+      [(b fn)
+      (let (
+            [end (fn b)]
+            [start (buffer-cursor b)]
+           )
+           (buffer-range-delete b start end)
+      )]
+   )
+)
 (define buffer-char-next-delete
    (case-lambda
       [()
-      (__cs_buf_text_obj_del (__cs_buf_current_get) #\c 1)]
+       (buffer-obj-delete buffer-char-next)]
 
       [(b)
-      (__cs_buf_text_obj_del b #\c 1)]
+       (buffer-obj-delete b buffer-char-next)]
    )
 )
 (define buffer-char-delete buffer-char-next-delete)
@@ -1029,20 +1047,20 @@
 (define buffer-char-prev-delete
    (case-lambda
       [()
-      (__cs_buf_text_obj_del (__cs_buf_current_get) #\c -1)]
+       (buffer-obj-delete buffer-char-prev)]
 
       [(b)
-      (__cs_buf_text_obj_del b #\c -1)]
+       (buffer-obj-delete b buffer-char-prev)]
    )
 )
 
 (define buffer-word-next-delete
    (case-lambda
       [()
-      (__cs_buf_text_obj_del (__cs_buf_current_get) #\w 1)]
+       (buffer-obj-delete buffer-word-next)]
 
       [(b)
-      (__cs_buf_text_obj_del b #\w 1)]
+       (buffer-obj-delete b buffer-word-next)]
    )
 )
 (define buffer-word-delete buffer-word-next-delete)
@@ -1050,30 +1068,30 @@
 (define buffer-word-prev-delete
    (case-lambda
       [()
-      (__cs_buf_text_obj_move (__cs_buf_current_get) #\w -1)]
+       (buffer-obj-delete buffer-word-prev)]
 
       [(b)
-      (__cs_buf_text_obj_move b #\w -1)]
+       (buffer-obj-delete b buffer-word-prev)]
    )
 )
 
 (define buffer-word-end-delete
    (case-lambda
       [()
-      (__cs_buf_text_obj_del (__cs_buf_current_get) #\e 1)]
+       (buffer-obj-delete buffer-word-end)]
 
       [(b)
-      (__cs_buf_text_obj_del b #\e 1)]
+       (buffer-obj-delete b buffer-word-edn)]
    )
 )
 
 (define buffer-longword-next-delete
    (case-lambda
       [()
-      (__cs_buf_text_obj_del (__cs_buf_current_get) #\W 1)]
+       (buffer-obj-delete buffer-longword-next)]
 
       [(b)
-      (__cs_buf_text_obj_del b #\W 1)]
+       (buffer-obj-delete b buffer-longword-next)]
    )
 )
 (define buffer-longword-delete buffer-longword-next-delete)
@@ -1081,100 +1099,100 @@
 (define buffer-longword-prev-delete
    (case-lambda
       [()
-      (__cs_buf_text_obj_del (__cs_buf_current_get) #\W -1)]
+       (buffer-obj-delete buffer-longword-prev)]
 
       [(b)
-      (__cs_buf_text_obj_del b #\W -1)]
+       (buffer-obj-delete b buffer-longword-prev)]
    )
 )
 
 (define buffer-longword-end-delete
    (case-lambda
       [()
-      (__cs_buf_text_obj_del (__cs_buf_current_get) #\E 1)]
+       (buffer-obj-delete buffer-longword-end)]
 
       [(b)
-      (__cs_buf_text_obj_del b #\E 1)]
+       (buffer-obj-delete b buffer-longword-end)]
    )
 )
 
 (define buffer-line-next-delete
    (case-lambda
       [()
-      (__cs_buf_text_obj_del (__cs_buf_current_get) #\L 1)]
+       (buffer-obj-delete buffer-line-next)]
 
       [(b)
-      (__cs_buf_text_obj_del b #\L 1)]
+       (buffer-obj-delete b buffer-line-next)]
    )
 )
 
 (define buffer-line-prev-delete
    (case-lambda
       [()
-      (__cs_buf_text_obj_del (__cs_buf_current_get) #\L -1)]
+       (buffer-obj-delete buffer-line-prev)]
 
       [(b)
-      (__cs_buf_text_obj_del b #\L -1)]
+       (buffer-obj-delete b buffer-line-prev)]
    )
 )
 
 (define buffer-line-start-delete
    (case-lambda
       [()
-      (__cs_buf_text_obj_del (__cs_buf_current_get) #\0 -1)]
+       (buffer-obj-delete buffer-line-start)]
 
       [(b)
-      (__cs_buf_text_obj_del b #\0 -1)]
+       (buffer-obj-delete b buffer-line-start)]
    )
 )
 
 (define buffer-line-finish-delete
    (case-lambda
       [()
-      (__cs_buf_text_obj_del (__cs_buf_current_get) #\0 1)]
+       (buffer-obj-delete buffer-line-finish)]
 
       [(b)
-      (__cs_buf_text_obj_del b #\0 1)]
+       (buffer-obj-delete b buffer-line-finish)]
    )
 )
 
 (define buffer-line-begin-delete
    (case-lambda
       [()
-      (__cs_buf_text_obj_del (__cs_buf_current_get) #\0 -1)]
+       (buffer-obj-delete buffer-line-begin)]
 
       [(b)
-      (__cs_buf_text_obj_del b #\0 -1)]
+       (buffer-obj-delete b buffer-line-begin)]
    )
 )
 
 (define buffer-line-end-delete
    (case-lambda
       [()
-      (__cs_buf_text_obj_move (__cs_buf_current_get) #\1 1)]
+       (buffer-obj-delete buffer-line-end)]
 
       [(b)
-      (__cs_buf_text_obj_move b #\1 1)]
+       (buffer-obj-delete b buffer-line-end)]
    )
 )
 
 (define buffer-begin-delete
    (case-lambda
       [()
-      (__cs_buf_text_obj_del (__cs_buf_current_get) #\g 1)]
+       (buffer-obj-delete buffer-begin)]
 
       [(b)
-      (__cs_buf_text_obj_del b #\g 1)]
+       (buffer-obj-delete b buffer-begin)]
    )
 )
 
 (define buffer-end-delete
    (case-lambda
       [()
-      (__cs_buf_text_obj_del (__cs_buf_current_get) #\g -1)]
+       (buffer-obj-delete buffer-end)]
 
       [(b)
-      (__cs_buf_text_obj_del b #\g -1)]
+       (buffer-obj-delete b buffer-end)]
    )
 )
 

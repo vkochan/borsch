@@ -2922,35 +2922,6 @@ size_t buf_text_obj_move(int bid, char obj, int n)
 	return pos;
 }
 
-size_t buf_text_obj_del(int bid, char obj, int n)
-{
-	size_t (*obj_move)(Text *t, size_t pos);
-	Buffer *buf = buffer_by_id(bid);
-	size_t start = EPOS, end, tmp, len;
-	Text *txt;
-
-	obj_move = text_move_fn_get(obj, n);
-
-	if (obj_move && buf) {
-		start = end = buffer_cursor_get(buf);
-		txt = buffer_text_get(buf);
-
-		for (n = abs(n); n; n--)
-			end = obj_move(txt, end);
-
-		if (start > end) {
-			tmp = end;
-			end = start;
-			start = tmp;
-		}
-
-		if (end - start && text_delete(txt, start, end - start))
-			buf_update(buf, start, 0);
-	}
-
-	return start;
-}
-
 size_t buf_text_range_del(int bid, int start, int end)
 {
 	Buffer *buf = buffer_by_id(bid);

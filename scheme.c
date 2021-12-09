@@ -335,16 +335,6 @@ ptr scheme_buf_text_range_del(int bid, int start, int end)
 	return Sfalse;
 }
 
-ptr scheme_buf_text_obj_del(int bid, char obj, int n)
-{
-	size_t pos = buf_text_obj_del(bid, obj, n);
-
-	if (pos != EPOS)
-		return Sinteger(pos);
-
-	return Sfalse;
-}
-
 ptr scheme_buf_cursor_get(int bid)
 {
 	size_t pos = buf_cursor_get(bid);
@@ -521,7 +511,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_text_insert", scheme_buf_text_insert);
 	Sregister_symbol("cs_buf_text_obj_move", scheme_buf_text_obj_move);
 	Sregister_symbol("cs_buf_text_range_del", scheme_buf_text_range_del);
-	Sregister_symbol("cs_buf_text_obj_del", scheme_buf_text_obj_del);
 	Sregister_symbol("cs_buf_cursor_get", scheme_buf_cursor_get);
 
 	Sregister_symbol("cs_view_current_get", scheme_view_current_get);
