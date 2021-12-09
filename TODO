@@ -15,3 +15,5 @@
 * TODO Integrate autocomplete from fzy project
 
 * TODO Implement editing of window text buffer
+
+* TODO Do not redraw UI after each text changes by Scheme but mark that update is needed
