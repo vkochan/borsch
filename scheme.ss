@@ -253,6 +253,7 @@
 (define __cs_buf_text_obj_pos (foreign-procedure "cs_buf_text_obj_pos" (int char int) scheme-object))
 (define __cs_buf_text_range_del (foreign-procedure "cs_buf_text_range_del" (int int int) scheme-object))
 (define __cs_buf_cursor_get (foreign-procedure __collect_safe "cs_buf_cursor_get" (int) scheme-object))
+(define __cs_buf_cursor_set (foreign-procedure __collect_safe "cs_buf_cursor_set" (int int) void))
 
 (define __cs_view_current_get (foreign-procedure __collect_safe "cs_view_current_get" () int))
 (define __cs_view_current_set (foreign-procedure __collect_safe "cs_view_current_set" (int) int))
@@ -731,6 +732,30 @@
 
      [(b)
       (__cs_buf_cursor_get b)]
+   )
+)
+
+(define cursor-set
+   (case-lambda
+     [(p)
+      (__cs_buf_cursor_set (__cs_buf_current_get) p)]
+
+     [(b p)
+      (__cs_buf_cursor_set b p)]
+   )
+)
+
+(define-syntax (cursor-save stx)
+   (syntax-case stx ()
+	       ((_ exp ...)
+		#`(let ([curs (cursor)])
+		    (begin
+                       exp
+		       ...
+                    )
+                    (cursor-set curs)
+                  )
+               )
    )
 )
 
