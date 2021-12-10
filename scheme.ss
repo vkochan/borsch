@@ -850,7 +850,7 @@
    )
 )
 
-(define char-next-move
+(define move-next-char
    (case-lambda
       [()
       (__cs_buf_text_obj_move (__cs_buf_current_get) #\c 1)]
@@ -860,7 +860,7 @@
    )
 )
 
-(define char-prev-move
+(define move-prev-char
    (case-lambda
       [()
       (__cs_buf_text_obj_move (__cs_buf_current_get) #\c -1)]
@@ -870,7 +870,7 @@
    )
 )
 
-(define word-next-move
+(define move-next-word
    (case-lambda
       [()
       (__cs_buf_text_obj_move (__cs_buf_current_get) #\w 1)]
@@ -880,7 +880,7 @@
    )
 )
 
-(define word-prev-move
+(define move-prev-word
    (case-lambda
       [()
       (__cs_buf_text_obj_move (__cs_buf_current_get) #\w -1)]
@@ -890,7 +890,7 @@
    )
 )
 
-(define word-end-move
+(define move-word-end
    (case-lambda
       [()
       (__cs_buf_text_obj_move (__cs_buf_current_get) #\e 1)]
@@ -900,7 +900,7 @@
    )
 )
 
-(define word-long-next-move
+(define move-next-longword
    (case-lambda
       [()
       (__cs_buf_text_obj_move (__cs_buf_current_get) #\W 1)]
@@ -910,7 +910,7 @@
    )
 )
 
-(define word-long-prev-move
+(define move-prev-longword
    (case-lambda
       [()
       (__cs_buf_text_obj_move (__cs_buf_current_get) #\W -1)]
@@ -920,7 +920,7 @@
    )
 )
 
-(define word-long-end-move
+(define move-longword-end
    (case-lambda
       [()
       (__cs_buf_text_obj_move (__cs_buf_current_get) #\E 1)]
@@ -930,7 +930,7 @@
    )
 )
 
-(define line-up-move
+(define move-prev-line
    (case-lambda
       [()
       (__cs_buf_text_obj_move (__cs_buf_current_get) #\l -1)]
@@ -940,7 +940,7 @@
    )
 )
 
-(define line-down-move
+(define move-next-line
    (case-lambda
       [()
       (__cs_buf_text_obj_move (__cs_buf_current_get) #\l 1)]
@@ -950,7 +950,7 @@
    )
 )
 
-(define line-next-move
+(define move-next-line-begin
    (case-lambda
       [()
       (__cs_buf_text_obj_move (__cs_buf_current_get) #\L 1)]
@@ -960,7 +960,7 @@
    )
 )
 
-(define line-prev-move
+(define move-prev-line-end
    (case-lambda
       [()
       (__cs_buf_text_obj_move (__cs_buf_current_get) #\L -1)]
@@ -970,7 +970,7 @@
    )
 )
 
-(define line-start-move
+(define move-line-start
    (case-lambda
       [()
       (__cs_buf_text_obj_move (__cs_buf_current_get) #\0 -1)]
@@ -980,7 +980,7 @@
    )
 )
 
-(define line-finish-move
+(define move-line-finish
    (case-lambda
       [()
       (__cs_buf_text_obj_move (__cs_buf_current_get) #\0 1)]
@@ -990,7 +990,7 @@
    )
 )
 
-(define line-begin-move
+(define move-line-begin
    (case-lambda
       [()
       (__cs_buf_text_obj_move (__cs_buf_current_get) #\0 -1)]
@@ -1000,7 +1000,7 @@
    )
 )
 
-(define line-end-move
+(define move-line-end
    (case-lambda
       [()
       (__cs_buf_text_obj_move (__cs_buf_current_get) #\1 1)]
@@ -1010,7 +1010,7 @@
    )
 )
 
-(define buffer-begin-move
+(define move-buffer-begin
    (case-lambda
       [()
       (__cs_buf_text_obj_move (__cs_buf_current_get) #\g 1)]
@@ -1020,7 +1020,7 @@
    )
 )
 
-(define buffer-end-move
+(define move-buffer-end
    (case-lambda
       [()
       (__cs_buf_text_obj_move (__cs_buf_current_get) #\g -1)]
@@ -1030,7 +1030,7 @@
    )
 )
 
-(define char-next-pos
+(define next-char-pos
    (case-lambda
       [()
       (__cs_buf_text_obj_pos (__cs_buf_current_get) #\c 1)]
@@ -1040,7 +1040,7 @@
    )
 )
 
-(define char-prev-pos
+(define prev-char-pos
    (case-lambda
       [()
       (__cs_buf_text_obj_pos (__cs_buf_current_get) #\c -1)]
@@ -1050,7 +1050,7 @@
    )
 )
 
-(define word-next-pos
+(define next-word-pos
    (case-lambda
       [()
       (__cs_buf_text_obj_pos (__cs_buf_current_get) #\w 1)]
@@ -1060,7 +1060,7 @@
    )
 )
 
-(define word-prev-pos
+(define prev-word-pos
    (case-lambda
       [()
       (__cs_buf_text_obj_pos (__cs_buf_current_get) #\w -1)]
@@ -1080,7 +1080,7 @@
    )
 )
 
-(define word-long-next-pos
+(define next-longword-pos
    (case-lambda
       [()
       (__cs_buf_text_obj_pos (__cs_buf_current_get) #\W 1)]
@@ -1090,7 +1090,7 @@
    )
 )
 
-(define word-long-prev-pos
+(define prev-longword-pos
    (case-lambda
       [()
       (__cs_buf_text_obj_pos (__cs_buf_current_get) #\W -1)]
@@ -1100,7 +1100,7 @@
    )
 )
 
-(define word-long-end-pos
+(define longword-end-pos
    (case-lambda
       [()
       (__cs_buf_text_obj_pos (__cs_buf_current_get) #\E 1)]
@@ -1110,7 +1110,7 @@
    )
 )
 
-(define line-up-pos
+(define prev-line-pos
    (case-lambda
       [()
       (__cs_buf_text_obj_pos (__cs_buf_current_get) #\l -1)]
@@ -1120,7 +1120,7 @@
    )
 )
 
-(define line-down-pos
+(define next-line-pos
    (case-lambda
       [()
       (__cs_buf_text_obj_pos (__cs_buf_current_get) #\l 1)]
@@ -1130,7 +1130,7 @@
    )
 )
 
-(define line-next-pos
+(define next-line-begin-pos
    (case-lambda
       [()
       (__cs_buf_text_obj_pos (__cs_buf_current_get) #\L 1)]
@@ -1140,7 +1140,7 @@
    )
 )
 
-(define line-prev-pos
+(define prev-line-end-pos
    (case-lambda
       [()
       (__cs_buf_text_obj_pos (__cs_buf_current_get) #\L -1)]
@@ -1210,7 +1210,7 @@
    )
 )
 
-(define range-delete
+(define delete-range
    (case-lambda
       [(s e)
       (__cs_buf_text_range_del (__cs_buf_current_get) s e)]
@@ -1227,7 +1227,7 @@
             [end (fn)]
             [start (cursor)]
            )
-           (range-delete start end)
+           (delete-range start end)
       )]
 
       [(b fn)
@@ -1235,170 +1235,170 @@
             [end (fn b)]
             [start (cursor b)]
            )
-           (range-delete b start end)
+           (delete-range b start end)
       )]
    )
 )
-(define char-next-delete
+(define delete-next-char
    (case-lambda
       [()
-       (cursor-obj-delete char-next-move)]
+       (cursor-obj-delete move-next-char)]
 
       [(b)
-       (cursor-obj-delete b char-next-move)]
+       (cursor-obj-delete b move-next-char)]
    )
 )
-(define char-delete char-next-delete)
+(define delete-char delete-next-char)
 
-(define char-prev-delete
+(define delete-prev-char
    (case-lambda
       [()
-       (cursor-obj-delete char-prev-move)]
+       (cursor-obj-delete move-prev-char)]
 
       [(b)
-       (cursor-obj-delete b char-prev-move)]
-   )
-)
-
-(define word-next-delete
-   (case-lambda
-      [()
-       (cursor-obj-delete word-next-move)]
-
-      [(b)
-       (cursor-obj-delete b word-next-move)]
-   )
-)
-(define word-delete word-next-delete)
-
-(define word-prev-delete
-   (case-lambda
-      [()
-       (cursor-obj-delete word-prev-move)]
-
-      [(b)
-       (cursor-obj-delete b word-prev-move)]
+       (cursor-obj-delete b move-prev-char)]
    )
 )
 
-(define word-end-delete
+(define delete-next-word
    (case-lambda
       [()
-       (cursor-obj-delete word-end-move)]
+       (cursor-obj-delete move-next-word)]
 
       [(b)
-       (cursor-obj-delete b word-end-move)]
+       (cursor-obj-delete b move-next-word)]
+   )
+)
+(define delete-word delete-next-word)
+
+(define delete-prev-word
+   (case-lambda
+      [()
+       (cursor-obj-delete move-prev-word)]
+
+      [(b)
+       (cursor-obj-delete b move-prev-word)]
    )
 )
 
-(define word-long-next-delete
+(define delete-word-end
    (case-lambda
       [()
-       (cursor-obj-delete word-long-next-move)]
+       (cursor-obj-delete move-word-end)]
 
       [(b)
-       (cursor-obj-delete b word-long-next-move)]
-   )
-)
-(define word-long-delete word-long-next-delete)
-
-(define word-long-prev-delete
-   (case-lambda
-      [()
-       (cursor-obj-delete word-long-prev-move)]
-
-      [(b)
-       (cursor-obj-delete b word-long-prev-move)]
+       (cursor-obj-delete b move-word-end)]
    )
 )
 
-(define word-long-end-delete
+(define delete-next-longword
    (case-lambda
       [()
-       (cursor-obj-delete word-long-end-move)]
+       (cursor-obj-delete move-next-longword)]
 
       [(b)
-       (cursor-obj-delete b word-long-end-move)]
+       (cursor-obj-delete b move-next-longword)]
+   )
+)
+(define delete-longword delete-next-longword)
+
+(define delete-prev-longword
+   (case-lambda
+      [()
+       (cursor-obj-delete move-prev-longword)]
+
+      [(b)
+       (cursor-obj-delete b move-prev-longword)]
    )
 )
 
-(define line-next-delete
+(define delete-longword-end
    (case-lambda
       [()
-       (cursor-obj-delete line-next-move)]
+       (cursor-obj-delete move-longword-end)]
 
       [(b)
-       (cursor-obj-delete b line-next-move)]
+       (cursor-obj-delete b move-longword-end)]
    )
 )
 
-(define line-prev-delete
+(define delete-next-line-begin
    (case-lambda
       [()
-       (cursor-obj-delete line-prev-move)]
+       (cursor-obj-delete move-next-line-begin)]
 
       [(b)
-       (cursor-obj-delete b line-prev-move)]
+       (cursor-obj-delete b move-next-line-begin)]
    )
 )
 
-(define line-start-delete
+(define delete-prev-line-end
    (case-lambda
       [()
-       (cursor-obj-delete line-start-move)]
+       (cursor-obj-delete move-prev-line-end)]
 
       [(b)
-       (cursor-obj-delete b line-start-move)]
+       (cursor-obj-delete b move-prev-line-end)]
    )
 )
 
-(define line-finish-delete
+(define delete-line-start
    (case-lambda
       [()
-       (cursor-obj-delete line-finish-move)]
+       (cursor-obj-delete move-line-start)]
 
       [(b)
-       (cursor-obj-delete b line-finish-move)]
+       (cursor-obj-delete b move-line-start)]
    )
 )
 
-(define line-begin-delete
+(define delete-line-finish
    (case-lambda
       [()
-       (cursor-obj-delete line-begin-move)]
+       (cursor-obj-delete move-line-finish)]
 
       [(b)
-       (cursor-obj-delete b line-begin-move)]
+       (cursor-obj-delete b move-line-finish)]
    )
 )
 
-(define line-end-delete
+(define delete-line-begin
    (case-lambda
       [()
-       (cursor-obj-delete line-end-move)]
+       (cursor-obj-delete move-line-begin)]
 
       [(b)
-       (cursor-obj-delete b line-end-move)]
+       (cursor-obj-delete b move-line-begin)]
    )
 )
 
-(define buffer-begin-delete
+(define delete-line-end
    (case-lambda
       [()
-       (cursor-obj-delete buffer-begin-move)]
+       (cursor-obj-delete move-line-end)]
 
       [(b)
-       (cursor-obj-delete b buffer-begin-move)]
+       (cursor-obj-delete b move-line-end)]
    )
 )
 
-(define buffer-end-delete
+(define delete-buffer-begin
    (case-lambda
       [()
-       (cursor-obj-delete buffer-end-move)]
+       (cursor-obj-delete move-buffer-begin)]
 
       [(b)
-       (cursor-obj-delete b buffer-end-move)]
+       (cursor-obj-delete b move-buffer-begin)]
+   )
+)
+
+(define delete-buffer-end
+   (case-lambda
+      [()
+       (cursor-obj-delete move-buffer-end)]
+
+      [(b)
+       (cursor-obj-delete b move-buffer-end)]
    )
 )
 
