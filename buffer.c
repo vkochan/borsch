@@ -17,6 +17,7 @@ typedef struct Buffer {
 	bool is_name_locked;
 	char name[256];
 	size_t ref_count;
+	bool is_dirty;
 } Buffer;
 
 static Buffer buf_list;
@@ -206,6 +207,7 @@ size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text)
 	len = strlen(text);
 
 	if (text_insert(buf->text, pos, text, len)) {
+		buf->is_dirty = true;
 		buf->cursor = pos + len;
 		pos += len;
 	} else {
@@ -226,8 +228,20 @@ size_t buffer_text_delete(Buffer *buf, size_t start, size_t end)
 		start = tmp;
 	}
 
-	if (text_delete(buf->text, start, end - start))
+	if (text_delete(buf->text, start, end - start)) {
+		buf->is_dirty = true;
 		buf->cursor = start;
+	}
 
 	return start;
+}
+
+bool buffer_is_dirty(Buffer *buf)
+{
+	return buf->is_dirty;
+}
+
+void buffer_dirty_set(Buffer *buf, bool dirty)
+{
+	buf->is_dirty = dirty;
 }

@@ -104,13 +104,14 @@ void ui_window_cursor_get(UiWin *win, int *x, int *y)
 
 void ui_window_draw(UiWin *win)
 {
-	view_draw(win->view);
-	view_update(win->view);
+	if (view_update(win->view)) {
+		view_draw(win->view);
 
-	if (win->draw)
-		win->draw(win);
-	else if (win->ui->window_draw)
-		win->ui->window_draw(win);
+		if (win->draw)
+			win->draw(win);
+		else if (win->ui->window_draw)
+			win->ui->window_draw(win);
+	}
 }
 
 void ui_window_redraw(UiWin *win)

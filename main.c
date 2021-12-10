@@ -228,6 +228,8 @@ static Client *clients = NULL;
 static char *title;
 static bool show_tagnamebycwd = false;
 
+static void buf_update(void);
+
 static KeyMap *win_min_kmap;
 static KeyMap *global_kmap;
 static KeyMap *curr_kmap;
@@ -856,10 +858,6 @@ focus(Client *c) {
 
 		if (c->pid)
 			ui_cursor_enable(ui, c && !c->minimized && vt_cursor_visible(c->term));
-
-		s = view_selections_primary_get(c->view);
-		if (s)
-			buffer_cursor_set(c->buf, view_cursors_pos(s));
 	}
 
 	if (c) {
@@ -2150,8 +2148,11 @@ rescan:
 					keypress(code);
 				}
 			}
-			if (r == 1) /* no data available on pty's */
+			/* no data available on pty's */
+			if (r == 1) {
+				buf_update();
 				continue;
+			}
 		}
 
 		if (cmdfifo.fd != -1 && FD_ISSET(cmdfifo.fd, &rd))
@@ -2765,28 +2766,29 @@ int buf_by_name(const char *name)
 	return 0;
 }
 
-static void buf_cursor_update(Buffer *buf, size_t pos)
+static void buf_update(void)
 {
-	buffer_cursor_set(buf, pos);
-
-	if (sel && sel->buf == buf) {
-		int x, y;
-
-		view_scroll_to(sel->view, pos);
-		if (!view_coord_get(sel->view, pos, NULL, &y, &x))
-			return;
-
-		ui_window_cursor_set(sel->win, x, y+1);
-	}
-}
-
-static void buf_update(Buffer *buf, size_t pos)
-{
-	buf_cursor_update(buf, pos);
-
 	for (Client *c = clients; c; c = c->next) {
-		if (c->buf == buf && is_content_visible(c)) {
-			ui_window_draw(c->win);
+		if (is_content_visible(c)) {
+			View *view = c->view;
+			Buffer *buf = c->buf;
+			UiWin *win = c->win;
+
+			if (buffer_is_dirty(buf)) {
+				size_t pos = buffer_cursor_get(buf);
+				int x, y;
+
+				view_scroll_to(view, pos);
+				if (view_coord_get(view, pos, NULL, &y, &x)) {
+					ui_window_cursor_set(win, x, y+1);
+				}
+
+				/* TODO: better to make buffer to know about it's
+				 * windows and mark them as dirty on text update */
+				buffer_dirty_set(buf, false);
+				view_invalidate(view);
+				ui_window_draw(win);
+			}
 		}
 	}
 }
@@ -2798,7 +2800,6 @@ size_t buf_text_insert(int bid, const char *text)
 
 	if (buf) {
 		pos = buffer_text_insert(buf, buffer_cursor_get(buf), text);
-		buf_update(buf, pos);
 	}
 
 	return pos;
@@ -2904,7 +2905,9 @@ size_t buf_text_obj_move(int bid, char obj, int n)
 		for (n = abs(n); n; n--)
 			pos = obj_move(txt, pos);
 
-		buf_update(buf, pos);
+		buffer_cursor_set(buf, pos);
+		/* just to make UI update */
+		buffer_dirty_set(buf, true);
 	}
 
 	return pos;
@@ -2916,7 +2919,6 @@ size_t buf_text_range_del(int bid, int start, int end)
 
 	if (buf) {
 		start = buffer_text_delete(buf, start, end);
-		buf_update(buf, start);
 	}
 
 	return start;
