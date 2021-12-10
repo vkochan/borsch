@@ -217,6 +217,19 @@ size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text)
 	return pos;
 }
 
+size_t buffer_text_len_insert(Buffer *buf, size_t pos, const char *text, size_t len)
+{
+	if (text_insert(buf->text, pos, text, len)) {
+		buf->is_dirty = true;
+		buf->cursor = pos + len;
+		pos += len;
+	} else {
+		pos = EPOS;
+	}
+
+	return pos;
+}
+
 size_t buffer_text_delete(Buffer *buf, size_t start, size_t end)
 {
 	size_t tmp;

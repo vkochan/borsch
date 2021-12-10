@@ -2811,6 +2811,45 @@ size_t buf_text_insert(int bid, const char *text)
 	return pos;
 }
 
+size_t buf_text_insert_file(int bid, const char *path)
+{
+	Buffer *buf = buffer_by_id(bid);
+	struct stat info;
+	char data[512];
+	ssize_t len;
+	size_t pos;
+	size_t rem;
+	int fd;
+
+	if (!buf)
+		return EPOS;
+
+	pos = buffer_cursor_get(buf);
+
+	fd = open(path, O_RDONLY);
+	if (fd == -1)
+		return EPOS;
+
+	fstat(fd, &info);
+	rem = info.st_size;
+
+	while (rem > 0) {
+		len = read(fd, data, sizeof(data));
+		if (len == -1) {
+			close(fd);
+			return EPOS;
+		} else if (len == 0) {
+			break;
+		} else {
+			pos += buffer_text_len_insert(buf, pos, data, len);
+			rem -= len;
+		}
+	}
+	close(fd);
+
+	return pos;
+}
+
 void *text_move_fn_get(char obj, int n)
 {
 	size_t (*obj_move)(Text *t, size_t pos);
