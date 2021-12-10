@@ -2895,7 +2895,7 @@ void *text_move_fn_get(char obj, int n)
 	return obj_move;
 }
 
-size_t buf_text_obj_move(int bid, char obj, int n)
+size_t buf_text_obj_move(int bid, char obj, int n, bool move)
 {
 	size_t (*obj_move)(Text *t, size_t pos);
 	Buffer *buf = buffer_by_id(bid);
@@ -2911,9 +2911,11 @@ size_t buf_text_obj_move(int bid, char obj, int n)
 		for (n = abs(n); n; n--)
 			pos = obj_move(txt, pos);
 
-		buffer_cursor_set(buf, pos);
-		/* just to make UI update */
-		buffer_dirty_set(buf, true);
+		if (move) {
+			buffer_cursor_set(buf, pos);
+			/* just to make UI update */
+			buffer_dirty_set(buf, true);
+		}
 	}
 
 	return pos;
