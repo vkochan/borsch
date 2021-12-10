@@ -1,3 +1,5 @@
+* TODO Split scheme.ss into smaller libraries
+
 * TODO Introduce initial buffer modality support
 
 * TODO Implement basic default 'text' buffer mode
