@@ -858,6 +858,8 @@ focus(Client *c) {
 
 		if (c->pid)
 			ui_cursor_enable(ui, c && !c->minimized && vt_cursor_visible(c->term));
+		else
+			ui_cursor_enable(ui, true);
 	}
 
 	if (c) {
@@ -1582,6 +1584,8 @@ scrollback(const char *args[]) {
 	draw(sel);
 	if (sel->pid)
 		ui_cursor_enable(ui, vt_cursor_visible(sel->term));
+	else
+		ui_cursor_enable(ui, true);
 }
 
 static void
@@ -2192,8 +2196,10 @@ rescan:
 			ui_window_draw(sel->win);
 			if (sel->pid) {
 				ui_cursor_enable(ui, vt_cursor_visible(sel->term));
-				ui_window_refresh(sel->win);
+			} else {
+				ui_cursor_enable(ui, true);
 			}
+			ui_window_refresh(sel->win);
 		}
 	}
 
