@@ -18,7 +18,7 @@ size_t buffer_cursor_get(Buffer *buf);
 char *buffer_name_get(Buffer *buf);
 void buffer_name_set(Buffer *buf, const char *name);
 void buffer_name_lock(Buffer *buf, bool lock);
-bool buffer_is_name_locked(Buffer *buf);
+bool buffer_name_is_locked(Buffer *buf);
 Buffer *buffer_by_name(const char *name);
 void buffer_ref_get(Buffer *buf);
 void buffer_ref_put(Buffer *buf);

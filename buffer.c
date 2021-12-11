@@ -167,7 +167,7 @@ void buffer_name_lock(Buffer *buf, bool lock)
 	buf->is_name_locked = lock;
 }
 
-bool buffer_is_name_locked(Buffer *buf)
+bool buffer_name_is_locked(Buffer *buf)
 {
 	return buf->is_name_locked;
 }

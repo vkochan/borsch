@@ -1383,7 +1383,7 @@ int create(const char *prog, const char *title, const char *cwd) {
 		strncpy(tmppath, prog, sizeof(tmppath));
 		tmppath[sizeof(tmppath)-1] = '\0';
 		strncpy(tmp, basename(tmppath), sizeof(tmp));
-		if (!buffer_is_name_locked(c->buf))
+		if (!buffer_name_is_locked(c->buf))
 			buffer_name_set(c->buf, tmp);
 	} else {
 		c->cmd = shell;
@@ -2181,7 +2181,7 @@ rescan:
 			}
 
 			if (is_content_visible(c)) {
-				if (c->pid && !buffer_is_name_locked(c->buf))
+				if (c->pid && !buffer_name_is_locked(c->buf))
 					synctitle(c);
 				if (c != sel) {
 					ui_window_draw(c->win);
