@@ -105,7 +105,7 @@ struct Ui {
 	void (*draw_char)(Ui *ui, int x, int y, unsigned int ch, int n);
 	void (*draw_char_vert)(Ui *ui, int x, int y, unsigned int ch, int n);
 	void (*redraw)(Ui*);
-	void (*reset)(Ui*);
+	void (*resize)(Ui*);
 	void (*suspend)(Ui*);
 	void (*resume)(Ui*);
 	void (*cursor_enable)(Ui*, bool enable);
@@ -136,7 +136,7 @@ Ui *ui_term_new(void);
 int ui_init(Ui *ui);
 void ui_free(Ui *ui);
 void ui_redraw(Ui *ui);
-void ui_reset(Ui *ui);
+void ui_resize(Ui *ui);
 int ui_height_get(Ui *ui);
 int ui_width_get(Ui *ui);
 short ui_color_make(Ui *ui, short fg, short bg);

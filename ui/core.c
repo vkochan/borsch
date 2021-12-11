@@ -25,10 +25,10 @@ void ui_redraw(Ui *ui)
 		ui->redraw(ui);
 }
 
-void ui_reset(Ui *ui)
+void ui_resize(Ui *ui)
 {
-	if (ui->reset)
-		ui->reset(ui);
+	if (ui->resize)
+		ui->resize(ui);
 }
 
 int ui_height_get(Ui *ui)

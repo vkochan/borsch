@@ -2067,7 +2067,7 @@ main(int argc, char *argv[]) {
 		int r, nfds = 0;
 		fd_set rd;
 
-		ui_reset(ui);
+		ui_resize(ui);
 		updatebarpos();
 
 		FD_ZERO(&rd);

@@ -199,7 +199,7 @@ static void term_free(Ui *ui)
 	free(ui);
 }
 
-static void term_reset(Ui *ui)
+static void term_resize(Ui *ui)
 {
 	if (need_resize) {
 		need_resize = false;
@@ -364,7 +364,7 @@ Ui *ui_term_new(void)
 	tui->ui.height_get = term_height_get;
 	tui->ui.width_get = term_width_get;
 	tui->ui.redraw = term_redraw;
-	tui->ui.reset = term_reset;
+	tui->ui.resize = term_resize;
 	tui->ui.color_make = term_color_make;
 	tui->ui.draw_char = term_draw_char;
 	tui->ui.draw_char_vert = term_draw_char_vert;
