@@ -37,6 +37,12 @@ void ui_clear(Ui *ui)
 		ui->clear(ui);
 }
 
+void ui_update(Ui *ui)
+{
+	if (ui->update)
+		ui->update(ui);
+}
+
 int ui_height_get(Ui *ui)
 {
 	if (ui->height_get)

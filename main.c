@@ -660,7 +660,7 @@ draw_all(void) {
 		ui_cursor_enable(ui, false);
 		ui_clear(ui);
 		drawbar();
-		doupdate();
+		ui_update(ui);
 		return;
 	}
 
@@ -2101,7 +2101,8 @@ main(int argc, char *argv[]) {
 			c = c->next;
 		}
 
-		doupdate();
+		ui_update(ui);
+
 		r = pselect(nfds + 1, &rd, NULL, NULL, NULL, &emptyset);
 
 		if (r < 0) {
