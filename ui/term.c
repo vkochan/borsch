@@ -207,6 +207,12 @@ static void term_resize(Ui *ui)
 	}
 }
 
+static void term_clear(Ui *ui)
+{
+	erase();
+	attrset(term_color_make(ui, default_fg, default_bg) | A_NORMAL);
+}
+
 static void term_draw_char(Ui *ui, int x, int y, unsigned int ch, int n)
 {
 	mvhline(y, x, ch, n);
@@ -365,6 +371,7 @@ Ui *ui_term_new(void)
 	tui->ui.width_get = term_width_get;
 	tui->ui.redraw = term_redraw;
 	tui->ui.resize = term_resize;
+	tui->ui.clear = term_clear;
 	tui->ui.color_make = term_color_make;
 	tui->ui.draw_char = term_draw_char;
 	tui->ui.draw_char_vert = term_draw_char_vert;

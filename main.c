@@ -658,7 +658,7 @@ draw_all(void) {
 	if (!nextvisible(clients)) {
 		sel = NULL;
 		ui_cursor_enable(ui, false);
-		erase();
+		ui_clear(ui);
 		drawbar();
 		doupdate();
 		return;
@@ -686,8 +686,9 @@ arrange(void) {
 		if (c->minimized)
 			m++;
 	}
-	erase();
-	attrset(NORMAL_ATTR);
+
+	ui_clear(ui);
+
 	if (bar.fd == -1 && bar.autohide) {
 		if ((!clients || !clients->next) && n == 1)
 			hidebar();
