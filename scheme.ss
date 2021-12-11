@@ -180,7 +180,7 @@
 	  (lambda (ev)
 	     (case ev
 	        [0  'window-create   ]
-		[1  'window-switch   ]
+		[1  'window-select   ]
 		[2  'window-minimize ]
 		[3  'window-maximize ]
 		[4  'window-delete   ]
@@ -395,33 +395,33 @@
    )
 )
 
-(define window-switch
+(define window-select
    (lambda (wid)
       (__cs_win_current_set wid)
    )
 )
 
-(define window-switch-left
+(define window-select-left
    (lambda ()
-      (window-switch (window-left))
+      (window-select (window-left))
    )
 )
 
-(define window-switch-right
+(define window-select-right
    (lambda ()
-      (window-switch (window-right))
+      (window-select (window-right))
    )
 )
 
-(define window-switch-upper
+(define window-select-upper
    (lambda ()
-      (window-switch (window-upper))
+      (window-select (window-upper))
    )
 )
 
-(define window-switch-lower
+(define window-select-lower
    (lambda ()
-      (window-switch (window-lower))
+      (window-select (window-lower))
    )
 )
 
@@ -1835,14 +1835,14 @@
 (bind-key "C-g c"       window-exec)
 (bind-key "C-g C-x"     window-eval)
 (bind-key "C-g x x"     window-delete)
-(bind-key "M-h"         window-switch-left)
-(bind-key "C-g h"       window-switch-left)
-(bind-key "M-l"         window-switch-right)
-(bind-key "C-g l"       window-switch-right)
-(bind-key "M-j"         window-switch-lower)
-(bind-key "C-g j"       window-switch-lower)
-(bind-key "M-k"         window-switch-upper)
-(bind-key "C-g k"       window-switch-upper)
+(bind-key "M-h"         window-select-left)
+(bind-key "C-g h"       window-select-left)
+(bind-key "M-l"         window-select-right)
+(bind-key "C-g l"       window-select-right)
+(bind-key "M-j"         window-select-lower)
+(bind-key "C-g j"       window-select-lower)
+(bind-key "M-k"         window-select-upper)
+(bind-key "C-g k"       window-select-upper)
 (bind-key "C-g <Enter>" window-set-master)
 (bind-key "C-g ."       window-set-minimized)
 (bind-key "C-g y"       window-copy)
