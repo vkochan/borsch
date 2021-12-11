@@ -100,7 +100,6 @@ struct Ui {
 	void (*window_draw_char)(UiWin*, int x, int y, unsigned int ch, int n);
 	void (*window_draw_text)(UiWin *win, int x, int y, const char *text, int n);
 	short (*window_color_get)(UiWin *win, short fg, short bg);
-	void (*arrange)(Ui*, enum UiLayout);
 	void (*draw)(Ui*);
 	void (*draw_char)(Ui *ui, int x, int y, unsigned int ch, int n);
 	void (*draw_char_vert)(Ui *ui, int x, int y, unsigned int ch, int n);
@@ -108,8 +107,6 @@ struct Ui {
 	void (*resize)(Ui*);
 	void (*clear)(Ui*);
 	void (*update)(Ui*);
-	void (*suspend)(Ui*);
-	void (*resume)(Ui*);
 	void (*cursor_enable)(Ui*, bool enable);
 	short (*color_make)(Ui *ui, short fg, short bg);
 };
