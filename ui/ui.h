@@ -107,6 +107,7 @@ struct Ui {
 	void (*resize)(Ui*);
 	void (*clear)(Ui*);
 	void (*update)(Ui*);
+	void (*refresh)(Ui*);
 	void (*cursor_enable)(Ui*, bool enable);
 	short (*color_make)(Ui *ui, short fg, short bg);
 };
@@ -138,6 +139,7 @@ void ui_redraw(Ui *ui);
 void ui_resize(Ui *ui);
 void ui_clear(Ui *ui);
 void ui_update(Ui *ui);
+void ui_refresh(Ui *ui);
 int ui_height_get(Ui *ui);
 int ui_width_get(Ui *ui);
 short ui_color_make(Ui *ui, short fg, short bg);

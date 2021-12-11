@@ -218,6 +218,11 @@ static void term_update(Ui *ui)
 	doupdate();
 }
 
+static void term_refresh(Ui *ui)
+{
+	wnoutrefresh(stdscr);
+}
+
 static void term_draw_char(Ui *ui, int x, int y, unsigned int ch, int n)
 {
 	mvhline(y, x, ch, n);
@@ -378,6 +383,7 @@ Ui *ui_term_new(void)
 	tui->ui.resize = term_resize;
 	tui->ui.clear = term_clear;
 	tui->ui.update = term_update;
+	tui->ui.refresh = term_refresh;
 	tui->ui.color_make = term_color_make;
 	tui->ui.draw_char = term_draw_char;
 	tui->ui.draw_char_vert = term_draw_char_vert;

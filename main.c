@@ -597,7 +597,7 @@ drawbar(void) {
 	mvaddch(bar.y, ui_width_get(ui) - 1, BAR_END);
 	attrset(NORMAL_ATTR);
 	move(sy, sx);
-	wnoutrefresh(stdscr);
+	ui_refresh(ui);
 }
 
 static void
@@ -720,7 +720,7 @@ arrange(void) {
 		wah += dh;
 	}
 	focus(NULL);
-	wnoutrefresh(stdscr);
+	ui_refresh(ui);
 	drawbar();
 	draw_all();
 }

@@ -43,6 +43,12 @@ void ui_update(Ui *ui)
 		ui->update(ui);
 }
 
+void ui_refresh(Ui *ui)
+{
+	if (ui->refresh)
+		ui->refresh(ui);
+}
+
 int ui_height_get(Ui *ui)
 {
 	if (ui->height_get)
