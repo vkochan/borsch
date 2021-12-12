@@ -248,7 +248,6 @@ static void term_resize(Ui *ui)
 static void term_clear(Ui *ui)
 {
 	erase();
-	attrset(term_color_make(ui, default_fg, default_bg) | A_NORMAL);
 }
 
 static void term_update(Ui *ui)
