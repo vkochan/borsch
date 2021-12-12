@@ -195,6 +195,20 @@ void ui_window_draw_text(UiWin *win, int x, int y, const char *text, int n)
 		win->ui->window_draw_text(win, x, y, text, n);
 }
 
+void ui_window_draw_char_attr(UiWin *win, int x, int y, unsigned ch, int n,
+			      short fg, short bg, ui_text_style_t style)
+{
+	if (win->ui->window_draw_char_attr)
+		win->ui->window_draw_char_attr(win, x, y, ch, n, fg, bg, style);
+}
+
+void ui_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int n,
+			      short fg, short bg, ui_text_style_t style)
+{
+	if (win->ui->window_draw_text_attr)
+		win->ui->window_draw_text_attr(win, x, y, text, n, fg, bg, style);
+}
+
 void ui_window_default_colors_set(UiWin *win, unsigned attrs, short fg, short bg)
 {
 	win->defattrs = attrs;

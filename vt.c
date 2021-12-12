@@ -49,10 +49,6 @@
 # include "forkpty-sunos.c"
 #endif
 
-#ifndef NCURSES_ATTR_SHIFT
-# define NCURSES_ATTR_SHIFT 8
-#endif
-
 #ifndef NCURSES_ACS
 # ifdef PDCURSES
 #  define NCURSES_ACS(c) (acs_map[(unsigned char)(c)])
@@ -89,7 +85,7 @@ static char vt_term[32];
 
 typedef struct {
 	wchar_t text;
-	attr_t attr;
+	ui_text_style_t attr;
 	short fg;
 	short bg;
 } VtCell;
@@ -157,7 +153,7 @@ typedef struct {
 	int scroll_below;      /* number of lines below current viewport */
 	int rows, cols;        /* current dimension of buffer */
 	int maxcols;           /* allocated cells (maximal cols over time) */
-	attr_t curattrs, savattrs; /* current and saved attributes for cells */
+	ui_text_style_t curattrs, savattrs; /* current and saved attributes for cells */
 	int curs_col;          /* current cursor column (zero based) */
 	int curs_srow, curs_scol; /* saved cursor row/colmn (zero based) */
 	short curfg, curbg;    /* current fore and background colors */
@@ -254,20 +250,13 @@ static void process_nonprinting(Vt *t, wchar_t wc);
 static void send_curs(Vt *t);
 static void vt_draw(UiWin *win);
 
-__attribute__ ((const))
-static attr_t build_attrs(attr_t curattrs)
-{
-	return ((curattrs & ~A_COLOR) | COLOR_PAIR(curattrs & 0xff))
-	    >> NCURSES_ATTR_SHIFT;
-}
-
 static void row_set(VtRow *row, int start, int len, VtBuffer *t)
 {
 	VtCell cell = {
 		.text = L'\0',
-		.attr = t ? build_attrs(t->curattrs) : 0,
-		.fg = t ? t->curfg : -1,
-		.bg = t ? t->curbg : -1,
+		.attr = t ? t->curattrs : UI_TEXT_STYLE_NORMAL,
+		.fg = t ? t->curfg : UI_TEXT_COLOR_DEFAULT,
+		.bg = t ? t->curbg : UI_TEXT_COLOR_DEFAULT,
 	};
 
 	for (int i = start; i < len + start; i++)
@@ -297,9 +286,9 @@ static void buffer_clear(VtBuffer *b)
 {
 	VtCell cell = {
 		.text = L'\0',
-		.attr = A_NORMAL,
-		.fg = -1,
-		.bg = -1,
+		.attr = UI_TEXT_STYLE_NORMAL,
+		.fg = UI_TEXT_COLOR_DEFAULT,
+		.bg = UI_TEXT_COLOR_DEFAULT,
 	};
 
 	for (int i = 0; i < b->rows; i++) {
@@ -438,8 +427,10 @@ static void buffer_resize(VtBuffer *b, int rows, int cols)
 
 static bool buffer_init(VtBuffer *b, int rows, int cols, int scroll_size)
 {
-	b->curattrs = A_NORMAL;	/* white text over black background */
-	b->curfg = b->curbg = -1;
+	b->curattrs = UI_TEXT_STYLE_NORMAL;
+	b->curfg = UI_TEXT_COLOR_DEFAULT;
+	b->curbg = UI_TEXT_COLOR_DEFAULT;
+	/* b->curfg = b->curbg = -1; */
 	if (scroll_size < 0)
 		scroll_size = 0;
 	if (scroll_size && !(b->scroll_buf = calloc(scroll_size, sizeof(VtRow))))
@@ -622,95 +613,98 @@ static bool is_valid_csi_ender(int c)
 	    || (c == '@' || c == '`');
 }
 
+static short curses2ui_color(short color)
+{
+	return color;
+}
+
 /* interprets a 'set attribute' (SGR) CSI escape sequence */
 static void interpret_csi_sgr(Vt *t, int param[], int pcount)
 {
 	VtBuffer *b = t->buffer;
 	if (pcount == 0) {
 		/* special case: reset attributes */
-		b->curattrs = A_NORMAL;
-		b->curfg = b->curbg = -1;
+		b->curattrs = UI_TEXT_STYLE_NORMAL;
+		b->curfg = UI_TEXT_COLOR_DEFAULT;
+		b->curbg = UI_TEXT_COLOR_DEFAULT;
 		return;
 	}
 
 	for (int i = 0; i < pcount; i++) {
 		switch (param[i]) {
 		case 0:
-			b->curattrs = A_NORMAL;
-			b->curfg = b->curbg = -1;
+			b->curattrs = UI_TEXT_STYLE_NORMAL;
+			b->curfg = UI_TEXT_COLOR_DEFAULT;
+			b->curbg = UI_TEXT_COLOR_DEFAULT;
 			break;
 		case 1:
-			b->curattrs |= A_BOLD;
+			b->curattrs |= UI_TEXT_STYLE_BOLD;
 			break;
 		case 2:
-			b->curattrs |= A_DIM;
+			b->curattrs |= UI_TEXT_STYLE_DIM;
 			break;
-#ifdef A_ITALIC
 		case 3:
-			b->curattrs |= A_ITALIC;
+			b->curattrs |= UI_TEXT_STYLE_ITALIC;
 			break;
-#endif
 		case 4:
-			b->curattrs |= A_UNDERLINE;
+			b->curattrs |= UI_TEXT_STYLE_UNDERLINE;
 			break;
 		case 5:
-			b->curattrs |= A_BLINK;
+			b->curattrs |= UI_TEXT_STYLE_BLINK;
 			break;
 		case 7:
-			b->curattrs |= A_REVERSE;
+			b->curattrs |= UI_TEXT_STYLE_REVERSE;
 			break;
 		case 8:
-			b->curattrs |= A_INVIS;
+			b->curattrs |= UI_TEXT_STYLE_INVIS;
 			break;
 		case 22:
-			b->curattrs &= ~(A_BOLD | A_DIM);
+			b->curattrs &= ~(UI_TEXT_STYLE_BOLD | UI_TEXT_STYLE_DIM);
 			break;
-#ifdef A_ITALIC
 		case 23:
-			b->curattrs &= ~A_ITALIC;
+			b->curattrs &= ~UI_TEXT_STYLE_ITALIC;
 			break;
-#endif
 		case 24:
-			b->curattrs &= ~A_UNDERLINE;
+			b->curattrs &= ~UI_TEXT_STYLE_UNDERLINE;
 			break;
 		case 25:
-			b->curattrs &= ~A_BLINK;
+			b->curattrs &= ~UI_TEXT_STYLE_BLINK;
 			break;
 		case 27:
-			b->curattrs &= ~A_REVERSE;
+			b->curattrs &= ~UI_TEXT_STYLE_REVERSE;
 			break;
 		case 28:
-			b->curattrs &= ~A_INVIS;
+			b->curattrs &= ~UI_TEXT_STYLE_INVIS;
 			break;
 		case 30 ... 37:	/* fg */
-			b->curfg = param[i] - 30;
+			b->curfg = curses2ui_color(param[i] - 30);
 			break;
 		case 38:
 			if ((i + 2) < pcount && param[i + 1] == 5) {
-				b->curfg = param[i + 2];
+				b->curfg = curses2ui_color(param[i + 2]);
 				i += 2;
 			}
 			break;
 		case 39:
-			b->curfg = -1;
+			b->curfg = UI_TEXT_COLOR_DEFAULT;
 			break;
 		case 40 ... 47:	/* bg */
-			b->curbg = param[i] - 40;
+			b->curbg = curses2ui_color(param[i] - 40);
 			break;
 		case 48:
 			if ((i + 2) < pcount && param[i + 1] == 5) {
-				b->curbg = param[i + 2];
+				b->curbg = curses2ui_color(param[i + 2]);
 				i += 2;
 			}
 			break;
 		case 49:
-			b->curbg = -1;
+			b->curbg = UI_TEXT_COLOR_DEFAULT;
 			break;
 		case 90 ... 97:	/* hi fg */
-			b->curfg = param[i] - 82;
+			b->curfg = curses2ui_color(param[i] - 82);
 			break;
 		case 100 ... 107: /* hi bg */
-			b->curbg = param[i] - 92;
+			b->curbg = curses2ui_color(param[i] - 92);
 			break;
 		default:
 			break;
@@ -725,8 +719,9 @@ static void interpret_csi_ed(Vt *t, int param[], int pcount)
 	VtBuffer *b = t->buffer;
 
 	attributes_save(t);
-	b->curattrs = A_NORMAL;
-	b->curfg = b->curbg = -1;
+	b->curattrs = UI_TEXT_STYLE_NORMAL;
+	b->curfg = UI_TEXT_COLOR_DEFAULT;
+	b->curbg = UI_TEXT_COLOR_DEFAULT;
 
 	if (pcount && param[0] == 2) {
 		start = b->lines;
@@ -1371,7 +1366,7 @@ static void put_wc(Vt *t, wchar_t wc)
 			width = 1;
 		}
 		VtBuffer *b = t->buffer;
-		VtCell blank_cell = { L'\0', build_attrs(b->curattrs), b->curfg, b->curbg };
+		VtCell blank_cell = { L'\0', b->curattrs, b->curfg, b->curbg };
 		if (width == 2 && b->curs_col == b->cols - 1) {
 			b->curs_row->cells[b->curs_col++] = blank_cell;
 			b->curs_row->dirty = true;
@@ -1510,6 +1505,9 @@ static void vt_draw(UiWin *win)
 	}
 
 	for (i = 0; i < b->rows; i++) {
+		short curattrs = UI_TEXT_STYLE_NORMAL;
+		short curfg = UI_TEXT_COLOR_DEFAULT;
+		short curbg = UI_TEXT_COLOR_DEFAULT;
 		VtRow *row = b->lines + i;
 
 		if (!row->dirty)
@@ -1523,31 +1521,29 @@ static void vt_draw(UiWin *win)
 			if (!prev_cell || cell->attr != prev_cell->attr
 			    || cell->fg != prev_cell->fg
 			    || cell->bg != prev_cell->bg) {
-				if (cell->attr == A_NORMAL)
-					cell->attr = ui_window_default_attrs_get(t->win);
-				if (cell->fg == -1)
-					cell->fg = ui_window_default_fg_get(t->win);
-				if (cell->bg == -1)
-					cell->bg = ui_window_default_bg_get(t->win);
-				ui_window_text_attr_set(win, cell->attr << NCURSES_ATTR_SHIFT);
-				ui_window_text_color_set(win, cell->fg, cell->bg);
+				curattrs = cell->attr;
+				curfg = cell->fg;
+				curbg = cell->bg;
 			}
 
 			if (is_utf8 && cell->text >= 128) {
 				char buf[MB_CUR_MAX + 1];
 				size_t len = wcrtomb(buf, cell->text, NULL);
 				if (len > 0) {
-					ui_window_draw_text(win, j, srow + i, buf, len);
+					ui_window_draw_text_attr(win, j, srow + i, buf, len,
+								 curfg, curbg, curattrs);
 					if (wcwidth(cell->text) > 1)
 						j++;
 				}
 			} else {
-				ui_window_draw_char(win, j, srow + i, cell->text > ' ' ? cell->text : ' ', 1);
+				ui_window_draw_char_attr(win, j, srow + i, cell->text > ' ' ? cell->text : ' ', 1,
+							 curfg, curbg, curattrs);
 			}
 		}
 
 		if (j && j < b->cols - 1)
-			ui_window_draw_char(win, j, srow + i, ' ', b->cols - j);
+			ui_window_draw_char_attr(win, j, srow + i, ' ', b->cols - j,
+						 curfg, curbg, curattrs);
 
 		row->dirty = false;
 	}
@@ -1819,14 +1815,14 @@ size_t vt_content_get(Vt *t, char **buf, bool colored)
 			if (colored) {
 				int esclen = 0;
 				if (!prev_cell || cell->attr != prev_cell->attr) {
-					attr_t attr = cell->attr << NCURSES_ATTR_SHIFT;
+					attr_t attr = cell->attr;
 					esclen = sprintf(s, "\033[0%s%s%s%s%s%sm",
-						attr & A_BOLD ? ";1" : "",
-						attr & A_DIM ? ";2" : "",
-						attr & A_UNDERLINE ? ";4" : "",
-						attr & A_BLINK ? ";5" : "",
-						attr & A_REVERSE ? ";7" : "",
-						attr & A_INVIS ? ";8" : "");
+						attr & UI_TEXT_STYLE_BOLD ? ";1" : "",
+						attr & UI_TEXT_STYLE_DIM ? ";2" : "",
+						attr & UI_TEXT_STYLE_UNDERLINE ? ";4" : "",
+						attr & UI_TEXT_STYLE_BLINK ? ";5" : "",
+						attr & UI_TEXT_STYLE_REVERSE ? ";7" : "",
+						attr & UI_TEXT_STYLE_INVIS ? ";8" : "");
 					if (esclen > 0)
 						s += esclen;
 				}

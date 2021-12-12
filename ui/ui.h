@@ -5,6 +5,8 @@
 #include <stdarg.h>
 #include <stdint.h>
 
+#include "ui/style.h"
+
 /* enable large file optimization for files larger than: */
 #define UI_LARGE_FILE_SIZE (1 << 25)
 /* enable large file optimization for files containing lines longer than: */
@@ -99,6 +101,10 @@ struct Ui {
 	void (*window_text_attr_set)(UiWin*, unsigned attrs);
 	void (*window_draw_char)(UiWin*, int x, int y, unsigned int ch, int n);
 	void (*window_draw_text)(UiWin *win, int x, int y, const char *text, int n);
+	void (*window_draw_char_attr)(UiWin *win, int x, int y, unsigned ch, int n,
+				      short fg, short bg, ui_text_style_t style);
+	void (*window_draw_text_attr)(UiWin *win, int x, int y, const char *text, int n,
+				      short fg, short bg, ui_text_style_t style);
 	short (*window_color_get)(UiWin *win, short fg, short bg);
 	void (*draw)(Ui*);
 	void (*draw_char)(Ui *ui, int x, int y, unsigned int ch, int n);
@@ -154,6 +160,10 @@ void ui_window_text_attr_set(UiWin *win, unsigned attrs);
 void ui_window_draw(UiWin *win);
 void ui_window_draw_char(UiWin *win, int x, int y, unsigned int ch, int n);
 void ui_window_draw_text(UiWin *win, int x, int y, const char *text, int n);
+void ui_window_draw_char_attr(UiWin *win, int x, int y, unsigned ch, int n,
+			      short fg, short bg, ui_text_style_t style);
+void ui_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int n,
+			      short fg, short bg, ui_text_style_t style);
 void ui_window_redraw(UiWin *win);
 void ui_window_refresh(UiWin *win);
 void ui_window_resize(UiWin *win, int width, int height);
