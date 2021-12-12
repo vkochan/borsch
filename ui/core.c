@@ -90,8 +90,6 @@ UiWin *ui_window_new(Ui *ui, View *view)
 	if (ui->window_new) {
 		win = ui->window_new(ui, view);
 		if (win) {
-			win->deffg = -1;
-			win->defbg = -1;
 			win->view = view;
 			win->ui = ui;
 		}
@@ -207,28 +205,6 @@ void ui_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int n,
 {
 	if (win->ui->window_draw_text_attr)
 		win->ui->window_draw_text_attr(win, x, y, text, n, fg, bg, style);
-}
-
-void ui_window_default_colors_set(UiWin *win, unsigned attrs, short fg, short bg)
-{
-	win->defattrs = attrs;
-	win->deffg = fg;
-	win->defbg = bg;
-}
-
-unsigned ui_window_default_attrs_get(UiWin *win)
-{
-	return win->defattrs;
-}
-
-short ui_window_default_fg_get(UiWin *win)
-{
-	return win->deffg;
-}
-
-short ui_window_default_bg_get(UiWin *win)
-{
-	return win->defbg;
 }
 
 void ui_window_title_set(UiWin *win, const char *title)

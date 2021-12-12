@@ -130,15 +130,15 @@ static short term_window_color_get(UiWin *win, short fg, short bg)
 	WinTerm *t = (WinTerm*)win;
 
 	if (fg >= COLORS)
-		fg = (t ? t->win.deffg : default_fg);
+		fg = (t ? t->curr_fg : default_fg);
 	if (bg >= COLORS)
-		bg = (t ? t->win.defbg : default_bg);
+		bg = (t ? t->curr_bg : default_bg);
 
 	if (!has_default_colors) {
 		if (fg == -1)
-			fg = (t && t->win.deffg != -1 ? t->win.deffg : default_fg);
+			fg = (t && t->curr_fg != -1 ? t->curr_fg : default_fg);
 		if (bg == -1)
-			bg = (t && t->win.defbg != -1 ? t->win.defbg : default_bg);
+			bg = (t && t->curr_bg != -1 ? t->curr_bg : default_bg);
 	}
 
 	if (!color2palette || (fg == -1 && bg == -1))
@@ -287,8 +287,6 @@ static UiWin *term_window_new(Ui *ui, View *view)
 		return NULL;
 	}
 
-	twin->win.deffg = default_fg;
-	twin->win.defbg = default_bg;
 	twin->curr_fg = default_fg;
 	twin->curr_bg = default_bg;
 	twin->cur_x = 0;
@@ -426,7 +424,7 @@ static void term_window_draw(UiWin *win)
 	wmove(twin->cwin, y, x);
 	wclrtobot(twin->cwin);
 
-	term_window_text_attr_set(win, term_color_make(win->ui, twin->win.deffg, twin->win.defbg));
+	term_window_text_attr_set(win, term_color_make(win->ui, twin->curr_fg, twin->curr_bg));
 
 	for (const Line *l = line; l; l = l->next, y++) {
 		for (x = 0; x < view_width; x++) {
