@@ -97,12 +97,6 @@ typedef struct {
 	short pair;
 } Color;
 
-typedef struct {
-	const char *title;
-	attr_t attrs;
-	Color *color;
-} ColorRule;
-
 /* #define ALT(k)      ((k) + (161 - 'a')) */
 #define ALT	27
 #if defined CTRL && defined _AIX
@@ -307,10 +301,6 @@ static Layout layouts[] = {
 	{ "+++", grid },
 	{ "TTT", bstack },
 	{ "[ ]", fullscreen },
-};
-
-static const ColorRule colorrules[] = {
-	{ "", A_NORMAL, &colors[DEFAULT] }, /* default */
 };
 
 /* possible values for the mouse buttons are listed below:
@@ -874,25 +864,6 @@ focus(Client *c) {
 }
 
 static void
-applycolorrules(Client *c) {
-	const ColorRule *r = colorrules;
-	short fg = r->color->fg, bg = r->color->bg;
-	attr_t attrs = r->attrs;
-
-	for (unsigned int i = 1; i < LENGTH(colorrules); i++) {
-		r = &colorrules[i];
-		if (strstr(ui_window_title_get(c->win), r->title)) {
-			attrs = r->attrs;
-			fg = r->color->fg;
-			bg = r->color->bg;
-			break;
-		}
-	}
-
-	ui_window_default_colors_set(c->win, attrs, fg, bg);
-}
-
-static void
 term_title_handler(Vt *term, const char *title) {
 	/* Client *c = (Client *)vt_data_get(term); */
 	/* if (title) */
@@ -901,7 +872,6 @@ term_title_handler(Vt *term, const char *title) {
 	/* settitle(c); */
 	/* if (!isarrange(fullscreen)) */
 	/* 	draw_border(c); */
-	/* applycolorrules(c); */
 }
 
 static void
@@ -1402,7 +1372,6 @@ int create(const char *prog, const char *title, const char *cwd) {
 	vt_urgent_handler_set(c->term, term_urgent_handler);
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
-	applycolorrules(c);
 	debug("client with pid %d forked\n", c->pid);
 	attach(c);
 	focus(c);
@@ -2416,7 +2385,6 @@ int win_new(void)
 
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
-	applycolorrules(c);
 
 	attach(c);
 	focus(c);
@@ -2458,7 +2426,6 @@ int win_title_set(int wid, char *title)
 		settitle(c);
 		if (!isarrange(fullscreen))
 			draw_border(c);
-		applycolorrules(c);
 		return 0;
 	}
 
