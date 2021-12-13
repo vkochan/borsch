@@ -250,7 +250,6 @@
 (define __cs_buf_by_name (foreign-procedure "cs_buf_by_name" (string) scheme-object))
 (define __cs_buf_text_insert (foreign-procedure "cs_buf_text_insert" (int string) scheme-object))
 (define __cs_buf_text_insert_file (foreign-procedure "cs_buf_text_insert_file" (int string) scheme-object))
-(define __cs_buf_text_obj_move (foreign-procedure "cs_buf_text_obj_move" (int char int) scheme-object))
 (define __cs_buf_text_obj_pos (foreign-procedure "cs_buf_text_obj_pos" (int char int) scheme-object))
 (define __cs_buf_text_range_del (foreign-procedure "cs_buf_text_range_del" (int int int) scheme-object))
 (define __cs_buf_cursor_get (foreign-procedure __collect_safe "cs_buf_cursor_get" (int) scheme-object))
@@ -864,180 +863,180 @@
 (define move-next-char
    (case-lambda
       [()
-      (__cs_buf_text_obj_move (__cs_buf_current_get) #\c 1)]
+      (cursor-set (next-char-pos))]
 
       [(b)
-      (__cs_buf_text_obj_move b #\c 1)]
+      (cursor-set b (next-char-pos b))]
    )
 )
 
 (define move-prev-char
    (case-lambda
       [()
-      (__cs_buf_text_obj_move (__cs_buf_current_get) #\c -1)]
+      (cursor-set (prev-char-pos))]
 
       [(b)
-      (__cs_buf_text_obj_move b #\c -1)]
+      (cursor-set b (prev-char-pos b))]
    )
 )
 
 (define move-next-word
    (case-lambda
       [()
-      (__cs_buf_text_obj_move (__cs_buf_current_get) #\w 1)]
+      (cursor-set (next-word-pos))]
 
       [(b)
-      (__cs_buf_text_obj_move b #\w 1)]
+      (cursor-set b (next-word-pos b))]
    )
 )
 
 (define move-prev-word
    (case-lambda
       [()
-      (__cs_buf_text_obj_move (__cs_buf_current_get) #\w -1)]
+      (cursor-set (prev-word-pos))]
 
       [(b)
-      (__cs_buf_text_obj_move b #\w -1)]
+      (cursor-set b (prev-word-pos b))]
    )
 )
 
 (define move-word-end
    (case-lambda
       [()
-      (__cs_buf_text_obj_move (__cs_buf_current_get) #\e 1)]
+      (cursor-set (word-end-pos))]
 
       [(b)
-      (__cs_buf_text_obj_move b #\e 1)]
+      (cursor-set b (word-end-pos b))]
    )
 )
 
 (define move-next-longword
    (case-lambda
       [()
-      (__cs_buf_text_obj_move (__cs_buf_current_get) #\W 1)]
+      (cursor-set (next-longword-pos))]
 
       [(b)
-      (__cs_buf_text_obj_move b #\W 1)]
+      (cursor-set b (next-longword-pos b))]
    )
 )
 
 (define move-prev-longword
    (case-lambda
       [()
-      (__cs_buf_text_obj_move (__cs_buf_current_get) #\W -1)]
+      (cursor-set (prev-longword-pos))]
 
       [(b)
-      (__cs_buf_text_obj_move b #\W -1)]
+      (cursor-set b (prev-longword-pos b))]
    )
 )
 
 (define move-longword-end
    (case-lambda
       [()
-      (__cs_buf_text_obj_move (__cs_buf_current_get) #\E 1)]
+      (cursor-set (longword-end-pos))]
 
       [(b)
-      (__cs_buf_text_obj_move b #\E 1)]
+      (cursor-set b (longword-end-pos b))]
    )
 )
 
 (define move-prev-line
    (case-lambda
       [()
-      (__cs_buf_text_obj_move (__cs_buf_current_get) #\l -1)]
+      (cursor-set (prev-line-pos))]
 
       [(b)
-      (__cs_buf_text_obj_move b #\l -1)]
+      (cursor-set b (prev-line-pos b))]
    )
 )
 
 (define move-next-line
    (case-lambda
       [()
-      (__cs_buf_text_obj_move (__cs_buf_current_get) #\l 1)]
+      (cursor-set (next-line-pos))]
 
       [(b)
-      (__cs_buf_text_obj_move b #\l 1)]
+      (cursor-set b (next-line-pos b))]
    )
 )
 
 (define move-next-line-begin
    (case-lambda
       [()
-      (__cs_buf_text_obj_move (__cs_buf_current_get) #\L 1)]
+      (cursor-set (next-line-begin-pos))]
 
       [(b)
-      (__cs_buf_text_obj_move b #\L 1)]
+      (cursor-set b (next-line-begin-pos b))]
    )
 )
 
 (define move-prev-line-end
    (case-lambda
       [()
-      (__cs_buf_text_obj_move (__cs_buf_current_get) #\L -1)]
+      (cursor-set (prev-line-begin-pos))]
 
       [(b)
-      (__cs_buf_text_obj_move b #\L -1)]
+      (cursor-set b (prev-line-begin-pos b))]
    )
 )
 
 (define move-line-start
    (case-lambda
       [()
-      (__cs_buf_text_obj_move (__cs_buf_current_get) #\0 -1)]
+      (cursor-set (line-start-pos))]
 
       [(b)
-      (__cs_buf_text_obj_move b #\0 -1)]
+      (cursor-set b (line-start-pos b))]
    )
 )
 
 (define move-line-finish
    (case-lambda
       [()
-      (__cs_buf_text_obj_move (__cs_buf_current_get) #\0 1)]
+      (cursor-set (line-finish-pos))]
 
       [(b)
-      (__cs_buf_text_obj_move b #\0 1)]
+      (cursor-set b (line-finish-pos b))]
    )
 )
 
 (define move-line-begin
    (case-lambda
       [()
-      (__cs_buf_text_obj_move (__cs_buf_current_get) #\0 -1)]
+      (cursor-set (line-begin-pos))]
 
       [(b)
-      (__cs_buf_text_obj_move b #\0 -1)]
+      (cursor-set b (line-begin-pos b))]
    )
 )
 
 (define move-line-end
    (case-lambda
       [()
-      (__cs_buf_text_obj_move (__cs_buf_current_get) #\1 1)]
+      (cursor-set (line-end-pos))]
 
       [(b)
-      (__cs_buf_text_obj_move b #\1 1)]
+      (cursor-set b (line-end-pos b))]
    )
 )
 
 (define move-buffer-begin
    (case-lambda
       [()
-      (__cs_buf_text_obj_move (__cs_buf_current_get) #\g 1)]
+      (cursor-set (buffer-begin-pos))]
 
       [(b)
-      (__cs_buf_text_obj_move b #\g 1)]
+      (cursor-set b (buffer-begin-pos b))]
    )
 )
 
 (define move-buffer-end
    (case-lambda
       [()
-      (__cs_buf_text_obj_move (__cs_buf_current_get) #\g -1)]
+      (cursor-set (buffer-end-pos))]
 
       [(b)
-      (__cs_buf_text_obj_move b #\g -1)]
+      (cursor-set b (buffer-end-pos b))]
    )
 )
 
