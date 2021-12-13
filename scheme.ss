@@ -1231,6 +1231,22 @@
    )
 )
 
+(define replace-range
+   (case-lambda
+      [(s e t)
+      (delete-range s e)
+      (cursor-set s)
+      (insert t)
+      ]
+
+      [(b s e t)
+      (delete-range b s e)
+      (cursor-set b s)
+      (insert b t)
+      ]
+   )
+)
+
 (define cursor-obj-delete
    (case-lambda
       [(fn)
