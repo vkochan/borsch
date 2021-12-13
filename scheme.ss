@@ -430,7 +430,7 @@
    )
 )
 
-(define window-exec
+(define window-shell
    (case-lambda
       [()
        (__cs_win_create #f "")]
@@ -675,7 +675,7 @@
 
 (define window-eval
    (lambda ()
-      (window-exec "borsch-eval -i" "eval")
+      (window-shell "borsch-eval -i" "eval")
    )
 )
 
@@ -1868,7 +1868,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Default key bindings
 ;;;;;;;;;;;;;;;;;;;;;;;
-(bind-key "C-g c"       window-exec)
+(bind-key "C-g c"       window-shell)
 (bind-key "C-g C-x"     window-eval)
 (bind-key "C-g x x"     window-delete)
 (bind-key "M-h"         window-select-left)
@@ -1921,4 +1921,4 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; start with a shell window
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(window-exec)
+(window-shell)
