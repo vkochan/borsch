@@ -4,8 +4,6 @@
 
 * TODO Implement basic default 'text' buffer mode
 
-* TODO Extend buffer text drawing with delete and replace text
-
 * TODO Add support for popup window
 
 * TODO Add support for hide/show window
