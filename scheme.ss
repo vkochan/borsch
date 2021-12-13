@@ -751,10 +751,18 @@
 (define cursor-set
    (case-lambda
      [(p)
-      (__cs_buf_cursor_set (buffer-current) p)]
+      (let ()
+         (__cs_buf_cursor_set (buffer-current) p)
+	 p
+      )
+     ]
 
      [(b p)
-      (__cs_buf_cursor_set b p)]
+      (let ()
+         (__cs_buf_cursor_set b p)
+	 p
+      )
+     ]
    )
 )
 
