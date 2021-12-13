@@ -725,6 +725,19 @@
    )
 )
 
+(define-syntax (with-buffer stx)
+   (syntax-case stx ()
+	       ((_ b exp ...)
+		#`(fluid-let ([buffer-current (lambda () b)])
+		    (begin
+                       exp
+		       ...
+                    )
+                  )
+               )
+   )
+)
+
 (define cursor
    (case-lambda
      [()
