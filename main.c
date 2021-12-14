@@ -72,10 +72,8 @@ struct Client {
 	View *view;
 	UiWin *win;
 	Vt *term;
-	Vt *overlay, *app;
 	bool is_editor;
 	int editor_fds[2];
-	volatile sig_atomic_t overlay_died;
 	const char *cmd;
 	int order;
 	pid_t pid;
@@ -182,7 +180,6 @@ extern int scheme_event_handle(event_t evt);
 extern int scheme_eval_file(const char *scm_in, const char *out);
 
 /* commands for use by keybindings */
-static void copymode(const char *args[]);
 static void focusn(const char *args[]);
 static void focusnextnm(const char *args[]);
 static void focusprevnm(const char *args[]);
@@ -890,9 +887,7 @@ resize_client(Client *c, int w, int h) {
 	ui_window_resize(c->win, w, h);
 
 	if (c->pid)
-		vt_resize(c->app, h - 1, w);
-	if (c->overlay)
-		vt_resize(c->overlay, h - 1, w);
+		vt_resize(c->term, h - 1, w);
 }
 
 static void
@@ -942,10 +937,6 @@ sigchld_handler(int sig) {
 		for (Client *c = clients; c; c = c->next) {
 			if (c->pid == pid) {
 				c->died = true;
-				break;
-			}
-			if (c->overlay && vt_pid_get(c->overlay) == pid) {
-				c->overlay_died = true;
 				break;
 			}
 		}
@@ -1266,7 +1257,7 @@ synctitle(Client *c)
 	int ret;
 	int fd;
 
-	pty = c->overlay ? vt_pty_get(c->overlay) : vt_pty_get(c->app);
+	pty = vt_pty_get(c->term);
 
 	pid = tcgetpgrp(pty);
 	if (pid == -1)
@@ -1341,7 +1332,7 @@ int create(const char *prog, const char *title, const char *cwd) {
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
 
-	c->term = c->app = vt_create(c->win, ui_height_get(ui), ui_width_get(ui), scr_history);
+	c->term = vt_create(c->win, ui_height_get(ui), ui_width_get(ui), scr_history);
 	if (!c->term) {
 		view_free(c->view);
 		buffer_del(c->buf);
@@ -1381,60 +1372,6 @@ int create(const char *prog, const char *title, const char *cwd) {
 	evt.oid = c->id;
 	scheme_event_handle(evt);
 	return c->id;
-}
-
-static void
-copymode(const char *args[]) {
-	if (!args || !args[0] || !sel || sel->overlay)
-		return;
-
-	bool colored = strstr(args[0], "pager") != NULL;
-	int w_h = ui_window_height_get(sel->win);
-	int w_w = ui_window_width_get(sel->win);
-
-	if (!(sel->overlay = vt_create(sel->win, w_h - 1, w_w, 0)))
-		return;
-
-	int *to = &sel->editor_fds[0];
-	int *from = strstr(args[0], "editor") ? &sel->editor_fds[1] : NULL;
-	sel->editor_fds[0] = sel->editor_fds[1] = -1;
-
-	const char *argv[3] = { args[0], NULL, NULL };
-	char argline[32];
-	int line = vt_content_start(sel->app);
-	snprintf(argline, sizeof(argline), "+%d", line);
-	argv[1] = argline;
-
-	if (vt_forkpty(sel->overlay, args[0], argv, NULL, NULL, to, from) < 0) {
-		vt_destroy(sel->overlay);
-		sel->overlay = NULL;
-		return;
-	}
-
-	sel->term = sel->overlay;
-
-	if (sel->editor_fds[0] != -1) {
-		char *buf = NULL;
-		size_t len = vt_content_get(sel->app, &buf, colored);
-		char *cur = buf;
-		while (len > 0) {
-			ssize_t res = write(sel->editor_fds[0], cur, len);
-			if (res < 0) {
-				if (errno == EAGAIN || errno == EINTR)
-					continue;
-				break;
-			}
-			cur += res;
-			len -= res;
-		}
-		free(buf);
-		close(sel->editor_fds[0]);
-		sel->editor_fds[0] = -1;
-	}
-	sel->is_editor = true;
-
-	if (args[1])
-		vt_write(sel->overlay, args[1], strlen(args[1]));
 }
 
 static void
@@ -1915,60 +1852,6 @@ handle_statusbar(void) {
 	}
 }
 
-static void
-handle_editor(Client *c) {
-	event_t evt;
-
-	if (!copyreg.data && (copyreg.data = malloc(scr_history)))
-		copyreg.size = scr_history;
-	copyreg.len = 0;
-	while (c->editor_fds[1] != -1 && copyreg.len < copyreg.size) {
-		ssize_t len = read(c->editor_fds[1], copyreg.data + copyreg.len, copyreg.size - copyreg.len);
-		if (len == -1) {
-			if (errno == EINTR)
-				continue;
-			break;
-		}
-		if (len == 0)
-			break;
-		copyreg.len += len;
-		if (copyreg.len == copyreg.size) {
-			copyreg.size *= 2;
-			if (!(copyreg.data = realloc(copyreg.data, copyreg.size))) {
-				copyreg.size = 0;
-				copyreg.len = 0;
-			}
-		}
-	}
-
-	if (copyreg.len >= 2) {
-		if (copyreg.data[copyreg.len - 2] == '\r')
-			copyreg.len--;
-		if (copyreg.data[copyreg.len - 1] == '\n')
-			copyreg.len--;
-	}
-
-	evt.eid = EVT_WIN_COPIED;
-	evt.oid = c->id;
-	scheme_event_handle(evt);
-}
-
-static void
-handle_overlay(Client *c) {
-	if (c->is_editor)
-		handle_editor(c);
-
-	c->overlay_died = false;
-	c->is_editor = false;
-	c->editor_fds[1] = -1;
-	vt_destroy(c->overlay);
-	c->overlay = NULL;
-	c->term = c->app;
-	vt_dirty(c->term);
-	ui_window_draw(c->win);
-	ui_window_refresh(c->win);
-}
-
 static int
 __open_or_create_fifo(const char *name, const char **name_created, int flags) {
 	struct stat info;
@@ -2055,16 +1938,14 @@ main(int argc, char *argv[]) {
 		}
 
 		for (Client *c = clients; c; ) {
-			if (c->overlay && c->overlay_died)
-				handle_overlay(c);
-			if (!c->overlay && c->died) {
+			if (c->died) {
 				Client *t = c->next;
 				destroy(c);
 				c = t;
 				continue;
 			}
 			if (c->pid) {
-				int pty = c->overlay ? vt_pty_get(c->overlay) : vt_pty_get(c->app);
+				int pty = vt_pty_get(c->term);
 				FD_SET(pty, &rd);
 				nfds = MAX(nfds, pty);
 			}
@@ -2141,10 +2022,7 @@ rescan:
 			if (c->pid) {
 				if (FD_ISSET(vt_pty_get(c->term), &rd)) {
 					if (vt_process(c->term) < 0 && errno == EIO) {
-						if (c->overlay)
-							c->overlay_died = true;
-						else
-							c->died = true;
+						c->died = true;
 						continue;
 					}
 				}
@@ -2626,43 +2504,6 @@ int win_text_send(int wid, char *text)
 	if (c->pid)
 		vt_write(c->term, text, strlen(text));
 	return 0;
-}
-
-int win_pager_mode(int wid)
-{
-	const char *args[] = {PROGNAME"-pager", NULL};
-	Client *c = client_get_by_id(wid);
-	Client *tmp = sel;
-
-	if (!c)
-		return -1;
-
-	sel = c;
-	copymode(args);
-	sel = tmp;
-
-	return 0;
-}
-
-int win_copy_mode(int wid)
-{
-	const char *args[] = {PROGNAME"-editor", NULL};
-	Client *c = client_get_by_id(wid);
-	Client *tmp = sel;
-
-	if (!c)
-		return -1;
-
-	sel = c;
-	copymode(args);
-	sel = tmp;
-
-	return 0;
-}
-
-char *win_capture(int wid)
-{
-	return NULL;
 }
 
 int win_buf_get(int wid)

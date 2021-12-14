@@ -37,14 +37,14 @@ define uninstall_scheme
 	done
 endef
 
-BIN += ${PROGNAME} ${PROGNAME}-editor ${PROGNAME}-pager
-MANUALS = ${PROGNAME}.1 ${PROGNAME}-editor.1 ${PROGNAME}-pager.1
+BIN += ${PROGNAME}
+MANUALS = ${PROGNAME}.1
 
 VERSION = $(shell git describe --always --dirty 2>/dev/null || echo "0.15-git")
 CFLAGS += -DVERSION=\"${VERSION}\"
 DEBUG_CFLAGS = ${CFLAGS} -UNDEBUG -O0 -g -ggdb -Wall -Wextra -Wno-unused-parameter
 
-all: ${PROGNAME} ${PROGNAME}-editor
+all: ${PROGNAME}
 
 ${PROGNAME}: libui.a libtext.a config.mk *.c *.h
 	${CC} ${CFLAGS} ${SRC} ${LDFLAGS} ${OBJS} ${LIBS} -o $@
@@ -54,9 +54,6 @@ libtext.a:
 
 libui.a:
 	$(MAKE) -C ui/
-
-${PROGNAME}-editor: ${PROGNAME}-editor.c
-	${CC} ${CFLAGS} $^ ${LDFLAGS} -o $@
 
 man:
 	@for m in ${MANUALS}; do \
@@ -72,7 +69,6 @@ clean:
 	@$(MAKE) -C text/ clean
 	@$(MAKE) -C ui/ clean
 	@rm -f ${PROGNAME} 
-	@rm -f ${PROGNAME}-editor
 
 dist: clean
 	@echo creating dist tarball

@@ -184,7 +184,6 @@
 		[2  'window-minimize ]
 		[3  'window-maximize ]
 		[4  'window-delete   ]
-		[5  'window-copy     ]
 		[20 'view-switch  ]
 		[40 'layout-switch]
 		[else #f]
@@ -237,9 +236,6 @@
 (define __cs_win_state_toggle(foreign-procedure __collect_safe "cs_win_state_toggle" (int int) int))
 (define __cs_win_keys_send (foreign-procedure "cs_win_keys_send" (int string) int))
 (define __cs_win_text_send (foreign-procedure "cs_win_text_send" (int string) int))
-(define __cs_win_pager_mode (foreign-procedure __collect_safe "cs_win_pager_mode" (int) int))
-(define __cs_win_copy_mode (foreign-procedure __collect_safe "cs_win_copy_mode" (int) int))
-(define __cs_win_capture (foreign-procedure __collect_safe "cs_win_capture" (int) scheme-object))
 (define __cs_win_buf_get (foreign-procedure __collect_safe "cs_win_buf_get" (int) scheme-object))
 
 (define __cs_buf_current_get (foreign-procedure __collect_safe "cs_buf_current_get" () scheme-object))
@@ -676,36 +672,6 @@
 (define window-eval
    (lambda ()
       (window-shell "borsch-eval -i" "eval")
-   )
-)
-
-(define window-copy
-   (case-lambda
-      [()
-       (__cs_win_copy_mode (__cs_win_current_get))]
-
-      [(wid)
-       (__cs_win_copy_mode wid)]
-   )
-)
-
-(define window-paste
-   (case-lambda
-      [()
-       (window-send-text (copy-buffer))]
-
-      [(wid)
-       (window-send-text wid (copy-buffer))]
-   )
-)
-
-(define window-capture
-   (case-lambda
-      [()
-       (__cs_win_capture (__cs_win_current_get))]
-
-      [(wid)
-       (__cs_win_capture wid)]
    )
 )
 
@@ -1881,9 +1847,6 @@
 (bind-key "C-g k"       window-select-upper)
 (bind-key "C-g <Enter>" window-set-master)
 (bind-key "C-g ."       window-set-minimized)
-(bind-key "C-g y"       window-copy)
-(bind-key "C-g p"       window-paste)
-(bind-key "C-g /"       window-pager)
 
 (bind-key "M-1"     view-switch-1)
 (bind-key "C-g v 1" view-switch-1)

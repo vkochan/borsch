@@ -229,22 +229,6 @@ int scheme_win_text_send(int wid, char *text)
 	return win_text_send(wid, text);
 }
 
-int scheme_win_pager_mode(int wid)
-{
-	return win_pager_mode(wid);
-}
-
-int scheme_win_copy_mode(int wid)
-{
-	return win_copy_mode(wid);
-}
-
-ptr scheme_win_capture(int wid)
-{
-	return 0;
-}
-
-
 ptr scheme_win_buf_get(int wid)
 {
 	int ret = win_buf_get(wid);
@@ -512,9 +496,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_state_toggle", scheme_win_state_toggle);
 	Sregister_symbol("cs_win_keys_send", scheme_win_keys_send);
 	Sregister_symbol("cs_win_text_send", scheme_win_text_send);
-	Sregister_symbol("cs_win_pager_mode", scheme_win_pager_mode);
-	Sregister_symbol("cs_win_copy_mode", scheme_win_copy_mode);
-	Sregister_symbol("cs_win_capture", scheme_win_capture);
 	Sregister_symbol("cs_win_buf_get", scheme_win_buf_get);
 
 	Sregister_symbol("cs_buf_current_get", scheme_buf_current_get);

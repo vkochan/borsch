@@ -9,7 +9,6 @@ typedef enum {
 	EVT_WIN_MINIMIZED   = 2,
 	EVT_WIN_MAXIMIZED   = 3,
 	EVT_WIN_DELETED     = 4,
-	EVT_WIN_COPIED      = 5,
 
 	EVT_VIEW_SELECTED   = 20,
 
@@ -61,9 +60,6 @@ int win_state_toggle(int wid, win_state_t st);
 win_state_t win_state_get(int wid);
 int win_keys_send(int wid, char *keys);
 int win_text_send(int wid, char *text);
-int win_pager_mode(int wid);
-int win_copy_mode(int wid);
-char *win_capture(int wid);
 int win_buf_get(int wid);
 
 int buf_current_get(void);
