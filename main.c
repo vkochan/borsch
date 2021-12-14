@@ -72,8 +72,6 @@ struct Client {
 	View *view;
 	UiWin *win;
 	Vt *term;
-	bool is_editor;
-	int editor_fds[2];
 	const char *cmd;
 	int order;
 	pid_t pid;
