@@ -1495,7 +1495,7 @@ static void vt_draw(UiWin *win)
 {
 	Vt *t = ui_window_priv_get(win);
 	VtBuffer *b = t->buffer;
-	int srow = 1, scol = 0;
+	int srow = 0, scol = 0;
 	int i, j;
 
 	if (srow != t->srow || scol != t->scol) {

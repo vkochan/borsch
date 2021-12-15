@@ -589,7 +589,7 @@ static void
 draw_border(Client *c) {
 	ui_text_style_t title_style = UI_TEXT_STYLE_NORMAL;
 	ui_text_style_t title_fg = UI_TEXT_COLOR_DEFAULT;
-	int x, y, maxlen;
+	int x, y, maxlen, title_y;
 	int w_w = ui_window_width_get(c->win);
 	char title[256];
 	char tmp[256];
@@ -598,13 +598,15 @@ draw_border(Client *c) {
 	if (sel == c || (pertag.runinall[pertag.curtag] && !c->minimized))
 		title_fg = UI_TEXT_COLOR_BLUE;
 
+	title_y = ui_window_height_get(c->win)-1;
+
 	ui_window_cursor_get(c->win, &x, &y);
 	if (c == sel) {
-		ui_window_draw_char_attr(c->win, 0, 0, ACS_HLINE, w_w,
+		ui_window_draw_char_attr(c->win, 0, title_y, ACS_HLINE, w_w,
 				UI_TEXT_COLOR_BLUE, UI_TEXT_COLOR_BLUE,
 				UI_TEXT_STYLE_NORMAL);
 	} else {
-		ui_window_draw_char_attr(c->win, 0, 0, ACS_HLINE, w_w,
+		ui_window_draw_char_attr(c->win, 0, title_y, ACS_HLINE, w_w,
 				UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT,
 				UI_TEXT_STYLE_NORMAL);
 	}
@@ -621,7 +623,7 @@ draw_border(Client *c) {
 			c->order,
 			ismastersticky(c) ? "*" : "",
 			tmp[0] ? tmp : "");
-	ui_window_draw_text_attr(c->win, 2, 0, title, w_w,
+	ui_window_draw_text_attr(c->win, 2, title_y, title, w_w,
 			title_fg, UI_TEXT_COLOR_DEFAULT,
 			UI_TEXT_STYLE_NORMAL);
 
@@ -1487,11 +1489,11 @@ scrollback(const char *args[]) {
 		else
 			vt_scroll(sel->term,  w_h/2);
 
-	draw(sel);
 	if (sel->pid)
 		ui_cursor_enable(ui, vt_cursor_visible(sel->term));
 	else
 		ui_cursor_enable(ui, true);
+	draw(sel);
 }
 
 static void
@@ -2030,8 +2032,7 @@ rescan:
 				if (c->pid && !buffer_name_is_locked(c->buf))
 					synctitle(c);
 				if (c != sel) {
-					ui_window_draw(c->win);
-					ui_window_refresh(c->win);
+					draw(c);
 				}
 			} else if (!isarrange(fullscreen) && isvisible(c)
 					&& c->minimized) {
@@ -2041,13 +2042,12 @@ rescan:
 		}
 
 		if (is_content_visible(sel)) {
-			ui_window_draw(sel->win);
 			if (sel->pid) {
 				ui_cursor_enable(ui, vt_cursor_visible(sel->term));
 			} else {
 				ui_cursor_enable(ui, true);
 			}
-			ui_window_refresh(sel->win);
+			draw(sel);
 		}
 	}
 
@@ -2595,14 +2595,14 @@ static void buf_update(void)
 
 				view_scroll_to(view, pos);
 				if (view_coord_get(view, pos, NULL, &y, &x)) {
-					ui_window_cursor_set(win, x, y+1);
+					ui_window_cursor_set(win, x, y);
 				}
 
 				/* TODO: better to make buffer to know about it's
 				 * windows and mark them as dirty on text update */
 				buffer_dirty_set(buf, false);
 				view_invalidate(view);
-				ui_window_draw(win);
+				draw(c);
 			}
 		}
 	}

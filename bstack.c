@@ -1,6 +1,8 @@
 static void bstack(void)
 {
+	unsigned int lax = wax, lay = way-1, law = waw, lah = wah;
 	unsigned int i, n, nx, ny, nw, nh, m, mw, mh, tw;
+
 	Client *c;
 
 	for (n = 0, c = nextvisible(clients); c; c = nextvisible(c->next))
@@ -8,11 +10,11 @@ static void bstack(void)
 			n++;
 
 	m  = MAX(1, MIN(n, getnmaster()));
-	mh = n == m ? wah : getmfact() * wah;
-	mw = waw / m;
-	tw = n == m ? 0 : waw / (n - m);
-	nx = wax;
-	ny = way;
+	mh = n == m ? lah : getmfact() * lah;
+	mw = law / m;
+	tw = n == m ? 0 : law / (n - m);
+	nx = lax;
+	ny = lay;
 
 	for (i = 0, c = nextvisible(clients); c; c = nextvisible(c->next)) {
 		if (c->minimized)
@@ -24,34 +26,34 @@ static void bstack(void)
 				nx++;
 			}
 			nh = mh;
-			nw = (i < m - 1) ? mw : (wax + waw) - nx;
+			nw = (i < m - 1) ? mw : (lax + law) - nx;
 		} else {	/* tile window */
 			if (i == m) {
-				nx = wax;
+				nx = lax;
 				ny += mh;
-				nh = (way + wah) - ny;
+				nh = (lay + lah) - ny;
 			}
 			if (i > m) {
 				ui_draw_char_vert(ui, nx, ny, ACS_VLINE, nh);
 				ui_draw_char(ui, nx, ny, ACS_TTEE, 1);
 				nx++;
 			}
-			nw = (i < n - 1) ? tw : (wax + waw) - nx;
+			nw = (i < n - 1) ? tw : (lax + law) - nx;
 		}
-		resize(c, nx, ny, nw, nh);
+		resize(c, nx, ny+(way-lay), nw, nh);
 		nx += nw;
 		i++;
 	}
 
 	/* Fill in nmaster intersections */
 	if (n > m) {
-		nx = wax;
+		nx = lax;
 		for (i = 0; i < m; i++) {
 			if (i > 0) {
 				ui_draw_char(ui, nx, ny, ACS_PLUS, 1);
 				nx++;
 			}
-			nw = (i < m - 1) ? mw : (wax + waw) - nx;
+			nw = (i < m - 1) ? mw : (lax + law) - nx;
 			nx += nw;
 		}
 	}

@@ -289,8 +289,6 @@ static UiWin *term_window_new(Ui *ui, View *view)
 
 	twin->curr_fg = default_fg;
 	twin->curr_bg = default_bg;
-	twin->cur_x = 0;
-	twin->cur_y = 1;
 
 	return (UiWin*)twin;
 }
@@ -417,7 +415,7 @@ static void term_window_draw(UiWin *win)
 	const Line *line = view_lines_first(win->view);
 	int view_width = view_width_get(win->view);
 	WinTerm *twin = (WinTerm*)win;
-	int x=0, y = 1; /* TODO: consider if to show title */
+	int x = 0, y = 0;
 	int sx, sy;
 
 	getyx(twin->cwin, sy, sx);
