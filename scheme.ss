@@ -486,7 +486,7 @@
    )
 )
 
-(define window-name-set
+(define window-set-name
    (case-lambda
       [(title)
        (__cs_win_title_set (__cs_win_current_get) title)]
@@ -496,7 +496,7 @@
    )
 )
 
-(define window-tag-set
+(define window-set-tag
    (case-lambda
       [(tag)
        (__cs_win_tag_set (__cs_win_current_get) tag)]
@@ -506,7 +506,7 @@
    )
 )
 
-(define window-tag-toggle
+(define window-toggle-tag
    (case-lambda
       [(tag)
        (__cs_win_tag_toggle (__cs_win_current_get) tag)]
@@ -803,7 +803,7 @@
    )
 )
 
-(define buffer-name-set
+(define buffer-set-name
    (case-lambda
       [(n)
          (__cs_buf_name_set (buffer-current) n)]
@@ -1524,7 +1524,7 @@
    )
 )
 
-(define view-name-set
+(define view-set-name
    (case-lambda
       [(name)
        (__cs_view_name_set (__cs_view_current_get) name)]
@@ -1544,7 +1544,7 @@
    )
 )
 
-(define view-cwd-set
+(define view-set-cwd
    (case-lambda
       [(cwd)
        (__cs_view_cwd_set (__cs_view_current_get) cwd)]
@@ -1686,7 +1686,7 @@
    )
 )
 
-(define layout-n-master-set
+(define layout-set-n-master
    (case-lambda
       [(n)
        (__cs_layout_nmaster_set (__cs_view_current_get) n)]
@@ -1744,7 +1744,7 @@
    )
 )
 
-(define layout-%-master-set
+(define layout-set-%-master
    (case-lambda
       [(f)
        (__cs_layout_fmaster_set (__cs_view_current_get) f)]
@@ -1822,7 +1822,7 @@
    )
 )
 
-(define tagbar-status-align
+(define tagbar-set-status-align
    (lambda (a)
       (let ([v (case a
                   ['right 0]
@@ -1841,7 +1841,7 @@
    )
 )
 
-(define tagbar-status-set
+(define tagbar-set-status
    (lambda (s)
       (__cs_tagbar_status_set s)
    )
