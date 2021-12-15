@@ -149,7 +149,7 @@ void ui_window_resize(UiWin *win, int width, int height)
 		win->height = height;
 		win->width = width;
 
-		view_resize(win->view, width, height);
+		view_resize(win->view, width, height-1);
 
 		if (win->resize)
 			win->resize(win, width, height);
