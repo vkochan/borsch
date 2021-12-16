@@ -1055,14 +1055,21 @@ keypress(int code) {
 	}
 
 	for (Client *c = pertag.runinall[pertag.curtag] ? nextvisible(clients) : sel; c; c = nextvisible(c->next)) {
-		if (c->pid && is_content_visible(c)) {
+		if (is_content_visible(c)) {
 			c->urgent = false;
-			if (code == '\e')
-				vt_write(c->term, buf, len);
-			else
-				vt_keypress(c->term, code);
-			if (key != -1)
-				vt_keypress(c->term, key);
+
+			if (c->pid) {
+				if (code == '\e')
+					vt_write(c->term, buf, len);
+				else
+					vt_keypress(c->term, code);
+				if (key != -1)
+					vt_keypress(c->term, key);
+			} else if (buffer_text_input_is_enabled(c->buf)) {
+				size_t pos = buffer_cursor_get(c->buf);
+				if (key == -1 && code <= UCHAR_MAX)
+					buffer_text_len_insert(c->buf, pos, (char *)&code, 1);
+			}
 		}
 		if (!pertag.runinall[pertag.curtag])
 			break;
@@ -2871,6 +2878,15 @@ void buf_cursor_set(int bid, size_t pos)
 		buffer_cursor_set(buf, pos);
 		/* just to make UI update */
 		buffer_dirty_set(buf, true);
+	}
+}
+
+void buf_input_enable(int bid, bool enable)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_text_input_enable(buf, enable);
 	}
 }
 

@@ -17,6 +17,7 @@ typedef struct Buffer {
 	bool is_name_locked;
 	char name[256];
 	size_t ref_count;
+	bool is_input_enabled;
 	bool is_dirty;
 } Buffer;
 
@@ -283,6 +284,16 @@ size_t buffer_text_delete(Buffer *buf, size_t start, size_t end)
 	}
 
 	return start;
+}
+
+void buffer_text_input_enable(Buffer *buf, bool enable)
+{
+	buf->is_input_enabled = enable;
+}
+
+bool buffer_text_input_is_enabled(Buffer *buf)
+{
+	return buf->is_input_enabled;
 }
 
 bool buffer_is_dirty(Buffer *buf)
