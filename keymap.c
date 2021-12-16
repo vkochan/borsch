@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include <sys/param.h>
 
+#include <curses.h>
+
 #define MAX_KEYS 3
 
 #define ALT	27
@@ -63,6 +65,9 @@ static int keymap_parse(KeyBinding *kbd, char *key)
 			kbd->keys[i] = '\r';
 		} else if (strcmp(tok, "<Tab>") == 0) {
 			kbd->keys[i] = '\t';
+		} else if (strcmp(tok, "<Backspace>") == 0) {
+			/* TODO: make it term specific and remove curses.h inclusion */
+			kbd->keys[i] = KEY_BACKSPACE;
 		} else {
 			kbd->keys[i] = tok[0];
 		}
