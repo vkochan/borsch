@@ -278,6 +278,7 @@
 (define __cs_buf_name_set (foreign-procedure "cs_buf_name_set" (int string) void))
 (define __cs_buf_by_name (foreign-procedure "cs_buf_by_name" (string) scheme-object))
 (define __cs_buf_text_insert (foreign-procedure "cs_buf_text_insert" (int string) scheme-object))
+(define __cs_buf_text_insert_nl (foreign-procedure "cs_buf_text_insert_nl" (int int) scheme-object))
 (define __cs_buf_text_insert_file (foreign-procedure "cs_buf_text_insert_file" (int string) scheme-object))
 (define __cs_buf_text_obj_pos (foreign-procedure "cs_buf_text_obj_pos" (int char int) scheme-object))
 (define __cs_buf_text_range_del (foreign-procedure "cs_buf_text_range_del" (int int int) scheme-object))
@@ -899,6 +900,16 @@
 
       [(b t)
       (__cs_buf_text_insert b t)]
+   )
+)
+
+(define insert-nl
+   (case-lambda
+      [()
+      (__cs_buf_text_insert_nl (buffer-current) (cursor))]
+
+      [(b)
+      (__cs_buf_text_insert_nl b (cursor))]
    )
 )
 

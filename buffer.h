@@ -26,6 +26,7 @@ void buffer_keymap_set(Buffer *buf, KeyMap *kmap);
 KeyMap *buffer_keymap_get(Buffer *buf);
 size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text);
 size_t buffer_text_len_insert(Buffer *buf, size_t pos, const char *text, size_t len);
+size_t buffer_text_insert_nl(Buffer *buf, size_t pos);
 size_t buffer_text_delete(Buffer *buf, size_t start, size_t end);
 bool buffer_is_dirty(Buffer *buf);
 void buffer_dirty_set(Buffer *buf, bool dirty);

@@ -243,6 +243,29 @@ size_t buffer_text_len_insert(Buffer *buf, size_t pos, const char *text, size_t 
 	return pos;
 }
 
+size_t buffer_text_insert_nl(Buffer *buf, size_t pos)
+{
+	Text *txt = buf->text;
+	char byte;
+	/* insert second newline at end of file, except if there is already one */
+	bool eof = pos == text_size(txt);
+	bool nl2 = eof && !(pos > 0 && text_byte_get(txt, pos-1, &byte) && byte == '\n');
+
+	text_insert(txt, pos, "\n", 1);
+	if (eof) {
+		if (nl2)
+			text_insert(txt, text_size(txt), "\n", 1);
+		else
+			pos--; /* place cursor before, not after nl */
+	}
+	pos++;
+
+	buf->is_dirty = true;
+	buf->cursor = pos;
+
+	return pos;
+}
+
 size_t buffer_text_delete(Buffer *buf, size_t start, size_t end)
 {
 	size_t tmp;

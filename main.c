@@ -2683,6 +2683,16 @@ size_t buf_text_insert(int bid, const char *text)
 	return pos;
 }
 
+size_t buf_text_insert_nl(int bid, int pos)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		return buffer_text_insert_nl(buf, pos);
+
+	return EPOS;
+}
+
 size_t buf_text_insert_file(int bid, const char *path)
 {
 	Buffer *buf = buffer_by_id(bid);
