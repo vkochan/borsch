@@ -1964,8 +1964,11 @@ main(int argc, char *argv[]) {
 		}
 
 		if (FD_ISSET(STDIN_FILENO, &rd)) {
-			if (sel && !sel->minimized)
-				curr_kmap = buffer_keymap_get(sel->buf);
+			if (sel && !sel->minimized) {
+				KeyMap *map = buffer_keymap_get(sel->buf);
+				if (map)
+					curr_kmap = map;
+			};
 reenter:
 			int code = getch();
 rescan:
@@ -2514,6 +2517,66 @@ int win_buf_get(int wid)
 	return buffer_id_get(c->buf);
 }
 
+int kmap_add(int pid)
+{
+	KeyMap *pmap = keymap_by_id(pid);
+	KeyMap *kmap;
+
+	kmap = keymap_new(pmap);
+
+	if (kmap)
+		return keymap_id_get(kmap);
+
+	return -1;
+}
+
+int kmap_parent_set(int kid, int pid)
+{
+	KeyMap *kmap = keymap_by_id(kid);
+	KeyMap *pmap = keymap_by_id(pid);
+
+	if (kmap && pmap) {
+		keymap_parent_set(kmap, pmap);
+		return 0;
+	}
+
+	return -1;
+}
+
+void kmap_del(int kid)
+{
+	KeyMap *kmap = keymap_by_id(kid);
+
+	if (kmap)
+		keymap_ref_put(kmap);
+}
+
+int buf_kmap_set(int bid, int kid)
+{
+	KeyMap *kmap = keymap_by_id(kid);
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf && kmap) {
+		buffer_keymap_set(buf, kmap);
+		return 0;
+	}
+
+	return -1;
+}
+
+int buf_kmap_get(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+	KeyMap *kmap;
+
+	if (buf)
+		kmap = buffer_keymap_get(buf);
+	if (kmap)
+		return keymap_id_get(kmap);
+
+	return -1;
+}
+
 int buf_current_get(void)
 {
 	if (sel)
@@ -2919,34 +2982,36 @@ int layout_sticky_set(int tag, bool is_sticky)
 	return 0;
 }
 
-int bind_key(char *key, void (*act)(void), int bid)
+int bind_key(char *key, void (*act)(void), int kid)
 {
 	KeyMap *kmap = global_kmap;
 
-	if (bid) {
-		Buffer *buf = buffer_by_id(bid);
-		if (buf)
-			kmap = buffer_keymap_get(buf);
-		else
+	if (kid) {
+		kmap = keymap_by_id(kid);
+		if (!kmap)
 			return -1;
 	}
 
-	return keymap_bind(kmap, key, act, NULL);
+	if (kmap)
+		return keymap_bind(kmap, key, act, NULL);
+
+	return -1;
 }
 
-int unbind_key(char *key, int bid)
+int unbind_key(char *key, int kid)
 {
 	KeyMap *kmap = global_kmap;
 
-	if (bid) {
-		Buffer *buf = buffer_by_id(bid);
-		if (buf)
-			kmap = buffer_keymap_get(buf);
-		else
+	if (kid) {
+		kmap = keymap_by_id(kid);
+		if (!kmap)
 			return -1;
 	}
 
-	return keymap_unbind(kmap, key);
+	if (kmap)
+		return keymap_unbind(kmap, key);
+
+	return -1;
 }
 
 char *copy_buf_get(size_t *len)

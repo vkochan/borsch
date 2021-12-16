@@ -6,6 +6,8 @@
 typedef struct KeyBinding KeyBinding;
 typedef struct KeyMap KeyMap;
 
+void keymap_ref_get(KeyMap *map);
+void keymap_ref_put(KeyMap *map);
 KeyMap *keymap_new(KeyMap *parent);
 void keymap_free(KeyMap *map);
 KeyBinding *keymap_find(KeyMap *map, char *key);
@@ -17,6 +19,7 @@ void keymap_kbd_action(KeyBinding *kbd);
 int keymap_bind(KeyMap *map, char *key, void (*act_cb)(void), KeyMap *act_map);
 int keymap_unbind(KeyMap *map, char *key);
 KeyMap *keymap_by_id(int id);
+int keymap_id_get(KeyMap *map);
 KeyMap *keymap_parent_get(KeyMap *map);
 void keymap_parent_set(KeyMap *map, KeyMap *parent);
 

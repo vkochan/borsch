@@ -103,6 +103,8 @@ void buffer_del(Buffer *buf)
 		buf->ref_count--;
 
 	if (!buf->ref_count) {
+		if (buf->keymap)
+			keymap_ref_put(buf->keymap);
 		buffer_list_del(buf);
 		text_free(buf->text);
 		free(buf);
@@ -193,6 +195,17 @@ void buffer_ref_put(Buffer *buf)
 {
 	if (buf->ref_count)
 		buf->ref_count--;
+}
+
+void buffer_keymap_set(Buffer *buf, KeyMap *kmap)
+{
+	if (kmap)
+		keymap_ref_get(kmap);
+
+	if (kmap != buf->keymap && buf->keymap)
+		keymap_ref_put(buf->keymap);
+
+	buf->keymap = kmap;
 }
 
 KeyMap *buffer_keymap_get(Buffer *buf)

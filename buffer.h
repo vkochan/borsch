@@ -22,6 +22,7 @@ bool buffer_name_is_locked(Buffer *buf);
 Buffer *buffer_by_name(const char *name);
 void buffer_ref_get(Buffer *buf);
 void buffer_ref_put(Buffer *buf);
+void buffer_keymap_set(Buffer *buf, KeyMap *kmap);
 KeyMap *buffer_keymap_get(Buffer *buf);
 size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text);
 size_t buffer_text_len_insert(Buffer *buf, size_t pos, const char *text, size_t len);

@@ -239,6 +239,41 @@ ptr scheme_win_buf_get(int wid)
 	return Sfalse;
 }
 
+ptr scheme_kmap_add(int pid)
+{
+	int ret = kmap_add(pid);
+
+	if (ret)
+		return Sinteger(ret);
+
+	return Sfalse;
+}
+
+void scheme_kmap_parent_set(int kid, int pid)
+{
+	kmap_parent_set(kid, pid);
+}
+
+void scheme_kmap_del(int kid)
+{
+	kmap_del(kid);
+}
+
+void scheme_buf_kmap_set(int bid, int kid)
+{
+	buf_kmap_set(bid, kid);
+}
+
+ptr scheme_buf_kmap_get(int bid)
+{
+	int ret = buf_kmap_get(bid);
+
+	if (ret)
+		return Sinteger(ret);
+
+	return Sfalse;
+}
+
 ptr scheme_buf_current_get(void)
 {
 	int ret = buf_current_get();
@@ -429,9 +464,9 @@ int scheme_tagbar_show(bool show)
 	return tagbar_show(show);
 }
 
-ptr scheme_bind_key(char *key, bind_key_cb_t cb, int bid)
+ptr scheme_bind_key(char *key, bind_key_cb_t cb, int mid)
 {
-	int ret = bind_key(key, cb, bid);
+	int ret = bind_key(key, cb, mid);
 
 	if (ret)
 		return Sinteger(ret);
@@ -439,9 +474,9 @@ ptr scheme_bind_key(char *key, bind_key_cb_t cb, int bid)
 	return Sfalse;
 }
 
-ptr scheme_unbind_key(char *key, int bid)
+ptr scheme_unbind_key(char *key, int mid)
 {
-	int ret = unbind_key(key, bid);
+	int ret = unbind_key(key, mid);
 	if (ret)
 		return Sinteger(ret);
 
@@ -498,6 +533,12 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_text_send", scheme_win_text_send);
 	Sregister_symbol("cs_win_buf_get", scheme_win_buf_get);
 
+	Sregister_symbol("cs_kmap_add", scheme_kmap_add);
+	Sregister_symbol("cs_kmap_parent_set", scheme_kmap_parent_set);
+	Sregister_symbol("cs_kmap_del", scheme_kmap_del);
+
+	Sregister_symbol("cs_buf_kmap_get", scheme_buf_kmap_get);
+	Sregister_symbol("cs_buf_kmap_set", scheme_buf_kmap_set);
 	Sregister_symbol("cs_buf_current_get", scheme_buf_current_get);
 	Sregister_symbol("cs_buf_first_get", scheme_buf_first_get);
 	Sregister_symbol("cs_buf_next_get", scheme_buf_next_get);

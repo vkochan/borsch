@@ -265,6 +265,12 @@
 (define __cs_win_text_send (foreign-procedure "cs_win_text_send" (int string) int))
 (define __cs_win_buf_get (foreign-procedure __collect_safe "cs_win_buf_get" (int) scheme-object))
 
+(define __cs_kmap_add (foreign-procedure __collect_safe "cs_kmap_add" (int) scheme-object))
+(define __cs_kmap_parent_set (foreign-procedure __collect_safe "cs_kmap_parent_set" (int int) void))
+(define __cs_kmap_del (foreign-procedure __collect_safe "cs_kmap_del" (int) void))
+
+(define __cs_buf_kmap_get (foreign-procedure __collect_safe "cs_buf_kmap_get" (int) scheme-object))
+(define __cs_buf_kmap_set (foreign-procedure __collect_safe "cs_buf_kmap_set" (int int) scheme-object))
 (define __cs_buf_current_get (foreign-procedure __collect_safe "cs_buf_current_get" () scheme-object))
 (define __cs_buf_first_get (foreign-procedure __collect_safe "cs_buf_first_get" () scheme-object))
 (define __cs_buf_next_get (foreign-procedure __collect_safe "cs_buf_next_get" (int) scheme-object))
@@ -308,15 +314,47 @@
 ;;
 
 ;; Public API
+(define global-map 1)
+
 (define bind-key
-   (lambda (k p)
-      (__cs_bind_key k (key-cb p) 0)
+   (case-lambda
+      [(k p)
+       (__cs_bind_key k (key-cb p) 0)]
+
+      [(m k p)
+       (__cs_bind_key k (key-cb p) m)]
    )
 )
 
 (define unbind-key
+   (case-lambda
+      [(k)
+       (__cs_unbind_key k 0)]
+
+      [(m k)
+       (__cs_unbind_key k m)]
+   )
+)
+
+(define make-keymap
+   (case-lambda
+      [()
+       (__cs_kmap_add global-map)]
+
+      [(p)
+       (__cs_kmap_add p)]
+   )
+)
+
+(define keymap-set-parent
    (lambda (k)
-      (__cs_unbind_key k 0)
+       (__cs_kmap_parent_set k)
+   )
+)
+
+(define keymap-del
+   (lambda (k)
+       (__cs_kmap_del k)
    )
 )
 
@@ -712,6 +750,26 @@
    )
 )
 
+(define buffer-keymap
+   (case-lambda
+      [()
+       (__cs_buf_kmap_get (buffer-current))]
+
+      [(b)
+       (__cs_buf_kmap_get b)]
+   )
+)
+
+(define buffer-set-keymap
+   (case-lambda
+      [(k)
+       (__cs_buf_kmap_set (buffer-current) k)]
+
+      [(b k)
+       (__cs_buf_kmap_set b k)]
+   )
+)
+
 (define buffer-current
    (lambda ()
       (__cs_buf_current_get)
@@ -770,26 +828,6 @@
                     (cursor-set curs)
                   )
                )
-   )
-)
-
-(define buffer-bind-key
-   (case-lambda
-     [(k p)
-      (__cs_bind_key k (key-cb p) (buffer-current))]
-
-     [(b k p)
-      (__cs_bind_key k (key-cb p) b)]
-   )
-)
-
-(define buffer-unbind-key
-   (case-lambda
-     [(k)
-      (__cs_unbind_key k (buffer-current))]
-
-     [(b k)
-      (__cs_unbind_key k b)]
    )
 )
 

@@ -31,11 +31,14 @@ typedef struct KeyMap {
 	char name[64];
 	KeyMap *parent;
 	KeyMap *next;
+	int ref_count;
 	int kid;
 } KeyMap;
 
 static KeyMap *map_list;
 static int map_id_gen;
+
+void keymap_free(KeyMap *map);
 
 static int keymap_parse(KeyBinding *kbd, char *key)
 {
@@ -173,6 +176,21 @@ int keymap_unbind(KeyMap *map, char *key)
 	return 0;
 }
 
+void keymap_ref_get(KeyMap *map)
+{
+	map->ref_count++;
+}
+
+void keymap_ref_put(KeyMap *map)
+{
+	if (map->ref_count == 1) {
+		keymap_free(map);
+		return;
+	} else if (map->ref_count > 1) {
+		map->ref_count--;
+	}
+}
+
 KeyMap *keymap_new(KeyMap *parent)
 {
 	KeyMap *map;
@@ -184,6 +202,11 @@ KeyMap *keymap_new(KeyMap *parent)
 	map->kid = ++map_id_gen;
 	map->parent = parent;
 	map->next = map_list;
+	map->ref_count = 1;
+
+	if (parent)
+		keymap_ref_get(parent);
+
 	map_list = map;
 
 	return map;
@@ -193,6 +216,9 @@ void keymap_free(KeyMap *map)
 {
 	KeyBinding *kbd;
 	KeyMap *prev;
+
+	if (map->ref_count && --map->ref_count)
+		return;
 
 	for (prev = map_list; prev; prev = prev->next) {
 		if (prev->next == map) {
@@ -208,6 +234,11 @@ void keymap_free(KeyMap *map)
 		free(kbd);
 		kbd = next;
 	}
+
+	if (map->parent)
+		keymap_ref_put(map->parent);
+
+	free(map);
 }
 
 KeyMap *keymap_by_id(int kid)
@@ -222,6 +253,11 @@ KeyMap *keymap_by_id(int kid)
 	return NULL;
 }
 
+int keymap_id_get(KeyMap *map)
+{
+	return map->kid;
+}
+
 KeyMap *keymap_parent_get(KeyMap *map)
 {
 	return map->parent;
@@ -229,5 +265,11 @@ KeyMap *keymap_parent_get(KeyMap *map)
 
 void keymap_parent_set(KeyMap *map, KeyMap *parent)
 {
+	if (parent)
+		keymap_ref_get(parent);
+
+	if (parent != map->parent && map->parent)
+		keymap_ref_put(map->parent);
+
 	map->parent = parent;
 }
