@@ -1978,7 +1978,18 @@ main(int argc, char *argv[]) {
 			};
 reenter:
 			int code = getch();
-rescan:
+			int alt_code;
+
+			if (code == ALT) {
+				nodelay(stdscr, TRUE);
+				alt_code = getch();
+				nodelay(stdscr, FALSE);
+				if (alt_code > 0) {
+					keys[key_index++] = code;
+					code = alt_code;
+				}
+			}
+
 			if (code >= 0) {
 				keys[key_index++] = code;
 				KeyBinding *kbd = NULL;
@@ -1986,22 +1997,11 @@ rescan:
 					key_index = 0;
 					handle_mouse();
 				} else if ((kbd = keymap_match(curr_kmap, keys, key_index))) {
-					int alt_code;
-
 					if (keymap_kbd_is_map(kbd)) {
 						curr_kmap = keymap_kbd_map_get(kbd);
 						memset(keys, 0, sizeof(keys));
 						key_index = 0;
 						goto reenter;
-					}
-
-					if (code == ALT) {
-						nodelay(stdscr, TRUE);
-						alt_code = getch();
-						nodelay(stdscr, FALSE);
-						if (alt_code >= 0)
-							code = alt_code;
-						goto rescan;
 					}
 
 					if (keymap_kbd_len(kbd) == key_index) {

@@ -68,6 +68,8 @@ static int keymap_parse(KeyBinding *kbd, char *key)
 		} else if (strcmp(tok, "<Backspace>") == 0) {
 			/* TODO: make it term specific and remove curses.h inclusion */
 			kbd->keys[i] = KEY_BACKSPACE;
+		} else if (strcmp(tok, "<Esc>") == 0) {
+			kbd->keys[i] = 27;
 		} else {
 			kbd->keys[i] = tok[0];
 		}
