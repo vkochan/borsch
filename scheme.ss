@@ -317,7 +317,7 @@
 ;;
 
 ;; Public API
-(define global-map 1)
+(define global-keymap 1)
 
 (define bind-key
    (case-lambda
@@ -347,7 +347,7 @@
 (define make-keymap
    (case-lambda
       [()
-       (__cs_kmap_add (symbol->string 'global-map))]
+       (__cs_kmap_add (symbol->string 'global-keymap))]
 
       [(p)
        (__cs_kmap_add (symbol->string p))]
