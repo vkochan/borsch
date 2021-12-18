@@ -365,9 +365,106 @@
    )
 )
 
+(define mode-gen-map-symb
+   (lambda (m)
+         (string->symbol
+            (string-append (symbol->string m) "-map"))
+   )
+)
+
+(define mode-gen-map-value
+   (lambda (m)
+      (let ([s (mode-gen-map-symb m)])
+         (if (top-level-bound? s)
+            (top-level-value s)
+            ;; else
+            #f
+         )
+      )
+   )
+)
+
+(define mode-gen-hook-symb
+   (lambda (m)
+         (string->symbol
+            (string-append (symbol->string m) "-hook"))
+   )
+)
+
+(define mode-gen-hook-value
+   (lambda (h)
+      (let ([s (mode-gen-hook-symb h)])
+         (if (top-level-bound? s)
+            (top-level-value s)
+            ;; else
+            #f
+         )
+      )
+   )
+)
+
+(define run-hooks
+   (lambda (symb)
+      (if (top-level-bound? symb)
+         (let ([hook-list (top-level-value symb)])
+            (for-each
+               (lambda (h)
+                  (h)
+               ) hook-list
+            )
+         )
+      )
+   )
+)
+
 (define add-hook
-   (lambda (f)
-      (set! __on-event-cb-list (append __on-event-cb-list (list f)))
+   (lambda (h f)
+      (if (not (top-level-bound? h))
+         (define-top-level-value h (list))
+      )
+      (let ([h-lst (top-level-value h)])
+         (if (not (member f h-lst))
+            (set-top-level-value! h (append h-lst (list f)))
+         )
+      )
+   )
+)
+
+(define remove-hook
+   (lambda (h f)
+      (if (top-level-bound? h)
+         (let ([h-lst (top-level-value h)])
+            (set-top-level-value! h (remove f h-lst))
+         )
+      )
+   )
+)
+
+(define-syntax (define-mode stx)
+   (syntax-case stx ()
+      ((_ mode name parent exp ...)
+       #`(define-top-level-value 'mode
+            (lambda ()
+               (when parent
+                  ((top-level-value 'parent))
+               )
+	       (let ([m-map (mode-gen-map-symb 'mode)])
+                  (when (top-level-bound? m-map)
+                     (when parent
+	                (let ([p-map (mode-gen-map-symb 'parent)])
+                           (keymap-set-parent (top-level-value m-map) p-map)
+                        )
+		     )
+                     (buffer-set-keymap m-map)
+                  )
+                  exp
+                  ...
+                  (run-hooks
+                     (mode-gen-hook-symb 'mode))
+               )
+            )
+         )
+      )
    )
 )
 
