@@ -9,7 +9,12 @@
 #include <sys/stat.h>
 
 #include "text/text.h"
+#include "keymap.h"
 #include "api.h"
+
+#ifndef Sunboundp
+#define Sunboundp(x) (((uptr)(x)) == 0x1E)
+#endif
 
 /* looks like cleanup() can ba called twice if
  * MOD-q-q was pressed, so use it to do deinit
@@ -239,19 +244,22 @@ ptr scheme_win_buf_get(int wid)
 	return Sfalse;
 }
 
-ptr scheme_kmap_add(int pid)
+ptr scheme_kmap_add(char *parent)
 {
-	int ret = kmap_add(pid);
+	int ret = kmap_add(0);
 
-	if (ret)
+	if (ret) {
+		if (parent && strlen(parent))
+			kmap_parent_set(ret, parent);
 		return Sinteger(ret);
+	}
 
 	return Sfalse;
 }
 
-void scheme_kmap_parent_set(int kid, int pid)
+void scheme_kmap_parent_set(int kid, char *name)
 {
-	kmap_parent_set(kid, pid);
+	kmap_parent_set(kid, name);
 }
 
 void scheme_kmap_del(int kid)
@@ -259,9 +267,9 @@ void scheme_kmap_del(int kid)
 	kmap_del(kid);
 }
 
-void scheme_buf_kmap_set(int bid, int kid)
+void scheme_buf_kmap_set(int bid, char *name)
 {
-	buf_kmap_set(bid, kid);
+	buf_kmap_set(bid, name);
 }
 
 ptr scheme_buf_kmap_get(int bid)
@@ -478,9 +486,9 @@ int scheme_tagbar_show(bool show)
 	return tagbar_show(show);
 }
 
-ptr scheme_bind_key(char *key, bind_key_cb_t cb, int mid)
+ptr scheme_bind_key(char *key, bind_key_cb_t cb, int mid, char *tname)
 {
-	int ret = bind_key(key, cb, mid);
+	int ret = bind_key(key, cb, mid, tname);
 
 	if (ret)
 		return Sinteger(ret);
@@ -597,6 +605,16 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_do_quit", scheme_do_quit);
 }
 
+static void *scheme_symb_resolver(keymap_symb_t type, char *name)
+{
+	ptr p = Stop_level_value(Sstring_to_symbol(name));
+
+	if (Sunboundp(p))
+		return NULL;
+
+	return (void *)Sinteger32_value(p);
+}
+
 int scheme_init(void)
 {
 	int err;
@@ -621,6 +639,8 @@ int scheme_init(void)
 		fprintf(stderr, "failed to create fifo\n");
 		return err;
 	}
+
+	keymap_symb_resolver_set(scheme_symb_resolver);
 
 	scheme_initialized = 1;
 	return 0;

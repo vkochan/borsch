@@ -265,12 +265,12 @@
 (define __cs_win_text_send (foreign-procedure "cs_win_text_send" (int string) int))
 (define __cs_win_buf_get (foreign-procedure __collect_safe "cs_win_buf_get" (int) scheme-object))
 
-(define __cs_kmap_add (foreign-procedure __collect_safe "cs_kmap_add" (int) scheme-object))
-(define __cs_kmap_parent_set (foreign-procedure __collect_safe "cs_kmap_parent_set" (int int) void))
+(define __cs_kmap_add (foreign-procedure "cs_kmap_add" (string) scheme-object))
+(define __cs_kmap_parent_set (foreign-procedure "cs_kmap_parent_set" (int string) void))
 (define __cs_kmap_del (foreign-procedure __collect_safe "cs_kmap_del" (int) void))
 
 (define __cs_buf_kmap_get (foreign-procedure __collect_safe "cs_buf_kmap_get" (int) scheme-object))
-(define __cs_buf_kmap_set (foreign-procedure __collect_safe "cs_buf_kmap_set" (int int) scheme-object))
+(define __cs_buf_kmap_set (foreign-procedure "cs_buf_kmap_set" (int string) scheme-object))
 (define __cs_buf_current_get (foreign-procedure __collect_safe "cs_buf_current_get" () scheme-object))
 (define __cs_buf_first_get (foreign-procedure __collect_safe "cs_buf_first_get" () scheme-object))
 (define __cs_buf_next_get (foreign-procedure __collect_safe "cs_buf_next_get" (int) scheme-object))
@@ -306,7 +306,7 @@
 (define __cs_tagbar_show (foreign-procedure __collect_safe "cs_tagbar_show" (boolean) int))
 (define __cs_tagbar_status_set (foreign-procedure "cs_tagbar_status_set" (string) int))
 
-(define __cs_bind_key (foreign-procedure "cs_bind_key" (string void* int) int))
+(define __cs_bind_key (foreign-procedure "cs_bind_key" (string void* int string) int))
 (define __cs_unbind_key (foreign-procedure "cs_unbind_key" (string int) int))
 
 (define __cs_copy_buf_get (foreign-procedure __collect_safe "cs_copy_buf_get" () scheme-object))
@@ -321,10 +321,15 @@
 (define bind-key
    (case-lambda
       [(k p)
-       (__cs_bind_key k (key-cb p) 0)]
+       (bind-key 0 k p)]
 
-      [(m k p)
-       (__cs_bind_key k (key-cb p) m)]
+      [(m k t)
+       (if (procedure? t)
+          (__cs_bind_key k (key-cb t) m "")
+          ;; else
+          (__cs_bind_key k 0 m (symbol->string t))
+       )
+      ]
    )
 )
 
@@ -341,16 +346,16 @@
 (define make-keymap
    (case-lambda
       [()
-       (__cs_kmap_add global-map)]
+       (__cs_kmap_add (symbol->string 'global-map))]
 
       [(p)
-       (__cs_kmap_add p)]
+       (__cs_kmap_add (symbol->string p))]
    )
 )
 
 (define keymap-set-parent
-   (lambda (k)
-       (__cs_kmap_parent_set k)
+   (lambda (k p)
+       (__cs_kmap_parent_set k p)
    )
 )
 
@@ -765,10 +770,10 @@
 (define buffer-set-keymap
    (case-lambda
       [(k)
-       (__cs_buf_kmap_set (buffer-current) k)]
+       (__cs_buf_kmap_set (buffer-current) (symbol->string k))]
 
       [(b k)
-       (__cs_buf_kmap_set b k)]
+       (__cs_buf_kmap_set b (symbol->string k))]
    )
 )
 

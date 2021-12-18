@@ -5,6 +5,8 @@
 
 #include <curses.h>
 
+#include "keymap.h"
+
 #define MAX_KEYS 3
 
 #define ALT	27
@@ -16,6 +18,8 @@
 #endif
 #define CTRL_ALT(k) ((k) + (129 - 'a'))
 
+static void* (*symb_resolver)(keymap_symb_t type, char *name);
+
 typedef unsigned int KeyCombo[MAX_KEYS];
 
 typedef struct KeyMap KeyMap;
@@ -25,14 +29,16 @@ typedef struct KeyBinding {
 	KeyCombo keys;
 	void (*act)(void);
 	int len;
+	char map_name[64];
 	KeyMap *map;
 } KeyBinding;
 
 typedef struct KeyMap {
 	KeyBinding *kbd_list;
-	char name[64];
+	char parent_name[64];
 	KeyMap *parent;
 	KeyMap *next;
+	char name[64];
 	int ref_count;
 	int kid;
 } KeyMap;
@@ -41,6 +47,27 @@ static KeyMap *map_list;
 static int map_id_gen;
 
 void keymap_free(KeyMap *map);
+
+KeyMap *keymap_by_name(char *name)
+{
+	KeyMap *map = NULL;
+
+	if (name && strlen(name) && symb_resolver) {
+		void *v = symb_resolver(KEYMAP_SYMB_MAP, name);
+		int id;
+
+		if (!v)
+			return NULL;
+
+		id = (int)v;
+		if (id > 0)
+			map = keymap_by_id(id);
+		if (map)
+			return map;
+	}
+
+	return NULL;
+}
 
 static int keymap_parse(KeyBinding *kbd, char *key)
 {
@@ -107,6 +134,7 @@ KeyBinding *keymap_find(KeyMap *map, char *key)
 KeyBinding *keymap_match(KeyMap *map, int *key, int len)
 {
 	KeyBinding *it;
+	KeyMap *parent;
 	int i;
 
 	len = MIN(len, MAX_KEYS);
@@ -118,19 +146,24 @@ KeyBinding *keymap_match(KeyMap *map, int *key, int len)
 		}
 	}
 
-	if (map->parent)
-		return keymap_match(map->parent, key, len);
+	parent = keymap_parent_get(map);
+	if (parent)
+		return keymap_match(parent, key, len);
 
 	return NULL;
 }
 
 bool keymap_kbd_is_map(KeyBinding *kbd)
 {
-	return kbd->map != NULL;
+	return kbd->map || kbd->map_name[0];
 }
 
 KeyMap *keymap_kbd_map_get(KeyBinding *kbd)
 {
+	if (kbd->map)
+		return kbd->map;
+
+	kbd->map = keymap_by_name(kbd->map_name);
 	return kbd->map;
 }
 
@@ -144,7 +177,7 @@ void keymap_kbd_action(KeyBinding *kbd)
 	kbd->act();
 }
 
-int keymap_bind(KeyMap *map, char *key, void (*act_cb)(void), KeyMap *act_map)
+int keymap_bind(KeyMap *map, char *key, void (*act_cb)(void), char *act_map)
 {
 	KeyBinding *kbd;
 
@@ -158,7 +191,8 @@ int keymap_bind(KeyMap *map, char *key, void (*act_cb)(void), KeyMap *act_map)
 		keymap_parse(kbd, key);
 	}
 
-	kbd->map = act_map;
+	if (act_map && strlen(act_map))
+		strncpy(kbd->map_name, act_map, sizeof(kbd->map_name));
 	kbd->act = act_cb;
 
 	return 0;
@@ -267,16 +301,32 @@ int keymap_id_get(KeyMap *map)
 
 KeyMap *keymap_parent_get(KeyMap *map)
 {
+	if (map->parent)
+		return map->parent;
+
+	map->parent = keymap_by_name(map->parent_name);
+
+	if (map->parent)
+		keymap_ref_get(map->parent);
+
 	return map->parent;
 }
 
-void keymap_parent_set(KeyMap *map, KeyMap *parent)
+void keymap_parent_set(KeyMap *map, char *name)
 {
-	if (parent)
-		keymap_ref_get(parent);
+	if (strcmp(map->parent_name, name) == 0)
+		return;
 
-	if (parent != map->parent && map->parent)
+	if (map->parent)
 		keymap_ref_put(map->parent);
 
-	map->parent = parent;
+	if (name)
+		strncpy(map->parent_name, name, sizeof(map->parent_name));
+
+	map->parent = NULL;
+}
+
+void keymap_symb_resolver_set(void * (*resolv)(keymap_symb_t type, char *name))
+{
+	symb_resolver = resolv;
 }

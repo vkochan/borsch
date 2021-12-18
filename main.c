@@ -1321,7 +1321,6 @@ int create(const char *prog, const char *title, const char *cwd) {
 		free(c);
 		return -1;
 	}
-	keymap_parent_set(buffer_keymap_get(c->buf), global_kmap);
 
 	c->view = view_new(buffer_text_get(c->buf));
 	if (!c->view) {
@@ -2252,7 +2251,6 @@ int win_new(void)
 		free(c);
 		return -1;
 	}
-	keymap_parent_set(buffer_keymap_get(c->buf), global_kmap);
 
 	c->view = view_new(buffer_text_get(c->buf));
 	if (!c->view) {
@@ -2530,20 +2528,18 @@ int kmap_add(int pid)
 	KeyMap *kmap;
 
 	kmap = keymap_new(pmap);
-
 	if (kmap)
 		return keymap_id_get(kmap);
 
 	return -1;
 }
 
-int kmap_parent_set(int kid, int pid)
+int kmap_parent_set(int kid, char *name)
 {
 	KeyMap *kmap = keymap_by_id(kid);
-	KeyMap *pmap = keymap_by_id(pid);
 
-	if (kmap && pmap) {
-		keymap_parent_set(kmap, pmap);
+	if (kmap && name) {
+		keymap_parent_set(kmap, name);
 		return 0;
 	}
 
@@ -2558,13 +2554,12 @@ void kmap_del(int kid)
 		keymap_ref_put(kmap);
 }
 
-int buf_kmap_set(int bid, int kid)
+int buf_kmap_set(int bid, char *name)
 {
-	KeyMap *kmap = keymap_by_id(kid);
 	Buffer *buf = buffer_by_id(bid);
 
-	if (buf && kmap) {
-		buffer_keymap_set(buf, kmap);
+	if (buf) {
+		buffer_keymap_set(buf, name);
 		return 0;
 	}
 
@@ -3008,7 +3003,7 @@ int layout_sticky_set(int tag, bool is_sticky)
 	return 0;
 }
 
-int bind_key(char *key, void (*act)(void), int kid)
+int bind_key(char *key, void (*act)(void), int kid, char *tname)
 {
 	KeyMap *kmap = global_kmap;
 
@@ -3019,7 +3014,7 @@ int bind_key(char *key, void (*act)(void), int kid)
 	}
 
 	if (kmap)
-		return keymap_bind(kmap, key, act, NULL);
+		return keymap_bind(kmap, key, act, tname);
 
 	return -1;
 }

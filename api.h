@@ -63,10 +63,10 @@ int win_text_send(int wid, char *text);
 int win_buf_get(int wid);
 
 int kmap_add(int pid);
-int kmap_parent_set(int kid, int pid);
+int kmap_parent_set(int kid, char *name);
 void kmap_del(int kid);
 
-int buf_kmap_set(int bid, int kid);
+int buf_kmap_set(int bid, char *name);
 int buf_kmap_get(int bid);
 int buf_current_get(void);
 int buf_first_get(void);
@@ -98,7 +98,7 @@ int layout_fmaster_set(int tag, float f);
 bool layout_sticky_get(int tag);
 int layout_sticky_set(int tag, bool is_sticky);
 
-int bind_key(char *map, bind_key_cb_t cb, int kid);
+int bind_key(char *map, bind_key_cb_t cb, int kid, char *tmap);
 int unbind_key(char *map, int kid);
 
 char *copy_buf_get(size_t *len);

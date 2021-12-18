@@ -11,6 +11,7 @@ typedef struct Buffer {
 	int buf_id;
 	struct Buffer *next;
 	struct Buffer *prev;
+	char kmap_name[64];
 	KeyMap *keymap;
 	size_t cursor;
 	Text *text;
@@ -75,13 +76,6 @@ Buffer *buffer_new(const char *name)
 		return NULL;
 	}
 	buf->ref_count = 1;
-
-	buf->keymap = keymap_new(NULL);
-	if (!buf->keymap) {
-		text_free(buf->text);
-		free(buf);
-		return NULL;
-	}
 
 	buf_count++;
 	buf->buf_id = buffer_id_gen();
@@ -198,19 +192,30 @@ void buffer_ref_put(Buffer *buf)
 		buf->ref_count--;
 }
 
-void buffer_keymap_set(Buffer *buf, KeyMap *kmap)
+void buffer_keymap_set(Buffer *buf, char *name)
 {
-	if (kmap)
-		keymap_ref_get(kmap);
+	if (strcmp(buf->kmap_name, name) == 0)
+		return;
 
-	if (kmap != buf->keymap && buf->keymap)
+	if (buf->keymap)
 		keymap_ref_put(buf->keymap);
 
-	buf->keymap = kmap;
+	if (name)
+		strncpy(buf->kmap_name, name, sizeof(buf->kmap_name));
+
+	buf->keymap = NULL;
 }
 
 KeyMap *buffer_keymap_get(Buffer *buf)
 {
+	if (buf->keymap)
+		return buf->keymap;
+
+	buf->keymap = keymap_by_name(buf->kmap_name);
+
+	if (buf->keymap)
+		keymap_ref_get(buf->keymap);
+
 	return buf->keymap;
 }
 
