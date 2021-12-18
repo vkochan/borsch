@@ -621,7 +621,8 @@ draw_border(Client *c) {
 		tmp[maxlen] = '\0';
 	}
 
-	len = snprintf(title, sizeof(title), "[%d|%s%s]",
+	len = snprintf(title, sizeof(title), "(%s)   [%d|%s%s]",
+			buffer_mode_get(c->buf),
 			c->order,
 			ismastersticky(c) ? "*" : "",
 			tmp[0] ? tmp : "");
@@ -1323,6 +1324,7 @@ int create(const char *prog, const char *title, const char *cwd) {
 		free(c);
 		return -1;
 	}
+	buffer_mode_set(c->buf, "Term");
 
 	c->view = view_new(buffer_text_get(c->buf));
 	if (!c->view) {
@@ -2892,6 +2894,15 @@ void buf_input_enable(int bid, bool enable)
 
 	if (buf) {
 		buffer_text_input_enable(buf, enable);
+	}
+}
+
+void buf_mode_set(int bid, char *name)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_mode_set(buf, name);
 	}
 }
 

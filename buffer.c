@@ -17,6 +17,7 @@ typedef struct Buffer {
 	Text *text;
 	bool is_name_locked;
 	char name[256];
+	char mode[32];
 	size_t ref_count;
 	bool is_input_enabled;
 	bool is_dirty;
@@ -86,6 +87,8 @@ Buffer *buffer_new(const char *name)
 	} else {
 		snprintf(buf->name, sizeof(buf->name), "new%d", buf->buf_id);
 	}
+
+	strncpy(buf->mode, "none", sizeof(buf->mode));
 
 	buffer_list_add(&buf_list, buf);
 
@@ -309,4 +312,14 @@ bool buffer_is_dirty(Buffer *buf)
 void buffer_dirty_set(Buffer *buf, bool dirty)
 {
 	buf->is_dirty = dirty;
+}
+
+char *buffer_mode_get(Buffer *buf)
+{
+	return buf->mode;
+}
+
+void buffer_mode_set(Buffer *buf, char *name)
+{
+	strncpy(buf->mode, name, sizeof(buf->mode));
 }

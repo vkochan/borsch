@@ -401,6 +401,11 @@ void scheme_buf_text_input_enable(int bid, bool enable)
 	buf_input_enable(bid, enable);
 }
 
+void scheme_buf_mode_set(int bid, char *mode)
+{
+	buf_mode_set(bid, mode);
+}
+
 int scheme_view_current_get(void)
 {
 	return view_current_get();
@@ -573,6 +578,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_text_obj_pos", scheme_buf_text_obj_pos);
 	Sregister_symbol("cs_buf_text_range_del", scheme_buf_text_range_del);
 	Sregister_symbol("cs_buf_text_input_enable", scheme_buf_text_input_enable);
+	Sregister_symbol("cs_buf_mode_set", scheme_buf_mode_set);
 	Sregister_symbol("cs_buf_cursor_get", scheme_buf_cursor_get);
 	Sregister_symbol("cs_buf_cursor_set", scheme_buf_cursor_set);
 

@@ -32,5 +32,7 @@ void buffer_text_input_enable(Buffer *buf, bool enable);
 bool buffer_text_input_is_enabled(Buffer *buf);
 bool buffer_is_dirty(Buffer *buf);
 void buffer_dirty_set(Buffer *buf, bool dirty);
+char *buffer_mode_get(Buffer *buf);
+void buffer_mode_set(Buffer *buf, char *name);
 
 #endif /* BUFFER_H */

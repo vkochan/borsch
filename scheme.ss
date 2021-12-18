@@ -285,6 +285,7 @@
 (define __cs_buf_text_range_del (foreign-procedure "cs_buf_text_range_del" (int int int) scheme-object))
 (define __cs_buf_cursor_get (foreign-procedure __collect_safe "cs_buf_cursor_get" (int) scheme-object))
 (define __cs_buf_cursor_set (foreign-procedure __collect_safe "cs_buf_cursor_set" (int int) void))
+(define __cs_buf_mode_set (foreign-procedure "cs_buf_mode_set" (int string) void))
 
 (define __cs_view_current_get (foreign-procedure __collect_safe "cs_view_current_get" () int))
 (define __cs_view_current_set (foreign-procedure __collect_safe "cs_view_current_set" (int) int))
@@ -457,6 +458,7 @@
 		     )
                      (buffer-set-keymap m-map)
                   )
+		  (buffer-set-mode name)
                   exp
                   ...
                   (run-hooks
@@ -851,6 +853,16 @@
 
       [(wid)
        (__cs_win_buf_get wid)]
+   )
+)
+
+(define buffer-set-mode
+   (case-lambda
+      [(n)
+         (__cs_buf_mode_set (buffer-current) n)]
+
+      [(b n)
+         (__cs_buf_mode_set b n)]
    )
 )
 

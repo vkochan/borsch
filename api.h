@@ -82,6 +82,7 @@ size_t buf_text_range_del(int bid, int start, int end);
 size_t buf_cursor_get(int bid);
 void buf_cursor_set(int bid, size_t pos);
 void buf_input_enable(int bid, bool enable);
+void buf_mode_set(int bid, char *name);
 
 int view_current_get(void);
 int view_current_set(int tag);
