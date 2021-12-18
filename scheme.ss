@@ -2052,9 +2052,7 @@
       (bind-key map "E" (lambda () (move-longword-end)))
       (bind-key map "x" (lambda () (delete-next-char)))
       (bind-key map "X" (lambda () (delete-prev-char)))
-      ; FIXME: for some reason this key binding triggers other
-      ; keybindings wo pressing "C-g".
-      ; (bind-key map "g g" (lambda () (move-buffer-begin)))
+      (bind-key map "g g" (lambda () (move-buffer-begin)))
       (bind-key map "G" (lambda () (move-buffer-end)))
       (bind-key map "i" text-mode-ins)
       map
