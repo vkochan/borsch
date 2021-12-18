@@ -172,10 +172,12 @@ static Ui *ui;
  #define debug eprint
 #endif
 
-extern int scheme_init(void);
+extern int scheme_init(const char *);
 extern void scheme_uninit(void);
 extern int scheme_event_handle(event_t evt);
 extern int scheme_eval_file(const char *scm_in, const char *out);
+
+static char *scheme_init_script;
 
 /* commands for use by keybindings */
 static void focusn(const char *args[]);
@@ -1178,7 +1180,7 @@ setup(void) {
 	sigaction(SIGTERM, &sa, NULL);
 	sa.sa_handler = SIG_IGN;
 	sigaction(SIGPIPE, &sa, NULL);
-	scheme_init();
+	scheme_init(scheme_init_script);
 }
 
 static void
@@ -1902,6 +1904,14 @@ parse_args(int argc, char *argv[]) {
 		prog_name = name + 1;
 	if (!getenv("ESCDELAY"))
 		set_escdelay(100);
+
+	for (int arg = 1; arg < argc; arg++) {
+		if (strcmp(argv[arg], "-i") == 0) {
+			scheme_init_script = argv[arg+1];
+			arg++;
+		}
+	}
+
 	return init;
 }
 

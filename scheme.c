@@ -615,7 +615,7 @@ static void *scheme_symb_resolver(keymap_symb_t type, char *name)
 	return (void *)Sinteger32_value(p);
 }
 
-int scheme_init(void)
+int scheme_init(const char *init_script)
 {
 	int err;
 
@@ -630,7 +630,10 @@ int scheme_init(void)
 	if (err)
 		return err;
 
-	err = scheme_run_init_script();
+	if (init_script && strlen(init_script))
+		err = scheme_run_script(init_script);
+	else
+		err = scheme_run_init_script();
 	if (err)
 		return err;
 
