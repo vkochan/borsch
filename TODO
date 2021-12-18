@@ -2,8 +2,6 @@
 
 * TODO Split scheme.ss into smaller libraries
 
-* TODO Implement basic default 'text' buffer mode
-
 * TODO Add support for popup window
 
 * TODO Add support for hide/show window
