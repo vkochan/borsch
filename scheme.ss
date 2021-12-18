@@ -2018,6 +2018,63 @@
    )
 )
 
+(define text-mode-cmd
+   (lambda ()
+      (buffer-set-keymap 'text-mode-cmd-map)
+      (buffer-set-input #f)
+   )
+)
+
+(define text-mode-ins
+   (lambda ()
+      (buffer-set-keymap 'text-mode-ins-map)
+      (buffer-set-input #t)
+   )
+)
+
+(define text-mode-map
+   (let ([map (make-keymap)])
+      map
+   )
+)
+
+(define text-mode-cmd-map
+   (let ([map (make-keymap 'text-mode-map)])
+      (bind-key map "h" (lambda () (move-prev-char)))
+      (bind-key map "l" (lambda () (move-next-char)))
+      (bind-key map "j" (lambda () (move-next-line)))
+      (bind-key map "k" (lambda () (move-prev-line)))
+      (bind-key map "w" (lambda () (move-next-word)))
+      (bind-key map "W" (lambda () (move-next-longword)))
+      (bind-key map "b" (lambda () (move-prev-word)))
+      (bind-key map "B" (lambda () (move-prev-longword)))
+      (bind-key map "e" (lambda () (move-word-end)))
+      (bind-key map "E" (lambda () (move-longword-end)))
+      (bind-key map "x" (lambda () (delete-next-char)))
+      (bind-key map "X" (lambda () (delete-prev-char)))
+      ; FIXME: for some reason this key binding triggers other
+      ; keybindings wo pressing "C-g".
+      ; (bind-key map "g g" (lambda () (move-buffer-begin)))
+      (bind-key map "G" (lambda () (move-buffer-end)))
+      (bind-key map "i" text-mode-ins)
+      map
+   )
+)
+
+(define text-mode-ins-map
+   (let ([map (make-keymap 'text-mode-map)])
+      (bind-key map "<Enter>" (lambda () (insert-nl)))
+      (bind-key map "<Backspace>" (lambda () (delete-prev-char)))
+      (bind-key map "<Esc>" text-mode-cmd)
+      map
+   )
+)
+
+(define-mode text-mode "Text" #f
+   (buffer-set-input #t)
+   (text-mode-cmd)
+)
+
 (define do-quit __cs_do_quit)
 
 ;;;;;;;;;;;;;;;;;;;;;;;
