@@ -135,15 +135,17 @@ KeyBinding *keymap_match(KeyMap *map, int *key, int len)
 {
 	KeyBinding *it;
 	KeyMap *parent;
-	int i;
+	int i, m;
 
 	len = MIN(len, MAX_KEYS);
 
 	for (it = map->kbd_list; it; it = it->next) {
-		for (i = 0; i < len; i++) {
-			if (it->keys[i] == key[i] && i == len - 1)
-				return it;
+		for (m = i = 0; i < len; i++) {
+			if (it->keys[i] == key[i])
+				m++;
 		}
+		if (m == len)
+			return it;
 	}
 
 	parent = keymap_parent_get(map);
