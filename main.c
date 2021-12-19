@@ -2903,6 +2903,8 @@ void buf_mode_set(int bid, char *name)
 
 	if (buf) {
 		buffer_mode_set(buf, name);
+		if (sel)
+			draw_border(sel);
 	}
 }
 
