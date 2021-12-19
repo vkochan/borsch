@@ -2033,6 +2033,7 @@
 (define text-mode-cmd
    (lambda ()
       (buffer-set-keymap 'text-mode-cmd-map)
+      (buffer-set-mode "Text <N>")
       (buffer-set-input #f)
    )
 )
@@ -2040,6 +2041,7 @@
 (define text-mode-ins
    (lambda ()
       (buffer-set-keymap 'text-mode-ins-map)
+      (buffer-set-mode "Text <I>")
       (buffer-set-input #t)
    )
 )
