@@ -1,4 +1,5 @@
 (load "common.ss")
+(load "tagbar.ss")
 
 ;; Event handling
 (define __on-event-cb-list '())
@@ -105,10 +106,6 @@
 (define __cs_layout_fmaster_set (foreign-procedure __collect_safe "cs_layout_fmaster_set" (int float) int))
 (define __cs_layout_sticky_get (foreign-procedure __collect_safe "cs_layout_sticky_get" (int) boolean))
 (define __cs_layout_sticky_set (foreign-procedure __collect_safe "cs_layout_sticky_set" (int boolean) int))
-
-(define __cs_tagbar_status_align (foreign-procedure __collect_safe "cs_tagbar_status_align" (int) int))
-(define __cs_tagbar_show (foreign-procedure __collect_safe "cs_tagbar_show" (boolean) int))
-(define __cs_tagbar_status_set (foreign-procedure "cs_tagbar_status_set" (string) int))
 
 (define __cs_bind_key (foreign-procedure "cs_bind_key" (string void* int string) int))
 (define __cs_unbind_key (foreign-procedure "cs_unbind_key" (string int) int))
@@ -1816,31 +1813,6 @@
 
       [(tag)
        (layout-set-sticky tag (not (layout-is-sticky? tag)))]
-   )
-)
-
-(define tagbar-set-status-align
-   (lambda (a)
-      (let ([v (case a
-                  ['right 0]
-                  ['left  1]
-               )
-            ]
-           )
-           (__cs_tagbar_status_align v)
-      )
-   )
-)
-
-(define tagbar-show
-   (lambda (s)
-      (__cs_tagbar_show s)
-   )
-)
-
-(define tagbar-set-status
-   (lambda (s)
-      (__cs_tagbar_status_set s)
    )
 )
 
