@@ -11,7 +11,7 @@ OBJS += $(SCH_PATH)/kernel.o
 BIN += ${PROGNAME}-eval
 SRC += scheme.c
 
-SCH_SCRIPTS = scheme.ss
+SCH_SCRIPTS = main.ss
 
 LDFLAGS += -L ./text -L ./ui
 LIBS += -ltext -lui
@@ -23,7 +23,7 @@ CFLAGS += -I$(SCH_PATH) \
 define install_scheme
 	@echo installing scheme scripts
 	@mkdir -p ${DESTDIR}${LIB_PREFIX}
-	@for s in ${SCH_SCRIPTS}; do \
+	@for s in $(ls -1 scheme/); do \
 		echo "installing ${DESTDIR}${LIB_PREFIX}/$$s"; \
 		cp -f "$$s" "${DESTDIR}${LIB_PREFIX}" && \
 		chmod 644 "${DESTDIR}${LIB_PREFIX}/$$s"; \

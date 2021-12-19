@@ -632,7 +632,7 @@ int scheme_init(const char *init_script)
 
 	scheme_export_symbols();
 
-	err = scheme_run_script(LIB_PATH"/scheme.ss");
+	err = scheme_run_script(LIB_PATH"/main.ss");
 	if (err)
 		return err;
 
