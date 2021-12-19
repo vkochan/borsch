@@ -12,6 +12,9 @@
 #include "keymap.h"
 #include "api.h"
 
+#define CALL0(who) Scall0(Stop_level_value(Sstring_to_symbol(who)))
+#define CALL1(who, arg) Scall1(Stop_level_value(Sstring_to_symbol(who)), arg)
+
 #ifndef Sunboundp
 #define Sunboundp(x) (((uptr)(x)) == 0x1E)
 #endif
@@ -629,6 +632,8 @@ int scheme_init(const char *init_script)
 	Sregister_boot_file("/usr/lib/csv"VERSION"/"MACHINE_TYPE"/petite.boot");
 	Sregister_boot_file("/usr/lib/csv"VERSION"/"MACHINE_TYPE"/scheme.boot");
 	Sbuild_heap(NULL, NULL);
+
+	CALL1("source-directories", Scons(Sstring(LIB_PATH), Snil));
 
 	scheme_export_symbols();
 
