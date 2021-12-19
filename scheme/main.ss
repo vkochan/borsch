@@ -85,6 +85,7 @@
 (define __cs_buf_text_input_enable (foreign-procedure __collect_safe "cs_buf_text_input_enable" (int boolean) void))
 (define __cs_buf_text_obj_pos (foreign-procedure "cs_buf_text_obj_pos" (int char int) scheme-object))
 (define __cs_buf_text_range_del (foreign-procedure "cs_buf_text_range_del" (int int int) scheme-object))
+(define __cs_buf_text_get (foreign-procedure "cs_buf_text_get" (int int int) scheme-object))
 (define __cs_buf_cursor_get (foreign-procedure __collect_safe "cs_buf_cursor_get" (int) scheme-object))
 (define __cs_buf_cursor_set (foreign-procedure __collect_safe "cs_buf_cursor_set" (int int) void))
 (define __cs_buf_mode_set (foreign-procedure "cs_buf_mode_set" (int string) void))
@@ -1207,6 +1208,26 @@
 
       [(b)
       (__cs_buf_text_obj_pos b #\g -1)]
+   )
+)
+
+(define buffer-string
+   (case-lambda
+      [()
+       (__cs_buf_text_get (buffer-current)
+                          (buffer-begin-pos)
+                          (- (buffer-end-pos) (buffer-begin-pos)))]
+
+      [(s l)
+       (__cs_buf_text_get (buffer-current) s l)]
+
+      [(b)
+       (__cs_buf_text_get b
+                          (buffer-begin-pos b)
+                          (- (buffer-end-pos b) (buffer-begin-pos b)))]
+
+      [(b s l)
+       (__cs_buf_text_get b s l)]
    )
 )
 

@@ -2867,6 +2867,17 @@ size_t buf_text_range_del(int bid, int start, int end)
 	return start;
 }
 
+char *buf_text_get(int bid, int start, int len)
+{
+	Buffer *buf = buffer_by_id(bid);
+	char *data = NULL;
+
+	if (buf)
+		data = buffer_text_extract(buf, start, len);
+
+	return data;
+}
+
 size_t buf_cursor_get(int bid)
 {
 	Buffer *buf = buffer_by_id(bid);

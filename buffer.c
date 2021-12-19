@@ -294,6 +294,11 @@ size_t buffer_text_delete(Buffer *buf, size_t start, size_t end)
 	return start;
 }
 
+char *buffer_text_extract(Buffer *buf, size_t pos, size_t len)
+{
+	return text_bytes_alloc0(buf->text, pos, len);
+}
+
 void buffer_text_input_enable(Buffer *buf, bool enable)
 {
 	buf->is_input_enabled = enable;

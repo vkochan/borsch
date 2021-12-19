@@ -79,6 +79,7 @@ size_t buf_text_insert_nl(int bid, int pos);
 size_t buf_text_insert_file(int bid, const char *path);
 size_t buf_text_obj_move(int bid, char obj, int n, bool move);
 size_t buf_text_range_del(int bid, int start, int end);
+char *buf_text_get(int bid, int start, int len);
 size_t buf_cursor_get(int bid);
 void buf_cursor_set(int bid, size_t pos);
 void buf_input_enable(int bid, bool enable);

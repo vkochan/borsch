@@ -384,6 +384,20 @@ ptr scheme_buf_text_range_del(int bid, int start, int end)
 	return Sfalse;
 }
 
+ptr scheme_buf_text_get(int bid, int start, int len)
+{
+	char *data = buf_text_get(bid, start, len);
+	ptr ret;
+
+	if (data)
+		ret = Sstring_of_length(data, len);
+	else
+		ret = Sfalse;
+
+	free(data);
+	return ret;
+}
+
 ptr scheme_buf_cursor_get(int bid)
 {
 	size_t pos = buf_cursor_get(bid);
@@ -579,6 +593,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_text_insert_nl", scheme_buf_text_insert_nl);
 	Sregister_symbol("cs_buf_text_insert_file", scheme_buf_text_insert_file);
 	Sregister_symbol("cs_buf_text_obj_pos", scheme_buf_text_obj_pos);
+	Sregister_symbol("cs_buf_text_get", scheme_buf_text_get);
 	Sregister_symbol("cs_buf_text_range_del", scheme_buf_text_range_del);
 	Sregister_symbol("cs_buf_text_input_enable", scheme_buf_text_input_enable);
 	Sregister_symbol("cs_buf_mode_set", scheme_buf_mode_set);
