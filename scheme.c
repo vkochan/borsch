@@ -364,14 +364,9 @@ ptr scheme_buf_text_insert_file(int bid, const char *path)
 	return Sfalse;
 }
 
-ptr scheme_buf_text_obj_pos(int bid, char obj, int n)
+ptr scheme_buf_text_obj_pos(int bid, size_t pos, char obj, int n)
 {
-	size_t pos = buf_text_obj_move(bid, obj, n, false);
-
-	if (pos != EPOS)
-		return Sinteger(pos);
-
-	return Sfalse;
+	return Sinteger(buf_text_obj_move(bid, pos, obj, n, false));
 }
 
 ptr scheme_buf_text_range_del(int bid, int start, int end)

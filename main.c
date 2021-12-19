@@ -2830,17 +2830,15 @@ void *text_move_fn_get(char obj, int n)
 	return obj_move;
 }
 
-size_t buf_text_obj_move(int bid, char obj, int n, bool move)
+size_t buf_text_obj_move(int bid, size_t pos, char obj, int n, bool move)
 {
 	size_t (*obj_move)(Text *t, size_t pos);
 	Buffer *buf = buffer_by_id(bid);
-	size_t pos = EPOS;
 	Text *txt;
 
 	obj_move = text_move_fn_get(obj, n);
 
 	if (obj_move && buf) {
-		pos = buffer_cursor_get(buf);
 		txt = buffer_text_get(buf);
 
 		for (n = abs(n); n; n--)

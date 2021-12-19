@@ -83,7 +83,7 @@
 (define __cs_buf_text_insert_nl (foreign-procedure "cs_buf_text_insert_nl" (int int) scheme-object))
 (define __cs_buf_text_insert_file (foreign-procedure "cs_buf_text_insert_file" (int string) scheme-object))
 (define __cs_buf_text_input_enable (foreign-procedure __collect_safe "cs_buf_text_input_enable" (int boolean) void))
-(define __cs_buf_text_obj_pos (foreign-procedure "cs_buf_text_obj_pos" (int char int) scheme-object))
+(define __cs_buf_text_obj_pos (foreign-procedure "cs_buf_text_obj_pos" (int int char int) scheme-object))
 (define __cs_buf_text_range_del (foreign-procedure "cs_buf_text_range_del" (int int int) scheme-object))
 (define __cs_buf_text_get (foreign-procedure "cs_buf_text_get" (int int int) scheme-object))
 (define __cs_buf_cursor_get (foreign-procedure __collect_safe "cs_buf_cursor_get" (int) scheme-object))
@@ -1034,180 +1034,180 @@
 (define next-char-pos
    (case-lambda
       [()
-      (__cs_buf_text_obj_pos (buffer-current) #\c 1)]
+      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\c 1)]
 
       [(b)
-      (__cs_buf_text_obj_pos b #\c 1)]
+      (__cs_buf_text_obj_pos b (cursor b) #\c 1)]
    )
 )
 
 (define prev-char-pos
    (case-lambda
       [()
-      (__cs_buf_text_obj_pos (buffer-current) #\c -1)]
+      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\c -1)]
 
       [(b)
-      (__cs_buf_text_obj_pos b #\c -1)]
+      (__cs_buf_text_obj_pos b (cursor b) #\c -1)]
    )
 )
 
 (define next-word-pos
    (case-lambda
       [()
-      (__cs_buf_text_obj_pos (buffer-current) #\w 1)]
+      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\w 1)]
 
       [(b)
-      (__cs_buf_text_obj_pos b #\w 1)]
+      (__cs_buf_text_obj_pos b (cursor b) #\w 1)]
    )
 )
 
 (define prev-word-pos
    (case-lambda
       [()
-      (__cs_buf_text_obj_pos (buffer-current) #\w -1)]
+      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\w -1)]
 
       [(b)
-      (__cs_buf_text_obj_pos b #\w -1)]
+      (__cs_buf_text_obj_pos b (cursor b) #\w -1)]
    )
 )
 
 (define word-end-pos
    (case-lambda
       [()
-      (__cs_buf_text_obj_pos (buffer-current) #\e 1)]
+      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\e 1)]
 
       [(b)
-      (__cs_buf_text_obj_pos b #\e 1)]
+      (__cs_buf_text_obj_pos b (cursor b) #\e 1)]
    )
 )
 
 (define next-longword-pos
    (case-lambda
       [()
-      (__cs_buf_text_obj_pos (buffer-current) #\W 1)]
+      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\W 1)]
 
       [(b)
-      (__cs_buf_text_obj_pos b #\W 1)]
+      (__cs_buf_text_obj_pos b (cursor b) #\W 1)]
    )
 )
 
 (define prev-longword-pos
    (case-lambda
       [()
-      (__cs_buf_text_obj_pos (buffer-current) #\W -1)]
+      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\W -1)]
 
       [(b)
-      (__cs_buf_text_obj_pos b #\W -1)]
+      (__cs_buf_text_obj_pos b (cursor b) #\W -1)]
    )
 )
 
 (define longword-end-pos
    (case-lambda
       [()
-      (__cs_buf_text_obj_pos (buffer-current) #\E 1)]
+      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\E 1)]
 
       [(b)
-      (__cs_buf_text_obj_pos b #\E 1)]
+      (__cs_buf_text_obj_pos b (cursor b) #\E 1)]
    )
 )
 
 (define prev-line-pos
    (case-lambda
       [()
-      (__cs_buf_text_obj_pos (buffer-current) #\l -1)]
+      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\l -1)]
 
       [(b)
-      (__cs_buf_text_obj_pos b #\l -1)]
+      (__cs_buf_text_obj_pos b (cursor b) #\l -1)]
    )
 )
 
 (define next-line-pos
    (case-lambda
       [()
-      (__cs_buf_text_obj_pos (buffer-current) #\l 1)]
+      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\l 1)]
 
       [(b)
-      (__cs_buf_text_obj_pos b #\l 1)]
+      (__cs_buf_text_obj_pos b (cursor b) #\l 1)]
    )
 )
 
 (define next-line-begin-pos
    (case-lambda
       [()
-      (__cs_buf_text_obj_pos (buffer-current) #\L 1)]
+      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\L 1)]
 
       [(b)
-      (__cs_buf_text_obj_pos b #\L 1)]
+      (__cs_buf_text_obj_pos b (cursor b) #\L 1)]
    )
 )
 
 (define prev-line-end-pos
    (case-lambda
       [()
-      (__cs_buf_text_obj_pos (buffer-current) #\L -1)]
+      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\L -1)]
 
       [(b)
-      (__cs_buf_text_obj_pos b #\L -1)]
+      (__cs_buf_text_obj_pos b (cursor b) #\L -1)]
    )
 )
 
 (define line-start-pos
    (case-lambda
       [()
-      (__cs_buf_text_obj_pos (buffer-current) #\0 -1)]
+      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\0 -1)]
 
       [(b)
-      (__cs_buf_text_obj_pos b #\0 -1)]
+      (__cs_buf_text_obj_pos b (cursor b) #\0 -1)]
    )
 )
 
 (define line-finish-pos
    (case-lambda
       [()
-      (__cs_buf_text_obj_pos (buffer-current) #\0 1)]
+      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\0 1)]
 
       [(b)
-      (__cs_buf_text_obj_pos b #\0 1)]
+      (__cs_buf_text_obj_pos b (cursor b) #\0 1)]
    )
 )
 
 (define line-begin-pos
    (case-lambda
       [()
-      (__cs_buf_text_obj_pos (buffer-current) #\0 -1)]
+      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\0 -1)]
 
       [(b)
-      (__cs_buf_text_obj_pos b #\0 -1)]
+      (__cs_buf_text_obj_pos b (cursor b) #\0 -1)]
    )
 )
 
 (define line-end-pos
    (case-lambda
       [()
-      (__cs_buf_text_obj_pos (buffer-current) #\1 1)]
+      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\1 1)]
 
       [(b)
-      (__cs_buf_text_obj_pos b #\1 1)]
+      (__cs_buf_text_obj_pos b (cursor b) #\1 1)]
    )
 )
 
 (define buffer-begin-pos
    (case-lambda
       [()
-      (__cs_buf_text_obj_pos (buffer-current) #\g 1)]
+      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\g 1)]
 
       [(b)
-      (__cs_buf_text_obj_pos b #\g 1)]
+      (__cs_buf_text_obj_pos b (cursor b) #\g 1)]
    )
 )
 
 (define buffer-end-pos
    (case-lambda
       [()
-      (__cs_buf_text_obj_pos (buffer-current) #\g -1)]
+      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\g -1)]
 
       [(b)
-      (__cs_buf_text_obj_pos b #\g -1)]
+      (__cs_buf_text_obj_pos b (cursor b) #\g -1)]
    )
 )
 
