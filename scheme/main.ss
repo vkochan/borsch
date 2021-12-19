@@ -44,43 +44,6 @@
 ;;
 
 ;; Public API
-(define run-hooks
-   (lambda (symb)
-      (if (top-level-bound? symb)
-         (let ([hook-list (top-level-value symb)])
-            (for-each
-               (lambda (h)
-                  (h)
-               ) hook-list
-            )
-         )
-      )
-   )
-)
-
-(define add-hook
-   (lambda (h f)
-      (if (not (top-level-bound? h))
-         (define-top-level-value h (list))
-      )
-      (let ([h-lst (top-level-value h)])
-         (if (not (member f h-lst))
-            (set-top-level-value! h (append h-lst (list f)))
-         )
-      )
-   )
-)
-
-(define remove-hook
-   (lambda (h f)
-      (if (top-level-bound? h)
-         (let ([h-lst (top-level-value h)])
-            (set-top-level-value! h (remove f h-lst))
-         )
-      )
-   )
-)
-
 (define copy-buffer-set #f)
 (define copy-buffer+ #f)
 
