@@ -590,28 +590,26 @@ drawbar(void) {
 
 static void draw_title(Window *c) {
 	ui_text_style_t title_style = UI_TEXT_STYLE_NORMAL;
-	ui_text_style_t title_fg = UI_TEXT_COLOR_DEFAULT;
+	int title_fg = UI_TEXT_COLOR_WHITE;
+	int title_bg = UI_TEXT_COLOR_BRIGHT_BLACK;
 	int x, y, maxlen, title_y;
 	int w_w = ui_window_width_get(c->win);
 	char title[256];
 	char tmp[256];
 	size_t len;
 
-	if (sel == c || (pertag.runinall[pertag.curtag] && !c->minimized))
-		title_fg = UI_TEXT_COLOR_BLUE;
+	if (sel == c || (pertag.runinall[pertag.curtag] && !c->minimized)) {
+		title_fg = UI_TEXT_COLOR_BLACK;
+		title_bg = UI_TEXT_COLOR_WHITE;
+	}
 
 	title_y = ui_window_height_get(c->win)-1;
 
 	ui_window_cursor_get(c->win, &x, &y);
-	if (c == sel) {
-		ui_window_draw_char_attr(c->win, 0, title_y, ACS_HLINE, w_w,
-				UI_TEXT_COLOR_BLUE, UI_TEXT_COLOR_BLUE,
-				UI_TEXT_STYLE_NORMAL);
-	} else {
-		ui_window_draw_char_attr(c->win, 0, title_y, ACS_HLINE, w_w,
-				UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT,
-				UI_TEXT_STYLE_NORMAL);
-	}
+
+	ui_window_draw_char_attr(c->win, 0, title_y, ACS_HLINE, w_w,
+				 title_bg, title_bg,
+				 UI_TEXT_STYLE_NORMAL);
 
 	maxlen = ui_window_width_get(c->win) - 10;
 	if (maxlen < 0)
@@ -627,7 +625,7 @@ static void draw_title(Window *c) {
 			ismastersticky(c) ? "*" : "",
 			tmp[0] ? tmp : "");
 	ui_window_draw_text_attr(c->win, 2, title_y, title, w_w,
-			title_fg, UI_TEXT_COLOR_DEFAULT,
+			title_fg, title_bg,
 			UI_TEXT_STYLE_NORMAL);
 
 	ui_window_cursor_set(c->win, x, y);
