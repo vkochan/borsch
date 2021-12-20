@@ -1183,6 +1183,7 @@ setup(void) {
 	sa.sa_handler = SIG_IGN;
 	sigaction(SIGPIPE, &sa, NULL);
 	scheme_init(scheme_init_script);
+	buf_update();
 }
 
 static void
