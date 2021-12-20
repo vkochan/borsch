@@ -66,8 +66,8 @@ typedef struct {
 	void (*arrange)(void);
 } Layout;
 
-typedef struct Client Client;
-struct Client {
+typedef struct Window Window;
+struct Window {
 	Buffer *buf;
 	View *view;
 	UiWin *win;
@@ -79,9 +79,9 @@ struct Client {
 	bool minimized;
 	bool urgent;
 	volatile sig_atomic_t died;
-	Client *next;
-	Client *prev;
-	Client *snext;
+	Window *next;
+	Window *prev;
+	Window *snext;
 	unsigned int tags;
 };
 
@@ -184,7 +184,7 @@ static void focusn(const char *args[]);
 static void focusnextnm(const char *args[]);
 static void focusprevnm(const char *args[]);
 static void focuslast(const char *args[]);
-static void killclient(void);
+static void killwindow(void);
 static void killother(const char *args[]);
 static void quit(const char *args[]);
 static void redraw(const char *args[]);
@@ -209,13 +209,13 @@ static void mouse_fullscreen(const char *args[]);
 static void mouse_minimize(const char *args[]);
 static void mouse_zoom(const char *args[]);
 
-static void attachafter(Client *c, Client *a);
-static Client* nextvisible(Client *c);
+static void attachafter(Window *c, Window *a);
+static Window* nextvisible(Window *c);
 
-static void focus(Client *c);
-static void resize(Client *c, int x, int y, int w, int h);
+static void focus(Window *c);
+static void resize(Window *c, int x, int y, int w, int h);
 static unsigned int waw, wah, wax, way;
-static Client *clients = NULL;
+static Window *windows = NULL;
 static char *title;
 static bool show_tagnamebycwd = false;
 
@@ -268,11 +268,11 @@ static Color colors[] = {
 #define BAR_END         ']'
 /* status bar (command line option -s) position */
 #define BAR_POS         BAR_TOP /* BAR_BOTTOM, BAR_OFF */
-/* whether status bar should be hidden if only one client exists */
+/* whether status bar should be hidden if only one window exists */
 #define BAR_AUTOHIDE    false
 /* master width factor [0.1 .. 0.9] */
 #define MFACT 0.5
-/* number of clients in master area */
+/* number of windows in master area */
 #define NMASTER 1
 /* printf format string for the tag in the status bar */
 #define TAG_SYMBOL   "[%s%s%s]"
@@ -367,10 +367,10 @@ typedef struct {
 /* global variables */
 static const char *prog_name = PROGNAME;
 static Pertag pertag;
-static Client *stack = NULL;
-static Client *sel = NULL;
-static Client *lastsel = NULL;
-static Client *msel = NULL;
+static Window *stack = NULL;
+static Window *sel = NULL;
+static Window *lastsel = NULL;
+static Window *msel = NULL;
 static unsigned int seltags;
 static unsigned int tagset[2] = { 1, 1 };
 static bool mouse_events_enabled = ENABLE_MOUSE;
@@ -420,12 +420,12 @@ isarrange(void (*func)()) {
 }
 
 static bool
-isvisible(Client *c) {
+isvisible(Window *c) {
 	return c->tags & tagset[seltags];
 }
 
 static bool
-is_content_visible(Client *c) {
+is_content_visible(Window *c) {
 	if (!c)
 		return false;
 	if (isarrange(fullscreen))
@@ -433,17 +433,17 @@ is_content_visible(Client *c) {
 	return isvisible(c) && !c->minimized;
 }
 
-static Client*
-nextvisible(Client *c) {
+static Window*
+nextvisible(Window *c) {
 	for (; c && !isvisible(c); c = c->next);
 	return c;
 }
 
-static bool ismaster(Client *c) {
+static bool ismaster(Window *c) {
 	int n = 0;
-	Client *m;
+	Window *m;
 
-	for (m = nextvisible(clients); m && n < getnmaster(); m = nextvisible(m->next), n++) {
+	for (m = nextvisible(windows); m && n < getnmaster(); m = nextvisible(m->next), n++) {
 		if (c == m)
 			return true;
 	}
@@ -451,16 +451,16 @@ static bool ismaster(Client *c) {
 	return false;
 }
 
-static bool ismastersticky(Client *c) {
+static bool ismastersticky(Window *c) {
 	int n = 0;
-	Client *m;
+	Window *m;
 
 	if (!pertag.msticky[pertag.curtag])
 		return false;
 	if (!c)
 		return true;
 
-	for (m = nextvisible(clients); m && n < getnmaster(); m = nextvisible(m->next), n++) {
+	for (m = nextvisible(windows); m && n < getnmaster(); m = nextvisible(m->next), n++) {
 		if (c == m)
 			return true;
 	}
@@ -468,7 +468,7 @@ static bool ismastersticky(Client *c) {
 	return false;
 }
 
-char *client_get_title(Client *c)
+char *window_get_title(Window *c)
 {
 	if (strlen(ui_window_title_get(c->win)))
 		return ui_window_title_get(c->win);
@@ -514,7 +514,7 @@ drawbar(void) {
 	if (bar.pos == BAR_OFF)
 		return;
 
-	for (Client *c = clients; c; c = c->next) {
+	for (Window *c = windows; c; c = c->next) {
 		occupied |= c->tags;
 		if (c->urgent)
 			urgent |= c->tags;
@@ -588,7 +588,7 @@ drawbar(void) {
 }
 
 static void
-draw_border(Client *c) {
+draw_border(Window *c) {
 	ui_text_style_t title_style = UI_TEXT_STYLE_NORMAL;
 	ui_text_style_t title_fg = UI_TEXT_COLOR_DEFAULT;
 	int x, y, maxlen, title_y;
@@ -616,7 +616,7 @@ draw_border(Client *c) {
 	maxlen = ui_window_width_get(c->win) - 10;
 	if (maxlen < 0)
 		maxlen = 0;
-	strncpy(tmp, client_get_title(c), sizeof(tmp));
+	strncpy(tmp, window_get_title(c), sizeof(tmp));
 	if ((size_t)maxlen < strlen(tmp)) {
 		tmp[maxlen] = '\0';
 	}
@@ -634,7 +634,7 @@ draw_border(Client *c) {
 }
 
 static void
-draw(Client *c) {
+draw(Window *c) {
 	if (is_content_visible(c)) {
 		ui_window_redraw(c->win);
 		ui_window_draw(c->win);
@@ -646,7 +646,7 @@ draw(Client *c) {
 
 static void
 draw_all(void) {
-	if (!nextvisible(clients)) {
+	if (!nextvisible(windows)) {
 		sel = NULL;
 		ui_cursor_enable(ui, false);
 		ui_clear(ui);
@@ -656,7 +656,7 @@ draw_all(void) {
 	}
 
 	if (!isarrange(fullscreen)) {
-		for (Client *c = nextvisible(clients); c; c = nextvisible(c->next)) {
+		for (Window *c = nextvisible(windows); c; c = nextvisible(c->next)) {
 			if (c != sel)
 				draw(c);
 		}
@@ -672,7 +672,7 @@ draw_all(void) {
 static void
 arrange(void) {
 	unsigned int m = 0, n = 0, dh = 0;
-	for (Client *c = nextvisible(clients); c; c = nextvisible(c->next)) {
+	for (Window *c = nextvisible(windows); c; c = nextvisible(c->next)) {
 		c->order = ++n;
 		if (c->minimized)
 			m++;
@@ -681,7 +681,7 @@ arrange(void) {
 	ui_clear(ui);
 
 	if (bar.fd == -1 && bar.autohide) {
-		if ((!clients || !clients->next) && n == 1)
+		if ((!windows || !windows->next) && n == 1)
 			hidebar();
 		else
 			showbar();
@@ -697,7 +697,7 @@ arrange(void) {
 	layout->arrange();
 	if (m && !isarrange(fullscreen)) {
 		unsigned int i = 0, nw = waw / m, nx = wax;
-		for (Client *c = nextvisible(clients); c; c = nextvisible(c->next)) {
+		for (Window *c = nextvisible(windows); c; c = nextvisible(c->next)) {
 			if (c->minimized) {
 				if (min_align == MIN_ALIGN_VERT) {
 					resize(c, nx, way+wah+i, waw, 1);
@@ -716,9 +716,9 @@ arrange(void) {
 	draw_all();
 }
 
-static Client *
+static Window *
 lastmaster(unsigned int tag) {
-	Client *c = clients;
+	Window *c = windows;
 	int n = 1;
 
 	for (; c && !(c->tags & tag); c = c->next);
@@ -728,20 +728,20 @@ lastmaster(unsigned int tag) {
 }
 
 static void
-attachfirst(Client *c) {
-	if (clients)
-		clients->prev = c;
-	c->next = clients;
+attachfirst(Window *c) {
+	if (windows)
+		windows->prev = c;
+	c->next = windows;
 	c->prev = NULL;
-	clients = c;
+	windows = c;
 	for (int o = 1; c; c = nextvisible(c->next), o++)
 		c->order = o;
 }
 
 static void
-attach(Client *c) {
+attach(Window *c) {
 	if (ismastersticky(NULL)) {
-		Client *master = lastmaster(c->tags);
+		Window *master = lastmaster(c->tags);
 
 		if (master) {
 			attachafter(c, master);
@@ -753,11 +753,11 @@ attach(Client *c) {
 }
 
 static void
-attachafter(Client *c, Client *a) { /* attach c after a */
+attachafter(Window *c, Window *a) { /* attach c after a */
 	if (c == a)
 		return;
 	if (!a)
-		for (a = clients; a && a->next; a = a->next);
+		for (a = windows; a && a->next; a = a->next);
 
 	if (a) {
 		if (a->next)
@@ -771,14 +771,14 @@ attachafter(Client *c, Client *a) { /* attach c after a */
 }
 
 static void
-attachstack(Client *c) {
+attachstack(Window *c) {
 	c->snext = stack;
 	stack = c;
 }
 
 static void
-detach(Client *c) {
-	Client *d;
+detach(Window *c) {
+	Window *d;
 	if (c->prev)
 		c->prev->next = c->next;
 	if (c->next) {
@@ -786,15 +786,15 @@ detach(Client *c) {
 		for (d = nextvisible(c->next); d; d = nextvisible(d->next))
 			--d->order;
 	}
-	if (c == clients)
-		clients = c->next;
+	if (c == windows)
+		windows = c->next;
 	c->next = c->prev = NULL;
 }
 
 static void
-settitle(Client *c) {
+settitle(Window *c) {
 	char *term, *t = title;
-	char *ctitle = client_get_title(c);
+	char *ctitle = window_get_title(c);
 	if (!t && sel == c && ctitle && strlen(ctitle))
 		t = ctitle;
 	if (t && (term = getenv("TERM")) && !strstr(term, "linux")) {
@@ -804,14 +804,14 @@ settitle(Client *c) {
 }
 
 static void
-detachstack(Client *c) {
-	Client **tc;
+detachstack(Window *c) {
+	Window **tc;
 	for (tc = &stack; *tc && *tc != c; tc = &(*tc)->snext);
 	*tc = c->snext;
 }
 
 static void
-focus(Client *c) {
+focus(Window *c) {
 	if (!c)
 		for (c = stack; c && !isvisible(c); c = c->snext);
 
@@ -865,7 +865,7 @@ focus(Client *c) {
 
 static void
 term_title_handler(Vt *term, const char *title) {
-	/* Client *c = (Client *)vt_data_get(term); */
+	/* Window *c = (Window *)vt_data_get(term); */
 	/* if (title) */
 	/* 	strncpy(c->title, title, sizeof(c->title) - 1); */
 	/* c->title[title ? sizeof(c->title) - 1 : 0] = '\0'; */
@@ -876,7 +876,7 @@ term_title_handler(Vt *term, const char *title) {
 
 static void
 term_urgent_handler(Vt *term) {
-	Client *c = (Client *)vt_data_get(term);
+	Window *c = (Window *)vt_data_get(term);
 	c->urgent = true;
 	printf("\a");
 	fflush(stdout);
@@ -886,7 +886,7 @@ term_urgent_handler(Vt *term) {
 }
 
 static void
-resize_client(Client *c, int w, int h) {
+resize_window(Window *c, int w, int h) {
 	ui_window_resize(c->win, w, h);
 
 	if (c->pid)
@@ -894,25 +894,25 @@ resize_client(Client *c, int w, int h) {
 }
 
 static void
-resize(Client *c, int x, int y, int w, int h) {
-	resize_client(c, w, h);
+resize(Window *c, int x, int y, int w, int h) {
+	resize_window(c, w, h);
 	ui_window_move(c->win, x, y);
 }
 
-static Client*
-get_client_by_coord(unsigned int x, unsigned int y) {
+static Window*
+get_window_by_coord(unsigned int x, unsigned int y) {
 	if (y < way || y >= way+wah)
 		return NULL;
 	if (isarrange(fullscreen))
 		return sel;
-	for (Client *c = nextvisible(clients); c; c = nextvisible(c->next)) {
+	for (Window *c = nextvisible(windows); c; c = nextvisible(c->next)) {
 		int w_h = ui_window_height_get(c->win);
 		int w_w = ui_window_width_get(c->win);
 		int w_y = ui_window_y_get(c->win);
 		int w_x = ui_window_x_get(c->win);
 
 		if (x >= w_x && x < w_x + w_w && y >= w_y && y < w_y + w_h) {
-			debug("mouse event, x: %d y: %d client: %d\n", x, y, c->order);
+			debug("mouse event, x: %d y: %d window: %d\n", x, y, c->order);
 			return c;
 		}
 	}
@@ -937,7 +937,7 @@ sigchld_handler(int sig) {
 
 		debug("child with pid %d died\n", pid);
 
-		for (Client *c = clients; c; c = c->next) {
+		for (Window *c = windows; c; c = c->next) {
 			if (c->pid == pid) {
 				c->died = true;
 				break;
@@ -965,13 +965,13 @@ bitoftag(const char *tag) {
 static void
 tagschanged() {
 	bool allminimized = true;
-	for (Client *c = nextvisible(clients); c; c = nextvisible(c->next)) {
+	for (Window *c = nextvisible(windows); c; c = nextvisible(c->next)) {
 		if (!c->minimized) {
 			allminimized = false;
 			break;
 		}
 	}
-	if (allminimized && nextvisible(clients)) {
+	if (allminimized && nextvisible(windows)) {
 		focus(NULL);
 		toggleminimize();
 	}
@@ -1057,7 +1057,7 @@ keypress(int code) {
 		nodelay(stdscr, FALSE);
 	}
 
-	for (Client *c = pertag.runinall[pertag.curtag] ? nextvisible(clients) : sel; c; c = nextvisible(c->next)) {
+	for (Window *c = pertag.runinall[pertag.curtag] ? nextvisible(windows) : sel; c; c = nextvisible(c->next)) {
 		if (is_content_visible(c)) {
 			c->urgent = false;
 
@@ -1142,7 +1142,7 @@ static void init_default_keymap(void)
 
 	win_min_kmap = keymap_new(global_kmap);
 	keymap_bind(win_min_kmap, "<Enter>", toggleminimize, NULL);
-	keymap_bind(win_min_kmap, "x", killclient, NULL);
+	keymap_bind(win_min_kmap, "x", killwindow, NULL);
 }
 
 static void
@@ -1185,7 +1185,7 @@ setup(void) {
 }
 
 static void
-destroy(Client *c) {
+destroy(Window *c) {
 	event_t evt;
 
 	if (sel == c)
@@ -1193,7 +1193,7 @@ destroy(Client *c) {
 	detach(c);
 	detachstack(c);
 	if (sel == c) {
-		Client *next = nextvisible(clients);
+		Window *next = nextvisible(windows);
 		if (next) {
 			focus(next);
 			toggleminimize();
@@ -1221,8 +1221,8 @@ static void
 cleanup(void) {
 	int i;
 	scheme_uninit();
-	while (clients)
-		destroy(clients);
+	while (windows)
+		destroy(windows);
 	keymap_free(win_min_kmap);
 	keymap_free(global_kmap);
 	vt_shutdown();
@@ -1246,7 +1246,7 @@ cleanup(void) {
 	}
 }
 
-static char *getcwd_by_pid(Client *c, char *buf) {
+static char *getcwd_by_pid(Window *c, char *buf) {
 	if (!c)
 		return NULL;
 	char tmp[32];
@@ -1255,7 +1255,7 @@ static char *getcwd_by_pid(Client *c, char *buf) {
 }
 
 static void
-synctitle(Client *c)
+synctitle(Window *c)
 {
 	size_t len = 256;
 	char buf[128];
@@ -1312,7 +1312,7 @@ int create(const char *prog, const char *title, const char *cwd) {
 		pargs[2] = prog;
 		pargs[3] = NULL;
 	}
-	Client *c = calloc(1, sizeof(Client));
+	Window *c = calloc(1, sizeof(Window));
 	if (!c)
 		return -1;
 	c->tags = tagset[seltags];
@@ -1373,7 +1373,7 @@ int create(const char *prog, const char *title, const char *cwd) {
 	vt_urgent_handler_set(c->term, term_urgent_handler);
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
-	debug("client with pid %d forked\n", c->pid);
+	debug("window with pid %d forked\n", c->pid);
 	attach(c);
 	focus(c);
 	arrange();
@@ -1386,7 +1386,7 @@ int create(const char *prog, const char *title, const char *cwd) {
 
 static void
 focusn(const char *args[]) {
-	for (Client *c = nextvisible(clients); c; c = nextvisible(c->next)) {
+	for (Window *c = nextvisible(windows); c; c = nextvisible(c->next)) {
 		if (c->order == atoi(args[0])) {
 			focus(c);
 			if (c->minimized)
@@ -1398,7 +1398,7 @@ focusn(const char *args[]) {
 
 static void
 __focusid(int win_id) {
-	for (Client *c = clients; c; c = c->next) {
+	for (Window *c = windows; c; c = c->next) {
 		if (c->id == win_id) {
 			focus(c);
 			if (!isvisible(c)) {
@@ -1414,11 +1414,11 @@ static void
 focusnextnm(const char *args[]) {
 	if (!sel)
 		return;
-	Client *c = sel;
+	Window *c = sel;
 	do {
 		c = nextvisible(c->next);
 		if (!c)
-			c = nextvisible(clients);
+			c = nextvisible(windows);
 	} while (c->minimized && c != sel);
 	focus(c);
 }
@@ -1427,11 +1427,11 @@ static void
 focusprevnm(const char *args[]) {
 	if (!sel)
 		return;
-	Client *c = sel;
+	Window *c = sel;
 	do {
 		for (c = c->prev; c && !isvisible(c); c = c->prev);
 		if (!c) {
-			for (c = clients; c && c->next; c = c->next);
+			for (c = windows; c && c->next; c = c->next);
 			for (; c && !isvisible(c); c = c->prev);
 		}
 	} while (c && c != sel && c->minimized);
@@ -1445,21 +1445,21 @@ focuslast(const char *args[]) {
 }
 
 static void
-killclient(void) {
-	Client *target = sel;
+killwindow(void) {
+	Window *target = sel;
 
 	if (!target)
 		return;
 
-	debug("killing client with pid: %d\n", target->pid);
+	debug("killing window with pid: %d\n", target->pid);
 	kill(-target->pid, SIGKILL);
 }
 
 static void killother(const char *args[]) {
 	unsigned int n;
-	Client *c;
+	Window *c;
 
-	for (n = 0, c = nextvisible(clients); c; c = nextvisible(c->next)) {
+	for (n = 0, c = nextvisible(windows); c; c = nextvisible(c->next)) {
 		if (ismastersticky(c) || sel == c)
 			continue;
 		kill(-c->pid, SIGKILL);
@@ -1474,7 +1474,7 @@ quit(const char *args[]) {
 
 static void
 redraw(const char *args[]) {
-	for (Client *c = clients; c; c = c->next) {
+	for (Window *c = windows; c; c = c->next) {
 		if (!c->minimized) {
 			if (c->pid)
 				vt_dirty(c->term);
@@ -1561,7 +1561,7 @@ togglebarpos(const char *args[]) {
 static void
 toggleminimize(void)
 {
-	Client *c, *m, *t;
+	Window *c, *m, *t;
 	unsigned int n;
 	event_t evt;
 
@@ -1572,7 +1572,7 @@ toggleminimize(void)
 		return;
 	/* the last window can't be minimized */
 	if (!sel->minimized) {
-		for (n = 0, c = nextvisible(clients); c; c = nextvisible(c->next))
+		for (n = 0, c = nextvisible(windows); c; c = nextvisible(c->next))
 			if (!c->minimized)
 				n++;
 		if (n == 1)
@@ -1580,8 +1580,8 @@ toggleminimize(void)
 	}
 	sel->minimized = !sel->minimized;
 	m = sel;
-	/* check whether the master client was minimized */
-	if (sel == nextvisible(clients) && sel->minimized) {
+	/* check whether the master window was minimized */
+	if (sel == nextvisible(windows) && sel->minimized) {
 		c = nextvisible(sel->next);
 		detach(c);
 		attach(c);
@@ -1594,7 +1594,7 @@ toggleminimize(void)
 		 * minimized ones */
 		focusnextnm(NULL);
 		detach(m);
-		for (c = nextvisible(clients); c && (t = nextvisible(c->next)) && !t->minimized; c = t);
+		for (c = nextvisible(windows); c && (t = nextvisible(c->next)) && !t->minimized; c = t);
 		attachafter(m, c);
 	} else { /* window is no longer minimized, move it to the master area */
 		if (m->pid)
@@ -1614,9 +1614,9 @@ toggleminimize(void)
 static void minimizeother(const char *args[])
 {
 	unsigned int n;
-	Client *c;
+	Window *c;
 
-	for (n = 0, c = nextvisible(clients); c; c = nextvisible(c->next)) {
+	for (n = 0, c = nextvisible(windows); c; c = nextvisible(c->next)) {
 		if (ismastersticky(c) || sel == c)
 			continue;
 
@@ -1641,13 +1641,13 @@ togglerunall(const char *args[]) {
 
 static void
 zoom(const char *args[]) {
-	Client *c;
+	Window *c;
 
 	if (!sel)
 		return;
 	if (args && args[0])
 		focusn(args);
-	if ((c = sel) == nextvisible(clients))
+	if ((c = sel) == nextvisible(windows))
 		if (!(c = nextvisible(c->next)))
 			return;
 	detach(c);
@@ -1817,7 +1817,7 @@ handle_mouse(void) {
 	if (getmouse(&event) != OK)
 		return;
 
-	msel = get_client_by_coord(event.x, event.y);
+	msel = get_window_by_coord(event.x, event.y);
 	if (!msel)
 		return;
 
@@ -1955,9 +1955,9 @@ main(int argc, char *argv[]) {
 			nfds = MAX(nfds, bar.fd);
 		}
 
-		for (Client *c = clients; c; ) {
+		for (Window *c = windows; c; ) {
 			if (c->died) {
-				Client *t = c->next;
+				Window *t = c->next;
 				destroy(c);
 				c = t;
 				continue;
@@ -2039,7 +2039,7 @@ reenter:
 		if (bar.fd != -1 && FD_ISSET(bar.fd, &rd))
 			handle_statusbar();
 
-		for (Client *c = clients; c; c = c->next) {
+		for (Window *c = windows; c; c = c->next) {
 			if (c->pid) {
 				if (FD_ISSET(vt_pty_get(c->term), &rd)) {
 					if (vt_process(c->term) < 0 && errno == EIO) {
@@ -2076,9 +2076,9 @@ reenter:
 	return 0;
 }
 
-static Client *client_get_by_id(int id)
+static Window *window_get_by_id(int id)
 {
-	for (Client *c = clients; c; c = c->next) {
+	for (Window *c = windows; c; c = c->next) {
 		if (c->id == id)
 			return c;
 	}
@@ -2089,7 +2089,7 @@ static Client *client_get_by_id(int id)
 /* External API */
 int win_get_by_coord(int x, int y)
 {
-	Client *c = get_client_by_coord(x, y);
+	Window *c = get_window_by_coord(x, y);
 
 	if (c)
 		return c->id;
@@ -2099,7 +2099,7 @@ int win_get_by_coord(int x, int y)
 
 bool win_is_visible(int wid)
 {
-	Client *c = client_get_by_id(wid);
+	Window *c = window_get_by_id(wid);
 
 	if (c)
 		return isvisible(c);
@@ -2109,9 +2109,9 @@ bool win_is_visible(int wid)
 
 int win_first_get(void)
 {
-	Client *c;
+	Window *c;
 
-	for (c = clients; c && !isvisible(c); c = c->next);
+	for (c = windows; c && !isvisible(c); c = c->next);
 
 	if (c && isvisible(c))
 		return c->id;
@@ -2121,8 +2121,8 @@ int win_first_get(void)
 
 int win_prev_get(int wid)
 {
-	Client *c = client_get_by_id(wid);
-	Client *p;
+	Window *c = window_get_by_id(wid);
+	Window *p;
 
 	if (!c)
 		return 0;
@@ -2137,8 +2137,8 @@ int win_prev_get(int wid)
 
 int win_next_get(int wid)
 {
-	Client *c = client_get_by_id(wid);
-	Client *n;
+	Window *c = window_get_by_id(wid);
+	Window *n;
 
 	if (!c)
 		return 0;
@@ -2153,9 +2153,9 @@ int win_next_get(int wid)
 
 int win_upper_get(int wid)
 {
-	Client *c = client_get_by_id(wid);
+	Window *c = window_get_by_id(wid);
 	int w_x, w_y;
-	Client *u;
+	Window *u;
 
 	if (!c)
 		return 0;
@@ -2164,7 +2164,7 @@ int win_upper_get(int wid)
 	w_y = ui_window_y_get(c->win);
 
 	/* avoid vertical separator, hence +1 in x direction */
-	u = get_client_by_coord(w_x + 1, w_y - 1);
+	u = get_window_by_coord(w_x + 1, w_y - 1);
 	if (u)
 		return u->id;
 
@@ -2173,9 +2173,9 @@ int win_upper_get(int wid)
 
 int win_lower_get(int wid)
 {
-	Client *c = client_get_by_id(wid);
+	Window *c = window_get_by_id(wid);
 	int w_x, w_y;
-	Client *l;
+	Window *l;
 
 	if (!c)
 		return 0;
@@ -2183,7 +2183,7 @@ int win_lower_get(int wid)
 	w_x = ui_window_x_get(c->win);
 	w_y = ui_window_y_get(c->win);
 
-	l = get_client_by_coord(w_x, w_y + ui_window_height_get(c->win));
+	l = get_window_by_coord(w_x, w_y + ui_window_height_get(c->win));
 	if (l)
 		return l->id;
 
@@ -2192,9 +2192,9 @@ int win_lower_get(int wid)
 
 int win_left_get(int wid)
 {
-	Client *c = client_get_by_id(wid);
+	Window *c = window_get_by_id(wid);
 	int w_x, w_y;
-	Client *l;
+	Window *l;
 
 	if (!c)
 		return 0;
@@ -2202,7 +2202,7 @@ int win_left_get(int wid)
 	w_x = ui_window_x_get(c->win);
 	w_y = ui_window_y_get(c->win);
 
-	l = get_client_by_coord(w_x - 2, w_y);
+	l = get_window_by_coord(w_x - 2, w_y);
 	if (l)
 		return l->id;
 
@@ -2211,9 +2211,9 @@ int win_left_get(int wid)
 
 int win_right_get(int wid)
 {
-	Client *c = client_get_by_id(wid);
+	Window *c = window_get_by_id(wid);
 	int w_x, w_y;
-	Client *r;
+	Window *r;
 
 	if (!c)
 		return 0;
@@ -2221,7 +2221,7 @@ int win_right_get(int wid)
 	w_x = ui_window_x_get(c->win);
 	w_y = ui_window_y_get(c->win);
 
-	r = get_client_by_coord(w_x + ui_window_width_get(c->win) + 1, w_y);
+	r = get_window_by_coord(w_x + ui_window_width_get(c->win) + 1, w_y);
 	if (r)
 		return r->id;
 
@@ -2249,7 +2249,7 @@ int win_create(char *prog, char *title)
 
 int win_new(void)
 {
-	Client *c = calloc(1, sizeof(Client));
+	Window *c = calloc(1, sizeof(Window));
 	event_t evt;
 
 	if (!c)
@@ -2295,7 +2295,7 @@ int win_new(void)
 
 void win_del(int wid)
 {
-	Client *c = client_get_by_id(wid);
+	Window *c = window_get_by_id(wid);
 
 	if (c && c->pid)
 		kill(-c->pid, SIGKILL);
@@ -2305,17 +2305,17 @@ void win_del(int wid)
 
 char *win_title_get(int wid)
 {
-	Client *c = client_get_by_id(wid);
+	Window *c = window_get_by_id(wid);
 
 	if (c)
-		return client_get_title(c);
+		return window_get_title(c);
 
 	return NULL;
 }
 
 int win_title_set(int wid, char *title)
 {
-	Client *c = client_get_by_id(wid);
+	Window *c = window_get_by_id(wid);
 
 	if (c) {
 		ui_window_title_set(c->win, title);
@@ -2340,12 +2340,12 @@ static int tag_to_bit(int tag)
 int win_tag_set(int wid, int tag)
 {
 	unsigned int ntags = tag_to_bit(tag);
-	Client *c;
+	Window *c;
 
 	if (!ntags)
 		return -1;
 
-	c = client_get_by_id(wid);
+	c = window_get_by_id(wid);
 	if (!c)
 		return -1;
 
@@ -2357,9 +2357,9 @@ int win_tag_set(int wid, int tag)
 int win_tag_toggle(int wid, int tag)
 {
 	unsigned int ntags;
-	Client *c;
+	Window *c;
 
-	c = client_get_by_id(wid);
+	c = window_get_by_id(wid);
 	if (!c)
 		return -1;
 
@@ -2373,9 +2373,9 @@ int win_tag_toggle(int wid, int tag)
 int win_tag_add(int wid, int tag)
 {
 	unsigned int ntags;
-	Client *c;
+	Window *c;
 
-	c = client_get_by_id(wid);
+	c = window_get_by_id(wid);
 	if (!c)
 		return -1;
 
@@ -2388,9 +2388,9 @@ int win_tag_add(int wid, int tag)
 int win_tag_del(int wid, int tag)
 {
 	unsigned int ntags;
-	Client *c;
+	Window *c;
 
-	c = client_get_by_id(wid);
+	c = window_get_by_id(wid);
 	if (!c)
 		return -1;
 
@@ -2402,7 +2402,7 @@ int win_tag_del(int wid, int tag)
 
 win_state_t win_state_get(int wid)
 {
-	Client *c = client_get_by_id(wid);
+	Window *c = window_get_by_id(wid);
 
 	if (!c)
 		return -1;
@@ -2421,9 +2421,9 @@ win_state_t win_state_get(int wid)
 int win_state_set(int wid, win_state_t st)
 {
 	const char *maxi[] = { "[ ]" };
-	Client *c, *orig;
+	Window *c, *orig;
 
-	c = client_get_by_id(wid);
+	c = window_get_by_id(wid);
 	if (!c)
 		return -1;
 
@@ -2467,9 +2467,9 @@ int win_state_set(int wid, win_state_t st)
 int win_state_toggle(int wid, win_state_t st)
 {
 	const char *maxi[] = { "[ ]" };
-	Client *c, *orig;
+	Window *c, *orig;
 
-	c = client_get_by_id(wid);
+	c = window_get_by_id(wid);
 	if (!c)
 		return -1;
 
@@ -2502,7 +2502,7 @@ int win_state_toggle(int wid, win_state_t st)
 
 int win_keys_send(int wid, char *keys)
 {
-	Client *c = client_get_by_id(wid);
+	Window *c = window_get_by_id(wid);
 
 	if (!c)
 		return -1;
@@ -2514,7 +2514,7 @@ int win_keys_send(int wid, char *keys)
 
 int win_text_send(int wid, char *text)
 {
-	Client *c = client_get_by_id(wid);
+	Window *c = window_get_by_id(wid);
 
 	if (!c)
 		return -1;
@@ -2526,7 +2526,7 @@ int win_text_send(int wid, char *text)
 
 int win_buf_get(int wid)
 {
-	Client *c = client_get_by_id(wid);
+	Window *c = window_get_by_id(wid);
 
 	if (!c || !c->buf)
 		return -1;
@@ -2631,7 +2631,7 @@ void buf_name_set(int bid, const char *name)
 		buffer_name_lock(buf, true);
 		buffer_name_set(buf, name);
 
-		for (Client *c = clients; c; c = c->next) {
+		for (Window *c = windows; c; c = c->next) {
 			if (isvisible(c) && c->buf == buf)
 				draw_border(c);
 		}
@@ -2660,7 +2660,7 @@ int buf_by_name(const char *name)
 
 static void buf_update(void)
 {
-	for (Client *c = clients; c; c = c->next) {
+	for (Window *c = windows; c; c = c->next) {
 		if (is_content_visible(c)) {
 			View *view = c->view;
 			Buffer *buf = c->buf;

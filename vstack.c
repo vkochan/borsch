@@ -2,9 +2,9 @@
 static void vstack(void)
 {
 	unsigned int i, n, ny, nh, m, mh, th;
-	Client *c;
+	Window *c;
 
-	for (n = 0, c = nextvisible(clients); c; c = nextvisible(c->next))
+	for (n = 0, c = nextvisible(windows); c; c = nextvisible(c->next))
 		if (!c->minimized)
 			n++;
 
@@ -13,7 +13,7 @@ static void vstack(void)
 	th = n == m ? 0 : (wah - mh) / (n - m);
 	ny = way;
 
-	for (i = 0, c = nextvisible(clients); c; c = nextvisible(c->next)) {
+	for (i = 0, c = nextvisible(windows); c; c = nextvisible(c->next)) {
 		if (c->minimized)
 			continue;
 		if (i < m) /* master */

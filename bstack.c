@@ -3,9 +3,9 @@ static void bstack(void)
 	unsigned int lax = wax, lay = way-1, law = waw, lah = wah;
 	unsigned int i, n, nx, ny, nw, nh, m, mw, mh, tw;
 
-	Client *c;
+	Window *c;
 
-	for (n = 0, c = nextvisible(clients); c; c = nextvisible(c->next))
+	for (n = 0, c = nextvisible(windows); c; c = nextvisible(c->next))
 		if (!c->minimized)
 			n++;
 
@@ -16,7 +16,7 @@ static void bstack(void)
 	nx = lax;
 	ny = lay;
 
-	for (i = 0, c = nextvisible(clients); c; c = nextvisible(c->next)) {
+	for (i = 0, c = nextvisible(windows); c; c = nextvisible(c->next)) {
 		if (c->minimized)
 			continue;
 		if (i < m) {	/* master */
