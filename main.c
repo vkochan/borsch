@@ -588,8 +588,7 @@ drawbar(void) {
 	ui_refresh(ui);
 }
 
-static void
-draw_border(Window *c) {
+static void draw_title(Window *c) {
 	ui_text_style_t title_style = UI_TEXT_STYLE_NORMAL;
 	ui_text_style_t title_fg = UI_TEXT_COLOR_DEFAULT;
 	int x, y, maxlen, title_y;
@@ -641,7 +640,7 @@ draw(Window *c) {
 		ui_window_draw(c->win);
 	}
 	if (!isarrange(fullscreen) || c == sel)
-		draw_border(c);
+		draw_title(c);
 	ui_window_refresh(c->win);
 }
 
@@ -830,7 +829,7 @@ focus(Window *c) {
 	if (lastsel) {
 		lastsel->urgent = false;
 		if (!isarrange(fullscreen)) {
-			draw_border(lastsel);
+			draw_title(lastsel);
 			ui_window_refresh(lastsel->win);
 		}
 	}
@@ -845,7 +844,7 @@ focus(Window *c) {
 		if (isarrange(fullscreen)) {
 			draw(c);
 		} else {
-			draw_border(c);
+			draw_title(c);
 			ui_window_refresh(c->win);
 		}
 
@@ -872,7 +871,7 @@ term_title_handler(Vt *term, const char *title) {
 	/* c->title[title ? sizeof(c->title) - 1 : 0] = '\0'; */
 	/* settitle(c); */
 	/* if (!isarrange(fullscreen)) */
-	/* 	draw_border(c); */
+	/* 	draw_title(c); */
 }
 
 static void
@@ -883,7 +882,7 @@ term_urgent_handler(Vt *term) {
 	fflush(stdout);
 	drawbar();
 	if (!isarrange(fullscreen) && sel != c && isvisible(c))
-		draw_border(c);
+		draw_title(c);
 }
 
 static void
@@ -1293,7 +1292,7 @@ synctitle(Window *c)
 
 	settitle(c);
 	if (!isarrange(fullscreen) || sel == c)
-		draw_border(c);
+		draw_title(c);
 done:
 	close(fd);
 }
@@ -2059,7 +2058,7 @@ reenter:
 				}
 			} else if (!isarrange(fullscreen) && isvisible(c)
 					&& c->minimized) {
-				draw_border(c);
+				draw_title(c);
 				ui_window_refresh(c->win);
 			}
 		}
@@ -2323,7 +2322,7 @@ int win_title_set(int wid, char *title)
 		ui_window_title_set(c->win, title);
 		settitle(c);
 		if (!isarrange(fullscreen))
-			draw_border(c);
+			draw_title(c);
 		return 0;
 	}
 
@@ -2635,7 +2634,7 @@ void buf_name_set(int bid, const char *name)
 
 		for (Window *c = windows; c; c = c->next) {
 			if (isvisible(c) && c->buf == buf)
-				draw_border(c);
+				draw_title(c);
 		}
 	}
 }
@@ -2985,7 +2984,7 @@ void buf_mode_set(int bid, char *name)
 	if (buf) {
 		buffer_mode_set(buf, name);
 		if (sel)
-			draw_border(sel);
+			draw_title(sel);
 	}
 }
 
