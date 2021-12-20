@@ -369,6 +369,15 @@ ptr scheme_buf_text_obj_pos(int bid, size_t pos, char obj, int n)
 	return Sinteger(buf_text_obj_move(bid, pos, obj, n, false));
 }
 
+ptr scheme_buf_text_obj_range(int bid, size_t pos, char obj, bool inner)
+{
+	int start, end;
+
+	buf_text_obj_range(bid, pos, obj, &start, &end, inner);
+
+	return Scons(Sinteger(start), Sinteger(end));
+}
+
 ptr scheme_buf_text_range_del(int bid, int start, int end)
 {
 	size_t pos = buf_text_range_del(bid, start, end);
@@ -588,6 +597,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_text_insert_nl", scheme_buf_text_insert_nl);
 	Sregister_symbol("cs_buf_text_insert_file", scheme_buf_text_insert_file);
 	Sregister_symbol("cs_buf_text_obj_pos", scheme_buf_text_obj_pos);
+	Sregister_symbol("cs_buf_text_obj_range", scheme_buf_text_obj_range);
 	Sregister_symbol("cs_buf_text_get", scheme_buf_text_get);
 	Sregister_symbol("cs_buf_text_range_del", scheme_buf_text_range_del);
 	Sregister_symbol("cs_buf_text_input_enable", scheme_buf_text_input_enable);

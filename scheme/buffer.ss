@@ -11,6 +11,7 @@
 (define __cs_buf_text_insert_file (foreign-procedure "cs_buf_text_insert_file" (int string) scheme-object))
 (define __cs_buf_text_input_enable (foreign-procedure __collect_safe "cs_buf_text_input_enable" (int boolean) void))
 (define __cs_buf_text_obj_pos (foreign-procedure "cs_buf_text_obj_pos" (int int char int) scheme-object))
+(define __cs_buf_text_obj_range (foreign-procedure "cs_buf_text_obj_range" (int int char boolean) scheme-object))
 (define __cs_buf_text_range_del (foreign-procedure "cs_buf_text_range_del" (int int int) scheme-object))
 (define __cs_buf_text_get (foreign-procedure "cs_buf_text_get" (int int int) scheme-object))
 (define __cs_buf_cursor_get (foreign-procedure __collect_safe "cs_buf_cursor_get" (int) scheme-object))
@@ -336,14 +337,22 @@
 )
 
 (define next-char-pos
-   (lambda ()
-      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\c 1)
+   (case-lambda
+      [()
+       (__cs_buf_text_obj_pos (buffer-current) (cursor) #\c 1)]
+
+      [(s)
+       (__cs_buf_text_obj_pos (buffer-current) s #\c 1)]
    )
 )
 
 (define prev-char-pos
-   (lambda ()
-      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\c -1)
+   (case-lambda
+      [()
+       (__cs_buf_text_obj_pos (buffer-current) (cursor) #\c -1)]
+
+      [(s)
+       (__cs_buf_text_obj_pos (buffer-current) s #\c -1)]
    )
 )
 
@@ -450,8 +459,259 @@
                           (buffer-begin-pos)
                           (- (buffer-end-pos) (buffer-begin-pos)))]
 
-      [(s l)
-       (__cs_buf_text_get (buffer-current) s l)]
+      [(s e)
+       (__cs_buf_text_get (buffer-current) s (- e s))]
+   )
+)
+
+(define extract-char
+   (case-lambda
+      [()
+         (extract-char (cursor))]
+
+      [(s)
+         (let ([str (buffer-string s (next-char-pos s))])
+            (if (> (string-length str) 0)
+               (string-ref str 0)
+               ;; else
+               #f
+            )
+         )
+      ]
+   )
+)
+
+(define extract-word
+   (case-lambda
+      [()
+       (extract-word (cursor))]
+
+      [(s)
+       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\w #t)])
+          (buffer-string (car r) (cdr r))
+       )
+      ]
+   )
+)
+
+(define extract-longword
+   (case-lambda
+      [()
+       (extract-longword (cursor))]
+
+      [(s)
+       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\W #t)])
+          (buffer-string (car r) (cdr r))
+       )
+      ]
+   )
+)
+
+(define extract-line
+   (case-lambda
+      [()
+       (extract-line (cursor))]
+
+      [(s)
+       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\l #f)])
+          (buffer-string (car r) (cdr r))
+       )
+      ]
+   )
+)
+
+(define extract-line-inner
+   (case-lambda
+      [()
+       (extract-line-inner (cursor))]
+
+      [(s)
+       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\l #t)])
+          (buffer-string (car r) (cdr r))
+       )
+      ]
+   )
+)
+
+(define extract-square-brackets
+   (case-lambda
+      [()
+       (extract-square-brackets (cursor))]
+
+      [(s)
+       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\[ #f)])
+          (buffer-string (car r) (cdr r))
+       )
+      ]
+   )
+)
+
+(define extract-square-brackets-inner
+   (case-lambda
+      [()
+       (extract-square-brackets-inner (cursor))]
+
+      [(s)
+       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\[ #t)])
+          (buffer-string (car r) (cdr r))
+       )
+      ]
+   )
+)
+
+(define extract-curly-brackets
+   (case-lambda
+      [()
+       (extract-curly-brackets (cursor))]
+
+      [(s)
+       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\{ #f)])
+          (buffer-string (car r) (cdr r))
+       )
+      ]
+   )
+)
+
+(define extract-curly-brackets-inner
+   (case-lambda
+      [()
+       (extract-curly-brackets-inner (cursor))]
+
+      [(s)
+       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\{ #t)])
+          (buffer-string (car r) (cdr r))
+       )
+      ]
+   )
+)
+
+(define extract-angle-brackets
+   (case-lambda
+      [()
+       (extract-angle-brackets (cursor))]
+
+      [(s)
+       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\< #f)])
+          (buffer-string (car r) (cdr r))
+       )
+      ]
+   )
+)
+
+(define extract-angle-brackets-inner
+   (case-lambda
+      [()
+       (extract-angle-brackets-inner (cursor))]
+
+      [(s)
+       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\< #t)])
+          (buffer-string (car r) (cdr r))
+       )
+      ]
+   )
+)
+
+(define extract-parens
+   (case-lambda
+      [()
+       (extract-parens (cursor))]
+
+      [(s)
+       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\( #f)])
+          (buffer-string (car r) (cdr r))
+       )
+      ]
+   )
+)
+
+(define extract-parens-inner
+   (case-lambda
+      [()
+       (extract-parens-inner (cursor))]
+
+      [(s)
+       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\( #t)])
+          (buffer-string (car r) (cdr r))
+       )
+      ]
+   )
+)
+
+(define extract-quote
+   (case-lambda
+      [()
+       (extract-quote (cursor))]
+
+      [(s)
+       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\" #f)])
+          (buffer-string (car r) (cdr r))
+       )
+      ]
+   )
+)
+
+(define extract-quote-inner
+   (case-lambda
+      [()
+       (extract-quote-inner (cursor))]
+
+      [(s)
+       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\" #t)])
+          (buffer-string (car r) (cdr r))
+       )
+      ]
+   )
+)
+
+(define extract-single-quote
+   (case-lambda
+      [()
+       (extract-single-quote (cursor))]
+
+      [(s)
+       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\' #f)])
+          (buffer-string (car r) (cdr r))
+       )
+      ]
+   )
+)
+
+(define extract-single-quote-inner
+   (case-lambda
+      [()
+       (extract-single-quote-inner (cursor))]
+
+      [(s)
+       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\' #t)])
+          (buffer-string (car r) (cdr r))
+       )
+      ]
+   )
+)
+
+(define extract-back-quote
+   (case-lambda
+      [()
+       (extract-back-quote (cursor))]
+
+      [(s)
+       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\` #f)])
+          (buffer-string (car r) (cdr r))
+       )
+      ]
+   )
+)
+
+(define extract-back-quote-inner
+   (case-lambda
+      [()
+       (extract-back-quote-inner (cursor))]
+
+      [(s)
+       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\` #t)])
+          (buffer-string (car r) (cdr r))
+       )
+      ]
    )
 )
 

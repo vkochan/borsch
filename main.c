@@ -42,6 +42,7 @@
 #include "keymap.h"
 #include "view.h"
 #include "text/text-motions.h"
+#include "text/text-objects.h"
 #if defined __CYGWIN__ || defined __sun
 # include <termios.h>
 #endif
@@ -2852,6 +2853,73 @@ size_t buf_text_obj_move(int bid, size_t pos, char obj, int n, bool move)
 	}
 
 	return pos;
+}
+
+int buf_text_obj_range(int bid, size_t pos, char obj, int *start, int *end, bool inner)
+{
+	Filerange (*obj_range)(Text *t, size_t pos);
+	Buffer *buf = buffer_by_id(bid);
+	Filerange ret;
+	int shift = 0;
+
+	if (buf) {
+		switch (obj) {
+		case 'w':
+			obj_range = inner ? text_object_word :
+				text_object_word_outer;
+			break;
+		case 'W':
+			obj_range = inner ? text_object_longword :
+				text_object_longword_outer;
+			break;
+		case 'l':
+			obj_range = inner ? text_object_line_inner :
+				text_object_line;
+			break;
+		case '[':
+			obj_range = text_object_square_bracket;
+			shift = !inner;
+			break;
+		case '{':
+			obj_range = text_object_curly_bracket;
+			shift = !inner;
+			break;
+		case '<':
+			obj_range = text_object_angle_bracket;
+			shift = !inner;
+			break;
+		case '(':
+			obj_range = text_object_parenthesis;
+			shift = !inner;
+			break;
+		case '\"':
+			obj_range = text_object_quote;
+			shift = !inner;
+			break;
+		case '\'':
+			obj_range = text_object_single_quote;
+			shift = !inner;
+			break;
+		case '`':
+			obj_range = text_object_backtick;
+			shift = !inner;
+			break;
+		default:
+			goto err;
+		}
+
+		ret = obj_range(buffer_text_get(buf), pos);
+		ret.start -= shift;
+		ret.end += shift;
+
+		*start = ret.start;
+		*end = ret.end;
+		return 0;
+	}
+
+err:
+	*start = *end = pos;
+	return -1;
 }
 
 size_t buf_text_range_del(int bid, int start, int end)
