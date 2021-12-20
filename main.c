@@ -2909,6 +2909,9 @@ int buf_text_obj_range(int bid, size_t pos, char obj, int *start, int *end, bool
 		}
 
 		ret = obj_range(buffer_text_get(buf), pos);
+		if (ret.start == EPOS || ret.end == EPOS)
+			goto err;
+
 		ret.start -= shift;
 		ret.end += shift;
 
