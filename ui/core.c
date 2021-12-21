@@ -169,18 +169,6 @@ void ui_window_move(UiWin *win, int x, int y)
 	}
 }
 
-void ui_window_text_color_set(UiWin *win, short fg, short bg)
-{
-	if (win->ui->window_text_color_set)
-		win->ui->window_text_color_set(win, fg, bg);
-}
-
-void ui_window_text_attr_set(UiWin *win, unsigned attrs)
-{
-	if (win->ui->window_text_attr_set)
-		win->ui->window_text_attr_set(win, attrs);
-}
-
 void ui_window_draw_char(UiWin *win, int x, int y, unsigned int ch, int n)
 {
 	if (win->ui->window_draw_char)
@@ -275,6 +263,36 @@ void ui_window_ops_resize_set(UiWin *win, void (*fn)(UiWin *, int, int))
 void *ui_window_ops_resize_get(UiWin *win)
 {
 	return win->resize;
+}
+
+void ui_window_text_fg_set(UiWin *win, short fg)
+{
+	win->curr_fg = fg;
+}
+
+void ui_window_text_bg_set(UiWin *win, short bg)
+{
+	win->curr_bg = bg;
+}
+
+void ui_window_text_style_set(UiWin *win, ui_text_style_t style)
+{
+	win->curr_style = style;
+}
+
+short ui_window_text_fg_get(UiWin *win)
+{
+	return win->curr_fg;
+}
+
+short ui_window_text_bg_get(UiWin *win)
+{
+	return win->curr_bg;
+}
+
+short ui_window_text_style_get(UiWin *win)
+{
+	return win->curr_style;
 }
 
 void ui_cursor_enable(Ui *ui, bool enable)

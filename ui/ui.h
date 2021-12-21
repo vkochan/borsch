@@ -97,15 +97,12 @@ struct Ui {
 	void (*window_refresh)(UiWin*);
 	void (*window_resize)(UiWin*, int width, int height);
 	void (*window_move)(UiWin*, int x, int y);
-	void (*window_text_color_set)(UiWin*, short fg, short bg);
-	void (*window_text_attr_set)(UiWin*, unsigned attrs);
 	void (*window_draw_char)(UiWin*, int x, int y, unsigned int ch, int n);
 	void (*window_draw_text)(UiWin *win, int x, int y, const char *text, int n);
 	void (*window_draw_char_attr)(UiWin *win, int x, int y, unsigned ch, int n,
 				      short fg, short bg, ui_text_style_t style);
 	void (*window_draw_text_attr)(UiWin *win, int x, int y, const char *text, int n,
 				      short fg, short bg, ui_text_style_t style);
-	short (*window_color_get)(UiWin *win, short fg, short bg);
 	void (*draw)(Ui*);
 	void (*draw_char)(Ui *ui, int x, int y, unsigned int ch, int n);
 	void (*draw_char_vert)(Ui *ui, int x, int y, unsigned int ch, int n);
@@ -124,8 +121,8 @@ struct UiWin {
 	void *priv;
 	int x, y;
 	int width, height;
-	unsigned defattrs;
-	short deffg, defbg;
+	unsigned curr_style;
+	short curr_fg, curr_bg;
 	char title[256];
 	CellStyle (*style_get)(UiWin*, enum UiStyle);
 	void (*status)(UiWin*, const char *txt);
@@ -155,8 +152,6 @@ UiWin *ui_window_new(Ui *ui, View *view);
 void ui_window_free(UiWin *win);
 void ui_window_cursor_set(UiWin *win, int x, int y);
 void ui_window_cursor_get(UiWin *win, int *x, int *y);
-void ui_window_text_color_set(UiWin *win, short fg, short bg);
-void ui_window_text_attr_set(UiWin *win, unsigned attrs);
 void ui_window_draw(UiWin *win);
 void ui_window_draw_char(UiWin *win, int x, int y, unsigned int ch, int n);
 void ui_window_draw_text(UiWin *win, int x, int y, const char *text, int n);
@@ -182,6 +177,12 @@ void ui_window_ops_draw_set(UiWin *win, void (*fn)(UiWin *));
 void *ui_window_ops_draw_get(UiWin *win);
 void ui_window_ops_resize_set(UiWin *win, void (*fn)(UiWin *, int, int));
 void *ui_window_ops_resize_get(UiWin *win);
+void ui_window_text_fg_set(UiWin *win, short fg);
+void ui_window_text_bg_set(UiWin *win, short bg);
+void ui_window_text_style_set(UiWin *win, ui_text_style_t style);
+short ui_window_text_fg_get(UiWin *win);
+short ui_window_text_bg_get(UiWin *win);
+short ui_window_text_style_get(UiWin *win);
 void ui_cursor_enable(Ui*, bool enable);
 
 #endif

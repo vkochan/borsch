@@ -41,9 +41,6 @@ typedef struct {
 	UiWin win;
 	WINDOW *cwin;
 	int cur_x, cur_y;
-	unsigned curr_attrs;
-	short curr_fg;
-	short curr_bg;
 } WinTerm;
 
 static bool is_utf8, has_default_colors;
@@ -128,17 +125,19 @@ static unsigned int term_color_hash(short fg, short bg)
 static short term_window_color_get(UiWin *win, short fg, short bg)
 {
 	WinTerm *t = (WinTerm*)win;
+	short curr_fg = term_color2curses(ui_window_text_fg_get(win));
+	short curr_bg = term_color2curses(ui_window_text_bg_get(win));
 
 	if (fg >= COLORS)
-		fg = (t ? t->curr_fg : default_fg);
+		fg = (t ? curr_fg : default_fg);
 	if (bg >= COLORS)
-		bg = (t ? t->curr_bg : default_bg);
+		bg = (t ? curr_bg : default_bg);
 
 	if (!has_default_colors) {
 		if (fg == -1)
-			fg = (t && t->curr_fg != -1 ? t->curr_fg : default_fg);
+			fg = (t && curr_fg != -1 ? curr_fg : default_fg);
 		if (bg == -1)
-			bg = (t && t->curr_bg != -1 ? t->curr_bg : default_bg);
+			bg = (t && curr_bg != -1 ? curr_bg : default_bg);
 	}
 
 	if (!color2palette || (fg == -1 && bg == -1))
@@ -287,8 +286,8 @@ static UiWin *term_window_new(Ui *ui, View *view)
 		return NULL;
 	}
 
-	twin->curr_fg = default_fg;
-	twin->curr_bg = default_bg;
+	ui_window_text_fg_set(&twin->win, default_fg);
+	ui_window_text_bg_set(&twin->win, default_bg);
 
 	return (UiWin*)twin;
 }
@@ -317,23 +316,6 @@ static void term_window_move(UiWin *win, int x, int y)
 	mvwin(twin->cwin, y, x);
 }
 
-void term_window_text_color_set(UiWin *win, short fg, short bg)
-{
-	WinTerm *twin = (WinTerm*)win;
-
-	wcolor_set(twin->cwin, term_window_color_get(win, fg, bg), NULL);
-	twin->curr_fg = fg;
-	twin->curr_bg = fg;
-}
-
-void term_window_text_attr_set(UiWin *win, unsigned attrs)
-{
-	WinTerm *twin = (WinTerm*)win;
-
-	wattrset(twin->cwin, attrs);
-	twin->curr_attrs = attrs;
-}
-
 void term_window_draw_char(UiWin *win, int x, int y, unsigned int ch, int n)
 {
 	WinTerm *twin = (WinTerm*)win;
@@ -352,9 +334,9 @@ void term_window_draw_char_attr(UiWin *win, int x, int y, unsigned ch, int n,
 				short fg, short bg, ui_text_style_t style)
 {
 	WinTerm *twin = (WinTerm*)win;
-	unsigned tmp_attr = twin->curr_attrs;
-	short tmp_fg = twin->curr_fg;
-	short tmp_bg = twin->curr_bg;
+	unsigned tmp_attr = ui_window_text_style_get(win);
+	short tmp_fg = ui_window_text_fg_get(win);
+	short tmp_bg = ui_window_text_bg_get(win);
 
 	wattrset(twin->cwin, term_style2attr(style));
 	wcolor_set(twin->cwin,
@@ -364,9 +346,10 @@ void term_window_draw_char_attr(UiWin *win, int x, int y, unsigned ch, int n,
 
 	mvwhline(twin->cwin, y, x, ch, n);
 
-	wattrset(twin->cwin, tmp_attr);
+	wattrset(twin->cwin, term_style2curses(tmp_attr));
 	wcolor_set(twin->cwin,
-		   term_color_make(win->ui, tmp_fg, tmp_bg),
+		   term_color_make(win->ui, term_color2curses(tmp_fg),
+			   term_color2curses(tmp_bg)),
 		   NULL);
 }
 
@@ -374,9 +357,9 @@ void term_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int 
 				short fg, short bg, ui_text_style_t style)
 {
 	WinTerm *twin = (WinTerm*)win;
-	unsigned tmp_attr = twin->curr_attrs;
-	short tmp_fg = twin->curr_fg;
-	short tmp_bg = twin->curr_bg;
+	unsigned tmp_attr = ui_window_text_style_get(win);
+	short tmp_fg = ui_window_text_fg_get(win);
+	short tmp_bg = ui_window_text_bg_get(win);
 
 	wattrset(twin->cwin, term_style2attr(style));
 	wcolor_set(twin->cwin,
@@ -386,7 +369,7 @@ void term_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int 
 
 	mvwaddnstr(twin->cwin, y, x, text, n);
 
-	wattrset(twin->cwin, tmp_attr);
+	wattrset(twin->cwin, term_style2curses(tmp_attr));
 	wcolor_set(twin->cwin,
 		   term_color_make(win->ui, tmp_fg, tmp_bg),
 		   NULL);
@@ -422,7 +405,9 @@ static void term_window_draw(UiWin *win)
 	wmove(twin->cwin, y, x);
 	wclrtobot(twin->cwin);
 
-	term_window_text_attr_set(win, term_color_make(win->ui, twin->curr_fg, twin->curr_bg));
+	wattrset(twin->cwin, term_color_make(win->ui,
+				term_color2curses(ui_window_text_fg_get(win)),
+				term_color2curses(ui_window_text_bg_get(win))));
 
 	for (const Line *l = line; l; l = l->next, y++) {
 		for (x = 0; x < view_width; x++) {
@@ -479,8 +464,6 @@ Ui *ui_term_new(void)
 	tui->ui.window_refresh = term_window_refresh;
 	tui->ui.window_resize = term_window_resize;
 	tui->ui.window_move = term_window_move;
-	tui->ui.window_text_color_set = term_window_text_color_set;
-	tui->ui.window_text_attr_set = term_window_text_attr_set;
 	tui->ui.window_draw_char = term_window_draw_char;
 	tui->ui.window_draw_text = term_window_draw_text;
 	tui->ui.window_draw_char_attr = term_window_draw_char_attr;
