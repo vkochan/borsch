@@ -233,3 +233,9 @@
       )
    )
 )
+
+(define bit
+   (lambda (n)
+     (bitwise-arithmetic-shift-left 1 n)
+   )
+)

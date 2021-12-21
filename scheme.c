@@ -402,6 +402,36 @@ ptr scheme_buf_text_get(int bid, int start, int len)
 	return ret;
 }
 
+void scheme_buf_text_fg_set(int bid, int fg)
+{
+	buf_text_fg_set(bid, fg);
+}
+
+ptr scheme_buf_text_fg_get(int bid)
+{
+	return Sinteger(buf_text_fg_get(bid));
+}
+
+void scheme_buf_text_bg_set(int bid, int bg)
+{
+	buf_text_bg_set(bid, bg);
+}
+
+ptr scheme_buf_text_bg_get(int bid)
+{
+	return Sinteger(buf_text_bg_get(bid));
+}
+
+void scheme_buf_text_style_set(int bid, int style)
+{
+	buf_text_style_set(bid, style);
+}
+
+ptr scheme_buf_text_style_get(int bid)
+{
+	return Sinteger(buf_text_style_get(bid));
+}
+
 ptr scheme_buf_cursor_get(int bid)
 {
 	size_t pos = buf_cursor_get(bid);
@@ -601,6 +631,13 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_text_get", scheme_buf_text_get);
 	Sregister_symbol("cs_buf_text_range_del", scheme_buf_text_range_del);
 	Sregister_symbol("cs_buf_text_input_enable", scheme_buf_text_input_enable);
+	Sregister_symbol("cs_buf_text_fg_set", scheme_buf_text_fg_set);
+	Sregister_symbol("cs_buf_text_bg_set", scheme_buf_text_bg_set);
+	Sregister_symbol("cs_buf_text_style_set", scheme_buf_text_style_set);
+	Sregister_symbol("cs_buf_text_fg_get", scheme_buf_text_fg_get);
+	Sregister_symbol("cs_buf_text_bg_get", scheme_buf_text_bg_get);
+	Sregister_symbol("cs_buf_text_style_get", scheme_buf_text_style_get);
+
 	Sregister_symbol("cs_buf_mode_set", scheme_buf_mode_set);
 	Sregister_symbol("cs_buf_cursor_get", scheme_buf_cursor_get);
 	Sregister_symbol("cs_buf_cursor_set", scheme_buf_cursor_set);

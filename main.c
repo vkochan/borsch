@@ -2945,6 +2945,87 @@ char *buf_text_get(int bid, int start, int len)
 	return data;
 }
 
+static void buf_text_style_update(Buffer *buf, char what)
+{
+	for (Window *c = windows; c; c = c->next) {
+		if (c->buf == buf) {
+			switch (what) {
+			case 'f':
+				ui_window_text_fg_set(c->win,
+						buffer_text_fg_get(buf));
+				break;
+			case 'b':
+				ui_window_text_bg_set(c->win,
+						buffer_text_bg_get(buf));
+				break;
+			case 's':
+				ui_window_text_style_set(c->win,
+						buffer_text_style_get(buf));
+			}
+		}
+	}
+}
+
+void buf_text_fg_set(int bid, short fg)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_text_fg_set(buf, fg);
+		buf_text_style_update(buf, 'f');
+	}
+}
+
+int buf_text_fg_get(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		return buffer_text_fg_get(buf);
+
+	return -1;
+}
+
+void buf_text_bg_set(int bid, short bg)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_text_bg_set(buf, bg);
+		buf_text_style_update(buf, 'b');
+	}
+}
+
+short buf_text_bg_get(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		return buffer_text_bg_get(buf);
+
+	return -1;
+}
+
+void buf_text_style_set(int bid, int style)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_text_style_set(buf, style);
+		buf_text_style_update(buf, 's');
+	}
+}
+
+int buf_text_style_get(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		return buffer_text_style_get(buf);
+
+	return -1;
+}
+
 size_t buf_cursor_get(int bid)
 {
 	Buffer *buf = buffer_by_id(bid);

@@ -1,4 +1,5 @@
 (load "common.ss")
+(load "style.ss")
 (load "keymap.ss")
 (load "tagbar.ss")
 (load "layout.ss")

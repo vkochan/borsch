@@ -113,6 +113,7 @@ struct Ui {
 	void (*refresh)(Ui*);
 	void (*cursor_enable)(Ui*, bool enable);
 	short (*color_make)(Ui *ui, short fg, short bg);
+	short (*colors_max_get)(Ui *ui);
 };
 
 struct UiWin {
@@ -148,6 +149,8 @@ int ui_width_get(Ui *ui);
 short ui_color_make(Ui *ui, short fg, short bg);
 void ui_draw_char(Ui *ui, int x, int y, unsigned int ch, int n);
 void ui_draw_char_vert(Ui *ui, int x, int y, unsigned int ch, int n);
+short ui_colors_max_get(Ui *ui);
+
 UiWin *ui_window_new(Ui *ui, View *view);
 void ui_window_free(UiWin *win);
 void ui_window_cursor_set(UiWin *win, int x, int y);

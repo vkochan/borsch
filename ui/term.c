@@ -183,6 +183,11 @@ short term_color_make(Ui *ui, short fg, short bg)
 	return color_pair >= 0 ? color_pair : -color_pair;
 }
 
+short term_colors_max_get(Ui *ui)
+{
+	return COLORS;
+}
+
 static void term_init_colors(Ui *ui)
 {
 	pair_content(0, &default_fg, &default_bg);
@@ -405,9 +410,11 @@ static void term_window_draw(UiWin *win)
 	wmove(twin->cwin, y, x);
 	wclrtobot(twin->cwin);
 
-	wattrset(twin->cwin, term_color_make(win->ui,
-				term_color2curses(ui_window_text_fg_get(win)),
-				term_color2curses(ui_window_text_bg_get(win))));
+	wattrset(twin->cwin, term_style2attr(ui_window_text_style_get(win)));
+	wcolor_set(twin->cwin, term_color_make(win->ui,
+			term_color2curses(ui_window_text_fg_get(win)),
+			term_color2curses(ui_window_text_bg_get(win))),
+			NULL);
 
 	for (const Line *l = line; l; l = l->next, y++) {
 		for (x = 0; x < view_width; x++) {
@@ -452,6 +459,7 @@ Ui *ui_term_new(void)
 	tui->ui.update = term_update;
 	tui->ui.refresh = term_refresh;
 	tui->ui.color_make = term_color_make;
+	tui->ui.colors_max_get = term_colors_max_get;
 	tui->ui.draw_char = term_draw_char;
 	tui->ui.draw_char_vert = term_draw_char_vert;
 	tui->ui.cursor_enable = term_cursor_enable;

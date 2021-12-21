@@ -14,6 +14,9 @@ typedef struct Buffer {
 	char kmap_name[64];
 	KeyMap *keymap;
 	size_t cursor;
+	ui_text_style_t curr_style;
+	short curr_fg;
+	short curr_bg;
 	Text *text;
 	bool is_name_locked;
 	char name[256];
@@ -89,6 +92,10 @@ Buffer *buffer_new(const char *name)
 	}
 
 	strncpy(buf->mode, "none", sizeof(buf->mode));
+
+	buf->curr_style = UI_TEXT_STYLE_NORMAL;
+	buf->curr_fg = UI_TEXT_COLOR_DEFAULT;
+	buf->curr_bg = UI_TEXT_COLOR_DEFAULT;
 
 	buffer_list_add(&buf_list, buf);
 
@@ -307,6 +314,42 @@ void buffer_text_input_enable(Buffer *buf, bool enable)
 bool buffer_text_input_is_enabled(Buffer *buf)
 {
 	return buf->is_input_enabled;
+}
+
+void buffer_text_fg_set(Buffer *buf, short fg)
+{
+	if (fg != buf->curr_fg)
+		buf->is_dirty = true;
+	buf->curr_fg = fg;
+}
+
+short buffer_text_fg_get(Buffer *buf)
+{
+	return buf->curr_fg;
+}
+
+void buffer_text_bg_set(Buffer *buf, short bg)
+{
+	if (bg != buf->curr_bg)
+		buf->is_dirty = true;
+	buf->curr_bg = bg;
+}
+
+short  buffer_text_bg_get(Buffer *buf)
+{
+	return buf->curr_bg;
+}
+
+void buffer_text_style_set(Buffer *buf, ui_text_style_t style)
+{
+	if (style != buf->curr_style)
+		buf->is_dirty = true;
+	buf->curr_style = style;
+}
+
+ui_text_style_t buffer_text_style_get(Buffer *buf)
+{
+	return buf->curr_style;
 }
 
 bool buffer_is_dirty(Buffer *buf)

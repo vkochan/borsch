@@ -300,3 +300,11 @@ void ui_cursor_enable(Ui *ui, bool enable)
 	if (ui->cursor_enable)
 		ui->cursor_enable(ui, enable);
 }
+
+short ui_colors_max_get(Ui *ui)
+{
+	if (ui->colors_max_get)
+		return ui->colors_max_get(ui);
+
+	return 8;
+}

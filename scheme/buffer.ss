@@ -14,6 +14,14 @@
 (define __cs_buf_text_obj_range (foreign-procedure "cs_buf_text_obj_range" (int int char boolean) scheme-object))
 (define __cs_buf_text_range_del (foreign-procedure "cs_buf_text_range_del" (int int int) scheme-object))
 (define __cs_buf_text_get (foreign-procedure "cs_buf_text_get" (int int int) scheme-object))
+
+(define __cs_buf_text_fg_set (foreign-procedure "cs_buf_text_fg_set" (int int) void))
+(define __cs_buf_text_bg_set (foreign-procedure "cs_buf_text_bg_set" (int int) void))
+(define __cs_buf_text_style_set (foreign-procedure "cs_buf_text_style_set" (int int) void))
+(define __cs_buf_text_fg_get (foreign-procedure "cs_buf_text_fg_get" (int) scheme-object))
+(define __cs_buf_text_bg_get (foreign-procedure "cs_buf_text_bg_get" (int) scheme-object))
+(define __cs_buf_text_style_get (foreign-procedure "cs_buf_text_style_get" (int) scheme-object))
+
 (define __cs_buf_cursor_get (foreign-procedure __collect_safe "cs_buf_cursor_get" (int) scheme-object))
 (define __cs_buf_cursor_set (foreign-procedure __collect_safe "cs_buf_cursor_set" (int int) void))
 (define __cs_buf_mode_set (foreign-procedure "cs_buf_mode_set" (int string) void))
@@ -836,5 +844,25 @@
 (define delete-buffer-end
    (lambda ()
       (cursor-obj-delete move-buffer-end)
+   )
+)
+
+(define set-text-style
+   (lambda (s . e)
+      (let ([a (append (list s) e)])
+         (for-each
+            (lambda (o)
+               (cond
+                  [(equal? (car o) ':fg)
+		     (__cs_buf_text_fg_set (buffer-current) (color-name->number (cadr o)))]
+                  [(equal? (car o) ':bg)
+		     (__cs_buf_text_bg_set (buffer-current) (color-name->number (cadr o)))]
+                  [(equal? (car o) ':style)
+		     (__cs_buf_text_style_set (buffer-current) (style-name->number (cadr o)))]
+               )
+            )
+            a
+         )
+      )
    )
 )
