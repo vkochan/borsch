@@ -420,6 +420,11 @@ static void term_window_draw(UiWin *win)
 		for (x = 0; x < view_width; x++) {
 			Cell *c = &l->cells[x];
 
+			if (!c->len) {
+				c->data[0] = ' ';
+				c->len = 1;
+			}
+
 			wmove(twin->cwin, y, x);
 			waddnstr(twin->cwin, c->data, c->len);
 		}
