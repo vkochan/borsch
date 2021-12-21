@@ -239,7 +239,7 @@ size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text)
 	return pos;
 }
 
-size_t buffer_text_len_insert(Buffer *buf, size_t pos, const char *text, size_t len)
+size_t buffer_text_insert_len(Buffer *buf, size_t pos, const char *text, size_t len)
 {
 	if (text_insert(buf->text, pos, text, len)) {
 		buf->is_dirty = true;

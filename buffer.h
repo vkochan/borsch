@@ -25,7 +25,7 @@ void buffer_ref_put(Buffer *buf);
 void buffer_keymap_set(Buffer *buf, char *name);
 KeyMap *buffer_keymap_get(Buffer *buf);
 size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text);
-size_t buffer_text_len_insert(Buffer *buf, size_t pos, const char *text, size_t len);
+size_t buffer_text_insert_len(Buffer *buf, size_t pos, const char *text, size_t len);
 size_t buffer_text_insert_nl(Buffer *buf, size_t pos);
 size_t buffer_text_delete(Buffer *buf, size_t start, size_t end);
 char *buffer_text_extract(Buffer *buf, size_t pos, size_t len);

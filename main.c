@@ -1069,7 +1069,7 @@ keypress(int code) {
 			} else if (buffer_text_input_is_enabled(c->buf)) {
 				size_t pos = buffer_cursor_get(c->buf);
 				if (key == -1 && code <= UCHAR_MAX)
-					buffer_text_len_insert(c->buf, pos, (char *)&code, 1);
+					buffer_text_insert_len(c->buf, pos, (char *)&code, 1);
 			}
 		}
 		if (!pertag.runinall[pertag.curtag])
@@ -2736,7 +2736,7 @@ size_t buf_text_insert_file(int bid, const char *path)
 		} else if (len == 0) {
 			break;
 		} else {
-			pos += buffer_text_len_insert(buf, pos, data, len);
+			pos += buffer_text_insert_len(buf, pos, data, len);
 			rem -= len;
 		}
 	}
