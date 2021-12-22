@@ -1,3 +1,9 @@
+* TODO Add buffer file operations:
+
+   - open file
+   - save file
+   - show status if modified
+
 * TODO Use Scheme guardian approach to free objects allocated in main.c
 
 * TODO Split scheme.ss into smaller libraries
