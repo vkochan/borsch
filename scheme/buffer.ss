@@ -171,6 +171,20 @@
    )
 )
 
+(define buffer-new
+   (case-lambda
+      [() 
+       (window-buffer (window-new))]
+
+      [(n) 
+       (let ([b (window-buffer (window-new))])
+          (buffer-set-name n)
+          b
+       )
+      ]
+   )
+)
+
 (define buffer-get
    (lambda (n)
       (__cs_buf_by_name n)
