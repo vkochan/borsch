@@ -218,6 +218,26 @@
    )
 )
 
+(define buffer-set-text-style
+   (lambda (s . e)
+      (let ([a (append (list s) e)])
+         (for-each
+            (lambda (o)
+               (cond
+                  [(equal? (car o) ':fg)
+		     (__cs_buf_text_fg_set (buffer-current) (color-name->number (cadr o)))]
+                  [(equal? (car o) ':bg)
+		     (__cs_buf_text_bg_set (buffer-current) (color-name->number (cadr o)))]
+                  [(equal? (car o) ':style)
+		     (__cs_buf_text_style_set (buffer-current) (style-name->number (cadr o)))]
+               )
+            )
+            a
+         )
+      )
+   )
+)
+
 (define insert
    (lambda (t)
       (__cs_buf_text_insert (buffer-current) t)
@@ -844,25 +864,5 @@
 (define delete-buffer-end
    (lambda ()
       (cursor-obj-delete move-buffer-end)
-   )
-)
-
-(define set-text-style
-   (lambda (s . e)
-      (let ([a (append (list s) e)])
-         (for-each
-            (lambda (o)
-               (cond
-                  [(equal? (car o) ':fg)
-		     (__cs_buf_text_fg_set (buffer-current) (color-name->number (cadr o)))]
-                  [(equal? (car o) ':bg)
-		     (__cs_buf_text_bg_set (buffer-current) (color-name->number (cadr o)))]
-                  [(equal? (car o) ':style)
-		     (__cs_buf_text_style_set (buffer-current) (style-name->number (cadr o)))]
-               )
-            )
-            a
-         )
-      )
    )
 )
