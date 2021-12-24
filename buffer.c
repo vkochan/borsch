@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <libgen.h>
 #include <fcntl.h>
 
 #include "view.h"
@@ -128,6 +129,8 @@ void buffer_del(Buffer *buf)
 int buffer_file_open(Buffer *buf, const char *file)
 {
 	struct stat st;
+	char tmp[256];
+	char *fname;
 	Text *text;
 	int err;
 
@@ -147,6 +150,10 @@ int buffer_file_open(Buffer *buf, const char *file)
 		free(buf->file.path);
 		text_free(buf->text);
 	}
+
+	strncpy(tmp, file, sizeof(tmp));
+	fname = basename(tmp);
+	strncpy(buf->name, fname, sizeof(buf->name));
 
 	buf->file.path = strdup(file);
 	buf->text = text;
