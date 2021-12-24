@@ -26,6 +26,9 @@
 (define __cs_buf_cursor_set (foreign-procedure __collect_safe "cs_buf_cursor_set" (int int) void))
 (define __cs_buf_mode_set (foreign-procedure "cs_buf_mode_set" (int string) void))
 
+(define __cs_buf_file_open (foreign-procedure "cs_buf_file_open" (int string) scheme-object))
+(define __cs_buf_save (foreign-procedure "cs_buf_save" (int) scheme-object))
+
 (define mode-gen-map-symb
    (lambda (m)
          (string->symbol
@@ -188,6 +191,18 @@
 (define buffer-get
    (lambda (n)
       (__cs_buf_by_name n)
+   )
+)
+
+(define buffer-open-file
+   (lambda (f)
+      (__cs_buf_file_open (buffer-current) f)
+   )
+)
+
+(define buffer-save
+   (lambda ()
+      (__cs_buf_save (buffer-current))
    )
 )
 

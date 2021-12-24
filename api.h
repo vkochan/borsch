@@ -91,6 +91,8 @@ size_t buf_cursor_get(int bid);
 void buf_cursor_set(int bid, size_t pos);
 void buf_input_enable(int bid, bool enable);
 void buf_mode_set(int bid, char *name);
+int buf_file_open(int bid, const char *file);
+int buf_save(int bid);
 
 int view_current_get(void);
 int view_current_set(int tag);

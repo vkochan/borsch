@@ -619,7 +619,8 @@ static void draw_title(Window *c) {
 		tmp[maxlen] = '\0';
 	}
 
-	len = snprintf(title, sizeof(title), "(%s)   [%d|%s%s]",
+	len = snprintf(title, sizeof(title), "%s(%s)   [%d|%s%s]",
+			buffer_is_modified(c->buf) ? "[+] " : "",
 			buffer_mode_get(c->buf),
 			c->order,
 			ismastersticky(c) ? "*" : "",
@@ -3065,6 +3066,36 @@ void buf_mode_set(int bid, char *name)
 		if (sel)
 			draw_title(sel);
 	}
+}
+
+int buf_file_open(int bid, const char *file)
+{
+	Buffer *buf = buffer_by_id(bid);
+	int err;
+
+	if (buf) {
+		err = buffer_file_open(buf, file);
+		if (err)
+			return -1;
+
+		/* update view with new text */
+		for (Window *c = windows; c; c = c->next) {
+			if (buf == c->buf) {
+				Text *txt = buffer_text_get(buf);
+
+				if (view_text(c->view) != txt)
+					view_reload(c->view, txt);
+			}
+		}
+	}
+}
+
+int buf_save(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		return buffer_save(buf);
 }
 
 int view_current_get(void)

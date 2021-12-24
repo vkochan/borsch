@@ -9,6 +9,9 @@ typedef struct KeyMap KeyMap;
 
 Buffer *buffer_new(const char *name);
 void buffer_del(Buffer *buf);
+int buffer_file_open(Buffer *buf, const char *file);
+int buffer_save(Buffer *buf);
+bool buffer_is_modified(Buffer *buf);
 Buffer *buffer_first_get(void);
 Buffer *buffer_next_get(Buffer *buf);
 Text *buffer_text_get(Buffer *buf);

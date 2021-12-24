@@ -457,6 +457,16 @@ void scheme_buf_mode_set(int bid, char *mode)
 	buf_mode_set(bid, mode);
 }
 
+ptr scheme_buf_file_open(int bid, const char *file)
+{
+	return Sinteger(buf_file_open(bid, file));
+}
+
+ptr scheme_buf_save(int bid)
+{
+	return Sinteger(buf_save(bid));
+}
+
 int scheme_view_current_get(void)
 {
 	return view_current_get();
@@ -641,6 +651,8 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_mode_set", scheme_buf_mode_set);
 	Sregister_symbol("cs_buf_cursor_get", scheme_buf_cursor_get);
 	Sregister_symbol("cs_buf_cursor_set", scheme_buf_cursor_set);
+	Sregister_symbol("cs_buf_file_open", scheme_buf_file_open);
+	Sregister_symbol("cs_buf_save", scheme_buf_save);
 
 	Sregister_symbol("cs_view_current_get", scheme_view_current_get);
 	Sregister_symbol("cs_view_current_set", scheme_view_current_set);

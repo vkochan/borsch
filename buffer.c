@@ -2,10 +2,16 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <fcntl.h>
 
 #include "view.h"
 #include "keymap.h"
 #include "text/text.h"
+
+typedef struct {
+	bool is_new;
+	char *path;
+} File;
 
 typedef struct Buffer {
 	int buf_id;
@@ -23,7 +29,9 @@ typedef struct Buffer {
 	char mode[32];
 	size_t ref_count;
 	bool is_input_enabled;
+	bool is_read_only;
 	bool is_dirty;
+	File file;
 } Buffer;
 
 static Buffer buf_list;
@@ -111,9 +119,59 @@ void buffer_del(Buffer *buf)
 		if (buf->keymap)
 			keymap_ref_put(buf->keymap);
 		buffer_list_del(buf);
+		/* TODO: check if buffer is not saved and ask user to save it */
 		text_free(buf->text);
+		free(buf->file.path);
 		free(buf);
 	}
+}
+
+int buffer_file_open(Buffer *buf, const char *file)
+{
+	bool is_new = false;
+	struct stat st;
+	Text *text;
+	int err;
+
+	err = stat(file, &st);
+	if (err) {
+		is_new = true;
+	} else {
+		text = text_load(file);
+		/* TODO show err message */
+		if (!text)
+			return -1;
+	}
+
+	/* close opened file */
+	if (buf->file.path) {
+		/* TODO show error message */
+		if (text_modified(buf->text))
+			text_save(buf->text, buf->file.path);
+		free(buf->file.path);
+		text_free(buf->text);
+	}
+
+	buf->file.path = strdup(file);
+	buf->text = text;
+	buf->cursor = 0;
+
+	return 0;
+}
+
+int buffer_save(Buffer *buf)
+{
+	if (buf->is_read_only)
+		return -1;
+
+	text_save(buf->text, buf->file.path);
+
+	return 0;
+}
+
+bool buffer_is_modified(Buffer *buf)
+{
+	return text_modified(buf->text);
 }
 
 Buffer *buffer_first_get(void)
@@ -236,8 +294,8 @@ size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text)
 	len = strlen(text);
 
 	if (text_insert(buf->text, pos, text, len)) {
-		buf->is_dirty = true;
 		buf->cursor = pos + len;
+		buf->is_dirty = true;
 		pos += len;
 	} else {
 		pos = EPOS;
@@ -249,8 +307,8 @@ size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text)
 size_t buffer_text_insert_len(Buffer *buf, size_t pos, const char *text, size_t len)
 {
 	if (text_insert(buf->text, pos, text, len)) {
-		buf->is_dirty = true;
 		buf->cursor = pos + len;
+		buf->is_dirty = true;
 		pos += len;
 	} else {
 		pos = EPOS;
