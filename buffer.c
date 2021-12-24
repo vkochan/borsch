@@ -159,14 +159,12 @@ int buffer_file_open(Buffer *buf, const char *file)
 	return 0;
 }
 
-int buffer_save(Buffer *buf)
+bool buffer_save(Buffer *buf)
 {
 	if (buf->is_read_only)
 		return -1;
 
-	text_save(buf->text, buf->file.path);
-
-	return 0;
+	return text_save(buf->text, buf->file.path);
 }
 
 bool buffer_is_modified(Buffer *buf)

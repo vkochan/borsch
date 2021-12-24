@@ -464,7 +464,7 @@ ptr scheme_buf_file_open(int bid, const char *file)
 
 ptr scheme_buf_save(int bid)
 {
-	return Sinteger(buf_save(bid));
+	return Sboolean(buf_save(bid));
 }
 
 int scheme_view_current_get(void)
