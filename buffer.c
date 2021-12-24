@@ -9,7 +9,6 @@
 #include "text/text.h"
 
 typedef struct {
-	bool is_new;
 	char *path;
 } File;
 
@@ -128,15 +127,12 @@ void buffer_del(Buffer *buf)
 
 int buffer_file_open(Buffer *buf, const char *file)
 {
-	bool is_new = false;
 	struct stat st;
 	Text *text;
 	int err;
 
 	err = stat(file, &st);
-	if (err) {
-		is_new = true;
-	} else {
+	if (!err) {
 		text = text_load(file);
 		/* TODO show err message */
 		if (!text)
