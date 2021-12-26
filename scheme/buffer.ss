@@ -148,7 +148,7 @@
    )
 )
 
-(define-syntax (cursor-save stx)
+(define-syntax (save-cursor stx)
    (syntax-case stx ()
 	       ((_ exp ...)
 		#`(let ([curs (cursor)])
