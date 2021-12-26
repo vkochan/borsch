@@ -247,7 +247,7 @@
    )
 )
 
-(define buffer-set-text-style
+(define set-text-style
    (lambda (s . e)
       (let ([a (append (list s) e)])
          (for-each
