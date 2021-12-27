@@ -1335,11 +1335,10 @@ bool view_style_define(View *view, enum UiStyle id, const char *style) {
 	return view->ui->style_define(view->ui, id, style);
 }
 
-void view_style(View *view, enum UiStyle style_id, size_t start, size_t end) {
+void view_style(View *view, CellStyle style, size_t start, size_t end) {
 	if (end < view->start || start > view->end)
 		return;
 
-	CellStyle style = view->ui->style_get(view->ui, style_id);
 	size_t pos = view->start;
 	Line *line = view->topline;
 
