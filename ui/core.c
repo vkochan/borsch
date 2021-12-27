@@ -83,6 +83,17 @@ void ui_draw_char_vert(Ui *ui, int x, int y, unsigned int ch, int n)
 		ui->draw_char_vert(ui, x, y, ch, n);
 }
 
+static CellStyle ui_window_style_get(UiWin *win, enum UiStyle style)
+{
+	CellStyle st = {
+		.attr = win->curr_style,
+		.fg = win->curr_fg,
+		.bg = win->curr_bg,
+	};
+
+	return st;
+}
+
 UiWin *ui_window_new(Ui *ui, View *view)
 {
 	UiWin *win = NULL;
@@ -90,6 +101,8 @@ UiWin *ui_window_new(Ui *ui, View *view)
 	if (ui->window_new) {
 		win = ui->window_new(ui, view);
 		if (win) {
+			win->style_get = ui_window_style_get;
+			view_ui(view, win);
 			win->view = view;
 			win->ui = ui;
 		}

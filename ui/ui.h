@@ -53,6 +53,7 @@ enum UiStyle {
 	UI_STYLE_MAX,
 };
 
+#define CONFIG_CURSES 1
 #if CONFIG_CURSES
 typedef uint64_t CellAttr;
 typedef short CellColor;

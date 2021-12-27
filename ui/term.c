@@ -410,12 +410,6 @@ static void term_window_draw(UiWin *win)
 	wmove(twin->cwin, y, x);
 	wclrtobot(twin->cwin);
 
-	wattrset(twin->cwin, term_style2attr(ui_window_text_style_get(win)));
-	wcolor_set(twin->cwin, term_color_make(win->ui,
-			term_color2curses(ui_window_text_fg_get(win)),
-			term_color2curses(ui_window_text_bg_get(win))),
-			NULL);
-
 	for (const Line *l = line; l; l = l->next, y++) {
 		for (x = 0; x < view_width; x++) {
 			Cell *c = &l->cells[x];
@@ -425,10 +419,23 @@ static void term_window_draw(UiWin *win)
 				c->len = 1;
 			}
 
+			wattrset(twin->cwin, term_style2attr(c->style.attr));
+
+			wcolor_set(twin->cwin, term_window_color_get(win,
+						term_color2curses(c->style.fg),
+						term_color2curses(c->style.bg)),
+					NULL);
+
 			wmove(twin->cwin, y, x);
 			waddnstr(twin->cwin, c->data, c->len);
 		}
 	}
+
+	wattrset(twin->cwin, term_style2attr(ui_window_text_style_get(win)));
+	wcolor_set(twin->cwin, term_color_make(win->ui,
+			term_color2curses(ui_window_text_fg_get(win)),
+			term_color2curses(ui_window_text_bg_get(win))),
+			NULL);
 
 	wmove(twin->cwin, sy, sx);
 	wnoutrefresh(twin->cwin);
