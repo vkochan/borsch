@@ -155,8 +155,8 @@
 (define text-mode-vis-map
    (let ([map (make-keymap 'text-mode-cmd-map)])
       (bind-key map "<Esc>" text-mode-cmd)
-      (bind-key map "x" (lambda () (mark-delete)))
-      (bind-key map "y" (lambda () (mark-copy-to-register)))
+      (bind-key map "x" (lambda () (mark-delete) (text-mode-cmd)))
+      (bind-key map "y" (lambda () (mark-copy-to-register) (text-mode-cmd)))
       map
    )
 )
@@ -164,11 +164,11 @@
 (define text-mode-vis-linewise-map
    (let ([map (make-keymap 'text-mode-map)])
       (bind-key map "<Esc>" text-mode-cmd)
-      (bind-key map "x" (lambda () (mark-delete)))
+      (bind-key map "x" (lambda () (mark-delete) (text-mode-cmd)))
       (bind-key map "l" (lambda () (move-next-line)))
       (bind-key map "j" (lambda () (move-next-line) (move-line-end)))
       (bind-key map "k" (lambda () (move-prev-line) (move-line-end)))
-      (bind-key map "y" (lambda () (mark-copy-to-register)))
+      (bind-key map "y" (lambda () (mark-copy-to-register) (text-mode-cmd)))
       map
    )
 )
