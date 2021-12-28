@@ -59,6 +59,8 @@
       (buffer-set-keymap 'text-mode-cmd-map)
       (buffer-set-mode "Text <N>")
       (buffer-set-input #f)
+      (mark-clear)
+      (window-highlight-mark #f)
    )
 )
 
@@ -67,6 +69,16 @@
       (buffer-set-keymap 'text-mode-ins-map)
       (buffer-set-mode "Text <I>")
       (buffer-set-input #t)
+   )
+)
+
+(define text-mode-vis
+   (lambda ()
+      (buffer-set-keymap 'text-mode-vis-map)
+      (buffer-set-mode "Text <V>")
+      (buffer-set-input #f)
+      (mark-set)
+      (window-highlight-mark #t)
    )
 )
 
@@ -93,6 +105,7 @@
       (bind-key map "g g" (lambda () (move-buffer-begin)))
       (bind-key map "G" (lambda () (move-buffer-end)))
       (bind-key map "i" text-mode-ins)
+      (bind-key map "v" text-mode-vis)
       map
    )
 )
@@ -102,6 +115,14 @@
       (bind-key map "<Enter>" (lambda () (insert-nl)))
       (bind-key map "<Backspace>" (lambda () (delete-prev-char)))
       (bind-key map "<Esc>" text-mode-cmd)
+      map
+   )
+)
+
+(define text-mode-vis-map
+   (let ([map (make-keymap 'text-mode-cmd-map)])
+      (bind-key map "<Esc>" text-mode-cmd)
+      (bind-key map "x" (lambda () (delete-range (mark-get) (next-char-pos (cursor)))))
       map
    )
 )
