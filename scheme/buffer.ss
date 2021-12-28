@@ -251,7 +251,7 @@
    )
 )
 
-(define set-text-style
+(define set-default-text-style
    (lambda (s . e)
       (let ([a (append (list s) e)])
          (for-each
