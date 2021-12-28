@@ -58,7 +58,9 @@
 
 (define paste-from-register
    (lambda ()
-      (move-next-char)
+      (when (not (equal? #\newline (extract-char)))
+         (move-next-char)
+      )
       (paste-from-register-inplace)
       (move-prev-char)
    )
