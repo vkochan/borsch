@@ -122,7 +122,7 @@
 (define text-mode-vis-map
    (let ([map (make-keymap 'text-mode-cmd-map)])
       (bind-key map "<Esc>" text-mode-cmd)
-      (bind-key map "x" (lambda () (delete-range (mark-get) (next-char-pos (cursor)))))
+      (bind-key map "x" (lambda () (mark-delete)))
       map
    )
 )

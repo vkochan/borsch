@@ -921,3 +921,27 @@
       (__cs_buf_mark_clear (buffer-current))
    )
 )
+
+(define mark-get-range
+   (lambda ()
+      (let (
+            [m (mark-get)]
+            [c (cursor)]
+           )
+           (let (
+                 [s (min m c)]
+                 [e (max m c)]
+                )
+	      (list s (next-char-pos e))
+           )
+      )
+   )
+)
+
+(define mark-delete
+   (lambda ()
+      (let ([r (mark-get-range)])
+         (delete-range (car r) (cadr r))
+      )
+   )
+)
