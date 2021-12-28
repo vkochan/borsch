@@ -100,6 +100,17 @@
    )
 )
 
+(define text-mode-vis-linewise
+   (lambda ()
+      (buffer-set-keymap 'text-mode-vis-linewise-map)
+      (buffer-set-mode "Text <V *L*>")
+      (buffer-set-input #f)
+      (mark-set (line-begin-pos))
+      (move-line-end)
+      (window-highlight-mark #t)
+   )
+)
+
 (define text-mode-map
    (let ([map (make-keymap)])
       map
@@ -124,6 +135,7 @@
       (bind-key map "G" (lambda () (move-buffer-end)))
       (bind-key map "i" (lambda () (text-mode-ins)))
       (bind-key map "v" (lambda () (text-mode-vis)))
+      (bind-key map "V" (lambda () (text-mode-vis-linewise)))
       (bind-key map "p" (lambda () (paste-from-register)))
       (bind-key map "P" (lambda () (paste-from-register-before)))
       map
@@ -143,6 +155,17 @@
    (let ([map (make-keymap 'text-mode-cmd-map)])
       (bind-key map "<Esc>" text-mode-cmd)
       (bind-key map "x" (lambda () (mark-delete)))
+      map
+   )
+)
+
+(define text-mode-vis-linewise-map
+   (let ([map (make-keymap 'text-mode-map)])
+      (bind-key map "<Esc>" text-mode-cmd)
+      (bind-key map "x" (lambda () (mark-delete)))
+      (bind-key map "l" (lambda () (move-next-line)))
+      (bind-key map "j" (lambda () (move-next-line) (move-line-end)))
+      (bind-key map "k" (lambda () (move-prev-line) (move-line-end)))
       map
    )
 )
