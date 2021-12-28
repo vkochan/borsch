@@ -84,6 +84,7 @@ struct Window {
 	Window *prev;
 	Window *snext;
 	unsigned int tags;
+	bool highlight_mark;
 };
 
 typedef struct {
@@ -2247,6 +2248,22 @@ int win_create(char *prog, char *title)
 	return create(prog, title, NULL);
 }
 
+static void on_view_update_cb(UiWin *win)
+{
+	Window *w = ui_window_priv_get(win);
+
+	if (w->highlight_mark) {
+		size_t start = buffer_mark_get(w->buf);
+		size_t end = buffer_cursor_get(w->buf);
+		CellStyle style = {
+			.fg = UI_TEXT_COLOR_WHITE,
+			.bg = UI_TEXT_COLOR_BLUE,
+		};
+
+		view_style(w->view, style, MIN(start, end), MAX(start, end));
+	}
+}
+
 int win_new(void)
 {
 	Window *c = calloc(1, sizeof(Window));
@@ -2279,6 +2296,8 @@ int win_new(void)
 		return -1;
 	}
 
+	ui_window_priv_set(c->win, c);
+	ui_window_on_view_update_set(c->win, on_view_update_cb);
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
 
@@ -2532,6 +2551,15 @@ int win_buf_get(int wid)
 		return -1;
 
 	return buffer_id_get(c->buf);
+}
+
+void win_mark_highlight(int wid, bool enable)
+{
+	Window *c = window_get_by_id(wid);
+
+	if (c) {
+		c->highlight_mark = enable;
+	}
 }
 
 int kmap_add(int pid)

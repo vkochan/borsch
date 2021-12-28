@@ -136,6 +136,9 @@ void ui_window_draw(UiWin *win)
 	if (view_update(win->view)) {
 		view_draw(win->view);
 
+		if (win->on_view_update)
+			win->on_view_update(win);
+
 		if (win->draw)
 			win->draw(win);
 		else if (win->ui->window_draw)
@@ -306,6 +309,11 @@ short ui_window_text_bg_get(UiWin *win)
 short ui_window_text_style_get(UiWin *win)
 {
 	return win->curr_style;
+}
+
+void ui_window_on_view_update_set(UiWin *win, void (*cb)(UiWin *))
+{
+	win->on_view_update = cb;
 }
 
 void ui_cursor_enable(Ui *ui, bool enable)

@@ -133,6 +133,7 @@ struct UiWin {
 	bool (*style_define)(UiWin*, int id, const char *style);
 	void (*resize)(UiWin *, int, int);
 	void (*draw)(UiWin *);
+	void (*on_view_update)(UiWin *win);
 };
 
 bool is_default_color(CellColor c);
@@ -187,6 +188,7 @@ void ui_window_text_style_set(UiWin *win, ui_text_style_t style);
 short ui_window_text_fg_get(UiWin *win);
 short ui_window_text_bg_get(UiWin *win);
 short ui_window_text_style_get(UiWin *win);
+void ui_window_on_view_update_set(UiWin *win, void (*cb)(UiWin *win));
 void ui_cursor_enable(Ui*, bool enable);
 
 #endif
