@@ -3098,6 +3098,32 @@ int buf_save(int bid)
 		return buffer_save(buf);
 }
 
+void buf_mark_set(int bid, size_t pos)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		buffer_mark_set(buf, pos);
+}
+
+size_t buf_mark_get(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		return buffer_mark_get(buf);
+
+	return EPOS;
+}
+
+void buf_mark_clear(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		buffer_mark_clear(buf);
+}
+
 int view_current_get(void)
 {
 	return pertag.curtag;

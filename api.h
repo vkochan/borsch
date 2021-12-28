@@ -93,7 +93,9 @@ void buf_input_enable(int bid, bool enable);
 void buf_mode_set(int bid, char *name);
 int buf_file_open(int bid, const char *file);
 int buf_save(int bid);
-
+void buf_mark_set(int bid, size_t pos);
+size_t buf_mark_get(int bid);
+void buf_mark_clear(int bid);
 int view_current_get(void);
 int view_current_set(int tag);
 const char *view_name_get(int tag);

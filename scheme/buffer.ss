@@ -29,6 +29,10 @@
 (define __cs_buf_file_open (foreign-procedure "cs_buf_file_open" (int string) scheme-object))
 (define __cs_buf_save (foreign-procedure "cs_buf_save" (int) scheme-object))
 
+(define __cs_buf_mark_set (foreign-procedure "cs_buf_mark_set" (int int) void))
+(define __cs_buf_mark_get (foreign-procedure "cs_buf_mark_get" (int) scheme-object))
+(define __cs_buf_mark_clear (foreign-procedure "cs_buf_mark_clear" (int) void))
+
 (define mode-gen-map-symb
    (lambda (m)
          (string->symbol
@@ -893,5 +897,27 @@
 (define delete-buffer-end
    (lambda ()
       (cursor-obj-delete move-buffer-end)
+   )
+)
+
+(define mark-set
+   (case-lambda
+      [()
+       (__cs_buf_mark_set (buffer-current) (cursor))]
+
+      [(s)
+       (__cs_buf_mark_set (buffer-current) s)]
+   )
+)
+
+(define mark-get
+   (lambda ()
+      (__cs_buf_mark_get (buffer-current))
+   )
+)
+
+(define mark-clear
+   (lambda ()
+      (__cs_buf_mark_clear (buffer-current))
    )
 )

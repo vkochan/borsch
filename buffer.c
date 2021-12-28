@@ -32,10 +32,13 @@ typedef struct Buffer {
 	bool is_read_only;
 	bool is_dirty;
 	File file;
+	size_t mark;
 } Buffer;
 
 static Buffer buf_list;
 static int buf_count;
+
+void buffer_cursor_set(Buffer *buf, size_t pos);
 
 static int buffer_id_gen(void)
 {
@@ -88,6 +91,7 @@ Buffer *buffer_new(const char *name)
 		return NULL;
 	}
 	buf->ref_count = 1;
+	buf->mark = EPOS;
 
 	buf_count++;
 	buf->buf_id = buffer_id_gen();
@@ -156,8 +160,8 @@ int buffer_file_open(Buffer *buf, const char *file)
 	strncpy(buf->name, fname, sizeof(buf->name));
 
 	buf->file.path = strdup(file);
+	buffer_cursor_set(buf, 0);
 	buf->text = text;
-	buf->cursor = 0;
 
 	return 0;
 }
@@ -210,6 +214,8 @@ Buffer *buffer_by_id(int bid)
 
 void buffer_cursor_set(Buffer *buf, size_t pos)
 {
+	if (buf->mark == EPOS)
+		buf->mark = pos;
 	buf->cursor = pos;
 }
 
@@ -295,7 +301,7 @@ size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text)
 	len = strlen(text);
 
 	if (text_insert(buf->text, pos, text, len)) {
-		buf->cursor = pos + len;
+		buffer_cursor_set(buf, pos + len);
 		buf->is_dirty = true;
 		pos += len;
 	} else {
@@ -308,7 +314,7 @@ size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text)
 size_t buffer_text_insert_len(Buffer *buf, size_t pos, const char *text, size_t len)
 {
 	if (text_insert(buf->text, pos, text, len)) {
-		buf->cursor = pos + len;
+		buffer_cursor_set(buf, pos + len);
 		buf->is_dirty = true;
 		pos += len;
 	} else {
@@ -335,8 +341,8 @@ size_t buffer_text_insert_nl(Buffer *buf, size_t pos)
 	}
 	pos++;
 
+	buffer_cursor_set(buf, pos);
 	buf->is_dirty = true;
-	buf->cursor = pos;
 
 	return pos;
 }
@@ -353,8 +359,8 @@ size_t buffer_text_delete(Buffer *buf, size_t start, size_t end)
 	}
 
 	if (text_delete(buf->text, start, end - start)) {
+		buffer_cursor_set(buf, start);
 		buf->is_dirty = true;
-		buf->cursor = start;
 	}
 
 	return start;
@@ -429,4 +435,19 @@ char *buffer_mode_get(Buffer *buf)
 void buffer_mode_set(Buffer *buf, char *name)
 {
 	strncpy(buf->mode, name, sizeof(buf->mode));
+}
+
+void buffer_mark_set(Buffer *buf, size_t pos)
+{
+	buf->mark = pos;
+}
+
+void buffer_mark_clear(Buffer *buf)
+{
+	buf->mark = EPOS;
+}
+
+size_t buffer_mark_get(Buffer *buf)
+{
+	return buf->mark;
 }
