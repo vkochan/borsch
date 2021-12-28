@@ -122,8 +122,8 @@
       (bind-key map "X" (lambda () (delete-prev-char)))
       (bind-key map "g g" (lambda () (move-buffer-begin)))
       (bind-key map "G" (lambda () (move-buffer-end)))
-      (bind-key map "i" text-mode-ins)
-      (bind-key map "v" text-mode-vis)
+      (bind-key map "i" (lambda () (text-mode-ins)))
+      (bind-key map "v" (lambda () (text-mode-vis)))
       (bind-key map "p" (lambda () (paste-from-register)))
       (bind-key map "P" (lambda () (paste-from-register-before)))
       map
