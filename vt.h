@@ -43,6 +43,7 @@ void vt_data_set(Vt*, void *);
 void *vt_data_get(Vt*);
 
 Vt *vt_create(UiWin *uiwin, int rows, int cols, int scroll_buf_sz);
+void vt_draw(UiWin *win);
 void vt_resize(Vt*, int rows, int cols);
 void vt_destroy(Vt*);
 pid_t vt_forkpty(Vt*, const char *p, const char *argv[], const char *cwd, const char *env[], int *to, int *from);

@@ -4,7 +4,9 @@
 #include <stdio.h>
 #include <libgen.h>
 #include <fcntl.h>
+#include <signal.h>
 
+#include "vt.h"
 #include "view.h"
 #include "keymap.h"
 #include "text/text.h"
@@ -32,6 +34,9 @@ typedef struct Buffer {
 	bool is_read_only;
 	bool is_dirty;
 	File file;
+	Vt *term;
+	pid_t pid;
+	volatile sig_atomic_t is_died;
 	size_t mark;
 } Buffer;
 
@@ -120,6 +125,8 @@ void buffer_del(Buffer *buf)
 		buf->ref_count--;
 
 	if (!buf->ref_count) {
+		if (buf->term)
+			vt_destroy(buf->term);
 		if (buf->keymap)
 			keymap_ref_put(buf->keymap);
 		buffer_list_del(buf);
@@ -450,4 +457,46 @@ void buffer_mark_clear(Buffer *buf)
 size_t buffer_mark_get(Buffer *buf)
 {
 	return buf->mark;
+}
+
+void buffer_term_set(Buffer *buf, Vt *term)
+{
+	buf->term = term;
+}
+
+Vt *buffer_term_get(Buffer *buf)
+{
+	return buf->term;
+}
+
+void buffer_pid_set(Buffer *buf, pid_t pid)
+{
+	buf->pid = pid;
+}
+
+pid_t buffer_pid_get(Buffer *buf)
+{
+	return buf->pid;
+}
+
+Buffer *buffer_by_pid(pid_t pid)
+{
+	Buffer *buf;
+
+	for (buf = buf_list.next; buf; buf = buf->next) {
+		if (buf->pid == pid)
+			return buf;
+	}
+
+	return NULL;
+}
+
+void buffer_died_set(Buffer *buf, bool died)
+{
+	buf->is_died = died;
+}
+
+bool buffer_is_died(Buffer *buf)
+{
+	return buf->is_died;
 }

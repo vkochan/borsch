@@ -72,14 +72,11 @@ struct Window {
 	Buffer *buf;
 	View *view;
 	UiWin *win;
-	Vt *term;
 	const char *cmd;
 	int order;
-	pid_t pid;
 	unsigned short int id;
 	bool minimized;
 	bool urgent;
-	volatile sig_atomic_t died;
 	Window *next;
 	Window *prev;
 	Window *snext;
@@ -848,8 +845,9 @@ focus(Window *c) {
 			ui_window_refresh(c->win);
 		}
 
-		if (c->pid)
-			ui_cursor_enable(ui, c && !c->minimized && vt_cursor_visible(c->term));
+		if (buffer_term_get(c->buf))
+			ui_cursor_enable(ui, c && !c->minimized &&
+					vt_cursor_visible(buffer_term_get(c->buf)));
 		else
 			ui_cursor_enable(ui, true);
 	}
@@ -889,8 +887,8 @@ static void
 resize_window(Window *c, int w, int h) {
 	ui_window_resize(c->win, w, h);
 
-	if (c->pid)
-		vt_resize(c->term, h - 1, w);
+	if (buffer_term_get(c->buf))
+		vt_resize(buffer_term_get(c->buf), h - 1, w);
 }
 
 static void
@@ -926,6 +924,8 @@ sigchld_handler(int sig) {
 	pid_t pid;
 
 	while ((pid = waitpid(-1, &status, WNOHANG)) != 0) {
+		Buffer *buf;
+
 		if (pid == -1) {
 			if (errno == ECHILD) {
 				/* no more child processes */
@@ -937,12 +937,9 @@ sigchld_handler(int sig) {
 
 		debug("child with pid %d died\n", pid);
 
-		for (Window *c = windows; c; c = c->next) {
-			if (c->pid == pid) {
-				c->died = true;
-				break;
-			}
-		}
+		buf = buffer_by_pid(pid);
+		if (buf)
+			buffer_died_set(buf, true);
 	}
 
 	errno = errsv;
@@ -1059,15 +1056,17 @@ keypress(int code) {
 
 	for (Window *c = pertag.runinall[pertag.curtag] ? nextvisible(windows) : sel; c; c = nextvisible(c->next)) {
 		if (is_content_visible(c)) {
+			Vt *term = buffer_term_get(c->buf);
+
 			c->urgent = false;
 
-			if (c->pid) {
+			if (buffer_term_get(c->buf)) {
 				if (code == '\e')
-					vt_write(c->term, buf, len);
+					vt_write(term, buf, len);
 				else
-					vt_keypress(c->term, code);
+					vt_keypress(term, code);
 				if (key != -1)
-					vt_keypress(c->term, key);
+					vt_keypress(term, key);
 			} else if (buffer_text_input_is_enabled(c->buf)) {
 				size_t pos = buffer_cursor_get(c->buf);
 				if (key == -1 && code <= UCHAR_MAX)
@@ -1204,8 +1203,6 @@ destroy(Window *c) {
 	}
 	if (lastsel == c)
 		lastsel = NULL;
-	if (c->pid)
-		vt_destroy(c->term);
 	ui_window_free(c->win);
 	view_free(c->view);
 	buffer_del(c->buf);
@@ -1251,7 +1248,7 @@ static char *getcwd_by_pid(Window *c, char *buf) {
 	if (!c)
 		return NULL;
 	char tmp[32];
-	snprintf(tmp, sizeof(tmp), "/proc/%d/cwd", c->pid);
+	snprintf(tmp, sizeof(tmp), "/proc/%d/cwd", buffer_pid_get(c->buf));
 	return realpath(tmp, buf);
 }
 
@@ -1268,7 +1265,7 @@ synctitle(Window *c)
 	int ret;
 	int fd;
 
-	pty = vt_pty_get(c->term);
+	pty = vt_pty_get(buffer_term_get(c->buf));
 
 	pid = tcgetpgrp(pty);
 	if (pid == -1)
@@ -1307,6 +1304,8 @@ int create(const char *prog, const char *title, const char *cwd) {
 	char tmppath[PATH_MAX];
 	char tmp[256];
 	event_t evt;
+	pid_t pid;
+	Vt *term;
 
 	if (prog) {
 		pargs[1] = "-c";
@@ -1343,13 +1342,16 @@ int create(const char *prog, const char *title, const char *cwd) {
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
 
-	c->term = vt_create(c->win, ui_height_get(ui), ui_width_get(ui), scr_history);
-	if (!c->term) {
+	term = vt_create(c->win, ui_height_get(ui), ui_width_get(ui), scr_history);
+	if (!term) {
 		view_free(c->view);
 		buffer_del(c->buf);
 		free(c);
 		return -1;
 	}
+	ui_window_ops_draw_set(c->win, vt_draw);
+	ui_window_priv_set(c->win, term);
+	buffer_term_set(c->buf, term);
 
 	if (prog) {
 		c->cmd = prog;
@@ -1367,14 +1369,15 @@ int create(const char *prog, const char *title, const char *cwd) {
 	else if (strlen(pertag.cwd[pertag.curtag]))
 		cwd = pertag.cwd[pertag.curtag];
 
-	c->pid = vt_forkpty(c->term, shell, pargs, cwd, env, NULL, NULL);
+	pid = vt_forkpty(term, shell, pargs, cwd, env, NULL, NULL);
+	buffer_pid_set(c->buf, pid);
 
-	vt_data_set(c->term, c);
-	vt_title_handler_set(c->term, term_title_handler);
-	vt_urgent_handler_set(c->term, term_urgent_handler);
+	vt_data_set(term, c);
+	vt_title_handler_set(term, term_title_handler);
+	vt_urgent_handler_set(term, term_urgent_handler);
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
-	debug("window with pid %d forked\n", c->pid);
+	debug("window with pid %d forked\n", pid);
 	attach(c);
 	focus(c);
 	arrange();
@@ -1448,12 +1451,17 @@ focuslast(const char *args[]) {
 static void
 killwindow(void) {
 	Window *target = sel;
+	pid_t pid;
 
 	if (!target)
 		return;
 
-	debug("killing window with pid: %d\n", target->pid);
-	kill(-target->pid, SIGKILL);
+	pid = buffer_pid_get(target->buf);
+	if (!pid)
+		return;
+
+	debug("killing window with pid: %d\n", pid);
+	kill(-pid, SIGKILL);
 }
 
 static void killother(const char *args[]) {
@@ -1463,7 +1471,7 @@ static void killother(const char *args[]) {
 	for (n = 0, c = nextvisible(windows); c; c = nextvisible(c->next)) {
 		if (ismastersticky(c) || sel == c)
 			continue;
-		kill(-c->pid, SIGKILL);
+		kill(-(buffer_pid_get(c->buf)), SIGKILL);
 	}
 }
 
@@ -1477,8 +1485,8 @@ static void
 redraw(const char *args[]) {
 	for (Window *c = windows; c; c = c->next) {
 		if (!c->minimized) {
-			if (c->pid)
-				vt_dirty(c->term);
+			if (buffer_term_get(c->buf))
+				vt_dirty(buffer_term_get(c->buf));
 			ui_window_redraw(c->win);
 		}
 	}
@@ -1490,18 +1498,21 @@ redraw(const char *args[]) {
 static void
 scrollback(const char *args[]) {
 	int w_h = ui_window_height_get(sel->win);
+	Vt *term;
 
 	if (!is_content_visible(sel))
 		return;
 
-	if (sel->pid)
-		if (!args[0] || atoi(args[0]) < 0)
-			vt_scroll(sel->term, -w_h/2);
-		else
-			vt_scroll(sel->term,  w_h/2);
+	term = buffer_term_get(sel->buf);
 
-	if (sel->pid)
-		ui_cursor_enable(ui, vt_cursor_visible(sel->term));
+	if (term)
+		if (!args[0] || atoi(args[0]) < 0)
+			vt_scroll(term, -w_h/2);
+		else
+			vt_scroll(term,  w_h/2);
+
+	if (term)
+		ui_cursor_enable(ui, vt_cursor_visible(term));
 	else
 		ui_cursor_enable(ui, true);
 	draw(sel);
@@ -1598,8 +1609,8 @@ toggleminimize(void)
 		for (c = nextvisible(windows); c && (t = nextvisible(c->next)) && !t->minimized; c = t);
 		attachafter(m, c);
 	} else { /* window is no longer minimized, move it to the master area */
-		if (m->pid)
-			vt_dirty(m->term);
+		if (buffer_term_get(m->buf))
+			vt_dirty(buffer_term_get(m->buf));
 		detach(m);
 		attach(m);
 	}
@@ -1827,8 +1838,8 @@ handle_mouse(void) {
 
 	debug("mouse x:%d y:%d cx:%d cy:%d mask:%d\n", event.x, event.y, event.x - w_x, event.y - w_y, event.bstate);
 
-	if (msel->pid)
-		vt_mouse(msel->term, event.x - w_x, event.y - w_y, event.bstate);
+	if (buffer_term_get(msel->buf))
+		vt_mouse(buffer_term_get(msel->buf), event.x - w_x, event.y - w_y, event.bstate);
 
 	for (i = 0; i < LENGTH(buttons); i++) {
 		if (event.bstate & buttons[i].mask)
@@ -1957,19 +1968,20 @@ main(int argc, char *argv[]) {
 		}
 
 		for (Window *c = windows; c; ) {
-			if (c->died) {
+			if (buffer_is_died(c->buf)) {
 				Window *t = c->next;
 				destroy(c);
 				c = t;
 				continue;
 			}
-			if (c->pid) {
-				int pty = vt_pty_get(c->term);
+			if (buffer_term_get(c->buf)) {
+				int pty = vt_pty_get(buffer_term_get(c->buf));
 				FD_SET(pty, &rd);
 				nfds = MAX(nfds, pty);
 			}
 			c = c->next;
 		}
+		/* TODO: what to do with a died buffers ? */
 
 		ui_update(ui);
 
@@ -2041,17 +2053,20 @@ reenter:
 			handle_statusbar();
 
 		for (Window *c = windows; c; c = c->next) {
-			if (c->pid) {
-				if (FD_ISSET(vt_pty_get(c->term), &rd)) {
-					if (vt_process(c->term) < 0 && errno == EIO) {
-						c->died = true;
+			pid_t pid = buffer_pid_get(c->buf);
+			Vt *term = buffer_term_get(c->buf);
+
+			if (term) {
+				if (FD_ISSET(vt_pty_get(term), &rd)) {
+					if (vt_process(term) < 0 && errno == EIO) {
+						buffer_died_set(c->buf, true);
 						continue;
 					}
 				}
 			}
 
 			if (is_content_visible(c)) {
-				if (c->pid && !buffer_name_is_locked(c->buf))
+				if (pid && !buffer_name_is_locked(c->buf))
 					synctitle(c);
 				if (c != sel) {
 					draw(c);
@@ -2064,8 +2079,8 @@ reenter:
 		}
 
 		if (is_content_visible(sel)) {
-			if (sel->pid) {
-				ui_cursor_enable(ui, vt_cursor_visible(sel->term));
+			if (buffer_term_get(sel->buf)) {
+				ui_cursor_enable(ui, vt_cursor_visible(buffer_term_get(sel->buf)));
 			} else {
 				ui_cursor_enable(ui, true);
 			}
@@ -2316,8 +2331,8 @@ void win_del(int wid)
 {
 	Window *c = window_get_by_id(wid);
 
-	if (c && c->pid)
-		kill(-c->pid, SIGKILL);
+	if (c && buffer_pid_get(c->buf))
+		kill(-buffer_pid_get(c->buf), SIGKILL);
 	else
 		destroy(c);
 }
@@ -2526,8 +2541,8 @@ int win_keys_send(int wid, char *keys)
 	if (!c)
 		return -1;
 
-	if (c->pid)
-		vt_write(c->term, keys, strlen(keys));
+	if (buffer_term_get(c->buf))
+		vt_write(buffer_term_get(c->buf), keys, strlen(keys));
 	return 0;
 }
 
@@ -2538,8 +2553,8 @@ int win_text_send(int wid, char *text)
 	if (!c)
 		return -1;
 
-	if (c->pid)
-		vt_write(c->term, text, strlen(text));
+	if (buffer_term_get(c->buf))
+		vt_write(buffer_term_get(c->buf), text, strlen(text));
 	return 0;
 }
 

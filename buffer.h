@@ -6,6 +6,7 @@
 
 typedef struct Buffer Buffer;
 typedef struct KeyMap KeyMap;
+typedef struct Vt Vt;
 
 Buffer *buffer_new(const char *name);
 void buffer_del(Buffer *buf);
@@ -48,5 +49,12 @@ void buffer_mode_set(Buffer *buf, char *name);
 void buffer_mark_set(Buffer *buf, size_t pos);
 void buffer_mark_clear(Buffer *buf);
 size_t buffer_mark_get(Buffer *buf);
+void buffer_term_set(Buffer *buf, Vt *vt);
+Vt *buffer_term_get(Buffer *buf);
+void buffer_pid_set(Buffer *buf, pid_t pid);
+pid_t buffer_pid_get(Buffer *buf);
+Buffer *buffer_by_pid(pid_t pid);
+void buffer_died_set(Buffer *buf, bool died);
+bool buffer_is_died(Buffer *buf);
 
 #endif /* BUFFER_H */

@@ -248,7 +248,6 @@ static const char *keytable[KEY_MAX+1] = {
 static void puttab(Vt *t, int count);
 static void process_nonprinting(Vt *t, wchar_t wc);
 static void send_curs(Vt *t);
-static void vt_draw(UiWin *win);
 
 static void row_set(VtRow *row, int start, int len, VtBuffer *t)
 {
@@ -1453,9 +1452,6 @@ Vt *vt_create(UiWin *win, int rows, int cols, int scroll_size)
 		return NULL;
 	}
 
-	ui_window_ops_draw_set(win, vt_draw);
-	ui_window_priv_set(win, t);
-
 	return t;
 }
 
@@ -1491,7 +1487,7 @@ void vt_dirty(Vt *t)
 		row->dirty = true;
 }
 
-static void vt_draw(UiWin *win)
+void vt_draw(UiWin *win)
 {
 	Vt *t = ui_window_priv_get(win);
 	VtBuffer *b = t->buffer;
