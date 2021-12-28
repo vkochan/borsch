@@ -38,22 +38,21 @@
 ;;
 
 ;; FFI
-(define __cs_copy_buf_get (foreign-procedure __collect_safe "cs_copy_buf_get" () scheme-object))
-(define __cs_copy_buf_set (foreign-procedure "cs_copy_buf_set" (string) int))
-
 (define __cs_do_quit (foreign-procedure "cs_do_quit" () void))
 ;;
+
+(define reg "")
 
 ;; Public API
 (define copy-to-register
    (lambda (s)
-      (__cs_copy_buf_set s)
+      (set! reg s)
    )
 )
 
 (define paste-from-register-inplace
    (lambda ()
-      (insert (__cs_copy_buf_get))
+      (insert reg)
    )
 )
 
