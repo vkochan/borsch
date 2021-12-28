@@ -45,12 +45,30 @@
 ;;
 
 ;; Public API
-(define copy-buffer-set #f)
-(define copy-buffer+ #f)
+(define copy-to-register
+   (lambda (s)
+      (__cs_copy_buf_set s)
+   )
+)
 
-(define copy-buffer
+(define paste-from-register-inplace
    (lambda ()
-      (__cs_copy_buf_get)
+      (insert (__cs_copy_buf_get))
+   )
+)
+
+(define paste-from-register
+   (lambda ()
+      (move-next-char)
+      (paste-from-register-inplace)
+      (move-prev-char)
+   )
+)
+
+(define paste-from-register-before
+   (lambda ()
+      (paste-from-register-inplace)
+      (move-prev-char)
    )
 )
 
@@ -106,6 +124,8 @@
       (bind-key map "G" (lambda () (move-buffer-end)))
       (bind-key map "i" text-mode-ins)
       (bind-key map "v" text-mode-vis)
+      (bind-key map "p" (lambda () (paste-from-register)))
+      (bind-key map "P" (lambda () (paste-from-register-before)))
       map
    )
 )
