@@ -1,5 +1,3 @@
-* TODO Add text selection and copy-pasting to/from register
-
 * TODO Use Scheme guardian approach to free objects allocated in main.c
 
 * TODO Split scheme.ss into smaller libraries
