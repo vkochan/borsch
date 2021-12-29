@@ -890,6 +890,22 @@
    )
 )
 
+(define delete-line
+   (lambda ()
+      (move-line-end)
+      (delete-prev-line-end)
+      (if (equal? (cursor) 0)
+         (delete-char)
+         ;; else
+         (if (equal? (buffer-end-pos) (1+ (line-end-pos)))
+            (move-line-begin)
+            ;; else
+            (move-next-line-begin)
+         )
+      )
+   )
+)
+
 (define delete-buffer-begin
    (lambda ()
       (cursor-obj-delete move-buffer-begin)
