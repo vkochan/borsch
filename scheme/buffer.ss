@@ -285,6 +285,24 @@
    )
 )
 
+(define insert-nl-up
+   (lambda ()
+      (move-prev-line-end)
+      (if (equal? (cursor) 0)
+         (save-cursor (insert-nl))
+         ;; else
+         (insert-nl)
+      )
+   )
+)
+
+(define insert-nl-down
+   (lambda ()
+      (move-line-end)
+      (insert-nl)
+   )
+)
+
 (define insert-file
    (lambda (t)
       (__cs_buf_text_insert_file (buffer-current) t)
