@@ -359,7 +359,7 @@
 
 (define move-prev-line-end
    (lambda ()
-      (cursor-set (prev-line-begin-pos))
+      (cursor-set (prev-line-end-pos))
    )
 )
 
