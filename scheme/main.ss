@@ -77,7 +77,7 @@
    (lambda ()
       (buffer-set-keymap 'text-mode-cmd-map)
       (buffer-set-mode "Text <N>")
-      (buffer-set-input #f)
+      (enable-insert #f)
       (mark-clear)
       (window-highlight-mark #f)
    )
@@ -87,7 +87,7 @@
    (lambda ()
       (buffer-set-keymap 'text-mode-ins-map)
       (buffer-set-mode "Text <I>")
-      (buffer-set-input #t)
+      (enable-insert #t)
    )
 )
 
@@ -95,7 +95,7 @@
    (lambda ()
       (buffer-set-keymap 'text-mode-vis-map)
       (buffer-set-mode "Text <V>")
-      (buffer-set-input #f)
+      (enable-insert #f)
       (mark-set)
       (window-highlight-mark #t)
    )
@@ -105,7 +105,7 @@
    (lambda ()
       (buffer-set-keymap 'text-mode-vis-linewise-map)
       (buffer-set-mode "Text <V *L*>")
-      (buffer-set-input #f)
+      (enable-insert #f)
       (mark-set (line-begin-pos))
       (move-line-end)
       (window-highlight-mark #t)
@@ -174,7 +174,7 @@
 )
 
 (define-mode text-mode "Text" #f
-   (buffer-set-input #t)
+   (enable-insert #t)
    (text-mode-cmd)
 )
 

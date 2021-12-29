@@ -245,7 +245,7 @@
    )
 )
 
-(define buffer-set-input
+(define enable-insert
    (lambda (e)
       (__cs_buf_text_input_enable (buffer-current) e)
    )
