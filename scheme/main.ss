@@ -152,6 +152,7 @@
       (bind-key map "E" (lambda () (move-longword-end)))
       (bind-key map "x" (lambda () (delete-next-char)))
       (bind-key map "X" (lambda () (delete-prev-char)))
+      (bind-key map "D" (lambda () (delete-line-end)))
       (bind-key map "g g" (lambda () (move-buffer-begin)))
       (bind-key map "G" (lambda () (move-buffer-end)))
       (bind-key map "i" (lambda () (text-mode-ins)))
