@@ -1995,14 +1995,16 @@ main(int argc, char *argv[]) {
 		}
 
 		if (FD_ISSET(STDIN_FILENO, &rd)) {
+			int alt_code;
+			int code;
+
 			if (sel && !sel->minimized) {
 				KeyMap *map = buffer_keymap_get(sel->buf);
 				if (map)
 					curr_kmap = map;
 			};
 reenter:
-			int code = getch();
-			int alt_code;
+			code = getch();
 
 			if (code == ALT) {
 				nodelay(stdscr, TRUE);
