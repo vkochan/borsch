@@ -2,7 +2,7 @@
 
 PROGNAME = borsch
 
-PREFIX ?= /usr/local
+PREFIX ?= /usr
 MANPREFIX = ${PREFIX}/share/man
 # specify your systems terminfo directory
 # leave empty to install into your home folder
