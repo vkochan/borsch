@@ -24,7 +24,6 @@
 (define __cs_win_keys_send (foreign-procedure "cs_win_keys_send" (int string) int))
 (define __cs_win_text_send (foreign-procedure "cs_win_text_send" (int string) int))
 (define __cs_win_buf_get (foreign-procedure __collect_safe "cs_win_buf_get" (int) scheme-object))
-(define __cs_win_mark_highlight (foreign-procedure __collect_safe "cs_win_mark_highlight" (int boolean) void))
 
 (define window-first
    (lambda ()
@@ -409,15 +408,5 @@
 
       [(wid)
        (__cs_win_buf_get wid)]
-   )
-)
-
-(define window-highlight-mark
-   (case-lambda
-      [(e)
-       (__cs_win_mark_highlight (__cs_win_current_get) e)]
-
-      [(wid e)
-       (__cs_win_mark_highlight wid e)]
    )
 )

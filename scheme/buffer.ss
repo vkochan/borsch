@@ -33,6 +33,8 @@
 (define __cs_buf_mark_get (foreign-procedure "cs_buf_mark_get" (int) scheme-object))
 (define __cs_buf_mark_clear (foreign-procedure "cs_buf_mark_clear" (int) void))
 
+(define __cs_win_mark_highlight (foreign-procedure __collect_safe "cs_win_mark_highlight" (int boolean) void))
+
 (define mode-gen-map-symb
    (lambda (m)
          (string->symbol
@@ -951,5 +953,15 @@
       (let ([r (mark-get-range)])
            (copy-to-register (buffer-string (car r) (cadr r)))
       )
+   )
+)
+
+(define mark-highlight
+   (case-lambda
+      [(e)
+       (__cs_win_mark_highlight (__cs_win_current_get) e)]
+
+      [(wid e)
+       (__cs_win_mark_highlight wid e)]
    )
 )

@@ -79,7 +79,7 @@
       (buffer-set-mode "Text <N>")
       (enable-insert #f)
       (mark-clear)
-      (window-highlight-mark #f)
+      (mark-highlight #f)
    )
 )
 
@@ -97,7 +97,7 @@
       (buffer-set-mode "Text <V>")
       (enable-insert #f)
       (mark-set)
-      (window-highlight-mark #t)
+      (mark-highlight #t)
    )
 )
 
@@ -108,7 +108,7 @@
       (enable-insert #f)
       (mark-set (line-begin-pos))
       (move-line-end)
-      (window-highlight-mark #t)
+      (mark-highlight #t)
    )
 )
 
