@@ -948,7 +948,7 @@
    )
 )
 
-(define mark-copy-to-register
+(define mark-copy
    (lambda ()
       (let ([r (mark-get-range)])
            (copy-to-register (buffer-string (car r) (cadr r)))
