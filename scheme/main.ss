@@ -42,11 +42,18 @@
 ;;
 
 (define reg "")
+(define reg-is-linewise #f)
 
 ;; Public API
 (define copy-to-register
-   (lambda (s)
-      (set! reg s)
+   (case-lambda
+      [(s)
+       (set! reg-is-linewise #f)
+       (set! reg s)]
+
+      [(s l)
+       (set! reg-is-linewise #t)
+       (set! reg s)]
    )
 )
 
@@ -58,11 +65,24 @@
 
 (define paste-from-register
    (lambda ()
-      (when (not (equal? #\newline (extract-char)))
-         (move-next-char)
+      (if (not reg-is-linewise)
+         (begin
+            (when (not (equal? #\newline (extract-char)))
+               (move-next-char)
+            )
+            (paste-from-register-inplace)
+            (move-prev-char)
+          )
+          ;; else
+          (begin
+             (move-line-end)
+             (insert-nl)
+             (save-cursor
+                (paste-from-register-inplace)
+                (delete-char)
+             )
+          )
       )
-      (paste-from-register-inplace)
-      (move-prev-char)
    )
 )
 
@@ -139,6 +159,8 @@
       (bind-key map "V" (lambda () (text-mode-vis-linewise)))
       (bind-key map "p" (lambda () (paste-from-register)))
       (bind-key map "P" (lambda () (paste-from-register-before)))
+      (bind-key map "Y" (lambda () (copy-line)))
+      (bind-key map "y y" (lambda () (copy-line)))
       map
    )
 )
@@ -168,7 +190,7 @@
       (bind-key map "l" (lambda () (move-next-line)))
       (bind-key map "j" (lambda () (move-next-line) (move-line-end)))
       (bind-key map "k" (lambda () (move-prev-line) (move-line-end)))
-      (bind-key map "y" (lambda () (mark-copy) (text-mode-cmd)))
+      (bind-key map "y" (lambda () (mark-copy-linewise) (text-mode-cmd)))
       map
    )
 )

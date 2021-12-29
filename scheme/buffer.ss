@@ -956,6 +956,14 @@
    )
 )
 
+(define mark-copy-linewise
+   (lambda ()
+      (let ([r (mark-get-range)])
+           (copy-to-register (buffer-string (car r) (cadr r)) #t)
+      )
+   )
+)
+
 (define mark-highlight
    (case-lambda
       [(e)
@@ -963,5 +971,11 @@
 
       [(wid e)
        (__cs_win_mark_highlight wid e)]
+   )
+)
+
+(define copy-line
+   (lambda ()
+      (copy-to-register (buffer-string (line-begin-pos) (1+ (line-end-pos))) #t)
    )
 )
