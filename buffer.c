@@ -139,6 +139,7 @@ void buffer_del(Buffer *buf)
 
 int buffer_file_open(Buffer *buf, const char *file)
 {
+	bool exist = false;
 	struct stat st;
 	char tmp[256];
 	char *fname;
@@ -151,6 +152,7 @@ int buffer_file_open(Buffer *buf, const char *file)
 		/* TODO show err message */
 		if (!text)
 			return -1;
+		exist = true;
 	}
 
 	/* close opened file */
@@ -160,6 +162,11 @@ int buffer_file_open(Buffer *buf, const char *file)
 			text_save(buf->text, buf->file.path);
 		free(buf->file.path);
 		text_free(buf->text);
+	} else if (!exist) {
+		text_free(buf->text);
+		text = text_load(NULL);
+		if (!text)
+			return -1;
 	}
 
 	strncpy(tmp, file, sizeof(tmp));
