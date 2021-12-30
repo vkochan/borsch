@@ -42,7 +42,10 @@ MANUALS = ${PROGNAME}.1
 
 VERSION = $(shell git describe --always --dirty 2>/dev/null || echo "0.15-git")
 CFLAGS += -DVERSION=\"${VERSION}\"
-DEBUG_CFLAGS = ${CFLAGS} -UNDEBUG -O0 -g -ggdb -Wall -Wextra -Wno-unused-parameter
+
+ifeq ($(DEBUG),1)
+CFLAGS += -UNDEBUG -O0 -g -ggdb -Wall -Wextra -Wno-unused-parameter
+endif
 
 all: ${PROGNAME}
 
