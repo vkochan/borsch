@@ -76,3 +76,33 @@
       )
    )
 )
+
+(define style->list
+   (lambda (s)
+      (let (
+            [f -1]
+	    [b -1]
+	    [a 0]
+           )
+           (let loop ([l s])
+              (let ([t (car l)])
+                 (cond
+                    [(equal? t ':fg)
+		     (set! f (color-name->number (cadr l)))
+                     (when (> (length l) 2) (loop (cdr (cdr l))))
+	            ]
+                    [(equal? t ':bg)
+		     (set! b (color-name->number (cadr l)))
+                     (when (> (length l) 2) (loop (cdr (cdr l))))
+                    ]
+                    [(equal? t ':attr)
+		     (set! a (style-name->number (cadr l)))
+                     (when (> (length l) 2) (loop (cdr (cdr l))))
+                    ]
+                 )
+              )
+           )
+         (list f b a)
+      )
+   )
+)

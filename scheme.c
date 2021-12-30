@@ -487,6 +487,20 @@ void scheme_buf_mark_clear(int bid)
 	buf_mark_clear(bid);
 }
 
+ptr scheme_buf_prop_style_add(int bid, int fg, int bg, int attr, int start, int end)
+{
+	int ret = buf_prop_style_add(bid, fg, bg, attr, start, end);
+
+	if (ret == 0)
+		Sinteger(ret);
+	return Sfalse;
+}
+
+void scheme_buf_prop_del(int bid, int type, int start, int end)
+{
+	buf_prop_del(bid, type, start, end);
+}
+
 int scheme_view_current_get(void)
 {
 	return view_current_get();
@@ -677,6 +691,9 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_mark_set", scheme_buf_mark_set);
 	Sregister_symbol("cs_buf_mark_get", scheme_buf_mark_get);
 	Sregister_symbol("cs_buf_mark_clear", scheme_buf_mark_clear);
+
+	Sregister_symbol("cs_buf_prop_style_add", scheme_buf_prop_style_add);
+	Sregister_symbol("cs_buf_prop_del", scheme_buf_prop_del);
 
 	Sregister_symbol("cs_view_current_get", scheme_view_current_get);
 	Sregister_symbol("cs_view_current_set", scheme_view_current_set);

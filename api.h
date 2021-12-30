@@ -97,6 +97,13 @@ int buf_save(int bid);
 void buf_mark_set(int bid, size_t pos);
 size_t buf_mark_get(int bid);
 void buf_mark_clear(int bid);
+
+int buf_prop_style_add(int bid, int fg, int bg, int attr, int start, int end);
+void buf_prop_del(int bid, int type, int start, int end);
+/* void buf_prop_walk(int bid, int type, int start, int end, void *arg, */
+/* 			void (*cb)(int bid, int type, int start, int end, void */
+/* 				*arg)); */
+
 int view_current_get(void);
 int view_current_set(int tag);
 const char *view_name_get(int tag);

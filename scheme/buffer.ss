@@ -22,6 +22,9 @@
 (define __cs_buf_text_bg_get (foreign-procedure "cs_buf_text_bg_get" (int) scheme-object))
 (define __cs_buf_text_style_get (foreign-procedure "cs_buf_text_style_get" (int) scheme-object))
 
+(define __cs_buf_prop_style_add (foreign-procedure "cs_buf_prop_style_add" (int int int int int int) scheme-object))
+(define __cs_buf_prop_del (foreign-procedure "cs_buf_prop_del" (int int int int) void))
+
 (define __cs_buf_cursor_get (foreign-procedure __collect_safe "cs_buf_cursor_get" (int) scheme-object))
 (define __cs_buf_cursor_set (foreign-procedure __collect_safe "cs_buf_cursor_set" (int int) void))
 (define __cs_buf_mode_set (foreign-procedure "cs_buf_mode_set" (int string) void))
@@ -263,7 +266,7 @@
 		     (__cs_buf_text_fg_set (buffer-current) (color-name->number (cadr o)))]
                   [(equal? (car o) ':bg)
 		     (__cs_buf_text_bg_set (buffer-current) (color-name->number (cadr o)))]
-                  [(equal? (car o) ':style)
+                  [(equal? (car o) ':attr)
 		     (__cs_buf_text_style_set (buffer-current) (style-name->number (cadr o)))]
                )
             )
@@ -273,9 +276,34 @@
    )
 )
 
+(define set-text-style
+   (lambda (s e a)
+      (let ([l (style->list a)])
+         (__cs_buf_prop_style_add (buffer-current)
+                                  (list-ref l 0)
+                                  (list-ref l 1)
+                                  (list-ref l 2)
+                                  s e)
+      )
+   )
+)
+
 (define insert
-   (lambda (t)
-      (__cs_buf_text_insert (buffer-current) t)
+   (lambda (t . s)
+      (if (equal? (length s) 0)
+         (__cs_buf_text_insert (buffer-current) t)
+         ;; else
+         (begin
+            (let ([c (cursor)])
+               (let ([p (- (__cs_buf_text_insert (buffer-current) t) 1)])
+                  (when (equal? 'style (car (car s)))
+                     (set-text-style c p (cadr (car s)))
+                  )
+                  p
+               )
+            )
+	 )
+      )
    )
 )
 

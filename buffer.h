@@ -8,6 +8,12 @@ typedef struct Buffer Buffer;
 typedef struct KeyMap KeyMap;
 typedef struct Vt Vt;
 
+typedef enum {
+	PROPERTY_TYPE_TEXT_STYLE = 1,
+
+	PROPERTY_TYPE_ALL
+} buffer_property_t;
+
 Buffer *buffer_new(const char *name);
 void buffer_del(Buffer *buf);
 int buffer_file_open(Buffer *buf, const char *file);
@@ -56,5 +62,12 @@ pid_t buffer_pid_get(Buffer *buf);
 Buffer *buffer_by_pid(pid_t pid);
 void buffer_died_set(Buffer *buf, bool died);
 bool buffer_is_died(Buffer *buf);
+int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *data);
+void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, void *arg,
+		int (*cb) (Buffer *buf, int type, size_t start, size_t end, void *data, void *arg));
+void buffer_property_remove(Buffer *buf, size_t type, size_t start, size_t end);
+void buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t end, void *arg,
+		void (*cb)(Buffer *buf, size_t type, size_t start, size_t end,
+			void *data, void *arg));
 
 #endif /* BUFFER_H */

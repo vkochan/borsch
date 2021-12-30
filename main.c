@@ -87,6 +87,12 @@ struct Window {
 typedef struct {
 	short fg;
 	short bg;
+	int attr;
+} StyleProperty;
+
+typedef struct {
+	short fg;
+	short bg;
 	short fg256;
 	short bg256;
 	short pair;
@@ -2265,9 +2271,29 @@ int win_create(char *prog, char *title)
 	return create(prog, title, NULL);
 }
 
+static int style_prop_draw(Buffer *buf, int id, size_t start, size_t end, void *data,
+		void *arg)
+{
+	StyleProperty *prop = data;
+	View *view = arg;
+	CellStyle style = {
+		.attr = prop->attr,
+		.fg = prop->fg,
+		.bg = prop->bg,
+	};
+
+	view_style(view, style, start, end);
+
+	return 0;
+}
+
 static void on_view_update_cb(UiWin *win)
 {
 	Window *w = ui_window_priv_get(win);
+	Filerange v = view_viewport_get(w->view);
+
+	buffer_properties_walk(w->buf, PROPERTY_TYPE_TEXT_STYLE,
+			v.start, v.end, w->view, style_prop_draw);
 
 	if (w->highlight_mark) {
 		size_t start = buffer_mark_get(w->buf);
@@ -3168,6 +3194,43 @@ void buf_mark_clear(int bid)
 	if (buf)
 		buffer_mark_clear(buf);
 }
+
+int buf_prop_style_add(int bid, int fg, int bg, int attr,  int start, int end)
+{
+	Buffer *buf = buffer_by_id(bid);
+	StyleProperty *style;
+	int err;
+
+	if (!buf)
+		return -1;
+
+	style = calloc(1, sizeof(StyleProperty));
+	if (!style)
+		return -1;
+
+	style->attr = attr;
+	style->fg = fg;
+	style->bg = bg;
+
+	err = buffer_property_add(buf, PROPERTY_TYPE_TEXT_STYLE, start, end, style);
+	if (err) {
+		free(style);
+		return err;
+	}
+
+	return 0;
+}
+
+void buf_prop_del(int bid, int type, int start, int end)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	buffer_property_remove(buf, type, start, end);
+}
+
+/* void buf_prop_walk(int bid, int type, int start, int end, void *arg, */
+/* 			void (*cb)(int bid, int type, int start, int end, void */
+/* 				*arg)); */
 
 int view_current_get(void)
 {

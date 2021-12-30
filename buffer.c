@@ -5,11 +5,25 @@
 #include <libgen.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <sys/param.h>
 
 #include "vt.h"
 #include "view.h"
 #include "keymap.h"
+#include "buffer.h"
 #include "text/text.h"
+
+typedef struct Buffer Buffer;
+
+typedef struct TextProperty {
+	struct TextProperty *prev;
+	struct TextProperty *next;
+	size_t start;
+	size_t end;
+	void *data;
+	int prio;
+	int type;
+} TextProperty;
 
 typedef struct {
 	char *path;
@@ -38,6 +52,9 @@ typedef struct Buffer {
 	pid_t pid;
 	volatile sig_atomic_t is_died;
 	size_t mark;
+	TextProperty *min_prop;
+	TextProperty *max_prop;
+	TextProperty props;
 } Buffer;
 
 static Buffer buf_list;
@@ -308,6 +325,13 @@ KeyMap *buffer_keymap_get(Buffer *buf)
 	return buf->keymap;
 }
 
+static void buffer_properties_pos_update(Buffer *buf, size_t pos, int len);
+
+static void buffer_text_changed(Buffer *buf, size_t pos, int len)
+{
+	buffer_properties_pos_update(buf, pos, len);
+}
+
 size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text)
 {
 	size_t len;
@@ -315,6 +339,7 @@ size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text)
 	len = strlen(text);
 
 	if (text_insert(buf->text, pos, text, len)) {
+		buffer_text_changed(buf, pos, len);
 		buffer_cursor_set(buf, pos + len);
 		buf->is_dirty = true;
 		pos += len;
@@ -328,6 +353,7 @@ size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text)
 size_t buffer_text_insert_len(Buffer *buf, size_t pos, const char *text, size_t len)
 {
 	if (text_insert(buf->text, pos, text, len)) {
+		buffer_text_changed(buf, pos, len);
 		buffer_cursor_set(buf, pos + len);
 		buf->is_dirty = true;
 		pos += len;
@@ -341,6 +367,8 @@ size_t buffer_text_insert_len(Buffer *buf, size_t pos, const char *text, size_t 
 size_t buffer_text_insert_nl(Buffer *buf, size_t pos)
 {
 	Text *txt = buf->text;
+	size_t pos_orig = pos;
+	size_t len = 1;
 	char byte;
 	/* insert second newline at end of file, except if there is already one */
 	bool eof = pos == text_size(txt);
@@ -348,13 +376,16 @@ size_t buffer_text_insert_nl(Buffer *buf, size_t pos)
 
 	text_insert(txt, pos, "\n", 1);
 	if (eof) {
-		if (nl2)
+		if (nl2) {
 			text_insert(txt, text_size(txt), "\n", 1);
-		else
+			len++;
+		} else {
 			pos--; /* place cursor before, not after nl */
+		}
 	}
 	pos++;
 
+	buffer_text_changed(buf, pos_orig, len);
 	buffer_cursor_set(buf, pos);
 	buf->is_dirty = true;
 
@@ -377,6 +408,7 @@ size_t buffer_text_delete(Buffer *buf, size_t start, size_t end)
 		buf->is_dirty = true;
 	}
 
+	buffer_text_changed(buf, start, -(end - start));
 	return start;
 }
 
@@ -506,4 +538,152 @@ void buffer_died_set(Buffer *buf, bool died)
 bool buffer_is_died(Buffer *buf)
 {
 	return buf->is_died;
+}
+
+static void text_property_insert_after(TextProperty *head, TextProperty *prop)
+{
+	prop->prev = head;
+	prop->next = head->next;
+
+	if (head->next)
+		head->next->prev = prop;
+
+	head->next = prop;
+}
+
+static void text_property_remove(TextProperty *prop)
+{
+	if (prop->prev)
+		prop->prev->next = prop->next;
+	if (prop->next)
+		prop->next->prev = prop->prev;
+}
+
+int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *data)
+{
+	TextProperty *p;
+
+	p = calloc(1, sizeof(*p));
+	if (!p)
+		return -1;
+
+	p->start = start;
+	p->data = data;
+	p->end = end;
+	p->type = type;
+
+	if (buf->max_prop && start > buf->max_prop->start) {
+		text_property_insert_after(buf->max_prop, p);
+		buf->max_prop = p;
+	} else if (buf->min_prop && start < buf->min_prop->start) {
+		text_property_insert_after(&buf->props, p);
+		buf->min_prop = p;
+	} else {
+		TextProperty *max_prop = buf->props.next;
+
+		while (max_prop && start > max_prop->start) {
+			if (!max_prop->next)
+				break;
+			max_prop = max_prop->next;
+		}
+
+		if (!max_prop)
+			text_property_insert_after(&buf->props, p);
+		else
+			text_property_insert_after(max_prop, p);
+
+		buf->max_prop = p;
+		if (!buf->min_prop)
+			buf->min_prop = buf->min_prop;
+	}
+
+	return 0;
+}
+
+void buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t end, void *arg,
+		void (*cb)(Buffer *buf, size_t type, size_t start, size_t end,
+			void *data, void *arg))
+{
+	TextProperty *it = buf->props.next;
+	int exp = 0;
+
+	if (start != EPOS && end != EPOS)
+		exp++;
+	if (type)
+		exp++;
+
+	if (!exp)
+		return;
+
+	while (type) {
+		int match = 0;
+
+		if (it->start >= start && it->end <= end)
+			match++;
+		if (type == it->type)
+			match++;
+		if (type == PROPERTY_TYPE_ALL)
+			match++;
+
+		if (match >= exp) {
+			TextProperty *next = it->next;
+
+			if (cb)
+				cb(buf, type, it->start, it->end, it->data, arg);
+			else
+				free(it->data);
+
+			text_property_remove(it);
+			it = next;
+		}
+	}
+}
+
+void buffer_property_remove(Buffer *buf, size_t type, size_t start, size_t end)
+{
+	buffer_property_remove_cb(buf, type, start, end, NULL, NULL);
+}
+
+void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, void *arg,
+		int (*cb) (Buffer *buf, int type, size_t start, size_t end, void *data, void *arg))
+{
+	TextProperty *it = buf->props.next;
+	int exp = 0;
+
+	if (start != EPOS && end != EPOS) {
+		if (buf->min_prop && end < buf->min_prop->start)
+			return;
+		if (buf->max_prop && start > buf->max_prop->end)
+			return;
+		exp++;
+	}
+	if (type)
+		exp++;
+
+	for (; it; it = it->next) {
+		int match = 0;
+
+		if (it->end >= start && (it->start >= start && it->start <= end ||
+				start >= it->start && it->start <= end))
+			match++;
+		if (it->type == type)
+			match++;
+		if (type == PROPERTY_TYPE_ALL)
+			match++;
+
+		if (match >= exp)
+			cb(buf, it->type, it->start, MIN(it->end, end), it->data, arg);
+	}
+}
+
+static void buffer_properties_pos_update(Buffer *buf, size_t pos, int len)
+{
+	TextProperty *it = buf->props.next;
+
+	for (; it; it = it->next) {
+		if (it->start >= pos) {
+			it->start += len;
+			it->end += len;
+		}
+	}
 }
