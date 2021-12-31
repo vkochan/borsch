@@ -313,7 +313,7 @@
    )
 )
 
-(define insert-nl-up
+(define insert-empty-line-up
    (lambda ()
       (move-prev-line-end)
       (if (equal? (cursor) 0)
@@ -324,7 +324,7 @@
    )
 )
 
-(define insert-nl-down
+(define insert-empty-line
    (lambda ()
       (move-line-end)
       (insert-nl)
