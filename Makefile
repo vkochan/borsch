@@ -25,8 +25,7 @@ define install_scheme
 	@mkdir -p ${DESTDIR}${LIB_PREFIX}
 	@for s in $$(find scheme/ -type f | sed -e 's|scheme/||'); do \
 		echo "installing ${DESTDIR}${LIB_PREFIX}/$$s"; \
-		cp -f "scheme/$$s" "${DESTDIR}${LIB_PREFIX}" && \
-		chmod 644 "${DESTDIR}${LIB_PREFIX}/$$s"; \
+		install -D -m 0644 "scheme/$$s" "${DESTDIR}${LIB_PREFIX}/$$s"; \
 	done
 endef
 
