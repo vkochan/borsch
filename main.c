@@ -157,13 +157,6 @@ typedef struct {
 	size_t size;
 } Register;
 
-typedef struct {
-	char *name;
-	const char *argv[4];
-	bool filter;
-	bool color;
-} Editor;
-
 static Ui *ui;
 
 #define LENGTH(arr) (sizeof(arr) / sizeof((arr)[0]))
