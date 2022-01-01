@@ -23,7 +23,7 @@ CFLAGS += -I$(SCH_PATH) \
 define install_scheme
 	@echo installing scheme scripts
 	@mkdir -p ${DESTDIR}${LIB_PREFIX}
-	@for s in $$(ls -1 scheme/); do \
+	@for s in $$(find scheme/ -type f | sed -e 's|scheme/||'); do \
 		echo "installing ${DESTDIR}${LIB_PREFIX}/$$s"; \
 		cp -f "scheme/$$s" "${DESTDIR}${LIB_PREFIX}" && \
 		chmod 644 "${DESTDIR}${LIB_PREFIX}/$$s"; \
@@ -31,7 +31,7 @@ define install_scheme
 endef
 
 define uninstall_scheme
-	@for s in $$(ls -1 scheme/); do \
+	@for s in $$(find scheme/ -type f | sed -e 's|scheme/||'); do \
 		echo "removing ${DESTDIR}${LIB_PREFIX}/$$s"; \
 		rm -rf "${DESTDIR}${LIB_PREFIX}/$$s"; \
 	done
