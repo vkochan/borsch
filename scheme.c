@@ -252,6 +252,11 @@ void scheme_win_mark_highlight(int wid, bool enable)
 	win_mark_highlight(wid, enable);
 }
 
+void scheme_win_popup(int wid, bool enable)
+{
+	win_popup(wid, enable);
+}
+
 ptr scheme_kmap_add(char *parent)
 {
 	int ret = kmap_add(0);
@@ -655,6 +660,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_text_send", scheme_win_text_send);
 	Sregister_symbol("cs_win_buf_get", scheme_win_buf_get);
 	Sregister_symbol("cs_win_mark_highlight", scheme_win_mark_highlight);
+	Sregister_symbol("cs_win_popup", scheme_win_popup);
 
 	Sregister_symbol("cs_kmap_add", scheme_kmap_add);
 	Sregister_symbol("cs_kmap_parent_set", scheme_kmap_parent_set);

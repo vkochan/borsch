@@ -126,6 +126,7 @@ struct UiWin {
 	unsigned curr_style;
 	short curr_fg, curr_bg;
 	char title[256];
+	bool has_border;
 	CellStyle (*style_get)(UiWin*, enum UiStyle);
 	void (*status)(UiWin*, const char *txt);
 	void (*options_set)(UiWin*, enum UiOption);
@@ -189,6 +190,8 @@ short ui_window_text_fg_get(UiWin *win);
 short ui_window_text_bg_get(UiWin *win);
 short ui_window_text_style_get(UiWin *win);
 void ui_window_on_view_update_set(UiWin *win, void (*cb)(UiWin *win));
+void ui_window_border_enable(UiWin *win, bool enable);
+bool ui_window_border_is_enabled(UiWin *win);
 void ui_cursor_enable(Ui*, bool enable);
 
 #endif

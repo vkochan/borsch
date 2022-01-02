@@ -62,6 +62,7 @@ int win_keys_send(int wid, char *keys);
 int win_text_send(int wid, char *text);
 int win_buf_get(int wid);
 void win_mark_highlight(int wid, bool enable);
+void win_popup(int wid, bool enable);
 
 int kmap_add(int pid);
 int kmap_parent_set(int kid, char *name);

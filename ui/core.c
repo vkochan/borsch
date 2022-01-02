@@ -121,14 +121,18 @@ void ui_window_free(UiWin *win)
 
 void ui_window_cursor_set(UiWin *win, int x, int y)
 {
+	int skip = win->has_border;
+
 	if (win->ui->window_cursor_set)
-		win->ui->window_cursor_set(win, x, y);
+		win->ui->window_cursor_set(win, x+skip, y+skip);
 }
 
 void ui_window_cursor_get(UiWin *win, int *x, int *y)
 {
 	if (win->ui->window_cursor_get)
 		win->ui->window_cursor_get(win, x, y);
+	*x -= win->has_border;
+	*y -= win->has_border;
 }
 
 void ui_window_draw(UiWin *win)
@@ -161,11 +165,12 @@ void ui_window_refresh(UiWin *win)
 void ui_window_resize(UiWin *win, int width, int height)
 {
 	if (width != win->width || height != win->height) {
+		int border = win->has_border;
 
 		win->height = height;
 		win->width = width;
 
-		view_resize(win->view, width, height-1);
+		view_resize(win->view, win->width-(border*2), win->height-border-1);
 
 		if (win->resize)
 			win->resize(win, width, height);
@@ -187,28 +192,36 @@ void ui_window_move(UiWin *win, int x, int y)
 
 void ui_window_draw_char(UiWin *win, int x, int y, unsigned int ch, int n)
 {
+	int skip = win->has_border;
+
 	if (win->ui->window_draw_char)
-		win->ui->window_draw_char(win, x, y, ch, n);
+		win->ui->window_draw_char(win, x+skip, y+skip, ch, n);
 }
 
 void ui_window_draw_text(UiWin *win, int x, int y, const char *text, int n)
 {
+	int skip = win->has_border;
+
 	if (win->ui->window_draw_text)
-		win->ui->window_draw_text(win, x, y, text, n);
+		win->ui->window_draw_text(win, x+skip, y+skip, text, n);
 }
 
 void ui_window_draw_char_attr(UiWin *win, int x, int y, unsigned ch, int n,
 			      short fg, short bg, ui_text_style_t style)
 {
+	int skip = win->has_border;
+
 	if (win->ui->window_draw_char_attr)
-		win->ui->window_draw_char_attr(win, x, y, ch, n, fg, bg, style);
+		win->ui->window_draw_char_attr(win, x+skip, y+skip, ch, n, fg, bg, style);
 }
 
 void ui_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int n,
 			      short fg, short bg, ui_text_style_t style)
 {
+	int skip = win->has_border;
+
 	if (win->ui->window_draw_text_attr)
-		win->ui->window_draw_text_attr(win, x, y, text, n, fg, bg, style);
+		win->ui->window_draw_text_attr(win, x+skip, y+skip, text, n, fg, bg, style);
 }
 
 void ui_window_title_set(UiWin *win, const char *title)
@@ -314,6 +327,16 @@ short ui_window_text_style_get(UiWin *win)
 void ui_window_on_view_update_set(UiWin *win, void (*cb)(UiWin *))
 {
 	win->on_view_update = cb;
+}
+
+void ui_window_border_enable(UiWin *win, bool enable)
+{
+	win->has_border = enable;
+}
+
+bool ui_window_border_is_enabled(UiWin *win)
+{
+	return win->has_border;
 }
 
 void ui_cursor_enable(Ui *ui, bool enable)

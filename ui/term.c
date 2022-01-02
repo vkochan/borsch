@@ -403,16 +403,16 @@ static void term_window_draw(UiWin *win)
 	const Line *line = view_lines_first(win->view);
 	int view_width = view_width_get(win->view);
 	WinTerm *twin = (WinTerm*)win;
-	int x = 0, y = 0;
+	int x0 = win->has_border, y = win->has_border;
 	int sx, sy;
 
 	getyx(twin->cwin, sy, sx);
-	wmove(twin->cwin, y, x);
+	wmove(twin->cwin, y, x0);
 	wclrtobot(twin->cwin);
 
 	for (const Line *l = line; l; l = l->next, y++) {
-		for (x = 0; x < view_width; x++) {
-			Cell *c = &l->cells[x];
+		for (int cx = 0, x = x0; cx < view_width; cx++,x++) {
+			Cell *c = &l->cells[cx];
 
 			if (!c->len) {
 				c->style.fg = ui_window_text_fg_get(win);
@@ -431,6 +431,15 @@ static void term_window_draw(UiWin *win)
 			wmove(twin->cwin, y, x);
 			waddnstr(twin->cwin, c->data, c->len);
 		}
+	}
+
+	if (win->has_border) {
+		mvwhline(twin->cwin, 0, 1, ACS_HLINE, ui_window_width_get(win)-2);
+		mvwhline(twin->cwin, 0, 0, ACS_ULCORNER, 1);
+		mvwhline(twin->cwin, 0, ui_window_width_get(win)-1, ACS_URCORNER, 1);
+		mvwvline(twin->cwin, 1, 0, ACS_VLINE, ui_window_height_get(win)-1);
+		mvwvline(twin->cwin, 1, ui_window_width_get(win)-1, ACS_VLINE,
+				ui_window_height_get(win)-1);
 	}
 
 	wattrset(twin->cwin, term_style2attr(ui_window_text_style_get(win)));

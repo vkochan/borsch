@@ -217,7 +217,7 @@ static Window *windows = NULL;
 static char *title;
 static bool show_tagnamebycwd = false;
 
-static void buf_update(void);
+static void buf_list_update(void);
 
 static KeyMap *win_min_kmap;
 static KeyMap *global_kmap;
@@ -360,6 +360,7 @@ typedef struct {
 	char *cwd[LENGTH(tags) + 1];
 	char *name[LENGTH(tags) + 1];
 	bool msticky[LENGTH(tags) + 1];
+	Window *popup[LENGTH(tags) + 1];
 } Pertag;
 
 /* global variables */
@@ -472,6 +473,16 @@ char *window_get_title(Window *c)
 		return ui_window_title_get(c->win);
 
 	return buffer_name_get(c->buf);
+}
+
+Window *get_popup(void)
+{
+	return pertag.popup[pertag.curtag];
+}
+
+void *set_popup(Window *p)
+{
+	pertag.popup[pertag.curtag] = p;
 }
 
 static void
@@ -589,8 +600,9 @@ static void draw_title(Window *c) {
 	ui_text_style_t title_style = UI_TEXT_STYLE_NORMAL;
 	int title_fg = UI_TEXT_COLOR_WHITE;
 	int title_bg = UI_TEXT_COLOR_BRIGHT_BLACK;
-	int x, y, maxlen, title_y;
+	int x, y, maxlen, title_y, title_x;
 	int w_w = ui_window_width_get(c->win);
+	int has_border = ui_window_border_is_enabled(c->win);
 	char title[256];
 	char tmp[256];
 	size_t len;
@@ -601,10 +613,13 @@ static void draw_title(Window *c) {
 	}
 
 	title_y = ui_window_height_get(c->win)-1;
+	title_y -= has_border;
+	title_x = has_border;
+	w_w -= has_border;
 
 	ui_window_cursor_get(c->win, &x, &y);
 
-	ui_window_draw_char_attr(c->win, 0, title_y, ACS_HLINE, w_w,
+	ui_window_draw_char_attr(c->win, title_x, title_y, ACS_HLINE, w_w-(has_border*2),
 				 title_bg, title_bg,
 				 UI_TEXT_STYLE_NORMAL);
 
@@ -622,7 +637,7 @@ static void draw_title(Window *c) {
 			c->order,
 			ismastersticky(c) ? "*" : "",
 			tmp[0] ? tmp : "");
-	ui_window_draw_text_attr(c->win, 2, title_y, title, w_w,
+	ui_window_draw_text_attr(c->win, 0, title_y, title, w_w,
 			title_fg, title_bg,
 			UI_TEXT_STYLE_NORMAL);
 
@@ -631,7 +646,7 @@ static void draw_title(Window *c) {
 
 static void
 draw(Window *c) {
-	if (is_content_visible(c)) {
+	if (is_content_visible(c) || c == get_popup()) {
 		ui_window_redraw(c->win);
 		ui_window_draw(c->win);
 	}
@@ -886,8 +901,13 @@ static void
 resize_window(Window *c, int w, int h) {
 	ui_window_resize(c->win, w, h);
 
-	if (buffer_term_get(c->buf))
+	if (buffer_term_get(c->buf)) {
+		if (c == get_popup()) {
+			w-=-2;
+			h--;
+		}
 		vt_resize(buffer_term_get(c->buf), h - 1, w);
+	}
 }
 
 static void
@@ -1180,7 +1200,7 @@ setup(void) {
 	sa.sa_handler = SIG_IGN;
 	sigaction(SIGPIPE, &sa, NULL);
 	scheme_init(scheme_init_script);
-	buf_update();
+	buf_list_update();
 }
 
 static void
@@ -1189,8 +1209,14 @@ destroy(Window *c) {
 
 	if (sel == c)
 		focusnextnm(NULL);
-	detach(c);
+
+	if (c != get_popup()) {
+		detach(c);
+	} else {
+		set_popup(NULL);
+	}
 	detachstack(c);
+
 	if (sel == c) {
 		Window *next = nextvisible(windows);
 		if (next) {
@@ -1240,6 +1266,8 @@ cleanup(void) {
 	for(i=0; i <= LENGTH(tags); i++) {
 		free(pertag.name[i]);
 		free(pertag.cwd[i]);
+		if (pertag.popup[i])
+			destroy(pertag.popup[i]);
 	}
 }
 
@@ -1422,7 +1450,7 @@ focusnextnm(const char *args[]) {
 		c = nextvisible(c->next);
 		if (!c)
 			c = nextvisible(windows);
-	} while (c->minimized && c != sel);
+	} while (c && c->minimized && c != sel);
 	focus(c);
 }
 
@@ -1980,6 +2008,11 @@ main(int argc, char *argv[]) {
 			}
 			c = c->next;
 		}
+		if (get_popup()) {
+			if (buffer_is_died(get_popup()->buf)) {
+				destroy(get_popup());
+			}
+		}
 		/* TODO: what to do with a died buffers ? */
 
 		ui_update(ui);
@@ -2042,7 +2075,7 @@ reenter:
 			}
 			/* no data available on pty's */
 			if (r == 1) {
-				buf_update();
+				buf_list_update();
 				continue;
 			}
 		}
@@ -2099,6 +2132,9 @@ static Window *window_get_by_id(int id)
 		if (c->id == id)
 			return c;
 	}
+
+	if (get_popup() && get_popup()->id == id)
+		return get_popup();
 
 	return NULL;
 }
@@ -2255,13 +2291,16 @@ int win_current_get(void)
 
 int win_current_set(int wid)
 {
-	__focusid(wid);
+	if (!get_popup())
+		__focusid(wid);
 	return 0;
 }
 
 int win_create(char *prog, char *title)
 {
-	return create(prog, title, NULL);
+	if (!get_popup())
+		return create(prog, title, NULL);
+	return -1;
 }
 
 static int style_prop_draw(Buffer *buf, int id, size_t start, size_t end, void *data,
@@ -2478,6 +2517,9 @@ int win_state_set(int wid, win_state_t st)
 	const char *maxi[] = { "[ ]" };
 	Window *c, *orig;
 
+	if (get_popup())
+		return -1;
+
 	c = window_get_by_id(wid);
 	if (!c)
 		return -1;
@@ -2595,6 +2637,43 @@ void win_mark_highlight(int wid, bool enable)
 
 	if (c) {
 		c->highlight_mark = enable;
+	}
+}
+
+void win_popup(int wid, bool enable)
+{
+	Window *w = window_get_by_id(wid);
+	int x, y;
+
+	/* TODO: add support for term window */
+	if (buffer_term_get(w->buf))
+		return;
+
+	if (w) {
+		if (enable) {
+			int pw = waw/3;
+			int ph = wah/3;
+
+			detach(w);
+
+			if (get_popup())
+				attach(get_popup());
+
+			ui_window_border_enable(w->win, true);
+			resize(w, waw-(waw-pw), wah-(wah-ph), pw, ph);
+			set_popup(w);
+			arrange();
+			focus(w);
+		} else {
+			set_popup(NULL);
+			ui_window_border_enable(w->win, false);
+			attach(w);
+			arrange();
+		}
+
+		ui_window_cursor_get(w->win, &x, &y);
+		ui_window_cursor_set(w->win, x+1, y+1);
+		ui_window_refresh(w->win);
 	}
 }
 
@@ -2722,31 +2801,38 @@ int buf_by_name(const char *name)
 	return 0;
 }
 
-static void buf_update(void)
+static void buf_update(Window *w)
 {
-	for (Window *c = windows; c; c = c->next) {
-		if (is_content_visible(c)) {
-			View *view = c->view;
-			Buffer *buf = c->buf;
-			UiWin *win = c->win;
+	View *view = w->view;
+	Buffer *buf = w->buf;
+	UiWin *win = w->win;
 
-			if (buffer_is_dirty(buf)) {
-				size_t pos = buffer_cursor_get(buf);
-				int x, y;
+	if (buffer_is_dirty(buf)) {
+		size_t pos = buffer_cursor_get(buf);
+		int x, y;
 
-				view_scroll_to(view, pos);
-				if (view_coord_get(view, pos, NULL, &y, &x)) {
-					ui_window_cursor_set(win, x, y);
-				}
+		view_scroll_to(view, pos);
+		if (view_coord_get(view, pos, NULL, &y, &x)) {
+			ui_window_cursor_set(win, x, y);
+		}
 
-				/* TODO: better to make buffer to know about it's
-				 * windows and mark them as dirty on text update */
-				buffer_dirty_set(buf, false);
-				view_invalidate(view);
-				draw(c);
-			}
+		/* TODO: better to make buffer to know about it's
+		 * windows and mark them as dirty on text update */
+		buffer_dirty_set(buf, false);
+		view_invalidate(view);
+		draw(w);
+	}
+}
+
+static void buf_list_update(void)
+{
+	for (Window *w = windows; w; w = w->next) {
+		if (is_content_visible(w)) {
+			buf_update(w);
 		}
 	}
+	if (get_popup())
+		buf_update(get_popup());
 }
 
 size_t buf_text_insert(int bid, const char *text)
@@ -3293,6 +3379,9 @@ layout_t layout_current_get(int tag)
 
 int layout_current_set(int tag, layout_t lay)
 {
+	if (get_popup())
+		return -1;
+
 	layout = &layouts[lay];
 	pertag.layout_prev[pertag.curtag] = pertag.layout[pertag.curtag];
 	pertag.layout[pertag.curtag] = layout;
@@ -3306,7 +3395,7 @@ int layout_nmaster_get(int tag)
 
 int layout_nmaster_set(int tag, int n)
 {
-	if (isarrange(fullscreen) || isarrange(grid))
+	if (get_popup() || isarrange(fullscreen) || isarrange(grid))
 		return -1;
 
 	pertag.nmaster[tag] = n;
@@ -3322,7 +3411,7 @@ float layout_fmaster_get(int tag)
 
 int layout_fmaster_set(int tag, float f)
 {
-	if (isarrange(fullscreen) || isarrange(grid))
+	if (get_popup() || isarrange(fullscreen) || isarrange(grid))
 		return -1;
 
 	pertag.mfact[tag] = f;
@@ -3338,6 +3427,9 @@ bool layout_sticky_get(int tag)
 
 int layout_sticky_set(int tag, bool is_sticky)
 {
+	if (get_popup())
+		return -1;
+
 	pertag.msticky[tag] = is_sticky;
 	draw_all();
 	return 0;
