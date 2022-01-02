@@ -172,8 +172,12 @@
 )
 
 (define buffer-name
-   (lambda ()
-      (__cs_buf_name_get (buffer-current))
+   (case-lambda
+      [()
+       (__cs_buf_name_get (buffer-current))]
+
+      [(b)
+       (__cs_buf_name_get b)]
    )
 )
 
