@@ -2645,11 +2645,11 @@ void win_popup(int wid, bool enable)
 	Window *w = window_get_by_id(wid);
 	int x, y;
 
-	/* TODO: add support for term window */
-	if (buffer_term_get(w->buf))
-		return;
-
 	if (w) {
+		/* TODO: add support for term window */
+		if (buffer_term_get(w->buf))
+			return;
+
 		if (enable) {
 			int pw = waw/3;
 			int ph = wah/3;
