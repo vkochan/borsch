@@ -1246,6 +1246,10 @@ cleanup(void) {
 	scheme_uninit();
 	while (windows)
 		destroy(windows);
+	for(i=0; i <= LENGTH(tags); i++) {
+		if (pertag.popup[i])
+			destroy(pertag.popup[i]);
+	}
 	keymap_free(win_min_kmap);
 	keymap_free(global_kmap);
 	vt_shutdown();
@@ -1266,8 +1270,6 @@ cleanup(void) {
 	for(i=0; i <= LENGTH(tags); i++) {
 		free(pertag.name[i]);
 		free(pertag.cwd[i]);
-		if (pertag.popup[i])
-			destroy(pertag.popup[i]);
 	}
 }
 
