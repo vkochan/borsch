@@ -167,15 +167,17 @@ void ui_window_resize(UiWin *win, int width, int height)
 	if (width != win->width || height != win->height) {
 		int border = win->has_border;
 
-		win->height = height;
-		win->width = width;
+		if (height > 0)
+			win->height = height;
+		if (width > 0)
+			win->width = width;
 
 		view_resize(win->view, win->width-(border*2), win->height-border-1);
 
 		if (win->resize)
-			win->resize(win, width, height);
+			win->resize(win, win->width, win->height);
 		else if (win->ui->window_resize)
-			win->ui->window_resize(win, width, height);
+			win->ui->window_resize(win, win->width, win->height);
 	}
 }
 
@@ -236,7 +238,7 @@ char *ui_window_title_get(UiWin *win)
 
 void ui_window_width_set(UiWin *win, int width)
 {
-	win->width = width;
+	ui_window_resize(win, width, -1);
 }
 
 int ui_window_width_get(UiWin *win)
@@ -246,7 +248,7 @@ int ui_window_width_get(UiWin *win)
 
 void ui_window_height_set(UiWin *win, int height)
 {
-	win->height = height;
+	ui_window_resize(win, -1, height);
 }
 
 int ui_window_height_get(UiWin *win)
@@ -331,6 +333,9 @@ void ui_window_on_view_update_set(UiWin *win, void (*cb)(UiWin *))
 
 void ui_window_border_enable(UiWin *win, bool enable)
 {
+	if (win->has_border != enable)
+		view_invalidate(win->view);
+
 	win->has_border = enable;
 }
 

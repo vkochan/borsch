@@ -25,6 +25,8 @@
 (define __cs_win_text_send (foreign-procedure "cs_win_text_send" (int string) int))
 (define __cs_win_buf_get (foreign-procedure __collect_safe "cs_win_buf_get" (int) scheme-object))
 (define __cs_win_popup (foreign-procedure __collect_safe "cs_win_popup" (int boolean) scheme-object))
+(define __cs_win_size_set (foreign-procedure __collect_safe "cs_win_size_set" (int int int) void))
+(define __cs_win_border_set (foreign-procedure __collect_safe "cs_win_border_set" (int boolean) void))
 
 (define window-first
    (lambda ()
@@ -419,5 +421,35 @@
 
       [(wid e)
        (__cs_win_popup wid e)]
+   )
+)
+
+(define window-set-width
+   (case-lambda
+      [(w)
+       (__cs_win_size_set (__cs_win_current_get) w -1)]
+
+      [(wid w)
+       (__cs_win_size_set wid w -1)]
+   )
+)
+
+(define window-set-height
+   (case-lambda
+      [(h)
+       (__cs_win_size_set (__cs_win_current_get) -1 h)]
+
+      [(wid h)
+       (__cs_win_size_set wid -1 h)]
+   )
+)
+
+(define window-set-border
+   (case-lambda
+      [(h)
+       (__cs_win_border_set (__cs_win_current_get) -1 h)]
+
+      [(wid h)
+       (__cs_win_border_set wid -1 h)]
    )
 )

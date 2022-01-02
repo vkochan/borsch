@@ -2677,6 +2677,28 @@ void win_popup(int wid, bool enable)
 	}
 }
 
+void win_size_set(int wid, int width, int height)
+{
+	Window *w = window_get_by_id(wid);
+
+	if (w) {
+		if (width > 0)
+			ui_window_width_set(w->win, width);
+		if (height > 0)
+			ui_window_height_set(w->win, height);
+		draw(w);
+	}
+}
+
+void win_border_set(int wid, bool enable)
+{
+	Window *w = window_get_by_id(wid);
+
+	if (w) {
+		ui_window_border_enable(w->win, enable);
+	}
+}
+
 int kmap_add(int pid)
 {
 	KeyMap *pmap = keymap_by_id(pid);
