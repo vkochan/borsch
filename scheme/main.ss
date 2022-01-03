@@ -144,6 +144,8 @@
 (bind-key "C-g b"   layout-switch-bstack)
 (bind-key "C-g m"   window-toggle-maximized)
 
+(bind-key "C-b s" buffer-switch)
+
 (bind-key "C-g q q" do-quit)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;

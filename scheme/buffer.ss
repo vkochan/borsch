@@ -1070,3 +1070,58 @@
       (copy-to-register (buffer-string (line-begin-pos) (1+ (line-end-pos))) #t)
    )
 )
+
+(define buffer-switch-select
+   (lambda ()
+      (let (
+              [b (buffer-get (extract-longword))]
+              [p (window-prev-selected)]
+           )
+         (when b
+            (window-switch-buffer p b)
+            (window-delete)
+	    (window-select p)
+         )
+      )
+   )
+)
+
+(define buffer-switch-map
+   (let ([map (make-keymap)])
+      (bind-key map "<Enter>" buffer-switch-select)
+      (bind-key map "j" (lambda ()
+                                   (highlight-clear)
+                                   (move-down-line)
+                                   (highlight-range
+                                      (line-begin-pos) (line-end-pos))))
+      (bind-key map "k" (lambda ()
+                                   (highlight-clear)
+                                   (move-up-line)
+                                   (highlight-range
+                                      (line-begin-pos) (line-end-pos))))
+      map
+   )
+)
+
+(define buffer-switch
+   (lambda ()
+      (let (
+              [b (buffer-new)]
+              [l (buffer-list)]
+           )
+         (window-popup #t)
+         (with-buffer b
+            (buffer-set-keymap 'buffer-switch-map)
+            (for-each
+               (lambda (x)
+                  (when (not (buffer-is-term? (car x)))
+                     (insert (format "~a\n" (cadr x)) '(style (:attr "bold")))
+                  )
+               ) l
+            )
+         )
+         (move-buffer-begin)
+         (highlight-range (line-begin-pos) (line-end-pos))
+      )
+   )
+)
