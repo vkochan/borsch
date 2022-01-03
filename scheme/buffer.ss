@@ -391,19 +391,19 @@
    )
 )
 
-(define move-prev-line
+(define move-up-line
    (lambda ()
       (cursor-set (prev-line-pos))
    )
 )
 
-(define move-next-line
+(define move-down-line
    (lambda ()
       (cursor-set (next-line-pos))
    )
 )
 
-(define move-next-line-begin
+(define move-next-line
    (lambda ()
       (cursor-set (next-line-begin-pos))
    )
@@ -918,7 +918,7 @@
 
 (define delete-next-line-begin
    (lambda ()
-      (cursor-obj-delete move-next-line-begin)
+      (cursor-obj-delete move-next-line)
    )
 )
 
@@ -962,7 +962,7 @@
          (if (equal? (buffer-end-pos) (1+ (line-end-pos)))
             (move-line-begin)
             ;; else
-            (move-next-line-begin)
+            (move-next-line)
          )
       )
    )
