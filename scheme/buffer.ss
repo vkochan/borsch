@@ -22,7 +22,7 @@
 (define __cs_buf_text_bg_get (foreign-procedure "cs_buf_text_bg_get" (int) scheme-object))
 (define __cs_buf_text_style_get (foreign-procedure "cs_buf_text_style_get" (int) scheme-object))
 
-(define __cs_buf_prop_style_add (foreign-procedure "cs_buf_prop_style_add" (int int int int int int) scheme-object))
+(define __cs_buf_prop_style_add (foreign-procedure "cs_buf_prop_style_add" (int int int int int int int) scheme-object))
 (define __cs_buf_prop_del (foreign-procedure "cs_buf_prop_del" (int int int int) void))
 
 (define __cs_buf_cursor_get (foreign-procedure __collect_safe "cs_buf_cursor_get" (int) scheme-object))
@@ -286,11 +286,24 @@
    (lambda (s e a)
       (let ([l (style->list a)])
          (__cs_buf_prop_style_add (buffer-current)
+				  1
                                   (list-ref l 0)
                                   (list-ref l 1)
                                   (list-ref l 2)
                                   s e)
       )
+   )
+)
+
+(define highlight-range
+   (lambda (s e)
+      (__cs_buf_prop_style_add (buffer-current) 2 -1 -1 -1 s e)
+   )
+)
+
+(define highlight-clear
+   (lambda ()
+      (__cs_buf_prop_del (buffer-current) 2 -1 -1)
    )
 )
 

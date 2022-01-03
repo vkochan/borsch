@@ -523,9 +523,9 @@ ptr scheme_buf_is_term(int bid)
 	return Sfalse;
 }
 
-ptr scheme_buf_prop_style_add(int bid, int fg, int bg, int attr, int start, int end)
+ptr scheme_buf_prop_style_add(int bid, int type, int fg, int bg, int attr, int start, int end)
 {
-	int ret = buf_prop_style_add(bid, fg, bg, attr, start, end);
+	int ret = buf_prop_style_add(bid, type, fg, bg, attr, start, end);
 
 	if (ret == 0)
 		Sinteger(ret);

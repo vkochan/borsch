@@ -2356,6 +2356,8 @@ static void on_view_update_cb(UiWin *win)
 
 	buffer_properties_walk(w->buf, PROPERTY_TYPE_TEXT_STYLE,
 			v.start, v.end, w->view, style_prop_draw);
+	buffer_properties_walk(w->buf, PROPERTY_TYPE_TEXT_HIGHLIGHT,
+			v.start, v.end, w->view, style_prop_draw);
 
 	if (w->highlight_mark) {
 		size_t start = buffer_mark_get(w->buf);
@@ -3369,7 +3371,7 @@ bool buf_is_term(int bid)
 	return false;
 }
 
-int buf_prop_style_add(int bid, int fg, int bg, int attr,  int start, int end)
+int buf_prop_style_add(int bid, int type, int fg, int bg, int attr,  int start, int end)
 {
 	Buffer *buf = buffer_by_id(bid);
 	StyleProperty *style;
@@ -3386,7 +3388,13 @@ int buf_prop_style_add(int bid, int fg, int bg, int attr,  int start, int end)
 	style->fg = fg;
 	style->bg = bg;
 
-	err = buffer_property_add(buf, PROPERTY_TYPE_TEXT_STYLE, start, end, style);
+	if (type == PROPERTY_TYPE_TEXT_HIGHLIGHT) {
+		style->attr = 0;
+		style->fg = UI_TEXT_COLOR_WHITE;
+		style->bg = UI_TEXT_COLOR_BLUE;
+	}
+
+	err = buffer_property_add(buf, type, start, end, style);
 	if (err) {
 		free(style);
 		return err;
@@ -3399,7 +3407,8 @@ void buf_prop_del(int bid, int type, int start, int end)
 {
 	Buffer *buf = buffer_by_id(bid);
 
-	buffer_property_remove(buf, type, start, end);
+	buffer_property_remove(buf, type, start == -1 ? EPOS : start,
+			end == -1 ? EPOS : end);
 }
 
 /* void buf_prop_walk(int bid, int type, int start, int end, void *arg, */
