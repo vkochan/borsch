@@ -644,9 +644,12 @@ static void draw_title(Window *c) {
 	ui_window_cursor_set(c->win, x, y);
 }
 
+static void buf_update(Window *w);
+
 static void
 draw(Window *c) {
 	if (is_content_visible(c) || c == get_popup()) {
+		buf_update(c);
 		ui_window_redraw(c->win);
 		ui_window_draw(c->win);
 	}
@@ -852,6 +855,7 @@ focus(Window *c) {
 		attachstack(c);
 		settitle(c);
 		c->urgent = false;
+
 		if (isarrange(fullscreen)) {
 			draw(c);
 		} else {
@@ -859,11 +863,16 @@ focus(Window *c) {
 			ui_window_refresh(c->win);
 		}
 
-		if (buffer_term_get(c->buf))
+		if (buffer_term_get(c->buf)) {
 			ui_cursor_enable(ui, c && !c->minimized &&
 					vt_cursor_visible(buffer_term_get(c->buf)));
-		else
+		} else {
+			size_t curs_view = view_cursor_get(c->view);
+
+			buffer_cursor_set(c->buf, curs_view);
+			buffer_dirty_set(c->buf, true);
 			ui_cursor_enable(ui, true);
+		}
 	}
 
 	if (c) {
@@ -1230,6 +1239,7 @@ destroy(Window *c) {
 		lastsel = NULL;
 	ui_window_free(c->win);
 	view_free(c->view);
+	buffer_ref_put(c->buf);
 	buffer_del(c->buf);
 
 	evt.eid = EVT_WIN_DELETED;
@@ -1242,7 +1252,9 @@ destroy(Window *c) {
 
 static void
 cleanup(void) {
+	Buffer *b;
 	int i;
+
 	scheme_uninit();
 	while (windows)
 		destroy(windows);
@@ -1250,6 +1262,14 @@ cleanup(void) {
 		if (pertag.popup[i])
 			destroy(pertag.popup[i]);
 	}
+
+	b = buffer_first_get();
+	while (b) {
+		Buffer *nextb = buffer_next_get(b);
+		buffer_del(b);
+		b = nextb;
+	}
+
 	keymap_free(win_min_kmap);
 	keymap_free(global_kmap);
 	vt_shutdown();
@@ -1354,6 +1374,7 @@ int create(const char *prog, const char *title, const char *cwd) {
 		return -1;
 	}
 	buffer_mode_set(c->buf, "Term");
+	buffer_ref_get(c->buf);
 
 	c->view = view_new(buffer_text_get(c->buf));
 	if (!c->view) {
@@ -1371,7 +1392,7 @@ int create(const char *prog, const char *title, const char *cwd) {
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
 
-	term = vt_create(c->win, ui_height_get(ui), ui_width_get(ui), scr_history);
+	term = vt_create(ui_height_get(ui), ui_width_get(ui), scr_history);
 	if (!term) {
 		view_free(c->view);
 		buffer_del(c->buf);
@@ -1381,6 +1402,7 @@ int create(const char *prog, const char *title, const char *cwd) {
 	ui_window_ops_draw_set(c->win, vt_draw);
 	ui_window_priv_set(c->win, term);
 	buffer_term_set(c->buf, term);
+	vt_attach(term, c->win);
 
 	if (prog) {
 		c->cmd = prog;
@@ -2005,6 +2027,7 @@ main(int argc, char *argv[]) {
 			}
 			if (buffer_term_get(c->buf)) {
 				int pty = vt_pty_get(buffer_term_get(c->buf));
+				vt_processed_set(buffer_term_get(c->buf), false);
 				FD_SET(pty, &rd);
 				nfds = MAX(nfds, pty);
 			}
@@ -2075,11 +2098,6 @@ reenter:
 					keypress(code);
 				}
 			}
-			/* no data available on pty's */
-			if (r == 1) {
-				buf_list_update();
-				continue;
-			}
 		}
 
 		if (cmdfifo.fd != -1 && FD_ISSET(cmdfifo.fd, &rd))
@@ -2093,11 +2111,12 @@ reenter:
 			Vt *term = buffer_term_get(c->buf);
 
 			if (term) {
-				if (FD_ISSET(vt_pty_get(term), &rd)) {
+				if (!vt_is_processed(term) && FD_ISSET(vt_pty_get(term), &rd)) {
 					if (vt_process(term) < 0 && errno == EIO) {
 						buffer_died_set(c->buf, true);
 						continue;
 					}
+					vt_processed_set(term, true);
 				}
 			}
 
@@ -2305,6 +2324,15 @@ int win_create(char *prog, char *title)
 	return -1;
 }
 
+int win_prev_selected(void)
+{
+	if (lastsel)
+		return lastsel->id;
+	if (sel)
+		return sel->id;
+	return 0;
+}
+
 static int style_prop_draw(Buffer *buf, int id, size_t start, size_t end, void *data,
 		void *arg)
 {
@@ -2357,6 +2385,7 @@ int win_new(void)
 		free(c);
 		return -1;
 	}
+	buffer_ref_get(c->buf);
 
 	c->view = view_new(buffer_text_get(c->buf));
 	if (!c->view) {
@@ -2701,6 +2730,36 @@ void win_border_set(int wid, bool enable)
 	}
 }
 
+void win_buf_switch(int wid, int bid)
+{
+	Window *w = window_get_by_id(wid);
+	Buffer *b = buffer_by_id(bid);
+
+	if (w && b && w->buf != b && !buffer_term_get(w->buf) && !buffer_term_get(b)) {
+		buffer_ref_put(w->buf);
+
+		if (buffer_term_get(b)) {
+			Vt *term = buffer_term_get(b);
+
+			ui_window_on_view_update_set(w->win, NULL);
+			ui_window_priv_set(w->win, term);
+			ui_window_ops_draw_set(w->win, vt_draw);
+			vt_attach(term, w->win);
+			vt_data_set(term, w);
+			vt_dirty(term);
+		} else {
+			ui_window_on_view_update_set(w->win, on_view_update_cb);
+			ui_window_ops_draw_set(w->win, NULL);
+			ui_window_priv_set(w->win, w);
+		}
+
+		view_reload(w->view, buffer_text_get(b));
+		buffer_dirty_set(b, true);
+		w->buf = b;
+		buffer_ref_get(w->buf);
+	}
+}
+
 int kmap_add(int pid)
 {
 	KeyMap *pmap = keymap_by_id(pid);
@@ -2835,16 +2894,18 @@ static void buf_update(Window *w)
 		size_t pos = buffer_cursor_get(buf);
 		int x, y;
 
-		view_scroll_to(view, pos);
-		if (view_coord_get(view, pos, NULL, &y, &x)) {
-			ui_window_cursor_set(win, x, y);
-		}
-
-		/* TODO: better to make buffer to know about it's
-		 * windows and mark them as dirty on text update */
-		buffer_dirty_set(buf, false);
 		view_invalidate(view);
-		draw(w);
+
+		if (w == sel) {
+			view_scroll_to(view, pos);
+			if (view_coord_get(view, pos, NULL, &y, &x)) {
+				ui_window_cursor_set(win, x, y);
+			}
+
+			/* TODO: better to make buffer to know about it's
+			 * windows and mark them as dirty on text update */
+			buffer_dirty_set(buf, false);
+		}
 	}
 }
 
@@ -3296,6 +3357,16 @@ void buf_mark_clear(int bid)
 
 	if (buf)
 		buffer_mark_clear(buf);
+}
+
+bool buf_is_term(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		return buffer_term_get(buf) != NULL;
+
+	return false;
 }
 
 int buf_prop_style_add(int bid, int fg, int bg, int attr,  int start, int end)

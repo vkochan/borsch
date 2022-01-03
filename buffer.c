@@ -12,6 +12,7 @@
 #include "keymap.h"
 #include "buffer.h"
 #include "text/text.h"
+#include "text/text-motions.h"
 
 typedef struct Buffer Buffer;
 
@@ -247,6 +248,8 @@ void buffer_cursor_set(Buffer *buf, size_t pos)
 {
 	if (buf->mark == EPOS)
 		buf->mark = pos;
+	if (pos > text_end(buf->text, 0))
+		pos = text_end(buf->text, 0);
 	buf->cursor = pos;
 }
 

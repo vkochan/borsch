@@ -42,7 +42,8 @@ void vt_urgent_handler_set(Vt*, vt_urgent_handler_t);
 void vt_data_set(Vt*, void *);
 void *vt_data_get(Vt*);
 
-Vt *vt_create(UiWin *uiwin, int rows, int cols, int scroll_buf_sz);
+Vt *vt_create(int rows, int cols, int scroll_buf_sz);
+void vt_attach(Vt *vt, UiWin *uiwin);
 void vt_draw(UiWin *win);
 void vt_resize(Vt*, int rows, int cols);
 void vt_destroy(Vt*);
@@ -51,6 +52,8 @@ int vt_pty_get(Vt*);
 bool vt_cursor_visible(Vt*);
 
 int vt_process(Vt *);
+void vt_processed_set(Vt *, bool processed);
+bool vt_is_processed(Vt *);
 void vt_keypress(Vt *, int keycode);
 ssize_t vt_write(Vt*, const char *buf, size_t len);
 void vt_mouse(Vt*, int x, int y, mmask_t mask);

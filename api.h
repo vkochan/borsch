@@ -65,6 +65,8 @@ void win_mark_highlight(int wid, bool enable);
 void win_popup(int wid, bool enable);
 void win_size_set(int wid, int width, int height);
 void win_border_set(int wid, bool enable);
+void win_buf_switch(int wid, int bid);
+int win_prev_selected(void);
 
 int kmap_add(int pid);
 int kmap_parent_set(int kid, char *name);
@@ -100,6 +102,7 @@ int buf_save(int bid);
 void buf_mark_set(int bid, size_t pos);
 size_t buf_mark_get(int bid);
 void buf_mark_clear(int bid);
+bool buf_is_term(int bid);
 
 int buf_prop_style_add(int bid, int fg, int bg, int attr, int start, int end);
 void buf_prop_del(int bid, int type, int start, int end);

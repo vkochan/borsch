@@ -27,6 +27,8 @@
 (define __cs_win_popup (foreign-procedure __collect_safe "cs_win_popup" (int boolean) scheme-object))
 (define __cs_win_size_set (foreign-procedure __collect_safe "cs_win_size_set" (int int int) void))
 (define __cs_win_border_set (foreign-procedure __collect_safe "cs_win_border_set" (int boolean) void))
+(define __cs_win_buf_switch (foreign-procedure __collect_safe "cs_win_buf_switch" (int int) void))
+(define __cs_win_prev_selected (foreign-procedure __collect_safe "cs_win_prev_selected" () scheme-object))
 
 (define window-first
    (lambda ()
@@ -116,6 +118,12 @@
 (define window-current
    (lambda ()
       (__cs_win_current_get)
+   )
+)
+
+(define window-prev-selected
+   (lambda ()
+       (__cs_win_prev_selected)
    )
 )
 
@@ -451,5 +459,15 @@
 
       [(wid h)
        (__cs_win_border_set wid -1 h)]
+   )
+)
+
+(define window-switch-buffer
+   (case-lambda
+      [(b)
+       (__cs_win_buf_switch (__cs_win_current_get) b)]
+
+      [(wid b)
+       (__cs_win_buf_switch wid b)]
    )
 )

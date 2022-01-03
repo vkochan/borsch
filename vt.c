@@ -188,6 +188,7 @@ struct Vt {
 	vt_title_handler_t title_handler; /* hook which is called when title changes */
 	vt_urgent_handler_t urgent_handler; /* hook which is called upon bell */
 	void *data;              /* user supplied data */
+	bool processed;
 };
 
 static const char *keytable[KEY_MAX+1] = {
@@ -1433,7 +1434,17 @@ int vt_process(Vt *t)
 	return 0;
 }
 
-Vt *vt_create(UiWin *win, int rows, int cols, int scroll_size)
+void vt_processed_set(Vt *vt, bool processed)
+{
+	vt->processed = processed;
+}
+
+bool vt_is_processed(Vt *vt)
+{
+	return vt->processed;
+}
+
+Vt *vt_create(int rows, int cols, int scroll_size)
 {
 	if (rows <= 0 || cols <= 0)
 		return NULL;
@@ -1442,7 +1453,6 @@ Vt *vt_create(UiWin *win, int rows, int cols, int scroll_size)
 	if (!t)
 		return NULL;
 
-	t->win = win;
 	t->pty = -1;
 	t->buffer = &t->buffer_normal;
 
@@ -1453,6 +1463,11 @@ Vt *vt_create(UiWin *win, int rows, int cols, int scroll_size)
 	}
 
 	return t;
+}
+
+void vt_attach(Vt *vt, UiWin *uiwin)
+{
+	vt->win = uiwin;
 }
 
 void vt_resize(Vt *t, int rows, int cols)

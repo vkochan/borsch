@@ -267,6 +267,20 @@ void scheme_win_border_set(int wid, bool enable)
 	win_border_set(wid, enable);
 }
 
+void scheme_win_buf_switch(int wid, int bid)
+{
+	win_buf_switch(wid, bid);
+}
+
+ptr scheme_win_prev_selected(void)
+{
+	int ret = win_prev_selected();
+
+	if (ret)
+		return Sinteger(ret);
+	return Sfalse;
+}
+
 ptr scheme_kmap_add(char *parent)
 {
 	int ret = kmap_add(0);
@@ -502,6 +516,13 @@ void scheme_buf_mark_clear(int bid)
 	buf_mark_clear(bid);
 }
 
+ptr scheme_buf_is_term(int bid)
+{
+	if (buf_is_term(bid))
+		return Strue;
+	return Sfalse;
+}
+
 ptr scheme_buf_prop_style_add(int bid, int fg, int bg, int attr, int start, int end)
 {
 	int ret = buf_prop_style_add(bid, fg, bg, attr, start, end);
@@ -673,6 +694,8 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_popup", scheme_win_popup);
 	Sregister_symbol("cs_win_size_set", scheme_win_size_set);
 	Sregister_symbol("cs_win_border_set", scheme_win_border_set);
+	Sregister_symbol("cs_win_buf_switch", scheme_win_buf_switch);
+	Sregister_symbol("cs_win_prev_selected", scheme_win_prev_selected);
 
 	Sregister_symbol("cs_kmap_add", scheme_kmap_add);
 	Sregister_symbol("cs_kmap_parent_set", scheme_kmap_parent_set);
@@ -709,6 +732,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_mark_set", scheme_buf_mark_set);
 	Sregister_symbol("cs_buf_mark_get", scheme_buf_mark_get);
 	Sregister_symbol("cs_buf_mark_clear", scheme_buf_mark_clear);
+	Sregister_symbol("cs_buf_is_term", scheme_buf_is_term);
 
 	Sregister_symbol("cs_buf_prop_style_add", scheme_buf_prop_style_add);
 	Sregister_symbol("cs_buf_prop_del", scheme_buf_prop_del);

@@ -38,6 +38,8 @@
 
 (define __cs_win_mark_highlight (foreign-procedure __collect_safe "cs_win_mark_highlight" (int boolean) void))
 
+(define __cs_buf_is_term (foreign-procedure __collect_safe "cs_buf_is_term" (int) scheme-object))
+
 (define mode-gen-map-symb
    (lambda (m)
          (string->symbol
@@ -574,6 +576,16 @@
 
       [(s e)
        (__cs_buf_text_get (buffer-current) s (- e s))]
+   )
+)
+
+(define buffer-is-term?
+   (case-lambda
+      [()
+       (__cs_buf_is_term (buffer-current))]
+
+      [(b)
+       (__cs_buf_is_term b)]
    )
 )
 
