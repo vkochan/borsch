@@ -620,6 +620,7 @@ void buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t en
 		return;
 
 	while (it) {
+		TextProperty *next = it->next;
 		int match = 0;
 
 		if (it->start >= start && it->end <= end)
@@ -630,8 +631,6 @@ void buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t en
 			match++;
 
 		if (match >= exp) {
-			TextProperty *next = it->next;
-
 			if (cb)
 				cb(buf, type, it->start, it->end, it->data, arg);
 			else
@@ -643,8 +642,8 @@ void buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t en
 				buf->max_prop = it->prev;
 
 			text_property_remove(it);
-			it = next;
 		}
+		it = next;
 	}
 }
 
