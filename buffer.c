@@ -618,7 +618,7 @@ void buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t en
 	if (!exp)
 		return;
 
-	while (type) {
+	while (it) {
 		int match = 0;
 
 		if (it->start >= start && it->end <= end)
