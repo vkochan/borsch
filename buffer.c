@@ -147,6 +147,7 @@ void buffer_del(Buffer *buf)
 			vt_destroy(buf->term);
 		if (buf->keymap)
 			keymap_ref_put(buf->keymap);
+		buffer_property_remove(buf, PROPERTY_TYPE_ALL, EPOS, EPOS);
 		buffer_list_del(buf);
 		/* TODO: check if buffer is not saved and ask user to save it */
 		text_free(buf->text);
