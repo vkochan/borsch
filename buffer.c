@@ -598,7 +598,7 @@ int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *d
 
 		buf->max_prop = p;
 		if (!buf->min_prop)
-			buf->min_prop = buf->min_prop;
+			buf->min_prop = buf->max_prop;
 	}
 
 	return 0;
