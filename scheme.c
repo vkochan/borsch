@@ -537,6 +537,15 @@ void scheme_buf_prop_del(int bid, int type, int start, int end)
 	buf_prop_del(bid, type, start, end);
 }
 
+ptr scheme_buf_env_get(int bid)
+{
+	void *env = buf_env_get(bid);
+
+	if (env)
+		return (ptr)env;
+	return Sfalse;
+}
+
 int scheme_view_current_get(void)
 {
 	return view_current_get();
@@ -737,6 +746,8 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_prop_style_add", scheme_buf_prop_style_add);
 	Sregister_symbol("cs_buf_prop_del", scheme_buf_prop_del);
 
+	Sregister_symbol("cs_buf_env_get", scheme_buf_env_get);
+
 	Sregister_symbol("cs_view_current_get", scheme_view_current_get);
 	Sregister_symbol("cs_view_current_set", scheme_view_current_set);
 	Sregister_symbol("cs_view_name_get", scheme_view_name_get);
@@ -834,4 +845,20 @@ int scheme_eval_file(const char *in, const char *out)
 	return Sinteger32_value(Scall2(Stop_level_value(Sstring_to_symbol("__do-eval-file")),
 				Sstring(in),
 				Sstring(out)));
+}
+
+void *scheme_env_alloc(void)
+{
+	ptr env;
+
+	env = CALL1("copy-environment", CALL0("interaction-environment"));
+	Slock_object(env);
+
+	return env;
+}
+
+void scheme_env_free(void *env)
+{
+	if (env)
+		Sunlock_object((ptr)env);
 }

@@ -40,6 +40,8 @@
 
 (define __cs_buf_is_term (foreign-procedure __collect_safe "cs_buf_is_term" (int) scheme-object))
 
+(define __cs_buf_env_get (foreign-procedure __collect_safe "cs_buf_env_get" (int) scheme-object))
+
 (define mode-gen-map-symb
    (lambda (m)
          (string->symbol
@@ -1068,6 +1070,44 @@
 (define copy-line
    (lambda ()
       (copy-to-register (buffer-string (line-begin-pos) (1+ (line-end-pos))) #t)
+   )
+)
+
+(define buffer-env
+   (lambda ()
+      (__cs_buf_env_get (buffer-current))
+   )
+)
+
+(define-syntax (define-local stx)
+   (syntax-case stx ()
+	       ((_ s v)
+		#`(define-top-level-value 's v (buffer-env))
+               )
+   )
+)
+
+(define-syntax (get-local stx)
+   (syntax-case stx ()
+	       ((_ s)
+		#`(top-level-value 's (buffer-env))
+               )
+   )
+)
+
+(define-syntax (set-local! stx)
+   (syntax-case stx ()
+	       ((_ s v)
+		#`(set-top-level-value! 's v (buffer-env))
+               )
+   )
+)
+
+(define-syntax (local-bound? stx)
+   (syntax-case stx ()
+	       ((_ s)
+		#`(top-level-bound? 's (buffer-env))
+               )
    )
 )
 

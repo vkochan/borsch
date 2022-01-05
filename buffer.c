@@ -56,6 +56,7 @@ typedef struct Buffer {
 	TextProperty *min_prop;
 	TextProperty *max_prop;
 	TextProperty props;
+	void *env;
 } Buffer;
 
 static Buffer buf_list;
@@ -137,7 +138,7 @@ Buffer *buffer_new(const char *name)
 	return buf;
 }
 
-void buffer_del(Buffer *buf)
+bool buffer_del(Buffer *buf)
 {
 	if (buf->ref_count)
 		buf->ref_count--;
@@ -153,7 +154,11 @@ void buffer_del(Buffer *buf)
 		text_free(buf->text);
 		free(buf->file.path);
 		free(buf);
+
+		return true;
 	}
+
+	return false;
 }
 
 int buffer_file_open(Buffer *buf, const char *file)
@@ -694,4 +699,14 @@ static void buffer_properties_pos_update(Buffer *buf, size_t pos, int len)
 			it->end += len;
 		}
 	}
+}
+
+void buffer_env_set(Buffer *buf, void *env)
+{
+	buf->env = env;
+}
+
+void *buffer_env_get(Buffer *buf)
+{
+	return buf->env;
 }

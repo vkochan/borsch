@@ -110,6 +110,9 @@ void buf_prop_del(int bid, int type, int start, int end);
 /* 			void (*cb)(int bid, int type, int start, int end, void */
 /* 				*arg)); */
 
+void *buf_env_get(int bid);
+void buf_env_set(int bid, void *env);
+
 int view_current_get(void);
 int view_current_set(int tag);
 const char *view_name_get(int tag);

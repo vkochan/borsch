@@ -174,6 +174,8 @@ extern int scheme_init(const char *);
 extern void scheme_uninit(void);
 extern int scheme_event_handle(event_t evt);
 extern int scheme_eval_file(const char *scm_in, const char *out);
+extern void *scheme_env_alloc(void);
+extern void scheme_env_free(void *env);
 
 static char *scheme_init_script;
 
@@ -1215,6 +1217,7 @@ setup(void) {
 static void
 destroy(Window *c) {
 	event_t evt;
+	void *env;
 
 	if (sel == c)
 		focusnextnm(NULL);
@@ -1240,7 +1243,10 @@ destroy(Window *c) {
 	ui_window_free(c->win);
 	view_free(c->view);
 	buffer_ref_put(c->buf);
-	buffer_del(c->buf);
+
+	env = buffer_env_get(c->buf);
+	if (buffer_del(c->buf))
+		scheme_env_free(env);
 
 	evt.eid = EVT_WIN_DELETED;
 	evt.oid = c->id;
@@ -1266,7 +1272,9 @@ cleanup(void) {
 	b = buffer_first_get();
 	while (b) {
 		Buffer *nextb = buffer_next_get(b);
-		buffer_del(b);
+		void *env = buffer_env_get(b);
+		if (buffer_del(b))
+			scheme_env_free(env);
 		b = nextb;
 	}
 
@@ -1422,6 +1430,8 @@ int create(const char *prog, const char *title, const char *cwd) {
 
 	pid = vt_forkpty(term, shell, pargs, cwd, env, NULL, NULL);
 	buffer_pid_set(c->buf, pid);
+
+	buffer_env_set(c->buf, scheme_env_alloc());
 
 	vt_data_set(term, c);
 	vt_title_handler_set(term, term_title_handler);
@@ -2403,6 +2413,8 @@ int win_new(void)
 		free(c);
 		return -1;
 	}
+
+	buffer_env_set(c->buf, scheme_env_alloc());
 
 	ui_window_priv_set(c->win, c);
 	ui_window_on_view_update_set(c->win, on_view_update_cb);
@@ -3414,6 +3426,26 @@ void buf_prop_del(int bid, int type, int start, int end)
 /* void buf_prop_walk(int bid, int type, int start, int end, void *arg, */
 /* 			void (*cb)(int bid, int type, int start, int end, void */
 /* 				*arg)); */
+
+void *buf_env_get(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		return buffer_env_get(buf);
+	}
+
+	return NULL;
+}
+
+void buf_env_set(int bid, void *env)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_env_set(buf, env);
+	}
+}
 
 int view_current_get(void)
 {

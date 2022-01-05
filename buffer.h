@@ -16,7 +16,7 @@ typedef enum {
 } buffer_property_t;
 
 Buffer *buffer_new(const char *name);
-void buffer_del(Buffer *buf);
+bool buffer_del(Buffer *buf);
 int buffer_file_open(Buffer *buf, const char *file);
 bool buffer_save(Buffer *buf);
 bool buffer_is_modified(Buffer *buf);
@@ -70,5 +70,7 @@ void buffer_property_remove(Buffer *buf, size_t type, size_t start, size_t end);
 void buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t end, void *arg,
 		void (*cb)(Buffer *buf, size_t type, size_t start, size_t end,
 			void *data, void *arg));
+void buffer_env_set(Buffer *buf, void *env);
+void *buffer_env_get(Buffer *buf);
 
 #endif /* BUFFER_H */
