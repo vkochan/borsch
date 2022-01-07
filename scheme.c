@@ -167,9 +167,9 @@ ptr scheme_win_create(char *prog, char *title)
 	return Sfalse;
 }
 
-ptr scheme_win_new(void)
+ptr scheme_win_new(int bid)
 {
-	int ret = win_new();
+	int ret = win_new(bid);
 
 	if (ret)
 		return Sinteger(ret);
@@ -180,6 +180,11 @@ ptr scheme_win_new(void)
 void scheme_win_del(int wid)
 {
 	return win_del(wid);
+}
+
+void scheme_win_close(int wid)
+{
+	return win_close(wid);
 }
 
 ptr scheme_win_title_get(int wid)
@@ -687,6 +692,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_create", scheme_win_create);
 	Sregister_symbol("cs_win_new", scheme_win_new);
 	Sregister_symbol("cs_win_del", scheme_win_del);
+	Sregister_symbol("cs_win_close", scheme_win_close);
 	Sregister_symbol("cs_win_title_get", scheme_win_title_get);
 	Sregister_symbol("cs_win_title_set", scheme_win_title_set);
 	Sregister_symbol("cs_win_tag_set", scheme_win_tag_set);

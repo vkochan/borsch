@@ -10,8 +10,9 @@
 (define __cs_win_current_get (foreign-procedure __collect_safe "cs_win_current_get" () scheme-object))
 (define __cs_win_current_set (foreign-procedure __collect_safe "cs_win_current_set" (int) int))
 (define __cs_win_create (foreign-procedure "cs_win_create" (string string) scheme-object))
-(define __cs_win_new (foreign-procedure "cs_win_new" () scheme-object))
+(define __cs_win_new (foreign-procedure "cs_win_new" (int) scheme-object))
 (define __cs_win_del (foreign-procedure __collect_safe "cs_win_del" (int) int))
+(define __cs_win_close (foreign-procedure __collect_safe "cs_win_close" (int) int))
 (define __cs_win_title_get (foreign-procedure __collect_safe "cs_win_title_get" (int) scheme-object))
 (define __cs_win_title_set (foreign-procedure "cs_win_title_set" (int string) int))
 (define __cs_win_tag_set (foreign-procedure __collect_safe "cs_win_tag_set" (int int) int))
@@ -159,11 +160,16 @@
 )
 
 (define window-new
-   (lambda ()
-      (let ([w (__cs_win_new)])
+   (case-lambda
+      [()
+       (window-new 0)]
+
+      [(b)
+       (let ([w (__cs_win_new b)])
          (when w (run-hooks 'window-create-hook w))
          w
-      )
+       )
+      ]
    )
 )
 
@@ -189,9 +195,21 @@
        [()
 	(window-delete (__cs_win_current_get))]
 
-       [(wid)
-	(__cs_win_del wid)
+       [(w)
+	(__cs_win_del w)
         (run-hooks 'window-delete-hook w)
+       ]
+    )
+)
+
+(define window-close
+    (case-lambda
+       [()
+	(window-close (__cs_win_current_get))]
+
+       [(w)
+	(__cs_win_close w)
+        (run-hooks 'window-close-hook w)
        ]
     )
 )

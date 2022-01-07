@@ -1199,21 +1199,19 @@ setup(void) {
 	buf_list_update();
 }
 
-static void
-destroy(Window *c) {
-	void *env;
-
-	if (sel == c)
+static void __win_del(Window *w)
+{
+	if (sel == w)
 		focusnextnm(NULL);
 
-	if (c != get_popup()) {
-		detach(c);
+	if (w != get_popup()) {
+		detach(w);
 	} else {
 		set_popup(NULL);
 	}
-	detachstack(c);
+	detachstack(w);
 
-	if (sel == c) {
+	if (sel == w) {
 		Window *next = nextvisible(windows);
 		if (next) {
 			focus(next);
@@ -1222,18 +1220,25 @@ destroy(Window *c) {
 			sel = NULL;
 		}
 	}
-	if (lastsel == c)
+	if (lastsel == w)
 		lastsel = NULL;
-	ui_window_free(c->win);
-	view_free(c->view);
-	buffer_ref_put(c->buf);
-
-	env = buffer_env_get(c->buf);
-	if (buffer_del(c->buf))
-		scheme_env_free(env);
-
-	free(c);
+	ui_window_free(w->win);
+	view_free(w->view);
+	free(w);
 	arrange();
+}
+
+static void
+destroy(Window *w) {
+	Buffer *buf = w->buf;
+	void *env;
+
+	buffer_ref_put(w->buf);
+	__win_del(w);
+
+	env = buffer_env_get(buf);
+	if (buffer_del(buf))
+		scheme_env_free(env);
 }
 
 static void
@@ -1361,7 +1366,6 @@ int create(const char *prog, const char *title, const char *cwd) {
 		return -1;
 	}
 	buffer_mode_set(c->buf, "Term");
-	buffer_ref_get(c->buf);
 
 	c->view = view_new(buffer_text_get(c->buf));
 	if (!c->view) {
@@ -1411,6 +1415,7 @@ int create(const char *prog, const char *title, const char *cwd) {
 	buffer_pid_set(c->buf, pid);
 
 	buffer_env_set(c->buf, scheme_env_alloc());
+	buffer_ref_get(c->buf);
 
 	vt_data_set(term, c);
 	vt_title_handler_set(term, term_title_handler);
@@ -2342,7 +2347,7 @@ static void on_view_update_cb(UiWin *win)
 	}
 }
 
-int win_new(void)
+int win_new(int bid)
 {
 	Window *c = calloc(1, sizeof(Window));
 
@@ -2352,12 +2357,19 @@ int win_new(void)
 	c->tags = tagset[seltags];
 	c->id = ++cmdfifo.id;
 
-	c->buf = buffer_new("");
+	if (bid) {
+		c->buf = buffer_by_id(bid);
+		buffer_dirty_set(c->buf, true);
+	} else {
+		c->buf = buffer_new("");
+	}
+
+	buffer_ref_get(c->buf);
+
 	if (!c->buf) {
 		free(c);
 		return -1;
 	}
-	buffer_ref_get(c->buf);
 
 	c->view = view_new(buffer_text_get(c->buf));
 	if (!c->view) {
@@ -2374,10 +2386,25 @@ int win_new(void)
 		return -1;
 	}
 
-	buffer_env_set(c->buf, scheme_env_alloc());
+	if (!bid)
+		buffer_env_set(c->buf, scheme_env_alloc());
 
-	ui_window_priv_set(c->win, c);
-	ui_window_on_view_update_set(c->win, on_view_update_cb);
+	if (buffer_term_get(c->buf)) {
+		Vt *term = buffer_term_get(c->buf);
+
+		vt_title_handler_set(term, term_title_handler);
+		vt_urgent_handler_set(term, term_urgent_handler);
+		ui_window_ops_draw_set(c->win, vt_draw);
+		ui_window_priv_set(c->win, term);
+		buffer_term_set(c->buf, term);
+		vt_attach(term, c->win);
+		vt_data_set(term, c);
+		vt_dirty(term);
+	} else {
+		ui_window_priv_set(c->win, c);
+		ui_window_on_view_update_set(c->win, on_view_update_cb);
+	}
+
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
 
@@ -2396,6 +2423,16 @@ void win_del(int wid)
 		kill(-buffer_pid_get(c->buf), SIGKILL);
 	else
 		destroy(c);
+}
+
+void win_close(int wid)
+{
+	Window *w = window_get_by_id(wid);
+
+	if (w) {
+		buffer_ref_put(w->buf);
+		__win_del(w);
+	}
 }
 
 char *win_title_get(int wid)

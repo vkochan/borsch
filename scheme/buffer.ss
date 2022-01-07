@@ -1111,7 +1111,7 @@
    )
 )
 
-(define buffer-switch-select
+(define buffer-select-switch
    (lambda ()
       (let (
               [b (buffer-get (extract-longword))]
@@ -1119,16 +1119,39 @@
            )
          (when b
             (window-switch-buffer p b)
-            (window-delete)
+            (window-delete (window-current))
 	    (window-select p)
          )
       )
    )
 )
 
-(define buffer-switch-map
+(define buffer-select-open
+   (lambda ()
+      (let (
+              [b (buffer-get (extract-longword))]
+           )
+         (when b
+            (window-delete (window-current))
+            (window-new b)
+         )
+      )
+   )
+)
+
+(define buffer-select-switch-or-open
+   (lambda ()
+      (if (get-local open-buffer)
+         (buffer-select-open)
+         ;; else
+         (buffer-select-switch)
+      )
+   )
+)
+
+(define buffer-switch-or-open-map
    (let ([map (make-keymap)])
-      (bind-key map "<Enter>" buffer-switch-select)
+      (bind-key map "<Enter>" buffer-select-switch-or-open)
       (bind-key map "j" (lambda ()
                                    (highlight-clear)
                                    (move-down-line)
@@ -1143,18 +1166,24 @@
    )
 )
 
-(define buffer-switch
-   (lambda ()
+(define buffer-switch-or-open
+   (lambda (open?)
       (let (
               [b (buffer-new)]
               [l (buffer-list)]
            )
          (window-popup #t)
          (with-buffer b
-            (buffer-set-keymap 'buffer-switch-map)
+            (define-local open-buffer open?)
+            (if open?
+               (buffer-set-name "Open buffer")
+               ;; else
+               (buffer-set-name "Switch buffer")
+            )
+            (buffer-set-keymap 'buffer-switch-or-open-map)
             (for-each
                (lambda (x)
-                  (when (not (buffer-is-term? (car x)))
+                  (when (or open? (not (buffer-is-term? (car x))))
                      (insert (format "~a\n" (cadr x)) '(style (:attr "bold")))
                   )
                ) l
@@ -1163,5 +1192,17 @@
          (move-buffer-begin)
          (highlight-range (line-begin-pos) (line-end-pos))
       )
+   )
+)
+
+(define buffer-switch
+   (lambda ()
+      (buffer-switch-or-open #f)
+   )
+)
+
+(define buffer-open
+   (lambda ()
+      (buffer-switch-or-open #t)
    )
 )

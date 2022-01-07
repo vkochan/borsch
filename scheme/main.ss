@@ -114,6 +114,8 @@
 (bind-key "C-g m"   window-toggle-maximized)
 
 (bind-key "C-b s" buffer-switch)
+(bind-key "C-b q" window-close)
+(bind-key "C-b o" buffer-open)
 
 (bind-key "C-g q q" do-quit)
 
