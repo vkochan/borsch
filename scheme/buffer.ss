@@ -38,6 +38,7 @@
 
 (define __cs_win_mark_highlight (foreign-procedure __collect_safe "cs_win_mark_highlight" (int boolean) void))
 
+(define __cs_buf_is_visible (foreign-procedure __collect_safe "cs_buf_is_visible" (int) scheme-object))
 (define __cs_buf_is_term (foreign-procedure __collect_safe "cs_buf_is_term" (int) scheme-object))
 
 (define __cs_buf_env_get (foreign-procedure __collect_safe "cs_buf_env_get" (int) scheme-object))
@@ -591,6 +592,16 @@
 
       [(s e)
        (__cs_buf_text_get (buffer-current) s (- e s))]
+   )
+)
+
+(define buffer-is-visible?
+   (case-lambda
+      [()
+       (__cs_buf_is_visible (buffer-current))]
+
+      [(b)
+       (__cs_buf_is_visible b)]
    )
 )
 

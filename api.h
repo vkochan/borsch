@@ -87,6 +87,7 @@ void buf_mark_set(int bid, size_t pos);
 size_t buf_mark_get(int bid);
 void buf_mark_clear(int bid);
 bool buf_is_term(int bid);
+bool buf_is_visible(int bid);
 
 int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, int start, int end);
 void buf_prop_del(int bid, int type, int start, int end);

@@ -528,6 +528,13 @@ ptr scheme_buf_is_term(int bid)
 	return Sfalse;
 }
 
+ptr scheme_buf_is_visible(int bid)
+{
+	if (buf_is_visible(bid))
+		return Strue;
+	return Sfalse;
+}
+
 ptr scheme_buf_prop_style_add(int bid, int type, int fg, int bg, int attr, int start, int end)
 {
 	int ret = buf_prop_style_add(bid, type, fg, bg, attr, start, end);
@@ -748,6 +755,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_mark_get", scheme_buf_mark_get);
 	Sregister_symbol("cs_buf_mark_clear", scheme_buf_mark_clear);
 	Sregister_symbol("cs_buf_is_term", scheme_buf_is_term);
+	Sregister_symbol("cs_buf_is_visible", scheme_buf_is_visible);
 
 	Sregister_symbol("cs_buf_prop_style_add", scheme_buf_prop_style_add);
 	Sregister_symbol("cs_buf_prop_del", scheme_buf_prop_del);

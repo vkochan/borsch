@@ -3376,6 +3376,20 @@ bool buf_is_term(int bid)
 	return false;
 }
 
+bool buf_is_visible(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		for (Window *c = nextvisible(windows); c; c = nextvisible(c->next)) {
+			if (c->buf == buf)
+				return true;
+		}
+	}
+
+	return false;
+}
+
 int buf_prop_style_add(int bid, int type, int fg, int bg, int attr,  int start, int end)
 {
 	Buffer *buf = buffer_by_id(bid);
