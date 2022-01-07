@@ -130,6 +130,7 @@
 (define window-select
    (lambda (wid)
       (__cs_win_current_set wid)
+      (run-hooks 'window-select-hook wid)
    )
 )
 
@@ -159,30 +160,39 @@
 
 (define window-new
    (lambda ()
-      (__cs_win_new)
+      (let ([w (__cs_win_new)])
+         (when w (run-hooks 'window-create-hook w))
+         w
+      )
    )
 )
 
 (define window-shell
    (case-lambda
       [()
-       (__cs_win_create #f "")]
+       (window-shell #f "")]
 
       [(prog)
-       (__cs_win_create prog "")]
+       (window-shell prog "")]
 
       [(prog title)
-       (__cs_win_create prog title)]
+       (let ([w (__cs_win_create prog title)])
+          (run-hooks 'window-create-hook w)
+          w
+       )
+      ]
    )
 )
 
 (define window-delete
     (case-lambda
        [()
-	(__cs_win_del (__cs_win_current_get))]
+	(window-delete (__cs_win_current_get))]
 
        [(wid)
-	(__cs_win_del wid)]
+	(__cs_win_del wid)
+        (run-hooks 'window-delete-hook w)
+       ]
     )
 )
 
@@ -319,20 +329,24 @@
 (define window-set-minimized
    (case-lambda
       [()
-       (__window-set 'minimized)]
+       (window-set-minimized (__cs_win_current_get))]
 
       [(wid)
-       (__window-set wid 'minimized)]
+       (__window-set wid 'minimized)
+       (run-hooks 'window-minimize-hook wid)
+      ]
    )
 )
 
 (define window-set-maximized
    (case-lambda
       [()
-       (__window-set 'maximized)]
+       (window-set-maximized (__cs_win_current_get))]
 
       [(wid)
-       (__window-set wid 'maximized)]
+       (__window-set wid 'maximized)
+       (run-hooks 'window-maximize-hook wid)
+      ]
    )
 )
 
@@ -359,20 +373,28 @@
 (define window-toggle-minimized
    (case-lambda
       [()
-       (__window-toggle 'minimized)]
+       (window-toggle-minimized (window-current))]
 
       [(wid)
-       (__window-toggle wid 'minimized)]
+       (__window-toggle wid 'minimized)
+       (when (window-is-minimized? wid)
+          (run-hooks 'window-minimize-hook wid)
+       )
+      ]
    )
 )
 
 (define window-toggle-maximized
    (case-lambda
       [()
-       (__window-toggle 'maximized)]
+       (window-toggle-maximized (window-current))]
 
       [(wid)
-       (__window-toggle wid 'maximized)]
+       (__window-toggle wid 'maximized)
+       (when (window-is-maximized? wid)
+          (run-hooks 'window-maximize-hook wid)
+       )
+      ]
    )
 )
 

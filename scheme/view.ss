@@ -14,6 +14,7 @@
 (define view-switch
    (lambda (tag)
       (__cs_view_current_set tag)
+      (run-hooks 'view-switch-hook tag)
    )
 )
 

@@ -198,12 +198,12 @@
 )
 
 (define run-hooks
-   (lambda (symb)
+   (lambda (symb . args)
       (if (top-level-bound? symb)
          (let ([hook-list (top-level-value symb)])
             (for-each
                (lambda (h)
-                  (h)
+                  (try h args)
                ) hook-list
             )
          )

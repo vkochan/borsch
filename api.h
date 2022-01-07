@@ -4,18 +4,6 @@
 #include <stdbool.h>
 
 typedef enum {
-	EVT_WIN_CREATED     = 0,
-	EVT_WIN_SELECTED    = 1,
-	EVT_WIN_MINIMIZED   = 2,
-	EVT_WIN_MAXIMIZED   = 3,
-	EVT_WIN_DELETED     = 4,
-
-	EVT_VIEW_SELECTED   = 20,
-
-	EVT_LAYOUT_SELECTED = 40,
-} event_id_t;
-
-typedef enum {
 	WIN_STATE_MINIMIZED = 0,
 	WIN_STATE_MAXIMIZED = 1,
 	WIN_STATE_MASTER    = 2,
@@ -27,11 +15,6 @@ typedef enum {
 	LAYOUT_BSTACK = 2,
 	LAYOUT_MAXIMIZED = 3,
 } layout_t;
-
-typedef struct {
-	event_id_t   eid;
-	int          oid;
-} event_t;
 
 typedef void (*bind_key_cb_t)(void);
 

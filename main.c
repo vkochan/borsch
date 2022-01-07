@@ -172,7 +172,6 @@ static Ui *ui;
 
 extern int scheme_init(const char *);
 extern void scheme_uninit(void);
-extern int scheme_event_handle(event_t evt);
 extern int scheme_eval_file(const char *scm_in, const char *out);
 extern void *scheme_env_alloc(void);
 extern void scheme_env_free(void *env);
@@ -876,14 +875,6 @@ focus(Window *c) {
 			ui_cursor_enable(ui, true);
 		}
 	}
-
-	if (c) {
-		event_t evt;
-
-		evt.eid = EVT_WIN_SELECTED;
-		evt.oid = c->id;
-		scheme_event_handle(evt);
-	}
 }
 
 static void
@@ -1018,8 +1009,6 @@ toggletag(const char *args[]) {
 
 static void
 setpertag(void) {
-	event_t evt;
-
 	layout = pertag.layout[pertag.curtag];
 	if (bar.pos != pertag.barpos[pertag.curtag]) {
 		bar.pos = pertag.barpos[pertag.curtag];
@@ -1027,10 +1016,6 @@ setpertag(void) {
 	}
 	bar.lastpos = pertag.barlastpos[pertag.curtag];
 	runinall = pertag.runinall[pertag.curtag];
-
-	evt.eid = EVT_VIEW_SELECTED;
-	evt.oid = pertag.curtag;
-	scheme_event_handle(evt);
 }
 
 static void
@@ -1216,7 +1201,6 @@ setup(void) {
 
 static void
 destroy(Window *c) {
-	event_t evt;
 	void *env;
 
 	if (sel == c)
@@ -1247,10 +1231,6 @@ destroy(Window *c) {
 	env = buffer_env_get(c->buf);
 	if (buffer_del(c->buf))
 		scheme_env_free(env);
-
-	evt.eid = EVT_WIN_DELETED;
-	evt.oid = c->id;
-	scheme_event_handle(evt);
 
 	free(c);
 	arrange();
@@ -1360,7 +1340,6 @@ int create(const char *prog, const char *title, const char *cwd) {
 	};
 	char tmppath[PATH_MAX];
 	char tmp[256];
-	event_t evt;
 	pid_t pid;
 	Vt *term;
 
@@ -1443,9 +1422,6 @@ int create(const char *prog, const char *title, const char *cwd) {
 	focus(c);
 	arrange();
 
-	evt.eid = EVT_WIN_CREATED;
-	evt.oid = c->id;
-	scheme_event_handle(evt);
 	return c->id;
 }
 
@@ -1597,14 +1573,6 @@ setlayout(const char *args[]) {
 	pertag.layout_prev[pertag.curtag] = pertag.layout[pertag.curtag];
 	pertag.layout[pertag.curtag] = layout;
 	arrange();
-
-	if (sel && isarrange(fullscreen)) {
-		event_t evt;
-
-		evt.eid = EVT_WIN_MAXIMIZED;
-		evt.oid = sel->id;
-		scheme_event_handle(evt);
-	}
 }
 
 static int
@@ -1636,7 +1604,6 @@ toggleminimize(void)
 {
 	Window *c, *m, *t;
 	unsigned int n;
-	event_t evt;
 
 	if (!sel)
 		return;
@@ -1676,12 +1643,6 @@ toggleminimize(void)
 		attach(m);
 	}
 	arrange();
-
-	if (m->minimized) {
-		evt.eid = EVT_WIN_MINIMIZED;
-		evt.oid = c->id;
-		scheme_event_handle(evt);
-	}
 }
 
 static void minimizeother(const char *args[])
@@ -2384,7 +2345,6 @@ static void on_view_update_cb(UiWin *win)
 int win_new(void)
 {
 	Window *c = calloc(1, sizeof(Window));
-	event_t evt;
 
 	if (!c)
 		return -1;
@@ -2424,10 +2384,6 @@ int win_new(void)
 	attach(c);
 	focus(c);
 	arrange();
-
-	evt.eid = EVT_WIN_CREATED;
-	evt.oid = c->id;
-	scheme_event_handle(evt);
 
 	return c->id;
 }

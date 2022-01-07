@@ -42,50 +42,52 @@
 (define layout-switch
    (case-lambda
         [(l)
-         (__cs_layout_current_set (__cs_view_current_get) (symb->layout l))]
+         (layout-switch (__cs_view_current_get) l)]
 
         [(tag l)
-         (__cs_layout_current_set tag (symb->layout l))]
+         (__cs_layout_current_set tag  l)
+         (run-hook 'layout-switch-hook l)
+        ]
    )
 )
 
 (define layout-switch-tiled
    (case-lambda
         [()
-         (__cs_layout_current_set (__cs_view_current_get) (symb->layout 'tiled))]
+         (layout-switch-tiled (__cs_view_current_get))]
 
         [(tag)
-         (__cs_layout_current_set tag (symb->layout 'tiled))]
+         (layout-switch tag (symb->layout 'tiled))]
    )
 )
 
 (define layout-switch-grid
    (case-lambda
         [()
-         (__cs_layout_current_set (__cs_view_current_get) (symb->layout 'grid))]
+         (layout-switch-grid (__cs_view_current_get))]
 
         [(tag)
-         (__cs_layout_current_set tag (symb->layout 'grid))]
+         (layout-switch tag (symb->layout 'grid))]
    )
 )
 
 (define layout-switch-bstack
    (case-lambda
         [()
-         (__cs_layout_current_set (__cs_view_current_get) (symb->layout 'bstack))]
+         (layout-switch-bstack (__cs_view_current_get))]
 
         [(tag)
-         (__cs_layout_current_set tag (symb->layout 'bstack))]
+         (layout-switch tag (symb->layout 'bstack))]
    )
 )
 
 (define layout-switch-maximized
    (case-lambda
         [()
-         (__cs_layout_current_set (__cs_view_current_get) (symb->layout 'maximized))]
+         (layout-switch-maximized (__cs_view_current_get))]
 
         [(tag)
-         (__cs_layout_current_set tag (symb->layout 'maximized))]
+         (layout-switch tag (symb->layout 'maximized))]
    )
 )
 

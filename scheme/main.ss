@@ -8,39 +8,8 @@
 (load "window.ss")
 (load "mode/text.ss")
 
-;; Event handling
-(define __on-event-cb-list '())
-
-(define __on-event-handler
-   (lambda (ev wid)
-       (define __evt->symb
-	  (lambda (ev)
-	     (case ev
-	        [0  'window-create   ]
-		[1  'window-select   ]
-		[2  'window-minimize ]
-		[3  'window-maximize ]
-		[4  'window-delete   ]
-		[20 'view-switch  ]
-		[40 'layout-switch]
-		[else #f]
-             )
-          )
-       )
-
-       (for-each
-	  (lambda (f)
-	     (try f (__evt->symb ev) wid)
-          )
-	  __on-event-cb-list
-       )
-   )
-)
-;;
-
 ;; FFI
 (define __cs_do_quit (foreign-procedure "cs_do_quit" () void))
-;;
 
 (define reg "")
 (define reg-is-linewise #f)

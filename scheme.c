@@ -831,15 +831,6 @@ void scheme_uninit(void)
 	}
 }
 
-int scheme_event_handle(event_t evt)
-{
-
-	Scall2(Stop_level_value(Sstring_to_symbol("__on-event-handler")),
-			Sinteger(evt.eid),
-			Sinteger(evt.oid));
-	return 0;
-}
-
 int scheme_eval_file(const char *in, const char *out)
 {
 	return Sinteger32_value(Scall2(Stop_level_value(Sstring_to_symbol("__do-eval-file")),
