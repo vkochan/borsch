@@ -1130,6 +1130,7 @@ initpertag(void) {
 		pertag.msticky[i] = false;
 		pertag.name[i] = NULL;
 		pertag.cwd[i] = calloc(CWD_MAX, 1);
+		getcwd(pertag.cwd[i], CWD_MAX);
 	}
 }
 
