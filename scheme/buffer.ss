@@ -1006,6 +1006,12 @@
    )
 )
 
+(define erase-buffer
+   (lambda ()
+      (delete-range (buffer-begin-pos) (buffer-end-pos))
+   )
+)
+
 (define mark-set
    (case-lambda
       [()
