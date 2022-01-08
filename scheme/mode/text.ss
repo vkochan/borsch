@@ -48,7 +48,7 @@
       (bind-key map "h" (lambda () (move-prev-char)))
       (bind-key map "l" (lambda () (move-next-char)))
       (bind-key map "j" (lambda () (move-line-down)))
-      (bind-key map "k" (lambda () (move-up-line)))
+      (bind-key map "k" (lambda () (move-line-up)))
       (bind-key map "w" (lambda () (move-next-word)))
       (bind-key map "W" (lambda () (move-next-longword)))
       (bind-key map "b" (lambda () (move-prev-word)))
