@@ -830,6 +830,9 @@ focus(Window *c) {
 	if (!c)
 		for (c = stack; c && !isvisible(c); c = c->snext);
 
+	if (sel == c)
+		return;
+
 	if (c) {
 		if (c->minimized)
 			curr_kmap = win_min_kmap;
@@ -837,8 +840,6 @@ focus(Window *c) {
 			curr_kmap = global_kmap;
 	}
 
-	if (sel == c)
-		return;
 	lastsel = sel;
 	sel = c;
 	if (lastsel) {
@@ -856,6 +857,12 @@ focus(Window *c) {
 		attachstack(c);
 		settitle(c);
 		c->urgent = false;
+
+		if (buffer_term_get(c->buf) && buffer_ref_count(c->buf) > 2) {
+			vt_resize(buffer_term_get(c->buf),
+					ui_window_height_get(c->win) - 1,
+					ui_window_width_get(c->win));
+		}
 
 		if (isarrange(fullscreen)) {
 			draw(c);

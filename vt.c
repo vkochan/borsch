@@ -1521,9 +1521,6 @@ void vt_draw(UiWin *win)
 		short curbg = UI_TEXT_COLOR_DEFAULT;
 		VtRow *row = b->lines + i;
 
-		if (!row->dirty)
-			continue;
-
 		ui_window_cursor_set(win, scol, srow + i);
 		VtCell *cell = NULL;
 		for (j = 0; j < b->cols; j++) {

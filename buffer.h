@@ -34,6 +34,7 @@ bool buffer_name_is_locked(Buffer *buf);
 Buffer *buffer_by_name(const char *name);
 void buffer_ref_get(Buffer *buf);
 void buffer_ref_put(Buffer *buf);
+int buffer_ref_count(Buffer *buf);
 void buffer_keymap_set(Buffer *buf, char *name);
 KeyMap *buffer_keymap_get(Buffer *buf);
 size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text);

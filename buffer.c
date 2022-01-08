@@ -307,6 +307,11 @@ void buffer_ref_put(Buffer *buf)
 		buf->ref_count--;
 }
 
+int buffer_ref_count(Buffer *buf)
+{
+	return buf->ref_count;
+}
+
 void buffer_keymap_set(Buffer *buf, char *name)
 {
 	if (strcmp(buf->kmap_name, name) == 0)
