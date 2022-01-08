@@ -192,7 +192,7 @@
    )
 )
 
-(define buffer-new
+(define buffer-create
    (case-lambda
       [() 
        (window-buffer (window-new))]
@@ -1182,7 +1182,7 @@
 (define buffer-switch-or-open
    (lambda (open?)
       (let (
-              [b (buffer-new)]
+              [b (buffer-create)]
               [l (buffer-list)]
            )
          (window-popup #t)
