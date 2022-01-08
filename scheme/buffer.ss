@@ -1130,7 +1130,7 @@
            )
          (when b
             (window-switch-buffer p b)
-            (window-delete (window-current))
+            (window-delete)
 	    (window-select p)
          )
       )
@@ -1143,7 +1143,7 @@
               [b (buffer-get (extract-longword))]
            )
          (when b
-            (window-delete (window-current))
+            (window-delete)
             (window-new b)
          )
       )
