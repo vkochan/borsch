@@ -407,13 +407,13 @@
    )
 )
 
-(define move-up-line
+(define move-line-up
    (lambda ()
       (cursor-set (prev-line-pos))
    )
 )
 
-(define move-down-line
+(define move-line-down
    (lambda ()
       (cursor-set (next-line-pos))
    )
@@ -1167,12 +1167,12 @@
       (bind-key map "q" window-delete)
       (bind-key map "j" (lambda ()
                                    (highlight-clear)
-                                   (move-down-line)
+                                   (move-line-down)
                                    (highlight-range
                                       (line-begin-pos) (line-end-pos))))
       (bind-key map "k" (lambda ()
                                    (highlight-clear)
-                                   (move-up-line)
+                                   (move-line-up)
                                    (highlight-range
                                       (line-begin-pos) (line-end-pos))))
       map
