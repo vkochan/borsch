@@ -1163,6 +1163,8 @@
 (define buffer-switch-or-open-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" buffer-select-switch-or-open)
+      (bind-key map "<Esc>" window-delete)
+      (bind-key map "q" window-delete)
       (bind-key map "j" (lambda ()
                                    (highlight-clear)
                                    (move-down-line)

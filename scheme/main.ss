@@ -4,8 +4,8 @@
 (load "tagbar.ss")
 (load "layout.ss")
 (load "view.ss")
-(load "buffer.ss")
 (load "window.ss")
+(load "buffer.ss")
 (load "mode/text.ss")
 
 ;; FFI
