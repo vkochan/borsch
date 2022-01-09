@@ -35,11 +35,7 @@
                (insert (fmt "~a\n" f))
             ) fl
          )
-	 (move-buffer-begin)
-	 (highlight-clear)
-         (highlight-range
-            (line-begin-pos)
-            (line-end-pos))
+	 (dirb-move-begin)
       )
    )
 )
@@ -81,6 +77,26 @@
           (line-begin-pos)
           (line-end-pos))
     )
+)
+
+(define dirb-move-begin
+   (lambda ()
+      (highlight-clear)
+      (move-buffer-begin)
+      (highlight-range
+         (line-begin-pos)
+         (line-end-pos))
+   )
+)
+
+(define dirb-move-end
+   (lambda ()
+      (highlight-clear)
+      (move-buffer-end)
+      (highlight-range
+         (line-begin-pos)
+         (line-end-pos))
+   )
 )
 
 (define dirb-open-parent
@@ -129,8 +145,8 @@
       (bind-key map "j" dirb-move-line-down)
       (bind-key map "k" dirb-move-line-up)
       (bind-key map "l" dirb-open-entry)
-      (bind-key map "g g" move-buffer-begin)
-      (bind-key map "G" move-buffer-end)
+      (bind-key map "g g" dirb-move-begin)
+      (bind-key map "G" dirb-move-end)
       (bind-key map "." dirb-show-hidden)
       map
    )
