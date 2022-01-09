@@ -433,7 +433,7 @@ ptr scheme_buf_text_get(int bid, int start, int len)
 	ptr ret;
 
 	if (data)
-		ret = Sstring_of_length(data, len);
+		ret = Sstring_utf8(data, len);
 	else
 		ret = Sfalse;
 
