@@ -49,8 +49,10 @@
 
       [(cwd)
        (let ([b (buffer-create)])
-          (buffer-set-keymap 'dirb-map)
-          (dirb-open-dir cwd)
+          (with-buffer b
+             (buffer-set-keymap 'dirb-map)
+             (dirb-open-dir cwd)
+          )
        )
       ]
    )
