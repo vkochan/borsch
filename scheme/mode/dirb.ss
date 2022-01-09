@@ -6,20 +6,23 @@
             [fl '()]
            )
          (if trail-sep?
-            (define-local current-cwd (path-parent cwd))
+            (set-local! current-cwd (path-parent cwd))
             ;; else
-            (define-local current-cwd cwd)
+            (set-local! current-cwd cwd)
          )
          (buffer-set-name cwd)
 	 (erase-buffer)
          (for-each
             (lambda (e)
-               (if (file-directory? (fmt "~a/~a" cwd e))
-                  (set! dl (append dl (list e)))
-               )
-               (if (file-regular? (fmt "~a/~a" cwd e))
-                  (set! fl (append fl (list e)))
-               )
+               (when (not (and (equal? (string-ref e 0) #\.)
+                               (not (get-local show-hidden))))
+                  (if (file-directory? (fmt "~a/~a" cwd e))
+                     (set! dl (append dl (list e)))
+                  )
+                  (if (file-regular? (fmt "~a/~a" cwd e))
+                     (set! fl (append fl (list e)))
+                  )
+              )
             ) (directory-list cwd)
          )
          (for-each
@@ -50,6 +53,8 @@
       [(cwd)
        (let ([b (buffer-create)])
           (with-buffer b
+             (define-local current-cwd cwd)
+             (define-local show-hidden #f)
              (buffer-set-keymap 'dirb-map)
              (dirb-open-dir cwd)
           )
@@ -109,6 +114,14 @@
     )
 )
 
+(define dirb-show-hidden
+   (lambda ()
+      (set-local! show-hidden
+         (not (get-local show-hidden)))
+      (dirb-open-dir (get-local current-cwd))
+   )
+)
+
 (define dirb-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" dirb-open-entry)
@@ -118,6 +131,7 @@
       (bind-key map "l" dirb-open-entry)
       (bind-key map "g g" move-buffer-begin)
       (bind-key map "G" move-buffer-end)
+      (bind-key map "." dirb-show-hidden)
       map
    )
 )
