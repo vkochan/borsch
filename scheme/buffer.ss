@@ -147,6 +147,8 @@
    )
 )
 
+(define *buffer-enable-eof* #f)
+
 (define cursor
    (lambda ()
       (__cs_buf_cursor_get (buffer-current))
@@ -155,9 +157,14 @@
 
 (define cursor-set
    (lambda (p)
-      (let ()
-         (__cs_buf_cursor_set (buffer-current) p)
-	 p
+      (let ([c p])
+         (when (and (not *buffer-enable-eof*)
+                    (and (> c 0) (>= c (buffer-end-pos)))
+               )
+            (set! c (- (buffer-end-pos) 1))
+         )
+	 (__cs_buf_cursor_set (buffer-current) c)
+         c
       )
    )
 )
