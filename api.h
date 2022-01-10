@@ -122,9 +122,6 @@ int layout_sticky_set(int tag, bool is_sticky);
 int bind_key(char *map, bind_key_cb_t cb, int kid, char *tmap);
 int unbind_key(char *map, int kid);
 
-char *copy_buf_get(size_t *len);
-int copy_buf_set(char *str);
-
 int fifo_create(void);
 
 int tagbar_status_set(const char *s);

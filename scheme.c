@@ -694,22 +694,6 @@ ptr scheme_unbind_key(char *key, int mid)
 	return Sfalse;
 }
 
-ptr scheme_copy_buf_get(void)
-{
-	size_t len;
-	char *buf;
-	ptr s;
-
-	buf = copy_buf_get(&len);
-
-	return Sstring_of_length(buf, len);
-}
-
-int scheme_copy_buf_set(char *str)
-{
-	return copy_buf_set(str);
-}
-
 void scheme_do_quit(void)
 {
 	do_quit();
@@ -819,9 +803,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_tagbar_status_align", scheme_tagbar_status_align);
 	Sregister_symbol("cs_tagbar_status_set", scheme_tagbar_status_set);
 	Sregister_symbol("cs_tagbar_show", scheme_tagbar_show);
-
-	Sregister_symbol("cs_copy_buf_set", scheme_copy_buf_set);
-	Sregister_symbol("cs_copy_buf_get", scheme_copy_buf_get);
 
 	Sregister_symbol("cs_bind_key", scheme_bind_key);
 	Sregister_symbol("cs_unbind_key", scheme_unbind_key);

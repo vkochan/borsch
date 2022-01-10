@@ -387,7 +387,6 @@ static Fifo cmdfifo = { .fd = -1 };
 static Fifo retfifo = { .fd = -1 };
 
 static const char *shell;
-static Register copyreg;
 static volatile sig_atomic_t running = true;
 static bool runinall = false;
 /* make sense only in layouts which has master window (tile, bstack) */
@@ -1275,7 +1274,6 @@ cleanup(void) {
 	keymap_free(global_kmap);
 	vt_shutdown();
 	ui_free(ui);
-	free(copyreg.data);
 	if (bar.fd > 0)
 		close(bar.fd);
 	if (bar.file)
@@ -3653,37 +3651,6 @@ int unbind_key(char *key, int kid)
 
 	if (kmap)
 		return keymap_unbind(kmap, key);
-
-	return -1;
-}
-
-char *copy_buf_get(size_t *len)
-{
-	*len = copyreg.len;
-
-	if (!copyreg.len)
-		return NULL;
-
-	return copyreg.data;
-}
-
-int copy_buf_set(char *str)
-{
-	size_t len;
-
-	if (str) {
-		len = strlen(str);
-
-		if (copyreg.size < len) {
-			copyreg.data = realloc(copyreg.data, len * 2);
-			copyreg.size = len * 2;
-			copyreg.len = len;
-		}
-
-		memcpy(copyreg.data, str, len);
-
-		return 0;
-	}
 
 	return -1;
 }
