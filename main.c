@@ -2301,13 +2301,6 @@ int win_current_set(int wid)
 	return 0;
 }
 
-int win_create(char *prog, char *title)
-{
-	if (!get_popup())
-		return create(prog, title, NULL);
-	return -1;
-}
-
 int win_prev_selected(void)
 {
 	if (lastsel)
@@ -2640,30 +2633,6 @@ int win_state_toggle(int wid, win_state_t st)
         default: return -1;
 	}
 
-	return 0;
-}
-
-int win_keys_send(int wid, char *keys)
-{
-	Window *c = window_get_by_id(wid);
-
-	if (!c)
-		return -1;
-
-	if (buffer_term_get(c->buf))
-		vt_write(buffer_term_get(c->buf), keys, strlen(keys));
-	return 0;
-}
-
-int win_text_send(int wid, char *text)
-{
-	Window *c = window_get_by_id(wid);
-
-	if (!c)
-		return -1;
-
-	if (buffer_term_get(c->buf))
-		vt_write(buffer_term_get(c->buf), text, strlen(text));
 	return 0;
 }
 
@@ -3487,6 +3456,37 @@ void buf_redo(int bid)
 	if (buf) {
 		buffer_redo(buf);
 	}
+}
+
+int term_create(char *prog, char *title)
+{
+	if (!get_popup())
+		return create(prog, title, NULL);
+	return -1;
+}
+
+int term_keys_send(int wid, char *keys)
+{
+	Window *c = window_get_by_id(wid);
+
+	if (!c)
+		return -1;
+
+	if (buffer_term_get(c->buf))
+		vt_write(buffer_term_get(c->buf), keys, strlen(keys));
+	return 0;
+}
+
+int term_text_send(int wid, char *text)
+{
+	Window *c = window_get_by_id(wid);
+
+	if (!c)
+		return -1;
+
+	if (buffer_term_get(c->buf))
+		vt_write(buffer_term_get(c->buf), text, strlen(text));
+	return 0;
 }
 
 int view_current_get(void)

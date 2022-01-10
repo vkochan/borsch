@@ -29,7 +29,6 @@ int win_right_get(int wid);
 int win_left_get(int wid);
 int win_current_get(void);
 int win_current_set(int wid);
-int win_create(char *prog, char *title);
 int win_new(int bid);
 void win_del(int wid);
 void win_close(int wid);
@@ -42,8 +41,6 @@ int win_tag_toggle(int wid, int tag);
 int win_state_set(int wid, win_state_t st);
 int win_state_toggle(int wid, win_state_t st);
 win_state_t win_state_get(int wid);
-int win_keys_send(int wid, char *keys);
-int win_text_send(int wid, char *text);
 int win_buf_get(int wid);
 void win_mark_highlight(int wid, bool enable);
 void win_popup(int wid, bool enable);
@@ -101,6 +98,10 @@ void buf_env_set(int bid, void *env);
 void buf_snapshot(int bid);
 void buf_undo(int bid);
 void buf_redo(int bid);
+
+int term_create(char *prog, char *title);
+int term_keys_send(int wid, char *keys);
+int term_text_send(int wid, char *text);
 
 int view_current_get(void);
 int view_current_set(int tag);

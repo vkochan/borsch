@@ -157,16 +157,6 @@ int scheme_win_current_set(int wid)
 	return win_current_set(wid);
 }
 
-ptr scheme_win_create(char *prog, char *title)
-{
-	int ret = win_create(prog, title);
-
-	if (ret)
-		return Sinteger(ret);
-
-	return Sfalse;
-}
-
 ptr scheme_win_new(int bid)
 {
 	int ret = win_new(bid);
@@ -230,16 +220,6 @@ int scheme_win_state_set(int wid, win_state_t st)
 int scheme_win_state_toggle(int wid, win_state_t st)
 {
 	return win_state_toggle(wid, st);
-}
-
-int scheme_win_keys_send(int wid, char *text)
-{
-	return win_keys_send(wid, text);
-}
-
-int scheme_win_text_send(int wid, char *text)
-{
-	return win_text_send(wid, text);
 }
 
 ptr scheme_win_buf_get(int wid)
@@ -573,6 +553,26 @@ void scheme_buf_redo(int bid)
 	buf_redo(bid);
 }
 
+ptr scheme_term_create(char *prog, char *title)
+{
+	int ret = term_create(prog, title);
+
+	if (ret)
+		return Sinteger(ret);
+
+	return Sfalse;
+}
+
+int scheme_term_keys_send(int wid, char *text)
+{
+	return term_keys_send(wid, text);
+}
+
+int scheme_term_text_send(int wid, char *text)
+{
+	return term_text_send(wid, text);
+}
+
 int scheme_view_current_get(void)
 {
 	return view_current_get();
@@ -711,7 +711,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_left_get", scheme_win_left_get);
 	Sregister_symbol("cs_win_current_get", scheme_win_current_get);
 	Sregister_symbol("cs_win_current_set", scheme_win_current_set);
-	Sregister_symbol("cs_win_create", scheme_win_create);
 	Sregister_symbol("cs_win_new", scheme_win_new);
 	Sregister_symbol("cs_win_del", scheme_win_del);
 	Sregister_symbol("cs_win_close", scheme_win_close);
@@ -724,8 +723,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_state_get", scheme_win_state_get);
 	Sregister_symbol("cs_win_state_set", scheme_win_state_set);
 	Sregister_symbol("cs_win_state_toggle", scheme_win_state_toggle);
-	Sregister_symbol("cs_win_keys_send", scheme_win_keys_send);
-	Sregister_symbol("cs_win_text_send", scheme_win_text_send);
 	Sregister_symbol("cs_win_buf_get", scheme_win_buf_get);
 	Sregister_symbol("cs_win_mark_highlight", scheme_win_mark_highlight);
 	Sregister_symbol("cs_win_popup", scheme_win_popup);
@@ -780,6 +777,10 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_snapshot", scheme_buf_snapshot);
 	Sregister_symbol("cs_buf_undo", scheme_buf_undo);
 	Sregister_symbol("cs_buf_redo", scheme_buf_redo);
+
+	Sregister_symbol("cs_term_create", scheme_term_create);
+	Sregister_symbol("cs_term_keys_send", scheme_term_keys_send);
+	Sregister_symbol("cs_term_text_send", scheme_term_text_send);
 
 	Sregister_symbol("cs_view_current_get", scheme_view_current_get);
 	Sregister_symbol("cs_view_current_set", scheme_view_current_set);
