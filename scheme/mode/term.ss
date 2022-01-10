@@ -1,6 +1,7 @@
 (define __cs_term_keys_send (foreign-procedure "cs_term_keys_send" (int string) int))
 (define __cs_term_text_send (foreign-procedure "cs_term_text_send" (int string) int))
 (define __cs_term_create (foreign-procedure "cs_term_create" (string string) scheme-object))
+(define __cs_term_text_get (foreign-procedure "cs_term_text_get" (int) scheme-object))
 
 (define term-send-keys
    (case-lambda
@@ -19,6 +20,16 @@
 
       [(wid text)
        (__cs_term_text_send wid text)]
+   )
+)
+
+(define term-string
+   (case-lambda
+      [()
+       (term-string (buffer-current))]
+
+      [(b)
+       (__cs_term_text_get b)]
    )
 )
 

@@ -3489,6 +3489,18 @@ int term_text_send(int wid, char *text)
 	return 0;
 }
 
+int term_text_get(int bid, char **buf, size_t *len)
+{
+	Buffer *b = buffer_by_id(bid);
+
+	if (b && buffer_term_get(b)) {
+		*len = vt_content_get(buffer_term_get(b), buf, false);
+		return 0;
+	} else {
+		return -1;
+	}
+}
+
 int view_current_get(void)
 {
 	return pertag.curtag;

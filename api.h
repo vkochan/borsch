@@ -102,6 +102,7 @@ void buf_redo(int bid);
 int term_create(char *prog, char *title);
 int term_keys_send(int wid, char *keys);
 int term_text_send(int wid, char *text);
+int term_text_get(int bid, char **buf, size_t *len);
 
 int view_current_get(void);
 int view_current_set(int tag);
