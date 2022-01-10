@@ -9,7 +9,6 @@
 (define __cs_win_left_get (foreign-procedure __collect_safe "cs_win_left_get" (int) scheme-object))
 (define __cs_win_current_get (foreign-procedure __collect_safe "cs_win_current_get" () scheme-object))
 (define __cs_win_current_set (foreign-procedure __collect_safe "cs_win_current_set" (int) int))
-(define __cs_win_create (foreign-procedure "cs_win_create" (string string) scheme-object))
 (define __cs_win_new (foreign-procedure "cs_win_new" (int) scheme-object))
 (define __cs_win_del (foreign-procedure __collect_safe "cs_win_del" (int) int))
 (define __cs_win_close (foreign-procedure __collect_safe "cs_win_close" (int) int))
@@ -22,8 +21,6 @@
 (define __cs_win_state_get(foreign-procedure __collect_safe "cs_win_state_get" (int) int))
 (define __cs_win_state_set(foreign-procedure __collect_safe "cs_win_state_set" (int int) int))
 (define __cs_win_state_toggle(foreign-procedure __collect_safe "cs_win_state_toggle" (int int) int))
-(define __cs_win_keys_send (foreign-procedure "cs_win_keys_send" (int string) int))
-(define __cs_win_text_send (foreign-procedure "cs_win_text_send" (int string) int))
 (define __cs_win_buf_get (foreign-procedure __collect_safe "cs_win_buf_get" (int) scheme-object))
 (define __cs_win_popup (foreign-procedure __collect_safe "cs_win_popup" (int boolean) scheme-object))
 (define __cs_win_size_set (foreign-procedure __collect_safe "cs_win_size_set" (int int int) void))
@@ -168,23 +165,6 @@
        (let ([w (__cs_win_new b)])
          (when w (run-hooks 'window-create-hook w))
          w
-       )
-      ]
-   )
-)
-
-(define window-shell
-   (case-lambda
-      [()
-       (window-shell #f "")]
-
-      [(prog)
-       (window-shell prog "")]
-
-      [(prog title)
-       (let ([w (__cs_win_create prog title)])
-          (run-hooks 'window-create-hook w)
-          w
        )
       ]
    )
@@ -413,32 +393,6 @@
           (run-hooks 'window-maximize-hook wid)
        )
       ]
-   )
-)
-
-(define window-send-keys
-   (case-lambda
-      [(keys)
-       (__cs_win_keys_send (__cs_win_current_get) keys)]
-
-      [(wid keys)
-       (__cs_win_keys_send wid keys)]
-   )
-)
-
-(define window-send-text
-   (case-lambda
-      [(text)
-       (__cs_win_text_send (__cs_win_current_get) text)]
-
-      [(wid text)
-       (__cs_win_text_send wid text)]
-   )
-)
-
-(define window-eval
-   (lambda ()
-      (window-shell "borsch-eval -i" "eval")
    )
 )
 

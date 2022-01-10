@@ -6,6 +6,7 @@
 (load "view.ss")
 (load "window.ss")
 (load "buffer.ss")
+(load "mode/term.ss")
 (load "mode/text.ss")
 (load "mode/dirb.ss")
 
@@ -66,11 +67,17 @@
 
 (define do-quit __cs_do_quit)
 
+(define open-repl
+   (lambda ()
+      (term "borsch-eval -i" "eval")
+   )
+)
+
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Default key bindings
 ;;;;;;;;;;;;;;;;;;;;;;;
-(bind-key "C-g c"       window-shell)
-(bind-key "C-g C-x"     window-eval)
+(bind-key "C-g c"       term)
+(bind-key "C-g C-x"     open-repl)
 (bind-key "C-g x x"     window-delete)
 (bind-key "M-h"         window-select-left)
 (bind-key "C-g h"       window-select-left)
@@ -121,6 +128,6 @@
 (bind-key "C-g q q" do-quit)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; start with a shell window
+; start with a terminal
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(window-shell)
+(term)
