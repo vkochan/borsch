@@ -436,16 +436,6 @@
    )
 )
 
-(define window-pager
-   (case-lambda
-      [()
-       (__cs_win_pager_mode (__cs_win_current_get))]
-
-      [(wid)
-       (__cs_win_pager_mode wid)]
-   )
-)
-
 (define window-eval
    (lambda ()
       (window-shell "borsch-eval -i" "eval")
