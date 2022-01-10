@@ -206,10 +206,10 @@
 (define buffer-create
    (case-lambda
       [() 
-       (window-buffer (window-new))]
+       (window-buffer (window-create))]
 
       [(n) 
-       (let ([b (window-buffer (window-new))])
+       (let ([b (window-buffer (window-create))])
           (buffer-set-name n)
           b
        )
@@ -1161,7 +1161,7 @@
            )
          (when b
             (window-delete)
-            (window-new b)
+            (window-create b)
          )
       )
    )

@@ -159,10 +159,10 @@
    )
 )
 
-(define window-new
+(define window-create
    (case-lambda
       [()
-       (window-new 0)]
+       (window-create 0)]
 
       [(b)
        (let ([w (__cs_win_new b)])
