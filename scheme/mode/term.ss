@@ -6,20 +6,20 @@
 (define term-send-keys
    (case-lambda
       [(keys)
-       (__cs_term_keys_send (__cs_win_current_get) keys)]
+       (__cs_term_keys_send (buffer-current) keys)]
 
-      [(wid keys)
-       (__cs_term_keys_send wid keys)]
+      [(bid keys)
+       (__cs_term_keys_send bid keys)]
    )
 )
 
 (define term-send-text
    (case-lambda
       [(text)
-       (__cs_term_text_send (__cs_win_current_get) text)]
+       (__cs_term_text_send (buffer-current) text)]
 
-      [(wid text)
-       (__cs_term_text_send wid text)]
+      [(bid text)
+       (__cs_term_text_send bid text)]
    )
 )
 

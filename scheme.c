@@ -563,14 +563,14 @@ ptr scheme_term_create(char *prog, char *title)
 	return Sfalse;
 }
 
-int scheme_term_keys_send(int wid, char *text)
+int scheme_term_keys_send(int bid, char *text)
 {
-	return term_keys_send(wid, text);
+	return term_keys_send(bid, text);
 }
 
-int scheme_term_text_send(int wid, char *text)
+int scheme_term_text_send(int bid, char *text)
 {
-	return term_text_send(wid, text);
+	return term_text_send(bid, text);
 }
 
 ptr scheme_term_text_get(int bid)

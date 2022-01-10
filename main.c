@@ -3463,27 +3463,27 @@ int term_create(char *prog, char *title)
 	return -1;
 }
 
-int term_keys_send(int wid, char *keys)
+int term_keys_send(int bid, char *keys)
 {
-	Window *c = window_get_by_id(wid);
+	Buffer *buf = buffer_by_id(bid);
 
-	if (!c)
+	if (!buf)
 		return -1;
 
-	if (buffer_term_get(c->buf))
-		vt_write(buffer_term_get(c->buf), keys, strlen(keys));
+	if (buffer_term_get(buf))
+		vt_write(buffer_term_get(buf), keys, strlen(keys));
 	return 0;
 }
 
-int term_text_send(int wid, char *text)
+int term_text_send(int bid, char *text)
 {
-	Window *c = window_get_by_id(wid);
+	Buffer *buf = buffer_by_id(bid);
 
-	if (!c)
+	if (!buf)
 		return -1;
 
-	if (buffer_term_get(c->buf))
-		vt_write(buffer_term_get(c->buf), text, strlen(text));
+	if (buffer_term_get(buf))
+		vt_write(buffer_term_get(buf), text, strlen(text));
 	return 0;
 }
 
