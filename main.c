@@ -2717,7 +2717,7 @@ void win_buf_switch(int wid, int bid)
 	Window *w = window_get_by_id(wid);
 	Buffer *b = buffer_by_id(bid);
 
-	if (w && b && w->buf != b && !buffer_term_get(w->buf) && !buffer_term_get(b)) {
+	if (w && b && w->buf != b) {
 		buffer_ref_put(w->buf);
 
 		if (buffer_term_get(b)) {

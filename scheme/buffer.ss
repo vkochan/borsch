@@ -1213,9 +1213,7 @@
             (buffer-set-keymap 'buffer-switch-or-open-map)
             (for-each
                (lambda (x)
-                  (when (or open? (not (buffer-is-term? (car x))))
-                     (insert (format "~a\n" (cadr x)) '(style (:attr "bold")))
-                  )
+                  (insert (format "~a\n" (cadr x)) '(style (:attr "bold")))
                ) l
             )
          )
