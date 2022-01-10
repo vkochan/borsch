@@ -43,6 +43,10 @@
 
 (define __cs_buf_env_get (foreign-procedure __collect_safe "cs_buf_env_get" (int) scheme-object))
 
+(define __cs_buf_snapshot (foreign-procedure __collect_safe "cs_buf_snapshot" (int) void))
+(define __cs_buf_undo (foreign-procedure __collect_safe "cs_buf_undo" (int) void))
+(define __cs_buf_redo (foreign-procedure __collect_safe "cs_buf_redo" (int) void))
+
 (define mode-gen-map-symb
    (lambda (m)
          (string->symbol
@@ -1230,5 +1234,23 @@
 (define buffer-open
    (lambda ()
       (buffer-switch-or-open #t)
+   )
+)
+
+(define buffer-snapshot
+   (lambda()
+      (__cs_buf_snapshot (buffer-current))
+   )
+)
+
+(define buffer-undo
+   (lambda()
+      (__cs_buf_undo (buffer-current))
+   )
+)
+
+(define buffer-redo
+   (lambda()
+      (__cs_buf_redo (buffer-current))
    )
 )

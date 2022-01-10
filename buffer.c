@@ -724,9 +724,11 @@ void buffer_snapshot(Buffer *buf)
 void buffer_undo(Buffer *buf)
 {
 	text_undo(buf->text);
+	buf->is_dirty = true;
 }
 
 void buffer_redo(Buffer *buf)
 {
 	text_redo(buf->text);
+	buf->is_dirty = true;
 }
