@@ -3462,6 +3462,33 @@ void buf_env_set(int bid, void *env)
 	}
 }
 
+void buf_snapshot(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_snapshot(buf);
+	}
+}
+
+void buf_undo(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_undo(buf);
+	}
+}
+
+void buf_redo(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_redo(buf);
+	}
+}
+
 int view_current_get(void)
 {
 	return pertag.curtag;

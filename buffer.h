@@ -74,4 +74,8 @@ void buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t en
 void buffer_env_set(Buffer *buf, void *env);
 void *buffer_env_get(Buffer *buf);
 
+void buffer_snapshot(Buffer *buf);
+void buffer_undo(Buffer *buf);
+void buffer_redo(Buffer *buf);
+
 #endif /* BUFFER_H */

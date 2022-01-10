@@ -715,3 +715,18 @@ void *buffer_env_get(Buffer *buf)
 {
 	return buf->env;
 }
+
+void buffer_snapshot(Buffer *buf)
+{
+	text_snapshot(buf->text);
+}
+
+void buffer_undo(Buffer *buf)
+{
+	text_undo(buf->text);
+}
+
+void buffer_redo(Buffer *buf)
+{
+	text_redo(buf->text);
+}

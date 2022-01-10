@@ -558,6 +558,21 @@ ptr scheme_buf_env_get(int bid)
 	return Sfalse;
 }
 
+void scheme_buf_snapshot(int bid)
+{
+	buf_snapshot(bid);
+}
+
+void scheme_buf_undo(int bid)
+{
+	buf_undo(bid);
+}
+
+void scheme_buf_redo(int bid)
+{
+	buf_redo(bid);
+}
+
 int scheme_view_current_get(void)
 {
 	return view_current_get();
@@ -761,6 +776,10 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_prop_del", scheme_buf_prop_del);
 
 	Sregister_symbol("cs_buf_env_get", scheme_buf_env_get);
+
+	Sregister_symbol("cs_buf_snapshot", scheme_buf_snapshot);
+	Sregister_symbol("cs_buf_undo", scheme_buf_undo);
+	Sregister_symbol("cs_buf_redo", scheme_buf_redo);
 
 	Sregister_symbol("cs_view_current_get", scheme_view_current_get);
 	Sregister_symbol("cs_view_current_set", scheme_view_current_set);
