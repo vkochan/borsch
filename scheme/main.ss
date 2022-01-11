@@ -125,6 +125,8 @@
 (bind-key "C-b q" window-close)
 (bind-key "C-b o" buffer-open)
 
+(bind-key "C-x f d" dirb)
+
 (bind-key "C-g q q" do-quit)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
