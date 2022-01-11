@@ -421,10 +421,15 @@ static void term_window_draw(UiWin *win)
 				c->len = 1;
 			}
 
-			wattrset(twin->cwin, term_style2attr(c->style.attr));
+			/* wattrset(twin->cwin, term_style2attr(c->style.attr)); */
 
-			wcolor_set(twin->cwin, term_window_color_get(win,
-						term_color2curses(c->style.fg),
+			/* wcolor_set(twin->cwin, term_window_color_get(win, */
+			/* 			term_color2curses(c->style.fg), */
+			/* 			term_color2curses(c->style.bg)), */
+			/* 		NULL); */
+			wattrset(twin->cwin, term_style2attr(c->style.attr));
+			wcolor_set(twin->cwin,
+					term_color_make(win->ui, term_color2curses(c->style.fg),
 						term_color2curses(c->style.bg)),
 					NULL);
 
