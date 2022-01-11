@@ -33,6 +33,34 @@
    )
 )
 
+(define term-mode-copy
+   (lambda ()
+      (let (
+            [b (buffer-create)]
+            [s (term-string (buffer-current))]
+           )
+         (with-buffer b
+            (text-mode)
+            (insert s)
+         )
+      )
+   )
+)
+
+(define term-mode-paste
+   (lambda ()
+      (term-send-text reg)
+   )
+)
+
+(define term-mode-map
+  (let ([map (make-keymap)])
+     (bind-key map "C-p" term-mode-paste)
+     (bind-key map "C-y" term-mode-copy)
+     map
+  )
+)
+
 (define term
    (case-lambda
       [()
@@ -42,7 +70,11 @@
        (term prog "")]
 
       [(prog title)
-       (let ([w (__cs_term_create prog title)])
+       (let* (
+              [w (__cs_term_create prog title)]
+              [b (window-buffer w)]
+             )
+          (buffer-set-keymap 'term-mode-map)
           (run-hooks 'window-create-hook w)
           w
        )
