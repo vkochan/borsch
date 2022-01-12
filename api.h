@@ -53,6 +53,8 @@ int kmap_add(int pid);
 int kmap_parent_set(int kid, char *name);
 void kmap_del(int kid);
 
+int buf_new(char *name);
+void buf_del(int bid);
 int buf_kmap_set(int bid, char *name);
 int buf_kmap_get(int bid);
 int buf_current_get(void);

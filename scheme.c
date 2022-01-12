@@ -289,6 +289,20 @@ void scheme_kmap_del(int kid)
 	kmap_del(kid);
 }
 
+ptr scheme_buf_new(char *name)
+{
+	int ret = buf_new(name);
+
+	if (ret)
+		return Sinteger(ret);
+	return Sfalse;
+}
+
+void scheme_buf_del(int bid)
+{
+	buf_del(bid);
+}
+
 void scheme_buf_kmap_set(int bid, char *name)
 {
 	buf_kmap_set(bid, name);
@@ -736,6 +750,8 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_kmap_parent_set", scheme_kmap_parent_set);
 	Sregister_symbol("cs_kmap_del", scheme_kmap_del);
 
+	Sregister_symbol("cs_buf_new", scheme_buf_new);
+	Sregister_symbol("cs_buf_del", scheme_buf_del);
 	Sregister_symbol("cs_buf_kmap_get", scheme_buf_kmap_get);
 	Sregister_symbol("cs_buf_kmap_set", scheme_buf_kmap_set);
 	Sregister_symbol("cs_buf_current_get", scheme_buf_current_get);

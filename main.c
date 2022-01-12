@@ -2726,7 +2726,6 @@ void win_buf_switch(int wid, int bid)
 			ui_window_on_view_update_set(w->win, NULL);
 			ui_window_priv_set(w->win, term);
 			ui_window_ops_draw_set(w->win, vt_draw);
-			vt_attach(term, w->win);
 			vt_data_set(term, w);
 			vt_dirty(term);
 		} else {
@@ -2772,6 +2771,31 @@ void kmap_del(int kid)
 
 	if (kmap)
 		keymap_ref_put(kmap);
+}
+
+int buf_new(char *name)
+{
+	Buffer *buf = buffer_new(name);
+
+	if (buf) {
+		buffer_env_set(buf, scheme_env_alloc());
+		buffer_ref_get(buf);
+		return buffer_id_get(buf);
+	}
+
+	return 0;
+}
+
+void buf_del(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		void *env = buffer_env_get(buf);
+		buffer_ref_put(buf);
+		if (buffer_del(buf))
+			scheme_env_free(env);
+	}
 }
 
 int buf_kmap_set(int bid, char *name)

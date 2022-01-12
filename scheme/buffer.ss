@@ -1,3 +1,5 @@
+(define __cs_buf_new (foreign-procedure "cs_buf_new" (string) scheme-object))
+(define __cs_buf_del (foreign-procedure __collect_safe "cs_buf_del" (int) void))
 (define __cs_buf_kmap_get (foreign-procedure __collect_safe "cs_buf_kmap_get" (int) scheme-object))
 (define __cs_buf_kmap_set (foreign-procedure "cs_buf_kmap_set" (int string) scheme-object))
 (define __cs_buf_current_get (foreign-procedure __collect_safe "cs_buf_current_get" () scheme-object))
@@ -214,6 +216,26 @@
           b
        )
       ]
+   )
+)
+
+(define buffer-new
+   (case-lambda
+      [() 
+       (buffer-new "")]
+
+      [(n) 
+       (__cs_buf_new n)]
+   )
+)
+
+(define buffer-delete
+   (case-lambda
+      [()
+         (buffer-delete (buffer-current))]
+
+      [(b)
+         (__cs_buf_del b)]
    )
 )
 
@@ -1088,10 +1110,10 @@
 (define mark-highlight
    (case-lambda
       [(e)
-       (__cs_win_mark_highlight (__cs_win_current_get) e)]
+       (mark-highlight (__cs_win_current_get) e)]
 
       [(wid e)
-       (__cs_win_mark_highlight wid e)]
+       (when wid (__cs_win_mark_highlight wid e))]
    )
 )
 
