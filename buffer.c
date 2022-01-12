@@ -214,7 +214,9 @@ bool buffer_save(Buffer *buf)
 
 bool buffer_is_modified(Buffer *buf)
 {
-	return text_modified(buf->text);
+	if (buf->file.path)
+		return text_modified(buf->text);
+	return false;
 }
 
 Buffer *buffer_first_get(void)
