@@ -150,19 +150,29 @@
 (define (try fn . args)
    (let ([fn fn]
          [args args])
-     (append '() (call/cc
-        (lambda (k)
-           (with-exception-handler
-              (lambda (x)
-                 (k (list 1 (err->str x)))
-              )
+      (let (
+            [ret (append '()
+                    (call/cc
+                       (lambda (k)
+                          (with-exception-handler
+                             (lambda (x)
+                                (k (list 1 (err->str x)))
+                             )
 
-              (lambda ()
-	         (k (list 0 (apply fn args)))
-              )
+                             (lambda ()
+	                        (k (list 0 (apply fn args)))
+                             )
+                          )
+                       )
+                    )
+                 )
+             ]
            )
-        )
-     ))
+         (when (= (car ret) 1)
+            (run-hooks 'on-error-hook (cadr ret))
+         )
+         ret
+      )
    )
 )
 

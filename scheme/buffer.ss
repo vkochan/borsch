@@ -1274,3 +1274,15 @@
       (__cs_buf_redo (buffer-current))
    )
 )
+
+(define message
+   (lambda (s)
+      (let ([b (buffer-get "*Messages*")])
+         (when b
+            (with-buffer b
+               (insert (format "~a\n" s))
+            )
+         )
+      )
+   )
+)

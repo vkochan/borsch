@@ -176,8 +176,16 @@
 	(window-delete (__cs_win_current_get))]
 
        [(w)
-	(__cs_win_del w)
-        (run-hooks 'window-delete-hook w)
+        (let ([n (buffer-name (window-buffer w))])
+           (if (equal? n "*Messages*")
+              (window-close w)
+              ;; else
+              (begin
+	         (__cs_win_del w)
+                 (run-hooks 'window-delete-hook w)
+              )
+           )
+        )
        ]
     )
 )

@@ -73,6 +73,24 @@
    )
 )
 
+(let ([m (buffer-new "*Messages*")])
+   (with-buffer m
+      (text-mode)
+   )
+)
+
+(add-hook 'on-error-hook
+   (lambda (e)
+      (let ([m (buffer-get "*Messages*")])
+         (when m
+            (with-buffer m
+               (insert (format "~a\n" e) '(style (:fg "red")))
+            )
+         )
+      )
+   )
+)
+
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Default key bindings
 ;;;;;;;;;;;;;;;;;;;;;;;
