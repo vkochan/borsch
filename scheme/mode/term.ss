@@ -33,16 +33,30 @@
    )
 )
 
-(define term-mode-copy
+(define term-mode-copy-enter
    (lambda ()
-      (let (
-            [b (buffer-create)]
-            [s (term-string (buffer-current))]
-           )
+      (let* (
+             [b (buffer-new)]
+             [c (buffer-current)]
+             [s (term-string c)]
+            )
          (with-buffer b
             (text-mode)
+            (buffer-set-keymap 'term-mode-copy-map)
+            (buffer-set-name "Term Copy")
+            (define-local orig-buf c)
+            (window-switch-buffer b)
             (insert s)
          )
+      )
+   )
+)
+
+(define term-mode-copy-exit
+   (lambda ()
+      (let ([c (buffer-current)])
+         (window-switch-buffer (get-local orig-buf))
+         (buffer-delete c)
       )
    )
 )
@@ -53,10 +67,18 @@
    )
 )
 
+(define term-mode-copy-map
+  (let ([map (make-keymap 'text-mode-cmd-map)])
+     (bind-key map "<Esc>" term-mode-copy-exit)
+     (bind-key map "q" term-mode-copy-exit)
+     map
+  )
+)
+
 (define term-mode-map
   (let ([map (make-keymap)])
+     (bind-key map "C-y" term-mode-copy-enter)
      (bind-key map "C-p" term-mode-paste)
-     (bind-key map "C-y" term-mode-copy)
      map
   )
 )
