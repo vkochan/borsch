@@ -139,9 +139,9 @@
 (bind-key "C-g b"   layout-switch-bstack)
 (bind-key "C-g m"   window-toggle-maximized)
 
-(bind-key "C-b s" buffer-switch)
-(bind-key "C-b q" window-close)
-(bind-key "C-b o" buffer-open)
+(bind-key "C-x b s" buffer-switch)
+(bind-key "C-x b c" window-close)
+(bind-key "C-x b o" buffer-open)
 
 (bind-key "C-x f d" dirb)
 
