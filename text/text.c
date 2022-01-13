@@ -121,7 +121,6 @@ static void revision_free(Revision *rev);
 /* logical line counting cache */
 static void lineno_cache_invalidate(LineCache *cache);
 static size_t lines_skip_forward(Text *txt, size_t pos, size_t lines, size_t *lines_skiped);
-static size_t lines_count(Text *txt, size_t pos, size_t len);
 
 /* stores the given data in a block, allocates a new one if necessary. Returns
  * a pointer to the storage location or NULL if allocation failed. */
@@ -853,7 +852,7 @@ size_t text_size(const Text *txt) {
 }
 
 /* count the number of new lines '\n' in range [pos, pos+len) */
-static size_t lines_count(Text *txt, size_t pos, size_t len) {
+size_t text_lines_count(Text *txt, size_t pos, size_t len) {
 	size_t lines = 0;
 	for (Iterator it = text_iterator_get(txt, pos);
 	     text_iterator_valid(&it);
@@ -938,11 +937,11 @@ size_t text_lineno_by_pos(Text *txt, size_t pos) {
 	if (pos < cache->pos) {
 		size_t diff = cache->pos - pos;
 		if (diff < pos)
-			cache->lineno -= lines_count(txt, pos, diff);
+			cache->lineno -= text_lines_count(txt, pos, diff);
 		else
-			cache->lineno = lines_count(txt, 0, pos) + 1;
+			cache->lineno = text_lines_count(txt, 0, pos) + 1;
 	} else if (pos > cache->pos) {
-		cache->lineno += lines_count(txt, cache->pos, pos - cache->pos);
+		cache->lineno += text_lines_count(txt, cache->pos, pos - cache->pos);
 	}
 	cache->pos = text_line_begin(txt, pos);
 	return cache->lineno;

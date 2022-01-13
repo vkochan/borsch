@@ -205,6 +205,7 @@ time_t text_state(const Text*);
  */
 size_t text_pos_by_lineno(Text*, size_t lineno);
 size_t text_lineno_by_pos(Text*, size_t pos);
+size_t text_lines_count(Text *txt, size_t pos, size_t len);
 
 /**
  * @}
