@@ -2925,7 +2925,7 @@ static void buf_update(Window *w)
 		view_invalidate(view);
 
 		if (w == sel) {
-			size_t (*scroll_fn)(View *, size_t) = view_scroll_to;
+			void (*scroll_fn)(View *, size_t) = view_scroll_to;
 			Filerange r = view_viewport_get(view);
 			Text *text = buffer_text_get(buf);
 
