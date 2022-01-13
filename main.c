@@ -2903,7 +2903,30 @@ static void buf_update(Window *w)
 		view_invalidate(view);
 
 		if (w == sel) {
-			view_scroll_to(view, pos);
+			size_t (*scroll_fn)(View *, size_t) = view_scroll_to;
+			Filerange r = view_viewport_get(view);
+			Text *text = buffer_text_get(buf);
+
+			if (pos < r.start || pos > r.end) {
+				size_t lines;
+				size_t start;
+				size_t end;
+
+				if (pos < r.start) {
+					start = pos;
+					end = r.start;
+				} else if (pos > r.end) {
+					start = r.end;
+					end = pos;
+				}
+
+				lines = text_lines_count(text, start, end - start);
+				if (lines > (view_height_get(view) / 2))
+					scroll_fn = view_cursor_to;
+			}
+
+			scroll_fn(view, pos);
+
 			if (view_coord_get(view, pos, NULL, &y, &x)) {
 				ui_window_cursor_set(win, x, y);
 			}
