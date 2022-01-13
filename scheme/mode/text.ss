@@ -62,6 +62,8 @@
       (bind-key map "d d" (lambda () (delete-line) (buffer-snapshot)))
       (bind-key map "g g" (lambda () (move-buffer-begin)))
       (bind-key map "G" (lambda () (move-buffer-end)))
+      (bind-key map "H" (lambda () (cursor-set (window-viewport-begin))))
+      (bind-key map "L" (lambda () (cursor-set (window-viewport-end))))
       (bind-key map "i" (lambda () (text-mode-ins)))
       (bind-key map "o" (lambda () (insert-empty-line) (text-mode-ins)))
       (bind-key map "O" (lambda () (insert-empty-line-up) (text-mode-ins)))

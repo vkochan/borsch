@@ -2308,6 +2308,28 @@ int win_prev_selected(void)
 	return 0;
 }
 
+int win_viewport_pos(int wid, char type)
+{
+	Window *w = window_get_by_id(wid);
+	Filerange v;
+	Text *text;
+
+	if (!w)
+		return EPOS;
+
+	v = view_viewport_get(w->view);
+	text = buffer_text_get(w->buf);
+
+	switch (type) {
+	case 'H':
+		return text_line_start(text, v.start);
+	case 'L':
+		return text_line_start(text, v.end > 0 ? v.end-1 : v.end);
+	}
+
+	return -1;
+}
+
 static int style_prop_draw(Buffer *buf, int id, size_t start, size_t end, void *data,
 		void *arg)
 {

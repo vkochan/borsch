@@ -27,6 +27,7 @@
 (define __cs_win_border_set (foreign-procedure __collect_safe "cs_win_border_set" (int boolean) void))
 (define __cs_win_buf_switch (foreign-procedure __collect_safe "cs_win_buf_switch" (int int) void))
 (define __cs_win_prev_selected (foreign-procedure __collect_safe "cs_win_prev_selected" () scheme-object))
+(define __cs_win_viewport_pos (foreign-procedure __collect_safe "cs_win_viewport_pos" (int char) scheme-object))
 
 (define window-first
    (lambda ()
@@ -461,5 +462,25 @@
 
       [(wid b)
        (__cs_win_buf_switch wid b)]
+   )
+)
+
+(define window-viewport-begin
+   (case-lambda
+      [()
+       (window-viewport-begin (window-current))]
+
+      [(w)
+       (__cs_win_viewport_pos w #\H)]
+   )
+)
+
+(define window-viewport-end
+   (case-lambda
+      [()
+       (window-viewport-end (window-current))]
+
+      [(w)
+       (__cs_win_viewport_pos w #\L)]
    )
 )

@@ -48,6 +48,7 @@ void win_size_set(int wid, int width, int height);
 void win_border_set(int wid, bool enable);
 void win_buf_switch(int wid, int bid);
 int win_prev_selected(void);
+int win_viewport_pos(int wid, char type);
 
 int kmap_add(int pid);
 int kmap_parent_set(int kid, char *name);
