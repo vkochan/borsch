@@ -2315,7 +2315,7 @@ int win_viewport_pos(int wid, char type)
 	Text *text;
 
 	if (!w)
-		return EPOS;
+		return -1;
 
 	v = view_viewport_get(w->view);
 	text = buffer_text_get(w->buf);
