@@ -271,6 +271,11 @@ ptr scheme_win_viewport_pos(int wid, char type)
 	return Sinteger(win_viewport_pos(wid, type));
 }
 
+ptr scheme_win_scroll(int wid, char type, int n)
+{
+	return Sinteger(win_scroll(wid, type, n));
+}
+
 ptr scheme_kmap_add(char *parent)
 {
 	int ret = kmap_add(0);
@@ -751,6 +756,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_buf_switch", scheme_win_buf_switch);
 	Sregister_symbol("cs_win_prev_selected", scheme_win_prev_selected);
 	Sregister_symbol("cs_win_viewport_pos", scheme_win_viewport_pos);
+	Sregister_symbol("cs_win_scroll", scheme_win_scroll);
 
 	Sregister_symbol("cs_kmap_add", scheme_kmap_add);
 	Sregister_symbol("cs_kmap_parent_set", scheme_kmap_parent_set);

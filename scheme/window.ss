@@ -28,6 +28,7 @@
 (define __cs_win_buf_switch (foreign-procedure __collect_safe "cs_win_buf_switch" (int int) void))
 (define __cs_win_prev_selected (foreign-procedure __collect_safe "cs_win_prev_selected" () scheme-object))
 (define __cs_win_viewport_pos (foreign-procedure __collect_safe "cs_win_viewport_pos" (int char) scheme-object))
+(define __cs_win_scroll (foreign-procedure __collect_safe "cs_win_scroll" (int char int) scheme-object))
 
 (define window-first
    (lambda ()
@@ -482,5 +483,65 @@
 
       [(w)
        (__cs_win_viewport_pos w #\L)]
+   )
+)
+
+(define window-scroll-page-down
+   (case-lambda
+      [()
+       (window-scroll-page-down (window-current))]
+
+      [(w)
+       (__cs_win_scroll w #\f 0)]
+   )
+)
+
+(define window-scroll-page-up
+   (case-lambda
+      [()
+       (window-scroll-page-up (window-current))]
+
+      [(w)
+       (__cs_win_scroll w #\b 0)]
+   )
+)
+
+(define window-scroll-halfpage-down
+   (case-lambda
+      [()
+       (window-scroll-halfpage-down (window-current))]
+
+      [(w)
+       (__cs_win_scroll w #\d 0)]
+   )
+)
+
+(define window-scroll-halfpage-up
+   (case-lambda
+      [()
+       (window-scroll-halfpage-up (window-current))]
+
+      [(w)
+       (__cs_win_scroll w #\u 0)]
+   )
+)
+
+(define window-scroll-down
+   (case-lambda
+      [(n)
+       (window-scroll-down (window-current))]
+
+      [(w n)
+       (__cs_win_scroll w #\l n)]
+   )
+)
+
+(define window-scroll-up
+   (case-lambda
+      [(n)
+       (window-scroll-down (window-current))]
+
+      [(w n)
+       (__cs_win_scroll w #\L n)]
    )
 )

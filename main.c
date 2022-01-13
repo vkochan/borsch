@@ -2330,6 +2330,31 @@ int win_viewport_pos(int wid, char type)
 	return -1;
 }
 
+int win_scroll(int wid, char type, int n)
+{
+	Window *w = window_get_by_id(wid);
+
+	if (!w)
+		return -1;
+
+	switch (type) {
+	case 'd':
+		return view_scroll_halfpage_down(w->view);
+	case 'u':
+		return view_scroll_halfpage_up(w->view);
+	case 'f':
+		return view_scroll_page_down(w->view);
+	case 'b':
+		return view_scroll_page_up(w->view);
+	case 'L':
+		return view_scroll_up(w->view, n);
+	case 'l':
+		return view_scroll_down(w->view, n);
+	}
+
+	return -1;
+}
+
 static int style_prop_draw(Buffer *buf, int id, size_t start, size_t end, void *data,
 		void *arg)
 {
