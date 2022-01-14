@@ -213,7 +213,7 @@
          (let ([hook-list (top-level-value symb)])
             (for-each
                (lambda (h)
-                  (try h args)
+                  (apply try (append (list h) args))
                ) hook-list
             )
          )
