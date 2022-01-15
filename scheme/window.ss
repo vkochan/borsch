@@ -64,7 +64,7 @@
 
          (while win
             (set! lst (append lst (list
-                                    (list win (window-name win) (window-buffer))
+                                    (list win (window-name win) (window-buffer win))
 				  )
             )         )
             (set! win (window-next win))
