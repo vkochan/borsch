@@ -83,6 +83,20 @@ void ui_draw_char_vert(Ui *ui, int x, int y, unsigned int ch, int n)
 		ui->draw_char_vert(ui, x, y, ch, n);
 }
 
+void ui_cursor_enable(Ui *ui, bool enable)
+{
+	if (ui->cursor_enable)
+		ui->cursor_enable(ui, enable);
+}
+
+short ui_colors_max_get(Ui *ui)
+{
+	if (ui->colors_max_get)
+		return ui->colors_max_get(ui);
+
+	return 8;
+}
+
 static CellStyle ui_window_style_get(UiWin *win, enum UiStyle style)
 {
 	CellStyle st = {
@@ -121,17 +135,18 @@ void ui_window_free(UiWin *win)
 
 void ui_window_cursor_set(UiWin *win, int x, int y)
 {
-	int skip = win->has_border;
+	int skip_x = win->has_border + win->sidebar_width;
+	int skip_y = win->has_border;
 
 	if (win->ui->window_cursor_set)
-		win->ui->window_cursor_set(win, x+skip, y+skip);
+		win->ui->window_cursor_set(win, x+skip_x, y+skip_y);
 }
 
 void ui_window_cursor_get(UiWin *win, int *x, int *y)
 {
 	if (win->ui->window_cursor_get)
 		win->ui->window_cursor_get(win, x, y);
-	*x -= win->has_border;
+	*x -= win->has_border + win->sidebar_width;
 	*y -= win->has_border;
 }
 
@@ -162,6 +177,12 @@ void ui_window_refresh(UiWin *win)
 		win->ui->window_refresh(win);
 }
 
+void ui_window_clear(UiWin *win)
+{
+	if (win->ui->window_clear)
+		win->ui->window_clear(win);
+}
+
 void ui_window_resize(UiWin *win, int width, int height)
 {
 	if (width != win->width || height != win->height) {
@@ -172,7 +193,8 @@ void ui_window_resize(UiWin *win, int width, int height)
 		if (width > 0)
 			win->width = width;
 
-		view_resize(win->view, win->width-(border*2), win->height-border-1);
+		view_resize(win->view, win->width - win->sidebar_width - (border*2),
+				       win->height - border-1);
 
 		if (win->resize)
 			win->resize(win, win->width, win->height);
@@ -194,36 +216,40 @@ void ui_window_move(UiWin *win, int x, int y)
 
 void ui_window_draw_char(UiWin *win, int x, int y, unsigned int ch, int n)
 {
-	int skip = win->has_border;
+	int skip_x = win->has_border;
+	int skip_y = win->has_border;
 
 	if (win->ui->window_draw_char)
-		win->ui->window_draw_char(win, x+skip, y+skip, ch, n);
+		win->ui->window_draw_char(win, x+skip_x, y+skip_y, ch, n);
 }
 
 void ui_window_draw_text(UiWin *win, int x, int y, const char *text, int n)
 {
-	int skip = win->has_border;
+	int skip_x = win->has_border;
+	int skip_y = win->has_border;
 
 	if (win->ui->window_draw_text)
-		win->ui->window_draw_text(win, x+skip, y+skip, text, n);
+		win->ui->window_draw_text(win, x+skip_x, y+skip_y, text, n);
 }
 
 void ui_window_draw_char_attr(UiWin *win, int x, int y, unsigned ch, int n,
 			      short fg, short bg, ui_text_style_t style)
 {
-	int skip = win->has_border;
+	int skip_x = win->has_border;
+	int skip_y = win->has_border;
 
 	if (win->ui->window_draw_char_attr)
-		win->ui->window_draw_char_attr(win, x+skip, y+skip, ch, n, fg, bg, style);
+		win->ui->window_draw_char_attr(win, x+skip_x, y+skip_y, ch, n, fg, bg, style);
 }
 
 void ui_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int n,
 			      short fg, short bg, ui_text_style_t style)
 {
-	int skip = win->has_border;
+	int skip_x = win->has_border;
+	int skip_y = win->has_border;
 
 	if (win->ui->window_draw_text_attr)
-		win->ui->window_draw_text_attr(win, x+skip, y+skip, text, n, fg, bg, style);
+		win->ui->window_draw_text_attr(win, x+skip_x, y+skip_y, text, n, fg, bg, style);
 }
 
 void ui_window_title_set(UiWin *win, const char *title)
@@ -344,16 +370,31 @@ bool ui_window_border_is_enabled(UiWin *win)
 	return win->has_border;
 }
 
-void ui_cursor_enable(Ui *ui, bool enable)
+#include <stdio.h>
+void ui_window_sidebar_width_set(UiWin *win, int width)
 {
-	if (ui->cursor_enable)
-		ui->cursor_enable(ui, enable);
+	if (win->sidebar_width != width) {
+		int border = win->has_border;
+
+		win->sidebar_width = width;
+
+		/* just to resize only view */
+		ui_window_resize(win, -1, -1);
+	}
 }
 
-short ui_colors_max_get(Ui *ui)
+int ui_window_sidebar_width_get(UiWin *win)
 {
-	if (ui->colors_max_get)
-		return ui->colors_max_get(ui);
+	return win->sidebar_width;
+}
 
-	return 8;
+void ui_window_sidebar_draw(UiWin *win, int x, int y, const char *text,
+			    short fg, short bg, ui_text_style_t style)
+{
+	int skip_x = win->has_border;
+	int skip_y = win->has_border;
+
+	if (win->ui->window_draw_text_attr)
+		win->ui->window_draw_text_attr(win, x+skip_x, y+skip_y, text,
+				strlen(text), fg, bg, style);
 }

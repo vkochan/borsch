@@ -403,12 +403,13 @@ static void term_window_draw(UiWin *win)
 	const Line *line = view_lines_first(win->view);
 	int view_width = view_width_get(win->view);
 	WinTerm *twin = (WinTerm*)win;
-	int x0 = win->has_border, y = win->has_border;
+	int sidebar = ui_window_sidebar_width_get(win);
+	int x0 = win->has_border + sidebar;
+	int y = win->has_border;
 	int sx, sy;
 
 	getyx(twin->cwin, sy, sx);
 	wmove(twin->cwin, y, x0);
-	wclrtobot(twin->cwin);
 
 	for (const Line *l = line; l; l = l->next, y++) {
 		for (int cx = 0, x = x0; cx < view_width; cx++,x++) {
@@ -464,6 +465,13 @@ static void term_window_refresh(UiWin *win)
 	wnoutrefresh(twin->cwin);
 }
 
+static void term_window_clear(UiWin *win)
+{
+	WinTerm *twin = (WinTerm*)win;
+
+	wclear(twin->cwin);
+}
+
 static void term_window_redraw(UiWin *win)
 {
 	WinTerm *twin = (WinTerm*)win;
@@ -498,6 +506,7 @@ Ui *ui_term_new(void)
 	tui->ui.window_draw = term_window_draw;
 	tui->ui.window_redraw = term_window_redraw;
 	tui->ui.window_refresh = term_window_refresh;
+	tui->ui.window_clear = term_window_clear;
 	tui->ui.window_resize = term_window_resize;
 	tui->ui.window_move = term_window_move;
 	tui->ui.window_draw_char = term_window_draw_char;

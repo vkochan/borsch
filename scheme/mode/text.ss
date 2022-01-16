@@ -113,7 +113,55 @@
    )
 )
 
+(define text-mode-linenum-width
+   (lambda (w)
+      (if (not (buffer-is-term? (window-buffer w)))
+         (begin
+            (let ([b (window-buffer w)])
+               (with-buffer b
+                  (let* (
+                         [end (line-begin-pos (window-viewport-end w))]
+                         [coord (window-viewport-coord w end)]
+                        )
+                     (if coord
+                        (count-digits-num (list-ref coord 2))
+                        ;; else
+                        0
+                     )
+                  )
+               )
+            )
+         )
+         ;; else
+         0
+      )
+   )
+)
+
+(define text-mode-linenum-draw
+   (lambda (w)
+      (let ([b (window-buffer w)])
+         (with-buffer b
+            (when (local-bound? linenum-enable)
+               (let ([width (text-mode-linenum-width w)])
+                  (window-set-sidebar-width w (1+ width))
+                  (let ([lines (window-viewport-lines-coord w)])
+                     (for-each
+                        (lambda (c)
+                           (window-draw-sidebar w 0 (list-ref c 1) (format "~a" (list-ref c 2)))
+                        ) lines
+                     )
+                  )
+               )
+            )
+         )
+      )
+   )
+)
+
 (define-mode text-mode "Text" #f
    (enable-insert #t)
    (text-mode-cmd)
+   (define-local linenum-enable #t)
+   (add-hook 'window-draw-hook text-mode-linenum-draw)
 )

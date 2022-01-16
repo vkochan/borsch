@@ -172,6 +172,7 @@ static Ui *ui;
 
 extern int scheme_init(const char *);
 extern void scheme_uninit(void);
+extern int scheme_event_handle(event_t evt);
 extern int scheme_eval_file(const char *scm_in, const char *out);
 extern void *scheme_env_alloc(void);
 extern void scheme_env_free(void *env);
@@ -649,7 +650,20 @@ static void buf_update(Window *w);
 static void
 draw(Window *c) {
 	if (is_content_visible(c) || c == get_popup()) {
+		event_t evt;
+
+		/* we assume that it will be set on EVT_WIN_DRAW */
+		/* ui_window_sidebar_width_set(c->win, 0); */
+		ui_window_clear(c->win);
+
 		buf_update(c);
+
+		evt.eid = EVT_WIN_DRAW;
+		evt.oid = c->id;
+		scheme_event_handle(evt);
+
+		buf_update(c);
+
 		ui_window_redraw(c->win);
 		ui_window_draw(c->win);
 	}
@@ -2369,6 +2383,36 @@ int win_scroll(int wid, char type, int n)
 	}
 
 	return -1;
+}
+
+void win_sidebar_set(int wid, int width)
+{
+	Window *w = window_get_by_id(wid);
+
+	if (w) {
+		ui_window_sidebar_width_set(w->win, width);
+		buffer_dirty_set(w->buf, true);
+	}
+}
+
+int win_sidebar_get(int wid)
+{
+	Window *w = window_get_by_id(wid);
+
+	if (w) {
+		return ui_window_sidebar_width_get(w->win);
+	}
+
+	return 0;
+}
+
+void win_sidebar_draw(int wid, int x, int y, const char *text, short fg, short bg, int attr)
+{
+	Window *w = window_get_by_id(wid);
+
+	if (w) {
+		ui_window_sidebar_draw(w->win, x, y, text, fg, bg, attr);
+	}
 }
 
 static int style_prop_draw(Buffer *buf, int id, size_t start, size_t end, void *data,

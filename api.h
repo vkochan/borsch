@@ -4,6 +4,10 @@
 #include <stdbool.h>
 
 typedef enum {
+	EVT_WIN_DRAW     = 1,
+} event_id_t;
+
+typedef enum {
 	WIN_STATE_MINIMIZED = 0,
 	WIN_STATE_MAXIMIZED = 1,
 	WIN_STATE_MASTER    = 2,
@@ -15,6 +19,11 @@ typedef enum {
 	LAYOUT_BSTACK = 2,
 	LAYOUT_MAXIMIZED = 3,
 } layout_t;
+
+typedef struct {
+	event_id_t   eid;
+	int          oid;
+} event_t;
 
 typedef void (*bind_key_cb_t)(void);
 
@@ -51,6 +60,9 @@ int win_prev_selected(void);
 int win_viewport_pos(int wid, char type);
 int win_viewport_coord(int wid, int pos, int *l, int *x, int *y);
 int win_scroll(int wid, char type, int n);
+void win_sidebar_set(int wid, int width);
+int win_sidebar_get(int wid);
+void win_sidebar_draw(int wid, int x, int y, const char *text, short fg, short bg, int attr);
 
 int kmap_add(int pid);
 int kmap_parent_set(int kid, char *name);

@@ -289,6 +289,21 @@ ptr scheme_win_scroll(int wid, char type, int n)
 	return Sinteger(win_scroll(wid, type, n));
 }
 
+void scheme_win_sidebar_set(int wid, int width)
+{
+	win_sidebar_set(wid, width);
+}
+
+ptr scheme_win_sidebar_get(int wid)
+{
+	return Sinteger(win_sidebar_get(wid));
+}
+
+void scheme_win_sidebar_draw(int wid, int x, int y, const char *text, short fg, short bg, int attr)
+{
+	win_sidebar_draw(wid, x, y, text, fg, bg, attr);
+}
+
 ptr scheme_kmap_add(char *parent)
 {
 	int ret = kmap_add(0);
@@ -771,6 +786,9 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_viewport_pos", scheme_win_viewport_pos);
 	Sregister_symbol("cs_win_viewport_coord", scheme_win_viewport_coord);
 	Sregister_symbol("cs_win_scroll", scheme_win_scroll);
+	Sregister_symbol("cs_win_sidebar_set", scheme_win_sidebar_set);
+	Sregister_symbol("cs_win_sidebar_get", scheme_win_sidebar_get);
+	Sregister_symbol("cs_win_sidebar_draw", scheme_win_sidebar_draw);
 
 	Sregister_symbol("cs_kmap_add", scheme_kmap_add);
 	Sregister_symbol("cs_kmap_parent_set", scheme_kmap_parent_set);
@@ -904,6 +922,15 @@ void scheme_uninit(void)
 		Sscheme_deinit();
 		scheme_initialized = 0;
 	}
+}
+
+int scheme_event_handle(event_t evt)
+{
+
+	Scall2(Stop_level_value(Sstring_to_symbol("__on-event-handler")),
+			Sinteger(evt.eid),
+			Sinteger(evt.oid));
+	return 0;
 }
 
 int scheme_eval_file(const char *in, const char *out)

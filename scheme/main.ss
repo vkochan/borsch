@@ -79,6 +79,25 @@
    )
 )
 
+(define __on-event-handler
+   (lambda (ev wid)
+       (define __evt->symb
+	  (lambda (ev)
+	     (case ev
+		[1  'window-draw-hook   ]
+		[else #f]
+             )
+          )
+       )
+
+       (let ([h (__evt->symb ev)])
+          (when h
+             (run-hooks h wid)
+          )
+       )
+   )
+)
+
 (add-hook 'on-error-hook
    (lambda (e)
       (let ([m (buffer-get "*Messages*")])

@@ -96,6 +96,7 @@ struct Ui {
 	void (*window_draw)(UiWin *);
 	void (*window_redraw)(UiWin*);
 	void (*window_refresh)(UiWin*);
+	void (*window_clear)(UiWin*);
 	void (*window_resize)(UiWin*, int width, int height);
 	void (*window_move)(UiWin*, int x, int y);
 	void (*window_draw_char)(UiWin*, int x, int y, unsigned int ch, int n);
@@ -127,6 +128,7 @@ struct UiWin {
 	short curr_fg, curr_bg;
 	char title[256];
 	bool has_border;
+	int sidebar_width;
 	CellStyle (*style_get)(UiWin*, enum UiStyle);
 	void (*status)(UiWin*, const char *txt);
 	void (*options_set)(UiWin*, enum UiOption);
@@ -153,6 +155,7 @@ short ui_color_make(Ui *ui, short fg, short bg);
 void ui_draw_char(Ui *ui, int x, int y, unsigned int ch, int n);
 void ui_draw_char_vert(Ui *ui, int x, int y, unsigned int ch, int n);
 short ui_colors_max_get(Ui *ui);
+void ui_cursor_enable(Ui*, bool enable);
 
 UiWin *ui_window_new(Ui *ui, View *view);
 void ui_window_free(UiWin *win);
@@ -167,6 +170,7 @@ void ui_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int n,
 			      short fg, short bg, ui_text_style_t style);
 void ui_window_redraw(UiWin *win);
 void ui_window_refresh(UiWin *win);
+void ui_window_clear(UiWin *win);
 void ui_window_resize(UiWin *win, int width, int height);
 void ui_window_move(UiWin *win, int x, int y);
 void ui_window_title_set(UiWin *win, const char *title);
@@ -192,6 +196,8 @@ short ui_window_text_style_get(UiWin *win);
 void ui_window_on_view_update_set(UiWin *win, void (*cb)(UiWin *win));
 void ui_window_border_enable(UiWin *win, bool enable);
 bool ui_window_border_is_enabled(UiWin *win);
-void ui_cursor_enable(Ui*, bool enable);
-
+void ui_window_sidebar_width_set(UiWin *win, int width);
+int ui_window_sidebar_width_get(UiWin *win);
+void ui_window_sidebar_draw(UiWin *win, int x, int y, const char *text,
+			    short fg, short bg, ui_text_style_t style);
 #endif

@@ -30,6 +30,9 @@
 (define __cs_win_viewport_pos (foreign-procedure __collect_safe "cs_win_viewport_pos" (int char) scheme-object))
 (define __cs_win_viewport_coord (foreign-procedure __collect_safe "cs_win_viewport_coord" (int int) scheme-object))
 (define __cs_win_scroll (foreign-procedure __collect_safe "cs_win_scroll" (int char int) scheme-object))
+(define __cs_win_sidebar_set (foreign-procedure __collect_safe "cs_win_sidebar_set" (int int) void))
+(define __cs_win_sidebar_get (foreign-procedure __collect_safe "cs_win_sidebar_get" (int) scheme-object))
+(define __cs_win_sidebar_draw (foreign-procedure "cs_win_sidebar_draw" (int int int string int int int) scheme-object))
 
 (define window-first
    (lambda ()
@@ -580,5 +583,42 @@
 
       [(w n)
        (__cs_win_scroll w #\L n)]
+   )
+)
+
+(define window-set-sidebar-width
+   (case-lambda
+      [(l)
+       (window-set-sidebar-width (window-current) l)]
+
+      [(w l)
+       (__cs_win_sidebar_set w l)]
+   )
+)
+
+(define window-sidebar-width
+   (case-lambda
+      [()
+       (window-sidebar-width (window-current))]
+
+      [(w)
+       (__cs_win_sidebar_get w)]
+   )
+)
+
+(define window-draw-sidebar
+   (case-lambda
+      [(w x y t)
+       (window-draw-sidebar w x y t '(:fg "default" :bg "default" :attr "normal"))
+      ]
+
+      [(w x y t s)
+       (let ([l (style->list  s)])
+         (__cs_win_sidebar_draw w x y t
+                                (list-ref l 0)
+                                (list-ref l 1)
+                                (list-ref l 2))
+       )
+      ]
    )
 )
