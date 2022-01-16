@@ -249,3 +249,15 @@
      (bitwise-arithmetic-shift-left 1 n)
    )
 )
+
+(define count-digits-num
+   (lambda (n)
+      (let loop ([e 0])
+         (if (> (fx/ n (expt 10 e)) 0)
+            (loop (1+ e))
+            ;; else
+            e
+         )
+      )
+   )
+)
