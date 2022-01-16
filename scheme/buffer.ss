@@ -563,8 +563,15 @@
 )
 
 (define next-line-pos
-   (lambda ()
-      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\l 1)
+   (case-lambda
+      [()
+       (next-line-pos (buffer-current) (cursor))]
+
+      [(s)
+       (next-line-pos (buffer-current) s)]
+
+      [(b s)
+       (__cs_buf_text_obj_pos b s #\l 1)]
    )
 )
 
@@ -593,8 +600,15 @@
 )
 
 (define line-begin-pos
-   (lambda ()
-      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\0 -1)
+   (case-lambda
+      [()
+       (line-begin-pos (buffer-current) (cursor))]
+
+      [(s)
+       (line-begin-pos (buffer-current) s)]
+
+      [(b s)
+       (__cs_buf_text_obj_pos b s #\0 -1)]
    )
 )
 

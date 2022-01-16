@@ -28,6 +28,7 @@
 (define __cs_win_buf_switch (foreign-procedure __collect_safe "cs_win_buf_switch" (int int) void))
 (define __cs_win_prev_selected (foreign-procedure __collect_safe "cs_win_prev_selected" () scheme-object))
 (define __cs_win_viewport_pos (foreign-procedure __collect_safe "cs_win_viewport_pos" (int char) scheme-object))
+(define __cs_win_viewport_coord (foreign-procedure __collect_safe "cs_win_viewport_coord" (int int) scheme-object))
 (define __cs_win_scroll (foreign-procedure __collect_safe "cs_win_scroll" (int char int) scheme-object))
 
 (define window-first
@@ -483,6 +484,42 @@
 
       [(w)
        (__cs_win_viewport_pos w #\L)]
+   )
+)
+
+(define window-viewport-coord
+   (case-lambda
+      [(p)
+       (window-viewport-coord (window-current) p)]
+
+      [(w p)
+       (__cs_win_viewport_coord w p)]
+   )
+)
+
+(define window-viewport-lines-coord
+   (lambda (w)
+      (when (not (buffer-is-term? (window-buffer w)))
+         (let (
+               [b (window-buffer w)]
+              )
+               (let* (
+                      [start (window-viewport-begin w)]
+                      [end (line-begin-pos b (window-viewport-end w))]
+                      [coord (window-viewport-coord w start)]
+                      [lst '()]
+                     )
+                  (while (and (<= start end) (not (= start (buffer-end-pos))))
+                     (when coord
+                        (set! lst (append lst (list coord)))
+                     )
+                     (set! start (next-line-pos b start))
+                     (set! coord (window-viewport-coord w start))
+                  )
+		  lst
+               )
+         )
+      )
    )
 )
 

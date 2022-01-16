@@ -2330,6 +2330,22 @@ int win_viewport_pos(int wid, char type)
 	return -1;
 }
 
+int win_viewport_coord(int wid, int pos, int *l, int *x, int *y)
+{
+	Window *w = window_get_by_id(wid);
+	Line *line;
+
+	if (!w)
+		return -1;
+
+	if (view_coord_get(w->view, pos, &line, y, x)) {
+		*l = line->lineno;
+		return 0;
+	}
+
+	return -1;
+}
+
 int win_scroll(int wid, char type, int n)
 {
 	Window *w = window_get_by_id(wid);
