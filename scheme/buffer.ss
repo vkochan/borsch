@@ -153,7 +153,7 @@
    )
 )
 
-(define *buffer-enable-eof* #f)
+(define *buffer-enable-eof* #t)
 
 (define cursor
    (lambda ()
