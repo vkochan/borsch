@@ -118,7 +118,7 @@
 
 (define buffer-set-mode
    (lambda (n)
-      (__cs_buf_mode_set (buffer-current) n)
+      (__cs_buf_mode_set (buffer-current) (format "(~a)" n))
    )
 )
 

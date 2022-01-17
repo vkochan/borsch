@@ -97,6 +97,7 @@
               [b (window-buffer w)]
              )
           (buffer-set-keymap 'term-mode-map)
+          (buffer-set-mode "Term")
           (run-hooks 'window-create-hook w)
           w
        )

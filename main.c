@@ -632,7 +632,7 @@ static void draw_title(Window *c) {
 		tmp[maxlen] = '\0';
 	}
 
-	len = snprintf(title, sizeof(title), "%s(%s)   [%d|%s%s]",
+	len = snprintf(title, sizeof(title), "%s%s   [%d|%s%s]",
 			buffer_is_modified(c->buf) ? "[+] " : "",
 			buffer_mode_get(c->buf),
 			c->order,
@@ -1385,7 +1385,6 @@ int create(const char *prog, const char *title, const char *cwd) {
 		free(c);
 		return -1;
 	}
-	buffer_mode_set(c->buf, "Term");
 
 	c->view = view_new(buffer_text_get(c->buf));
 	if (!c->view) {

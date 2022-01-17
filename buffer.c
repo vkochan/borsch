@@ -127,8 +127,6 @@ Buffer *buffer_new(const char *name)
 		snprintf(buf->name, sizeof(buf->name), "new%d", buf->buf_id);
 	}
 
-	strncpy(buf->mode, "none", sizeof(buf->mode));
-
 	buf->curr_style = UI_TEXT_STYLE_NORMAL;
 	buf->curr_fg = UI_TEXT_COLOR_DEFAULT;
 	buf->curr_bg = UI_TEXT_COLOR_DEFAULT;
