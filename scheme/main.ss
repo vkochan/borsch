@@ -6,6 +6,7 @@
 (load "view.ss")
 (load "window.ss")
 (load "buffer.ss")
+(load "prompt.ss")
 (load "mode/term.ss")
 (load "mode/text.ss")
 (load "mode/dirb.ss")
