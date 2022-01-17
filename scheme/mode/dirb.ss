@@ -1,29 +1,39 @@
+(define dirb-get-dir
+   (lambda (dir)
+      (let (
+            [trail-sep? (eq? (string-length (path-last dir)) 0)]
+           )
+         (if trail-sep?
+            (path-parent dir)
+            ;; else
+            dir
+         )
+      )
+   )
+)
+
 (define dirb-open-dir
    (lambda (cwd)
       (let (
-            [trail-sep? (eq? (string-length (path-last cwd)) 0)]
+            [dir (dirb-get-dir cwd)]
             [dl '()]
             [fl '()]
            )
-         (if trail-sep?
-            (set-local! current-cwd (path-parent cwd))
-            ;; else
-            (set-local! current-cwd cwd)
-         )
-         (buffer-set-name cwd)
+         (set-local! current-cwd dir)
+         (buffer-set-name dir)
 	 (erase-buffer)
          (for-each
             (lambda (e)
                (when (not (and (equal? (string-ref e 0) #\.)
                                (not (get-local show-hidden))))
-                  (if (file-directory? (fmt "~a/~a" cwd e))
+                  (if (file-directory? (fmt "~a/~a" dir e))
                      (set! dl (append dl (list e)))
                   )
-                  (if (file-regular? (fmt "~a/~a" cwd e))
+                  (if (file-regular? (fmt "~a/~a" dir e))
                      (set! fl (append fl (list e)))
                   )
               )
-            ) (directory-list cwd)
+            ) (directory-list dir)
          )
          (for-each
             (lambda (d)
