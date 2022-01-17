@@ -130,6 +130,46 @@
     )
 )
 
+(define dirb-scroll-halfpage-up
+  (lambda ()
+    (highlight-clear)
+    (cursor-set (window-scroll-halfpage-up))
+    (highlight-range
+       (line-begin-pos)
+       (line-end-pos))
+  )
+)
+
+(define dirb-scroll-halfpage-down
+  (lambda ()
+    (highlight-clear)
+    (cursor-set (window-scroll-halfpage-down))
+    (highlight-range
+       (line-begin-pos)
+       (line-end-pos))
+  )
+)
+
+(define dirb-scroll-page-down
+  (lambda ()
+    (highlight-clear)
+    (cursor-set (window-scroll-page-down))
+    (highlight-range
+       (line-begin-pos)
+       (line-end-pos))
+  )
+)
+
+(define dirb-scroll-page-up
+  (lambda ()
+    (highlight-clear)
+    (cursor-set (window-scroll-page-up))
+    (highlight-range
+       (line-begin-pos)
+       (line-end-pos))
+  )
+)
+
 (define dirb-show-hidden
    (lambda ()
       (set-local! show-hidden
@@ -146,6 +186,10 @@
       (bind-key map "k" dirb-move-line-up)
       (bind-key map "l" dirb-open-entry)
       (bind-key map "g g" dirb-move-begin)
+      (bind-key map "C-u" dirb-scroll-halfpage-up)
+      (bind-key map "C-d" dirb-scroll-halfpage-down)
+      (bind-key map "C-f" dirb-scroll-page-down)
+      (bind-key map "C-b" dirb-scroll-page-up)
       (bind-key map "G" dirb-move-end)
       (bind-key map "." dirb-show-hidden)
       map
