@@ -669,10 +669,11 @@ void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, voi
 	int exp = 0;
 
 	if (start != EPOS && end != EPOS) {
-		if (buf->min_prop && end < buf->min_prop->start)
-			return;
-		if (buf->max_prop && start > buf->max_prop->end)
-			return;
+		/* TODO: this does not work */
+		/* if (buf->min_prop && end < buf->min_prop->start) */
+		/* 	return; */
+		/* if (buf->max_prop && start > buf->max_prop->end) */
+		/* 	return; */
 		exp++;
 	}
 	if (type)
