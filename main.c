@@ -3548,6 +3548,7 @@ int buf_prop_style_add(int bid, int type, int fg, int bg, int attr,  int start, 
 		return err;
 	}
 
+	buffer_dirty_set(buf, true);
 	return 0;
 }
 
@@ -3557,6 +3558,7 @@ void buf_prop_del(int bid, int type, int start, int end)
 
 	buffer_property_remove(buf, type, start == -1 ? EPOS : start,
 			end == -1 ? EPOS : end);
+	buffer_dirty_set(buf, true);
 }
 
 /* void buf_prop_walk(int bid, int type, int start, int end, void *arg, */

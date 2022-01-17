@@ -331,6 +331,12 @@
    )
 )
 
+(define clear-text-style
+   (lambda (s e)
+      (__cs_buf_prop_del (buffer-current) 1 s e)
+   )
+)
+
 (define highlight-range
    (lambda (s e)
       (__cs_buf_prop_style_add (buffer-current) 2 -1 -1 -1 s e)
