@@ -2806,7 +2806,7 @@ void win_size_set(int wid, int width, int height)
 			ui_window_width_set(w->win, width);
 		if (height > 0)
 			ui_window_height_set(w->win, height);
-		draw(w);
+		redraw(NULL);
 	}
 }
 
