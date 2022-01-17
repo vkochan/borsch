@@ -184,6 +184,13 @@
    )
 )
 
+(define dirb-set-cwd
+   (lambda ()
+      (view-set-cwd (get-local current-cwd))
+      (dirb-open-dir (view-cwd))
+   )
+)
+
 (define dirb-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" dirb-open-entry)
@@ -199,6 +206,7 @@
       (bind-key map "G" dirb-move-end)
       (bind-key map "." dirb-show-hidden)
       (bind-key map "w" dirb-goto-cwd)
+      (bind-key map "W" dirb-set-cwd)
       map
    )
 )
