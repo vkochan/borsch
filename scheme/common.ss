@@ -98,9 +98,9 @@
    )
 )
 
-(define eval-port->str
-   (lambda (p)
-      (let ([e (eval (read p))])
+(define eval->str
+   (lambda (s)
+      (let ([e (eval s)])
          (if (and (not (equal? e #!eof))
                   (not (equal? e (void)))
 		  )
@@ -125,6 +125,12 @@
             ""
          )
       )
+   )
+)
+
+(define eval-port->str
+   (lambda (p)
+      (eval->str (read p))
    )
 )
 
