@@ -188,6 +188,12 @@
    )
 )
 
+(define dirb-goto-home
+   (lambda ()
+      (dirb-open-dir "~")
+   )
+)
+
 (define dirb-goto-cwd
    (lambda ()
       (dirb-open-dir (view-cwd))
@@ -215,6 +221,7 @@
       (bind-key map "C-b" dirb-scroll-page-up)
       (bind-key map "G" dirb-move-end)
       (bind-key map "." dirb-show-hidden)
+      (bind-key map "~" dirb-goto-home)
       (bind-key map "w" dirb-goto-cwd)
       (bind-key map "W" dirb-set-cwd)
       map
