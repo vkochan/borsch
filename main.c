@@ -608,6 +608,9 @@ static void draw_title(Window *c) {
 	char tmp[256];
 	size_t len;
 
+	if (!ui_window_has_title(c->win))
+		return;
+
 	if (sel == c || (pertag.runinall[pertag.curtag] && !c->minimized)) {
 		title_fg = UI_TEXT_COLOR_BLACK;
 		title_bg = UI_TEXT_COLOR_WHITE;
@@ -873,7 +876,7 @@ focus(Window *c) {
 
 		if (buffer_term_get(c->buf) && buffer_ref_count(c->buf) > 2) {
 			vt_resize(buffer_term_get(c->buf),
-					ui_window_height_get(c->win) - 1,
+					ui_window_height_get(c->win) - ui_window_has_title(c->win),
 					ui_window_width_get(c->win));
 		}
 
@@ -928,7 +931,7 @@ resize_window(Window *c, int w, int h) {
 			w-=-2;
 			h--;
 		}
-		vt_resize(buffer_term_get(c->buf), h - 1, w);
+		vt_resize(buffer_term_get(c->buf), h - ui_window_has_title(c->win), w);
 	}
 }
 
@@ -1409,6 +1412,8 @@ int create(const char *prog, const char *title, const char *cwd) {
 		free(c);
 		return -1;
 	}
+
+	ui_window_has_title_set(c->win, true);
 	ui_window_ops_draw_set(c->win, vt_draw);
 	ui_window_priv_set(c->win, term);
 	buffer_term_set(c->buf, term);
@@ -2510,6 +2515,7 @@ int win_new(int bid)
 		ui_window_on_view_update_set(c->win, on_view_update_cb);
 	}
 
+	ui_window_has_title_set(c->win, true);
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
 

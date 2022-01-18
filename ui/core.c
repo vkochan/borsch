@@ -194,7 +194,7 @@ void ui_window_resize(UiWin *win, int width, int height)
 			win->width = width;
 
 		view_resize(win->view, win->width - win->sidebar_width - (border*2),
-				       win->height - border-1);
+				       win->height - (border + win->has_title));
 
 		if (win->resize)
 			win->resize(win, win->width, win->height);
@@ -397,4 +397,14 @@ void ui_window_sidebar_draw(UiWin *win, int x, int y, const char *text,
 	if (win->ui->window_draw_text_attr)
 		win->ui->window_draw_text_attr(win, x+skip_x, y+skip_y, text,
 				strlen(text), fg, bg, style);
+}
+
+void ui_window_has_title_set(UiWin *win, bool has_title)
+{
+	win->has_title = has_title;
+}
+
+bool ui_window_has_title(UiWin *win)
+{
+	return win->has_title;
 }
