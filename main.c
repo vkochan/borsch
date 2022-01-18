@@ -64,7 +64,7 @@ static int scr_history = SCROLL_HISTORY;
 
 typedef struct {
 	const char *symbol;
-	void (*arrange)(void);
+	void (*arrange)(unsigned int, unsigned int, unsigned int, unsigned int);
 } Layout;
 
 typedef struct Window Window;
@@ -725,7 +725,7 @@ arrange(void) {
 			dh = 1;
 	}
 	wah -= dh;
-	layout->arrange();
+	layout->arrange(wax, way, waw, wah);
 	if (m && !isarrange(fullscreen)) {
 		unsigned int i = 0, nw = waw / m, nx = wax;
 		for (Window *c = nextvisible(windows); c; c = nextvisible(c->next)) {

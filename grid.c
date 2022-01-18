@@ -1,4 +1,4 @@
-static void grid(void)
+static void grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
 {
 	unsigned int lax = wax, lay = way-1, law = waw, lah = wah;
 	unsigned int i, n, nx, ny, nw, nh, aw, ah, cols, rows;
