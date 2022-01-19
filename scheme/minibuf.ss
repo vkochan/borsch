@@ -54,7 +54,7 @@
    )
 )
 
-(define minibuf-map
+(define minibuf-prompt-map
    (let ([map (make-empty-keymap)])
       (bind-key map "<Backspace>" minibuf-delete-prev-char)
       (bind-key map "<Enter>" minibuf-send-value)
@@ -73,7 +73,6 @@
          (set! minibuf-window m)
 
          (with-buffer minibuf-buffer
-            (buffer-set-keymap 'minibuf-map)
             (define-local input-mode #f)
             (define-local func-value #f)
             (define-local prompt-pos 0)
@@ -136,6 +135,7 @@
             (set-local! input-mode #t)
             (set-local! func-value fn)
             (set-local! orig-buf b)
+            (buffer-set-keymap 'minibuf-prompt-map)
          )
          (window-select minibuf-window)
       )
