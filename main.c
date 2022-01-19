@@ -225,6 +225,8 @@ static KeyMap *win_min_kmap;
 static KeyMap *global_kmap;
 static KeyMap *curr_kmap;
 
+static Window *minibuf;
+
 /* valid curses attributes are listed below they can be ORed
  *
  * A_NORMAL        Normal display (no highlight)
@@ -487,11 +489,16 @@ void *set_popup(Window *p)
 }
 
 static void
-updatebarpos(void) {
+update_screen_size(void) {
+	int dec_h = 0;
 	bar.y = 0;
 	wax = 0;
 	way = 0;
-	wah = ui_height_get(ui);
+
+	if (minibuf)
+		dec_h = ui_window_height_get(minibuf->win);
+
+	wah = ui_height_get(ui)-dec_h;
 	waw = ui_width_get(ui);
 	if (bar.pos == BAR_TOP) {
 		wah -= bar.h;
@@ -500,6 +507,9 @@ updatebarpos(void) {
 		wah -= bar.h;
 		bar.y = wah;
 	}
+
+	if (minibuf)
+		ui_window_move(minibuf->win, 0, ui_height_get(ui)-1);
 }
 
 static void
@@ -652,7 +662,7 @@ static void buf_update(Window *w);
 
 static void
 draw(Window *c) {
-	if (is_content_visible(c) || c == get_popup()) {
+	if (is_content_visible(c) || c == get_popup() || c == minibuf) {
 		event_t evt;
 
 		/* we assume that it will be set on EVT_WIN_DRAW */
@@ -672,11 +682,15 @@ draw(Window *c) {
 	}
 	if (!isarrange(fullscreen) || c == sel)
 		draw_title(c);
+
 	ui_window_refresh(c->win);
 }
 
 static void
 draw_all(void) {
+	if (minibuf)
+		draw(minibuf);
+
 	if (!nextvisible(windows)) {
 		sel = NULL;
 		ui_cursor_enable(ui, false);
@@ -692,6 +706,7 @@ draw_all(void) {
 				draw(c);
 		}
 	}
+
 	/* as a last step the selected window is redrawn,
 	 * this has the effect that the cursor position is
 	 * accurate
@@ -716,7 +731,7 @@ arrange(void) {
 			hidebar();
 		else
 			showbar();
-		updatebarpos();
+		update_screen_size();
 	}
 	if (m && !isarrange(fullscreen)) {
 		if (min_align == MIN_ALIGN_VERT)
@@ -1035,7 +1050,7 @@ setpertag(void) {
 	layout = pertag.layout[pertag.curtag];
 	if (bar.pos != pertag.barpos[pertag.curtag]) {
 		bar.pos = pertag.barpos[pertag.curtag];
-		updatebarpos();
+		update_screen_size();
 	}
 	bar.lastpos = pertag.barlastpos[pertag.curtag];
 	runinall = pertag.runinall[pertag.curtag];
@@ -1207,7 +1222,7 @@ setup(void) {
 		colors[i].pair = ui_color_make(ui, colors[i].fg, colors[i].bg);
 	}
 	initpertag();
-	updatebarpos();
+	update_screen_size();
 	arrange();
 	struct sigaction sa;
 	memset(&sa, 0, sizeof sa);
@@ -1557,7 +1572,7 @@ redraw(const char *args[]) {
 		}
 	}
 	ui_redraw(ui);
-	updatebarpos();
+	update_screen_size();
 	arrange();
 }
 
@@ -1624,7 +1639,7 @@ togglebarpos(const char *args[]) {
 		bar.pos = pertag.barpos[pertag.curtag] = BAR_TOP;
 		break;
 	}
-	updatebarpos();
+	update_screen_size();
 	redraw(NULL);
 }
 
@@ -2003,7 +2018,7 @@ main(int argc, char *argv[]) {
 		fd_set rd;
 
 		ui_resize(ui);
-		updatebarpos();
+		update_screen_size();
 
 		FD_ZERO(&rd);
 		FD_SET(STDIN_FILENO, &rd);
@@ -2111,6 +2126,9 @@ reenter:
 		if (bar.fd != -1 && FD_ISSET(bar.fd, &rd))
 			handle_statusbar();
 
+		if (minibuf)
+			draw(minibuf);
+
 		for (Window *c = windows; c; c = c->next) {
 			pid_t pid = buffer_pid_get(c->buf);
 			Vt *term = buffer_term_get(c->buf);
@@ -2161,6 +2179,8 @@ static Window *window_get_by_id(int id)
 
 	if (get_popup() && get_popup()->id == id)
 		return get_popup();
+	else if (minibuf && minibuf->id == id)
+		return minibuf;
 
 	return NULL;
 }
@@ -3019,7 +3039,7 @@ static void buf_update(Window *w)
 
 		view_invalidate(view);
 
-		if (w == sel) {
+		if (w == sel || w == minibuf) {
 			void (*scroll_fn)(View *, size_t) = view_scroll_to;
 			Filerange r = view_viewport_get(view);
 			Text *text = buffer_text_get(buf);
@@ -3045,7 +3065,8 @@ static void buf_update(Window *w)
 			scroll_fn(view, pos);
 
 			if (view_coord_get(view, pos, NULL, &y, &x)) {
-				ui_window_cursor_set(win, x, y);
+				if (w == sel)
+					ui_window_cursor_set(win, x, y);
 			}
 
 			/* TODO: better to make buffer to know about it's
@@ -3064,6 +3085,8 @@ static void buf_list_update(void)
 	}
 	if (get_popup())
 		buf_update(get_popup());
+	if (minibuf)
+		buf_update(minibuf);
 }
 
 size_t buf_text_insert(int bid, const char *text)
@@ -3622,6 +3645,65 @@ void buf_redo(int bid)
 	}
 }
 
+int minibuf_create(void)
+{
+	KeyMap *kmap;
+	Window *w;
+
+	if (minibuf)
+		return minibuf->id;
+
+	w = calloc(1, sizeof(Window));
+	if (!w)
+		return -1;
+
+	/* c->tags = tagset[seltags]; */
+	w->id = ++cmdfifo.id;
+
+	w->buf = buffer_new("*minibuf*");
+	if (!w->buf) {
+		free(w);
+		return -1;
+	}
+
+	kmap = keymap_new(global_kmap);
+	if (!kmap) {
+		buffer_del(w->buf);
+		free(w);
+		return -1;
+	}
+
+	w->view = view_new(buffer_text_get(w->buf));
+	if (!w->view) {
+		keymap_free(kmap);
+		buffer_del(w->buf);
+		free(w);
+		return -1;
+	}
+
+	w->win = ui_window_new(ui, w->view);
+	if (!w->win) {
+		view_free(w->view);
+		keymap_free(kmap);
+		buffer_del(w->buf);
+		free(w);
+		return -1;
+	}
+
+	buffer_env_set(w->buf, scheme_env_alloc());
+	buffer_ref_get(w->buf);
+
+	ui_window_on_view_update_set(w->win, on_view_update_cb);
+	ui_window_resize(w->win, waw, 1);
+	ui_window_priv_set(w->win, w);
+	ui_window_move(w->win, 0, ui_height_get(ui)-1);
+	ui_window_draw(w->win);
+
+	minibuf = w;
+	update_screen_size();
+	return w->id;
+}
+
 int term_create(char *prog, char *title)
 {
 	if (!get_popup())
@@ -3902,7 +3984,7 @@ int tagbar_show(bool show)
 		showbar();
 
 	bar.autohide = false;
-	updatebarpos();
+	update_screen_size();
 	redraw(NULL);
 	return 0;
 }

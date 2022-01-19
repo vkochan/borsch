@@ -280,10 +280,12 @@
 	   )
 
          (while buf
-            (set! lst (append lst (list
-                                    (list buf (buffer-name buf))
-				  )
-            )         )
+            (when (not (equal? (buffer-name buf) "*minibuf*"))
+               (set! lst (append lst (list
+                                        (list buf (buffer-name buf))
+				     )
+               )         )
+            )
             (set! buf (buffer-next buf))
          )
 
@@ -1303,6 +1305,7 @@
                (insert (format "~a\n" s))
             )
          )
+         (run-hooks 'on-message-hook s)
       )
    )
 )

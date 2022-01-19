@@ -7,6 +7,7 @@
 (load "window.ss")
 (load "buffer.ss")
 (load "prompt.ss")
+(load "minibuf.ss")
 (load "mode/term.ss")
 (load "mode/text.ss")
 (load "mode/dirb.ss")
@@ -74,11 +75,7 @@
    )
 )
 
-(let ([m (buffer-new "*Messages*")])
-   (with-buffer m
-      (text-mode)
-   )
-)
+(minibuf-create)
 
 (define __on-event-handler
    (lambda (ev wid)
@@ -97,6 +94,12 @@
              (run-hooks h wid)
           )
        )
+   )
+)
+
+(let ([m (buffer-new "*Messages*")])
+   (with-buffer m
+      (text-mode)
    )
 )
 

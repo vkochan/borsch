@@ -117,6 +117,8 @@ void buf_snapshot(int bid);
 void buf_undo(int bid);
 void buf_redo(int bid);
 
+int minibuf_create(void);
+
 int term_create(char *prog, char *title);
 int term_keys_send(int bid, char *keys);
 int term_text_send(int bid, char *text);

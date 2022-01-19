@@ -605,6 +605,14 @@ void scheme_buf_redo(int bid)
 	buf_redo(bid);
 }
 
+ptr scheme_minibuf_create(void)
+{
+	int ret = minibuf_create();
+	if (ret > 0)
+		return Sinteger(ret);
+	return Sfalse;
+}
+
 ptr scheme_term_create(char *prog, char *title)
 {
 	int ret = term_create(prog, title);
@@ -838,6 +846,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_snapshot", scheme_buf_snapshot);
 	Sregister_symbol("cs_buf_undo", scheme_buf_undo);
 	Sregister_symbol("cs_buf_redo", scheme_buf_redo);
+	Sregister_symbol("cs_minibuf_create", scheme_minibuf_create);
 
 	Sregister_symbol("cs_term_create", scheme_term_create);
 	Sregister_symbol("cs_term_keys_send", scheme_term_keys_send);
