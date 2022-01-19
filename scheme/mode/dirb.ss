@@ -244,6 +244,21 @@
    )
 )
 
+(define dirb-enter-new-dir
+   (lambda (b f)
+      (with-buffer b
+         (mkdir (string-append (get-local current-cwd) "/" f))
+         (dirb-open-dir (get-local current-cwd))
+      )
+   )
+)
+
+(define dirb-create-new-dir
+   (lambda ()
+      (minibuf-read "new dir:" dirb-enter-new-dir)
+   )
+)
+
 (define dirb-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" dirb-open-entry)
@@ -264,6 +279,7 @@
       (bind-key map "w" dirb-goto-cwd)
       (bind-key map "W" dirb-set-cwd)
       (bind-key map "n f" dirb-create-new-file)
+      (bind-key map "n d" dirb-create-new-dir)
       map
    )
 )
