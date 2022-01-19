@@ -259,6 +259,28 @@
    )
 )
 
+(define dirb-delete-answer
+   (lambda (b v)
+      (let*(
+            [e (extract-line-inner)]
+            [p (string-append (get-local current-cwd) "/" e)]
+           )
+         (with-buffer b
+            (when (eq? v 'yes)
+               (rm-rf p)
+               (dirb-open-dir (get-local current-cwd))
+            )
+         )
+      )
+   )
+)
+
+(define dirb-delete-entry
+   (lambda ()
+      (minibuf-ask "Delete entry(s) ?" dirb-delete-answer)
+   )
+)
+
 (define dirb-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" dirb-open-entry)
@@ -280,6 +302,7 @@
       (bind-key map "W" dirb-set-cwd)
       (bind-key map "n f" dirb-create-new-file)
       (bind-key map "n d" dirb-create-new-dir)
+      (bind-key map "d" dirb-delete-entry)
       map
    )
 )
