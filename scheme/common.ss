@@ -3,6 +3,101 @@
 (define do-quit __cs_do_quit)
 
 ;; Misc helpers
+(define is-dir? file-directory?)
+(define is-file? file-regular?)
+(define is-link? file-symbolic-link?)
+(define (is-file-or-link? p) (or (is-link? p) (is-file? p))) 
+
+(define suffix+
+   (lambda (str sfx)
+      (cond
+         ([list? str]
+          (map
+             (lambda (x)
+	        (string-append x sfx)
+             ) str
+          )
+         )
+         (else (string-append str sfx))
+      )
+   )
+)
+
+(define prefix+
+   (lambda (str pfx)
+      (cond
+         ([list? str]
+          (map
+             (lambda (x)
+	        (string-append pfx x)
+             ) str
+          )
+         )
+         (else (string-append pfx str))
+      )
+   )
+)
+
+(define path+
+   (lambda (p x)
+      (suffix+ p (prefix+ x "/"))
+   )
+)
+
+(define path-parent+
+   (lambda (p x)
+      (prefix+ p (suffix+ x "/"))
+   )
+)
+
+(define rm
+   (lambda (f)
+      (if (is-dir? f)
+         (delete-directory f)
+         ;; else
+         (delete-file f)
+      )
+   )
+)
+
+(define path->file-list
+   (lambda (p)
+      (cond
+         ((is-dir? p) (directory-list p))
+         ((is-file-or-link? p) (list p))
+         (else '())
+      )
+   )
+)
+
+(define rm-rf
+   (lambda (p)
+      (letrec ([rm-recur 
+	       (lambda (p)
+                  (let ([lst (path-parent+ (path->file-list p) p)])
+		     (for-each
+                        (lambda (f)
+                           (if (is-file-or-link? f)
+                              (rm f)
+                              ;; else
+                              (if (is-dir? f)
+                                 (begin
+                                    (rm-recur f)
+                                    (rm f)
+                                 )
+                              )
+                           )
+                         ) lst
+                      )
+		   )
+		   (rm p)
+		 )
+	       ])
+          (rm-recur p)
+       )
+    )
+)
+
 (define file>
    (lambda (file str)
       (let ([p (open-output-file file 'truncate)])
