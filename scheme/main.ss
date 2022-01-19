@@ -12,9 +12,6 @@
 (load "mode/text.ss")
 (load "mode/dirb.ss")
 
-;; FFI
-(define __cs_do_quit (foreign-procedure "cs_do_quit" () void))
-
 (define reg "")
 (define reg-is-linewise #f)
 
@@ -66,8 +63,6 @@
       (move-prev-char)
    )
 )
-
-(define do-quit __cs_do_quit)
 
 (define open-repl
    (lambda ()

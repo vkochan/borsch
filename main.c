@@ -432,6 +432,8 @@ is_content_visible(Window *c) {
 		return false;
 	if (isarrange(fullscreen))
 		return sel == c;
+	else if (c == minibuf)
+		return true;
 	return isvisible(c) && !c->minimized;
 }
 
@@ -618,8 +620,13 @@ static void draw_title(Window *c) {
 	char tmp[256];
 	size_t len;
 
-	if (!ui_window_has_title(c->win))
+	if (!ui_window_has_title(c->win)) {
+		/* HACK for the minibuf which does not has the title so it will be
+		 * skipped */
+		ui_window_cursor_get(c->win, &x, &y);
+		ui_window_cursor_set(c->win, x, y);
 		return;
+	}
 
 	if (sel == c || (pertag.runinall[pertag.curtag] && !c->minimized)) {
 		title_fg = UI_TEXT_COLOR_BLACK;
@@ -662,7 +669,7 @@ static void buf_update(Window *w);
 
 static void
 draw(Window *c) {
-	if (is_content_visible(c) || c == get_popup() || c == minibuf) {
+	if (is_content_visible(c) || c == get_popup()) {
 		event_t evt;
 
 		/* we assume that it will be set on EVT_WIN_DRAW */
@@ -1493,6 +1500,9 @@ __focusid(int win_id) {
 			return;
 		}
 	}
+
+	if (minibuf && minibuf->id == win_id)
+		focus(minibuf);
 }
 
 static void
@@ -2201,7 +2211,7 @@ bool win_is_visible(int wid)
 	Window *c = window_get_by_id(wid);
 
 	if (c)
-		return isvisible(c);
+		return isvisible(c) || c == minibuf;
 
 	return false;
 }
@@ -3104,6 +3114,9 @@ size_t buf_text_insert(int bid, const char *text)
 
 	if (buf) {
 		pos = buffer_text_insert(buf, buffer_cursor_get(buf), text);
+		if (minibuf) {
+			draw(minibuf);
+		}
 	}
 
 	return pos;
@@ -3674,7 +3687,7 @@ int minibuf_create(void)
 		return -1;
 	}
 
-	kmap = keymap_new(global_kmap);
+	kmap = keymap_new(NULL);
 	if (!kmap) {
 		buffer_del(w->buf);
 		free(w);

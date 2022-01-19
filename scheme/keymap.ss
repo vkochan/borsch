@@ -41,6 +41,12 @@
    )
 )
 
+(define make-empty-keymap
+   (lambda ()
+     (__cs_kmap_add "")
+   )
+)
+
 (define make-keymap
    (case-lambda
       [()
