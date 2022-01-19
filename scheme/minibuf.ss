@@ -186,6 +186,6 @@
       (with-buffer minibuf-buffer
          (enable-insert #f)
       )
-      (minibuf-interactive-func 'minibuf-ask-map str fn)
+      (minibuf-interactive-func 'minibuf-ask-map (format "~a y/n" str) fn)
    )
 )
