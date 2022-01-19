@@ -5,6 +5,7 @@
 
 typedef enum {
 	EVT_WIN_DRAW     = 1,
+	EVT_KEY_PRESS    = 100,
 } event_id_t;
 
 typedef enum {

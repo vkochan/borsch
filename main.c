@@ -2053,6 +2053,7 @@ main(int argc, char *argv[]) {
 
 		if (FD_ISSET(STDIN_FILENO, &rd)) {
 			int alt_code;
+			event_t evt;
 			int code;
 
 			if (sel && !sel->minimized) {
@@ -2062,6 +2063,10 @@ main(int argc, char *argv[]) {
 			};
 reenter:
 			code = getch();
+
+			evt.eid = EVT_KEY_PRESS;
+			evt.oid = code;
+			scheme_event_handle(evt);
 
 			if (code == ALT) {
 				nodelay(stdscr, TRUE);

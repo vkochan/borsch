@@ -85,7 +85,8 @@
        (define __evt->symb
 	  (lambda (ev)
 	     (case ev
-		[1  'window-draw-hook   ]
+		[1    'window-draw-hook ]
+		[100  'key-press-hook   ]
 		[else #f]
              )
           )
