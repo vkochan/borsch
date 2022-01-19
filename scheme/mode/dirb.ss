@@ -1,4 +1,4 @@
-(define dirb-get-dir
+(define dirb-get-entry
    (lambda (dir)
       (let (
             [trail-sep? (eq? (string-length (path-last dir)) 0)]
@@ -15,7 +15,7 @@
 (define dirb-open-dir
    (lambda (cwd)
       (let (
-            [dir (dirb-get-dir cwd)]
+            [dir (dirb-get-entry cwd)]
             [dl '()]
             [fl '()]
            )
@@ -61,6 +61,7 @@
           (with-buffer b
              (define-local current-cwd cwd)
              (define-local show-hidden #f)
+             (define-local defval #f)
              (buffer-set-keymap 'dirb-map)
              (dirb-open-dir cwd)
           )
@@ -281,6 +282,27 @@
    )
 )
 
+(define dirb-enter-rename-entry
+   (lambda (b v)
+      (let (
+            [old (string-append (get-local current-cwd) "/" (get-local defval))]
+            [new (string-append (get-local current-cwd) "/" v)]
+           )
+         (rename-file old new)
+         (dirb-open-dir (get-local current-cwd))
+      )
+   )
+)
+
+(define dirb-rename-entry
+   (lambda ()
+      (let ([entry (dirb-get-entry (extract-line-inner))])
+         (set-local! defval entry)
+         (minibuf-read "rename:" entry dirb-enter-rename-entry)
+      )
+   )
+)
+
 (define dirb-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" dirb-open-entry)
@@ -303,6 +325,7 @@
       (bind-key map "n f" dirb-create-new-file)
       (bind-key map "n d" dirb-create-new-dir)
       (bind-key map "d" dirb-delete-entry)
+      (bind-key map "r" dirb-rename-entry)
       map
    )
 )
