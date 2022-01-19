@@ -154,7 +154,7 @@
 )
 
 (define minibuf-interactive-func
-   (lambda (map str fn)
+   (lambda (map str def fn)
       (let (
             [b (buffer-current)]
            )
@@ -166,6 +166,9 @@
             (set-local! func-value fn)
             (set-local! orig-buf b)
             (buffer-set-keymap map)
+            (when def
+               (insert def)
+            )
          )
          (window-select minibuf-window)
       )
@@ -173,11 +176,17 @@
 )
 
 (define minibuf-read
-   (lambda (str fn)
-      (with-buffer minibuf-buffer
-         (enable-insert #t)
-      )
-      (minibuf-interactive-func 'minibuf-prompt-map str fn)
+   (case-lambda
+      [(str fn)
+       (minibuf-read str #f fn)
+      ]
+
+      [(str def fn)
+       (with-buffer minibuf-buffer
+          (enable-insert #t)
+       )
+       (minibuf-interactive-func 'minibuf-prompt-map str def fn)
+      ]
    )
 )
 
@@ -186,6 +195,6 @@
       (with-buffer minibuf-buffer
          (enable-insert #f)
       )
-      (minibuf-interactive-func 'minibuf-ask-map (format "~a y/n" str) fn)
+      (minibuf-interactive-func 'minibuf-ask-map (format "~a y/n" str) #f fn)
    )
 )
