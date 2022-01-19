@@ -13,9 +13,8 @@
 )
 
 (define minibuf-send-value
-   (lambda ()
+   (lambda (v)
       (let (
-            [s  (buffer-string (get-local prompt-pos) (buffer-end-pos))]
             [fn (get-local func-value)]
             [b  (get-local orig-buf)]
            )
@@ -23,12 +22,22 @@
          (enable-insert #f)
          (erase-buffer)
          (window-select (window-prev-selected))
-         (fn b s)
+         (fn b v)
       )
    )
 )
 
-(define minibuf-delete-prev-char
+(define minibuf-prompt-send-value
+   (lambda ()
+      (let (
+            [s  (buffer-string (get-local prompt-pos) (buffer-end-pos))]
+           )
+         (minibuf-send-value s)
+      )
+   )
+)
+
+(define minibuf-prompt-delete-prev-char
    (lambda ()
       (let ([p (get-local prompt-pos)])
          (when (> (cursor) p)
@@ -38,7 +47,7 @@
    )
 )
 
-(define minibuf-move-prev-char
+(define minibuf-prompt-move-prev-char
    (lambda ()
       (let ([p (get-local prompt-pos)])
          (when (> (cursor) p)
@@ -48,7 +57,7 @@
    )
 )
 
-(define minibuf-move-next-char
+(define minibuf-prompt-move-next-char
    (lambda ()
       (move-next-char)
    )
@@ -56,11 +65,33 @@
 
 (define minibuf-prompt-map
    (let ([map (make-empty-keymap)])
-      (bind-key map "<Backspace>" minibuf-delete-prev-char)
-      (bind-key map "<Enter>" minibuf-send-value)
+      (bind-key map "<Backspace>" minibuf-prompt-delete-prev-char)
+      (bind-key map "<Enter>" minibuf-prompt-send-value)
       (bind-key map "<Esc>" minibuf-cancel-read)
-      (bind-key map "C-h" minibuf-move-prev-char)
-      (bind-key map "C-l" minibuf-move-next-char)
+      (bind-key map "C-h" minibuf-prompt-move-prev-char)
+      (bind-key map "C-l" minibuf-prompt-move-next-char)
+      (bind-key map "C-g q q" do-quit)
+      map
+   )
+)
+
+(define minibuf-answer-yes
+   (lambda ()
+      (minibuf-send-value 'yes)
+   )
+)
+
+(define minibuf-answer-no
+   (lambda ()
+      (minibuf-send-value 'no)
+   )
+)
+
+(define minibuf-ask-map
+   (let ([map (make-empty-keymap)])
+      (bind-key map "<Esc>" minibuf-cancel-read)
+      (bind-key map "y" minibuf-answer-yes)
+      (bind-key map "n" minibuf-answer-no)
       (bind-key map "C-g q q" do-quit)
       map
    )
@@ -122,8 +153,8 @@
    )
 )
 
-(define minibuf-read
-   (lambda (str fn)
+(define minibuf-interactive-func
+   (lambda (map str fn)
       (let (
             [b (buffer-current)]
            )
@@ -135,9 +166,21 @@
             (set-local! input-mode #t)
             (set-local! func-value fn)
             (set-local! orig-buf b)
-            (buffer-set-keymap 'minibuf-prompt-map)
+            (buffer-set-keymap map)
          )
          (window-select minibuf-window)
       )
+   )
+)
+
+(define minibuf-read
+   (lambda (str fn)
+      (minibuf-interactive-func 'minibuf-prompt-map str fn)
+   )
+)
+
+(define minibuf-ask
+   (lambda (str fn)
+      (minibuf-interactive-func 'minibuf-ask-map str fn)
    )
 )
