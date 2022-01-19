@@ -180,6 +180,26 @@
   )
 )
 
+(define dirb-viewport-begin
+  (lambda ()
+    (highlight-clear)
+    (cursor-set (window-viewport-begin))
+    (highlight-range
+       (line-begin-pos)
+       (line-end-pos))
+  )
+)
+
+(define dirb-viewport-end
+  (lambda ()
+    (highlight-clear)
+    (cursor-set (window-viewport-end))
+    (highlight-range
+       (line-begin-pos)
+       (line-end-pos))
+  )
+)
+
 (define dirb-show-hidden
    (lambda ()
       (set-local! show-hidden
@@ -219,6 +239,8 @@
       (bind-key map "C-d" dirb-scroll-halfpage-down)
       (bind-key map "C-f" dirb-scroll-page-down)
       (bind-key map "C-b" dirb-scroll-page-up)
+      (bind-key map "H" dirb-viewport-begin)
+      (bind-key map "L" dirb-viewport-end)
       (bind-key map "G" dirb-move-end)
       (bind-key map "." dirb-show-hidden)
       (bind-key map "~" dirb-goto-home)
