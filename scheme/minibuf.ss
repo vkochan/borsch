@@ -159,7 +159,6 @@
             [b (buffer-current)]
            )
          (with-buffer minibuf-buffer
-            (enable-insert #t)
             (erase-buffer)
             (insert str)
             (set-local! prompt-pos (cursor))
@@ -175,12 +174,18 @@
 
 (define minibuf-read
    (lambda (str fn)
+      (with-buffer minibuf-buffer
+         (enable-insert #t)
+      )
       (minibuf-interactive-func 'minibuf-prompt-map str fn)
    )
 )
 
 (define minibuf-ask
    (lambda (str fn)
+      (with-buffer minibuf-buffer
+         (enable-insert #f)
+      )
       (minibuf-interactive-func 'minibuf-ask-map str fn)
    )
 )
