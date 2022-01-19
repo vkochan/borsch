@@ -509,7 +509,7 @@ update_screen_size(void) {
 	}
 
 	if (minibuf)
-		ui_window_move(minibuf->win, 0, ui_height_get(ui)-1);
+		ui_window_move(minibuf->win, 0, ui_height_get(ui)-dec_h);
 }
 
 static void
@@ -2836,7 +2836,15 @@ void win_size_set(int wid, int width, int height)
 			ui_window_width_set(w->win, width);
 		if (height > 0)
 			ui_window_height_set(w->win, height);
-		redraw(NULL);
+
+		if (w == minibuf) {
+			update_screen_size();
+			buffer_dirty_set(w->buf, true);
+			draw(w);
+			arrange();
+		} else {
+			redraw(NULL);
+		}
 	}
 }
 
