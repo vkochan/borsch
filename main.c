@@ -664,7 +664,7 @@ static void buf_update(Window *w);
 
 static void
 draw(Window *c, bool force) {
-	if (force || (buffer_is_dirty(c->buf) && is_content_visible(c)) || c == get_popup()) {
+	if ((force || buffer_is_dirty(c->buf) && is_content_visible(c)) || c == get_popup()) {
 		event_t evt;
 
 		/* we assume that it will be set on EVT_WIN_DRAW */
@@ -691,8 +691,9 @@ draw(Window *c, bool force) {
 
 static void
 draw_all(void) {
-	if (minibuf)
+	if (minibuf) {
 		draw(minibuf, true);
+	}
 
 	if (!nextvisible(windows)) {
 		sel = NULL;
@@ -705,8 +706,9 @@ draw_all(void) {
 
 	if (!isarrange(fullscreen)) {
 		for (Window *c = nextvisible(windows); c; c = nextvisible(c->next)) {
-			if (c != sel)
+			if (c != sel) {
 				draw(c, true);
+			}
 		}
 	}
 
@@ -714,8 +716,9 @@ draw_all(void) {
 	 * this has the effect that the cursor position is
 	 * accurate
 	 */
-	if (sel)
+	if (sel) {
 		draw(sel, true);
+	}
 }
 
 static void
@@ -2132,8 +2135,9 @@ reenter:
 		if (bar.fd != -1 && FD_ISSET(bar.fd, &rd))
 			handle_statusbar();
 
-		if (minibuf)
+		if (minibuf) {
 			draw(minibuf, false);
+		}
 
 		for (Window *c = windows; c; c = c->next) {
 			pid_t pid = buffer_pid_get(c->buf);
@@ -2431,7 +2435,6 @@ void win_sidebar_set(int wid, int width)
 
 	if (w) {
 		ui_window_sidebar_width_set(w->win, width);
-		buffer_dirty_set(w->buf, true);
 	}
 }
 
