@@ -2842,6 +2842,10 @@ void win_size_set(int wid, int width, int height)
 	Window *w = window_get_by_id(wid);
 
 	if (w) {
+		if (width == ui_window_width_get(w->win) &&
+				height == ui_window_height_get(w->win))
+			return;
+
 		if (width > 0)
 			ui_window_width_set(w->win, width);
 		if (height > 0)
