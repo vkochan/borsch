@@ -620,13 +620,8 @@ static void draw_title(Window *c) {
 	char tmp[256];
 	size_t len;
 
-	if (!ui_window_has_title(c->win)) {
-		/* HACK for the minibuf which does not has the title so it will be
-		 * skipped */
-		ui_window_cursor_get(c->win, &x, &y);
-		ui_window_cursor_set(c->win, x, y);
+	if (!ui_window_has_title(c->win))
 		return;
-	}
 
 	if (sel == c || (pertag.runinall[pertag.curtag] && !c->minimized)) {
 		title_fg = UI_TEXT_COLOR_BLACK;
@@ -668,8 +663,8 @@ static void draw_title(Window *c) {
 static void buf_update(Window *w);
 
 static void
-draw(Window *c) {
-	if (is_content_visible(c) || c == get_popup()) {
+draw(Window *c, bool force) {
+	if (force || (buffer_is_dirty(c->buf) && is_content_visible(c)) || c == get_popup()) {
 		event_t evt;
 
 		/* we assume that it will be set on EVT_WIN_DRAW */
@@ -686,17 +681,18 @@ draw(Window *c) {
 
 		ui_window_redraw(c->win);
 		ui_window_draw(c->win);
-	}
-	if (!isarrange(fullscreen) || c == sel)
-		draw_title(c);
 
-	ui_window_refresh(c->win);
+		if (!isarrange(fullscreen) || c == sel)
+			draw_title(c);
+
+		ui_window_refresh(c->win);
+	}
 }
 
 static void
 draw_all(void) {
 	if (minibuf)
-		draw(minibuf);
+		draw(minibuf, true);
 
 	if (!nextvisible(windows)) {
 		sel = NULL;
@@ -710,7 +706,7 @@ draw_all(void) {
 	if (!isarrange(fullscreen)) {
 		for (Window *c = nextvisible(windows); c; c = nextvisible(c->next)) {
 			if (c != sel)
-				draw(c);
+				draw(c, true);
 		}
 	}
 
@@ -719,7 +715,7 @@ draw_all(void) {
 	 * accurate
 	 */
 	if (sel)
-		draw(sel);
+		draw(sel, true);
 }
 
 static void
@@ -903,7 +899,7 @@ focus(Window *c) {
 		}
 
 		if (isarrange(fullscreen)) {
-			draw(c);
+			draw(c, true);
 		} else {
 			draw_title(c);
 			ui_window_refresh(c->win);
@@ -1606,7 +1602,7 @@ scrollback(const char *args[]) {
 		ui_cursor_enable(ui, vt_cursor_visible(term));
 	else
 		ui_cursor_enable(ui, true);
-	draw(sel);
+	draw(sel, true);
 }
 
 static void
@@ -2137,7 +2133,7 @@ reenter:
 			handle_statusbar();
 
 		if (minibuf)
-			draw(minibuf);
+			draw(minibuf, false);
 
 		for (Window *c = windows; c; c = c->next) {
 			pid_t pid = buffer_pid_get(c->buf);
@@ -2149,6 +2145,7 @@ reenter:
 						buffer_died_set(c->buf, true);
 						continue;
 					}
+					buffer_dirty_set(c->buf, true);
 					vt_processed_set(term, true);
 				}
 			}
@@ -2157,7 +2154,7 @@ reenter:
 				if (pid && !buffer_name_is_locked(c->buf))
 					synctitle(c);
 				if (c != sel) {
-					draw(c);
+					draw(c, false);
 				}
 			} else if (!isarrange(fullscreen) && isvisible(c)
 					&& c->minimized) {
@@ -2167,12 +2164,16 @@ reenter:
 		}
 
 		if (is_content_visible(sel)) {
+			int x, y;
+
 			if (buffer_term_get(sel->buf)) {
 				ui_cursor_enable(ui, vt_cursor_visible(buffer_term_get(sel->buf)));
 			} else {
 				ui_cursor_enable(ui, true);
 			}
-			draw(sel);
+			draw(sel, false);
+		        ui_window_cursor_get(sel->win, &x, &y);
+		        ui_window_cursor_set(sel->win, x, y);
 		}
 	}
 
@@ -2842,19 +2843,24 @@ void win_size_set(int wid, int width, int height)
 	Window *w = window_get_by_id(wid);
 
 	if (w) {
-		if (width == ui_window_width_get(w->win) &&
-				height == ui_window_height_get(w->win))
-			return;
+		bool is_changed = false;
 
-		if (width > 0)
+		if (width > 0 && width != ui_window_width_get(w->win)) {
 			ui_window_width_set(w->win, width);
-		if (height > 0)
+			is_changed = true;
+		}
+		if (height > 0 && height != ui_window_height_get(w->win)) {
 			ui_window_height_set(w->win, height);
+			is_changed = true;
+		}
+
+		if (!is_changed)
+			return;
 
 		if (w == minibuf) {
 			update_screen_size();
 			buffer_dirty_set(w->buf, true);
-			draw(w);
+			draw(w, true);
 			arrange();
 		} else {
 			redraw(NULL);
@@ -3119,7 +3125,7 @@ size_t buf_text_insert(int bid, const char *text)
 	if (buf) {
 		pos = buffer_text_insert(buf, buffer_cursor_get(buf), text);
 		if (minibuf) {
-			draw(minibuf);
+			draw(minibuf, true);
 		}
 	}
 

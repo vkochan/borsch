@@ -256,6 +256,7 @@ void buffer_cursor_set(Buffer *buf, size_t pos)
 		buf->mark = pos;
 	if (pos > text_end(buf->text, 0))
 		pos = text_end(buf->text, 0);
+	buf->is_dirty = true;
 	buf->cursor = pos;
 }
 
