@@ -28,6 +28,18 @@
    )
 )
 
+(define append-to-register
+   (case-lambda
+      [(s)
+       (set! reg-is-linewise #f)
+       (set! reg (string-append reg " " s))]
+
+      [(s l)
+       (set! reg-is-linewise #t)
+       (set! reg (string-append reg "\n" s))]
+   )
+)
+
 (define paste-from-register-inplace
    (lambda ()
       (insert reg)

@@ -1121,10 +1121,26 @@
    )
 )
 
+(define mark-copy-append
+   (lambda ()
+      (let ([r (mark-get-range)])
+           (append-to-register (buffer-string (car r) (cadr r)))
+      )
+   )
+)
+
 (define mark-copy-linewise
    (lambda ()
       (let ([r (mark-get-range)])
            (copy-to-register (buffer-string (car r) (cadr r)) #t)
+      )
+   )
+)
+
+(define mark-copy-append-linewise
+   (lambda ()
+      (let ([r (mark-get-range)])
+           (append-to-register (buffer-string (car r) (cadr r)) #t)
       )
    )
 )

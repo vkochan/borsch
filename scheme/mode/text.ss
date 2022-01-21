@@ -97,6 +97,8 @@
       (bind-key map "<Esc>" text-mode-cmd)
       (bind-key map "x" (lambda () (mark-delete) (text-mode-cmd)))
       (bind-key map "y" (lambda () (mark-copy) (text-mode-cmd)))
+      (bind-key map "a" (lambda () (mark-copy-append) (text-mode-cmd)))
+      (bind-key map "A" (lambda () (mark-copy-append-linewise) (text-mode-cmd)))
       map
    )
 )
@@ -109,6 +111,8 @@
       (bind-key map "j" (lambda () (move-line-down) (move-line-end)))
       (bind-key map "k" (lambda () (move-line-up) (move-line-end)))
       (bind-key map "y" (lambda () (mark-copy-linewise) (text-mode-cmd)))
+      (bind-key map "a" (lambda () (mark-copy-append) (text-mode-cmd)))
+      (bind-key map "A" (lambda () (mark-copy-append-linewise) (text-mode-cmd)))
       map
    )
 )
