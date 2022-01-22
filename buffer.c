@@ -612,14 +612,16 @@ int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *d
 			buf->min_prop = buf->max_prop;
 	}
 
+	buf->is_dirty = true;
 	return 0;
 }
 
-void buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t end, void *arg,
+bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t end, void *arg,
 		void (*cb)(Buffer *buf, size_t type, size_t start, size_t end,
 			void *data, void *arg))
 {
 	TextProperty *it = buf->props.next;
+	size_t rem_count = 0;
 	int exp = 0;
 
 	if (start != EPOS && end != EPOS)
@@ -628,7 +630,7 @@ void buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t en
 		exp++;
 
 	if (!exp)
-		return;
+		return false;
 
 	while (it) {
 		TextProperty *next = it->next;
@@ -653,14 +655,22 @@ void buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t en
 				buf->max_prop = it->prev;
 
 			text_property_remove(it);
+			rem_count++;
 		}
 		it = next;
 	}
+
+	return rem_count > 0;
 }
 
-void buffer_property_remove(Buffer *buf, size_t type, size_t start, size_t end)
+bool buffer_property_remove(Buffer *buf, size_t type, size_t start, size_t end)
 {
-	buffer_property_remove_cb(buf, type, start, end, NULL, NULL);
+	if (buffer_property_remove_cb(buf, type, start, end, NULL, NULL)) {
+		buf->is_dirty = true;
+		return true;
+	}
+
+	return false;
 }
 
 void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, void *arg,

@@ -67,8 +67,8 @@ bool buffer_is_died(Buffer *buf);
 int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *data);
 void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, void *arg,
 		int (*cb) (Buffer *buf, int type, size_t start, size_t end, void *data, void *arg));
-void buffer_property_remove(Buffer *buf, size_t type, size_t start, size_t end);
-void buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t end, void *arg,
+bool buffer_property_remove(Buffer *buf, size_t type, size_t start, size_t end);
+bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t end, void *arg,
 		void (*cb)(Buffer *buf, size_t type, size_t start, size_t end,
 			void *data, void *arg));
 void buffer_env_set(Buffer *buf, void *env);
