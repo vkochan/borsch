@@ -2800,6 +2800,8 @@ void win_mark_highlight(int wid, bool enable)
 	Window *c = window_get_by_id(wid);
 
 	if (c) {
+		if (enable != c->highlight_mark)
+			buffer_dirty_set(c->buf, true);
 		c->highlight_mark = enable;
 	}
 }
