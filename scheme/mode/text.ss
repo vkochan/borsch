@@ -147,8 +147,10 @@
       (let ([b (window-buffer w)])
          (with-buffer b
             (when (local-bound? linenum-enable)
-               (let ([width (text-mode-linenum-width w)])
-                  (window-set-sidebar-width w (1+ width))
+               (let ([width (1+ (text-mode-linenum-width w))])
+                  (when (not (eq? width (window-sidebar-width w)))
+                     (window-set-sidebar-width w width)
+                  )
                   (let ([lines (window-viewport-lines-coord w)])
                      (for-each
                         (lambda (c)
