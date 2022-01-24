@@ -2897,6 +2897,7 @@ void win_buf_switch(int wid, int bid)
 			Vt *term = buffer_term_get(b);
 
 			ui_window_on_view_update_set(w->win, NULL);
+			ui_window_sidebar_width_set(w->win, 0);
 			ui_window_priv_set(w->win, term);
 			ui_window_ops_draw_set(w->win, vt_draw);
 			vt_data_set(term, w);
