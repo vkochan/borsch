@@ -1410,6 +1410,8 @@ int create(const char *prog, const char *title, const char *cwd) {
 		return -1;
 	}
 
+	keymap_parent_set(buffer_keymap_get(c->buf), global_kmap);
+
 	c->view = view_new(buffer_text_get(c->buf));
 	if (!c->view) {
 		buffer_del(c->buf);
@@ -2511,6 +2513,7 @@ int win_new(int bid)
 		buffer_dirty_set(c->buf, true);
 	} else {
 		c->buf = buffer_new("");
+		keymap_parent_set(buffer_keymap_get(c->buf), global_kmap);
 	}
 
 	buffer_ref_get(c->buf);
@@ -2917,19 +2920,42 @@ int kmap_add(int pid)
 	KeyMap *kmap;
 
 	kmap = keymap_new(pmap);
-	if (kmap)
+	if (kmap) {
+		keymap_ref_get(kmap);
 		return keymap_id_get(kmap);
+	}
 
 	return -1;
 }
 
-int kmap_parent_set(int kid, char *name)
+int kmap_parent_set(int kid, char *name, int pid)
 {
 	KeyMap *kmap = keymap_by_id(kid);
 
-	if (kmap && name) {
-		keymap_parent_set(kmap, name);
+	if (kmap) {
+		if (pid > 0) {
+			KeyMap *parent = keymap_by_id(pid);
+			if (parent) {
+				keymap_parent_set(kmap, parent);
+			}
+		} else {
+			keymap_parent_name_set(kmap, name);
+		}
 		return 0;
+	}
+
+	return -1;
+}
+
+int kmap_parent_get(int kid)
+{
+	KeyMap *kmap = keymap_by_id(kid);
+
+	if (kmap) {
+		KeyMap *parent = keymap_parent_get(kmap);
+
+		if (parent)
+			return keymap_id_get(parent);
 	}
 
 	return -1;
@@ -2939,8 +2965,10 @@ void kmap_del(int kid)
 {
 	KeyMap *kmap = keymap_by_id(kid);
 
-	if (kmap)
+	if (kmap) {
 		keymap_ref_put(kmap);
+		keymap_free(kmap);
+	}
 }
 
 int buf_new(char *name)
@@ -2948,6 +2976,7 @@ int buf_new(char *name)
 	Buffer *buf = buffer_new(name);
 
 	if (buf) {
+		keymap_parent_set(buffer_keymap_get(buf), global_kmap);
 		buffer_env_set(buf, scheme_env_alloc());
 		buffer_ref_get(buf);
 		return buffer_id_get(buf);
@@ -3683,7 +3712,6 @@ void buf_redo(int bid)
 
 int minibuf_create(void)
 {
-	KeyMap *kmap;
 	Window *w;
 
 	if (minibuf)
@@ -3702,16 +3730,8 @@ int minibuf_create(void)
 		return -1;
 	}
 
-	kmap = keymap_new(NULL);
-	if (!kmap) {
-		buffer_del(w->buf);
-		free(w);
-		return -1;
-	}
-
 	w->view = view_new(buffer_text_get(w->buf));
 	if (!w->view) {
-		keymap_free(kmap);
 		buffer_del(w->buf);
 		free(w);
 		return -1;
@@ -3720,7 +3740,6 @@ int minibuf_create(void)
 	w->win = ui_window_new(ui, w->view);
 	if (!w->win) {
 		view_free(w->view);
-		keymap_free(kmap);
 		buffer_del(w->buf);
 		free(w);
 		return -1;

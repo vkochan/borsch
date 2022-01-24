@@ -310,16 +310,25 @@ ptr scheme_kmap_add(char *parent)
 
 	if (ret) {
 		if (parent && strlen(parent))
-			kmap_parent_set(ret, parent);
+			kmap_parent_set(ret, parent, -1);
 		return Sinteger(ret);
 	}
 
 	return Sfalse;
 }
 
-void scheme_kmap_parent_set(int kid, char *name)
+void scheme_kmap_parent_set(int kid, char *name, int pid)
 {
-	kmap_parent_set(kid, name);
+	kmap_parent_set(kid, name, pid);
+}
+
+ptr scheme_kmap_parent_get(int kid)
+{
+	int ret = kmap_parent_get(kid);
+
+	if (ret > 0)
+		return Sinteger(ret);
+	return Sfalse;
 }
 
 void scheme_kmap_del(int kid)
@@ -800,6 +809,7 @@ static void scheme_export_symbols(void)
 
 	Sregister_symbol("cs_kmap_add", scheme_kmap_add);
 	Sregister_symbol("cs_kmap_parent_set", scheme_kmap_parent_set);
+	Sregister_symbol("cs_kmap_parent_get", scheme_kmap_parent_get);
 	Sregister_symbol("cs_kmap_del", scheme_kmap_del);
 
 	Sregister_symbol("cs_buf_new", scheme_buf_new);

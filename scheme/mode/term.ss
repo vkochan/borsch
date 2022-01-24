@@ -42,7 +42,8 @@
             )
          (with-buffer b
             (text-mode)
-            (buffer-set-keymap 'term-mode-copy-map)
+            (bind-key-local "<Esc>" term-mode-copy-exit)
+            (bind-key-local "q" term-mode-copy-exit)
             (buffer-set-name "Term Copy")
             (define-local orig-buf c)
             (window-switch-buffer b)
@@ -65,14 +66,6 @@
    (lambda ()
       (term-send-text reg)
    )
-)
-
-(define term-mode-copy-map
-  (let ([map (make-keymap 'text-mode-cmd-map)])
-     (bind-key map "<Esc>" term-mode-copy-exit)
-     (bind-key map "q" term-mode-copy-exit)
-     map
-  )
 )
 
 (define term-mode-map

@@ -27,7 +27,8 @@ KeyMap *keymap_by_name(char *name);
 KeyMap *keymap_by_id(int id);
 int keymap_id_get(KeyMap *map);
 KeyMap *keymap_parent_get(KeyMap *map);
-void keymap_parent_set(KeyMap *map, char *name);
+void keymap_parent_set(KeyMap *map, KeyMap *pmap);
+void keymap_parent_name_set(KeyMap *map, char *name);
 void keymap_symb_resolver_set(void * (*resolv)(keymap_symb_t type, char *name));
 
 #endif /* KEYMAP_H */

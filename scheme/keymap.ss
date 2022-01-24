@@ -8,7 +8,8 @@
 )
 
 (define __cs_kmap_add (foreign-procedure "cs_kmap_add" (string) scheme-object))
-(define __cs_kmap_parent_set (foreign-procedure "cs_kmap_parent_set" (int string) void))
+(define __cs_kmap_parent_set (foreign-procedure "cs_kmap_parent_set" (int string int) void))
+(define __cs_kmap_parent_get (foreign-procedure __collect_safe "cs_kmap_parent_set" (int) scheme-object))
 (define __cs_kmap_del (foreign-procedure __collect_safe "cs_kmap_del" (int) void))
 
 (define __cs_bind_key (foreign-procedure "cs_bind_key" (string void* int string) int))
@@ -57,9 +58,19 @@
    )
 )
 
+(define keymap-parent
+   (lambda (k)
+       (__cs_kmap_parent_get k)
+   )
+)
+
 (define keymap-set-parent
    (lambda (k p)
-       (__cs_kmap_parent_set k p)
+       (if (symbol? p)
+          (__cs_kmap_parent_set k (symbol->string p) -1)
+          ;; else
+          (__cs_kmap_parent_set k "" p)
+       )
    )
 )
 

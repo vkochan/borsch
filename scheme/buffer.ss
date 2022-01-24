@@ -129,8 +129,10 @@
 )
 
 (define buffer-set-keymap
-   (lambda (k)
-      (__cs_buf_kmap_set (buffer-current) (symbol->string k))
+   (lambda (sym)
+      (let ([lmap (buffer-keymap)])
+         (keymap-set-parent lmap sym)
+      )
    )
 )
 
@@ -1188,6 +1190,12 @@
 	       ((_ s v)
 		#`(set-top-level-value! 's v (buffer-env))
                )
+   )
+)
+
+(define bind-key-local
+   (lambda (k p)
+      (bind-key (buffer-keymap) k p)
    )
 )
 

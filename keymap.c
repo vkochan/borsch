@@ -307,23 +307,33 @@ KeyMap *keymap_parent_get(KeyMap *map)
 		return map->parent;
 
 	map->parent = keymap_by_name(map->parent_name);
-
 	if (map->parent)
 		keymap_ref_get(map->parent);
 
 	return map->parent;
 }
 
-void keymap_parent_set(KeyMap *map, char *name)
+void keymap_parent_set(KeyMap *map, KeyMap *parent)
+{
+	if (map->parent)
+		keymap_ref_put(map->parent);
+
+	map->parent = parent;
+
+	if (parent)
+		keymap_ref_get(parent);
+}
+
+void keymap_parent_name_set(KeyMap *map, char *name)
 {
 	if (strcmp(map->parent_name, name) == 0)
 		return;
 
-	if (map->parent)
-		keymap_ref_put(map->parent);
-
 	if (name)
 		strncpy(map->parent_name, name, sizeof(map->parent_name));
+
+	if (map->parent)
+		keymap_ref_put(map->parent);
 
 	map->parent = NULL;
 }

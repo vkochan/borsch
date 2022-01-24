@@ -1,6 +1,12 @@
+(define text-mode-set-keymap
+   (lambda (m)
+      (keymap-set-parent (get-local text-mode-map) m)
+   )
+)
+
 (define text-mode-cmd
    (lambda ()
-      (buffer-set-keymap 'text-mode-cmd-map)
+      (text-mode-set-keymap 'text-mode-cmd-map)
       (buffer-set-mode "Text <N>")
       (buffer-snapshot)
       (enable-insert #f)
@@ -11,7 +17,7 @@
 
 (define text-mode-ins
    (lambda ()
-      (buffer-set-keymap 'text-mode-ins-map)
+      (text-mode-set-keymap 'text-mode-ins-map)
       (buffer-set-mode "Text <I>")
       (enable-insert #t)
    )
@@ -19,7 +25,7 @@
 
 (define text-mode-vis
    (lambda ()
-      (buffer-set-keymap 'text-mode-vis-map)
+      (text-mode-set-keymap 'text-mode-vis-map)
       (buffer-set-mode "Text <V>")
       (enable-insert #f)
       (mark-set)
@@ -29,7 +35,7 @@
 
 (define text-mode-vis-linewise
    (lambda ()
-      (buffer-set-keymap 'text-mode-vis-linewise-map)
+      (text-mode-set-keymap 'text-mode-vis-linewise-map)
       (buffer-set-mode "Text <V *L*>")
       (enable-insert #f)
       (mark-set (line-begin-pos))
@@ -38,14 +44,8 @@
    )
 )
 
-(define text-mode-map
-   (let ([map (make-keymap)])
-      map
-   )
-)
-
 (define text-mode-cmd-map
-   (let ([map (make-keymap 'text-mode-map)])
+   (let ([map (make-keymap)])
       (bind-key map "h" (lambda () (move-prev-char)))
       (bind-key map "l" (lambda () (move-next-char)))
       (bind-key map "j" (lambda () (move-line-down)))
@@ -84,7 +84,7 @@
 )
 
 (define text-mode-ins-map
-   (let ([map (make-keymap 'text-mode-map)])
+   (let ([map (make-keymap)])
       (bind-key map "<Enter>" (lambda () (insert-nl)))
       (bind-key map "<Backspace>" (lambda () (delete-prev-char)))
       (bind-key map "<Esc>" text-mode-cmd)
@@ -104,7 +104,7 @@
 )
 
 (define text-mode-vis-linewise-map
-   (let ([map (make-keymap 'text-mode-map)])
+   (let ([map (make-keymap)])
       (bind-key map "<Esc>" text-mode-cmd)
       (bind-key map "x" (lambda () (mark-delete) (text-mode-cmd)))
       (bind-key map "l" (lambda () (move-line-down)))
@@ -164,7 +164,12 @@
 )
 
 (define-mode text-mode "Text" #f
-   (enable-insert #t)
+   (when (not (local-bound? text-mode-map))
+      (let ([map (make-keymap)])
+         (define-local text-mode-map map)
+         (buffer-set-keymap map)
+      )
+   )
    (text-mode-cmd)
    (define-local linenum-enable #t)
    (add-hook 'window-draw-hook text-mode-linenum-draw)

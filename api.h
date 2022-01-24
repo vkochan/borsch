@@ -66,7 +66,8 @@ int win_sidebar_get(int wid);
 void win_sidebar_draw(int wid, int x, int y, const char *text, short fg, short bg, int attr);
 
 int kmap_add(int pid);
-int kmap_parent_set(int kid, char *name);
+int kmap_parent_set(int kid, char *name, int pid);
+int kmap_parent_get(int kid);
 void kmap_del(int kid);
 
 int buf_new(char *name);

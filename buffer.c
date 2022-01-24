@@ -109,8 +109,15 @@ Buffer *buffer_new(const char *name)
 	if (!buf)
 		return NULL;
 
+	buf->keymap = keymap_new(NULL);
+	if (!buf->keymap) {
+		free(buf);
+		return NULL;
+	}
+
 	buf->text = text_load(NULL);
 	if (!buf->text) {
+		keymap_free(buf->keymap);
 		free(buf);
 		return NULL;
 	}
@@ -144,11 +151,10 @@ bool buffer_del(Buffer *buf)
 	if (!buf->ref_count) {
 		if (buf->term)
 			vt_destroy(buf->term);
-		if (buf->keymap)
-			keymap_ref_put(buf->keymap);
 		buffer_property_remove(buf, PROPERTY_TYPE_ALL, EPOS, EPOS);
 		buffer_list_del(buf);
 		/* TODO: check if buffer is not saved and ask user to save it */
+		keymap_free(buf->keymap);
 		text_free(buf->text);
 		free(buf->file.path);
 		free(buf);
