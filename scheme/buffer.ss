@@ -122,15 +122,21 @@
    )
 )
 
-(define buffer-keymap
+(define %buffer-local-keymap
    (lambda ()
        (__cs_buf_kmap_get (buffer-current))
    )
 )
 
+(define buffer-keymap
+   (lambda ()
+      (keymap-get-parent (%buffer-local-keymap))
+   )
+)
+
 (define buffer-set-keymap
    (lambda (sym)
-      (let ([lmap (buffer-keymap)])
+      (let ([lmap (%buffer-local-keymap)])
          (keymap-set-parent lmap sym)
       )
    )
@@ -1195,7 +1201,7 @@
 
 (define bind-key-local
    (lambda (k p)
-      (bind-key (buffer-keymap) k p)
+      (bind-key (%buffer-local-keymap) k p)
    )
 )
 
