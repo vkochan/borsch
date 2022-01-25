@@ -1,12 +1,12 @@
 (define text-mode-set-keymap
    (lambda (m)
-      (keymap-set-parent (get-local text-mode-map) m)
+      (keymap-set-parent (get-local text-mode-map) (get-local-symbol m))
    )
 )
 
 (define text-mode-cmd
    (lambda ()
-      (text-mode-set-keymap 'text-mode-cmd-map)
+      (text-mode-set-keymap 'text-mode-cmd-local-map)
       (buffer-set-mode "Text <N>")
       (buffer-snapshot)
       (enable-insert #f)
@@ -17,7 +17,7 @@
 
 (define text-mode-ins
    (lambda ()
-      (text-mode-set-keymap 'text-mode-ins-map)
+      (text-mode-set-keymap 'text-mode-ins-local-map)
       (buffer-set-mode "Text <I>")
       (enable-insert #t)
    )
@@ -25,7 +25,7 @@
 
 (define text-mode-vis
    (lambda ()
-      (text-mode-set-keymap 'text-mode-vis-map)
+      (text-mode-set-keymap 'text-mode-vis-local-map)
       (buffer-set-mode "Text <V>")
       (enable-insert #f)
       (mark-set)
@@ -35,7 +35,7 @@
 
 (define text-mode-vis-linewise
    (lambda ()
-      (text-mode-set-keymap 'text-mode-vis-linewise-map)
+      (text-mode-set-keymap 'text-mode-vis-linewise-local-map)
       (buffer-set-mode "Text <V *L*>")
       (enable-insert #f)
       (mark-set (line-begin-pos))
@@ -171,6 +171,18 @@
          (define-local text-mode-map map)
          (buffer-set-keymap map)
       )
+   )
+   (when (not (local-bound? text-mode-vis-local-map))
+         (define-local text-mode-vis-local-map (make-keymap 'text-mode-vis-map))
+   )
+   (when (not (local-bound? text-mode-vis-linewise-local-map))
+         (define-local text-mode-vis-linewise-local-map (make-keymap 'text-mode-vis-linewise-map))
+   )
+   (when (not (local-bound? text-mode-cmd-local-map))
+         (define-local text-mode-cmd-local-map (make-keymap 'text-mode-cmd-map))
+   )
+   (when (not (local-bound? text-mode-ins-local-map))
+         (define-local text-mode-ins-local-map (make-keymap 'text-mode-ins-map))
    )
    (text-mode-cmd)
    (define-local linenum-enable #t)

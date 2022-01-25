@@ -1183,10 +1183,28 @@
    )
 )
 
+(define local-symbol-bound?
+   (lambda (sym)
+      (top-level-bound? sym (buffer-env))
+   )
+)
+
+(define get-local-symbol
+   (lambda (sym)
+      (top-level-value sym (buffer-env))
+   )
+)
+
+(define set-local-symbol!
+   (lambda (sym val)
+      (set-top-level-value! sym val (buffer-env))
+   )
+)
+
 (define-syntax (get-local stx)
    (syntax-case stx ()
 	       ((_ s)
-		#`(top-level-value 's (buffer-env))
+		#`(get-local-symbol 's)
                )
    )
 )
@@ -1194,21 +1212,15 @@
 (define-syntax (set-local! stx)
    (syntax-case stx ()
 	       ((_ s v)
-		#`(set-top-level-value! 's v (buffer-env))
+		#`(set-local-symbol! 's v)
                )
-   )
-)
-
-(define bind-key-local
-   (lambda (k p)
-      (bind-key (%buffer-local-keymap) k p)
    )
 )
 
 (define-syntax (local-bound? stx)
    (syntax-case stx ()
 	       ((_ s)
-		#`(top-level-bound? 's (buffer-env))
+		#`(local-symbol-bound? 's)
                )
    )
 )

@@ -17,18 +17,36 @@
 
 (define global-keymap 1)
 
+(define %keymap-get
+   (lambda (m)
+      (if (and (buffer-current) (local-symbol-bound? m))
+         (get-local-symbol m)
+         ;; else
+         m
+      )
+   )
+)
+
 (define bind-key
    (case-lambda
       [(k p)
        (bind-key 0 k p)]
 
       [(m k t)
-       (if (procedure? t)
-          (__cs_bind_key k (key-cb t) m "")
-          ;; else
-          (__cs_bind_key k 0 m (symbol->string t))
+       (let ([map (%keymap-get m)])
+          (if (procedure? t)
+             (__cs_bind_key k (key-cb t) map "")
+             ;; else
+             (__cs_bind_key k 0 map (symbol->string t))
+          )
        )
       ]
+   )
+)
+
+(define bind-key-local
+   (lambda (k p)
+      (bind-key (%buffer-local-keymap) k p)
    )
 )
 
@@ -38,7 +56,10 @@
        (__cs_unbind_key k 0)]
 
       [(m k)
-       (__cs_unbind_key k m)]
+       (let ([map (%keymap-get m)])
+          (__cs_unbind_key k map)
+       )
+      ]
    )
 )
 

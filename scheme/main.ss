@@ -11,6 +11,7 @@
 (load "mode/term.ss")
 (load "mode/text.ss")
 (load "mode/dirb.ss")
+(load "mode/lisp.ss")
 
 (define reg "")
 (define reg-is-linewise #f)
