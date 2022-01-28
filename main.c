@@ -20,7 +20,6 @@
 #include <wchar.h>
 #include <limits.h>
 #include <libgen.h>
-#include <sys/select.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <sys/wait.h>
@@ -38,6 +37,7 @@
 #include <errno.h>
 #include <pwd.h>
 
+#include "event.h"
 #include "buffer.h"
 #include "keymap.h"
 #include "view.h"
@@ -128,6 +128,13 @@ typedef struct {
 	const char *name;
 	Action action;
 } Cmd;
+
+typedef struct {
+	unsigned int key_index;
+	KeyCombo keys;
+} KeyBuf;
+
+static KeyBuf kbuf;
 
 enum { BAR_TOP, BAR_BOTTOM, BAR_OFF };
 enum { BAR_LEFT, BAR_RIGHT };
@@ -1273,23 +1280,43 @@ static void __win_del(Window *w)
 	arrange();
 }
 
+static void __buf_del(Buffer *buf)
+{
+	int pty = -1;
+	void *env;
+
+	if (buffer_term_get(buf))
+		pty = vt_pty_get(buffer_term_get(buf));
+
+	env = buffer_env_get(buf);
+
+	buffer_ref_put(buf);
+	if (buffer_del(buf)) {
+		if (pty >= 0)
+			event_fd_handler_unregister(pty);
+		scheme_env_free(env);
+	}
+}
+
 static void
 destroy(Window *w) {
 	Buffer *buf = w->buf;
-	void *env;
 
-	buffer_ref_put(w->buf);
+	__buf_del(buf);
 	__win_del(w);
-
-	env = buffer_env_get(buf);
-	if (buffer_del(buf))
-		scheme_env_free(env);
 }
 
 static void
 cleanup(void) {
 	Buffer *b;
 	int i;
+
+	/* issue when deleting fd handlers during execution the fd handler ? */
+	event_fd_handler_unregister(STDIN_FILENO);
+	if (cmdfifo.fd != -1)
+		event_fd_handler_unregister(cmdfifo.fd);
+	if (bar.fd != -1)
+		event_fd_handler_unregister(bar.fd);
 
 	scheme_uninit();
 	while (windows)
@@ -1302,9 +1329,7 @@ cleanup(void) {
 	b = buffer_first_get();
 	while (b) {
 		Buffer *nextb = buffer_next_get(b);
-		void *env = buffer_env_get(b);
-		if (buffer_del(b))
-			scheme_env_free(env);
+		__buf_del(b);
 		b = nextb;
 	}
 
@@ -1378,6 +1403,24 @@ synctitle(Window *c)
 		draw_title(c);
 done:
 	close(fd);
+}
+
+static void handle_vt(int fd, void *arg) {
+	Buffer *buf = arg;
+	pid_t pid;
+	Vt *term;
+
+	term = buffer_term_get(buf);
+	pid = buffer_pid_get(buf);
+
+	if (!vt_is_processed(term)) {
+		if (vt_process(term) < 0 && errno == EIO) {
+			buffer_died_set(buf, true);
+		} else {
+			buffer_dirty_set(buf, true);
+			vt_processed_set(term, true);
+		}
+	}
 }
 
 int create(const char *prog, const char *title, const char *cwd) {
@@ -1463,6 +1506,8 @@ int create(const char *prog, const char *title, const char *cwd) {
 
 	buffer_env_set(c->buf, scheme_env_alloc());
 	buffer_ref_get(c->buf);
+
+	event_fd_handler_register(vt_pty_get(term), handle_vt, c->buf);
 
 	vt_data_set(term, c);
 	vt_title_handler_set(term, term_title_handler);
@@ -1869,8 +1914,7 @@ handle_cmd(char *cmdbuf) {
 	}
 }
 
-static void
-handle_cmdfifo(void) {
+static void handle_cmdfifo(int fd, void *arg) {
 	char *p, cmdbuf[512];
 	int r;
 
@@ -1927,8 +1971,7 @@ handle_mouse(void) {
 #endif /* CONFIG_MOUSE */
 }
 
-static void
-handle_statusbar(void) {
+static void handle_statusbar(int fd, void *arg) {
 	char *p;
 	int r;
 	switch (r = read(bar.fd, bar.text, sizeof bar.text - 1)) {
@@ -2006,43 +2049,87 @@ parse_args(int argc, char *argv[]) {
 	return init;
 }
 
-int
-main(int argc, char *argv[]) {
-	KeyCombo keys;
-	unsigned int key_index = 0;
-	memset(keys, 0, sizeof(keys));
-	sigset_t emptyset, blockset;
+static void handle_keypress(int fd, void *arg) {
+	KeyBuf *kbuf = arg;
+	int alt_code;
+	event_t evt;
+	int code;
+
+	if (!sel) {
+		curr_kmap = global_kmap;
+	} else if (sel && !sel->minimized) {
+		KeyMap *map = buffer_keymap_get(sel->buf);
+		if (map)
+			curr_kmap = map;
+	};
+
+reenter:
+	code = getch();
+
+	evt.eid = EVT_KEY_PRESS;
+	evt.oid = code;
+	scheme_event_handle(evt);
+
+	if (code == ALT) {
+		nodelay(stdscr, TRUE);
+		alt_code = getch();
+		nodelay(stdscr, FALSE);
+		if (alt_code > 0) {
+			kbuf->keys[kbuf->key_index++] = code;
+			code = alt_code;
+		}
+	}
+
+	if (code >= 0) {
+		kbuf->keys[kbuf->key_index++] = code;
+		KeyBinding *kbd = NULL;
+		if (code == KEY_MOUSE) {
+			kbuf->key_index = 0;
+			handle_mouse();
+		} else if ((kbd = keymap_match(curr_kmap, kbuf->keys, kbuf->key_index))) {
+			if (keymap_kbd_is_map(kbd)) {
+				curr_kmap = keymap_kbd_map_get(kbd);
+				memset(kbuf->keys, 0, sizeof(kbuf->keys));
+				kbuf->key_index = 0;
+				goto reenter;
+			}
+
+			if (keymap_kbd_len(kbd) == kbuf->key_index) {
+				keymap_kbd_action(kbd);
+				memset(kbuf->keys, 0, sizeof(kbuf->keys));
+				kbuf->key_index = 0;
+			}
+		} else {
+			kbuf->key_index = 0;
+			memset(kbuf->keys, 0, sizeof(kbuf->keys));
+			keypress(code);
+		}
+	}
+}
+
+int main(int argc, char *argv[]) {
+	sigset_t blockset;
 
 	setenv("BORSCH", VERSION, 1);
 	if (!parse_args(argc, argv)) {
 		setup();
 	}
 
-	sigemptyset(&emptyset);
 	sigemptyset(&blockset);
 	sigaddset(&blockset, SIGWINCH);
 	sigaddset(&blockset, SIGCHLD);
 	sigprocmask(SIG_BLOCK, &blockset, NULL);
 
-	while (running) {
-		int r, nfds = 0;
-		fd_set rd;
+	if (cmdfifo.fd != -1)
+		event_fd_handler_register(cmdfifo.fd, handle_cmdfifo, NULL);
+	if (bar.fd != -1)
+		event_fd_handler_register(bar.fd, handle_statusbar, NULL);
 
+	event_fd_handler_register(STDIN_FILENO, handle_keypress, &kbuf);
+
+	while (running) {
 		ui_resize(ui);
 		update_screen_size();
-
-		FD_ZERO(&rd);
-		FD_SET(STDIN_FILENO, &rd);
-
-		if (cmdfifo.fd != -1) {
-			FD_SET(cmdfifo.fd, &rd);
-			nfds = cmdfifo.fd;
-		}
-
-		if (bar.fd != -1) {
-			FD_SET(bar.fd, &rd);
-			nfds = MAX(nfds, bar.fd);
-		}
 
 		for (Window *c = windows; c; ) {
 			if (buffer_is_died(c->buf)) {
@@ -2054,8 +2141,6 @@ main(int argc, char *argv[]) {
 			if (buffer_term_get(c->buf)) {
 				int pty = vt_pty_get(buffer_term_get(c->buf));
 				vt_processed_set(buffer_term_get(c->buf), false);
-				FD_SET(pty, &rd);
-				nfds = MAX(nfds, pty);
 			}
 			c = c->next;
 		}
@@ -2068,74 +2153,7 @@ main(int argc, char *argv[]) {
 
 		ui_update(ui);
 
-		r = pselect(nfds + 1, &rd, NULL, NULL, NULL, &emptyset);
-
-		if (r < 0) {
-			if (errno == EINTR)
-				continue;
-			perror("select()");
-			exit(EXIT_FAILURE);
-		}
-
-		if (FD_ISSET(STDIN_FILENO, &rd)) {
-			int alt_code;
-			event_t evt;
-			int code;
-
-			if (sel && !sel->minimized) {
-				KeyMap *map = buffer_keymap_get(sel->buf);
-				if (map)
-					curr_kmap = map;
-			};
-reenter:
-			code = getch();
-
-			evt.eid = EVT_KEY_PRESS;
-			evt.oid = code;
-			scheme_event_handle(evt);
-
-			if (code == ALT) {
-				nodelay(stdscr, TRUE);
-				alt_code = getch();
-				nodelay(stdscr, FALSE);
-				if (alt_code > 0) {
-					keys[key_index++] = code;
-					code = alt_code;
-				}
-			}
-
-			if (code >= 0) {
-				keys[key_index++] = code;
-				KeyBinding *kbd = NULL;
-				if (code == KEY_MOUSE) {
-					key_index = 0;
-					handle_mouse();
-				} else if ((kbd = keymap_match(curr_kmap, keys, key_index))) {
-					if (keymap_kbd_is_map(kbd)) {
-						curr_kmap = keymap_kbd_map_get(kbd);
-						memset(keys, 0, sizeof(keys));
-						key_index = 0;
-						goto reenter;
-					}
-
-					if (keymap_kbd_len(kbd) == key_index) {
-						keymap_kbd_action(kbd);
-						memset(keys, 0, sizeof(keys));
-						key_index = 0;
-					}
-				} else {
-					key_index = 0;
-					memset(keys, 0, sizeof(keys));
-					keypress(code);
-				}
-			}
-		}
-
-		if (cmdfifo.fd != -1 && FD_ISSET(cmdfifo.fd, &rd))
-			handle_cmdfifo();
-
-		if (bar.fd != -1 && FD_ISSET(bar.fd, &rd))
-			handle_statusbar();
+		event_process();
 
 		if (minibuf) {
 			draw(minibuf, false);
@@ -2144,17 +2162,6 @@ reenter:
 		for (Window *c = windows; c; c = c->next) {
 			pid_t pid = buffer_pid_get(c->buf);
 			Vt *term = buffer_term_get(c->buf);
-
-			if (term) {
-				if (!vt_is_processed(term) && FD_ISSET(vt_pty_get(term), &rd)) {
-					if (vt_process(term) < 0 && errno == EIO) {
-						buffer_died_set(c->buf, true);
-						continue;
-					}
-					buffer_dirty_set(c->buf, true);
-					vt_processed_set(term, true);
-				}
-			}
 
 			if (is_content_visible(c)) {
 				if (pid && !buffer_name_is_locked(c->buf))
@@ -2992,10 +2999,7 @@ void buf_del(int bid)
 	Buffer *buf = buffer_by_id(bid);
 
 	if (buf) {
-		void *env = buffer_env_get(buf);
-		buffer_ref_put(buf);
-		if (buffer_del(buf))
-			scheme_env_free(env);
+		__buf_del(buf);
 	}
 }
 
