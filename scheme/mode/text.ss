@@ -44,15 +44,34 @@
    )
 )
 
+(define get-file-location
+   (lambda (s)
+      (if (file-regular? s)
+         (values s 0)
+         ;; else
+         (begin
+            (let ([grep-line (string-split s #\:)])
+               (if (> (length grep-line) 1)
+                  (values (list-ref grep-line 0) (string->number (list-ref grep-line 1)))
+                  ;; else
+                  (values (list-ref grep-line 0) 0)
+               )
+            )
+         )
+      )
+   )
+)
+
 (define file-open-at-cursor
    (lambda ()
-      (let ([w (extract-longword)])
-         (let ([p (if (equal? #\/ (string-ref w 0)) w (string-append (view-cwd) "/" w))])
+      (let-values ([(f l) (get-file-location (extract-longword))])
+         (let ([p (if (equal? #\/ (string-ref f 0)) f (string-append (view-cwd) "/" f))])
             (if (file-regular? p)
                (let ([b (buffer-create)])
                   (with-buffer b
                      (text-mode)
                      (buffer-open-file p)
+                     (move-line-num l)
                   )
                )
             )

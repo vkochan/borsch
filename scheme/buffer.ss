@@ -456,6 +456,12 @@
    )
 )
 
+(define move-line-num
+   (lambda (n)
+      (cursor-set (next-line-pos (buffer-current) 0 (- n 1)))
+   )
+)
+
 (define move-line-up
    (lambda ()
       (cursor-set (prev-line-pos))
@@ -588,6 +594,9 @@
 
       [(b s)
        (__cs_buf_text_obj_pos b s #\l 1)]
+
+      [(b s n)
+       (__cs_buf_text_obj_pos b s #\l n)]
    )
 )
 
