@@ -1360,3 +1360,21 @@
       )
    )
 )
+
+(define current-cwd
+   (lambda ()
+      (let ([b (buffer-current)])
+         (if b
+            (with-buffer b
+               (if (local-bound? current-cwd)
+                  (get-local current-cwd)
+                  ;; else
+                  (view-cwd)
+               )
+            )
+            ;; else
+            (view-cwd)
+         )
+      )
+   )
+)

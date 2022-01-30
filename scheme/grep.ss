@@ -8,7 +8,9 @@
 
 (define grep-search-prompt
    (lambda (b s)
-      (grep s)
+      (with-buffer b
+         (grep s)
+      )
    )
 )
 
@@ -19,7 +21,7 @@
       ]
 
       [(s)
-       (grep s (view-cwd))]
+       (grep s (current-cwd))]
 
       [(s d)
        (let (

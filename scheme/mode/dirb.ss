@@ -303,6 +303,12 @@
    )
 )
 
+(define dirb-grep
+   (lambda ()
+      (grep)
+   )
+)
+
 (define dirb-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" dirb-open-entry)
@@ -326,6 +332,7 @@
       (bind-key map "n d" dirb-create-new-dir)
       (bind-key map "d" dirb-delete-entry)
       (bind-key map "r" dirb-rename-entry)
+      (bind-key map "s" dirb-grep)
       map
    )
 )
