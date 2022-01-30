@@ -2109,6 +2109,7 @@ reenter:
 
 int main(int argc, char *argv[]) {
 	sigset_t blockset;
+	event_t evt;
 
 	setenv("BORSCH", VERSION, 1);
 	if (!parse_args(argc, argv)) {
@@ -2188,6 +2189,9 @@ int main(int argc, char *argv[]) {
 		        ui_window_cursor_get(sel->win, &x, &y);
 		        ui_window_cursor_set(sel->win, x, y);
 		}
+
+		evt.eid = EVT_IDLE;
+		scheme_event_handle(evt);
 	}
 
 	cleanup();
@@ -4048,6 +4052,30 @@ int tagbar_show(bool show)
 	update_screen_size();
 	redraw(NULL);
 	return 0;
+}
+
+int evt_fd_handler_add(int fd, void (*fn)(int fd, void *), void *arg)
+{
+	return event_fd_handler_register(fd, fn, arg);
+}
+
+void evt_fd_handler_del(int fd)
+{
+	event_fd_handler_unregister(fd);
+}
+
+bool process_is_alive(pid_t pid)
+{
+	int status;
+	pid_t ret;
+
+	ret = waitpid(pid, &status, WNOHANG);
+	if (ret != pid) {
+		fprintf(stderr, "process %d is dead\n", pid);
+		return false;
+	} else {
+		return true;
+	}
 }
 
 void do_quit(void)

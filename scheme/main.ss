@@ -8,6 +8,7 @@
 (load "buffer.ss")
 (load "prompt.ss")
 (load "minibuf.ss")
+(load "process.ss")
 (load "mode/term.ss")
 (load "mode/text.ss")
 (load "mode/dirb.ss")
@@ -86,12 +87,13 @@
 (minibuf-create)
 
 (define __on-event-handler
-   (lambda (ev wid)
+   (lambda (ev oid)
        (define __evt->symb
 	  (lambda (ev)
 	     (case ev
 		[1    'window-draw-hook ]
 		[100  'key-press-hook   ]
+		[1000 'idle-hook   ]
 		[else #f]
              )
           )
@@ -99,7 +101,11 @@
 
        (let ([h (__evt->symb ev)])
           (when h
-             (run-hooks h wid)
+             (if (eq? h 'idle-hook)
+                (run-hooks h)
+                ;; else
+                (run-hooks h oid)
+             )
           )
        )
    )

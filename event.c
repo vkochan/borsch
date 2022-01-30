@@ -88,10 +88,14 @@ int event_process(void)
 			return 0;
 	}
 
-	for (evt = event_fd_list.next; evt; evt = evt->next) {
+	evt = event_fd_list.next;
+	while (evt) {
+		event_fd_t *next = evt->next;
+
 		if (FD_ISSET(evt->fd, &rd)) {
 			evt->fn(evt->fd, evt->arg);
 		}
+		evt = next;
 	}
 
 	return r;

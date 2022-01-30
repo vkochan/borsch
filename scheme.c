@@ -763,6 +763,26 @@ ptr scheme_unbind_key(char *key, int mid)
 	return Sfalse;
 }
 
+ptr scheme_evt_fd_handler_add(int fd, void (*fn)(int fd, void *))
+{
+	int ret = evt_fd_handler_add(fd, fn, NULL);
+
+	if (ret == 0)
+		return Sinteger(ret);
+	return Sfalse;
+}
+
+void scheme_evt_fd_handler_del(int fd)
+{
+	evt_fd_handler_del(fd);
+}
+
+
+ptr scheme_process_is_alive(int pid)
+{
+	return Sboolean(process_is_alive(pid));
+}
+
 void scheme_do_quit(void)
 {
 	do_quit();
@@ -885,6 +905,11 @@ static void scheme_export_symbols(void)
 
 	Sregister_symbol("cs_bind_key", scheme_bind_key);
 	Sregister_symbol("cs_unbind_key", scheme_unbind_key);
+
+	Sregister_symbol("cs_evt_fd_handler_add", scheme_evt_fd_handler_add);
+	Sregister_symbol("cs_evt_fd_handler_del", scheme_evt_fd_handler_del);
+
+	Sregister_symbol("cs_process_is_alive", scheme_process_is_alive);
 
 	Sregister_symbol("cs_do_quit", scheme_do_quit);
 }

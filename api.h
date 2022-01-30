@@ -6,6 +6,7 @@
 typedef enum {
 	EVT_WIN_DRAW     = 1,
 	EVT_KEY_PRESS    = 100,
+	EVT_IDLE	 = 1000,
 } event_id_t;
 
 typedef enum {
@@ -148,6 +149,11 @@ int fifo_create(void);
 int tagbar_status_set(const char *s);
 int tagbar_status_align(int align);
 int tagbar_show(bool show);
+
+int evt_fd_handler_add(int fd, void (*fn)(int fd, void *), void *);
+void evt_fd_handler_del(int fd);
+
+bool process_is_alive(pid_t pid);
 
 void do_quit(void);
 
