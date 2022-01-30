@@ -44,6 +44,23 @@
    )
 )
 
+(define file-open-at-cursor
+   (lambda ()
+      (let ([w (extract-longword)])
+         (let ([p (if (equal? #\/ (string-ref w 0)) w (string-append (view-cwd) "/" w))])
+            (if (file-regular? p)
+               (let ([b (buffer-create)])
+                  (with-buffer b
+                     (text-mode)
+                     (buffer-open-file p)
+                  )
+               )
+            )
+         )
+      )
+   )
+)
+
 (define text-mode-cmd-map
    (let ([map (make-keymap)])
       (bind-key map "h" (lambda () (move-prev-char)))
@@ -79,6 +96,7 @@
       (bind-key map "y y" (lambda () (copy-line)))
       (bind-key map "C-r" (lambda () (buffer-redo)))
       (bind-key map "u" (lambda () (buffer-undo)))
+      (bind-key map "g f" (lambda () (file-open-at-cursor)))
       map
    )
 )
