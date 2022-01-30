@@ -85,6 +85,7 @@
                )
             (__cs_evt_fd_handler_add fd (foreign-callable-entry-point cb))
             (hashtable-set! %process-fd-ht fd p)
+            (values stdin stdout stderr pid)
          )
        )
       ]
