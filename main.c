@@ -4071,7 +4071,6 @@ bool process_is_alive(pid_t pid)
 
 	ret = waitpid(pid, &status, WNOHANG);
 	if (ret != pid) {
-		fprintf(stderr, "process %d is dead\n", pid);
 		return false;
 	} else {
 		return true;
