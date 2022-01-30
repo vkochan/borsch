@@ -9,6 +9,7 @@
 (load "prompt.ss")
 (load "minibuf.ss")
 (load "process.ss")
+(load "grep.ss")
 (load "mode/term.ss")
 (load "mode/text.ss")
 (load "mode/dirb.ss")
@@ -182,6 +183,8 @@
 (bind-key "C-x b o" buffer-open)
 
 (bind-key "C-x f d" dirb)
+
+(bind-key "C-x s g" grep)
 
 (bind-key "C-g q q" do-quit)
 
