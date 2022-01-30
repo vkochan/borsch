@@ -5,12 +5,17 @@
 (define __process-fd-entry-delete!
    (lambda (p)
       (let (
+            [on-ready (%process-on-ready p)]
             [stdin (%process-stdin p)]
             [stdout (%process-stdout p)]
             [stderr (%process-stderr p)]
+            [buf (%process-buf p)]
             [fd (%process-fd p)]
             [cb (%process-cb p)]
            )
+         (when on-ready
+            (on-ready buf)
+         )
          (hashtable-delete! %process-fd-ht fd)
          (__cs_evt_fd_handler_del fd)
          (close-port stdout)
@@ -57,13 +62,16 @@
    )
 )
 
-(define-record-type %process (fields stdin stdout stderr pid fd buf cb))
+(define-record-type %process (fields stdin stdout stderr pid fd buf cb on-ready))
 
 (define %process-fd-ht (make-eq-hashtable))
 
 (define process-start
    (case-lambda
       [(buf cmd)
+       (process-start buf cmd #f)]
+
+      [(buf cmd on-ready)
        (let-values (
                     [(stdin stdout stderr pid)
                        (open-process-ports cmd (buffer-mode block) (native-transcoder))]
@@ -73,7 +81,7 @@
          (let* (
                 [cb (__process-fd-cb)]
                 [fd (port-file-descriptor stdout)]
-                [p (make-%process stdin stdout stderr pid fd buf cb)]
+                [p (make-%process stdin stdout stderr pid fd buf cb on-ready)]
                )
             (__cs_evt_fd_handler_add fd (foreign-callable-entry-point cb))
             (hashtable-set! %process-fd-ht fd p)
