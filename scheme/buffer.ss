@@ -154,12 +154,14 @@
 
 (define-syntax (with-buffer stx)
    (syntax-case stx ()
-	       ((_ b exp ...)
-		#`(fluid-let ([buffer-current (lambda () b)])
-		    (begin
-                       exp
-		       ...
-                    )
+	       ((_ buf exp ...)
+		#`(let ([b buf])
+                     (fluid-let ([buffer-current (lambda () b)])
+		        (begin
+                           exp
+		           ...
+                        )
+                     )
                   )
                )
    )
