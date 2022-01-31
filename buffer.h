@@ -78,4 +78,6 @@ void buffer_snapshot(Buffer *buf);
 void buffer_undo(Buffer *buf);
 void buffer_redo(Buffer *buf);
 
+size_t buffer_search_regex(Buffer *buf, size_t pos, const char *pattern, int dir);
+
 #endif /* BUFFER_H */

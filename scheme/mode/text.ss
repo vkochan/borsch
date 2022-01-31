@@ -116,6 +116,10 @@
       (bind-key map "C-r" (lambda () (buffer-redo)))
       (bind-key map "u" (lambda () (buffer-undo)))
       (bind-key map "g f" (lambda () (file-open-at-cursor)))
+      (bind-key map "*" (lambda () (search-word-forward)))
+      (bind-key map "/" (lambda () (search-regex-read)))
+      (bind-key map "n" (lambda () (search-next)))
+      (bind-key map "N" (lambda () (search-prev)))
       map
    )
 )

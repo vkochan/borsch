@@ -12,6 +12,7 @@
 #include "keymap.h"
 #include "buffer.h"
 #include "text/text.h"
+#include "text/text-regex.h"
 #include "text/text-motions.h"
 
 typedef struct Buffer Buffer;
@@ -749,4 +750,22 @@ void buffer_redo(Buffer *buf)
 {
 	text_redo(buf->text);
 	buf->is_dirty = true;
+}
+
+size_t buffer_search_regex(Buffer *buf, size_t pos, const char *pattern, int dir)
+{
+	int cflags = REG_EXTENDED|REG_NEWLINE;
+	Regex *regex = text_regex_new();
+	if (!regex)
+		return EPOS;
+	if (text_regex_compile(regex, pattern, cflags) != 0) {
+		text_regex_free(regex);
+		return EPOS;
+	}
+	if (dir > 0)
+		pos = text_search_forward(buf->text, pos, regex);
+	else
+		pos = text_search_backward(buf->text, pos, regex);
+	text_regex_free(regex);
+	return pos;
 }

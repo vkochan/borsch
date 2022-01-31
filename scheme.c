@@ -614,6 +614,15 @@ void scheme_buf_redo(int bid)
 	buf_redo(bid);
 }
 
+ptr scheme_buf_search_regex(int bid, size_t pos, const char *pattern, int dir)
+{
+	size_t ret = buf_search_regex(bid, pos, pattern, dir);
+
+	if (ret != EPOS)
+		return Sinteger(ret);
+	return Sinteger(pos);
+}
+
 ptr scheme_minibuf_create(void)
 {
 	int ret = minibuf_create();
@@ -876,6 +885,8 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_snapshot", scheme_buf_snapshot);
 	Sregister_symbol("cs_buf_undo", scheme_buf_undo);
 	Sregister_symbol("cs_buf_redo", scheme_buf_redo);
+	Sregister_symbol("cs_buf_search_regex", scheme_buf_search_regex);
+
 	Sregister_symbol("cs_minibuf_create", scheme_minibuf_create);
 
 	Sregister_symbol("cs_term_create", scheme_term_create);

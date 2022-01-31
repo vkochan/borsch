@@ -3720,6 +3720,17 @@ void buf_redo(int bid)
 	}
 }
 
+size_t buf_search_regex(int bid, size_t pos, const char *pattern, int dir)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		return buffer_search_regex(buf, pos, pattern, dir);
+	}
+
+	return EPOS;
+}
+
 int minibuf_create(void)
 {
 	Window *w;
