@@ -80,6 +80,55 @@
    )
 )
 
+(define text-mode-save
+   (lambda ()
+      (if (buffer-save)
+         (message (format "~a is saved" (buffer-filename)))
+         ;; else
+         (message (format "Can't save ~a" (buffer-filename)))
+      )
+   )
+)
+
+(define text-mode-save-file
+   (lambda ()
+      (let ([f (buffer-filename)])
+         (if (not (equal? f ""))
+            (text-mode-save)
+            ;; else
+            (begin
+               (minibuf-read "Save as:" (buffer-name)
+                  (lambda (b f)
+                     (with-buffer b
+                        (define-local tmp-file-name f)
+                        (if (file-exists? f)
+                           (minibuf-ask (format "~a already exists, overwrite ?" f)
+                              (lambda (b a)
+                                 (with-buffer b
+                                    (if (equal? a 'yes)
+                                       (begin
+                                          (buffer-set-filename (get-local tmp-file-name))
+                                          (text-mode-save)
+                                       )
+                                    )
+                                 )
+                              )
+                           )
+                           ;; else
+                           (begin
+                              (buffer-set-filename f)
+                              (text-mode-save)
+                           )
+                        )
+                     )
+                  )
+               )
+            )
+         )
+      )
+   )
+)
+
 (define text-mode-cmd-map
    (let ([map (make-keymap)])
       (bind-key map "h" (lambda () (move-prev-char)))
@@ -120,14 +169,7 @@
       (bind-key map "/" (lambda () (search-regex-read)))
       (bind-key map "n" (lambda () (search-next)))
       (bind-key map "N" (lambda () (search-prev)))
-      (bind-key map "C-s" (lambda ()
-                                     (if (buffer-save)
-                                        (message (format "~a is saved" (buffer-filename)))
-                                        ;; else
-                                        (message (format "Can't save ~a" (buffer-filename)))
-                                     )
-                          )
-      )
+      (bind-key map "C-s" (lambda () (text-mode-save-file)))
       map
    )
 )
