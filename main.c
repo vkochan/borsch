@@ -3569,6 +3569,26 @@ int buf_file_open(int bid, const char *file)
 	}
 }
 
+void buf_file_set(int bid, const char *file)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_filename_set(buf, file);
+	}
+}
+
+char *buf_file_get(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		return buffer_filename_get(buf);
+	}
+
+	return NULL;
+}
+
 int buf_save(int bid)
 {
 	Buffer *buf = buffer_by_id(bid);

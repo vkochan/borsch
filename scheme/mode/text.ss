@@ -120,6 +120,14 @@
       (bind-key map "/" (lambda () (search-regex-read)))
       (bind-key map "n" (lambda () (search-next)))
       (bind-key map "N" (lambda () (search-prev)))
+      (bind-key map "C-s" (lambda ()
+                                     (if (buffer-save)
+                                        (message (format "~a is saved" (buffer-filename)))
+                                        ;; else
+                                        (message (format "Can't save ~a" (buffer-filename)))
+                                     )
+                          )
+      )
       map
    )
 )

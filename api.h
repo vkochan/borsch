@@ -99,6 +99,10 @@ void buf_cursor_set(int bid, size_t pos);
 void buf_input_enable(int bid, bool enable);
 void buf_mode_set(int bid, char *name);
 int buf_file_open(int bid, const char *file);
+
+void buf_file_set(int bid, const char *file);
+char *buf_file_get(int bid);
+
 int buf_save(int bid);
 void buf_mark_set(int bid, size_t pos);
 size_t buf_mark_get(int bid);

@@ -209,12 +209,24 @@ int buffer_file_open(Buffer *buf, const char *file)
 	return 0;
 }
 
+char *buffer_filename_get(Buffer *buf)
+{
+	return buf->file.path;
+}
+
+void buffer_filename_set(Buffer *buf, const char *name)
+{
+	free(buf->file.path);
+	buf->file.path = strdup(name);
+}
+
 bool buffer_save(Buffer *buf)
 {
 	if (buf->is_read_only)
-		return -1;
-
-	return text_save(buf->text, buf->file.path);
+		return false;
+	if (buf->file.path)
+		return text_save(buf->text, buf->file.path);
+	return false;
 }
 
 bool buffer_is_modified(Buffer *buf)

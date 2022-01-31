@@ -32,6 +32,8 @@
 (define __cs_buf_mode_set (foreign-procedure "cs_buf_mode_set" (int string) void))
 
 (define __cs_buf_file_open (foreign-procedure "cs_buf_file_open" (int string) scheme-object))
+(define __cs_buf_file_set (foreign-procedure "cs_buf_file_set" (int string) void))
+(define __cs_buf_file_get (foreign-procedure "cs_buf_file_get" (int) scheme-object))
 (define __cs_buf_save (foreign-procedure "cs_buf_save" (int) scheme-object))
 
 (define __cs_buf_mark_set (foreign-procedure "cs_buf_mark_set" (int int) void))
@@ -258,6 +260,18 @@
 (define buffer-open-file
    (lambda (f)
       (__cs_buf_file_open (buffer-current) f)
+   )
+)
+
+(define buffer-filename
+   (lambda ()
+      (__cs_buf_file_get (buffer-current))
+   )
+)
+
+(define buffer-set-filename
+   (lambda (f)
+      (__cs_buf_file_set (buffer-current) f)
    )
 )
 
