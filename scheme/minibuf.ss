@@ -63,6 +63,12 @@
    )
 )
 
+(define minibuf-prompt-copybuf-paste
+   (lambda ()
+      (paste-from-register)
+   )
+)
+
 (define minibuf-prompt-map
    (let ([map (make-empty-keymap)])
       (bind-key map "<Backspace>" minibuf-prompt-delete-prev-char)
@@ -70,6 +76,7 @@
       (bind-key map "<Esc>" minibuf-cancel-read)
       (bind-key map "C-h" minibuf-prompt-move-prev-char)
       (bind-key map "C-l" minibuf-prompt-move-next-char)
+      (bind-key map "C-p" minibuf-prompt-copybuf-paste)
       (bind-key map "C-g q q" do-quit)
       map
    )
