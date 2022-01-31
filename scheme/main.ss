@@ -130,6 +130,16 @@
    )
 )
 
+(define new-text-buffer
+   (lambda ()
+      (let ([b (buffer-create)])
+         (with-buffer b
+            (text-mode)
+         )
+      )
+   )
+)
+
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Default key bindings
 ;;;;;;;;;;;;;;;;;;;;;;;
@@ -177,6 +187,7 @@
 (bind-key "C-g g"   layout-switch-grid)
 (bind-key "C-g b"   layout-switch-bstack)
 (bind-key "C-g m"   window-toggle-maximized)
+(bind-key "C-g n"   new-text-buffer)
 
 (bind-key "C-x b s" buffer-switch)
 (bind-key "C-x b c" window-close)
