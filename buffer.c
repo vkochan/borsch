@@ -218,6 +218,7 @@ void buffer_filename_set(Buffer *buf, const char *name)
 {
 	free(buf->file.path);
 	buf->file.path = strdup(name);
+	strncpy(buf->name, name, sizeof(buf->name));
 }
 
 bool buffer_save(Buffer *buf)
