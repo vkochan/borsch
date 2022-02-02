@@ -1399,15 +1399,28 @@
 
 (define search-reg "")
 
+(define search-regex
+   (case-lambda
+      [(rx)
+       (search-regex rx (cursor))]
+
+      [(rx pos)
+       (search-regex rx (cursor) +1)]
+
+      [(rx pos dir)
+       (__cs_buf_search_regex (buffer-current) pos rx dir)]
+   )
+)
+
 (define search-next
    (lambda ()
-      (cursor-set (__cs_buf_search_regex (buffer-current) (cursor) search-reg +1))
+      (cursor-set (search-regex search-reg (cursor) +1))
    )
 )
 
 (define search-prev
    (lambda ()
-      (cursor-set (__cs_buf_search_regex (buffer-current) (cursor) search-reg -1))
+      (cursor-set (search-regex search-reg (cursor) -1))
    )
 )
 
@@ -1415,7 +1428,7 @@
    (lambda (word dir)
       (let ([pattern (format "\\<~a\\>" word)])
          (set! search-reg pattern)
-         (cursor-set (__cs_buf_search_regex (buffer-current) (cursor) pattern dir))
+         (cursor-set (search-regex pattern (cursor) dir))
       )
    )
 )
@@ -1444,7 +1457,7 @@
    (lambda (b r)
       (with-buffer b
          (set! search-reg r)
-         (cursor-set (__cs_buf_search_regex b (cursor) r +1))
+         (cursor-set (search-regex r))
       )
    )
 )
