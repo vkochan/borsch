@@ -205,3 +205,20 @@
       (minibuf-interactive-func 'minibuf-ask-map (format "~a y/n" str) #f fn)
    )
 )
+
+(define minibuf-cmd
+   (lambda ()
+      (with-buffer minibuf-buffer
+         (enable-insert #t)
+      )
+      (minibuf-interactive-func 'minibuf-prompt-map ":" #f
+         (lambda (buf val)
+            (let ([line (string->number val)])
+               (when line
+                  (move-line-num line)
+               )
+            )
+         )
+      )
+   )
+)

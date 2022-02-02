@@ -170,6 +170,7 @@
       (bind-key map "n" (lambda () (search-next)))
       (bind-key map "N" (lambda () (search-prev)))
       (bind-key map "C-s" (lambda () (text-mode-save-file)))
+      (bind-key map ":" (lambda () (minibuf-cmd)))
       map
    )
 )
