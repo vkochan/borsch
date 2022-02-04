@@ -200,6 +200,8 @@ void ui_window_resize(UiWin *win, int width, int height)
 			win->resize(win, win->width, win->height);
 		else if (win->ui->window_resize)
 			win->ui->window_resize(win, win->width, win->height);
+
+		ui_window_clear(win);
 	}
 }
 
@@ -370,7 +372,6 @@ bool ui_window_border_is_enabled(UiWin *win)
 	return win->has_border;
 }
 
-#include <stdio.h>
 void ui_window_sidebar_width_set(UiWin *win, int width)
 {
 	if (win->sidebar_width != width) {

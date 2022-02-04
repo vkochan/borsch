@@ -467,9 +467,23 @@ static void term_window_refresh(UiWin *win)
 
 static void term_window_clear(UiWin *win)
 {
+	int sidebar = ui_window_sidebar_width_get(win);
 	WinTerm *twin = (WinTerm*)win;
 
-	wclear(twin->cwin);
+	if (sidebar) {
+		int y = win->has_border;
+		char ch = ' ';
+		int sx, sy;
+
+		getyx(twin->cwin, sy, sx);
+
+		for (; y < ui_window_height_get(win) - 1; y++) {
+			mvwhline(twin->cwin, y, 0, ch, sidebar);
+		}
+
+		wmove(twin->cwin, sy, sx);
+		wnoutrefresh(twin->cwin);
+	}
 }
 
 static void term_window_redraw(UiWin *win)
