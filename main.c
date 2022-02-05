@@ -428,6 +428,16 @@ isarrange(void (*func)()) {
 	return func == layout->arrange;
 }
 
+static Window *current_window(void)
+{
+	return sel;
+}
+
+static void set_current_window(Window *w)
+{
+	sel = w;
+}
+
 static bool
 isvisible(Window *c) {
 	return c->tags & tagset[seltags];
@@ -438,7 +448,7 @@ is_content_visible(Window *c) {
 	if (!c)
 		return false;
 	if (isarrange(fullscreen))
-		return sel == c;
+		return current_window() == c;
 	else if (c == minibuf)
 		return true;
 	return isvisible(c) && !c->minimized;
@@ -630,7 +640,7 @@ static void draw_title(Window *c) {
 	if (!ui_window_has_title(c->win))
 		return;
 
-	if (sel == c || (pertag.runinall[pertag.curtag] && !c->minimized)) {
+	if (current_window() == c || (pertag.runinall[pertag.curtag] && !c->minimized)) {
 		title_fg = UI_TEXT_COLOR_BLACK;
 		title_bg = UI_TEXT_COLOR_WHITE;
 	}
@@ -689,7 +699,7 @@ draw(Window *c, bool force) {
 		ui_window_redraw(c->win);
 		ui_window_draw(c->win);
 
-		if (!isarrange(fullscreen) || c == sel)
+		if (!isarrange(fullscreen) || c == current_window())
 			draw_title(c);
 
 		ui_window_refresh(c->win);
@@ -703,7 +713,7 @@ draw_all(void) {
 	}
 
 	if (!nextvisible(windows)) {
-		sel = NULL;
+		set_current_window(NULL);
 		ui_cursor_enable(ui, false);
 		ui_clear(ui);
 		drawbar();
@@ -713,7 +723,7 @@ draw_all(void) {
 
 	if (!isarrange(fullscreen)) {
 		for (Window *c = nextvisible(windows); c; c = nextvisible(c->next)) {
-			if (c != sel) {
+			if (c != current_window()) {
 				draw(c, true);
 			}
 		}
@@ -723,8 +733,8 @@ draw_all(void) {
 	 * this has the effect that the cursor position is
 	 * accurate
 	 */
-	if (sel) {
-		draw(sel, true);
+	if (current_window()) {
+		draw(current_window(), true);
 	}
 }
 
@@ -854,7 +864,7 @@ static void
 settitle(Window *c) {
 	char *term, *t = title;
 	char *ctitle = window_get_title(c);
-	if (!t && sel == c && ctitle && strlen(ctitle))
+	if (!t && current_window() == c && ctitle && strlen(ctitle))
 		t = ctitle;
 	if (t && (term = getenv("TERM")) && !strstr(term, "linux")) {
 		printf("\033]0;%s\007", t);
@@ -874,7 +884,7 @@ focus(Window *c) {
 	if (!c)
 		for (c = stack; c && !isvisible(c); c = c->snext);
 
-	if (sel == c)
+	if (current_window() == c)
 		return;
 
 	if (c) {
@@ -884,8 +894,8 @@ focus(Window *c) {
 			curr_kmap = global_kmap;
 	}
 
-	lastsel = sel;
-	sel = c;
+	lastsel = current_window();
+	set_current_window(c);
 	if (lastsel) {
 		lastsel->urgent = false;
 		if (!isarrange(fullscreen)) {
@@ -946,7 +956,7 @@ term_urgent_handler(Vt *term) {
 	printf("\a");
 	fflush(stdout);
 	drawbar();
-	if (!isarrange(fullscreen) && sel != c && isvisible(c))
+	if (!isarrange(fullscreen) && current_window() != c && isvisible(c))
 		draw_title(c);
 }
 
@@ -974,7 +984,7 @@ get_window_by_coord(unsigned int x, unsigned int y) {
 	if (y < way || y >= way+wah)
 		return NULL;
 	if (isarrange(fullscreen))
-		return sel;
+		return current_window();
 	for (Window *c = nextvisible(windows); c; c = nextvisible(c->next)) {
 		int w_h = ui_window_height_get(c->win);
 		int w_w = ui_window_width_get(c->win);
@@ -1049,11 +1059,11 @@ tagschanged() {
 
 static void
 toggletag(const char *args[]) {
-	if (!sel)
+	if (!current_window())
 		return;
-	unsigned int newtags = sel->tags ^ (bitoftag(args[0]) & TAGMASK);
+	unsigned int newtags = current_window()->tags ^ (bitoftag(args[0]) & TAGMASK);
 	if (newtags) {
-		sel->tags = newtags;
+		current_window()->tags = newtags;
 		tagschanged();
 	}
 }
@@ -1120,7 +1130,7 @@ keypress(int code) {
 		nodelay(stdscr, FALSE);
 	}
 
-	for (Window *c = pertag.runinall[pertag.curtag] ? nextvisible(windows) : sel; c; c = nextvisible(c->next)) {
+	for (Window *c = pertag.runinall[pertag.curtag] ? nextvisible(windows) : current_window(); c; c = nextvisible(c->next)) {
 		if (is_content_visible(c)) {
 			Vt *term = buffer_term_get(c->buf);
 
@@ -1253,7 +1263,7 @@ setup(void) {
 
 static void __win_del(Window *w)
 {
-	if (sel == w)
+	if (current_window() == w)
 		focusnextnm(NULL);
 
 	if (w != get_popup()) {
@@ -1263,13 +1273,13 @@ static void __win_del(Window *w)
 	}
 	detachstack(w);
 
-	if (sel == w) {
+	if (current_window() == w) {
 		Window *next = nextvisible(windows);
 		if (next) {
 			focus(next);
 			toggleminimize();
 		} else {
-			sel = NULL;
+			set_current_window(NULL);
 		}
 	}
 	if (lastsel == w)
@@ -1413,7 +1423,7 @@ synctitle(Window *c)
 	buffer_name_set(c->buf, basename(buf));
 
 	settitle(c);
-	if (!isarrange(fullscreen) || sel == c)
+	if (!isarrange(fullscreen) || current_window() == c)
 		draw_title(c);
 done:
 	close(fd);
@@ -1509,7 +1519,7 @@ int create(const char *prog, const char *title, const char *cwd) {
 	}
 
 	if (!cwd)
-		cwd = getcwd_by_pid(sel, tmppath);
+		cwd = getcwd_by_pid(current_window(), tmppath);
 	else if (strlen(pertag.cwd[pertag.curtag]))
 		cwd = pertag.cwd[pertag.curtag];
 
@@ -1562,29 +1572,29 @@ __focusid(int win_id) {
 
 static void
 focusnextnm(const char *args[]) {
-	if (!sel)
+	if (!current_window())
 		return;
-	Window *c = sel;
+	Window *c = current_window();
 	do {
 		c = nextvisible(c->next);
 		if (!c)
 			c = nextvisible(windows);
-	} while (c && c->minimized && c != sel);
+	} while (c && c->minimized && c != current_window());
 	focus(c);
 }
 
 static void
 focusprevnm(const char *args[]) {
-	if (!sel)
+	if (!current_window())
 		return;
-	Window *c = sel;
+	Window *c = current_window();
 	do {
 		for (c = c->prev; c && !isvisible(c); c = c->prev);
 		if (!c) {
 			for (c = windows; c && c->next; c = c->next);
 			for (; c && !isvisible(c); c = c->prev);
 		}
-	} while (c && c != sel && c->minimized);
+	} while (c && c != current_window() && c->minimized);
 	focus(c);
 }
 
@@ -1596,7 +1606,7 @@ focuslast(const char *args[]) {
 
 static void
 killwindow(void) {
-	Window *target = sel;
+	Window *target = current_window();
 	pid_t pid;
 
 	if (!target)
@@ -1615,7 +1625,7 @@ static void killother(const char *args[]) {
 	Window *c;
 
 	for (n = 0, c = nextvisible(windows); c; c = nextvisible(c->next)) {
-		if (ismastersticky(c) || sel == c)
+		if (ismastersticky(c) || current_window() == c)
 			continue;
 		kill(-(buffer_pid_get(c->buf)), SIGKILL);
 	}
@@ -1643,13 +1653,13 @@ redraw(const char *args[]) {
 
 static void
 scrollback(const char *args[]) {
-	int w_h = ui_window_height_get(sel->win);
+	int w_h = ui_window_height_get(current_window()->win);
 	Vt *term;
 
-	if (!is_content_visible(sel))
+	if (!is_content_visible(current_window()))
 		return;
 
-	term = buffer_term_get(sel->buf);
+	term = buffer_term_get(current_window()->buf);
 
 	if (term)
 		if (!args[0] || atoi(args[0]) < 0)
@@ -1661,7 +1671,7 @@ scrollback(const char *args[]) {
 		ui_cursor_enable(ui, vt_cursor_visible(term));
 	else
 		ui_cursor_enable(ui, true);
-	draw(sel, true);
+	draw(current_window(), true);
 }
 
 static void
@@ -1714,24 +1724,24 @@ toggleminimize(void)
 	Window *c, *m, *t;
 	unsigned int n;
 
-	if (!sel)
+	if (!current_window())
 		return;
 	/* do not minimize sticked master */
-	if (ismastersticky(sel))
+	if (ismastersticky(current_window()))
 		return;
 	/* the last window can't be minimized */
-	if (!sel->minimized) {
+	if (!current_window()->minimized) {
 		for (n = 0, c = nextvisible(windows); c; c = nextvisible(c->next))
 			if (!c->minimized)
 				n++;
 		if (n == 1)
 			return;
 	}
-	sel->minimized = !sel->minimized;
-	m = sel;
+	current_window()->minimized = !current_window()->minimized;
+	m = current_window();
 	/* check whether the master window was minimized */
-	if (sel == nextvisible(windows) && sel->minimized) {
-		c = nextvisible(sel->next);
+	if (current_window() == nextvisible(windows) && current_window()->minimized) {
+		c = nextvisible(current_window()->next);
 		detach(c);
 		attach(c);
 		focus(c);
@@ -1760,7 +1770,7 @@ static void minimizeother(const char *args[])
 	Window *c;
 
 	for (n = 0, c = nextvisible(windows); c; c = nextvisible(c->next)) {
-		if (ismastersticky(c) || sel == c)
+		if (ismastersticky(c) || current_window() == c)
 			continue;
 
 		c->minimized = true;
@@ -1786,11 +1796,11 @@ static void
 zoom(const char *args[]) {
 	Window *c;
 
-	if (!sel)
+	if (!current_window())
 		return;
 	if (args && args[0])
 		focusn(args);
-	if ((c = sel) == nextvisible(windows))
+	if ((c = current_window()) == nextvisible(windows))
 		if (!(c = nextvisible(c->next)))
 			return;
 	detach(c);
@@ -2064,10 +2074,10 @@ static void handle_keypress(int fd, void *arg) {
 	event_t evt;
 	int code;
 
-	if (!sel) {
+	if (!current_window()) {
 		curr_kmap = global_kmap;
-	} else if (sel && !sel->minimized) {
-		KeyMap *map = buffer_keymap_get(sel->buf);
+	} else if (current_window() && !current_window()->minimized) {
+		KeyMap *map = buffer_keymap_get(current_window()->buf);
 		if (map)
 			curr_kmap = map;
 	};
@@ -2176,7 +2186,7 @@ int main(int argc, char *argv[]) {
 			if (is_content_visible(c)) {
 				if (pid && !buffer_name_is_locked(c->buf))
 					synctitle(c);
-				if (c != sel) {
+				if (c != current_window()) {
 					draw(c, false);
 				}
 			} else if (!isarrange(fullscreen) && isvisible(c)
@@ -2186,17 +2196,17 @@ int main(int argc, char *argv[]) {
 			}
 		}
 
-		if (is_content_visible(sel)) {
+		if (is_content_visible(current_window())) {
 			int x, y;
 
-			if (buffer_term_get(sel->buf)) {
-				ui_cursor_enable(ui, vt_cursor_visible(buffer_term_get(sel->buf)));
+			if (buffer_term_get(current_window()->buf)) {
+				ui_cursor_enable(ui, vt_cursor_visible(buffer_term_get(current_window()->buf)));
 			} else {
 				ui_cursor_enable(ui, true);
 			}
-			draw(sel, false);
-		        ui_window_cursor_get(sel->win, &x, &y);
-		        ui_window_cursor_set(sel->win, x, y);
+			draw(current_window(), false);
+		        ui_window_cursor_get(current_window()->win, &x, &y);
+		        ui_window_cursor_set(current_window()->win, x, y);
 		}
 
 		evt.eid = EVT_IDLE;
@@ -2366,8 +2376,8 @@ int win_right_get(int wid)
 
 int win_current_get(void)
 {
-	if (sel)
-		return sel->id;
+	if (current_window())
+		return current_window()->id;
 
 	return 0;
 }
@@ -2383,8 +2393,8 @@ int win_prev_selected(void)
 {
 	if (lastsel)
 		return lastsel->id;
-	if (sel)
-		return sel->id;
+	if (current_window())
+		return current_window()->id;
 	return 0;
 }
 
@@ -2731,7 +2741,7 @@ int win_state_set(int wid, win_state_t st)
 	if (!c)
 		return -1;
 
-	orig = sel;
+	orig = current_window();
 
 	switch (st) {
 	case WIN_STATE_MINIMIZED:
@@ -2777,7 +2787,7 @@ int win_state_toggle(int wid, win_state_t st)
 	if (!c)
 		return -1;
 
-	orig = sel;
+	orig = current_window();
 
 	switch (st) {
 	case WIN_STATE_MINIMIZED:
@@ -3033,8 +3043,8 @@ int buf_kmap_get(int bid)
 
 int buf_current_get(void)
 {
-	if (sel)
-		return buffer_id_get(sel->buf);
+	if (current_window())
+		return buffer_id_get(current_window()->buf);
 
 	return 0;
 }
@@ -3110,7 +3120,7 @@ static void buf_update(Window *w)
 
 		view_invalidate(view);
 
-		if (w == sel || w == minibuf) {
+		if (w == current_window() || w == minibuf) {
 			void (*scroll_fn)(View *, size_t) = view_scroll_to;
 			Filerange r = view_viewport_get(view);
 			Text *text = buffer_text_get(buf);
@@ -3136,7 +3146,7 @@ static void buf_update(Window *w)
 			scroll_fn(view, pos);
 
 			if (view_coord_get(view, pos, NULL, &y, &x)) {
-				if (w == sel)
+				if (w == current_window())
 					ui_window_cursor_set(win, x, y);
 			}
 
@@ -3541,8 +3551,8 @@ void buf_mode_set(int bid, char *name)
 
 	if (buf) {
 		buffer_mode_set(buf, name);
-		if (sel)
-			draw_title(sel);
+		if (current_window())
+			draw_title(current_window());
 	}
 }
 
@@ -3850,7 +3860,7 @@ int view_current_set(int tag)
 
 	unsigned int newtagset = tag_to_bit(tag);
 	if (tagset[seltags] != newtagset && newtagset) {
-		seltags ^= 1; /* toggle sel tagset */
+		seltags ^= 1; /* toggle current_window() tagset */
 		pertag.prevtag = pertag.curtag;
 		pertag.curtag = tag;
 		setpertag();
