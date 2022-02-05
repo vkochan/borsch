@@ -1280,6 +1280,20 @@ static void __win_del(Window *w)
 	arrange();
 }
 
+static Buffer *__buf_new(const char *name, KeyMap *kmap)
+{
+	Buffer *buf = buffer_new(name);
+
+	if (buf) {
+		keymap_parent_set(buffer_keymap_get(buf), kmap);
+		buffer_env_set(buf, scheme_env_alloc());
+		buffer_ref_get(buf);
+		return buf;
+	}
+
+	return NULL;
+}
+
 static void __buf_del(Buffer *buf)
 {
 	int pty = -1;
@@ -1447,24 +1461,22 @@ int create(const char *prog, const char *title, const char *cwd) {
 	c->id = ++cmdfifo.id;
 	snprintf(buf, sizeof buf, "%d", c->id);
 
-	c->buf = buffer_new(title);
+	c->buf = __buf_new(title, global_kmap);
 	if (!c->buf) {
 		free(c);
 		return -1;
 	}
 
-	keymap_parent_set(buffer_keymap_get(c->buf), global_kmap);
-
 	c->view = view_new(buffer_text_get(c->buf));
 	if (!c->view) {
-		buffer_del(c->buf);
+		__buf_del(c->buf);
 		free(c);
 	}
 
 	c->win = ui_window_new(ui, c->view);
 	if (!c->win) {
 		view_free(c->view);
-		buffer_del(c->buf);
+		__buf_del(c->buf);
 		free(c);
 		return -1;
 	}
@@ -1474,7 +1486,7 @@ int create(const char *prog, const char *title, const char *cwd) {
 	term = vt_create(ui_height_get(ui), ui_width_get(ui), scr_history);
 	if (!term) {
 		view_free(c->view);
-		buffer_del(c->buf);
+		__buf_del(c->buf);
 		free(c);
 		return -1;
 	}
@@ -1503,9 +1515,6 @@ int create(const char *prog, const char *title, const char *cwd) {
 
 	pid = vt_forkpty(term, shell, pargs, cwd, env, NULL, NULL);
 	buffer_pid_set(c->buf, pid);
-
-	buffer_env_set(c->buf, scheme_env_alloc());
-	buffer_ref_get(c->buf);
 
 	event_fd_handler_register(vt_pty_get(term), handle_vt, c->buf);
 
@@ -2523,12 +2532,10 @@ int win_new(int bid)
 	if (bid) {
 		c->buf = buffer_by_id(bid);
 		buffer_dirty_set(c->buf, true);
+		buffer_ref_get(c->buf);
 	} else {
-		c->buf = buffer_new("");
-		keymap_parent_set(buffer_keymap_get(c->buf), global_kmap);
+		c->buf = __buf_new("", global_kmap);
 	}
-
-	buffer_ref_get(c->buf);
 
 	if (!c->buf) {
 		free(c);
@@ -2537,7 +2544,7 @@ int win_new(int bid)
 
 	c->view = view_new(buffer_text_get(c->buf));
 	if (!c->view) {
-		buffer_del(c->buf);
+		__buf_del(c->buf);
 		free(c);
 		return -1;
 	}
@@ -2545,13 +2552,10 @@ int win_new(int bid)
 	c->win = ui_window_new(ui, c->view);
 	if (!c->win) {
 		view_free(c->view);
-		buffer_del(c->buf);
+		__buf_del(c->buf);
 		free(c);
 		return -1;
 	}
-
-	if (!bid)
-		buffer_env_set(c->buf, scheme_env_alloc());
 
 	if (buffer_term_get(c->buf)) {
 		Vt *term = buffer_term_get(c->buf);
@@ -2986,15 +2990,10 @@ void kmap_del(int kid)
 
 int buf_new(char *name)
 {
-	Buffer *buf = buffer_new(name);
+	Buffer *buf = __buf_new(name, global_kmap);
 
-	if (buf) {
-		keymap_parent_set(buffer_keymap_get(buf), global_kmap);
-		buffer_env_set(buf, scheme_env_alloc());
-		buffer_ref_get(buf);
+	if (buf)
 		return buffer_id_get(buf);
-	}
-
 	return 0;
 }
 
@@ -3765,7 +3764,7 @@ int minibuf_create(void)
 	/* c->tags = tagset[seltags]; */
 	w->id = ++cmdfifo.id;
 
-	w->buf = buffer_new("*minibuf*");
+	w->buf = __buf_new("*minibuf*", NULL);
 	if (!w->buf) {
 		free(w);
 		return -1;
@@ -3773,7 +3772,7 @@ int minibuf_create(void)
 
 	w->view = view_new(buffer_text_get(w->buf));
 	if (!w->view) {
-		buffer_del(w->buf);
+		__buf_del(w->buf);
 		free(w);
 		return -1;
 	}
@@ -3781,13 +3780,10 @@ int minibuf_create(void)
 	w->win = ui_window_new(ui, w->view);
 	if (!w->win) {
 		view_free(w->view);
-		buffer_del(w->buf);
+		__buf_del(w->buf);
 		free(w);
 		return -1;
 	}
-
-	buffer_env_set(w->buf, scheme_env_alloc());
-	buffer_ref_get(w->buf);
 
 	ui_window_on_view_update_set(w->win, on_view_update_cb);
 	ui_window_resize(w->win, waw, 1);
