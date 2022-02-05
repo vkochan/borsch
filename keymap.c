@@ -37,13 +37,14 @@ typedef struct KeyMap {
 	KeyBinding *kbd_list;
 	char parent_name[64];
 	KeyMap *parent;
+	KeyMap *prev;
 	KeyMap *next;
 	char name[64];
 	int ref_count;
 	int kid;
 } KeyMap;
 
-static KeyMap *map_list;
+static KeyMap map_list;
 static int map_id_gen;
 
 void keymap_free(KeyMap *map);
@@ -144,6 +145,7 @@ KeyBinding *keymap_match(KeyMap *map, int *key, int len)
 			if (it->keys[i] == key[i])
 				m++;
 		}
+
 		if (m == len)
 			return it;
 	}
@@ -234,6 +236,24 @@ void keymap_ref_put(KeyMap *map)
 	}
 }
 
+static void keymap_insert(KeyMap *head, KeyMap *map)
+{
+	map->next = head->next;
+	map->prev = head;
+
+	if (head->next)
+		head->next->prev = map;
+	head->next = map;
+}
+
+static void keymap_remove(KeyMap *map)
+{
+	if (map->prev)
+		map->prev->next = map->next;
+	if (map->next)
+		map->next->prev = map->prev;
+}
+
 KeyMap *keymap_new(KeyMap *parent)
 {
 	KeyMap *map;
@@ -244,31 +264,23 @@ KeyMap *keymap_new(KeyMap *parent)
 
 	map->kid = ++map_id_gen;
 	map->parent = parent;
-	map->next = map_list;
 	map->ref_count = 1;
 
 	if (parent)
 		keymap_ref_get(parent);
 
-	map_list = map;
-
+	keymap_insert(&map_list, map);
 	return map;
 }
 
 void keymap_free(KeyMap *map)
 {
 	KeyBinding *kbd;
-	KeyMap *prev;
 
 	if (map->ref_count && --map->ref_count)
 		return;
 
-	for (prev = map_list; prev; prev = prev->next) {
-		if (prev->next == map) {
-			prev->next = map->next;
-			break;
-		}
-	}
+	keymap_remove(map);
 
 	kbd = map->kbd_list;
 	while (kbd) {
@@ -288,7 +300,7 @@ KeyMap *keymap_by_id(int kid)
 {
 	KeyMap *it;
 
-	for (it = map_list; it; it = it->next) {
+	for (it = map_list.next; it; it = it->next) {
 		if (it->kid == kid)
 			return it;
 	}
