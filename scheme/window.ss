@@ -119,7 +119,7 @@
    )
 )
 
-(define window-current
+(define current-window
    (lambda ()
       (__cs_win_current_get)
    )
@@ -385,7 +385,7 @@
 (define window-toggle-minimized
    (case-lambda
       [()
-       (window-toggle-minimized (window-current))]
+       (window-toggle-minimized (current-window))]
 
       [(wid)
        (__window-toggle wid 'minimized)
@@ -399,7 +399,7 @@
 (define window-toggle-maximized
    (case-lambda
       [()
-       (window-toggle-maximized (window-current))]
+       (window-toggle-maximized (current-window))]
 
       [(wid)
        (__window-toggle wid 'maximized)
@@ -473,7 +473,7 @@
 (define window-viewport-begin
    (case-lambda
       [()
-       (window-viewport-begin (window-current))]
+       (window-viewport-begin (current-window))]
 
       [(w)
        (__cs_win_viewport_pos w #\H)]
@@ -483,7 +483,7 @@
 (define window-viewport-end
    (case-lambda
       [()
-       (window-viewport-end (window-current))]
+       (window-viewport-end (current-window))]
 
       [(w)
        (__cs_win_viewport_pos w #\L)]
@@ -493,7 +493,7 @@
 (define window-viewport-coord
    (case-lambda
       [(p)
-       (window-viewport-coord (window-current) p)]
+       (window-viewport-coord (current-window) p)]
 
       [(w p)
        (__cs_win_viewport_coord w p)]
@@ -529,7 +529,7 @@
 (define window-scroll-page-down
    (case-lambda
       [()
-       (window-scroll-page-down (window-current))]
+       (window-scroll-page-down (current-window))]
 
       [(w)
        (__cs_win_scroll w #\f 0)]
@@ -539,7 +539,7 @@
 (define window-scroll-page-up
    (case-lambda
       [()
-       (window-scroll-page-up (window-current))]
+       (window-scroll-page-up (current-window))]
 
       [(w)
        (__cs_win_scroll w #\b 0)]
@@ -549,7 +549,7 @@
 (define window-scroll-halfpage-down
    (case-lambda
       [()
-       (window-scroll-halfpage-down (window-current))]
+       (window-scroll-halfpage-down (current-window))]
 
       [(w)
        (__cs_win_scroll w #\d 0)]
@@ -559,7 +559,7 @@
 (define window-scroll-halfpage-up
    (case-lambda
       [()
-       (window-scroll-halfpage-up (window-current))]
+       (window-scroll-halfpage-up (current-window))]
 
       [(w)
        (__cs_win_scroll w #\u 0)]
@@ -569,7 +569,7 @@
 (define window-scroll-down
    (case-lambda
       [(n)
-       (window-scroll-down (window-current))]
+       (window-scroll-down (current-window))]
 
       [(w n)
        (__cs_win_scroll w #\l n)]
@@ -579,7 +579,7 @@
 (define window-scroll-up
    (case-lambda
       [(n)
-       (window-scroll-down (window-current))]
+       (window-scroll-down (current-window))]
 
       [(w n)
        (__cs_win_scroll w #\L n)]
@@ -589,7 +589,7 @@
 (define window-set-sidebar-width
    (case-lambda
       [(l)
-       (window-set-sidebar-width (window-current) l)]
+       (window-set-sidebar-width (current-window) l)]
 
       [(w l)
        (__cs_win_sidebar_set w l)]
@@ -599,7 +599,7 @@
 (define window-sidebar-width
    (case-lambda
       [()
-       (window-sidebar-width (window-current))]
+       (window-sidebar-width (current-window))]
 
       [(w)
        (__cs_win_sidebar_get w)]
