@@ -1151,7 +1151,7 @@
 (define mark-copy
    (lambda ()
       (let ([r (mark-get-range)])
-           (copy-to-register (buffer-string (car r) (cadr r)))
+           (copybuf-copy (buffer-string (car r) (cadr r)))
       )
    )
 )
@@ -1159,7 +1159,7 @@
 (define mark-copy-append
    (lambda ()
       (let ([r (mark-get-range)])
-           (append-to-register (buffer-string (car r) (cadr r)))
+           (copybuf-append (buffer-string (car r) (cadr r)))
       )
    )
 )
@@ -1167,7 +1167,7 @@
 (define mark-copy-linewise
    (lambda ()
       (let ([r (mark-get-range)])
-           (copy-to-register (buffer-string (car r) (cadr r)) #t)
+           (copybuf-copy (buffer-string (car r) (cadr r)) #t)
       )
    )
 )
@@ -1175,7 +1175,7 @@
 (define mark-copy-append-linewise
    (lambda ()
       (let ([r (mark-get-range)])
-           (append-to-register (buffer-string (car r) (cadr r)) #t)
+           (copybuf-append (buffer-string (car r) (cadr r)) #t)
       )
    )
 )
@@ -1192,7 +1192,7 @@
 
 (define copy-line
    (lambda ()
-      (copy-to-register (buffer-string (line-begin-pos) (1+ (line-end-pos))) #t)
+      (copybuf-copy (buffer-string (line-begin-pos) (1+ (line-end-pos))) #t)
    )
 )
 

@@ -7,6 +7,7 @@
 (load "window.ss")
 (load "buffer.ss")
 (load "prompt.ss")
+(load "copybuf.ss")
 (load "minibuf.ss")
 (load "process.ss")
 (load "grep.ss")
@@ -14,70 +15,6 @@
 (load "mode/text.ss")
 (load "mode/dirb.ss")
 (load "mode/lisp.ss")
-
-(define reg "")
-(define reg-is-linewise #f)
-
-;; Public API
-(define copy-to-register
-   (case-lambda
-      [(s)
-       (set! reg-is-linewise #f)
-       (set! reg s)]
-
-      [(s l)
-       (set! reg-is-linewise #t)
-       (set! reg s)]
-   )
-)
-
-(define append-to-register
-   (case-lambda
-      [(s)
-       (set! reg-is-linewise #f)
-       (set! reg (string-append reg " " s))]
-
-      [(s l)
-       (set! reg-is-linewise #t)
-       (set! reg (string-append reg "\n" s))]
-   )
-)
-
-(define paste-from-register-inplace
-   (lambda ()
-      (insert reg)
-   )
-)
-
-(define paste-from-register
-   (lambda ()
-      (if (not reg-is-linewise)
-         (begin
-            (when (not (equal? #\newline (extract-char)))
-               (move-next-char)
-            )
-            (paste-from-register-inplace)
-            (move-prev-char)
-          )
-          ;; else
-          (begin
-             (move-line-end)
-             (insert-nl)
-             (save-cursor
-                (paste-from-register-inplace)
-                (delete-char)
-             )
-          )
-      )
-   )
-)
-
-(define paste-from-register-before
-   (lambda ()
-      (paste-from-register-inplace)
-      (move-prev-char)
-   )
-)
 
 (define open-repl
    (lambda ()

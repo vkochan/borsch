@@ -65,7 +65,7 @@
 
 (define minibuf-prompt-copybuf-paste
    (lambda ()
-      (paste-from-register)
+      (copybuf-paste)
    )
 )
 
