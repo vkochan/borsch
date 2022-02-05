@@ -163,7 +163,7 @@
 (define minibuf-interactive-func
    (lambda (map str def fn)
       (let (
-            [b (buffer-current)]
+            [b (current-buffer)]
            )
          (with-buffer minibuf-buffer
             (erase-buffer)

@@ -19,7 +19,7 @@
 
 (define %keymap-get
    (lambda (m)
-      (if (and (symbol? m) (buffer-current) (local-symbol-bound? m))
+      (if (and (symbol? m) (current-buffer) (local-symbol-bound? m))
          (get-local-symbol m)
          ;; else
          m

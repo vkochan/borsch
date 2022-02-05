@@ -24,7 +24,7 @@
    (lambda (s f)
       (let (
             [b (buffer-create)]
-            [c (buffer-current)]
+            [c (current-buffer)]
            )
          (with-buffer b
             (define-local prompt-orig-buf c)

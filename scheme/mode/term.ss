@@ -6,7 +6,7 @@
 (define term-send-keys
    (case-lambda
       [(keys)
-       (__cs_term_keys_send (buffer-current) keys)]
+       (__cs_term_keys_send (current-buffer) keys)]
 
       [(bid keys)
        (__cs_term_keys_send bid keys)]
@@ -16,7 +16,7 @@
 (define term-send-text
    (case-lambda
       [(text)
-       (__cs_term_text_send (buffer-current) text)]
+       (__cs_term_text_send (current-buffer) text)]
 
       [(bid text)
        (__cs_term_text_send bid text)]
@@ -26,7 +26,7 @@
 (define term-string
    (case-lambda
       [()
-       (term-string (buffer-current))]
+       (term-string (current-buffer))]
 
       [(b)
        (__cs_term_text_get b)]
@@ -37,7 +37,7 @@
    (lambda ()
       (let* (
              [b (buffer-new)]
-             [c (buffer-current)]
+             [c (current-buffer)]
              [s (term-string c)]
             )
          (with-buffer b
@@ -55,7 +55,7 @@
 
 (define term-mode-copy-exit
    (lambda ()
-      (let ([c (buffer-current)])
+      (let ([c (current-buffer)])
          (window-switch-buffer (get-local orig-buf))
          (buffer-delete c)
       )

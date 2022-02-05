@@ -122,13 +122,13 @@
 
 (define buffer-set-mode
    (lambda (n)
-      (__cs_buf_mode_set (buffer-current) (format "(~a)" n))
+      (__cs_buf_mode_set (current-buffer) (format "(~a)" n))
    )
 )
 
 (define %buffer-local-keymap
    (lambda ()
-       (__cs_buf_kmap_get (buffer-current))
+       (__cs_buf_kmap_get (current-buffer))
    )
 )
 
@@ -146,7 +146,7 @@
    )
 )
 
-(define buffer-current
+(define current-buffer
    (lambda ()
       (__cs_buf_current_get)
    )
@@ -156,7 +156,7 @@
    (syntax-case stx ()
 	       ((_ buf exp ...)
 		#`(let ([b buf])
-                     (fluid-let ([buffer-current (lambda () b)])
+                     (fluid-let ([current-buffer (lambda () b)])
 		        (begin
                            exp
 		           ...
@@ -171,7 +171,7 @@
 
 (define cursor
    (lambda ()
-      (__cs_buf_cursor_get (buffer-current))
+      (__cs_buf_cursor_get (current-buffer))
    )
 )
 
@@ -183,7 +183,7 @@
                )
             (set! c (- (buffer-end-pos) 1))
          )
-	 (__cs_buf_cursor_set (buffer-current) c)
+	 (__cs_buf_cursor_set (current-buffer) c)
          c
       )
    )
@@ -206,7 +206,7 @@
 (define buffer-name
    (case-lambda
       [()
-       (__cs_buf_name_get (buffer-current))]
+       (__cs_buf_name_get (current-buffer))]
 
       [(b)
        (__cs_buf_name_get b)]
@@ -215,7 +215,7 @@
 
 (define buffer-set-name
    (lambda (n)
-      (__cs_buf_name_set (buffer-current) n)
+      (__cs_buf_name_set (current-buffer) n)
    )
 )
 
@@ -246,7 +246,7 @@
 (define buffer-delete
    (case-lambda
       [()
-         (buffer-delete (buffer-current))]
+         (buffer-delete (current-buffer))]
 
       [(b)
          (__cs_buf_del b)]
@@ -261,25 +261,25 @@
 
 (define buffer-open-file
    (lambda (f)
-      (__cs_buf_file_open (buffer-current) f)
+      (__cs_buf_file_open (current-buffer) f)
    )
 )
 
 (define buffer-filename
    (lambda ()
-      (__cs_buf_file_get (buffer-current))
+      (__cs_buf_file_get (current-buffer))
    )
 )
 
 (define buffer-set-filename
    (lambda (f)
-      (__cs_buf_file_set (buffer-current) f)
+      (__cs_buf_file_set (current-buffer) f)
    )
 )
 
 (define buffer-save
    (lambda ()
-      (__cs_buf_save (buffer-current))
+      (__cs_buf_save (current-buffer))
    )
 )
 
@@ -292,7 +292,7 @@
 (define buffer-next
    (case-lambda
       [()
-       (__cs_buf_next_get (buffer-current))]
+       (__cs_buf_next_get (current-buffer))]
 
       [(bid)
        (__cs_buf_next_get bid)]
@@ -322,7 +322,7 @@
 
 (define enable-insert
    (lambda (e)
-      (__cs_buf_text_input_enable (buffer-current) e)
+      (__cs_buf_text_input_enable (current-buffer) e)
    )
 )
 
@@ -333,11 +333,11 @@
             (lambda (o)
                (cond
                   [(equal? (car o) ':fg)
-		     (__cs_buf_text_fg_set (buffer-current) (color-name->number (cadr o)))]
+		     (__cs_buf_text_fg_set (current-buffer) (color-name->number (cadr o)))]
                   [(equal? (car o) ':bg)
-		     (__cs_buf_text_bg_set (buffer-current) (color-name->number (cadr o)))]
+		     (__cs_buf_text_bg_set (current-buffer) (color-name->number (cadr o)))]
                   [(equal? (car o) ':attr)
-		     (__cs_buf_text_style_set (buffer-current) (style-name->number (cadr o)))]
+		     (__cs_buf_text_style_set (current-buffer) (style-name->number (cadr o)))]
                )
             )
             a
@@ -349,7 +349,7 @@
 (define set-text-style
    (lambda (s e a)
       (let ([l (style->list a)])
-         (__cs_buf_prop_style_add (buffer-current)
+         (__cs_buf_prop_style_add (current-buffer)
 				  1
                                   (list-ref l 0)
                                   (list-ref l 1)
@@ -361,30 +361,30 @@
 
 (define clear-text-style
    (lambda (s e)
-      (__cs_buf_prop_del (buffer-current) 1 s e)
+      (__cs_buf_prop_del (current-buffer) 1 s e)
    )
 )
 
 (define highlight-range
    (lambda (s e)
-      (__cs_buf_prop_style_add (buffer-current) 2 -1 -1 -1 s e)
+      (__cs_buf_prop_style_add (current-buffer) 2 -1 -1 -1 s e)
    )
 )
 
 (define highlight-clear
    (lambda ()
-      (__cs_buf_prop_del (buffer-current) 2 -1 -1)
+      (__cs_buf_prop_del (current-buffer) 2 -1 -1)
    )
 )
 
 (define insert
    (lambda (t . s)
       (if (equal? (length s) 0)
-         (__cs_buf_text_insert (buffer-current) t)
+         (__cs_buf_text_insert (current-buffer) t)
          ;; else
          (begin
             (let ([c (cursor)])
-               (let ([p (- (__cs_buf_text_insert (buffer-current) t) 1)])
+               (let ([p (- (__cs_buf_text_insert (current-buffer) t) 1)])
                   (when (equal? 'style (car (car s)))
                      (set-text-style c p (cadr (car s)))
                   )
@@ -398,7 +398,7 @@
 
 (define insert-nl
    (lambda ()
-      (__cs_buf_text_insert_nl (buffer-current) (cursor))
+      (__cs_buf_text_insert_nl (current-buffer) (cursor))
    )
 )
 
@@ -422,7 +422,7 @@
 
 (define insert-file
    (lambda (t)
-      (__cs_buf_text_insert_file (buffer-current) t)
+      (__cs_buf_text_insert_file (current-buffer) t)
    )
 )
 
@@ -476,7 +476,7 @@
 
 (define move-line-num
    (lambda (n)
-      (cursor-set (next-line-pos (buffer-current) 0 (- n 1)))
+      (cursor-set (next-line-pos (current-buffer) 0 (- n 1)))
    )
 )
 
@@ -543,72 +543,72 @@
 (define next-char-pos
    (case-lambda
       [()
-       (__cs_buf_text_obj_pos (buffer-current) (cursor) #\c 1)]
+       (__cs_buf_text_obj_pos (current-buffer) (cursor) #\c 1)]
 
       [(s)
-       (__cs_buf_text_obj_pos (buffer-current) s #\c 1)]
+       (__cs_buf_text_obj_pos (current-buffer) s #\c 1)]
    )
 )
 
 (define prev-char-pos
    (case-lambda
       [()
-       (__cs_buf_text_obj_pos (buffer-current) (cursor) #\c -1)]
+       (__cs_buf_text_obj_pos (current-buffer) (cursor) #\c -1)]
 
       [(s)
-       (__cs_buf_text_obj_pos (buffer-current) s #\c -1)]
+       (__cs_buf_text_obj_pos (current-buffer) s #\c -1)]
    )
 )
 
 (define next-word-pos
    (lambda ()
-      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\w 1)
+      (__cs_buf_text_obj_pos (current-buffer) (cursor) #\w 1)
    )
 )
 
 (define prev-word-pos
    (lambda ()
-      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\w -1)
+      (__cs_buf_text_obj_pos (current-buffer) (cursor) #\w -1)
    )
 )
 
 (define word-end-pos
    (lambda ()
-      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\e 1)
+      (__cs_buf_text_obj_pos (current-buffer) (cursor) #\e 1)
    )
 )
 
 (define next-longword-pos
    (lambda ()
-      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\W 1)
+      (__cs_buf_text_obj_pos (current-buffer) (cursor) #\W 1)
    )
 )
 
 (define prev-longword-pos
    (lambda ()
-      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\W -1)
+      (__cs_buf_text_obj_pos (current-buffer) (cursor) #\W -1)
    )
 )
 
 (define longword-end-pos
    (lambda ()
-      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\E 1)
+      (__cs_buf_text_obj_pos (current-buffer) (cursor) #\E 1)
    )
 )
 
 (define prev-line-pos
    (lambda ()
-      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\l -1)
+      (__cs_buf_text_obj_pos (current-buffer) (cursor) #\l -1)
    )
 )
 
 (define next-line-pos
    (case-lambda
       [()
-       (next-line-pos (buffer-current) (cursor))]
+       (next-line-pos (current-buffer) (cursor))]
 
       [(s)
-       (next-line-pos (buffer-current) s)]
+       (next-line-pos (current-buffer) s)]
 
       [(b s)
        (__cs_buf_text_obj_pos b s #\l 1)]
@@ -620,35 +620,35 @@
 
 (define next-line-begin-pos
    (lambda ()
-      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\L 1)
+      (__cs_buf_text_obj_pos (current-buffer) (cursor) #\L 1)
    )
 )
 
 (define prev-line-end-pos
    (lambda ()
-      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\L -1)
+      (__cs_buf_text_obj_pos (current-buffer) (cursor) #\L -1)
    )
 )
 
 (define line-start-pos
    (lambda ()
-      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\0 -1)
+      (__cs_buf_text_obj_pos (current-buffer) (cursor) #\0 -1)
    )
 )
 
 (define line-finish-pos
    (lambda ()
-      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\0 1)
+      (__cs_buf_text_obj_pos (current-buffer) (cursor) #\0 1)
    )
 )
 
 (define line-begin-pos
    (case-lambda
       [()
-       (line-begin-pos (buffer-current) (cursor))]
+       (line-begin-pos (current-buffer) (cursor))]
 
       [(s)
-       (line-begin-pos (buffer-current) s)]
+       (line-begin-pos (current-buffer) s)]
 
       [(b s)
        (__cs_buf_text_obj_pos b s #\0 -1)]
@@ -657,38 +657,38 @@
 
 (define line-end-pos
    (lambda ()
-      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\1 1)
+      (__cs_buf_text_obj_pos (current-buffer) (cursor) #\1 1)
    )
 )
 
 (define buffer-begin-pos
    (lambda ()
-      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\g 1)
+      (__cs_buf_text_obj_pos (current-buffer) (cursor) #\g 1)
    )
 )
 
 (define buffer-end-pos
    (lambda ()
-      (__cs_buf_text_obj_pos (buffer-current) (cursor) #\g -1)
+      (__cs_buf_text_obj_pos (current-buffer) (cursor) #\g -1)
    )
 )
 
 (define buffer-string
    (case-lambda
       [()
-       (__cs_buf_text_get (buffer-current)
+       (__cs_buf_text_get (current-buffer)
                           (buffer-begin-pos)
                           (- (buffer-end-pos) (buffer-begin-pos)))]
 
       [(s e)
-       (__cs_buf_text_get (buffer-current) s (- e s))]
+       (__cs_buf_text_get (current-buffer) s (- e s))]
    )
 )
 
 (define buffer-is-visible?
    (case-lambda
       [()
-       (__cs_buf_is_visible (buffer-current))]
+       (__cs_buf_is_visible (current-buffer))]
 
       [(b)
        (__cs_buf_is_visible b)]
@@ -698,7 +698,7 @@
 (define buffer-is-term?
    (case-lambda
       [()
-       (__cs_buf_is_term (buffer-current))]
+       (__cs_buf_is_term (current-buffer))]
 
       [(b)
        (__cs_buf_is_term b)]
@@ -728,7 +728,7 @@
        (extract-word (cursor))]
 
       [(s)
-       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\w #t)])
+       (let ([r (__cs_buf_text_obj_range (current-buffer) s #\w #t)])
           (buffer-string (car r) (cdr r))
        )
       ]
@@ -741,7 +741,7 @@
        (extract-longword (cursor))]
 
       [(s)
-       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\W #t)])
+       (let ([r (__cs_buf_text_obj_range (current-buffer) s #\W #t)])
           (buffer-string (car r) (cdr r))
        )
       ]
@@ -754,7 +754,7 @@
        (extract-line (cursor))]
 
       [(s)
-       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\l #f)])
+       (let ([r (__cs_buf_text_obj_range (current-buffer) s #\l #f)])
           (buffer-string (car r) (cdr r))
        )
       ]
@@ -767,7 +767,7 @@
        (extract-line-inner (cursor))]
 
       [(s)
-       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\l #t)])
+       (let ([r (__cs_buf_text_obj_range (current-buffer) s #\l #t)])
           (buffer-string (car r) (cdr r))
        )
       ]
@@ -780,7 +780,7 @@
        (extract-square-brackets (cursor))]
 
       [(s)
-       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\[ #f)])
+       (let ([r (__cs_buf_text_obj_range (current-buffer) s #\[ #f)])
           (buffer-string (car r) (cdr r))
        )
       ]
@@ -793,7 +793,7 @@
        (extract-square-brackets-inner (cursor))]
 
       [(s)
-       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\[ #t)])
+       (let ([r (__cs_buf_text_obj_range (current-buffer) s #\[ #t)])
           (buffer-string (car r) (cdr r))
        )
       ]
@@ -806,7 +806,7 @@
        (extract-curly-brackets (cursor))]
 
       [(s)
-       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\{ #f)])
+       (let ([r (__cs_buf_text_obj_range (current-buffer) s #\{ #f)])
           (buffer-string (car r) (cdr r))
        )
       ]
@@ -819,7 +819,7 @@
        (extract-curly-brackets-inner (cursor))]
 
       [(s)
-       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\{ #t)])
+       (let ([r (__cs_buf_text_obj_range (current-buffer) s #\{ #t)])
           (buffer-string (car r) (cdr r))
        )
       ]
@@ -832,7 +832,7 @@
        (extract-angle-brackets (cursor))]
 
       [(s)
-       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\< #f)])
+       (let ([r (__cs_buf_text_obj_range (current-buffer) s #\< #f)])
           (buffer-string (car r) (cdr r))
        )
       ]
@@ -845,7 +845,7 @@
        (extract-angle-brackets-inner (cursor))]
 
       [(s)
-       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\< #t)])
+       (let ([r (__cs_buf_text_obj_range (current-buffer) s #\< #t)])
           (buffer-string (car r) (cdr r))
        )
       ]
@@ -858,7 +858,7 @@
        (extract-parens (cursor))]
 
       [(s)
-       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\( #f)])
+       (let ([r (__cs_buf_text_obj_range (current-buffer) s #\( #f)])
           (buffer-string (car r) (cdr r))
        )
       ]
@@ -871,7 +871,7 @@
        (extract-parens-inner (cursor))]
 
       [(s)
-       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\( #t)])
+       (let ([r (__cs_buf_text_obj_range (current-buffer) s #\( #t)])
           (buffer-string (car r) (cdr r))
        )
       ]
@@ -884,7 +884,7 @@
        (extract-quote (cursor))]
 
       [(s)
-       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\" #f)])
+       (let ([r (__cs_buf_text_obj_range (current-buffer) s #\" #f)])
           (buffer-string (car r) (cdr r))
        )
       ]
@@ -897,7 +897,7 @@
        (extract-quote-inner (cursor))]
 
       [(s)
-       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\" #t)])
+       (let ([r (__cs_buf_text_obj_range (current-buffer) s #\" #t)])
           (buffer-string (car r) (cdr r))
        )
       ]
@@ -910,7 +910,7 @@
        (extract-single-quote (cursor))]
 
       [(s)
-       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\' #f)])
+       (let ([r (__cs_buf_text_obj_range (current-buffer) s #\' #f)])
           (buffer-string (car r) (cdr r))
        )
       ]
@@ -923,7 +923,7 @@
        (extract-single-quote-inner (cursor))]
 
       [(s)
-       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\' #t)])
+       (let ([r (__cs_buf_text_obj_range (current-buffer) s #\' #t)])
           (buffer-string (car r) (cdr r))
        )
       ]
@@ -936,7 +936,7 @@
        (extract-back-quote (cursor))]
 
       [(s)
-       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\` #f)])
+       (let ([r (__cs_buf_text_obj_range (current-buffer) s #\` #f)])
           (buffer-string (car r) (cdr r))
        )
       ]
@@ -949,7 +949,7 @@
        (extract-back-quote-inner (cursor))]
 
       [(s)
-       (let ([r (__cs_buf_text_obj_range (buffer-current) s #\` #t)])
+       (let ([r (__cs_buf_text_obj_range (current-buffer) s #\` #t)])
           (buffer-string (car r) (cdr r))
        )
       ]
@@ -958,7 +958,7 @@
 
 (define delete-range
    (lambda (s e)
-      (__cs_buf_text_range_del (buffer-current) s e)
+      (__cs_buf_text_range_del (current-buffer) s e)
    )
 )
 
@@ -1105,22 +1105,22 @@
 (define mark-set
    (case-lambda
       [()
-       (__cs_buf_mark_set (buffer-current) (cursor))]
+       (__cs_buf_mark_set (current-buffer) (cursor))]
 
       [(s)
-       (__cs_buf_mark_set (buffer-current) s)]
+       (__cs_buf_mark_set (current-buffer) s)]
    )
 )
 
 (define mark-get
    (lambda ()
-      (__cs_buf_mark_get (buffer-current))
+      (__cs_buf_mark_get (current-buffer))
    )
 )
 
 (define mark-clear
    (lambda ()
-      (__cs_buf_mark_clear (buffer-current))
+      (__cs_buf_mark_clear (current-buffer))
    )
 )
 
@@ -1198,7 +1198,7 @@
 
 (define buffer-env
    (lambda ()
-      (__cs_buf_env_get (buffer-current))
+      (__cs_buf_env_get (current-buffer))
    )
 )
 
@@ -1350,19 +1350,19 @@
 
 (define buffer-snapshot
    (lambda()
-      (__cs_buf_snapshot (buffer-current))
+      (__cs_buf_snapshot (current-buffer))
    )
 )
 
 (define buffer-undo
    (lambda()
-      (__cs_buf_undo (buffer-current))
+      (__cs_buf_undo (current-buffer))
    )
 )
 
 (define buffer-redo
    (lambda()
-      (__cs_buf_redo (buffer-current))
+      (__cs_buf_redo (current-buffer))
    )
 )
 
@@ -1381,7 +1381,7 @@
 
 (define current-cwd
    (lambda ()
-      (let ([b (buffer-current)])
+      (let ([b (current-buffer)])
          (if b
             (with-buffer b
                (if (local-bound? current-cwd)
@@ -1408,7 +1408,7 @@
        (search-regex rx (cursor) +1)]
 
       [(rx pos dir)
-       (__cs_buf_search_regex (buffer-current) pos rx dir)]
+       (__cs_buf_search_regex (current-buffer) pos rx dir)]
    )
 )
 
