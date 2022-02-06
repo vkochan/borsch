@@ -1453,17 +1453,15 @@
    )
 )
 
-(define search-regex-prompt
-   (lambda (r)
-      (set! search-reg r)
-      (cursor-set (search-regex r))
-   )
-)
-
 (define search-regex-read
    (lambda ()
       (when (not (buffer-is-term?))
-         (minibuf-read "/" search-regex-prompt)
+         (minibuf-read "/"
+            (lambda (r)
+               (set! search-reg r)
+               (cursor-set (search-regex r))
+            )
+         )
       )
    )
 )

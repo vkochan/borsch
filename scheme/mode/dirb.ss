@@ -228,42 +228,24 @@
    )
 )
 
-(define dirb-enter-new-file
-   (lambda (f)
-      (let ([p (open-output-file (string-append (get-local current-cwd) "/" f))])
-         (close-port p)
-      )
-      (dirb-open-dir (get-local current-cwd))
-   )
-)
-
 (define dirb-create-new-file
    (lambda ()
-      (minibuf-read "new file:" dirb-enter-new-file)
-   )
-)
-
-(define dirb-enter-new-dir
-   (lambda (f)
-      (mkdir (string-append (get-local current-cwd) "/" f))
-      (dirb-open-dir (get-local current-cwd))
+      (minibuf-read "new file:"
+         (lambda (f)
+            (let ([p (open-output-file (string-append (get-local current-cwd) "/" f))])
+               (close-port p)
+            )
+            (dirb-open-dir (get-local current-cwd))
+         )
+      )
    )
 )
 
 (define dirb-create-new-dir
    (lambda ()
-      (minibuf-read "new dir:" dirb-enter-new-dir)
-   )
-)
-
-(define dirb-delete-answer
-   (lambda (v)
-      (let*(
-            [e (extract-line-inner)]
-            [p (string-append (get-local current-cwd) "/" e)]
-           )
-         (when (eq? v 'yes)
-            (rm-rf p)
+      (minibuf-read "new dir:"
+         (lambda (f)
+            (mkdir (string-append (get-local current-cwd) "/" f))
             (dirb-open-dir (get-local current-cwd))
          )
       )
@@ -272,18 +254,18 @@
 
 (define dirb-delete-entry
    (lambda ()
-      (minibuf-ask "Delete entry(s) ?" dirb-delete-answer)
-   )
-)
-
-(define dirb-enter-rename-entry
-   (lambda (v)
-      (let (
-            [old (string-append (get-local current-cwd) "/" (get-local defval))]
-            [new (string-append (get-local current-cwd) "/" v)]
-           )
-         (rename-file old new)
-         (dirb-open-dir (get-local current-cwd))
+      (minibuf-ask "Delete entry(s) ?"
+         (lambda (v)
+            (let*(
+                  [e (extract-line-inner)]
+                  [p (string-append (get-local current-cwd) "/" e)]
+                 )
+               (when (eq? v 'yes)
+                  (rm-rf p)
+                  (dirb-open-dir (get-local current-cwd))
+               )
+            )
+         )
       )
    )
 )
@@ -292,7 +274,17 @@
    (lambda ()
       (let ([entry (dirb-get-entry (extract-line-inner))])
          (set-local! defval entry)
-         (minibuf-read "rename:" entry dirb-enter-rename-entry)
+         (minibuf-read "rename:" entry
+            (lambda (v)
+               (let (
+                     [old (string-append (get-local current-cwd) "/" (get-local defval))]
+                     [new (string-append (get-local current-cwd) "/" v)]
+                    )
+                  (rename-file old new)
+                  (dirb-open-dir (get-local current-cwd))
+               )
+            )
+         )
       )
    )
 )

@@ -6,16 +6,14 @@
    )
 )
 
-(define grep-search-prompt
-   (lambda (s)
-      (grep s)
-   )
-)
-
 (define grep
    (case-lambda
       [()
-       (minibuf-read "Search:" grep-search-prompt)
+       (minibuf-read "Search:"
+          (lambda (s)
+             (grep s)
+          )
+       )
       ]
 
       [(s)
