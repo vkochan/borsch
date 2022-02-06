@@ -92,7 +92,7 @@
    )
 )
 
-(add-hook 'idle-hook
+(add-hook 'post-draw-hook
    (lambda ()
       (let (
             [proc-list (hashtable-values %process-fd-ht)]

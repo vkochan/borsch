@@ -2176,7 +2176,7 @@ int main(int argc, char *argv[]) {
 		        ui_window_cursor_set(current_window()->win, x, y);
 		}
 
-		evt.eid = EVT_IDLE;
+		evt.eid = EVT_POST_DRAW;
 		scheme_event_handle(evt);
 	}
 
