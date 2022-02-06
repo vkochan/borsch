@@ -98,27 +98,23 @@
             ;; else
             (begin
                (minibuf-read "Save as:" (buffer-name)
-                  (lambda (b f)
-                     (with-buffer b
-                        (define-local tmp-file-name f)
-                        (if (file-exists? f)
-                           (minibuf-ask (format "~a already exists, overwrite ?" f)
-                              (lambda (b a)
-                                 (with-buffer b
-                                    (if (equal? a 'yes)
-                                       (begin
-                                          (buffer-set-filename (get-local tmp-file-name))
-                                          (text-mode-save)
-                                       )
-                                    )
+                  (lambda (f)
+                     (define-local tmp-file-name f)
+                     (if (file-exists? f)
+                        (minibuf-ask (format "~a already exists, overwrite ?" f)
+                           (lambda (a)
+                              (if (equal? a 'yes)
+                                 (begin
+                                    (buffer-set-filename (get-local tmp-file-name))
+                                    (text-mode-save)
                                  )
                               )
                            )
-                           ;; else
-                           (begin
-                              (buffer-set-filename f)
-                              (text-mode-save)
-                           )
+                        )
+                        ;; else
+                        (begin
+                           (buffer-set-filename f)
+                           (text-mode-save)
                         )
                      )
                   )

@@ -229,13 +229,11 @@
 )
 
 (define dirb-enter-new-file
-   (lambda (b f)
-      (with-buffer b
-         (let ([p (open-output-file (string-append (get-local current-cwd) "/" f))])
-	    (close-port p)
-         )
-         (dirb-open-dir (get-local current-cwd))
+   (lambda (f)
+      (let ([p (open-output-file (string-append (get-local current-cwd) "/" f))])
+         (close-port p)
       )
+      (dirb-open-dir (get-local current-cwd))
    )
 )
 
@@ -246,11 +244,9 @@
 )
 
 (define dirb-enter-new-dir
-   (lambda (b f)
-      (with-buffer b
-         (mkdir (string-append (get-local current-cwd) "/" f))
-         (dirb-open-dir (get-local current-cwd))
-      )
+   (lambda (f)
+      (mkdir (string-append (get-local current-cwd) "/" f))
+      (dirb-open-dir (get-local current-cwd))
    )
 )
 
@@ -261,16 +257,14 @@
 )
 
 (define dirb-delete-answer
-   (lambda (b v)
+   (lambda (v)
       (let*(
             [e (extract-line-inner)]
             [p (string-append (get-local current-cwd) "/" e)]
            )
-         (with-buffer b
-            (when (eq? v 'yes)
-               (rm-rf p)
-               (dirb-open-dir (get-local current-cwd))
-            )
+         (when (eq? v 'yes)
+            (rm-rf p)
+            (dirb-open-dir (get-local current-cwd))
          )
       )
    )
@@ -283,7 +277,7 @@
 )
 
 (define dirb-enter-rename-entry
-   (lambda (b v)
+   (lambda (v)
       (let (
             [old (string-append (get-local current-cwd) "/" (get-local defval))]
             [new (string-append (get-local current-cwd) "/" v)]

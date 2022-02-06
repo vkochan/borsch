@@ -7,10 +7,8 @@
 )
 
 (define grep-search-prompt
-   (lambda (b s)
-      (with-buffer b
-         (grep s)
-      )
+   (lambda (s)
+      (grep s)
    )
 )
 

@@ -1454,11 +1454,9 @@
 )
 
 (define search-regex-prompt
-   (lambda (b r)
-      (with-buffer b
-         (set! search-reg r)
-         (cursor-set (search-regex r))
-      )
+   (lambda (r)
+      (set! search-reg r)
+      (cursor-set (search-regex r))
    )
 )
 

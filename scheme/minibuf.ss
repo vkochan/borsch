@@ -22,7 +22,7 @@
          (enable-insert #f)
          (erase-buffer)
          (window-select (window-prev-selected))
-         (fn b v)
+         (fn v)
       )
    )
 )
