@@ -694,8 +694,6 @@ draw(Window *c, bool force) {
 		evt.oid = c->id;
 		scheme_event_handle(evt);
 
-		buf_update(c);
-
 		ui_window_redraw(c->win);
 		ui_window_draw(c->win);
 
@@ -2465,9 +2463,10 @@ void win_sidebar_set(int wid, int width)
 {
 	Window *w = window_get_by_id(wid);
 
-	if (w) {
+	if (w && width != ui_window_sidebar_width_get(w->win)) {
 		ui_window_sidebar_width_set(w->win, width);
 		buffer_dirty_set(w->buf, true);
+		buf_update(w);
 	}
 }
 
