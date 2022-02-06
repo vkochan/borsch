@@ -346,7 +346,7 @@
    )
 )
 
-(define set-text-style
+(define add-text-property
    (lambda (s e a)
       (let ([l (style->list a)])
          (__cs_buf_prop_style_add (current-buffer)
@@ -359,7 +359,7 @@
    )
 )
 
-(define clear-text-style
+(define remove-text-property
    (lambda (s e)
       (__cs_buf_prop_del (current-buffer) 1 s e)
    )
@@ -386,7 +386,7 @@
             (let ([c (cursor)])
                (let ([p (- (__cs_buf_text_insert (current-buffer) t) 1)])
                   (when (equal? 'style (car (car s)))
-                     (set-text-style c p (cadr (car s)))
+                     (add-text-property c p (cadr (car s)))
                   )
                   p
                )
