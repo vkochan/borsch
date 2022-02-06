@@ -26,3 +26,9 @@
       (__cs_tagbar_status_set s)
    )
 )
+
+(add-hook 'pre-draw-hook
+   (lambda ()
+      (run-hooks 'tagbar-status-hook)
+   )
+)

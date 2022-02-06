@@ -30,6 +30,7 @@
 	  (lambda (ev)
 	     (case ev
 		[1    'window-draw-hook ]
+		[2    'pre-draw-hook ]
 		[100  'key-press-hook   ]
 		[1000 'idle-hook   ]
 		[else #f]
@@ -39,7 +40,8 @@
 
        (let ([h (__evt->symb ev)])
           (when h
-             (if (eq? h 'idle-hook)
+             (if (or (eq? h 'idle-hook)
+                     (eq? h 'pre-draw-hook))
                 (run-hooks h)
                 ;; else
                 (run-hooks h oid)
@@ -64,6 +66,14 @@
             )
          )
       )
+   )
+)
+
+(tagbar-set-status-align 'left)
+
+(add-hook 'tagbar-status-hook
+   (lambda ()
+      (tagbar-set-status (view-cwd))
    )
 )
 

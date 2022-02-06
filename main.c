@@ -142,14 +142,12 @@ enum { BAR_LEFT, BAR_RIGHT };
 enum { MIN_ALIGN_HORIZ, MIN_ALIGN_VERT };
 
 typedef struct {
-	int fd;
 	int pos, lastpos;
 	int align;
 	bool autohide;
 	unsigned short int h;
 	unsigned short int y;
 	char text[512];
-	const char *file;
 } StatusBar;
 
 typedef struct {
@@ -385,8 +383,7 @@ static unsigned int seltags;
 static unsigned int tagset[2] = { 1, 1 };
 static bool mouse_events_enabled = ENABLE_MOUSE;
 static Layout *layout = layouts;
-static StatusBar bar = { .fd = -1,
-			 .lastpos = BAR_POS,
+static StatusBar bar = { .lastpos = BAR_POS,
 			 .pos = BAR_POS,
 			 .align = BAR_RIGHT,
 			 .autohide = BAR_AUTOHIDE,
@@ -747,7 +744,7 @@ arrange(void) {
 
 	ui_clear(ui);
 
-	if (bar.fd == -1 && bar.autohide) {
+	if (bar.autohide) {
 		if ((!windows || !windows->next) && n == 1)
 			hidebar();
 		else
@@ -1337,8 +1334,6 @@ cleanup(void) {
 	event_fd_handler_unregister(STDIN_FILENO);
 	if (cmdfifo.fd != -1)
 		event_fd_handler_unregister(cmdfifo.fd);
-	if (bar.fd != -1)
-		event_fd_handler_unregister(bar.fd);
 
 	scheme_uninit();
 	while (windows)
@@ -1359,10 +1354,6 @@ cleanup(void) {
 	keymap_free(global_kmap);
 	vt_shutdown();
 	ui_free(ui);
-	if (bar.fd > 0)
-		close(bar.fd);
-	if (bar.file)
-		unlink(bar.file);
 	if (cmdfifo.fd > 0)
 		close(cmdfifo.fd);
 	if (cmdfifo.file)
@@ -1988,29 +1979,6 @@ handle_mouse(void) {
 #endif /* CONFIG_MOUSE */
 }
 
-static void handle_statusbar(int fd, void *arg) {
-	char *p;
-	int r;
-	switch (r = read(bar.fd, bar.text, sizeof bar.text - 1)) {
-		case -1:
-			strncpy(bar.text, strerror(errno), sizeof bar.text - 1);
-			bar.text[sizeof bar.text - 1] = '\0';
-			bar.fd = -1;
-			break;
-		case 0:
-			bar.fd = -1;
-			break;
-		default:
-			bar.text[r] = '\0';
-			p = bar.text + r - 1;
-			for (; p >= bar.text && *p == '\n'; *p-- = '\0');
-			for (; p >= bar.text && *p != '\n'; --p);
-			if (p >= bar.text)
-				memmove(bar.text, p + 1, strlen(p));
-			drawbar();
-	}
-}
-
 static int
 __open_or_create_fifo(const char *name, const char **name_created, int flags) {
 	struct stat info;
@@ -2140,8 +2108,6 @@ int main(int argc, char *argv[]) {
 
 	if (cmdfifo.fd != -1)
 		event_fd_handler_register(cmdfifo.fd, handle_cmdfifo, NULL);
-	if (bar.fd != -1)
-		event_fd_handler_register(bar.fd, handle_statusbar, NULL);
 
 	event_fd_handler_register(STDIN_FILENO, handle_keypress, &kbuf);
 
@@ -2172,6 +2138,9 @@ int main(int argc, char *argv[]) {
 		ui_update(ui);
 
 		event_process();
+
+		evt.eid = EVT_PRE_DRAW;
+		scheme_event_handle(evt);
 
 		if (minibuf) {
 			draw(minibuf, false);
@@ -4038,17 +4007,6 @@ int fifo_create(void)
 	}
 	retfifo.file = strdup(ret);
 
-	snprintf(tmp, sizeof(tmp), "%s/"PROGNAME"-status-fifo-%d", rundir, pid);
-	bar.fd = __open_or_create_fifo(tmp, &bar.file, O_RDWR);
-	if (!(sta = realpath(tmp, NULL))) {
-		close(cmdfifo.fd);
-		unlink(cmdfifo.file);
-		close(retfifo.fd);
-		unlink(retfifo.file);
-		return -1;
-	}
-	bar.file = strdup(sta);
-
 	setenv("BORSCH_CMD_FIFO", cmd, 1);
 	setenv("BORSCH_RET_FIFO", ret, 1);
 
@@ -4057,7 +4015,8 @@ int fifo_create(void)
 
 int tagbar_status_set(const char *s)
 {
-	write(bar.fd, s, strlen(s));
+	strncpy(bar.text, s, sizeof bar.text - 1);
+	drawbar();
 	return 0;
 }
 
