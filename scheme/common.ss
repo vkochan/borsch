@@ -366,3 +366,42 @@
       )
    )
 )
+
+(define make-stack
+   (lambda ()
+      (let ([st (list)])
+         (lambda (msg . args)
+            (cond
+               [(eqv? msg 'empty?) (null? st)]
+               [(eqv? msg 'push!) (set! st (cons (car args) st))]
+               [(eqv? msg 'top)   (car st)]
+               [(eqv? msg 'pop!) (let ([v (car st)]) (set! st (cdr st)) v)]
+            )
+         )
+      )
+   )
+)
+
+(define stack-empty?
+   (lambda (st)
+      (st 'empty?)
+   )
+)
+
+(define stack-push!
+   (lambda (st val)
+      (st 'push! val)
+   )
+)
+
+(define stack-top
+   (lambda (st)
+      (st 'top)
+   )
+)
+
+(define stack-pop!
+   (lambda (st)
+      (st 'pop!)
+   )
+)
