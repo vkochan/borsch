@@ -92,6 +92,12 @@
    )
 )
 
+(define program-exists?
+   (lambda (prog)
+      (= 0 (system (format "command -v ~a > /dev/null" prog)))
+   )
+)
+
 (add-hook 'post-draw-hook
    (lambda ()
       (let (
