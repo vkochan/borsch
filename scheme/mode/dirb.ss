@@ -72,41 +72,25 @@
 
 (define dirb-move-line-down
     (lambda ()
-       (highlight-clear)
        (move-line-down)
-       (highlight-range
-          (line-begin-pos)
-          (line-end-pos))
     )
 )
 
 (define dirb-move-line-up
     (lambda ()
-       (highlight-clear)
        (move-line-up)
-       (highlight-range
-          (line-begin-pos)
-          (line-end-pos))
     )
 )
 
 (define dirb-move-begin
    (lambda ()
-      (highlight-clear)
       (move-buffer-begin)
-      (highlight-range
-         (line-begin-pos)
-         (line-end-pos))
    )
 )
 
 (define dirb-move-end
    (lambda ()
-      (highlight-clear)
       (move-buffer-end)
-      (highlight-range
-         (line-begin-pos)
-         (line-end-pos))
    )
 )
 
@@ -143,61 +127,37 @@
 
 (define dirb-scroll-halfpage-up
   (lambda ()
-    (highlight-clear)
     (cursor-set (window-scroll-halfpage-up))
-    (highlight-range
-       (line-begin-pos)
-       (line-end-pos))
   )
 )
 
 (define dirb-scroll-halfpage-down
   (lambda ()
-    (highlight-clear)
     (cursor-set (window-scroll-halfpage-down))
-    (highlight-range
-       (line-begin-pos)
-       (line-end-pos))
   )
 )
 
 (define dirb-scroll-page-down
   (lambda ()
-    (highlight-clear)
     (cursor-set (window-scroll-page-down))
-    (highlight-range
-       (line-begin-pos)
-       (line-end-pos))
   )
 )
 
 (define dirb-scroll-page-up
   (lambda ()
-    (highlight-clear)
     (cursor-set (window-scroll-page-up))
-    (highlight-range
-       (line-begin-pos)
-       (line-end-pos))
   )
 )
 
 (define dirb-viewport-begin
   (lambda ()
-    (highlight-clear)
     (cursor-set (window-viewport-begin))
-    (highlight-range
-       (line-begin-pos)
-       (line-end-pos))
   )
 )
 
 (define dirb-viewport-end
   (lambda ()
-    (highlight-clear)
     (cursor-set (window-viewport-end))
-    (highlight-range
-       (line-begin-pos)
-       (line-end-pos))
   )
 )
 
