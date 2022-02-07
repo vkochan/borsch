@@ -61,9 +61,11 @@
           (with-buffer b
              (define-local current-cwd cwd)
              (define-local show-hidden #f)
+             (define-local prev-cursor (make-stack))
              (define-local defval #f)
              (buffer-set-keymap 'dirb-map)
              (dirb-open-dir cwd)
+             (stack-push! (get-local prev-cursor) (cursor))
           )
        )
       ]
@@ -96,9 +98,15 @@
 
 (define dirb-open-parent
     (lambda ()
-       (let ([p (path-parent (get-local current-cwd))])
-          (if (> (string-length p) 0)
+       (let (
+             [p (path-parent (get-local current-cwd))]
+             [s (get-local prev-cursor)]
+            )
+          (when (> (string-length p) 0)
              (dirb-open-dir p)
+             (when (not (stack-empty? s))
+                (cursor-set (stack-pop! s))
+             )
           )
        )
     )
@@ -111,7 +119,10 @@
                [p (fmt "~a/~a" (get-local current-cwd) e)] 
              )
           (if (file-directory? p)
-             (dirb-open-dir p)
+             (let ([s (get-local prev-cursor)])
+                (stack-push! s (cursor))
+                (dirb-open-dir p)
+             )
           )
           (if (file-regular? p)
              (let ([b (buffer-create)])
