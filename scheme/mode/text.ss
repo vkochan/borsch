@@ -17,9 +17,11 @@
 
 (define text-mode-ins
    (lambda ()
-      (text-mode-set-keymap 'text-mode-ins-local-map)
-      (buffer-set-mode "Text <I>")
-      (enable-insert #t)
+      (buffer-modify
+         (text-mode-set-keymap 'text-mode-ins-local-map)
+         (buffer-set-mode "Text <I>")
+         (enable-insert #t)
+      )
    )
 )
 

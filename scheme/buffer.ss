@@ -7,6 +7,8 @@
 (define __cs_buf_next_get (foreign-procedure __collect_safe "cs_buf_next_get" (int) scheme-object))
 (define __cs_buf_name_get (foreign-procedure __collect_safe "cs_buf_name_get" (int) scheme-object))
 (define __cs_buf_name_set (foreign-procedure "cs_buf_name_set" (int string) void))
+(define __cs_buf_readonly_set (foreign-procedure __collect_safe "cs_buf_readonly_set" (int boolean) void))
+(define __cs_buf_readonly_get (foreign-procedure __collect_safe "cs_buf_readonly_get" (int) scheme-object))
 (define __cs_buf_by_name (foreign-procedure "cs_buf_by_name" (string) scheme-object))
 (define __cs_buf_text_insert (foreign-procedure "cs_buf_text_insert" (int string) scheme-object))
 (define __cs_buf_text_insert_nl (foreign-procedure "cs_buf_text_insert_nl" (int int) scheme-object))
@@ -219,6 +221,44 @@
    )
 )
 
+(define buffer-set-readonly
+   (case-lambda
+      [(read-only?)
+       (buffer-set-readonly (current-buffer) read-only?)]
+
+      [(buf read-only?)
+       (__cs_buf_readonly_set buf read-only?)]
+   )
+)
+
+(define buffer-is-readonly?
+   (case-lambda
+      [()
+       (buffer-is-readonly? (current-buffer))]
+
+      [(buf)
+       (__cs_buf_readonly_get buf)]
+   )
+)
+
+(define-syntax (buffer-modify stx)
+   (syntax-case stx ()
+      ((_ exp ...)
+       #`(if (buffer-is-readonly?)
+            (begin
+               (message "buffer is readonly")
+               (cursor)
+            )
+            ;; else
+            (begin
+               exp
+               ...
+            )
+         )
+      )
+   )
+)
+
 (define buffer-create
    (case-lambda
       [() 
@@ -398,31 +438,35 @@
 
 (define insert-nl
    (lambda ()
-      (__cs_buf_text_insert_nl (current-buffer) (cursor))
+      (buffer-modify (__cs_buf_text_insert_nl (current-buffer) (cursor)))
    )
 )
 
 (define insert-empty-line-up
    (lambda ()
-      (move-prev-line-end)
-      (if (equal? (cursor) 0)
-         (save-cursor (insert-nl))
-         ;; else
-         (insert-nl)
+      (buffer-modify
+         (move-prev-line-end)
+         (if (equal? (cursor) 0)
+            (save-cursor (insert-nl))
+            ;; else
+            (insert-nl)
+         )
       )
    )
 )
 
 (define insert-empty-line
    (lambda ()
-      (move-line-end)
-      (insert-nl)
+      (buffer-modify
+         (move-line-end)
+         (insert-nl)
+      )
    )
 )
 
 (define insert-file
    (lambda (t)
-      (__cs_buf_text_insert_file (current-buffer) t)
+      (buffer-modify (__cs_buf_text_insert_file (current-buffer) t))
    )
 )
 
@@ -958,7 +1002,7 @@
 
 (define delete-range
    (lambda (s e)
-      (__cs_buf_text_range_del (current-buffer) s e)
+      (buffer-modify (__cs_buf_text_range_del (current-buffer) s e))
    )
 )
 
@@ -972,11 +1016,13 @@
 
 (define cursor-obj-delete
    (lambda (fn)
-      (let (
-            [end (fn)]
-            [start (cursor)]
-           )
-           (delete-range start end)
+      (buffer-modify
+         (let (
+               [end (fn)]
+               [start (cursor)]
+              )
+            (delete-range start end)
+         )
       )
    )
 )

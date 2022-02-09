@@ -166,6 +166,16 @@ bool buffer_del(Buffer *buf)
 	return false;
 }
 
+void buffer_readonly_set(Buffer *buf, bool is_readonly)
+{
+	buf->is_read_only = is_readonly;
+}
+
+bool buffer_is_readonly(Buffer *buf)
+{
+	return buf->is_read_only;
+}
+
 int buffer_file_open(Buffer *buf, const char *file)
 {
 	bool exist = false;
@@ -371,6 +381,9 @@ size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text)
 {
 	size_t len;
 
+	if (buf->is_read_only)
+		return buf->cursor;
+
 	len = strlen(text);
 
 	if (text_insert(buf->text, pos, text, len)) {
@@ -387,6 +400,9 @@ size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text)
 
 size_t buffer_text_insert_len(Buffer *buf, size_t pos, const char *text, size_t len)
 {
+	if (buf->is_read_only)
+		return buf->cursor;
+
 	if (text_insert(buf->text, pos, text, len)) {
 		buffer_text_changed(buf, pos, len);
 		buffer_cursor_set(buf, pos + len);
@@ -405,6 +421,10 @@ size_t buffer_text_insert_nl(Buffer *buf, size_t pos)
 	size_t pos_orig = pos;
 	size_t len = 1;
 	char byte;
+
+	if (buf->is_read_only)
+		return buf->cursor;
+
 	/* insert second newline at end of file, except if there is already one */
 	bool eof = pos == text_size(txt);
 	bool nl2 = eof && !(pos > 0 && text_byte_get(txt, pos-1, &byte) && byte == '\n');
@@ -431,6 +451,9 @@ size_t buffer_text_delete(Buffer *buf, size_t start, size_t end)
 {
 	size_t tmp;
 	Text *txt;
+
+	if (buf->is_read_only)
+		return buf->cursor;
 
 	if (start > end) {
 		tmp = end;
@@ -755,12 +778,18 @@ void buffer_snapshot(Buffer *buf)
 
 void buffer_undo(Buffer *buf)
 {
+	if (buf->is_read_only)
+		return;
+
 	text_undo(buf->text);
 	buf->is_dirty = true;
 }
 
 void buffer_redo(Buffer *buf)
 {
+	if (buf->is_read_only)
+		return;
+
 	text_redo(buf->text);
 	buf->is_dirty = true;
 }

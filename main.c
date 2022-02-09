@@ -661,12 +661,13 @@ static void draw_title(Window *c) {
 		tmp[maxlen] = '\0';
 	}
 
-	len = snprintf(title, sizeof(title), "%s%s   [%d|%s%s]",
+	len = snprintf(title, sizeof(title), "%s%s   [%d|%s%s]%s",
 			buffer_is_modified(c->buf) ? "[+] " : "",
 			buffer_mode_get(c->buf),
 			c->order,
 			ismastersticky(c) ? "*" : "",
-			tmp[0] ? tmp : "");
+			tmp[0] ? tmp : "",
+			buffer_is_readonly(c->buf) ? "[RO]" : "");
 	ui_window_draw_text_attr(c->win, 0, title_y, title, w_w,
 			title_fg, title_bg,
 			UI_TEXT_STYLE_NORMAL);
@@ -3066,6 +3067,24 @@ char *buf_name_get(int bid)
 	return NULL;
 }
 
+void buf_readonly_set(int bid, bool is_readonly)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		return buffer_readonly_set(buf, is_readonly);
+}
+
+bool buf_is_readonly(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		return buffer_is_readonly(buf);
+
+	return false;
+}
+
 int buf_by_name(const char *name)
 {
 	Buffer *buf = buffer_by_name(name);
@@ -3174,6 +3193,8 @@ size_t buf_text_insert_file(int bid, const char *path)
 	int fd;
 
 	if (!buf)
+		return EPOS;
+	if (buffer_is_readonly(buf))
 		return EPOS;
 
 	pos = buffer_cursor_get(buf);

@@ -405,6 +405,16 @@ void scheme_buf_name_set(int bid, const char *name)
 	buf_name_set(bid, name);
 }
 
+ptr scheme_buf_readonly_get(int bid)
+{
+	return Sboolean(buf_is_readonly(bid));
+}
+
+void scheme_buf_readonly_set(int bid, bool is_readonly)
+{
+	buf_readonly_set(bid, is_readonly);
+}
+
 ptr scheme_buf_by_name(const char *name)
 {
 	int ret = buf_by_name(name);
@@ -864,6 +874,8 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_next_get", scheme_buf_next_get);
 	Sregister_symbol("cs_buf_name_get", scheme_buf_name_get);
 	Sregister_symbol("cs_buf_name_set", scheme_buf_name_set);
+	Sregister_symbol("cs_buf_readonly_get", scheme_buf_readonly_get);
+	Sregister_symbol("cs_buf_readonly_set", scheme_buf_readonly_set);
 	Sregister_symbol("cs_buf_by_name", scheme_buf_by_name);
 	Sregister_symbol("cs_buf_text_insert", scheme_buf_text_insert);
 	Sregister_symbol("cs_buf_text_insert_nl", scheme_buf_text_insert_nl);
