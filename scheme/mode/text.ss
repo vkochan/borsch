@@ -236,7 +236,7 @@
    (lambda (w)
       (let ([b (window-buffer w)])
          (with-buffer b
-            (when (local-bound? linenum-enable)
+            (when (and (local-bound? linenum-enable) (get-local linenum-enable))
                (let ([width (1+ (text-mode-linenum-width w))])
                   (when (not (eq? width (window-sidebar-width w)))
                      (window-set-sidebar-width w width)
