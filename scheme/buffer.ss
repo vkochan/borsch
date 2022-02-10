@@ -115,7 +115,7 @@
 		     )
                      (buffer-set-keymap m-map)
                   )
-		  (buffer-set-mode name)
+		  (buffer-set-mode-name name)
                   exp
                   ...
                   (run-hooks
@@ -127,7 +127,7 @@
    )
 )
 
-(define buffer-set-mode
+(define buffer-set-mode-name
    (lambda (n)
       (__cs_buf_mode_set (current-buffer) (format "(~a)" n))
    )

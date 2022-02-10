@@ -7,7 +7,7 @@
 (define text-mode-cmd
    (lambda ()
       (text-mode-set-keymap 'text-mode-cmd-local-map)
-      (buffer-set-mode "Text <N>")
+      (buffer-set-mode-name "Text <N>")
       (buffer-snapshot)
       (enable-insert #f)
       (mark-clear)
@@ -19,7 +19,7 @@
    (lambda ()
       (buffer-modify
          (text-mode-set-keymap 'text-mode-ins-local-map)
-         (buffer-set-mode "Text <I>")
+         (buffer-set-mode-name "Text <I>")
          (enable-insert #t)
       )
    )
@@ -28,7 +28,7 @@
 (define text-mode-vis
    (lambda ()
       (text-mode-set-keymap 'text-mode-vis-local-map)
-      (buffer-set-mode "Text <V>")
+      (buffer-set-mode-name "Text <V>")
       (enable-insert #f)
       (mark-set)
       (mark-highlight #t)
@@ -38,7 +38,7 @@
 (define text-mode-vis-linewise
    (lambda ()
       (text-mode-set-keymap 'text-mode-vis-linewise-local-map)
-      (buffer-set-mode "Text <V *L*>")
+      (buffer-set-mode-name "Text <V *L*>")
       (enable-insert #f)
       (mark-set (line-begin-pos))
       (move-line-end)

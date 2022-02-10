@@ -91,7 +91,7 @@
              )
           (define-local major-mode 'term-mode)
           (buffer-set-keymap 'term-mode-map)
-          (buffer-set-mode "Term")
+          (buffer-set-mode-name "Term")
           (run-hooks 'window-create-hook w)
           w
        )
