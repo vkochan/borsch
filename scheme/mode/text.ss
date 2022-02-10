@@ -156,6 +156,8 @@
       (bind-key map "i" (lambda () (text-mode-ins)))
       (bind-key map "o" (lambda () (insert-empty-line) (text-mode-ins)))
       (bind-key map "O" (lambda () (insert-empty-line-up) (text-mode-ins)))
+      (bind-key map "C" (lambda () (delete-line-end) (text-mode-ins)))
+      (bind-key map "S" (lambda () (move-line-begin) (delete-line-end) (text-mode-ins)))
       (bind-key map "v" (lambda () (text-mode-vis)))
       (bind-key map "V" (lambda () (text-mode-vis-linewise)))
       (bind-key map "p" (lambda () (copybuf-paste) (buffer-snapshot)))
