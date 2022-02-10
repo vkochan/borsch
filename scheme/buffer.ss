@@ -136,7 +136,7 @@
 
 (define buffer-set-state-name
    (lambda (n)
-      (__cs_buf_state_name_set (current-buffer) (format "<~a>" n))
+      (__cs_buf_state_name_set (current-buffer) (format "~a" n))
    )
 )
 
