@@ -25,9 +25,10 @@
              [b (buffer-create)]
             )
           (with-buffer b
-             (define-local major-mode 'grep-mode)
-             (buffer-set-name (format "Grep: ~a" s))
              (text-mode)
+             (define-local major-mode 'grep-mode)
+             (buffer-set-name (format "Search: ~a" s))
+             (buffer-set-mode-name "Grep")
           )
           (process-start b cmd)
           #t
