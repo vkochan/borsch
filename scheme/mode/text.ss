@@ -139,6 +139,8 @@
       (bind-key map "B" (lambda () (move-prev-longword)))
       (bind-key map "e" (lambda () (move-word-end)))
       (bind-key map "E" (lambda () (move-longword-end)))
+      (bind-key map "0" (lambda () (move-line-begin)))
+      (bind-key map "$" (lambda () (move-line-end)))
       (bind-key map "x" (lambda () (delete-next-char) (buffer-snapshot)))
       (bind-key map "X" (lambda () (delete-prev-char) (buffer-snapshot)))
       (bind-key map "D" (lambda () (delete-line-end) (buffer-snapshot)))
