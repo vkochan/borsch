@@ -663,7 +663,7 @@ static void draw_title(Window *c) {
 
 	len = snprintf(title, sizeof(title), "%s%s   [%d|%s%s]%s",
 			buffer_is_modified(c->buf) ? "[+] " : "",
-			buffer_mode_get(c->buf),
+			buffer_mode_name_get(c->buf),
 			c->order,
 			ismastersticky(c) ? "*" : "",
 			tmp[0] ? tmp : "",
@@ -3534,12 +3534,12 @@ void buf_input_enable(int bid, bool enable)
 	}
 }
 
-void buf_mode_set(int bid, char *name)
+void buf_mode_name_set(int bid, char *name)
 {
 	Buffer *buf = buffer_by_id(bid);
 
 	if (buf) {
-		buffer_mode_set(buf, name);
+		buffer_mode_name_set(buf, name);
 		if (current_window())
 			draw_title(current_window());
 	}

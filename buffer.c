@@ -531,12 +531,12 @@ void buffer_dirty_set(Buffer *buf, bool dirty)
 	buf->is_dirty = dirty;
 }
 
-char *buffer_mode_get(Buffer *buf)
+char *buffer_mode_name_get(Buffer *buf)
 {
 	return buf->mode;
 }
 
-void buffer_mode_set(Buffer *buf, char *name)
+void buffer_mode_name_set(Buffer *buf, char *name)
 {
 	strncpy(buf->mode, name, sizeof(buf->mode));
 }
