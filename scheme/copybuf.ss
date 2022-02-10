@@ -1,15 +1,25 @@
+(define copybuf-sync-with-clip #t)
 (define copybuf-is-linewise #f)
 (define copybuf-reg "")
+
+(define copybuf-put
+   (lambda (str)
+      (set! copybuf-reg str)
+      (when copybuf-sync-with-clip
+         (copybuf-clip-put str)
+      )
+   )
+)
 
 (define copybuf-copy
    (case-lambda
       [(s)
        (set! copybuf-is-linewise #f)
-       (set! copybuf-reg s)]
+       (copybuf-put s)]
 
       [(s l)
        (set! copybuf-is-linewise #t)
-       (set! copybuf-reg s)]
+       (copybuf-put s)]
    )
 )
 
@@ -17,11 +27,11 @@
    (case-lambda
       [(s)
        (set! copybuf-is-linewise #f)
-       (set! copybuf-reg (string-append copybuf-reg " " s))]
+       (copybuf-put (string-append copybuf-reg " " s))]
 
       [(s l)
        (set! copybuf-is-linewise #t)
-       (set! copybuf-reg (string-append copybuf-reg "\n" s))]
+       (copybuf-put (string-append copybuf-reg "\n" s))]
    )
 )
 
