@@ -105,7 +105,11 @@
                   (when (top-level-bound? m-map)
                      (when parent
 	                (let ([p-map (mode-gen-map-symb 'parent)])
-                           (keymap-set-parent (top-level-value m-map) p-map)
+                           (if (local-symbol-bound? p-map)
+                              (keymap-set-parent (top-level-value m-map) (get-local-symbol p-map))
+                              ;; else
+                              (keymap-set-parent (top-level-value m-map) p-map)
+                           )
                         )
 		     )
                      (buffer-set-keymap m-map)
