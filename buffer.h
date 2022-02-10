@@ -58,6 +58,8 @@ bool buffer_is_dirty(Buffer *buf);
 void buffer_dirty_set(Buffer *buf, bool dirty);
 char *buffer_mode_name_get(Buffer *buf);
 void buffer_mode_name_set(Buffer *buf, char *name);
+char *buffer_state_name_get(Buffer *buf);
+void buffer_state_name_set(Buffer *buf, char *name);
 void buffer_mark_set(Buffer *buf, size_t pos);
 void buffer_mark_clear(Buffer *buf);
 size_t buffer_mark_get(Buffer *buf);

@@ -44,6 +44,7 @@ typedef struct Buffer {
 	Text *text;
 	bool is_name_locked;
 	char name[256];
+	char state[32];
 	char mode[32];
 	size_t ref_count;
 	bool is_input_enabled;
@@ -539,6 +540,16 @@ char *buffer_mode_name_get(Buffer *buf)
 void buffer_mode_name_set(Buffer *buf, char *name)
 {
 	strncpy(buf->mode, name, sizeof(buf->mode));
+}
+
+char *buffer_state_name_get(Buffer *buf)
+{
+	return buf->state;
+}
+
+void buffer_state_name_set(Buffer *buf, char *name)
+{
+	strncpy(buf->state, name, sizeof(buf->state));
 }
 
 void buffer_mark_set(Buffer *buf, size_t pos)
