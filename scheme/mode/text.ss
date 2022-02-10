@@ -160,6 +160,7 @@
       (bind-key map "P" (lambda () (copybuf-paste-before) (buffer-snapshot)))
       (bind-key map "Y" (lambda () (copy-line)))
       (bind-key map "y y" (lambda () (copy-line)))
+      (bind-key map "y p" (lambda () (copybuf-copy (buffer-filename))))
       (bind-key map "C-r" (lambda () (buffer-redo)))
       (bind-key map "u" (lambda () (buffer-undo)))
       (bind-key map "g f" (lambda () (file-open-at-cursor)))
