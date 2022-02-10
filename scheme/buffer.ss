@@ -707,7 +707,7 @@
        (line-begin-pos (current-buffer) s)]
 
       [(b s)
-       (__cs_buf_text_obj_pos b s #\0 -1)]
+       (__cs_buf_text_obj_pos b s #\1 -1)]
    )
 )
 
