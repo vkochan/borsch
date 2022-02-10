@@ -64,7 +64,7 @@
 
 (define term-mode-paste
    (lambda ()
-      (term-send-text reg)
+      (term-send-text copybuf-reg)
    )
 )
 
