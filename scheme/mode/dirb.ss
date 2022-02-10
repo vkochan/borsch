@@ -19,6 +19,7 @@
             [dl '()]
             [fl '()]
            )
+         (buffer-set-readonly #f)
          (set-local! current-cwd dir)
          (buffer-set-name dir)
 	 (erase-buffer)
@@ -45,54 +46,9 @@
                (insert (fmt "~a\n" f))
             ) fl
          )
-	 (dirb-move-begin)
+         (move-buffer-begin)
+         (buffer-set-readonly #t)
       )
-   )
-)
-
-(define dirb
-   (case-lambda
-      [()
-       (dirb (view-cwd))
-      ]
-
-      [(cwd)
-       (let ([b (buffer-create)])
-          (with-buffer b
-             (define-local current-cwd cwd)
-             (define-local show-hidden #f)
-             (define-local prev-cursor (make-stack))
-             (define-local defval #f)
-             (buffer-set-keymap 'dirb-map)
-             (dirb-open-dir cwd)
-             (stack-push! (get-local prev-cursor) (cursor))
-          )
-       )
-      ]
-   )
-)
-
-(define dirb-move-line-down
-    (lambda ()
-       (move-line-down)
-    )
-)
-
-(define dirb-move-line-up
-    (lambda ()
-       (move-line-up)
-    )
-)
-
-(define dirb-move-begin
-   (lambda ()
-      (move-buffer-begin)
-   )
-)
-
-(define dirb-move-end
-   (lambda ()
-      (move-buffer-end)
    )
 )
 
@@ -266,21 +222,17 @@
    )
 )
 
-(define dirb-map
+(define dirb-mode-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" dirb-open-entry)
       (bind-key map "h" dirb-open-parent)
-      (bind-key map "j" dirb-move-line-down)
-      (bind-key map "k" dirb-move-line-up)
       (bind-key map "l" dirb-open-entry)
-      (bind-key map "g g" dirb-move-begin)
       (bind-key map "C-u" dirb-scroll-halfpage-up)
       (bind-key map "C-d" dirb-scroll-halfpage-down)
       (bind-key map "C-f" dirb-scroll-page-down)
       (bind-key map "C-b" dirb-scroll-page-up)
       (bind-key map "H" dirb-viewport-begin)
       (bind-key map "L" dirb-viewport-end)
-      (bind-key map "G" dirb-move-end)
       (bind-key map "." dirb-show-hidden)
       (bind-key map "~" dirb-goto-home)
       (bind-key map "w" dirb-goto-cwd)
@@ -294,6 +246,30 @@
    )
 )
 
-(define-mode dirb-mode "Dirb" #f
-   #f
+(define-mode dirb-mode "Dirb" text-mode
+   (define-local current-cwd (view-cwd))
+   (define-local show-hidden #f)
+   (define-local prev-cursor (make-stack))
+   (define-local defval #f)
+   (set-local! linenum-enable #f)
+)
+
+(define dirb
+   (case-lambda
+      [()
+       (dirb (view-cwd))
+      ]
+
+      [(cwd)
+       (let ([b (buffer-create)])
+          (with-buffer b
+             (buffer-set-readonly #t)
+             (dirb-mode)
+             (set-local! current-cwd cwd)
+             (dirb-open-dir cwd)
+             (stack-push! (get-local prev-cursor) (cursor))
+          )
+       )
+      ]
+   )
 )
