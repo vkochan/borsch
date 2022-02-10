@@ -92,42 +92,6 @@
     )
 )
 
-(define dirb-scroll-halfpage-up
-  (lambda ()
-    (cursor-set (window-scroll-halfpage-up))
-  )
-)
-
-(define dirb-scroll-halfpage-down
-  (lambda ()
-    (cursor-set (window-scroll-halfpage-down))
-  )
-)
-
-(define dirb-scroll-page-down
-  (lambda ()
-    (cursor-set (window-scroll-page-down))
-  )
-)
-
-(define dirb-scroll-page-up
-  (lambda ()
-    (cursor-set (window-scroll-page-up))
-  )
-)
-
-(define dirb-viewport-begin
-  (lambda ()
-    (cursor-set (window-viewport-begin))
-  )
-)
-
-(define dirb-viewport-end
-  (lambda ()
-    (cursor-set (window-viewport-end))
-  )
-)
-
 (define dirb-show-hidden
    (lambda ()
       (set-local! show-hidden
@@ -227,12 +191,6 @@
       (bind-key map "<Enter>" dirb-open-entry)
       (bind-key map "h" dirb-open-parent)
       (bind-key map "l" dirb-open-entry)
-      (bind-key map "C-u" dirb-scroll-halfpage-up)
-      (bind-key map "C-d" dirb-scroll-halfpage-down)
-      (bind-key map "C-f" dirb-scroll-page-down)
-      (bind-key map "C-b" dirb-scroll-page-up)
-      (bind-key map "H" dirb-viewport-begin)
-      (bind-key map "L" dirb-viewport-end)
       (bind-key map "." dirb-show-hidden)
       (bind-key map "~" dirb-goto-home)
       (bind-key map "w" dirb-goto-cwd)
