@@ -101,6 +101,7 @@
                (when parent
                   ((top-level-value 'parent))
                )
+               (define-local major-mode 'mode)
 	       (let ([m-map (mode-gen-map-symb 'mode)])
                   (when (top-level-bound? m-map)
                      (when parent

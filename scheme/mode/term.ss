@@ -89,6 +89,7 @@
               [w (__cs_term_create prog title)]
               [b (window-buffer w)]
              )
+          (define-local major-mode 'term-mode)
           (buffer-set-keymap 'term-mode-map)
           (buffer-set-mode "Term")
           (run-hooks 'window-create-hook w)
