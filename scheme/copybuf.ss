@@ -60,3 +60,53 @@
       (move-prev-char)
    )
 )
+
+(define copybuf-has-xclip?
+   (lambda ()
+      (delay (program-exists? "xclip"))
+   )
+)
+
+(define copybuf-clip-get
+   (lambda ()
+      (if (copybuf-has-xclip?)
+         (let (
+               [ret (process "xclip -o")]
+              )
+            (let (
+                  [out (list-ref ret 0)]
+                  [in (list-ref ret 1)]
+                  [str ""]
+                 )
+               (while (not (port-eof? out))
+                  (set! str (string-append str (get-string-some out)))
+               )
+               (close-port out)
+               (close-port in)
+               str
+            )
+         )
+         ;; else
+         "" 
+      )
+   )
+)
+
+(define copybuf-clip-put
+   (lambda (str)
+      (if (copybuf-has-xclip?)
+         (let (
+               [ret (process "xclip -i")]
+              )
+            (let (
+                  [out (list-ref ret 0)]
+                  [in (list-ref ret 1)]
+                 )
+               (put-string-some in str)
+               (close-port out)
+               (close-port in)
+            )
+         )
+      )
+   )
+)
