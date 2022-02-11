@@ -10,7 +10,7 @@
 (load "copybuf.ss")
 (load "minibuf.ss")
 (load "process.ss")
-(load "grep.ss")
+(load "mode/grep.ss")
 (load "mode/term.ss")
 (load "mode/text.ss")
 (load "mode/dirb.ss")
