@@ -1,6 +1,6 @@
 include config.mk
 
-SRC = main.c vt.c array.c view.c buffer.c keymap.c event.c
+SRC = main.c vt.c array.c view.c buffer.c keymap.c event.c timer.c
 
 SCH_VERSION := $(shell echo "(scheme-version)" | scheme -q | sed -e 's|"||g' | cut -d ' ' -f4)
 SCH_MACHINE := $(shell echo "(machine-type)" | scheme -q)

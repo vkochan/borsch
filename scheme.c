@@ -10,6 +10,7 @@
 
 #include "text/text.h"
 #include "keymap.h"
+#include "timer.h"
 #include "api.h"
 
 #define CALL0(who) Scall0(Stop_level_value(Sstring_to_symbol(who)))
@@ -815,6 +816,30 @@ void scheme_evt_fd_handler_del(int fd)
 	evt_fd_handler_del(fd);
 }
 
+ptr scheme_timer_add(void (*cb)(void *ctx))
+{
+	int fd = timer_add(cb, NULL);
+
+	if (fd < 0)
+		return Sfalse;
+
+	return Sinteger(fd);
+}
+
+void scheme_timer_del(int fd)
+{
+	timer_del(fd);
+}
+
+void scheme_timer_interval_set(int fd, unsigned long ms)
+{
+	timer_interval_set(fd, ms);
+}
+
+void scheme_timer_time_set(int fd, unsigned long sec, unsigned long nsec)
+{
+	timer_time_set(fd, sec, nsec);
+}
 
 ptr scheme_process_is_alive(int pid)
 {
@@ -953,6 +978,11 @@ static void scheme_export_symbols(void)
 
 	Sregister_symbol("cs_evt_fd_handler_add", scheme_evt_fd_handler_add);
 	Sregister_symbol("cs_evt_fd_handler_del", scheme_evt_fd_handler_del);
+
+	Sregister_symbol("cs_timer_add", scheme_timer_add);
+	Sregister_symbol("cs_timer_del", scheme_timer_del);
+	Sregister_symbol("cs_timer_interval_set", scheme_timer_interval_set);
+	Sregister_symbol("cs_timer_time_set", scheme_timer_time_set);
 
 	Sregister_symbol("cs_process_is_alive", scheme_process_is_alive);
 
