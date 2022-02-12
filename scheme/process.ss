@@ -92,6 +92,27 @@
    )
 )
 
+(define process-read
+   (lambda (cmd)
+      (let (
+            [ret (process cmd)]
+           )
+         (let (
+               [out (list-ref ret 0)]
+               [in (list-ref ret 1)]
+               [str ""]
+              )
+            (while (not (port-eof? out))
+               (set! str (string-append str (get-string-some out)))
+            )
+            (close-port out)
+            (close-port in)
+            str
+         )
+      )
+   )
+)
+
 (define program-exists?
    (lambda (prog)
       (= 0 (system (format "command -v ~a > /dev/null" prog)))
