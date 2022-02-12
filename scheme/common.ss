@@ -166,6 +166,22 @@
    )
 )
 
+(define string-remove-nl
+   (lambda (s)
+      (let (
+            [chars (string->list s)]
+           )
+         (list->string
+            (filter
+               (lambda (c)
+                  (not (equal? c #\newline))
+               ) chars
+            )
+         )
+      )
+   )
+)
+
 (define % modulo)
 
 (define fmt format)
