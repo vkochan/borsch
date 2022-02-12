@@ -182,6 +182,26 @@
    )
 )
 
+(define (string-index t s)
+   (let* (
+          [len (string-length s)]
+	  [max (- (string-length t) len)]
+         )
+      (let loop ((i 0))
+         (cond ((> i max) #f)
+	       ((string=? s (substring t i (+ i len))) i)
+	       (else (loop (+ i 1)))
+         )
+      )
+   )
+)
+
+(define string-contains?
+   (lambda (s c)
+      (not (not (string-index s c)))
+   )
+)
+
 (define % modulo)
 
 (define fmt format)
