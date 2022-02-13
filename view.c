@@ -598,6 +598,8 @@ static bool view_viewport_up(View *view, int n) {
 		if (++off > max)
 			break;
 	} while (text_iterator_byte_prev(&it, &c));
+	if (!off)
+		return false;
 	view->start -= MIN(view->start, off);
 	view_draw(view);
 	return true;
