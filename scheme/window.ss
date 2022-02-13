@@ -36,27 +36,27 @@
 
 (define window-first
    (lambda ()
-       (__cs_win_first_get)
+       (call-foreign (__cs_win_first_get))
    )
 )
 
 (define window-next
    (case-lambda
       [()
-       (__cs_win_next_get (current-window))]
+       (call-foreign (__cs_win_next_get (current-window)))]
 
       [(wid)
-       (__cs_win_next_get wid)]
+       (call-foreign (__cs_win_next_get wid))]
    )
 )
 
 (define window-prev
    (case-lambda
       [()
-       (__cs_win_prev_get (current-window))]
+       (call-foreign (__cs_win_prev_get (current-window)))]
 
       [(wid)
-       (__cs_win_prev_get wid)]
+       (call-foreign (__cs_win_prev_get wid))]
    )
 )
 
@@ -82,58 +82,58 @@
 (define window-upper
    (case-lambda
       [()
-       (__cs_win_upper_get (current-window))]
+       (call-foreign (__cs_win_upper_get (current-window)))]
 
       [(wid)
-       (__cs_win_upper_get wid)]
+       (call-foreign (__cs_win_upper_get wid))]
    )
 )
 
 (define window-lower
    (case-lambda
       [()
-       (__cs_win_lower_get (current-window))]
+       (call-foreign (__cs_win_lower_get (current-window)))]
 
       [(wid)
-       (__cs_win_lower_get wid)]
+       (call-foreign (__cs_win_lower_get wid))]
    )
 )
 
 (define window-right
    (case-lambda
       [()
-       (__cs_win_right_get (current-window))]
+       (call-foreign (__cs_win_right_get (current-window)))]
 
       [(wid)
-       (__cs_win_right_get wid)]
+       (call-foreign (__cs_win_right_get wid))]
    )
 )
 
 (define window-left
    (case-lambda
       [()
-       (__cs_win_left_get (current-window))]
+       (call-foreign (__cs_win_left_get (current-window)))]
 
       [(wid)
-       (__cs_win_left_get wid)]
+       (call-foreign (__cs_win_left_get wid))]
    )
 )
 
 (define current-window
    (lambda ()
-      (__cs_win_current_get)
+      (call-foreign (__cs_win_current_get))
    )
 )
 
 (define window-prev-selected
    (lambda ()
-       (__cs_win_prev_selected)
+       (call-foreign (__cs_win_prev_selected))
    )
 )
 
 (define window-select
    (lambda (wid)
-      (__cs_win_current_set wid)
+      (call-foreign (__cs_win_current_set wid))
       (run-hooks 'window-select-hook wid)
    )
 )
@@ -168,7 +168,7 @@
        (window-create 0)]
 
       [(b)
-       (let ([w (__cs_win_new b)])
+       (let ([w (call-foreign (__cs_win_new b))])
          (when w (run-hooks 'window-create-hook w))
          w
        )
@@ -187,7 +187,7 @@
               (window-close w)
               ;; else
               (begin
-	         (__cs_win_del w)
+	         (call-foreign (__cs_win_del w))
                  (run-hooks 'window-delete-hook w)
               )
            )
@@ -202,7 +202,7 @@
 	(window-close (current-window))]
 
        [(w)
-	(__cs_win_close w)
+	(call-foreign (__cs_win_close w))
         (run-hooks 'window-close-hook w)
        ]
     )
@@ -211,60 +211,60 @@
 (define window-name
    (case-lambda
       [()
-       (__cs_win_title_get (current-window))]
+       (call-foreign (__cs_win_title_get (current-window)))]
 
       [(wid)
-       (__cs_win_title_get wid)]
+       (call-foreign (__cs_win_title_get wid))]
    )
 )
 
 (define window-set-name
    (case-lambda
       [(title)
-       (__cs_win_title_set (current-window) title)]
+       (call-foreign (__cs_win_title_set (current-window) title))]
 
       [(wid title)
-       (__cs_win_title_set wid title)]
+       (call-foreign (__cs_win_title_set wid title))]
    )
 )
 
 (define window-set-tag
    (case-lambda
       [(tag)
-       (__cs_win_tag_set (current-window) tag)]
+       (call-foreign (__cs_win_tag_set (current-window) tag))]
 
       [(wid tag)
-       (__cs_win_tag_set wid tag)]
+       (call-foreign (__cs_win_tag_set wid tag))]
    )
 )
 
 (define window-toggle-tag
    (case-lambda
       [(tag)
-       (__cs_win_tag_toggle (current-window) tag)]
+       (call-foreign (__cs_win_tag_toggle (current-window) tag))]
 
       [(wid tag)
-       (__cs_win_tag_toggle wid tag)]
+       (call-foreign (__cs_win_tag_toggle wid tag))]
    )
 )
 
 (define window-tag+
    (case-lambda
       [(tag)
-       (__cs_win_tag_add (current-window) tag)]
+       (call-foreign (__cs_win_tag_add (current-window) tag))]
 
       [(wid tag)
-       (__cs_win_tag_add wid tag)]
+       (call-foreign (__cs_win_tag_add wid tag))]
    )
 )
 
 (define window-tag-
    (case-lambda
       [(tag)
-       (__cs_win_tag_del (current-window) tag)]
+       (call-foreign (__cs_win_tag_del (current-window) tag))]
 
       [(wid tag)
-       (__cs_win_tag_del wid tag)]
+       (call-foreign (__cs_win_tag_del wid tag))]
    )
 )
 
@@ -281,10 +281,10 @@
 (define __window-get
    (case-lambda
       [(st)
-       (win-state->symb (__cs_win_state_get (current-window)))]
+       (win-state->symb (call-foreign (__cs_win_state_get (current-window))))]
 
       [(wid st)
-       (win-state->symb (__cs_win_state_get (wid)))]
+       (win-state->symb (call-foreign (__cs_win_state_get (wid))))]
    )
 )
 
@@ -331,10 +331,10 @@
 (define __window-set
    (case-lambda
       [(st)
-       (__cs_win_state_set (current-window) (symb->win-state st))]
+       (call-foreign (__cs_win_state_set (current-window) (symb->win-state st)))]
 
       [(wid st)
-       (__cs_win_state_set wid (symb->win-state st))]
+       (call-foreign (__cs_win_state_set wid (symb->win-state st)))]
    )
 )
 
@@ -375,10 +375,10 @@
 (define __window-toggle
    (case-lambda
       [(st)
-       (__cs_win_state_toggle (current-window) (symb->win-state st))]
+       (call-foreign (__cs_win_state_toggle (current-window) (symb->win-state st)))]
 
       [(wid st)
-       (__cs_win_state_toggle wid (symb->win-state st))]
+       (call-foreign (__cs_win_state_toggle wid (symb->win-state st)))]
    )
 )
 
@@ -413,60 +413,60 @@
 (define window-buffer
    (case-lambda
       [()
-       (__cs_win_buf_get (current-window))]
+       (call-foreign (__cs_win_buf_get (current-window)))]
 
       [(wid)
-       (__cs_win_buf_get wid)]
+       (call-foreign (__cs_win_buf_get wid))]
    )
 )
 
 (define window-popup
    (case-lambda
       [(e)
-       (__cs_win_popup (current-window) e)]
+       (call-foreign (__cs_win_popup (current-window) e))]
 
       [(wid e)
-       (__cs_win_popup wid e)]
+       (call-foreign (__cs_win_popup wid e))]
    )
 )
 
 (define window-set-width
    (case-lambda
       [(w)
-       (__cs_win_size_set (current-window) w -1)]
+       (call-foreign (__cs_win_size_set (current-window) w -1))]
 
       [(wid w)
-       (__cs_win_size_set wid w -1)]
+       (call-foreign (__cs_win_size_set wid w -1))]
    )
 )
 
 (define window-set-height
    (case-lambda
       [(h)
-       (__cs_win_size_set (current-window) -1 h)]
+       (call-foreign (__cs_win_size_set (current-window) -1 h))]
 
       [(wid h)
-       (__cs_win_size_set wid -1 h)]
+       (call-foreign (__cs_win_size_set wid -1 h))]
    )
 )
 
 (define window-set-border
    (case-lambda
       [(h)
-       (__cs_win_border_set (current-window) -1 h)]
+       (call-foreign (__cs_win_border_set (current-window) -1 h))]
 
       [(wid h)
-       (__cs_win_border_set wid -1 h)]
+       (call-foreign (__cs_win_border_set wid -1 h))]
    )
 )
 
 (define window-switch-buffer
    (case-lambda
       [(b)
-       (__cs_win_buf_switch (current-window) b)]
+       (call-foreign (__cs_win_buf_switch (current-window) b))]
 
       [(wid b)
-       (__cs_win_buf_switch wid b)]
+       (call-foreign (__cs_win_buf_switch wid b))]
    )
 )
 
@@ -476,7 +476,7 @@
        (window-viewport-begin (current-window))]
 
       [(w)
-       (__cs_win_viewport_pos w #\H)]
+       (call-foreign (__cs_win_viewport_pos w #\H))]
    )
 )
 
@@ -486,7 +486,7 @@
        (window-viewport-end (current-window))]
 
       [(w)
-       (__cs_win_viewport_pos w #\L)]
+       (call-foreign (__cs_win_viewport_pos w #\L))]
    )
 )
 
@@ -496,7 +496,7 @@
        (window-viewport-coord (current-window) p)]
 
       [(w p)
-       (__cs_win_viewport_coord w p)]
+       (call-foreign (__cs_win_viewport_coord w p))]
    )
 )
 
@@ -532,7 +532,7 @@
        (window-scroll-page-down (current-window))]
 
       [(w)
-       (__cs_win_scroll w #\f 0)]
+       (call-foreign (__cs_win_scroll w #\f 0))]
    )
 )
 
@@ -542,7 +542,7 @@
        (window-scroll-page-up (current-window))]
 
       [(w)
-       (__cs_win_scroll w #\b 0)]
+       (call-foreign (__cs_win_scroll w #\b 0))]
    )
 )
 
@@ -552,7 +552,7 @@
        (window-scroll-halfpage-down (current-window))]
 
       [(w)
-       (__cs_win_scroll w #\d 0)]
+       (call-foreign (__cs_win_scroll w #\d 0))]
    )
 )
 
@@ -562,7 +562,7 @@
        (window-scroll-halfpage-up (current-window))]
 
       [(w)
-       (__cs_win_scroll w #\u 0)]
+       (call-foreign (__cs_win_scroll w #\u 0))]
    )
 )
 
@@ -572,7 +572,7 @@
        (window-scroll-down (current-window))]
 
       [(w n)
-       (__cs_win_scroll w #\l n)]
+       (call-foreign (__cs_win_scroll w #\l n))]
    )
 )
 
@@ -582,7 +582,7 @@
        (window-scroll-down (current-window))]
 
       [(w n)
-       (__cs_win_scroll w #\L n)]
+       (call-foreign (__cs_win_scroll w #\L n))]
    )
 )
 
@@ -592,7 +592,7 @@
        (window-set-sidebar-width (current-window) l)]
 
       [(w l)
-       (__cs_win_sidebar_set w l)]
+       (call-foreign (__cs_win_sidebar_set w l))]
    )
 )
 
@@ -602,7 +602,7 @@
        (window-sidebar-width (current-window))]
 
       [(w)
-       (__cs_win_sidebar_get w)]
+       (call-foreign (__cs_win_sidebar_get w))]
    )
 )
 
@@ -614,10 +614,10 @@
 
       [(w x y t s)
        (let ([l (style->list  s)])
-         (__cs_win_sidebar_draw w x y t
+         (call-foreign (__cs_win_sidebar_draw w x y t
                                 (list-ref l 0)
                                 (list-ref l 1)
-                                (list-ref l 2))
+                                (list-ref l 2)))
        )
       ]
    )

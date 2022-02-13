@@ -65,38 +65,38 @@
 
 (define make-empty-keymap
    (lambda ()
-     (__cs_kmap_add "")
+     (call-foreign (__cs_kmap_add ""))
    )
 )
 
 (define make-keymap
    (case-lambda
       [()
-       (__cs_kmap_add (symbol->string 'global-keymap))]
+       (call-foreign (__cs_kmap_add (symbol->string 'global-keymap)))]
 
       [(p)
-       (__cs_kmap_add (symbol->string p))]
+       (call-foreign (__cs_kmap_add (symbol->string p)))]
    )
 )
 
 (define keymap-parent
    (lambda (k)
-       (__cs_kmap_parent_get k)
+       (call-foreign (__cs_kmap_parent_get k))
    )
 )
 
 (define keymap-set-parent
    (lambda (k p)
        (if (symbol? p)
-          (__cs_kmap_parent_set k (symbol->string p) -1)
+          (call-foreign (__cs_kmap_parent_set k (symbol->string p) -1))
           ;; else
-          (__cs_kmap_parent_set k "" p)
+          (call-foreign (__cs_kmap_parent_set k "" p))
        )
    )
 )
 
 (define keymap-del
    (lambda (k)
-       (__cs_kmap_del k)
+       (call-foreign (__cs_kmap_del k))
    )
 )

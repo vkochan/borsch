@@ -106,7 +106,7 @@
 
 (define minibuf-create
    (lambda ()
-      (let ([m (__cs_minibuf_create)])
+      (let ([m (call-foreign (__cs_minibuf_create))])
          (set! minibuf-buffer (window-buffer m))
          (set! minibuf-window m)
 

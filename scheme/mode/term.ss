@@ -6,20 +6,20 @@
 (define term-send-keys
    (case-lambda
       [(keys)
-       (__cs_term_keys_send (current-buffer) keys)]
+       (call-foreign (__cs_term_keys_send (current-buffer) keys))]
 
       [(bid keys)
-       (__cs_term_keys_send bid keys)]
+       (call-foreign (__cs_term_keys_send bid keys))]
    )
 )
 
 (define term-send-text
    (case-lambda
       [(text)
-       (__cs_term_text_send (current-buffer) text)]
+       (call-foreign (__cs_term_text_send (current-buffer) text))]
 
       [(bid text)
-       (__cs_term_text_send bid text)]
+       (call-foreign (__cs_term_text_send bid text))]
    )
 )
 
@@ -29,7 +29,7 @@
        (term-string (current-buffer))]
 
       [(b)
-       (__cs_term_text_get b)]
+       (call-foreign (__cs_term_text_get b))]
    )
 )
 
@@ -86,7 +86,7 @@
 
       [(prog title)
        (let* (
-              [w (__cs_term_create prog title)]
+              [w (call-foreign (__cs_term_create prog title))]
               [b (window-buffer w)]
              )
           (define-local major-mode 'term-mode)

@@ -1,6 +1,24 @@
 ;; FFI
 (define __cs_do_quit (foreign-procedure "cs_do_quit" () void))
-(define do-quit __cs_do_quit)
+
+(define foreign-mutex (make-mutex))
+
+(define-syntax (call-foreign stx)
+   (syntax-case stx ()
+      ((_ exp ...)
+       #`(with-mutex foreign-mutex
+            exp
+	    ...
+         )
+      )
+   )
+)
+
+(define do-quit
+   (lambda ()
+      (call-foreign (__cs_do_quit))
+   )
+)
 
 ;; Misc helpers
 (define is-dir? file-directory?)

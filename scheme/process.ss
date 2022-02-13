@@ -17,7 +17,7 @@
             (on-ready buf)
          )
          (hashtable-delete! %process-fd-ht fd)
-         (__cs_evt_fd_handler_del fd)
+         (call-foreign (__cs_evt_fd_handler_del fd))
          (close-port stdout)
          (close-port stderr)
          (close-port stdin)
@@ -83,7 +83,7 @@
                 [fd (port-file-descriptor stdout)]
                 [p (make-%process stdin stdout stderr pid fd buf cb on-ready)]
                )
-            (__cs_evt_fd_handler_add fd (foreign-callable-entry-point cb))
+            (call-foreign (__cs_evt_fd_handler_add fd (foreign-callable-entry-point cb)))
             (hashtable-set! %process-fd-ht fd p)
             (values stdin stdout stderr pid)
          )
@@ -128,7 +128,7 @@
          (vector-for-each
             (lambda (p)
                (when (and
-                        (not (__cs_process_is_alive (%process-pid p)))
+                        (not (call-foreign (__cs_process_is_alive (%process-pid p))))
                         (port-eof? (%process-stdout p))
                      )
                   (set! to-delete (append to-delete (list p)))

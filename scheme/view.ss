@@ -7,13 +7,13 @@
 
 (define view-current
    (lambda ()
-      (__cs_view_current_get)
+      (call-foreign (__cs_view_current_get))
    )
 )
 
 (define view-switch
    (lambda (tag)
-      (__cs_view_current_set tag)
+      (call-foreign (__cs_view_current_set tag))
       (run-hooks 'view-switch-hook tag)
    )
 )
@@ -81,39 +81,39 @@
 (define view-name
    (case-lambda
       [()
-       (__cs_view_name_get (__cs_view_current_get))]
+       (call-foreign (__cs_view_name_get (view-current)))]
 
       [(tag)
-       (__cs_view_name_get tag)]
+       (call-foreign (__cs_view_name_get tag))]
    )
 )
 
 (define view-set-name
    (case-lambda
       [(name)
-       (__cs_view_name_set (__cs_view_current_get) name)]
+       (call-foreign (__cs_view_name_set (view-current) name))]
 
       [(tag name)
-       (__cs_view_name_set tag name)]
+       (call-foreign (__cs_view_name_set tag name))]
    )
 )
 
 (define view-cwd
    (case-lambda
       [()
-       (__cs_view_cwd_get (__cs_view_current_get))]
+       (call-foreign (__cs_view_cwd_get (view-current)))]
 
       [(tag)
-       (__cs_view_cwd_get tag)]
+       (call-foreign (__cs_view_cwd_get tag))]
    )
 )
 
 (define view-set-cwd
    (case-lambda
       [(cwd)
-       (__cs_view_cwd_set (__cs_view_current_get) cwd)]
+       (call-foreign (__cs_view_cwd_set (view-current) cwd))]
 
       [(tag cwd)
-       (__cs_view_cwd_set tag cwd)]
+       (call-foreign (__cs_view_cwd_set tag cwd))]
    )
 )

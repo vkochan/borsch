@@ -35,7 +35,7 @@
                [nsec (time-nanosecond tm)]
                [sec (time-second tm)]
               )
-            (__cs_timer_time_set tid sec nsec)
+            (call-foreign (__cs_timer_time_set tid sec nsec))
          )
       )
    )
@@ -43,7 +43,7 @@
 
 (define timer-set-interval
    (lambda (tid ms)
-      (__cs_timer_interval_set tid ms)
+      (call-foreign (__cs_timer_interval_set tid ms))
    )
 )
 
@@ -54,7 +54,7 @@
             [cb (timer-cb fn)]
            )
          (let (
-               [tid (__cs_timer_add (foreign-callable-entry-point cb))]
+               [tid (call-foreign (__cs_timer_add (foreign-callable-entry-point cb)))]
               )
             (if tid
                (begin
@@ -78,7 +78,7 @@
    (lambda (id)
       (let ([cb (hashtable-ref %timer-fd-ht id #f)])
          (when cb
-            (__cs_timer_del id)
+            (call-foreign (__cs_timer_del id))
             (unlock-object cb)
          )
       )

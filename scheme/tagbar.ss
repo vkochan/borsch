@@ -10,20 +10,20 @@
                )
             ]
            )
-           (__cs_tagbar_status_align v)
+           (call-foreign (__cs_tagbar_status_align v))
       )
    )
 )
 
 (define tagbar-show
    (lambda (s)
-      (__cs_tagbar_show s)
+      (call-foreign (__cs_tagbar_show s))
    )
 )
 
 (define tagbar-set-status
    (lambda (s)
-      (__cs_tagbar_status_set s)
+      (call-foreign (__cs_tagbar_status_set s))
    )
 )
 
