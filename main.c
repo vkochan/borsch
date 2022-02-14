@@ -2036,6 +2036,27 @@ parse_args(int argc, char *argv[]) {
 	return init;
 }
 
+static int buf_keymap_prop_match(Buffer *buf, int id, size_t start, size_t end, void *data,
+				 void *arg)
+{
+	KeyMap **map = arg;
+	*map = (KeyMap *) data;
+}
+
+static KeyMap *buf_keymap_get(Buffer *buf)
+{
+	size_t cursor = buffer_cursor_get(buf);
+	KeyMap *tmap = NULL;
+
+	buffer_properties_walk(buf, PROPERTY_TYPE_TEXT_KEYMAP,
+			       cursor, cursor+1, &tmap, buf_keymap_prop_match);
+
+	if (tmap)
+		return tmap;
+
+	return buffer_keymap_get(buf);
+}
+
 static void handle_keypress(int fd, void *arg) {
 	KeyBuf *kbuf = arg;
 	int alt_code;
@@ -2045,7 +2066,7 @@ static void handle_keypress(int fd, void *arg) {
 	if (!current_window()) {
 		curr_kmap = global_kmap;
 	} else if (current_window() && !current_window()->minimized) {
-		KeyMap *map = buffer_keymap_get(current_window()->buf);
+		KeyMap *map = buf_keymap_get(current_window()->buf);
 		if (map)
 			curr_kmap = map;
 	};
@@ -3690,12 +3711,44 @@ int buf_prop_style_add(int bid, int type, int fg, int bg, int attr,  int start, 
 	return 0;
 }
 
+
+int buf_prop_kmap_add(int bid, int kid, int start, int end)
+{
+	Buffer *buf = buffer_by_id(bid);
+	KeyMap *map = keymap_by_id(kid);
+	int err;
+
+	if (!map || !buf)
+		return -1;
+
+	err = buffer_property_add(buf, PROPERTY_TYPE_TEXT_KEYMAP, start, end, map);
+	if (err)
+		return err;
+
+	keymap_parent_set(map, buffer_keymap_get(buf));
+	keymap_ref_get(map);
+	return 0;
+}
+
+void buf_prop_del_cb(Buffer *buf, size_t type, size_t start, size_t end,
+		     void *data, void *arg)
+{
+	if (type == PROPERTY_TYPE_TEXT_KEYMAP) {
+		KeyMap *map = data;
+
+		keymap_parent_set(map, NULL);
+		keymap_ref_put(map);
+	} else {
+		free(data);
+	}
+}
+
 void buf_prop_del(int bid, int type, int start, int end)
 {
 	Buffer *buf = buffer_by_id(bid);
 
-	buffer_property_remove(buf, type, start == -1 ? EPOS : start,
-			end == -1 ? EPOS : end);
+	buffer_property_remove_cb(buf, type, start == -1 ? EPOS : start,
+			end == -1 ? EPOS : end, NULL, buf_prop_del_cb);
 	buffer_dirty_set(buf, true);
 }
 

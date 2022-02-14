@@ -27,6 +27,7 @@
 (define __cs_buf_text_style_get (foreign-procedure "cs_buf_text_style_get" (int) scheme-object))
 
 (define __cs_buf_prop_style_add (foreign-procedure "cs_buf_prop_style_add" (int int int int int int int) scheme-object))
+(define __cs_buf_prop_kmap_add (foreign-procedure "cs_buf_prop_kmap_add" (int int int int) scheme-object))
 (define __cs_buf_prop_del (foreign-procedure "cs_buf_prop_del" (int int int int) void))
 
 (define __cs_buf_cursor_get (foreign-procedure __collect_safe "cs_buf_cursor_get" (int) scheme-object))
@@ -398,7 +399,7 @@
    )
 )
 
-(define add-text-property
+(define add-text-style-property
    (lambda (s e a)
       (let ([l (style->list a)])
          (call-foreign (__cs_buf_prop_style_add (current-buffer)
@@ -407,6 +408,23 @@
                                   (list-ref l 1)
                                   (list-ref l 2)
                                   s e))
+      )
+   )
+)
+
+(define add-text-keymap-property
+   (lambda (s e k)
+      (call-foreign (__cs_buf_prop_kmap_add (current-buffer) k s e))
+   )
+)
+
+(define add-text-property
+   (lambda (s e p)
+      (when (equal? 'style (car p))
+         (add-text-style-property s e (cadr p))
+      )
+      (when (equal? 'keymap (car p))
+         (add-text-keymap-property s e (cadr p))
       )
    )
 )
@@ -437,8 +455,10 @@
          (begin
             (let ([c (cursor)])
                (let ([p (- (call-foreign (__cs_buf_text_insert (current-buffer) t)) 1)])
-                  (when (equal? 'style (car (car s)))
-                     (add-text-property c p (cadr (car s)))
+                  (for-each
+                     (lambda (a)
+                        (add-text-property c p a)
+                     ) s
                   )
                   p
                )

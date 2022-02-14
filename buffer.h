@@ -11,6 +11,7 @@ typedef struct Vt Vt;
 typedef enum {
 	PROPERTY_TYPE_TEXT_STYLE	= 1,
 	PROPERTY_TYPE_TEXT_HIGHLIGHT	= 2,
+	PROPERTY_TYPE_TEXT_KEYMAP	= 3,
 
 	PROPERTY_TYPE_ALL
 } buffer_property_t;

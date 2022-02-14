@@ -615,6 +615,15 @@ ptr scheme_buf_prop_style_add(int bid, int type, int fg, int bg, int attr, int s
 	return Sfalse;
 }
 
+ptr scheme_buf_prop_kmap_add(int bid, int kid, int start, int end)
+{
+	int ret = buf_prop_kmap_add(bid, kid, start, end);
+
+	if (ret == 0)
+		Sinteger(ret);
+	return Sfalse;
+}
+
 void scheme_buf_prop_del(int bid, int type, int start, int end)
 {
 	buf_prop_del(bid, type, start, end);
@@ -937,6 +946,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_is_visible", scheme_buf_is_visible);
 
 	Sregister_symbol("cs_buf_prop_style_add", scheme_buf_prop_style_add);
+	Sregister_symbol("cs_buf_prop_kmap_add", scheme_buf_prop_kmap_add);
 	Sregister_symbol("cs_buf_prop_del", scheme_buf_prop_del);
 
 	Sregister_symbol("cs_buf_env_get", scheme_buf_env_get);
