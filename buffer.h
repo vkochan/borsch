@@ -13,7 +13,7 @@ typedef enum {
 	PROPERTY_TYPE_TEXT_HIGHLIGHT	= 2,
 	PROPERTY_TYPE_TEXT_KEYMAP	= 3,
 
-	PROPERTY_TYPE_ALL
+	PROPERTY_TYPE_ALL		= 10000,
 } buffer_property_t;
 
 Buffer *buffer_new(const char *name);

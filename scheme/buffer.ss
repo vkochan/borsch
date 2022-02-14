@@ -399,6 +399,18 @@
    )
 )
 
+(define symbol->text-property-type
+   (lambda (s)
+      (case s
+         [('style)     1]
+         [('highlight) 2]
+         [('keymap)    3]
+         [('all)       10000]
+         [else         0]
+      )
+   )
+)
+
 (define add-text-style-property
    (lambda (s e a)
       (let ([l (style->list a)])
@@ -430,8 +442,15 @@
 )
 
 (define remove-text-property
-   (lambda (s e)
-      (call-foreign (__cs_buf_prop_del (current-buffer) 1 s e))
+   (case-lambda
+      [(s e t)
+       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type t) s e))]
+
+      [(s e)
+       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type 'all) s e))]
+
+      [(t)
+       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type 'all) -1 -1))]
    )
 )
 
@@ -1188,7 +1207,13 @@
 
 (define erase-buffer
    (lambda ()
-      (delete-range (buffer-begin-pos) (buffer-end-pos))
+      (let (
+            [s (buffer-begin-pos)]
+            [e (buffer-end-pos)]
+           )
+         (remove-text-property s e)
+         (delete-range s e)
+      )
    )
 )
 
