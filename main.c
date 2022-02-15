@@ -3093,8 +3093,14 @@ void buf_readonly_set(int bid, bool is_readonly)
 {
 	Buffer *buf = buffer_by_id(bid);
 
-	if (buf)
-		return buffer_readonly_set(buf, is_readonly);
+	if (buf) {
+		buffer_readonly_set(buf, is_readonly);
+
+		for (Window *w = windows; w; w = w->next) {
+			if (isvisible(w) && w->buf == buf)
+				draw_title(w);
+		}
+	}
 }
 
 bool buf_is_readonly(int bid)
