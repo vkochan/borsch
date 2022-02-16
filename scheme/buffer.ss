@@ -326,7 +326,20 @@
 
 (define buffer-set-filename
    (lambda (f)
-      (call-foreign (__cs_buf_file_set (current-buffer) f))
+      (let (
+            [first-path (path-first f)]
+            [path f]
+           )
+         (if (equal? first-path "~")
+            (set! path
+               (format "~a/~a"
+                  (getenv "HOME")
+                  (path-rest f)
+               )
+            )
+         )
+         (call-foreign (__cs_buf_file_set (current-buffer) path))
+      )
    )
 )
 
