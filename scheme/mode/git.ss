@@ -60,6 +60,39 @@
    )
 )
 
+(define git-branch-list
+   (case-lambda
+      [()
+       (git-branch-list "")
+      ]
+
+      [(opts)
+       (let ([ret (git-cmd-read (format "branch ~a" opts))])
+          (let ([ls (string-split ret #\newline)])
+             (let ([blist (list)])
+                (for-each
+                   (lambda (b)
+                      (let ([bs (string-split b #\ )])
+                         ;; handle '->'
+                         (if (< (length bs) 2)
+                            ;; handle '*'
+                            (if (> (length bs) 1)
+                               (set! blist (append blist (list (list-ref bs 1))))
+                               ;; else
+                               (set! blist (append blist (list (list-ref bs 0))))
+                            )
+                         )
+                      )
+                   ) ls
+                )
+                blist
+             )
+          )
+       )
+      ]
+   )
+)
+
 (define git-cmd-file-status
    (lambda (f)
       (let ([st-line (git-cmd-list (format "status -z ~a" f))])
