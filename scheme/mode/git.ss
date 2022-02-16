@@ -207,6 +207,24 @@
    )
 )
 
+(define git-status-diff-file
+   (lambda (status file)
+      (let ([b (buffer-create)])
+         (with-buffer b
+            (text-mode)
+            (insert
+               (git-cmd-read
+                  (format "diff ~a -- ~a"
+                     (if (eq? status 'staged) "--cached" "")
+                     file
+                  )
+               )
+            )
+         )
+      )
+   )
+)
+
 (define git-staged-update
    (lambda ()
       (move-line-begin)
@@ -216,9 +234,18 @@
    )
 )
 
+(define git-staged-diff-file
+   (lambda ()
+      (move-line-begin)
+      (move-next-longword)
+      (git-status-diff-file 'staged (extract-longword))
+   )
+)
+
 (define git-staged-map
    (let ([map (make-keymap)])
       (bind-key map "u" git-staged-update)
+      (bind-key map "<Enter>" git-staged-diff-file)
       map
    )
 )
@@ -229,6 +256,14 @@
       (move-next-longword)
       (git-stage-file-cmd (extract-longword))
       (git-show-status)
+   )
+)
+
+(define git-unstaged-diff-file
+   (lambda ()
+      (move-line-begin)
+      (move-next-longword)
+      (git-status-diff-file 'unstaged (extract-longword))
    )
 )
 
@@ -251,6 +286,7 @@
    (let ([map (make-keymap)])
       (bind-key map "u" git-unstaged-update)
       (bind-key map "!" git-unstaged-revert)
+      (bind-key map "<Enter>" git-unstaged-diff-file)
       map
    )
 )
