@@ -143,6 +143,7 @@
 (bind-key "C-x b o" buffer-open)
 
 (bind-key "C-x g s" git-status)
+(bind-key "C-x g c" git-switch-branch)
 
 (bind-key "C-x f d" dirb)
 
