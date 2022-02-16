@@ -1398,7 +1398,7 @@
 (define buffer-select-open
    (lambda ()
       (let (
-              [b (buffer-get (extract-longword))]
+            [b (buffer-get (extract-longword))]
            )
          (when b
             (window-delete)
