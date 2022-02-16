@@ -153,7 +153,6 @@ bool buffer_del(Buffer *buf)
 	if (!buf->ref_count) {
 		if (buf->term)
 			vt_destroy(buf->term);
-		buffer_property_remove(buf, PROPERTY_TYPE_ALL, EPOS, EPOS);
 		buffer_list_del(buf);
 		/* TODO: check if buffer is not saved and ask user to save it */
 		keymap_free(buf->keymap);

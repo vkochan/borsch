@@ -1301,6 +1301,19 @@ static Buffer *__buf_new(const char *name, KeyMap *kmap)
 	return NULL;
 }
 
+void buf_prop_del_cb(Buffer *buf, size_t type, size_t start, size_t end,
+		     void *data, void *arg)
+{
+	if (type == PROPERTY_TYPE_TEXT_KEYMAP) {
+		KeyMap *map = data;
+
+		keymap_parent_set(map, NULL);
+		keymap_ref_put(map);
+	} else {
+		free(data);
+	}
+}
+
 static void __buf_del(Buffer *buf)
 {
 	int pty = -1;
@@ -1311,6 +1324,7 @@ static void __buf_del(Buffer *buf)
 
 	env = buffer_env_get(buf);
 
+	buffer_property_remove_cb(buf, PROPERTY_TYPE_ALL, EPOS, EPOS, NULL, buf_prop_del_cb);
 	buffer_ref_put(buf);
 	if (buffer_del(buf)) {
 		if (pty >= 0)
@@ -3734,19 +3748,6 @@ int buf_prop_kmap_add(int bid, int kid, int start, int end)
 	keymap_parent_set(map, buffer_keymap_get(buf));
 	keymap_ref_get(map);
 	return 0;
-}
-
-void buf_prop_del_cb(Buffer *buf, size_t type, size_t start, size_t end,
-		     void *data, void *arg)
-{
-	if (type == PROPERTY_TYPE_TEXT_KEYMAP) {
-		KeyMap *map = data;
-
-		keymap_parent_set(map, NULL);
-		keymap_ref_put(map);
-	} else {
-		free(data);
-	}
 }
 
 void buf_prop_del(int bid, int type, int start, int end)
