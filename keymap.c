@@ -118,13 +118,17 @@ KeyBinding *keymap_find(KeyMap *map, char *key)
 
 	for (it = map->kbd_list; it; it = it->next) {
 		int len = MIN(it->len, MAX_KEYS);
+		int match = 0;
 
 		if (it->len != kbd.len)
 			continue;
 
 		for (i = 0; i < len; i++)
-			if (it->keys[i] == kbd.keys[i] && i == len - 1)
-				return it;
+			if (it->keys[i] == kbd.keys[i])
+				match++;
+
+		if (match == kbd.len)
+			return it;
 	}
 
 	return NULL;
