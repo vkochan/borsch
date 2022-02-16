@@ -11,6 +11,7 @@
 (load "minibuf.ss")
 (load "process.ss")
 (load "timer.ss")
+(load "mode/git.ss")
 (load "mode/grep.ss")
 (load "mode/term.ss")
 (load "mode/text.ss")
@@ -140,6 +141,8 @@
 (bind-key "C-x b s" buffer-switch)
 (bind-key "C-x b c" window-close)
 (bind-key "C-x b o" buffer-open)
+
+(bind-key "C-x g s" git-status)
 
 (bind-key "C-x f d" dirb)
 
