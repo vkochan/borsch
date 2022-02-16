@@ -379,6 +379,7 @@
       (set-local! unstaged-list (git-list-unstaged))
       (set-local! unmerged-list (git-list-unmerged))
       (set-local! untracked-list (git-list-untracked))
+      (insert (format "On branch ~a\n\n" (git-branch-name)))
       (git-show-staged-status)
       (git-show-unstaged-status)
       ; (git-show-unmerged-status)
