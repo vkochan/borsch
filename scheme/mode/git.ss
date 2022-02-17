@@ -422,9 +422,28 @@
    )
 )
 
+(define git-create-commit
+   (lambda ()
+      (let ([b (buffer-create)])
+         (with-buffer b
+            (text-mode)
+            (buffer-set-mode-name "Git Commit")
+            (bind-key-local "C-c C-c"
+               (lambda ()
+                  (process-write (format "git -C ~a commit -F -" (view-cwd))
+                                 (buffer-string))
+                  (window-delete)
+               )
+            )
+         )
+      )
+   )
+)
+
 (define git-status-mode-map
    (let ([map (make-keymap)])
       (bind-key map "g r" (lambda () (git-show-status)))
+      (bind-key map "c" (lambda () (git-create-commit)))
       map
    )
 )
