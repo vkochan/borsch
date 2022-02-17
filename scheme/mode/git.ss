@@ -569,3 +569,58 @@
       )
    )
 )
+
+(define git-insert-log
+   (case-lambda
+      [()
+       (git-insert-log 500)
+      ]
+
+      [(num)
+       (let ([ls (git-cmd (format "log --no-merges -n ~a --pretty=format:\"%h  (%an)  %s\"" num))])
+          (buffer-set-readonly #f)
+          (insert ls)
+          (buffer-set-readonly #t)
+       )
+      ]
+   )
+)
+
+(define git-show-commit
+   (lambda ()
+      (move-line-begin)
+      (let ([id (extract-word)])
+         (let ([b (buffer-create)])
+            (text-mode)
+            (buffer-set-name (format "commit: ~a" id))
+            (insert (git-cmd (format "show ~a" id)))
+            (buffer-set-readonly #t)
+            (move-buffer-begin)
+         )
+      )
+   )
+)
+
+(define git-log-mode-map
+   (let ([map (make-keymap)])
+      (bind-key map "<Enter>" git-show-commit)
+      map
+   )
+)
+
+(define-mode git-log-mode "Git Log" text-mode
+   (buffer-set-readonly #t)
+   (set-local! linenum-enable #f)
+   (git-insert-log)
+)
+
+(define git-show-log
+   (lambda ()
+      (let ([b (buffer-create)])
+         (with-buffer b
+            (git-log-mode)
+            (move-buffer-begin)
+         )
+      )
+   )
+)
