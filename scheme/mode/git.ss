@@ -504,3 +504,22 @@
       )
    )
 )
+
+(define git-create-and-switch-branch
+   (lambda ()
+      (minibuf-read "switch to new branch:"
+         (lambda (b)
+            (if (member b (git-branch-list))
+               (message (format "branch ~a already exists" b))
+               ;; else
+               (begin
+                  (git-cmd (format "checkout -b ~a" b))
+                  (if (not (equal? b (git-branch-name)))
+                     (message (format "could not switch to new ~a branch" b))
+                  )
+               )
+            )
+         )
+      )
+   )
+)
