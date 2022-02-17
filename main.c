@@ -2516,6 +2516,8 @@ static void on_view_update_cb(UiWin *win)
 {
 	Window *w = ui_window_priv_get(win);
 	Filerange v = view_viewport_get(w->view);
+	char *eof_sym = "~";
+	size_t eof_len = strlen(eof_sym);
 
 	buffer_properties_walk(w->buf, PROPERTY_TYPE_TEXT_STYLE,
 			v.start, v.end, w->view, style_prop_draw);
@@ -2531,6 +2533,13 @@ static void on_view_update_cb(UiWin *win)
 		};
 
 		view_style(w->view, style, MIN(start, end), MAX(start, end));
+	}
+
+	for (Line *l = view_lines_last(w->view)->next; l; l = l->next) {
+		l->cells[0].style.fg = ui_window_text_fg_get(win);
+		l->cells[0].style.bg = ui_window_text_bg_get(win);
+		strncpy(l->cells[0].data, eof_sym, eof_len);
+		l->cells[0].len = eof_len;
 	}
 }
 
