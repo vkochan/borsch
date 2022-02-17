@@ -3870,7 +3870,7 @@ int minibuf_create(void)
 int term_create(char *prog, char *title)
 {
 	if (!get_popup())
-		return create(prog, title, NULL);
+		return create(prog, title, "");
 	return -1;
 }
 
