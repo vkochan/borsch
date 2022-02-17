@@ -113,6 +113,23 @@
    )
 )
 
+(define process-write
+   (lambda (cmd str)
+      (let (
+            [ret (process cmd)]
+           )
+         (let (
+               [out (list-ref ret 0)]
+               [in (list-ref ret 1)]
+              )
+            (put-string in str)
+            (close-port out)
+            (close-port in)
+         )
+      )
+   )
+)
+
 (define program-exists?
    (lambda (prog)
       (= 0 (system (format "command -v ~a > /dev/null" prog)))
