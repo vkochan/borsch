@@ -125,6 +125,7 @@
             (put-string in str)
             (close-port out)
             (close-port in)
+            (while (not (__cs_process_is_alive (list-ref ret 2))) #f)
          )
       )
    )
