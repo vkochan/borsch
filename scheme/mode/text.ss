@@ -76,6 +76,10 @@
                      (move-line-num l)
                   )
                )
+               ;; else
+               (if (file-directory? p)
+                  (dirb p)
+               )
             )
          )
       )
