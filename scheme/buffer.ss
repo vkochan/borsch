@@ -648,6 +648,25 @@
    )
 )
 
+(define is-last-line?
+   (lambda ()
+      (equal? (line-begin-pos) (line-end-pos))
+   )
+)
+
+(define move-each-line
+   (lambda (fn)
+      (let loop ()
+         (move-line-begin)
+         (when (not (is-last-line?))
+            (fn)
+            (move-next-line)
+            (loop)
+         )
+      )
+   )
+)
+
 (define text-obj-pos
    (lambda (buf curs obj num)
       (call-foreign (__cs_buf_text_obj_pos buf curs obj num))
