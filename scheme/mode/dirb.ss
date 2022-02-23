@@ -12,6 +12,14 @@
    )
 )
 
+(define dirb-ls
+   (lambda (dir)
+      (string-split
+         (process-read (format "ls -1 ~a" dir))
+         #\newline)
+   )
+)
+
 (define dirb-open-dir
    (lambda (cwd)
       (let (
@@ -34,7 +42,7 @@
                      (set! fl (append fl (list e)))
                   )
               )
-            ) (directory-list dir)
+            ) (dirb-ls dir)
          )
          (for-each
             (lambda (d)
