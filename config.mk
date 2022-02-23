@@ -10,7 +10,7 @@ TERMINFO := ${DESTDIR}${PREFIX}/share/terminfo
 LIB_PREFIX = ${PREFIX}/lib/${PROGNAME}
 
 INCS = -I.
-LIBS = -lc -lutil -lncursesw
+LIBS = -lc -lutil -lncursesw -ltinfo
 CPPFLAGS = -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -D_XOPEN_SOURCE_EXTENDED
 CFLAGS += -std=c99 ${INCS} -DNDEBUG ${CPPFLAGS}
 
