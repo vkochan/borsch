@@ -42,15 +42,15 @@
    )
 )
 
-(define git-cmd
+(define git-cmd-format
    (lambda (cmd)
-      (process-read (format "git -C ~a ~a" (view-cwd) cmd))
+      (format "git -C ~a ~a" (view-cwd) cmd)
    )
 )
 
 (define git-cmd-read
    (lambda (cmd)
-      (process-read (format "git -C ~a ~a 2> /dev/null" (view-cwd) cmd))
+      (process-read (git-cmd-format cmd))
    )
 )
 
@@ -212,25 +212,25 @@
 
 (define git-add-file-cmd
    (lambda (f)
-      (git-cmd (format "add ~a" f))
+      (git-cmd-read (format "add ~a" f))
    )
 )
 
 (define git-stage-file-cmd
    (lambda (f)
-      (git-cmd (format "add -- ~a" f))
+      (git-cmd-read (format "add -- ~a" f))
    )
 )
 
 (define git-revert-file-cmd
    (lambda (f)
-      (git-cmd (format "checkout -- ~a" f))
+      (git-cmd-read (format "checkout -- ~a" f))
    )
 )
 
 (define git-unstage-file-cmd
    (lambda (f)
-      (git-cmd (format "reset -- ~a" f))
+      (git-cmd-read (format "reset -- ~a" f))
    )
 )
 
@@ -413,7 +413,7 @@
       (set-local! unmerged-list (git-list-unmerged))
       (set-local! untracked-list (git-list-untracked))
       (insert (format "On branch ~a\n" (git-branch-name)))
-      (insert (git-cmd "log -1 --oneline"))
+      (insert (git-cmd-read "log -1 --oneline"))
       (insert "\n")
       (git-show-staged-status)
       (git-show-unstaged-status)
@@ -440,7 +440,7 @@
                 (define-local status-buffer c)
                 (text-mode)
                 (if (eq? mode 'amend)
-                   (insert (git-cmd "log --format=%B -n 1 HEAD"))
+                   (insert (git-cmd-read "log --format=%B -n 1 HEAD"))
                 )
                 (buffer-set-mode-name "Git Commit")
                 (bind-key-local "C-c C-c"
@@ -466,11 +466,20 @@
    )
 )
 
+(define git-pull-changes
+   (lambda ()
+      (with-process-temp-buffer (git-cmd-format "pull")
+         (git-show-status)
+      )
+   )
+)
+
 (define git-status-mode-map
    (let ([map (make-keymap)])
       (bind-key map "g r" (lambda () (git-show-status)))
       (bind-key map "c" (lambda () (git-create-commit)))
       (bind-key map "a" (lambda () (git-amend-commit)))
+      (bind-key map "u" (lambda () (git-pull-changes)))
       map
    )
 )
@@ -500,7 +509,7 @@
             [b (extract-longword)]
            )
          (when b
-            (git-cmd (format "checkout ~a" b))
+            (git-cmd-read (format "checkout ~a" b))
             (if (not (equal? b (git-branch-name)))
                (message (format "could not switch to ~a" b))
             )
@@ -559,7 +568,7 @@
                (message (format "branch ~a already exists" b))
                ;; else
                (begin
-                  (git-cmd (format "checkout -b ~a" b))
+                  (git-cmd-read (format "checkout -b ~a" b))
                   (if (not (equal? b (git-branch-name)))
                      (message (format "could not switch to new ~a branch" b))
                   )
@@ -577,7 +586,7 @@
       ]
 
       [(num)
-       (let ([ls (git-cmd (format "log --no-merges -n ~a --pretty=format:\"%h  (%an)  %s\"" num))])
+       (let ([ls (git-cmd-read (format "log --no-merges -n ~a --pretty=format:\"%h  (%an)  %s\"" num))])
           (buffer-set-readonly #f)
           (insert ls)
           (buffer-set-readonly #t)
@@ -593,7 +602,7 @@
          (let ([b (buffer-create)])
             (text-mode)
             (buffer-set-name (format "commit: ~a" id))
-            (insert (git-cmd (format "show ~a" id)))
+            (insert (git-cmd-read (format "show ~a" id)))
             (buffer-set-readonly #t)
             (move-buffer-begin)
          )
