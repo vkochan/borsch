@@ -85,10 +85,27 @@
                )
             (call-foreign (__cs_evt_fd_handler_add fd (foreign-callable-entry-point cb)))
             (hashtable-set! %process-fd-ht fd p)
-            (values stdin stdout stderr pid)
          )
        )
       ]
+   )
+)
+
+(define-syntax (with-process-temp-buffer stx)
+   (syntax-case stx ()
+      ((_ cmd exp ...)
+       #`(let ([b (buffer-new)])
+            (process-start b cmd
+               (lambda (b)
+                  (begin
+                     exp
+		     ...
+                  )
+                  (buffer-delete b)
+               )
+            )
+         )
+      )
    )
 )
 
