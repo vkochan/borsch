@@ -581,12 +581,12 @@
 
 (define git-insert-log
    (case-lambda
-      [()
-       (git-insert-log 500)
+      [(obj)
+       (git-insert-log obj 500)
       ]
 
-      [(num)
-       (let ([ls (git-cmd-read (format "log --no-merges -n ~a --pretty=format:\"%h  (%an)  %s\"" num))])
+      [(obj num)
+       (let ([ls (git-cmd-read (format "log --no-merges -n ~a --pretty=format:\"%h  (%an) %s\" ~a" num obj))])
           (buffer-set-readonly #f)
           (insert ls)
           (buffer-set-readonly #t)
@@ -620,16 +620,22 @@
 (define-mode git-log-mode "Git Log" text-mode
    (buffer-set-readonly #t)
    (set-local! linenum-enable #f)
-   (git-insert-log)
+   (git-insert-log (buffer-name))
 )
 
 (define git-show-log
-   (lambda ()
-      (let ([b (buffer-create)])
-         (with-buffer b
+   (case-lambda
+      [()
+       (git-show-log (git-branch-name))
+      ]
+
+      [(obj)
+       (let ([b (buffer-create obj)])
+          (with-buffer b
             (git-log-mode)
             (move-buffer-begin)
-         )
-      )
+          )
+        )
+      ]
    )
 )
