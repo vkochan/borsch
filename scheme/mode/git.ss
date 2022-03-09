@@ -242,9 +242,10 @@
 
 (define git-status-diff-file
    (lambda (status file)
-      (let ([b (buffer-create)])
+      (let ([b (buffer-create file)])
          (with-buffer b
             (text-mode)
+            (buffer-set-mode-name "Diff")
             (insert
                (git-cmd-read
                   (format "diff ~a -- ~a"
@@ -253,6 +254,7 @@
                   )
                )
             )
+            (buffer-set-readonly #t)
          )
       )
    )
