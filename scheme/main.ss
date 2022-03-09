@@ -11,10 +11,10 @@
 (load "minibuf.ss")
 (load "process.ss")
 (load "timer.ss")
+(load "mode/text.ss")
 (load "mode/git.ss")
 (load "mode/grep.ss")
 (load "mode/term.ss")
-(load "mode/text.ss")
 (load "mode/dirb.ss")
 (load "mode/lisp.ss")
 
@@ -143,7 +143,6 @@
 (bind-key "C-x b o" buffer-open)
 
 (bind-key "C-x g s" git-status)
-(bind-key "C-x g l" git-show-log)
 (bind-key "C-x g c" git-switch-branch)
 (bind-key "C-x g b" git-create-and-switch-branch)
 

@@ -639,3 +639,5 @@
       ]
    )
 )
+
+(bind-key text-mode-cmd-map "g l" (lambda () (git-show-log (buffer-filename))))
