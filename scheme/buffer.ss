@@ -1122,6 +1122,19 @@
    )
 )
 
+(define cursor-obj-delete-inclusive
+   (lambda (fn)
+      (buffer-modify
+         (let (
+               [end (next-char-pos (fn))]
+               [start (cursor)]
+              )
+            (delete-range start end)
+         )
+      )
+   )
+)
+
 (define delete-next-char
    (lambda ()
       (cursor-obj-delete move-next-char)
@@ -1150,7 +1163,7 @@
 
 (define delete-word-end
    (lambda ()
-      (cursor-obj-delete move-word-end)
+      (cursor-obj-delete-inclusive move-word-end)
    )
 )
 
@@ -1169,7 +1182,7 @@
 
 (define delete-longword-end
    (lambda ()
-      (cursor-obj-delete move-longword-end)
+      (cursor-obj-delete-inclusive move-longword-end)
    )
 )
 
