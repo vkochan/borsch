@@ -149,6 +149,8 @@
       (bind-key map "X" (lambda () (delete-prev-char) (buffer-snapshot)))
       (bind-key map "D" (lambda () (delete-line-end) (buffer-snapshot)))
       (bind-key map "d d" (lambda () (delete-line) (buffer-snapshot)))
+      (bind-key map "d w" (lambda () (delete-word) (buffer-snapshot)))
+      (bind-key map "d W" (lambda () (delete-longword) (buffer-snapshot)))
       (bind-key map "g g" (lambda () (move-buffer-begin)))
       (bind-key map "G" (lambda () (move-buffer-end)))
       (bind-key map "H" (lambda () (cursor-set (window-viewport-begin))))
