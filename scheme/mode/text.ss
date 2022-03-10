@@ -160,6 +160,8 @@
       (bind-key map "C-f" (lambda () (cursor-set (window-scroll-page-down))))
       (bind-key map "C-b" (lambda () (cursor-set (window-scroll-page-up))))
       (bind-key map "i" (lambda () (text-mode-ins)))
+      (bind-key map "a" (lambda () (move-next-char) (text-mode-ins)))
+      (bind-key map "A" (lambda () (move-line-end) (text-mode-ins)))
       (bind-key map "o" (lambda () (insert-empty-line) (text-mode-ins)))
       (bind-key map "O" (lambda () (insert-empty-line-up) (text-mode-ins)))
       (bind-key map "C" (lambda () (delete-line-end) (text-mode-ins)))
