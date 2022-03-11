@@ -58,7 +58,7 @@ int ESCDELAY;
 #endif
 
 /* scroll back buffer size in lines */
-#define SCROLL_HISTORY 500
+#define SCROLL_HISTORY 4000
 
 static int scr_history = SCROLL_HISTORY;
 
