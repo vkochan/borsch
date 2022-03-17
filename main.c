@@ -2148,9 +2148,14 @@ int main(int argc, char *argv[]) {
 
 	event_fd_handler_register(STDIN_FILENO, handle_keypress, &kbuf);
 
+	update_screen_size();
+
 	while (running) {
-		ui_resize(ui);
-		update_screen_size();
+		if (ui_resize(ui)) {
+			update_screen_size();
+			redraw(NULL);
+			continue;
+		}
 
 		for (Window *c = windows; c; ) {
 			if (buffer_is_died(c->buf)) {

@@ -25,10 +25,12 @@ void ui_redraw(Ui *ui)
 		ui->redraw(ui);
 }
 
-void ui_resize(Ui *ui)
+bool ui_resize(Ui *ui)
 {
 	if (ui->resize)
-		ui->resize(ui);
+		return ui->resize(ui);
+
+	return false;
 }
 
 void ui_clear(Ui *ui)

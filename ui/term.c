@@ -241,12 +241,16 @@ static void term_free(Ui *ui)
 	free(ui);
 }
 
-static void term_resize(Ui *ui)
+static bool term_resize(Ui *ui)
 {
+	bool do_resize = need_resize;
+
 	if (need_resize) {
 		need_resize = false;
 		term_redraw(ui);
 	}
+
+        return do_resize;
 }
 
 static void term_clear(Ui *ui)

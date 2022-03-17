@@ -109,7 +109,7 @@ struct Ui {
 	void (*draw_char)(Ui *ui, int x, int y, unsigned int ch, int n);
 	void (*draw_char_vert)(Ui *ui, int x, int y, unsigned int ch, int n);
 	void (*redraw)(Ui*);
-	void (*resize)(Ui*);
+	bool (*resize)(Ui*);
 	void (*clear)(Ui*);
 	void (*update)(Ui*);
 	void (*refresh)(Ui*);
@@ -146,7 +146,7 @@ Ui *ui_term_new(void);
 int ui_init(Ui *ui);
 void ui_free(Ui *ui);
 void ui_redraw(Ui *ui);
-void ui_resize(Ui *ui);
+bool ui_resize(Ui *ui);
 void ui_clear(Ui *ui);
 void ui_update(Ui *ui);
 void ui_refresh(Ui *ui);
