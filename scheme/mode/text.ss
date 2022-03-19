@@ -261,20 +261,16 @@
 
 (define text-mode-linenum-draw
    (lambda (w)
-      (let ([b (window-buffer w)])
-         (with-buffer b
-            (when (and (local-bound? linenum-enable) (get-local linenum-enable))
-               (let ([width (1+ (text-mode-linenum-width w))])
-                  (when (not (eq? width (window-sidebar-width w)))
-                     (window-set-sidebar-width w width)
-                  )
-                  (let ([lines (window-viewport-lines-coord w)])
-                     (for-each
-                        (lambda (c)
-                           (window-draw-sidebar w 0 (list-ref c 1) (format "~a" (list-ref c 2)))
-                        ) lines
-                     )
-                  )
+      (when (and (local-bound? linenum-enable) (get-local linenum-enable))
+         (let ([width (1+ (text-mode-linenum-width w))])
+            (when (not (eq? width (window-sidebar-width w)))
+               (window-set-sidebar-width w width)
+            )
+            (let ([lines (window-viewport-lines-coord w)])
+               (for-each
+                  (lambda (c)
+                     (window-draw-sidebar w 0 (list-ref c 1) (format "~a" (list-ref c 2)))
+                  ) lines
                )
             )
          )
@@ -301,7 +297,7 @@
    (when (not (local-bound? text-mode-ins-local-map))
          (define-local text-mode-ins-local-map (make-keymap 'text-mode-ins-map))
    )
-   (text-mode-cmd)
+   (define-local window-draw-hook text-mode-linenum-draw)
    (define-local linenum-enable #t)
-   (add-hook 'window-draw-hook text-mode-linenum-draw)
+   (text-mode-cmd)
 )

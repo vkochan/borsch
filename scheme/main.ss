@@ -89,6 +89,22 @@
    )
 )
 
+(add-hook 'window-draw-hook
+   (lambda (w)
+      (let ([b (window-buffer w)])
+         (when b
+            (with-buffer b
+               (when (local-bound? window-draw-hook)
+                  (let ([h (get-local window-draw-hook)])
+                     (apply h (list w))
+                  )
+               )
+            )
+         )
+      )
+   )
+)
+
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Default key bindings
 ;;;;;;;;;;;;;;;;;;;;;;;
