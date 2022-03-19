@@ -689,12 +689,12 @@ draw(Window *c, bool force) {
 
 		buf_update(c);
 
+		ui_window_redraw(c->win);
+		ui_window_draw(c->win);
+
 		evt.eid = EVT_WIN_DRAW;
 		evt.oid = c->id;
 		scheme_event_handle(evt);
-
-		ui_window_redraw(c->win);
-		ui_window_draw(c->win);
 
 		if (!isarrange(fullscreen) || c == current_window())
 			draw_title(c);
