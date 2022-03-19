@@ -1073,7 +1073,7 @@ void *scheme_env_alloc(void)
 {
 	ptr env;
 
-	env = CALL1("copy-environment", CALL0("interaction-environment"));
+	env = CALL1("copy-environment", CALL0("scheme-environment"));
 	Slock_object(env);
 
 	return env;
