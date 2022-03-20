@@ -2477,7 +2477,7 @@ void win_sidebar_set(int wid, int width)
 	if (w && width != ui_window_sidebar_width_get(w->win)) {
 		ui_window_sidebar_width_set(w->win, width);
 		buffer_dirty_set(w->buf, true);
-		buf_update(w);
+                draw(w, true);
 	}
 }
 
