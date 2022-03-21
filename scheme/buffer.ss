@@ -650,7 +650,7 @@
 
 (define is-last-line?
    (lambda ()
-      (equal? (line-begin-pos) (line-end-pos))
+      (<= (- (buffer-end-pos) (line-end-pos)) 1)
    )
 )
 
