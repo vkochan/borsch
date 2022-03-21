@@ -158,7 +158,7 @@
       (bind-key map "d 0" (lambda () (delete-line-begin) (buffer-snapshot)))
       (bind-key map "d $" (lambda () (delete-line-end) (buffer-snapshot)))
       (bind-key map "g g" (lambda () (move-buffer-begin)))
-      (bind-key map "G" (lambda () (move-buffer-end)))
+      (bind-key map "G" (lambda () (cursor-set (- (buffer-end-pos) 1)) (move-line-start)))
       (bind-key map "H" (lambda () (cursor-set (window-viewport-begin))))
       (bind-key map "L" (lambda () (cursor-set (window-viewport-end))))
       (bind-key map "C-u" (lambda () (cursor-set (window-scroll-halfpage-up))))
