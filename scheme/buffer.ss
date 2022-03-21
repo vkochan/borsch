@@ -596,7 +596,9 @@
 
 (define move-line-down
    (lambda ()
-      (cursor-set (next-line-pos))
+      (when (not (is-last-line?))
+         (cursor-set (next-line-pos))
+      )
    )
 )
 
