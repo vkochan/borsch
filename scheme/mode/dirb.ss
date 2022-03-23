@@ -14,9 +14,11 @@
 
 (define dirb-ls
    (lambda (dir)
-      (string-split
-         (process-read (format "ls -1 ~a" dir))
-         #\newline)
+      (let ([opts (if (get-local show-hidden) "-a" "")])
+         (string-split
+            (process-read (format "ls -1 ~a ~a" opts dir))
+            #\newline)
+      )
    )
 )
 
