@@ -112,7 +112,7 @@
 
 (define dirb-goto-home
    (lambda ()
-      (dirb-open-dir "~")
+      (dirb-open-dir (getenv "HOME"))
    )
 )
 
