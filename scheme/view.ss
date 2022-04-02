@@ -111,9 +111,11 @@
 (define view-set-cwd
    (case-lambda
       [(cwd)
-       (call-foreign (__cs_view_cwd_set (view-current) cwd))]
+       (view-set-cwd (view-current) cwd)]
 
       [(tag cwd)
-       (call-foreign (__cs_view_cwd_set tag cwd))]
+       (call-foreign (__cs_view_cwd_set tag cwd))
+       (run-hooks 'change-cwd-hook)
+      ]
    )
 )

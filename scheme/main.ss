@@ -105,6 +105,20 @@
    )
 )
 
+(add-hook 'change-cwd-hook
+   (lambda ()
+      (let (
+            [local-script (string-append (view-cwd) "/" ".borsch.ss")]
+           )
+         (when (file-exists? local-script)
+            (load local-script)
+         )
+      )
+   )
+)
+
+(view-set-cwd (current-directory))
+
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Default key bindings
 ;;;;;;;;;;;;;;;;;;;;;;;
