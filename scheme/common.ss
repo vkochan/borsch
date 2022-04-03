@@ -16,6 +16,7 @@
 
 (define do-quit
    (lambda ()
+      (run-hooks 'exit-hook)
       (call-foreign (__cs_do_quit))
    )
 )
