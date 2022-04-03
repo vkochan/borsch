@@ -329,7 +329,7 @@
              ]
            )
          (when (= (car ret) 1)
-            (run-hooks 'on-error-hook (cadr ret))
+            (run-hooks 'error-hook (cadr ret))
          )
          ret
       )

@@ -59,7 +59,7 @@
    )
 )
 
-(add-hook 'on-error-hook
+(add-hook 'error-hook
    (lambda (e)
       (let ([m (buffer-get "*Messages*")])
          (when m

@@ -133,7 +133,7 @@
    )
 )
 
-(add-hook 'on-error-hook
+(add-hook 'error-hook
    (lambda (e)
       (when minibuf-buffer
          (window-set-height minibuf-window (1+ (lines-count e)))
