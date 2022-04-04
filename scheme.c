@@ -305,6 +305,11 @@ void scheme_win_sidebar_draw(int wid, int x, int y, const char *text, short fg, 
 	win_sidebar_draw(wid, x, y, text, fg, bg, attr);
 }
 
+void scheme_win_update(int wid)
+{
+	win_update(wid);
+}
+
 ptr scheme_kmap_add(char *parent)
 {
 	int ret = kmap_add(0);
@@ -898,6 +903,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_sidebar_set", scheme_win_sidebar_set);
 	Sregister_symbol("cs_win_sidebar_get", scheme_win_sidebar_get);
 	Sregister_symbol("cs_win_sidebar_draw", scheme_win_sidebar_draw);
+	Sregister_symbol("cs_win_update", scheme_win_update);
 
 	Sregister_symbol("cs_kmap_add", scheme_kmap_add);
 	Sregister_symbol("cs_kmap_parent_set", scheme_kmap_parent_set);

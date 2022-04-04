@@ -66,6 +66,7 @@ int win_scroll(int wid, char type, int n);
 void win_sidebar_set(int wid, int width);
 int win_sidebar_get(int wid);
 void win_sidebar_draw(int wid, int x, int y, const char *text, short fg, short bg, int attr);
+void win_update(int wid);
 
 int kmap_add(int pid);
 int kmap_parent_set(int kid, char *name, int pid);

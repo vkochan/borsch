@@ -33,6 +33,7 @@
 (define __cs_win_sidebar_set (foreign-procedure __collect_safe "cs_win_sidebar_set" (int int) void))
 (define __cs_win_sidebar_get (foreign-procedure __collect_safe "cs_win_sidebar_get" (int) scheme-object))
 (define __cs_win_sidebar_draw (foreign-procedure "cs_win_sidebar_draw" (int int int string int int int) scheme-object))
+(define __cs_win_update (foreign-procedure "cs_win_update" (int) void))
 
 (define window-first
    (lambda ()
@@ -627,4 +628,14 @@
        )
       ]
    )
+)
+
+(define window-update
+    (case-lambda 
+       [()
+        (window-update (current-window))]
+
+       [(w)
+        (call-foreign (__cs_win_update w))]
+    )
 )

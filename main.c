@@ -2501,6 +2501,15 @@ void win_sidebar_draw(int wid, int x, int y, const char *text, short fg, short b
 	}
 }
 
+void win_update(int wid)
+{
+	Window *w = window_get_by_id(wid);
+
+	if (w) {
+		ui_window_update(w->win);
+	}
+}
+
 static int style_prop_draw(Buffer *buf, int id, size_t start, size_t end, void *data,
 		void *arg)
 {

@@ -204,4 +204,6 @@ void ui_window_sidebar_draw(UiWin *win, int x, int y, const char *text,
 void ui_window_has_title_set(UiWin *win, bool has_title);
 bool ui_window_has_title(UiWin *win);
 
+void ui_window_update(UiWin *win);
+
 #endif
