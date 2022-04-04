@@ -152,8 +152,11 @@ void ui_window_cursor_get(UiWin *win, int *x, int *y)
 	*y -= win->has_border;
 }
 
-void ui_window_draw(UiWin *win)
+void __ui_window_draw(UiWin *win, bool force)
 {
+	if (force)
+		view_invalidate(win->view);
+
 	if (view_update(win->view)) {
 		view_draw(win->view);
 
@@ -165,6 +168,11 @@ void ui_window_draw(UiWin *win)
 		else if (win->ui->window_draw)
 			win->ui->window_draw(win);
 	}
+}
+
+void ui_window_draw(UiWin *win)
+{
+	__ui_window_draw(win, false);
 }
 
 void ui_window_redraw(UiWin *win)
@@ -383,6 +391,7 @@ void ui_window_sidebar_width_set(UiWin *win, int width)
 
 		/* just to resize only view */
 		ui_window_resize(win, -1, -1);
+		__ui_window_draw(win, true);
 	}
 }
 
@@ -410,4 +419,9 @@ void ui_window_has_title_set(UiWin *win, bool has_title)
 bool ui_window_has_title(UiWin *win)
 {
 	return win->has_title;
+}
+
+void ui_window_update(UiWin *win)
+{
+	__ui_window_draw(win, true);
 }
