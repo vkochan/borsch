@@ -78,6 +78,20 @@
     )
 )
 
+(define dirb-entry-path
+    (case-lambda 
+       [()
+        (dirb-entry-path (cursor))
+       ]
+
+       [(pos)
+        (let ([e (extract-line-inner pos)])
+           (dirb-get-entry (fmt "~a/~a" (get-local current-cwd) e))
+        )
+       ]
+    )
+)
+
 (define dirb-open-entry
     (lambda ()
        (let* (
@@ -129,6 +143,12 @@
    )
 )
 
+(define dirb-list-selection
+   (lambda ()
+      (get-local selected)
+   )
+)
+
 (define dirb-create-new-file
    (lambda ()
       (minibuf-read "new file:"
@@ -153,7 +173,7 @@
    )
 )
 
-(define dirb-delete-entry
+(define dirb-delete-entry-cursor
    (lambda ()
       (minibuf-ask "Delete entry(s) ?"
          (lambda (v)
@@ -167,6 +187,34 @@
                )
             )
          )
+      )
+   )
+)
+
+(define dirb-delete-entry-selected
+   (lambda ()
+      (minibuf-ask (format "Delete selected (~d) entry(s) ?" (length (dirb-list-selection)))
+         (lambda (v)
+            (when (eq? v 'yes)
+               (for-each
+                  (lambda (p)
+                     (rm-rf p)
+                  )
+                  (dirb-list-selection)
+               )
+               (dirb-open-dir (get-local current-cwd))
+            )
+         )
+      )
+   )
+)
+
+(define dirb-delete-entry
+   (lambda ()
+      (if (> (length (dirb-list-selection)) 0)
+         (dirb-delete-entry-selected)
+         ;; else
+         (dirb-delete-entry-cursor)
       )
    )
 )
@@ -196,6 +244,62 @@
    )
 )
 
+(define dirb-draw-selection
+   (lambda (w)
+      (let ([slist (get-local selected)])
+         (if (> (length slist) 0)
+            (window-set-sidebar-width w 2)
+            ;; else
+            (window-set-sidebar-width w 0)
+         )
+         (when (> (length slist) 0)
+            (let ([lines (window-viewport-lines-coord w)])
+               (for-each
+                  (lambda (c)
+                     (let (
+                           [line-pos (list-ref c 3)]
+                           [line-y (list-ref c 1)]
+                          )
+                        (let ([path (dirb-entry-path line-pos)])
+                           (if (member path slist)
+                              (window-draw-sidebar w 0 line-y "*")
+                              ;; else
+                              (window-draw-sidebar w 0 line-y " ")
+                           )
+                        )
+                     )
+                  ) lines
+               )
+            )
+         )
+      )
+   )
+)
+
+(define dirb-select-entry
+   (lambda ()
+      (let (
+            [slist (get-local selected)]
+            [path (dirb-entry-path)]
+           )
+         (if (member path slist)
+            (set! slist (remove path slist))
+            ;; else
+            (set! slist (append slist (list path)))
+         )
+         (set-local! selected slist)
+         (dirb-draw-selection (current-window))
+      )
+   )
+)
+
+(define dirb-clear-selection
+   (lambda ()
+      (set-local! selected (list))
+      (dirb-draw-selection (current-window))
+   )
+)
+
 (define dirb-mode-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" dirb-open-entry)
@@ -210,6 +314,8 @@
       (bind-key map "d" dirb-delete-entry)
       (bind-key map "r" dirb-rename-entry)
       (bind-key map "s" dirb-grep)
+      (bind-key map "<Space>" dirb-select-entry)
+      (bind-key map "<Esc>" dirb-clear-selection)
       map
    )
 )
@@ -218,6 +324,8 @@
    (define-local current-cwd (view-cwd))
    (define-local show-hidden #f)
    (define-local prev-cursor (make-stack))
+   (define-local selected (list))
+   (define-local window-draw-hook dirb-draw-selection)
    (define-local defval #f)
    (set-local! linenum-enable #f)
 )
