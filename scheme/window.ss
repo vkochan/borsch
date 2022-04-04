@@ -514,7 +514,13 @@
                      )
                   (while (and (<= start end) (not (= start (buffer-end-pos))))
                      (when coord
-                        (set! lst (append lst (list coord)))
+                        (let (
+                              [line-x (list-ref coord 0)]
+                              [line-y (list-ref coord 1)]
+                              [line-n (list-ref coord 2)]
+                             )
+                           (set! lst (append lst (list (list line-x line-y line-n start))))
+                        )
                      )
                      (set! start (next-line-pos b start))
                      (set! coord (window-viewport-coord w start))
