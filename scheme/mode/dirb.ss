@@ -22,6 +22,18 @@
    )
 )
 
+(define dirb-current-dir
+   (lambda ()
+      (get-local current-dir)
+   )
+)
+
+(define dirb-set-current-dir
+   (lambda (dir)
+      (set-local! current-dir dir)
+   )
+)
+
 (define dirb-open-dir
    (lambda (cwd)
       (let (
@@ -30,7 +42,7 @@
             [fl '()]
            )
          (buffer-set-readonly #f)
-         (set-local! current-cwd dir)
+         (dirb-set-current-dir dir)
          (buffer-set-name dir)
 	 (erase-buffer)
          (for-each
@@ -65,7 +77,7 @@
 (define dirb-open-parent
     (lambda ()
        (let (
-             [p (path-parent (get-local current-cwd))]
+             [p (path-parent (dirb-current-dir))]
              [s (get-local prev-cursor)]
             )
           (when (> (string-length p) 0)
@@ -86,7 +98,7 @@
 
        [(pos)
         (let ([e (extract-line-inner pos)])
-           (dirb-get-entry (fmt "~a/~a" (get-local current-cwd) e))
+           (dirb-get-entry (fmt "~a/~a" (dirb-current-dir) e))
         )
        ]
     )
@@ -96,7 +108,7 @@
     (lambda ()
        (let* (
                [e (extract-line-inner)]
-               [p (fmt "~a/~a" (get-local current-cwd) e)] 
+               [p (fmt "~a/~a" (dirb-current-dir) e)] 
              )
           (if (file-directory? p)
              (let ([s (get-local prev-cursor)])
@@ -120,7 +132,7 @@
    (lambda ()
       (set-local! show-hidden
          (not (get-local show-hidden)))
-      (dirb-open-dir (get-local current-cwd))
+      (dirb-open-dir (dirb-current-dir))
    )
 )
 
@@ -138,7 +150,7 @@
 
 (define dirb-set-cwd
    (lambda ()
-      (view-set-cwd (get-local current-cwd))
+      (view-set-cwd (dirb-current-dir))
       (dirb-open-dir (view-cwd))
    )
 )
@@ -153,10 +165,10 @@
    (lambda ()
       (minibuf-read "new file:"
          (lambda (f)
-            (let ([p (open-output-file (string-append (get-local current-cwd) "/" f))])
+            (let ([p (open-output-file (string-append (dirb-current-dir) "/" f))])
                (close-port p)
             )
-            (dirb-open-dir (get-local current-cwd))
+            (dirb-open-dir (dirb-current-dir))
          )
       )
    )
@@ -166,8 +178,8 @@
    (lambda ()
       (minibuf-read "new dir:"
          (lambda (f)
-            (mkdir (string-append (get-local current-cwd) "/" f))
-            (dirb-open-dir (get-local current-cwd))
+            (mkdir (string-append (dirb-current-dir) "/" f))
+            (dirb-open-dir (dirb-current-dir))
          )
       )
    )
@@ -179,11 +191,11 @@
          (lambda (v)
             (let*(
                   [e (extract-line-inner)]
-                  [p (string-append (get-local current-cwd) "/" e)]
+                  [p (string-append (dirb-current-dir) "/" e)]
                  )
                (when (eq? v 'yes)
                   (rm-rf p)
-                  (dirb-open-dir (get-local current-cwd))
+                  (dirb-open-dir (dirb-current-dir))
                )
             )
          )
@@ -202,7 +214,7 @@
                   )
                   (dirb-list-selection)
                )
-               (dirb-open-dir (get-local current-cwd))
+               (dirb-open-dir (dirb-current-dir))
             )
          )
       )
@@ -226,11 +238,11 @@
          (minibuf-read "rename:" entry
             (lambda (v)
                (let (
-                     [old (string-append (get-local current-cwd) "/" (get-local defval))]
-                     [new (string-append (get-local current-cwd) "/" v)]
+                     [old (string-append (dirb-current-dir) "/" (get-local defval))]
+                     [new (string-append (dirb-current-dir) "/" v)]
                     )
                   (rename-file old new)
-                  (dirb-open-dir (get-local current-cwd))
+                  (dirb-open-dir (dirb-current-dir))
                )
             )
          )
@@ -321,7 +333,7 @@
 )
 
 (define-mode dirb-mode "Dirb" text-mode
-   (define-local current-cwd (view-cwd))
+   (define-local current-dir (view-cwd))
    (define-local show-hidden #f)
    (define-local prev-cursor (make-stack))
    (define-local selected (list))
@@ -336,13 +348,13 @@
        (dirb (view-cwd))
       ]
 
-      [(cwd)
+      [(dir)
        (let ([b (buffer-create)])
           (with-buffer b
              (buffer-set-readonly #t)
              (dirb-mode)
-             (set-local! current-cwd cwd)
-             (dirb-open-dir cwd)
+             (set-local! current-dir dir)
+             (dirb-open-dir dir)
              (stack-push! (get-local prev-cursor) (cursor))
           )
        )
