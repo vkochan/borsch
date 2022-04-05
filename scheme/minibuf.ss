@@ -212,7 +212,7 @@
          (enable-insert #t)
       )
       (minibuf-interactive-func 'minibuf-prompt-map ":" #f
-         (lambda (buf val)
+         (lambda (val)
             (let ([line (string->number val)])
                (when line
                   (move-line-num line)
