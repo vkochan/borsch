@@ -191,7 +191,7 @@
    )
 )
 
-(define dirb-delete-entry-selected
+(define dirb-delete-selection
    (lambda ()
       (minibuf-ask (format "Delete selected (~d) entry(s) ?" (length (dirb-list-selection)))
          (lambda (v)
@@ -212,7 +212,7 @@
 (define dirb-delete-entry
    (lambda ()
       (if (> (length (dirb-list-selection)) 0)
-         (dirb-delete-entry-selected)
+         (dirb-delete-selection)
          ;; else
          (dirb-delete-entry-cursor)
       )
