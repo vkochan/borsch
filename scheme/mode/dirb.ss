@@ -234,6 +234,54 @@
    )
 )
 
+(define dirb-move-selection
+   (lambda ()
+
+      (define has-same-dest?
+         (lambda ()
+            (exists
+               (lambda (p)
+                  (equal? (path-parent p) (dirb-current-dir))
+               )
+               (dirb-list-selection)
+            )
+         )
+      )
+      
+      (let ([count (length (dirb-list-selection))])
+         (if (> count 0)
+            (begin
+               (if (not (has-same-dest?))
+                  (begin
+                     (for-each
+                        (lambda (p)
+                           (let (
+                                 [dest (format "~a/~a" (dirb-current-dir) (path-last p))]
+                                )
+                              (system (format "mv ~a ~a" p dest))
+                           )
+                        )
+                        (dirb-list-selection)
+                     )
+                     (dirb-open-dir (dirb-current-dir))
+                     (dirb-clear-selection)
+                     (message (format "~d entries were moved" count))
+                  )
+                  ;; else
+                  (begin
+                     (message "Could not move entries with same destination")
+                  )
+               )
+            )
+            ;; else
+            (begin
+               (message "No entries were selected")
+            )
+         )
+      )
+   )
+)
+
 (define dirb-delete-selection
    (lambda ()
       (minibuf-ask (format "Delete selected (~d) entry(s) ?" (length (dirb-list-selection)))
@@ -349,6 +397,7 @@
       (bind-key map "^" dirb-create-new-file)
       (bind-key map "+" dirb-create-new-dir)
       (bind-key map "p" dirb-paste-selection)
+      (bind-key map "m" dirb-move-selection)
       (bind-key map "d" dirb-delete-entry)
       (bind-key map "r" dirb-rename-entry)
       (bind-key map "s" dirb-grep)
