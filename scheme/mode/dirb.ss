@@ -161,7 +161,7 @@
    )
 )
 
-(define dirb-create-new-file
+(define dirb-create-file
    (lambda ()
       (minibuf-read "new file:"
          (lambda (f)
@@ -174,7 +174,7 @@
    )
 )
 
-(define dirb-create-new-dir
+(define dirb-create-dir
    (lambda ()
       (minibuf-read "new dir:"
          (lambda (f)
@@ -394,8 +394,8 @@
       (bind-key map "~" dirb-goto-home)
       (bind-key map "w" dirb-goto-cwd)
       (bind-key map "W" dirb-set-cwd)
-      (bind-key map "^" dirb-create-new-file)
-      (bind-key map "+" dirb-create-new-dir)
+      (bind-key map "^" dirb-create-file)
+      (bind-key map "+" dirb-create-dir)
       (bind-key map "p" dirb-paste-selection)
       (bind-key map "m" dirb-move-selection)
       (bind-key map "d" dirb-delete-entry)
