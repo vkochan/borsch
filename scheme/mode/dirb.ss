@@ -185,6 +185,13 @@
    )
 )
 
+(define dirb-clear-selection
+   (lambda ()
+      (set-local! selected (list))
+      (dirb-draw-selection (current-window))
+   )
+)
+
 (define dirb-delete-entry-cursor
    (lambda ()
       (minibuf-ask "Delete entry(s) ?"
@@ -203,6 +210,30 @@
    )
 )
 
+(define dirb-paste-selection
+   (lambda ()
+      (let ([count (length (dirb-list-selection))])
+         (if (> count 0)
+            (begin
+               (for-each
+                  (lambda (p)
+                     (system (format "cp -r ~a ~a" p (dirb-current-dir)))
+                  )
+                  (dirb-list-selection)
+               )
+               (dirb-open-dir (dirb-current-dir))
+               (dirb-clear-selection)
+               (message (format "~d files were copied" count))
+            )
+            ;; else
+            (begin
+               (message "No files were selected")
+            )
+         )
+      )
+   )
+)
+
 (define dirb-delete-selection
    (lambda ()
       (minibuf-ask (format "Delete selected (~d) entry(s) ?" (length (dirb-list-selection)))
@@ -214,6 +245,7 @@
                   )
                   (dirb-list-selection)
                )
+               (dirb-clear-selection)
                (dirb-open-dir (dirb-current-dir))
             )
          )
@@ -305,13 +337,6 @@
    )
 )
 
-(define dirb-clear-selection
-   (lambda ()
-      (set-local! selected (list))
-      (dirb-draw-selection (current-window))
-   )
-)
-
 (define dirb-mode-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" dirb-open-entry)
@@ -323,6 +348,7 @@
       (bind-key map "W" dirb-set-cwd)
       (bind-key map "^" dirb-create-new-file)
       (bind-key map "+" dirb-create-new-dir)
+      (bind-key map "p" dirb-paste-selection)
       (bind-key map "d" dirb-delete-entry)
       (bind-key map "r" dirb-rename-entry)
       (bind-key map "s" dirb-grep)
