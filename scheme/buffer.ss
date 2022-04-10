@@ -463,6 +463,9 @@
        (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type 'all) s e))]
 
       [(t)
+       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type t) -1 -1))]
+
+      [()
        (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type 'all) -1 -1))]
    )
 )
