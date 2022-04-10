@@ -476,6 +476,15 @@
    )
 )
 
+(define git-pull-changes-and-show
+   (lambda ()
+      (let ([b (buffer-create)])
+         (text-mode)
+         (process-start b (git-cmd-format "pull"))
+      )
+   )
+)
+
 (define git-status-mode-map
    (let ([map (make-keymap)])
       (bind-key map "g r" (lambda () (git-show-status)))

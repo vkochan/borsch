@@ -176,6 +176,7 @@
 (bind-key "C-x g c" git-switch-branch)
 (bind-key "C-x g b" git-create-and-switch-branch)
 (bind-key "C-x g l" git-show-log)
+(bind-key "C-x g u" git-pull-changes-and-show)
 
 (bind-key "C-x f d" dirb)
 
