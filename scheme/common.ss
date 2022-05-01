@@ -460,3 +460,9 @@
       (st 'pop!)
    )
 )
+
+(define add-to-list
+    (lambda (lst el . rest)
+        (set-top-level-value! lst (append (top-level-value lst) (list el) rest))
+    )
+)
