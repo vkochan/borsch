@@ -206,6 +206,26 @@
    )
 )
 
+(define minibuf-eval
+   (lambda (s)
+      (let (
+            [code (open-string-input-port s)]
+            [ret '()]
+            [out ""]
+           )
+         (set! out (with-output-to-string
+                      (lambda ()
+                         (set! ret (try eval-port->str code))
+                      )
+                   )
+         )
+         (close-port code)
+         (set! out (string-append out (second ret)))
+         (message out)
+      )
+   )
+)
+
 (define minibuf-cmd
    (lambda ()
       (with-buffer minibuf-buffer
@@ -214,8 +234,10 @@
       (minibuf-interactive-func 'minibuf-prompt-map ":" #f
          (lambda (val)
             (let ([line (string->number val)])
-               (when line
+               (if line
                   (move-line-num line)
+                  ;; else
+                  (minibuf-eval val)
                )
             )
          )
