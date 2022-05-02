@@ -1,4 +1,4 @@
-(define lisp-mode-eval
+(define scheme-mode-eval
    (lambda (s)
       (let (
             [code (open-string-input-port s)]
@@ -18,12 +18,12 @@
    )
 )
 
-(define lisp-mode-eval-buffer
+(define scheme-mode-eval-buffer
    (lambda ()
-      (lisp-mode-eval (buffer-string))
+      (scheme-mode-eval (buffer-string))
    )
 )
 
-(define-mode lisp-mode "Lisp" text-mode
-   (bind-key-local "C-c C-c" lisp-mode-eval-buffer)
+(define-mode scheme-mode "Scheme" text-mode
+   (bind-key-local "C-c C-c" scheme-mode-eval-buffer)
 )

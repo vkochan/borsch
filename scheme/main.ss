@@ -16,7 +16,7 @@
 (load "mode/grep.ss")
 (load "mode/term.ss")
 (load "mode/dirb.ss")
-(load "mode/lisp.ss")
+(load "mode/scheme.ss")
 
 (define open-repl
    (lambda ()
