@@ -1,7 +1,7 @@
 (define scheme-mode-eval
    (lambda (s)
       (let (
-            [code (open-string-input-port s)]
+            [code (open-string-input-port (format "(begin ~a)" s))]
             [ret '()]
             [out ""]
            )
