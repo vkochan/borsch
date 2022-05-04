@@ -17,7 +17,10 @@
       ]
 
       [(s)
-       (grep s (current-cwd))]
+       (grep s
+             (if (local-bound? current-dir) (get-local current-dir) (current-cwd))
+       )
+      ]
 
       [(s d)
        (let (
