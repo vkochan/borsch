@@ -208,15 +208,15 @@
 
 (define-syntax (save-cursor stx)
    (syntax-case stx ()
-	       ((_ exp ...)
-		#`(let ([curs (cursor)])
-		    (begin
-                       exp
-		       ...
-                    )
-                    (cursor-set curs)
-                  )
-               )
+      ((_ exp ...)
+       #`(let ([curs (cursor)])
+            (begin
+               exp
+                  ...
+            )
+            (cursor-set curs)
+         )
+      )
    )
 )
 
