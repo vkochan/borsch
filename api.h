@@ -132,6 +132,7 @@ void buf_redo(int bid);
 size_t buf_search_regex(int bid, size_t pos, const char *pattern, int dir);
 
 int minibuf_create(void);
+int topbar_create(void);
 
 int term_create(char *prog, char *title);
 int term_keys_send(int bid, char *keys);
@@ -157,10 +158,6 @@ int bind_key(char *map, bind_key_cb_t cb, int kid, char *tmap);
 int unbind_key(char *map, int kid);
 
 int fifo_create(void);
-
-int tagbar_status_set(const char *s);
-int tagbar_status_align(int align);
-int tagbar_show(bool show);
 
 int evt_fd_handler_add(int fd, void (*fn)(int fd, void *), void *);
 void evt_fd_handler_del(int fd);

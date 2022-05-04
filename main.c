@@ -142,15 +142,6 @@ enum { BAR_LEFT, BAR_RIGHT };
 enum { MIN_ALIGN_HORIZ, MIN_ALIGN_VERT };
 
 typedef struct {
-	int pos, lastpos;
-	int align;
-	bool autohide;
-	unsigned short int h;
-	unsigned short int y;
-	char text[512];
-} StatusBar;
-
-typedef struct {
 	int fd;
 	const char *file;
 	unsigned short int id;
@@ -197,7 +188,6 @@ static void scrollback(const char *args[]);
 static void setlayout(const char *args[]);
 static int getnmaster(void);
 static float getmfact(void);
-static void togglebarpos(const char *args[]);
 static void toggleminimize(void);
 static void minimizeother(const char *args[]);
 static void togglemouse(const char *args[]);
@@ -231,6 +221,7 @@ static KeyMap *global_kmap;
 static KeyMap *curr_kmap;
 
 static Window *minibuf;
+static Window *topbar;
 
 /* valid curses attributes are listed below they can be ORed
  *
@@ -261,36 +252,12 @@ static Color colors[] = {
 	[BLUE_BG]   = { .fg = -1, .bg = COLOR_BLUE, .fg256 = -1, .bg256 = 0, },
 };
 
-#define COLOR(c)        COLOR_PAIR(colors[c].pair)
-/* curses attributes for the currently focused window */
-#define SELECTED_ATTR   (COLOR(BLUE) | A_NORMAL)
-/* curses attributes for normal (not selected) windows */
-#define NORMAL_ATTR     (COLOR(DEFAULT) | A_NORMAL)
-/* curses attributes for a window with pending urgent flag */
-#define URGENT_ATTR     NORMAL_ATTR
-/* curses attributes for the status bar */
-#define BAR_ATTR        (COLOR(BLUE) | A_NORMAL)
-/* characters for beginning and end of status bar message */
-#define BAR_BEGIN       '['
-#define BAR_END         ']'
 /* status bar (command line option -s) position */
 #define BAR_POS         BAR_TOP /* BAR_BOTTOM, BAR_OFF */
-/* whether status bar should be hidden if only one window exists */
-#define BAR_AUTOHIDE    false
 /* master width factor [0.1 .. 0.9] */
 #define MFACT 0.5
 /* number of windows in master area */
 #define NMASTER 1
-/* printf format string for the tag in the status bar */
-#define TAG_SYMBOL   "[%s%s%s]"
-/* curses attributes for the currently selected tags */
-#define TAG_SEL      (COLOR(RED) | A_BOLD)
-/* curses attributes for not selected tags which contain no windows */
-#define TAG_NORMAL   (COLOR(DEFAULT) | A_NORMAL)
-/* curses attributes for not selected tags which contain windows */
-#define TAG_OCCUPIED (COLOR(BLUE) | A_NORMAL)
-/* curses attributes for not selected tags which with urgent windows */
-#define TAG_URGENT (COLOR(BLUE) | A_NORMAL | A_BLINK)
 
 const char tags[][8] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
@@ -363,8 +330,6 @@ typedef struct {
 	float mfact[LENGTH(tags) + 1];
 	Layout *layout[LENGTH(tags) + 1];
 	Layout *layout_prev[LENGTH(tags) + 1];
-	int barpos[LENGTH(tags) + 1];
-	int barlastpos[LENGTH(tags) + 1];
 	bool runinall[LENGTH(tags) + 1];
 	char *cwd[LENGTH(tags) + 1];
 	char *name[LENGTH(tags) + 1];
@@ -383,12 +348,6 @@ static unsigned int seltags;
 static unsigned int tagset[2] = { 1, 1 };
 static bool mouse_events_enabled = ENABLE_MOUSE;
 static Layout *layout = layouts;
-static StatusBar bar = { .lastpos = BAR_POS,
-			 .pos = BAR_POS,
-			 .align = BAR_RIGHT,
-			 .autohide = BAR_AUTOHIDE,
-			 .h = 1
-		       };
 
 static Fifo cmdfifo = { .fd = -1 };
 static Fifo retfifo = { .fd = -1 };
@@ -447,6 +406,8 @@ is_content_visible(Window *c) {
 	if (isarrange(fullscreen))
 		return current_window() == c;
 	else if (c == minibuf)
+		return true;
+	else if (c == topbar)
 		return true;
 	return isvisible(c) && !c->minimized;
 }
@@ -507,120 +468,34 @@ void *set_popup(Window *p)
 static void
 update_screen_size(void) {
 	int dec_h = 0;
-	bar.y = 0;
+	int top_h = 0;
 	wax = 0;
 	way = 0;
 
+	if (topbar)
+		top_h = ui_window_height_get(topbar->win);
 	if (minibuf)
 		dec_h = ui_window_height_get(minibuf->win);
 
 	wah = ui_height_get(ui)-dec_h;
 	waw = ui_width_get(ui);
-	if (bar.pos == BAR_TOP) {
-		wah -= bar.h;
-		way += bar.h;
-	} else if (bar.pos == BAR_BOTTOM) {
-		wah -= bar.h;
-		bar.y = wah;
+	if (BAR_POS == BAR_TOP) {
+		wah -= top_h;
+		way += top_h;
+	} else if (BAR_POS == BAR_BOTTOM) {
+		wah -= top_h;
 	}
 
 	if (minibuf)
 		ui_window_move(minibuf->win, 0, ui_height_get(ui)-dec_h);
 }
 
-static void
-hidebar(void) {
-	if (bar.pos != BAR_OFF) {
-		bar.lastpos = pertag.barlastpos[pertag.curtag] = bar.pos;
-		bar.pos = pertag.barpos[pertag.curtag] = BAR_OFF;
-	}
-}
-
-static void
-showbar(void) {
-	if (bar.pos == BAR_OFF)
-		bar.pos = pertag.barpos[pertag.curtag] = bar.lastpos;
-}
+static void draw(Window *c, bool force);
 
 static void
 drawbar(void) {
-	char buf[128];
-	int sx, sy, x, y, width;
-	unsigned int occupied = 0, urgent = 0;
-	if (bar.pos == BAR_OFF)
-		return;
-
-	for (Window *c = windows; c; c = c->next) {
-		occupied |= c->tags;
-		if (c->urgent)
-			urgent |= c->tags;
-	}
-
-	getyx(stdscr, sy, sx);
-	attrset(BAR_ATTR);
-	move(bar.y, 0);
-
-	for (unsigned int i = 0; i < LENGTH(tags); i++){
-		if (tagset[seltags] & (1 << i))
-			attrset(TAG_SEL);
-		else if (urgent & (1 << i))
-			attrset(TAG_URGENT);
-		else if (occupied & (1 << i))
-			attrset(TAG_OCCUPIED);
-		else
-			attrset(TAG_NORMAL);
-
-		if (pertag.name[i+1] && strlen(pertag.name[i+1])) {
-			printw(TAG_SYMBOL, tags[i], ":", pertag.name[i+1]);
-		} else if (strlen(pertag.cwd[i+1]) && show_tagnamebycwd && (occupied & (1 << i))) {
-			printw(TAG_SYMBOL, tags[i], ":", basename(pertag.cwd[i+1]));
-		} else {
-			printw(TAG_SYMBOL, tags[i], "", "");
-		}
-	}
-
-	attrset(pertag.runinall[pertag.curtag] ? TAG_SEL : TAG_NORMAL);
-	addstr(layout->symbol);
-	attrset(TAG_NORMAL);
-
-	getyx(stdscr, y, x);
-	(void)y;
-	int maxwidth = ui_width_get(ui) - x - 2;
-
-	addch(BAR_BEGIN);
-	attrset(BAR_ATTR);
-
-	wchar_t wbuf[sizeof bar.text];
-	size_t numchars = mbstowcs(wbuf, bar.text, sizeof bar.text);
-
-	if (numchars != (size_t)-1 && (width = wcswidth(wbuf, maxwidth)) != -1) {
-		int pos = 0;
-
-		if (bar.align == BAR_RIGHT) {
-			for (; pos + width < maxwidth; pos++)
-				addch(' ');
-		}
-
-		for (size_t i = 0; i < numchars; i++) {
-			pos += wcwidth(wbuf[i]);
-			if (pos > maxwidth)
-				break;
-			addnwstr(wbuf+i, 1);
-		}
-
-		if (bar.align == BAR_LEFT) {
-			for (; pos + width < maxwidth; pos++)
-				addch(' ');
-		}
-
-		clrtoeol();
-	}
-
-	attrset(TAG_NORMAL);
-	mvaddch(bar.y, ui_width_get(ui) - 1, BAR_END);
-	attrset(NORMAL_ATTR);
-	move(sy, sx);
-	ui_refresh(ui);
+	if (topbar)
+		draw(topbar, true);
 }
 
 static void draw_title(Window *c) {
@@ -705,6 +580,9 @@ draw(Window *c, bool force) {
 
 static void
 draw_all(void) {
+	if (topbar) {
+		draw(topbar, true);
+	}
 	if (minibuf) {
 		draw(minibuf, true);
 	}
@@ -746,13 +624,6 @@ arrange(void) {
 
 	ui_clear(ui);
 
-	if (bar.autohide) {
-		if ((!windows || !windows->next) && n == 1)
-			hidebar();
-		else
-			showbar();
-		update_screen_size();
-	}
 	if (m && !isarrange(fullscreen)) {
 		if (min_align == MIN_ALIGN_VERT)
 			dh = m;
@@ -1068,11 +939,6 @@ toggletag(const char *args[]) {
 static void
 setpertag(void) {
 	layout = pertag.layout[pertag.curtag];
-	if (bar.pos != pertag.barpos[pertag.curtag]) {
-		bar.pos = pertag.barpos[pertag.curtag];
-		update_screen_size();
-	}
-	bar.lastpos = pertag.barlastpos[pertag.curtag];
 	runinall = pertag.runinall[pertag.curtag];
 }
 
@@ -1175,8 +1041,6 @@ initpertag(void) {
 		pertag.mfact[i] = MFACT;
 		pertag.layout[i] = layout;
 		pertag.layout_prev[i] = layout;
-		pertag.barpos[i] = bar.pos;
-		pertag.barlastpos[i] = bar.lastpos;
 		pertag.runinall[i] = runinall;
 		pertag.msticky[i] = false;
 		pertag.name[i] = NULL;
@@ -1710,20 +1574,6 @@ getmfact(void) {
 }
 
 static void
-togglebarpos(const char *args[]) {
-	switch (bar.pos == BAR_OFF ? bar.lastpos : bar.pos) {
-	case BAR_TOP:
-		bar.pos = pertag.barpos[pertag.curtag] = BAR_BOTTOM;
-		break;
-	case BAR_BOTTOM:
-		bar.pos = pertag.barpos[pertag.curtag] = BAR_TOP;
-		break;
-	}
-	update_screen_size();
-	redraw(NULL);
-}
-
-static void
 toggleminimize(void)
 {
 	Window *c, *m, *t;
@@ -2184,6 +2034,9 @@ int main(int argc, char *argv[]) {
 		evt.eid = EVT_PRE_DRAW;
 		scheme_event_handle(evt);
 
+	        if (topbar) {
+		   draw(topbar, true);
+	        }
 		if (minibuf) {
 			draw(minibuf, false);
 		}
@@ -2237,6 +2090,8 @@ static Window *window_get_by_id(int id)
 		return get_popup();
 	else if (minibuf && minibuf->id == id)
 		return minibuf;
+	else if (topbar && topbar->id == id)
+		return topbar;
 
 	return NULL;
 }
@@ -2257,7 +2112,7 @@ bool win_is_visible(int wid)
 	Window *c = window_get_by_id(wid);
 
 	if (c)
-		return isvisible(c) || c == minibuf;
+		return isvisible(c) || c == minibuf || c == topbar;
 
 	return false;
 }
@@ -2919,7 +2774,7 @@ void win_size_set(int wid, int width, int height)
 		if (!is_changed)
 			return;
 
-		if (w == minibuf) {
+		if (w == minibuf || w == topbar) {
 			update_screen_size();
 			buffer_dirty_set(w->buf, true);
 			draw(w, true);
@@ -3172,7 +3027,7 @@ static void buf_update(Window *w)
 
 		view_invalidate(view);
 
-		if (w == current_window() || w == minibuf) {
+		if (w == current_window() || w == minibuf || w == topbar) {
 			void (*scroll_fn)(View *, size_t) = view_scroll_to;
 			Filerange r = view_viewport_get(view);
 			Text *text = buffer_text_get(buf);
@@ -3211,11 +3066,16 @@ static void buf_update(Window *w)
 
 static void buf_list_update(void)
 {
+	if (topbar)
+		buf_update(topbar);
+
 	for (Window *w = windows; w; w = w->next) {
 		if (is_content_visible(w)) {
 			buf_update(w);
 		}
 	}
+	if (topbar)
+		buf_update(topbar);
 	if (get_popup())
 		buf_update(get_popup());
 	if (minibuf)
@@ -3890,6 +3750,52 @@ int minibuf_create(void)
 	return w->id;
 }
 
+int topbar_create(void)
+{
+	Window *w;
+
+	if (topbar)
+		return topbar->id;
+
+	w = calloc(1, sizeof(Window));
+	if (!w)
+		return -1;
+
+	/* c->tags = tagset[seltags]; */
+	w->id = ++cmdfifo.id;
+
+	w->buf = __buf_new("*topbar*", NULL);
+	if (!w->buf) {
+		free(w);
+		return -1;
+	}
+
+	w->view = view_new(buffer_text_get(w->buf));
+	if (!w->view) {
+		__buf_del(w->buf);
+		free(w);
+		return -1;
+	}
+
+	w->win = ui_window_new(ui, w->view);
+	if (!w->win) {
+		view_free(w->view);
+		__buf_del(w->buf);
+		free(w);
+		return -1;
+	}
+
+	ui_window_on_view_update_set(w->win, on_view_update_cb);
+	ui_window_resize(w->win, waw, 1);
+	ui_window_priv_set(w->win, w);
+	ui_window_move(w->win, 0, 0);
+	ui_window_draw(w->win);
+
+	topbar = w;
+	update_screen_size();
+	return w->id;
+}
+
 int term_create(char *prog, char *title)
 {
 	if (!get_popup())
@@ -4126,42 +4032,6 @@ int fifo_create(void)
 	setenv("BORSCH_CMD_FIFO", cmd, 1);
 	setenv("BORSCH_RET_FIFO", ret, 1);
 
-	return 0;
-}
-
-int tagbar_status_set(const char *s)
-{
-	strncpy(bar.text, s, sizeof bar.text - 1);
-	drawbar();
-	return 0;
-}
-
-int tagbar_status_align(int align)
-{
-	if (align)
-		bar.align = BAR_LEFT;
-	else
-		bar.align = BAR_RIGHT;
-
-	drawbar();
-	return 0;
-}
-
-int tagbar_show(bool show)
-{
-	if (!show)
-		bar.pos = BAR_OFF;
-	else
-		bar.pos = bar.lastpos;
-
-	if (bar.pos == BAR_OFF)
-		hidebar();
-	else
-		showbar();
-
-	bar.autohide = false;
-	update_screen_size();
-	redraw(NULL);
 	return 0;
 }
 

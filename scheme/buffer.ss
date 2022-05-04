@@ -387,7 +387,10 @@
 	   )
 
          (while buf
-            (when (not (equal? (buffer-name buf) "*minibuf*"))
+            (when (and
+                     (not (equal? (buffer-name buf) "*minibuf*"))
+                     (not (equal? (buffer-name buf) "*topbar*"))
+                  )
                (set! lst (append lst (list
                                         (list buf (buffer-name buf))
 				     )

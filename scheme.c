@@ -675,6 +675,14 @@ ptr scheme_minibuf_create(void)
 	return Sfalse;
 }
 
+ptr scheme_topbar_create(void)
+{
+	int ret = topbar_create();
+	if (ret > 0)
+		return Sinteger(ret);
+	return Sfalse;
+}
+
 ptr scheme_term_create(char *prog, char *title)
 {
 	int ret = term_create(prog, title);
@@ -780,21 +788,6 @@ bool scheme_layout_sticky_get(int tag)
 int scheme_layout_sticky_set(int tag, bool is_sticky)
 {
 	return layout_sticky_set(tag, is_sticky);
-}
-
-int scheme_tagbar_status_set(char *s)
-{
-	return tagbar_status_set(s);
-}
-
-int scheme_tagbar_status_align(int align)
-{
-	return tagbar_status_align(align);
-}
-
-int scheme_tagbar_show(bool show)
-{
-	return tagbar_show(show);
 }
 
 ptr scheme_bind_key(char *key, bind_key_cb_t cb, int mid, char *tname)
@@ -963,6 +956,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_search_regex", scheme_buf_search_regex);
 
 	Sregister_symbol("cs_minibuf_create", scheme_minibuf_create);
+	Sregister_symbol("cs_topbar_create", scheme_topbar_create);
 
 	Sregister_symbol("cs_term_create", scheme_term_create);
 	Sregister_symbol("cs_term_keys_send", scheme_term_keys_send);
@@ -984,10 +978,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_layout_fmaster_set", scheme_layout_fmaster_set);
 	Sregister_symbol("cs_layout_sticky_get", scheme_layout_sticky_get);
 	Sregister_symbol("cs_layout_sticky_set", scheme_layout_sticky_set);
-
-	Sregister_symbol("cs_tagbar_status_align", scheme_tagbar_status_align);
-	Sregister_symbol("cs_tagbar_status_set", scheme_tagbar_status_set);
-	Sregister_symbol("cs_tagbar_show", scheme_tagbar_show);
 
 	Sregister_symbol("cs_bind_key", scheme_bind_key);
 	Sregister_symbol("cs_unbind_key", scheme_unbind_key);

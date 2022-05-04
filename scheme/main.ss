@@ -1,13 +1,13 @@
 (load "common.ss")
 (load "style.ss")
 (load "keymap.ss")
-(load "tagbar.ss")
 (load "layout.ss")
 (load "view.ss")
 (load "window.ss")
 (load "buffer.ss")
 (load "prompt.ss")
 (load "copybuf.ss")
+(load "topbar.ss")
 (load "minibuf.ss")
 (load "process.ss")
 (load "timer.ss")
@@ -23,8 +23,6 @@
       (term "borsch-eval -i" "eval")
    )
 )
-
-(minibuf-create)
 
 (define __on-event-handler
    (lambda (ev oid)
@@ -71,14 +69,6 @@
    )
 )
 
-(tagbar-set-status-align 'left)
-
-(add-hook 'tagbar-status-hook
-   (lambda ()
-      (tagbar-set-status (view-cwd))
-   )
-)
-
 (define new-text-buffer
    (lambda ()
       (let ([b (buffer-create)])
@@ -116,6 +106,13 @@
       )
    )
 )
+
+(minibuf-create)
+(topbar-create)
+
+;(with-current-buffer topbar-buffer
+;   (insert "[a][b][c]")
+;)
 
 (view-set-cwd (current-directory))
 

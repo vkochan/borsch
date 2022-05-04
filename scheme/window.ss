@@ -404,9 +404,7 @@
 
       [(wid)
        (__window-toggle wid 'maximized)
-       (when (window-is-maximized? wid)
-          (run-hooks 'window-maximize-hook wid)
-       )
+       (run-hooks 'window-toggle-maximize-hook wid)
       ]
    )
 )

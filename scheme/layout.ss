@@ -18,13 +18,14 @@
    )
 )
 
-(define layout-current
-   (case-lambda
-        [()
-         (layout->symb (call-foreign (__cs_layout_current_get (view-current))))]
-
-        [(tag)
-         (layout->symb (call-foreign (__cs_layout_current_get tag)))]
+(define layout->name
+   (lambda (l)
+      (case l 
+         [0 "[]="        ]
+         [1 "+++"        ]
+         [2 "TTT"        ]
+         [3 "[ ]"        ]
+      )
    )
 )
 
@@ -39,6 +40,28 @@
    )
 )
 
+(define layout-current
+   (case-lambda
+        [()
+         (layout->symb (call-foreign (__cs_layout_current_get (view-current))))]
+
+        [(tag)
+         (layout->symb (call-foreign (__cs_layout_current_get tag)))]
+   )
+)
+
+(define layout-name
+   (case-lambda
+      [()
+       (layout-name (layout-current))
+      ]
+
+      [(symb)
+       (layout->name (symb->layout symb))
+      ]
+   )
+)
+
 (define layout-switch
    (case-lambda
         [(l)
@@ -46,7 +69,7 @@
 
         [(tag l)
          (call-foreign (__cs_layout_current_set tag  l))
-         (run-hook 'layout-switch-hook l)
+         (run-hook 'layout-switch-hook)
         ]
    )
 )
