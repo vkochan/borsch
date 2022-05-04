@@ -428,7 +428,7 @@
           (with-current-buffer b
              (buffer-set-readonly #t)
              (dirb-mode)
-             (set-local! current-dir dir)
+             (dirb-set-current-dir dir)
              (dirb-open-dir dir)
              (stack-push! (get-local prev-cursor) (cursor))
           )
