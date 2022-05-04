@@ -54,7 +54,7 @@
 )
 
 (let ([m (buffer-new "*Messages*")])
-   (with-buffer m
+   (with-current-buffer m
       (text-mode)
    )
 )
@@ -63,7 +63,7 @@
    (lambda (e)
       (let ([m (buffer-get "*Messages*")])
          (when m
-            (with-buffer m
+            (with-current-buffer m
                (insert (format "~a\n" e) '(style (:fg "red")))
             )
          )
@@ -82,7 +82,7 @@
 (define new-text-buffer
    (lambda ()
       (let ([b (buffer-create)])
-         (with-buffer b
+         (with-current-buffer b
             (text-mode)
          )
       )
@@ -93,7 +93,7 @@
    (lambda (w)
       (let ([b (window-buffer w)])
          (when b
-            (with-buffer b
+            (with-current-buffer b
                (when (local-bound? window-draw-hook)
                   (let ([h (get-local window-draw-hook)])
                      (apply h (list w))

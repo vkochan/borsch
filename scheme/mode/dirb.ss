@@ -118,7 +118,7 @@
           )
           (if (file-regular? p)
              (let ([b (buffer-create)])
-                (with-buffer b
+                (with-current-buffer b
                    (text-mode)
                    (buffer-open-file p)
                 )
@@ -425,7 +425,7 @@
 
       [(dir)
        (let ([b (buffer-create)])
-          (with-buffer b
+          (with-current-buffer b
              (buffer-set-readonly #t)
              (dirb-mode)
              (set-local! current-dir dir)

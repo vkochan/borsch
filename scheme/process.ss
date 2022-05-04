@@ -39,7 +39,7 @@
                  )
                (let ([s (get-string-some stdout)])
                   (when (not (eof-object? s))
-                     (with-buffer buf
+                     (with-current-buffer buf
                         (save-cursor
                            (move-buffer-end)
                            (insert s)

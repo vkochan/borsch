@@ -24,7 +24,7 @@
              [cmd (grep-fmt-cmd s d)]
              [b (buffer-create)]
             )
-          (with-buffer b
+          (with-current-buffer b
              (text-mode)
              (define-local major-mode 'grep-mode)
              (buffer-set-name (format "Search: ~a" s))

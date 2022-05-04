@@ -169,7 +169,7 @@
    )
 )
 
-(define-syntax (with-buffer stx)
+(define-syntax (with-current-buffer stx)
    (syntax-case stx ()
 	       ((_ buf exp ...)
 		#`(let ([b buf])
@@ -1496,7 +1496,7 @@
               [l (buffer-list)]
            )
          (window-popup #t)
-         (with-buffer b
+         (with-current-buffer b
             (define-local open-buffer open?)
             (if open?
                (buffer-set-name "Open buffer")
@@ -1550,7 +1550,7 @@
    (lambda (s)
       (let ([b (buffer-get "*Messages*")])
          (when b
-            (with-buffer b
+            (with-current-buffer b
                (insert (format "~a\n" s))
             )
          )
@@ -1563,7 +1563,7 @@
    (lambda ()
       (let ([b (current-buffer)])
          (if b
-            (with-buffer b
+            (with-current-buffer b
                (if (local-bound? current-cwd)
                   (get-local current-cwd)
                   ;; else

@@ -26,7 +26,7 @@
             [b (buffer-create)]
             [c (current-buffer)]
            )
-         (with-buffer b
+         (with-current-buffer b
             (define-local prompt-orig-buf c)
             (define-local prompt-cb f)
             (buffer-set-name s)

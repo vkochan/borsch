@@ -243,7 +243,7 @@
 (define git-status-diff-file
    (lambda (status file)
       (let ([b (buffer-create file)])
-         (with-buffer b
+         (with-current-buffer b
             (text-mode)
             (buffer-set-mode-name "Diff")
             (insert
@@ -438,7 +438,7 @@
                 [opt (if (eq? mode 'amend) "--amend" "")]
                 [b (buffer-create)]
                )
-             (with-buffer b
+             (with-current-buffer b
                 (define-local status-buffer c)
                 (text-mode)
                 (if (eq? mode 'amend)
@@ -449,7 +449,7 @@
                    (lambda ()
                       (process-write (format "git -C ~a commit ~a -F -" (view-cwd) opt)
                                      (buffer-string))
-                      (with-buffer (get-local status-buffer)
+                      (with-current-buffer (get-local status-buffer)
                          (git-show-status)
                       )
                       (window-delete)
@@ -556,7 +556,7 @@
             [b (buffer-create)]
            )
          (window-popup #t)
-         (with-buffer b
+         (with-current-buffer b
             (buffer-set-name "Switch branch")
             (buffer-set-keymap 'git-switch-branch-map)
             (for-each
@@ -642,7 +642,7 @@
 
       [(obj)
        (let ([b (buffer-create obj)])
-          (with-buffer b
+          (with-current-buffer b
             (git-log-mode)
             (move-buffer-begin)
           )

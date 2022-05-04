@@ -110,7 +110,7 @@
          (set! minibuf-buffer (window-buffer m))
          (set! minibuf-window m)
 
-         (with-buffer minibuf-buffer
+         (with-current-buffer minibuf-buffer
             (define-local input-mode #f)
             (define-local func-value #f)
             (define-local prompt-pos 0)
@@ -125,7 +125,7 @@
    (lambda (m)
       (when minibuf-buffer
          (window-set-height minibuf-window (1+ (lines-count m)))
-         (with-buffer minibuf-buffer
+         (with-current-buffer minibuf-buffer
             (insert (format "~a\n" m))
             (cursor-set 0)
          )
@@ -137,7 +137,7 @@
    (lambda (e)
       (when minibuf-buffer
          (window-set-height minibuf-window (1+ (lines-count e)))
-         (with-buffer minibuf-buffer
+         (with-current-buffer minibuf-buffer
             (when (not (get-local input-mode))
                (insert (format "~a\n" e) '(style (:fg "red")))
                (cursor-set 0)
@@ -150,7 +150,7 @@
 (add-hook 'key-press-hook
    (lambda (k)
       (when minibuf-buffer
-         (with-buffer minibuf-buffer
+         (with-current-buffer minibuf-buffer
             (when (not (get-local input-mode))
                (window-set-height minibuf-window 1)
                (erase-buffer)
@@ -165,7 +165,7 @@
       (let (
             [b (current-buffer)]
            )
-         (with-buffer minibuf-buffer
+         (with-current-buffer minibuf-buffer
             (erase-buffer)
             (insert str)
             (set-local! prompt-pos (cursor))
@@ -189,7 +189,7 @@
       ]
 
       [(str def fn)
-       (with-buffer minibuf-buffer
+       (with-current-buffer minibuf-buffer
           (enable-insert #t)
        )
        (minibuf-interactive-func 'minibuf-prompt-map str def fn)
@@ -199,7 +199,7 @@
 
 (define minibuf-ask
    (lambda (str fn)
-      (with-buffer minibuf-buffer
+      (with-current-buffer minibuf-buffer
          (enable-insert #f)
       )
       (minibuf-interactive-func 'minibuf-ask-map (format "~a y/n" str) #f fn)
@@ -228,7 +228,7 @@
 
 (define minibuf-cmd
    (lambda ()
-      (with-buffer minibuf-buffer
+      (with-current-buffer minibuf-buffer
          (enable-insert #t)
       )
       (minibuf-interactive-func 'minibuf-prompt-map ":" #f

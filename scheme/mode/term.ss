@@ -40,7 +40,7 @@
              [c (current-buffer)]
              [s (term-string c)]
             )
-         (with-buffer b
+         (with-current-buffer b
             (text-mode)
             (bind-key-local "<Esc>" term-mode-copy-exit)
             (bind-key-local "q" term-mode-copy-exit)

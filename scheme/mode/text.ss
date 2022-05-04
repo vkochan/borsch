@@ -70,7 +70,7 @@
          (let ([p (if (equal? #\/ (string-ref f 0)) f (string-append (view-cwd) "/" f))])
             (if (file-regular? p)
                (let ([b (buffer-create)])
-                  (with-buffer b
+                  (with-current-buffer b
                      (text-mode)
                      (buffer-open-file p)
                      (move-line-num l)
@@ -241,7 +241,7 @@
       (if (not (buffer-is-term? (window-buffer w)))
          (begin
             (let ([b (window-buffer w)])
-               (with-buffer b
+               (with-current-buffer b
                   (let* (
                          [end (line-begin-pos (window-viewport-end w))]
                          [coord (window-viewport-coord w end)]
