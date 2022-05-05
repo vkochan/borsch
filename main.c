@@ -3704,12 +3704,9 @@ size_t buf_search_regex(int bid, size_t pos, const char *pattern, int dir)
 	return EPOS;
 }
 
-int minibuf_create(void)
+static Window *widget_create(const char *name, int x, int y, int width, int height)
 {
 	Window *w;
-
-	if (minibuf)
-		return minibuf->id;
 
 	w = calloc(1, sizeof(Window));
 	if (!w)
@@ -3718,7 +3715,7 @@ int minibuf_create(void)
 	/* c->tags = tagset[seltags]; */
 	w->id = ++cmdfifo.id;
 
-	w->buf = __buf_new("*minibuf*", NULL);
+	w->buf = __buf_new(name, NULL);
 	if (!w->buf) {
 		free(w);
 		return -1;
@@ -3740,60 +3737,26 @@ int minibuf_create(void)
 	}
 
 	ui_window_on_view_update_set(w->win, on_view_update_cb);
-	ui_window_resize(w->win, waw, 1);
+	ui_window_resize(w->win, width, height);
 	ui_window_priv_set(w->win, w);
-	ui_window_move(w->win, 0, ui_height_get(ui)-1);
+	ui_window_move(w->win, x, y);
 	ui_window_draw(w->win);
 
-	minibuf = w;
+	return w;
+}
+
+int minibuf_create(void)
+{
+	minibuf = widget_create("*minibuf*", 0, ui_height_get(ui)-1, waw, 1);
 	update_screen_size();
-	return w->id;
+	return minibuf->id;
 }
 
 int topbar_create(void)
 {
-	Window *w;
-
-	if (topbar)
-		return topbar->id;
-
-	w = calloc(1, sizeof(Window));
-	if (!w)
-		return -1;
-
-	/* c->tags = tagset[seltags]; */
-	w->id = ++cmdfifo.id;
-
-	w->buf = __buf_new("*topbar*", NULL);
-	if (!w->buf) {
-		free(w);
-		return -1;
-	}
-
-	w->view = view_new(buffer_text_get(w->buf));
-	if (!w->view) {
-		__buf_del(w->buf);
-		free(w);
-		return -1;
-	}
-
-	w->win = ui_window_new(ui, w->view);
-	if (!w->win) {
-		view_free(w->view);
-		__buf_del(w->buf);
-		free(w);
-		return -1;
-	}
-
-	ui_window_on_view_update_set(w->win, on_view_update_cb);
-	ui_window_resize(w->win, waw, 1);
-	ui_window_priv_set(w->win, w);
-	ui_window_move(w->win, 0, 0);
-	ui_window_draw(w->win);
-
-	topbar = w;
+	topbar = widget_create("*topbar*", 0, 0, waw, 1);
 	update_screen_size();
-	return w->id;
+	return topbar->id;
 }
 
 int term_create(char *prog, char *title)
