@@ -301,6 +301,29 @@
    )
 )
 
+(define dirb-copy-path-selection
+   (lambda ()
+      (let ([count (length (dirb-list-selection))])
+         (if (> count 0)
+            (begin
+               (copybuf-copy "")
+               (for-each
+                  (lambda (p)
+                     (copybuf-append (format "~a\n" p))
+                  )
+                  (dirb-list-selection)
+               )
+               (dirb-clear-selection)
+            )
+            ;; else
+            (begin
+               (message "No files were selected")
+            )
+         )
+      )
+   )
+)
+
 (define dirb-delete-entry
    (lambda ()
       (if (> (length (dirb-list-selection)) 0)
@@ -398,6 +421,7 @@
       (bind-key map "+" dirb-create-dir)
       (bind-key map "p" dirb-paste-selection)
       (bind-key map "m" dirb-move-selection)
+      (bind-key map "y" dirb-copy-path-selection)
       (bind-key map "d" dirb-delete-entry)
       (bind-key map "r" dirb-rename-entry)
       (bind-key map "s" dirb-grep)
