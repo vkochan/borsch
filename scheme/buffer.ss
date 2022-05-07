@@ -333,6 +333,16 @@
    )
 )
 
+(define buffer-reload-file
+   (lambda ()
+      (save-cursor
+         (erase-buffer)
+         (insert-file (buffer-filename))
+         (buffer-save)
+      )
+   )
+)
+
 (define buffer-filename
    (lambda ()
       (call-foreign (__cs_buf_file_get (current-buffer)))
