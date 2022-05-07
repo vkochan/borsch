@@ -74,6 +74,12 @@
    )
 )
 
+(define dirb-reload
+   (lambda ()
+      (dirb-open-dir (dirb-current-dir))
+   )
+)
+
 (define dirb-open-parent
     (lambda ()
        (let (
@@ -438,6 +444,7 @@
    (define-local selected (list))
    (define-local window-draw-hook dirb-draw-selection)
    (define-local defval #f)
+   (define-local buffer-reload-func dirb-reload)
    (set-local! linenum-enable #f)
 )
 
