@@ -288,21 +288,22 @@
          (buffer-set-keymap map)
       )
    )
-   (when (not (local-bound? text-mode-vis-local-map))
-         (define-local text-mode-vis-local-map (make-keymap 'text-mode-vis-map))
-   )
-   (when (not (local-bound? text-mode-vis-linewise-local-map))
-         (define-local text-mode-vis-linewise-local-map (make-keymap 'text-mode-vis-linewise-map))
-   )
-   (when (not (local-bound? text-mode-cmd-local-map))
-         (define-local text-mode-cmd-local-map (make-keymap 'text-mode-cmd-map))
-   )
-   (when (not (local-bound? text-mode-ins-local-map))
-         (define-local text-mode-ins-local-map (make-keymap 'text-mode-ins-map))
-   )
-   (when (not (local-bound? buffer-reload-func))
-      (define-local buffer-reload-func buffer-reload-file)
-   )
+
+   (or (local-bound? text-mode-vis-local-map)
+       (define-local text-mode-vis-local-map (make-keymap 'text-mode-vis-map)))
+
+   (or (local-bound? text-mode-vis-linewise-local-map)
+       (define-local text-mode-vis-linewise-local-map (make-keymap 'text-mode-vis-linewise-map)))
+
+   (or (local-bound? text-mode-cmd-local-map)
+       (define-local text-mode-cmd-local-map (make-keymap 'text-mode-cmd-map)))
+
+   (or (local-bound? text-mode-ins-local-map)
+      (define-local text-mode-ins-local-map (make-keymap 'text-mode-ins-map)))
+
+   (or (local-bound? buffer-reload-func)
+      (define-local buffer-reload-func buffer-reload-file))
+
    (define-local window-draw-hook text-mode-linenum-draw)
    (define-local linenum-enable #t)
    (text-mode-cmd)
