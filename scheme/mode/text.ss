@@ -299,10 +299,10 @@
        (define-local text-mode-cmd-local-map (make-keymap 'text-mode-cmd-map)))
 
    (or (local-bound? text-mode-ins-local-map)
-      (define-local text-mode-ins-local-map (make-keymap 'text-mode-ins-map)))
+       (define-local text-mode-ins-local-map (make-keymap 'text-mode-ins-map)))
 
    (or (local-bound? buffer-reload-func)
-      (define-local buffer-reload-func buffer-reload-file))
+       (define-local buffer-reload-func buffer-reload-file))
 
    (define-local window-draw-hook text-mode-linenum-draw)
    (define-local linenum-enable #t)
