@@ -3140,7 +3140,7 @@ size_t buf_text_insert_file(int bid, const char *path)
 		} else if (len == 0) {
 			break;
 		} else {
-			pos += buffer_text_insert_len(buf, pos, data, len);
+			pos = buffer_text_insert_len(buf, pos, data, len);
 			rem -= len;
 		}
 	}
