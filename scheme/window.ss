@@ -81,6 +81,17 @@
    )
 )
 
+(define window-list-by-tag
+   (lambda (tag)
+      (filter
+         (lambda (w)
+            (member tag (window-tags (first w)))
+         )
+         (window-list)
+      )
+   )
+)
+
 (define window-upper
    (case-lambda
       [()

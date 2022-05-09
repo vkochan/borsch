@@ -13,7 +13,13 @@
                      [tag-color (if (equal? tag (view-current))
                                     "blue"
                                     ;; else
-                                    "green"
+                                    (if (> (length (window-list-by-tag tag)) 0)
+                                       "green"
+                                       ;;"bright-black"
+                                       ;; else
+                                       ;;"green"
+                                       "bright-black"
+                                    )
                                 )
                      ]
                     )
