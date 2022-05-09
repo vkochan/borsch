@@ -193,6 +193,11 @@ int scheme_win_tag_set(int wid, int tag)
 	return win_tag_set(wid, tag);
 }
 
+int scheme_win_tag_bits(int wid)
+{
+	return win_tag_bits(wid);
+}
+
 int scheme_win_tag_toggle(int wid, int tag)
 {
 	return win_tag_toggle(wid, tag);
@@ -877,6 +882,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_title_get", scheme_win_title_get);
 	Sregister_symbol("cs_win_title_set", scheme_win_title_set);
 	Sregister_symbol("cs_win_tag_set", scheme_win_tag_set);
+	Sregister_symbol("cs_win_tag_bits", scheme_win_tag_bits);
 	Sregister_symbol("cs_win_tag_toggle", scheme_win_tag_toggle);
 	Sregister_symbol("cs_win_tag_add", scheme_win_tag_add);
 	Sregister_symbol("cs_win_tag_del", scheme_win_tag_del);

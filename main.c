@@ -2119,12 +2119,8 @@ bool win_is_visible(int wid)
 
 int win_first_get(void)
 {
-	Window *c;
-
-	for (c = windows; c && !isvisible(c); c = c->next);
-
-	if (c && isvisible(c))
-		return c->id;
+	if (windows)
+		return windows->id;
 
 	return 0;
 }
@@ -2132,15 +2128,12 @@ int win_first_get(void)
 int win_prev_get(int wid)
 {
 	Window *c = window_get_by_id(wid);
-	Window *p;
 
 	if (!c)
 		return 0;
 
-	for (p = c->prev; p && !isvisible(p); p = p->prev);
-
-	if (p && isvisible(p))
-		return p->id;
+	if (c->prev)
+		return c->prev->id;
 
 	return 0;
 }
@@ -2148,15 +2141,12 @@ int win_prev_get(int wid)
 int win_next_get(int wid)
 {
 	Window *c = window_get_by_id(wid);
-	Window *n;
 
 	if (!c)
 		return 0;
 
-	for (n = c->next; n && !isvisible(n); n = n->next);
-
-	if (n && isvisible(n))
-		return n->id;
+	if (c->next)
+		return c->next->id;
 
 	return 0;
 }
@@ -2546,6 +2536,17 @@ int win_tag_set(int wid, int tag)
 	c->tags = ntags;
 	tagschanged();
 	return 0;
+}
+
+int win_tag_bits(int wid)
+{
+	Window *c;
+
+	c = window_get_by_id(wid);
+	if (!c)
+		return 0;
+
+	return c->tags;
 }
 
 int win_tag_toggle(int wid, int tag)

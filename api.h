@@ -47,6 +47,7 @@ void win_close(int wid);
 char* win_title_get(int wid);
 int win_title_set(int wid, char *title);
 int win_tag_set(int wid, int tag);
+int win_tag_bits(int wid);
 int win_tag_add(int wid, int tag);
 int win_tag_del(int wid, int tag);
 int win_tag_toggle(int wid, int tag);
