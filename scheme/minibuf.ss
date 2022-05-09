@@ -66,6 +66,7 @@
 (define minibuf-prompt-copybuf-paste
    (lambda ()
       (copybuf-paste)
+      (move-next-char)
    )
 )
 
