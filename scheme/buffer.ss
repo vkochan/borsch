@@ -1426,6 +1426,9 @@
 	       ((_ s)
 		#`(get-local-symbol 's)
                )
+	       ((_ s e)
+		#`(if (local-bound? s) (get-local s) e)
+               )
    )
 )
 
