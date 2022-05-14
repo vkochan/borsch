@@ -433,6 +433,7 @@
       (bind-key map "s" dirb-grep)
       (bind-key map "<Space>" dirb-select-entry)
       (bind-key map "<Esc>" dirb-clear-selection)
+      (bind-key map "`" (lambda () (term #f "" (dirb-current-dir))))
       map
    )
 )

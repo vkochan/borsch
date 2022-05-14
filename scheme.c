@@ -688,9 +688,9 @@ ptr scheme_topbar_create(void)
 	return Sfalse;
 }
 
-ptr scheme_term_create(char *prog, char *title)
+ptr scheme_term_create(char *prog, char *title, char *cwd)
 {
-	int ret = term_create(prog, title);
+	int ret = term_create(prog, title, cwd);
 
 	if (ret)
 		return Sinteger(ret);

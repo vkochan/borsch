@@ -1387,11 +1387,6 @@ int create(const char *prog, const char *title, const char *cwd) {
 		c->cmd = shell;
 	}
 
-	if (!cwd)
-		cwd = getcwd_by_pid(current_window(), tmppath);
-	else if (strlen(pertag.cwd[pertag.curtag]))
-		cwd = pertag.cwd[pertag.curtag];
-
 	pid = vt_forkpty(term, shell, pargs, cwd, env, NULL, NULL);
 	buffer_pid_set(c->buf, pid);
 
@@ -3760,10 +3755,10 @@ int topbar_create(void)
 	return topbar->id;
 }
 
-int term_create(char *prog, char *title)
+int term_create(char *prog, char *title, char *cwd)
 {
 	if (!get_popup())
-		return create(prog, title, "");
+		return create(prog, title, cwd);
 	return -1;
 }
 
