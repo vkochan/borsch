@@ -288,6 +288,24 @@
    )
 )
 
+(define buffer-create-text
+   (case-lambda
+      [() 
+       (let ([b (buffer-create)])
+          (text-mode)
+          b
+       )
+      ]
+
+      [(n) 
+       (let ([b (buffer-create n)])
+          (text-mode)
+          b
+       )
+      ]
+   )
+)
+
 (define buffer-new
    (case-lambda
       [() 
