@@ -1574,18 +1574,22 @@
 
 (define current-cwd
    (lambda ()
-      (let ([b (current-buffer)])
-         (if b
-            (with-current-buffer b
-               (if (local-bound? current-cwd)
-                  (get-local current-cwd)
-                  ;; else
-                  (view-cwd)
-               )
-            )
-            ;; else
-            (view-cwd)
-         )
+      (view-cwd)
+   )
+)
+
+(define buffer-set-cwd
+   (lambda (cwd)
+      (define-local current-cwd cwd)
+   )
+)
+
+(define buffer-cwd
+   (lambda ()
+      (if (and (local-bound? current-cwd) (get-local current-cwd))
+         (get-local current-cwd)
+         ;; else
+         (view-cwd)
       )
    )
 )

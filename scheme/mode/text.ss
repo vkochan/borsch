@@ -67,7 +67,7 @@
 (define file-open-at-cursor
    (lambda ()
       (let-values ([(f l) (get-file-location (extract-longword))])
-         (let ([p (if (equal? #\/ (string-ref f 0)) f (string-append (view-cwd) "/" f))])
+         (let ([p (if (equal? #\/ (string-ref f 0)) f (string-append (buffer-cwd) "/" f))])
             (if (file-regular? p)
                (let ([b (buffer-create)])
                   (with-current-buffer b
