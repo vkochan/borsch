@@ -233,6 +233,7 @@
       (bind-key map "y" (lambda () (mark-copy-linewise) (text-mode-cmd)))
       (bind-key map "a" (lambda () (mark-copy-append) (text-mode-cmd)))
       (bind-key map "A" (lambda () (mark-copy-append-linewise) (text-mode-cmd)))
+      (bind-key map "G" (lambda () (move-buffer-end)))
       map
    )
 )
