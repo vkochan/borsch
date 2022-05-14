@@ -10,7 +10,7 @@
          (for-each
             (lambda (tag)
                (let (
-                     [tag-color (if (equal? tag (view-current))
+                     [tag-color (if (equal? tag (current-view))
                                     "blue"
                                     ;; else
                                     (if (> (length (window-list-by-tag tag)) 0)

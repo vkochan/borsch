@@ -5,7 +5,7 @@
 (define __cs_view_cwd_get (foreign-procedure __collect_safe "cs_view_cwd_get" (int) scheme-object))
 (define __cs_view_cwd_set (foreign-procedure "cs_view_cwd_set" (int string) int))
 
-(define view-current
+(define current-view
    (lambda ()
       (call-foreign (__cs_view_current_get))
    )
@@ -81,7 +81,7 @@
 (define view-name
    (case-lambda
       [()
-       (call-foreign (__cs_view_name_get (view-current)))]
+       (call-foreign (__cs_view_name_get (current-view)))]
 
       [(tag)
        (call-foreign (__cs_view_name_get tag))]
@@ -91,7 +91,7 @@
 (define view-set-name
    (case-lambda
       [(name)
-       (call-foreign (__cs_view_name_set (view-current) name))]
+       (call-foreign (__cs_view_name_set (current-view) name))]
 
       [(tag name)
        (call-foreign (__cs_view_name_set tag name))]
@@ -101,7 +101,7 @@
 (define view-cwd
    (case-lambda
       [()
-       (call-foreign (__cs_view_cwd_get (view-current)))]
+       (call-foreign (__cs_view_cwd_get (current-view)))]
 
       [(tag)
        (call-foreign (__cs_view_cwd_get tag))]
@@ -111,7 +111,7 @@
 (define view-set-cwd
    (case-lambda
       [(cwd)
-       (view-set-cwd (view-current) cwd)]
+       (view-set-cwd (current-view) cwd)]
 
       [(tag cwd)
        (call-foreign (__cs_view_cwd_set tag cwd))

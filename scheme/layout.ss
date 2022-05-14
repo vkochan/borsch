@@ -43,7 +43,7 @@
 (define layout-current
    (case-lambda
         [()
-         (layout->symb (call-foreign (__cs_layout_current_get (view-current))))]
+         (layout->symb (call-foreign (__cs_layout_current_get (current-view))))]
 
         [(tag)
          (layout->symb (call-foreign (__cs_layout_current_get tag)))]
@@ -65,7 +65,7 @@
 (define layout-switch
    (case-lambda
         [(l)
-         (layout-switch (view-current) l)]
+         (layout-switch (current-view) l)]
 
         [(tag l)
          (call-foreign (__cs_layout_current_set tag  l))
@@ -77,7 +77,7 @@
 (define layout-switch-tiled
    (case-lambda
         [()
-         (layout-switch-tiled (view-current))]
+         (layout-switch-tiled (current-view))]
 
         [(tag)
          (layout-switch tag (symb->layout 'tiled))]
@@ -87,7 +87,7 @@
 (define layout-switch-grid
    (case-lambda
         [()
-         (layout-switch-grid (view-current))]
+         (layout-switch-grid (current-view))]
 
         [(tag)
          (layout-switch tag (symb->layout 'grid))]
@@ -97,7 +97,7 @@
 (define layout-switch-bstack
    (case-lambda
         [()
-         (layout-switch-bstack (view-current))]
+         (layout-switch-bstack (current-view))]
 
         [(tag)
          (layout-switch tag (symb->layout 'bstack))]
@@ -107,7 +107,7 @@
 (define layout-switch-maximized
    (case-lambda
         [()
-         (layout-switch-maximized (view-current))]
+         (layout-switch-maximized (current-view))]
 
         [(tag)
          (layout-switch tag (symb->layout 'maximized))]
@@ -157,7 +157,7 @@
 (define layout-n-master
    (case-lambda
       [()
-       (call-foreign (__cs_layout_nmaster_get (view-current)))]
+       (call-foreign (__cs_layout_nmaster_get (current-view)))]
 
       [(tag)
        (call-foreign (__cs_layout_nmaster_get tag))]
@@ -167,7 +167,7 @@
 (define layout-set-n-master
    (case-lambda
       [(n)
-       (call-foreign (__cs_layout_nmaster_set (view-current) n))]
+       (call-foreign (__cs_layout_nmaster_set (current-view) n))]
 
       [(tag n)
        (call-foreign (__cs_layout_nmaster_set tag n))]
@@ -178,12 +178,12 @@
    (case-lambda
       [()
        (call-foreign (__cs_layout_nmaster_set
-          (view-current) (+ (call-foreign (__cs_layout_nmaster_get (view-current))) 1)
+          (current-view) (+ (call-foreign (__cs_layout_nmaster_get (current-view))) 1)
        ))]
 
       [(n)
        (call-foreign (__cs_layout_nmaster_set
-          (view-current) (+ (call-foreign (__cs_layout_nmaster_get (view-current))) n)
+          (current-view) (+ (call-foreign (__cs_layout_nmaster_get (current-view))) n)
        ))]
 
       [(tag n)
@@ -197,12 +197,12 @@
    (case-lambda
       [()
        (call-foreign (__cs_layout_nmaster_set
-          (view-current) (- (call-foreign (__cs_layout_nmaster_get (view-current))) 1)
+          (current-view) (- (call-foreign (__cs_layout_nmaster_get (current-view))) 1)
        ))]
 
       [(n)
        (call-foreign (__cs_layout_nmaster_set
-          (view-current) (- (call-foreign (__cs_layout_nmaster_get (view-current))) n)
+          (current-view) (- (call-foreign (__cs_layout_nmaster_get (current-view))) n)
        ))]
 
       [(tag n)
@@ -215,7 +215,7 @@
 (define layout-%-master
    (case-lambda
       [()
-       (call-foreign (__cs_layout_fmaster_get (view-current)))]
+       (call-foreign (__cs_layout_fmaster_get (current-view)))]
 
       [(tag)
        (call-foreign (__cs_layout_fmaster_get tag))]
@@ -225,7 +225,7 @@
 (define layout-set-%-master
    (case-lambda
       [(f)
-       (call-foreign (__cs_layout_fmaster_set (view-current) f))]
+       (call-foreign (__cs_layout_fmaster_set (current-view) f))]
 
       [(tag f)
        (call-foreign (__cs_layout_fmaster_set tag f))]
@@ -236,12 +236,12 @@
    (case-lambda
       [()
        (call-foreign (__cs_layout_fmaster_set
-          (view-current) (+ (call-foreign (__cs_layout_fmaster_get (view-current))) 0.05)
+          (current-view) (+ (call-foreign (__cs_layout_fmaster_get (current-view))) 0.05)
        ))]
 
       [(f)
        (call-foreign (__cs_layout_fmaster_set
-          (view-current) (+ (call-foreign (__cs_layout_fmaster_get (view-current))) f)
+          (current-view) (+ (call-foreign (__cs_layout_fmaster_get (current-view))) f)
        ))]
 
       [(tag f)
@@ -255,12 +255,12 @@
    (case-lambda
       [()
        (call-foreign (__cs_layout_fmaster_set
-          (view-current) (- (call-foreign (__cs_layout_fmaster_get (view-current))) 0.05)
+          (current-view) (- (call-foreign (__cs_layout_fmaster_get (current-view))) 0.05)
        ))]
 
       [(f)
        (call-foreign (__cs_layout_fmaster_set
-          (view-current) (- (call-foreign (__cs_layout_fmaster_get (view-current))) f)
+          (current-view) (- (call-foreign (__cs_layout_fmaster_get (current-view))) f)
        ))]
 
       [(tag f)
@@ -273,7 +273,7 @@
 (define layout-set-sticky
    (case-lambda
         [(s)
-         (call-foreign (__cs_layout_sticky_set (view-current) s))]
+         (call-foreign (__cs_layout_sticky_set (current-view) s))]
 
         [(tag s)
          (call-foreign (__cs_layout_sticky_set tag s))]
@@ -283,7 +283,7 @@
 (define layout-is-sticky?
    (case-lambda
         [()
-         (call-foreign (__cs_layout_sticky_get (view-current)))]
+         (call-foreign (__cs_layout_sticky_get (current-view)))]
 
         [(tag)
          (call-foreign (__cs_layout_sticky_get tag))]
