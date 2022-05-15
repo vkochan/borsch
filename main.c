@@ -1248,6 +1248,13 @@ cleanup(void) {
 	}
 }
 
+static void __win_buf_attach(Window *win, Buffer *buf)
+{
+	ui_window_text_style_set(win, buffer_text_style_get(buf));
+	ui_window_text_fg_set(win, buffer_text_fg_get(buf));
+	ui_window_text_bg_set(win, buffer_text_bg_get(buf));
+}
+
 static char *getcwd_by_pid(Window *c, char *buf) {
 	if (!c)
 		return NULL;
@@ -2453,6 +2460,7 @@ int win_new(int bid)
 		ui_window_priv_set(c->win, c);
 		ui_window_on_view_update_set(c->win, on_view_update_cb);
 	}
+	__win_buf_attach(c, c->buf);
 
 	ui_window_has_title_set(c->win, true);
 	ui_window_resize(c->win, waw, wah);
@@ -2815,6 +2823,8 @@ void win_buf_switch(int wid, int bid)
 			ui_window_ops_draw_set(w->win, NULL);
 			ui_window_priv_set(w->win, w);
 		}
+
+		__win_buf_attach(w, b);
 
 		view_reload(w->view, buffer_text_get(b));
 		buffer_dirty_set(b, true);
