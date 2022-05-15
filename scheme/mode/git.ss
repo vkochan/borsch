@@ -599,7 +599,7 @@
       ]
 
       [(obj num)
-       (let ([ls (git-cmd-read (format "log --no-merges -n ~a --pretty=format:\"%h  %d (%an) %s\" ~a" num obj))])
+       (let ([ls (git-cmd-read (format "log --no-merges -n ~a --pretty=format:\"%h  %d (%an <%ae>) %s\" ~a" num obj))])
           (buffer-set-readonly #f)
           (insert ls)
           (buffer-set-readonly #t)
