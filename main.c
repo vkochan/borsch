@@ -1316,7 +1316,7 @@ static void handle_vt(int fd, void *arg) {
 	}
 }
 
-int create(const char *prog, const char *title, const char *cwd) {
+int term_create(const char *prog, const char *title, const char *cwd) {
 	const char *pargs[4] = { shell, NULL };
 	char buf[8];
 	const char *env[] = {
@@ -1327,6 +1327,9 @@ int create(const char *prog, const char *title, const char *cwd) {
 	char tmp[256];
 	pid_t pid;
 	Vt *term;
+
+	if (get_popup())
+		return -1;
 
 	if (prog) {
 		pargs[1] = "-c";
@@ -3753,13 +3756,6 @@ int topbar_create(void)
 	topbar = widget_create("*topbar*", 0, 0, waw, 1);
 	update_screen_size();
 	return topbar->id;
-}
-
-int term_create(char *prog, char *title, char *cwd)
-{
-	if (!get_popup())
-		return create(prog, title, cwd);
-	return -1;
 }
 
 int term_keys_send(int bid, char *keys)

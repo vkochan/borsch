@@ -135,7 +135,7 @@ size_t buf_search_regex(int bid, size_t pos, const char *pattern, int dir);
 int minibuf_create(void);
 int topbar_create(void);
 
-int term_create(char *prog, char *title, char *cwd);
+int term_create(const char *prog, const char *title, const char *cwd);
 int term_keys_send(int bid, char *keys);
 int term_text_send(int bid, char *text);
 int term_text_get(int bid, char **buf, size_t *len);
