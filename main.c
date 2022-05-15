@@ -1248,11 +1248,11 @@ cleanup(void) {
 	}
 }
 
-static void __win_buf_attach(Window *win, Buffer *buf)
+static void __win_buf_attach(Window *w, Buffer *buf)
 {
-	ui_window_text_style_set(win, buffer_text_style_get(buf));
-	ui_window_text_fg_set(win, buffer_text_fg_get(buf));
-	ui_window_text_bg_set(win, buffer_text_bg_get(buf));
+	ui_window_text_style_set(w->win, buffer_text_style_get(buf));
+	ui_window_text_fg_set(w->win, buffer_text_fg_get(buf));
+	ui_window_text_bg_set(w->win, buffer_text_bg_get(buf));
 }
 
 static char *getcwd_by_pid(Window *c, char *buf) {
