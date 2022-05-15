@@ -1,3 +1,6 @@
+(define dirb-dir-style '(:fg "blue" :attr "bold"))
+(define dirb-file-style '(:fg "white"))
+
 (define dirb-get-entry
    (lambda (dir)
       (let (
@@ -60,12 +63,12 @@
          )
          (for-each
             (lambda (d)
-               (insert (fmt "~a/\n" d) '(style (:attr "bold")))
+               (insert (fmt "~a/\n" d) `(style ,dirb-dir-style))
             ) dl
          )
          (for-each
             (lambda (f)
-               (insert (fmt "~a\n" f))
+               (insert (fmt "~a\n" f) `(style ,dirb-file-style))
             ) fl
          )
          (move-buffer-begin)
