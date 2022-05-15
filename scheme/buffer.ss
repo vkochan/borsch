@@ -277,10 +277,14 @@
 (define buffer-create
    (case-lambda
       [() 
-       (window-buffer (window-create))]
+       (let ([b (window-buffer (window-create))])
+          (set-text-style '(:fg "white"))
+          b
+       )
+      ]
 
       [(n) 
-       (let ([b (window-buffer (window-create))])
+       (let ([b (buffer-create)])
           (buffer-set-name n)
           b
        )
@@ -309,10 +313,17 @@
 (define buffer-new
    (case-lambda
       [() 
-       (buffer-new "")]
+       (buffer-new "")
+      ]
 
       [(n) 
-       (call-foreign (__cs_buf_new n))]
+       (let ([b (call-foreign (__cs_buf_new n))])
+          (with-current-buffer b
+             (set-text-style '(:fg "white"))
+          )
+          b
+       )
+      ]
    )
 )
 
@@ -438,7 +449,7 @@
    )
 )
 
-(define set-default-text-style
+(define set-text-style
    (lambda (s . e)
       (let ([a (append (list s) e)])
          (for-each
