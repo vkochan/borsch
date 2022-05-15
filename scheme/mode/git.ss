@@ -647,6 +647,11 @@
           (with-current-buffer b
             (git-log-mode)
             (move-buffer-begin)
+            (move-each-line
+               (lambda ()
+                  (add-text-property (cursor) (word-end-pos) '(style (:fg "green")))
+               )
+            )
           )
         )
       ]
