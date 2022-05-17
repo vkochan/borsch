@@ -3719,7 +3719,7 @@ static Window *widget_create(const char *name, int x, int y, int width, int heig
 
 	w = calloc(1, sizeof(Window));
 	if (!w)
-		return -1;
+		return NULL;
 
 	/* c->tags = tagset[seltags]; */
 	w->id = ++cmdfifo.id;
@@ -3727,14 +3727,14 @@ static Window *widget_create(const char *name, int x, int y, int width, int heig
 	w->buf = __buf_new(name, NULL);
 	if (!w->buf) {
 		free(w);
-		return -1;
+		return NULL;
 	}
 
 	w->view = view_new(buffer_text_get(w->buf));
 	if (!w->view) {
 		__buf_del(w->buf);
 		free(w);
-		return -1;
+		return NULL;
 	}
 
 	w->win = ui_window_new(ui, w->view);
@@ -3742,7 +3742,7 @@ static Window *widget_create(const char *name, int x, int y, int width, int heig
 		view_free(w->view);
 		__buf_del(w->buf);
 		free(w);
-		return -1;
+		return NULL;
 	}
 
 	ui_window_on_view_update_set(w->win, on_view_update_cb);
