@@ -86,6 +86,17 @@ unsigned term_style2attr(ui_text_style_t style)
 
 static void term_sigwinch_handler(int sig) {
 	need_resize = true;
+	struct winsize ws;
+
+	if (ioctl(0, TIOCGWINSZ, &ws) == -1) {
+		getmaxyx(stdscr, scr_height, scr_width);
+	} else {
+		scr_width = ws.ws_col;
+		scr_height = ws.ws_row;
+	}
+
+	resize_term(scr_height, scr_width);
+	wrefresh(curscr);
 }
 
 static int term_height_get(Ui *ui)
@@ -247,7 +258,6 @@ static bool term_resize(Ui *ui)
 
 	if (need_resize) {
 		need_resize = false;
-		term_redraw(ui);
 	}
 
         return do_resize;
