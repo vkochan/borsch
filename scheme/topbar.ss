@@ -23,7 +23,7 @@
                                 )
                      ]
                     )
-                  (insert (format "[~a]" tag) `(style (:fg ,tag-color)))
+                  (insert (format "[~a]" (view-name tag)) `(style (:fg ,tag-color)))
                )
             )
             '(1 2 3 4 5 6 7 8 9)
@@ -42,6 +42,11 @@
       )
       (add-hook 'view-switch-hook
          (lambda (tag)
+            (topbar-draw)
+         )
+      )
+      (add-hook 'change-view-name-hook
+         (lambda ()
             (topbar-draw)
          )
       )

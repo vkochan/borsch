@@ -91,10 +91,13 @@
 (define view-set-name
    (case-lambda
       [(name)
-       (call-foreign (__cs_view_name_set (current-view) name))]
+       (view-set-name (current-view) name)
+      ]
 
       [(tag name)
-       (call-foreign (__cs_view_name_set tag name))]
+       (call-foreign (__cs_view_name_set tag name))
+       (run-hooks 'change-view-name-hook)
+      ]
    )
 )
 
