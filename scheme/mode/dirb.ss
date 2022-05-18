@@ -224,11 +224,40 @@
       (let ([count (length (dirb-list-selection))])
          (if (> count 0)
             (begin
-               (for-each
-                  (lambda (p)
-                     (system (format "cp -r ~a ~a" p (dirb-current-dir)))
+               (if (> count 1)
+                  (for-each
+                     (lambda (p)
+                        (system (format "cp -r ~a ~a" p (dirb-current-dir)))
+                     )
+                     (dirb-list-selection)
                   )
-                  (dirb-list-selection)
+                  ;; else - single file, check if copy to same dir
+                  (let ([p (first (dirb-list-selection))])
+                     (if (equal? (path-parent p) (dirb-current-dir))
+                        (begin
+                           (set-local! defval (path-last p))
+                           (minibuf-read "rename:" (path-last p)
+                              (lambda (v)
+                                 (let (
+                                       [old (string-append (dirb-current-dir) "/" (get-local defval))]
+                                       [new (string-append (dirb-current-dir) "/" v)]
+                                      )
+                                    (system (format "cp -r ~a ~a" old new))
+                                    (dirb-open-dir (dirb-current-dir))
+                                    (dirb-clear-selection)
+                                 )
+                              )
+                           )
+                        )
+                        ;; else
+                        (begin
+                           (dirb-open-dir (dirb-current-dir))
+                           (dirb-clear-selection)
+                           (system (format "cp -r ~a ~a" p (dirb-current-dir)))
+                           (message (format "~d files were copied" count))
+                        )
+                     )
+                  )
                )
                (dirb-open-dir (dirb-current-dir))
                (dirb-clear-selection)
