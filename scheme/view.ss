@@ -11,6 +11,24 @@
    )
 )
 
+(define-syntax (with-current-view stx)
+   (syntax-case stx ()
+      ((_ view exp ...)
+       #`(let (
+               [from (current-view)]
+               [to view]
+              )
+            (view-switch to)
+            (begin
+               exp
+               ...
+            )
+            (view-switch from)
+         )
+      )
+   )
+)
+
 (define view-switch
    (lambda (tag)
       (call-foreign (__cs_view_current_set tag))
