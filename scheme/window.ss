@@ -36,6 +36,18 @@
 (define __cs_win_sidebar_draw (foreign-procedure "cs_win_sidebar_draw" (int int int string int int int) scheme-object))
 (define __cs_win_update (foreign-procedure "cs_win_update" (int) void))
 
+(define window-is-visible?
+   (case-lambda
+      [()
+       (window-is-visible? (current-window))
+      ]
+
+      [(wid)
+       (call-foreign (__cs_win_is_visible wid))
+      ]
+   )
+)
+
 (define window-first
    (lambda ()
        (call-foreign (__cs_win_first_get))
@@ -49,6 +61,66 @@
 
       [(wid)
        (call-foreign (__cs_win_next_get wid))]
+   )
+)
+
+(define window-first-visible
+   (lambda ()
+      (let ([win (window-first)]
+	   )
+         (while (and win (not (window-is-visible? win)))
+            (set! win (window-next win))
+         )
+	 win
+      )
+   )
+)
+
+(define window-next-visible
+   (case-lambda
+      [()
+       (window-next-visible (current-window))
+      ]
+
+      [(wid)
+       (let ([win (window-next wid)]
+	    )
+          (while (and win (not (window-is-visible? win)))
+             (set! win (window-next win))
+          )
+	  win
+       )
+      ]
+   )
+)
+
+(define window-prev-visible
+   (case-lambda
+      [()
+       (window-prev-visible (current-window))
+      ]
+
+      [(wid)
+       (let ([win (window-prev wid)]
+	    )
+          (while (and win (not (window-is-visible? win)))
+             (set! win (window-prev win))
+          )
+	  win
+       )
+      ]
+   )
+)
+
+(define window-last-visible
+   (lambda ()
+      (let ([win (window-first-visible)]
+	   )
+         (while (window-next-visible win)
+            (set! win (window-next-visible win))
+         )
+	 win
+      )
    )
 )
 
@@ -165,13 +237,13 @@
 
 (define window-select-upper
    (lambda ()
-      (window-select (window-upper))
+      (window-select (or (window-upper) (window-prev-visible) (window-last-visible)))
    )
 )
 
 (define window-select-lower
    (lambda ()
-      (window-select (window-lower))
+      (window-select (or (window-lower) (window-next-visible) (window-first-visible)))
    )
 )
 
