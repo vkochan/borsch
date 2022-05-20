@@ -62,19 +62,6 @@
    )
 )
 
-(define window-last
-   (lambda ()
-      (let ([win (window-first)]
-	   )
-
-         (while (window-next win)
-            (set! win (window-next win))
-         )
-	 win
-      )
-   )
-)
-
 (define window-list
    (lambda ()
       (let ([win (window-first)]
@@ -178,13 +165,13 @@
 
 (define window-select-upper
    (lambda ()
-      (window-select (or (window-upper) (window-prev) (window-last)))
+      (window-select (window-upper))
    )
 )
 
 (define window-select-lower
    (lambda ()
-      (window-select (or (window-lower) (window-next) (window-first)))
+      (window-select (window-lower))
    )
 )
 
