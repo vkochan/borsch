@@ -1,5 +1,6 @@
 (define dirb-dir-style '(:fg "blue" :attr "bold"))
-(define dirb-file-style '(:fg "white"))
+(define dirb-file-executable-style '(:fg "yellow" :attr "bold"))
+(define dirb-file-regular-style '(:fg "white"))
 
 (define dirb-get-entry
    (lambda (dir)
@@ -68,7 +69,11 @@
          )
          (for-each
             (lambda (f)
-               (insert (fmt "~a\n" f) `(style ,dirb-file-style))
+               (if (= 0 (bitwise-and #o100 (get-mode (fmt "~a/~a" dir f))))
+                  (insert (fmt "~a\n" f) `(style ,dirb-file-regular-style))
+                  ;; else
+                  (insert (fmt "~a\n" f) `(style ,dirb-file-executable-style))
+               )
             ) fl
          )
          (move-buffer-begin)
