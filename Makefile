@@ -14,7 +14,9 @@ SRC += scheme.c
 SCH_SCRIPTS = main.ss
 
 LDFLAGS += -L ./text -L ./ui
-LIBS += -ltext -lui
+LIBS += -ltext -lui -ltree-sitter
+
+SRC += parser/c/parser.c
 
 CFLAGS += -I$(SCH_PATH) \
    -DPROGNAME='"${PROGNAME}"' \

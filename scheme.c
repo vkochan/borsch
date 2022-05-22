@@ -672,6 +672,33 @@ ptr scheme_buf_search_regex(int bid, size_t pos, const char *pattern, int dir)
 	return Sinteger(pos);
 }
 
+ptr scheme_buf_parser_set(int bid, const char *lang)
+{
+	int err = buf_parser_set(bid, lang);
+
+	if (err)
+		return Sfalse;
+	return Strue;
+}
+
+ptr scheme_buf_parser_parse(int bid)
+{
+	int err = buf_parser_parse(bid);
+
+	if (err)
+		return Sfalse;
+	return Strue;
+}
+
+ptr scheme_buf_syntax_style_set(int bid, int fg, int bg, int attr, const char *match)
+{
+	int ret = buf_syntax_style_set(bid, fg, bg, attr, match);
+
+	if (ret == 0)
+		return Strue;
+	return Sfalse;
+}
+
 ptr scheme_minibuf_create(void)
 {
 	int ret = minibuf_create();
@@ -960,6 +987,10 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_undo", scheme_buf_undo);
 	Sregister_symbol("cs_buf_redo", scheme_buf_redo);
 	Sregister_symbol("cs_buf_search_regex", scheme_buf_search_regex);
+
+	Sregister_symbol("cs_buf_parser_set", scheme_buf_parser_set);
+	Sregister_symbol("cs_buf_parser_parse", scheme_buf_parser_parse);
+	Sregister_symbol("cs_buf_syntax_style_set", scheme_buf_syntax_style_set);
 
 	Sregister_symbol("cs_minibuf_create", scheme_minibuf_create);
 	Sregister_symbol("cs_topbar_create", scheme_topbar_create);

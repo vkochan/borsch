@@ -16,6 +16,10 @@ typedef enum {
 	PROPERTY_TYPE_ALL		= 10000,
 } buffer_property_t;
 
+typedef enum {
+	SYNTAX_RULE_TYPE_STYLE = 1,
+} syntax_rule_type_t;
+
 Buffer *buffer_new(const char *name);
 bool buffer_del(Buffer *buf);
 int buffer_file_open(Buffer *buf, const char *file);
@@ -86,5 +90,15 @@ void buffer_undo(Buffer *buf);
 void buffer_redo(Buffer *buf);
 
 size_t buffer_search_regex(Buffer *buf, size_t pos, const char *pattern, int dir);
+
+int buffer_parser_set(Buffer *buf, const char *lang);
+int buffer_parser_parse(Buffer *buf);
+
+int buffer_parser_rule_add(Buffer *buf, syntax_rule_type_t type, const char *match, void *data);
+
+int buffer_parser_rule_remove(Buffer *buf, syntax_rule_type_t type, const char *match);
+
+void buffer_parser_rules_walk(Buffer *buf, syntax_rule_type_t type, size_t start, size_t end, void *arg,
+			      int (*cb) (Buffer *buf, int type, size_t start, size_t end, void *data, void *arg));
 
 #endif /* BUFFER_H */

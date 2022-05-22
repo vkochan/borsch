@@ -57,6 +57,10 @@
 
 (define __cs_buf_search_regex (foreign-procedure "cs_buf_search_regex" (int int string int) scheme-object))
 
+(define __cs_buf_parser_set (foreign-procedure "cs_buf_parser_set" (int string) scheme-object))
+(define __cs_buf_parser_parse (foreign-procedure "cs_buf_parser_parse" (int) scheme-object))
+(define __cs_buf_syntax_style_set (foreign-procedure "cs_buf_syntax_style_set" (int int int int string) scheme-object))
+
 (define file-ext-mode (list))
 
 (define mode-gen-map-symb
@@ -1694,3 +1698,22 @@
       )
    )
 )
+
+(define syntax-set-lang
+   (lambda (lang)
+      (call-foreign (__cs_buf_parser_set (current-buffer) lang))
+   )
+)
+
+(define syntax-set-style
+   (lambda (s a)
+      (let ([l (style->list a)])
+         (call-foreign (__cs_buf_syntax_style_set (current-buffer)
+                                  (list-ref l 0)
+                                  (list-ref l 1)
+                                  (list-ref l 2)
+                                  s))
+      )
+   )
+)
+

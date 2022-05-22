@@ -2383,6 +2383,8 @@ static void on_view_update_cb(UiWin *win)
 	char *eof_sym = "~";
 	size_t eof_len = strlen(eof_sym);
 
+	buffer_parser_rules_walk(w->buf, SYNTAX_RULE_TYPE_STYLE,
+			v.start, v.end, w->view, style_prop_draw);
 	buffer_properties_walk(w->buf, PROPERTY_TYPE_TEXT_STYLE,
 			v.start, v.end, w->view, style_prop_draw);
 	buffer_properties_walk(w->buf, PROPERTY_TYPE_TEXT_HIGHLIGHT,
@@ -3711,6 +3713,61 @@ size_t buf_search_regex(int bid, size_t pos, const char *pattern, int dir)
 	}
 
 	return EPOS;
+}
+
+int buf_parser_set(int bid, const char *lang)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		return buffer_parser_set(buf, lang);
+	}
+
+	return -1;
+}
+
+int buf_parser_parse(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		return buffer_parser_parse(buf);
+	}
+
+	return -1;
+}
+
+int buf_syntax_style_set(int bid, int fg, int bg, int attr, const char *rule)
+{
+	Buffer *buf = buffer_by_id(bid);
+	StyleProperty *style;
+	int err;
+
+	if (!buf)
+		return -1;
+
+	style = calloc(1, sizeof(StyleProperty));
+	if (!style)
+		return -1;
+
+	style->attr = attr;
+	style->fg = fg;
+	style->bg = bg;
+
+	err = buffer_parser_rule_remove(buf, SYNTAX_RULE_TYPE_STYLE, rule);
+	if (err) {
+		free(style);
+		return err;
+	}
+
+	err = buffer_parser_rule_add(buf, SYNTAX_RULE_TYPE_STYLE, rule, style);
+	if (err) {
+		free(style);
+		return err;
+	}
+
+	buffer_dirty_set(buf, true);
+	return 0;
 }
 
 static Window *widget_create(const char *name, int x, int y, int width, int height)
