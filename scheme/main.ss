@@ -11,6 +11,7 @@
 (load "minibuf.ss")
 (load "process.ss")
 (load "timer.ss")
+(load "syntax.ss")
 (load "mode/text.ss")
 (load "mode/git.ss")
 (load "mode/grep.ss")

@@ -681,22 +681,23 @@ ptr scheme_buf_parser_set(int bid, const char *lang)
 	return Strue;
 }
 
-ptr scheme_buf_parser_parse(int bid)
+ptr scheme_stx_lang_style_add(const char *lang, int fg, int bg, int attr, const char *match)
 {
-	int err = buf_parser_parse(bid);
-
-	if (err)
-		return Sfalse;
-	return Strue;
-}
-
-ptr scheme_buf_syntax_style_set(int bid, int fg, int bg, int attr, const char *match)
-{
-	int ret = buf_syntax_style_set(bid, fg, bg, attr, match);
+	int ret = stx_lang_style_add(lang, fg, bg, attr, match);
 
 	if (ret == 0)
 		return Strue;
 	return Sfalse;
+}
+
+void scheme_stx_lang_style_del(const char *lang, const char *match)
+{
+	stx_lang_style_del(lang, match);
+}
+
+void scheme_stx_lang_style_clear(const char *lang)
+{
+	stx_lang_style_clear(lang);
 }
 
 ptr scheme_minibuf_create(void)
@@ -989,8 +990,9 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_search_regex", scheme_buf_search_regex);
 
 	Sregister_symbol("cs_buf_parser_set", scheme_buf_parser_set);
-	Sregister_symbol("cs_buf_parser_parse", scheme_buf_parser_parse);
-	Sregister_symbol("cs_buf_syntax_style_set", scheme_buf_syntax_style_set);
+	Sregister_symbol("cs_stx_lang_style_add", scheme_stx_lang_style_add);
+	Sregister_symbol("cs_stx_lang_style_del", scheme_stx_lang_style_del);
+	Sregister_symbol("cs_stx_lang_style_clear", scheme_stx_lang_style_clear);
 
 	Sregister_symbol("cs_minibuf_create", scheme_minibuf_create);
 	Sregister_symbol("cs_topbar_create", scheme_topbar_create);

@@ -41,6 +41,7 @@
 #include "buffer.h"
 #include "keymap.h"
 #include "view.h"
+#include "syntax.h"
 #include "text/text-motions.h"
 #include "text/text-objects.h"
 #if defined __CYGWIN__ || defined __sun
@@ -1094,6 +1095,8 @@ setup(void) {
 
 	mouse_setup();
 
+	syntax_init();
+
 	vt_init();
 	vt_keytable_set(keytable, LENGTH(keytable));
 	for (unsigned int i = 0; i < LENGTH(colors); i++) {
@@ -1233,6 +1236,7 @@ cleanup(void) {
 	keymap_free(win_min_kmap);
 	keymap_free(global_kmap);
 	vt_shutdown();
+	syntax_cleanup();
 	ui_free(ui);
 	if (cmdfifo.fd > 0)
 		close(cmdfifo.fd);
@@ -2376,6 +2380,22 @@ static int style_prop_draw(Buffer *buf, int id, size_t start, size_t end, void *
 	return 0;
 }
 
+static int style_syntax_draw(SyntaxParser *parser, int id, size_t start, size_t end, void *data,
+		void *arg)
+{
+	StyleProperty *prop = data;
+	View *view = arg;
+	CellStyle style = {
+		.attr = prop->attr,
+		.fg = prop->fg,
+		.bg = prop->bg,
+	};
+
+	view_style(view, style, start, end);
+
+	return 0;
+}
+
 static void on_view_update_cb(UiWin *win)
 {
 	Window *w = ui_window_priv_get(win);
@@ -2383,8 +2403,8 @@ static void on_view_update_cb(UiWin *win)
 	char *eof_sym = "~";
 	size_t eof_len = strlen(eof_sym);
 
-	buffer_parser_rules_walk(w->buf, SYNTAX_RULE_TYPE_STYLE,
-			v.start, v.end, w->view, style_prop_draw);
+	buffer_syntax_rules_walk(w->buf, SYNTAX_RULE_TYPE_STYLE,
+			v.start, v.end, w->view, style_syntax_draw);
 	buffer_properties_walk(w->buf, PROPERTY_TYPE_TEXT_STYLE,
 			v.start, v.end, w->view, style_prop_draw);
 	buffer_properties_walk(w->buf, PROPERTY_TYPE_TEXT_HIGHLIGHT,
@@ -3726,25 +3746,10 @@ int buf_parser_set(int bid, const char *lang)
 	return -1;
 }
 
-int buf_parser_parse(int bid)
+int stx_lang_style_add(const char *lang, int fg, int bg, int attr, const char *rule)
 {
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf) {
-		return buffer_parser_parse(buf);
-	}
-
-	return -1;
-}
-
-int buf_syntax_style_set(int bid, int fg, int bg, int attr, const char *rule)
-{
-	Buffer *buf = buffer_by_id(bid);
 	StyleProperty *style;
 	int err;
-
-	if (!buf)
-		return -1;
 
 	style = calloc(1, sizeof(StyleProperty));
 	if (!style)
@@ -3754,20 +3759,23 @@ int buf_syntax_style_set(int bid, int fg, int bg, int attr, const char *rule)
 	style->fg = fg;
 	style->bg = bg;
 
-	err = buffer_parser_rule_remove(buf, SYNTAX_RULE_TYPE_STYLE, rule);
+	err = syntax_lang_rule_add(lang, SYNTAX_RULE_TYPE_STYLE, rule, style);
 	if (err) {
 		free(style);
 		return err;
 	}
 
-	err = buffer_parser_rule_add(buf, SYNTAX_RULE_TYPE_STYLE, rule, style);
-	if (err) {
-		free(style);
-		return err;
-	}
-
-	buffer_dirty_set(buf, true);
 	return 0;
+}
+
+void stx_lang_style_del(const char *lang, const char *rule)
+{
+	syntax_lang_rule_remove(lang, SYNTAX_RULE_TYPE_STYLE, rule);
+}
+
+void stx_lang_style_clear(const char *lang)
+{
+	syntax_lang_rules_clear(lang, SYNTAX_RULE_TYPE_STYLE);
 }
 
 static Window *widget_create(const char *name, int x, int y, int width, int height)

@@ -4,6 +4,7 @@
 #include <text/text.h>
 #include <ui/style.h>
 
+typedef struct SyntaxParser SyntaxParser;
 typedef struct Buffer Buffer;
 typedef struct KeyMap KeyMap;
 typedef struct Vt Vt;
@@ -98,7 +99,7 @@ int buffer_parser_rule_add(Buffer *buf, syntax_rule_type_t type, const char *mat
 
 int buffer_parser_rule_remove(Buffer *buf, syntax_rule_type_t type, const char *match);
 
-void buffer_parser_rules_walk(Buffer *buf, syntax_rule_type_t type, size_t start, size_t end, void *arg,
-			      int (*cb) (Buffer *buf, int type, size_t start, size_t end, void *data, void *arg));
+void buffer_syntax_rules_walk(Buffer *buf, syntax_rule_type_t type, size_t start, size_t end, void *arg,
+			      int (*cb) (SyntaxParser *parser, int type, size_t start, size_t end, void *data, void *arg));
 
 #endif /* BUFFER_H */

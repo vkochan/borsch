@@ -7,17 +7,14 @@
 #include <signal.h>
 #include <sys/param.h>
 
-#include <tree_sitter/api.h>
-
 #include "vt.h"
 #include "view.h"
 #include "keymap.h"
 #include "buffer.h"
+#include "syntax.h"
 #include "text/text.h"
 #include "text/text-regex.h"
 #include "text/text-motions.h"
-
-TSLanguage *tree_sitter_c();
 
 typedef struct Buffer Buffer;
 
@@ -34,13 +31,6 @@ typedef struct TextProperty {
 typedef struct {
 	char *path;
 } File;
-
-typedef struct {
-	syntax_rule_type_t type;
-	const char *match;
-	TSQuery *query;
-	void *data;
-} SyntaxRule;
 
 typedef struct Buffer {
 	int buf_id;
@@ -69,15 +59,8 @@ typedef struct Buffer {
 	TextProperty *min_prop;
 	TextProperty *max_prop;
 	TextProperty props;
+	SyntaxParser *parser;
 	void *env;
-	/* Syntax parser */
-	TSQueryCursor *syntax_cursor;
-	uint32_t parser_n_changes;
-	TSRange *parser_changes;
-	TSTree *parser_tree;
-	TSParser *parser;
-	SyntaxRule *syntax_rules;
-	int n_syntax_rules;
 } Buffer;
 
 static Buffer buf_list;
@@ -85,8 +68,7 @@ static int buf_count;
 
 void buffer_cursor_set(Buffer *buf, size_t pos);
 
-static const char *buffer_parser_read(void *payload, uint32_t byte_index, TSPoint position,
-				      uint32_t *bytes_read)
+static const char *buffer_parser_read(void *payload, uint32_t byte_index, uint32_t *bytes_read)
 {
 	Buffer *buf = payload;
 	const Text *txt = buf->text;
@@ -101,50 +83,6 @@ static const char *buffer_parser_read(void *payload, uint32_t byte_index, TSPoin
 
 	*bytes_read = it.end - it.text;
 	return it.text;
-}
-
-static void buffer_parser_delete(Buffer *buf)
-{
-	ts_tree_delete(buf->parser_tree);
-	ts_parser_delete(buf->parser);
-	free(buf->parser_changes);
-}
-
-int buffer_parser_parse(Buffer *buf)
-{
-	TSInput input = {
-		.encoding = TSInputEncodingUTF8,
-		.read = buffer_parser_read,
-		.payload = buf,
-	};
-	/* TODO: add support of tree edit */
-	/* TSTree *old_tree = buf->parser_tree; */
-	TSTree *old_tree = NULL;
-	TSRange *new_changes = NULL;
-	uint32_t n_changes;
-	TSTree *new_tree;
-
-	new_tree = ts_parser_parse(buf->parser, old_tree, input);
-	if (!new_tree)
-		return -1;
-
-	if (old_tree)
-		new_changes = ts_tree_get_changed_ranges(old_tree, new_tree, &n_changes);
-
-	free(buf->parser_changes);
-	ts_tree_delete(old_tree);
-
-	buf->parser_n_changes = n_changes;
-	buf->parser_changes = new_changes;
-	buf->parser_tree = new_tree;
-
-	return 0;
-}
-
-static void buffer_parser_edit(Buffer *buf, size_t pos, size_t len)
-{
-	/* TODO: implement editing */
-	buffer_parser_parse(buf);
 }
 
 static int buffer_id_gen(void)
@@ -198,15 +136,6 @@ Buffer *buffer_new(const char *name)
 		return NULL;
 	}
 
-#if 0
-	buf->parser = ts_parser_new();
-	if (!buf->parser) {
-		keymap_free(buf->keymap);
-		free(buf);
-		return NULL;
-	}
-#endif
-
 	buf->text = text_load(NULL);
 	if (!buf->text) {
 		keymap_free(buf->keymap);
@@ -245,13 +174,7 @@ bool buffer_del(Buffer *buf)
 			vt_destroy(buf->term);
 		buffer_list_del(buf);
 		/* TODO: check if buffer is not saved and ask user to save it */
-		if (buf->syntax_cursor)
-			ts_query_cursor_delete(buf->syntax_cursor);
-		for (int i = 0; i < buf->n_syntax_rules; i++) {
-			free(buf->syntax_rules[i].data);
-		}
-		free(buf->syntax_rules);
-		buffer_parser_delete(buf);
+		syntax_parser_delete(buf->parser);
 		keymap_free(buf->keymap);
 		text_free(buf->text);
 		free(buf->file.path);
@@ -473,7 +396,7 @@ static void buffer_text_changed(Buffer *buf, size_t pos, int len)
 {
 	buffer_properties_pos_update(buf, pos, len);
 	if (buf->parser)
-		buffer_parser_edit(buf, pos, len);
+		syntax_parser_edit(buf->parser, pos, len);
 }
 
 size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text)
@@ -923,136 +846,25 @@ size_t buffer_search_regex(Buffer *buf, size_t pos, const char *pattern, int dir
 
 int buffer_parser_set(Buffer *buf, const char *lang)
 {
-	bool is_set = false;
-	TSParser *parser;
-
 	if (!lang || !strlen(lang)) {
-		buffer_parser_delete(buf);
+		syntax_parser_delete(buf->parser);
+		buf->parser = NULL;
 		return 0;
 	}
 
-	parser = ts_parser_new();
-	if (!parser)
-		return -1;
-
-	if (strcmp("C", lang) == 0) {
-		is_set = ts_parser_set_language(parser, tree_sitter_c());
-	}
-
-	if (is_set) {
-		buf->syntax_cursor = ts_query_cursor_new();
-		if (!buf->syntax_cursor)
-			return -1;
-
-		buf->parser = parser;
-		return buffer_parser_parse(buf);
-	}
-
-	ts_parser_delete(parser);
-	return -1;
-}
-
-int buffer_parser_rule_add(Buffer *buf, syntax_rule_type_t type, const char *match, void *data)
-{
-	TSQueryError error_type;
-	uint32_t error_offset;
-	SyntaxRule *rule;
-	TSQuery *query;
-
-	query = ts_query_new(ts_parser_language(buf->parser), match, strlen(match),
-  			     &error_offset, &error_type);
-	if (!query) {
-		char *errmsg = "unknown";
-
-		switch (error_type) {
-		case TSQueryErrorSyntax: errmsg = "syntax"; break;
-		case TSQueryErrorNodeType: errmsg = "node type"; break;
-		case TSQueryErrorField: errmsg = "field"; break;
-		case TSQueryErrorCapture: errmsg = "capture"; break;
-		case TSQueryErrorStructure: errmsg = "structure"; break;
-		case TSQueryErrorLanguage: errmsg = "language"; break;
-		}
-
-		fprintf(stderr, "Invalid syntax query [%s]: (%s)\n", match, errmsg);
-		return -2;
-	}
-
-	buf->n_syntax_rules++;
-	buf->syntax_rules = realloc(buf->syntax_rules, sizeof(*rule) * buf->n_syntax_rules);
-	if (!buf->syntax_rules) {
-		ts_query_delete(query);
-		return -1;
-	}
-
-	rule = &buf->syntax_rules[buf->n_syntax_rules-1];
-	memset(rule, 0, sizeof(*rule));
-	rule->match = match;
-	rule->query = query;
-	rule->type = type;
-	rule->data = data;
-
-	return 0;
-}
-
-int buffer_parser_rule_remove(Buffer *buf, syntax_rule_type_t type, const char *match)
-{
-	SyntaxRule *rule;
-	int i;
-
-	for (i = 0; i < buf->n_syntax_rules; i++) {
-		rule = &buf->syntax_rules[i];
-
-		if (rule->type == type && strcmp(rule->match, match) == 0) {
-			ts_query_delete(rule->query);
-			/* TODO: pass a data destructor */
-			free(rule->data);
-			*rule = buf->syntax_rules[buf->n_syntax_rules-1];
-			buf->n_syntax_rules--;
-			buf->syntax_rules = realloc(buf->syntax_rules, sizeof(*rule) * buf->n_syntax_rules);
-			if (!buf->syntax_rules)
-				return -1;
-			return 0;
-		}
-	}
-
-	return 0;
-}
-
-void buffer_parser_rules_walk(Buffer *buf, syntax_rule_type_t type, size_t start, size_t end, void *arg,
-			      int (*cb) (Buffer *buf, int type, size_t start, size_t end, void *data, void *arg))
-{
-	TSQueryCursor *syntax_cursor;;
-	TSNode root_node;
-	int i;
-
+	buf->parser = syntax_parser_new(lang);
 	if (!buf->parser)
-		return;
+		return -1;
 
-	root_node = ts_tree_root_node(buf->parser_tree);
-	syntax_cursor = buf->syntax_cursor;
+	syntax_parser_input_set(buf->parser, buf, buffer_parser_read);
 
-	ts_query_cursor_set_byte_range(syntax_cursor, start, end);
+	return syntax_parser_parse(buf->parser);
+}
 
-	for (i = 0; i < buf->n_syntax_rules; i++) {
-		SyntaxRule *rule = &buf->syntax_rules[i];
-
-		if (rule->type == type) {
-			TSQueryMatch match;
-
-			ts_query_cursor_exec(syntax_cursor, rule->query, root_node);
-
-			while (ts_query_cursor_next_match(syntax_cursor, &match)) {
-				int cap_count = match.capture_count;
-				int c;
-
-				for (c = 0; c < cap_count; c++) {
-					const TSQueryCapture *cap = &match.captures[c];
-					uint32_t node_start = ts_node_start_byte(cap->node);
-					uint32_t node_end = ts_node_end_byte(cap->node);
-
-					cb(buf, type, node_start, node_end, rule->data, arg);
-				}
-			}
-		}
+void buffer_syntax_rules_walk(Buffer *buf, syntax_rule_type_t type, size_t start, size_t end, void *arg,
+			      int (*cb) (SyntaxParser *parser, int type, size_t start, size_t end, void *data, void *arg))
+{
+	if (buf->parser) {
+		syntax_parser_rules_walk(buf->parser, type, start, end, arg, cb);
 	}
 }
