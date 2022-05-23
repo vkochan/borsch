@@ -352,7 +352,7 @@
                (copybuf-copy "")
                (for-each
                   (lambda (p)
-                     (copybuf-append (format "~a\n" p))
+                     (copybuf-append (format (if (= count 1) "~a" "~a\n") p))
                   )
                   (dirb-list-selection)
                )
