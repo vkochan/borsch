@@ -815,6 +815,7 @@ void buffer_undo(Buffer *buf)
 
 	text_undo(buf->text);
 	buf->is_dirty = true;
+	buffer_text_changed(buf, 0, text_size(buf->text));
 }
 
 void buffer_redo(Buffer *buf)
@@ -824,6 +825,7 @@ void buffer_redo(Buffer *buf)
 
 	text_redo(buf->text);
 	buf->is_dirty = true;
+	buffer_text_changed(buf, 0, text_size(buf->text));
 }
 
 size_t buffer_search_regex(Buffer *buf, size_t pos, const char *pattern, int dir)
