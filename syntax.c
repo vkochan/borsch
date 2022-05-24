@@ -289,7 +289,7 @@ void syntax_parser_rules_walk(
 					uint32_t node_start = ts_node_start_byte(cap->node);
 					uint32_t node_end = ts_node_end_byte(cap->node);
 
-					cb(parser, type, node_start, node_end, rule->data, arg);
+					cb(parser, type, node_start, node_end-1, rule->data, arg);
 				}
 			}
 		}
