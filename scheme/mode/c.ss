@@ -92,8 +92,13 @@
     \"->\"
     \"=\"
     \"!=\"
+    \"|=\"
+    \"&=\"
     \"*\"
     \"&\"
+    \"~\"
+    \"|\"
+    \"!\"
     \"&&\"
     \"+\"
     \"++\"
@@ -123,7 +128,7 @@
 (define c-syntax-type-style      '(:fg "green"))
 (define c-syntax-string-style    '(:fg "bright-yellow"))
 (define c-syntax-func-style      '(:fg "cyan"))
-(define c-syntax-operator-style  '(:fg "red" :bg "bold"))
+(define c-syntax-operator-style  '(:fg "yellow" :bg "bold"))
 (define c-syntax-delimiter-style '(:fg "green"))
 (define c-syntax-comment-style   '(:fg "bright-black"))
 (define c-syntax-variable-style  '(:fg "cyan"))
