@@ -1,4 +1,4 @@
-(define-mode dts-mode "DTS" text-mode
+(define-mode dts-mode "Device-tree" text-mode
    (syntax-set-lang 'dts)
 )
 
