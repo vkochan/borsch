@@ -14,6 +14,14 @@
    )
 )
 
+(define-syntax (while stx)
+  (syntax-case stx ()
+	       ((_ condition expression ...)
+		#`(do ()
+		    ((not condition))
+		    expression
+		    ...))))
+
 (define do-quit
    (lambda ()
       (run-hooks 'exit-hook)
@@ -221,6 +229,54 @@
    )
 )
 
+(define string-trim-left
+   (case-lambda
+      [(s)
+       (string-trim-left s '(#\space))
+      ]
+
+      [(s t)
+       (let ([n (string-length s)]
+             [i 0]
+            )
+          (while (and (< i n) (member (string-ref s i) t))
+             (set! i (1+ i))
+          )
+          (substring s i n)
+       )
+      ]
+   )
+)
+
+(define string-trim-right
+   (case-lambda
+      [(s)
+       (string-trim-right s '(#\space))
+      ]
+
+      [(s t)
+       (let ([n (1- (string-length s))])
+          (while (and (>= n 0) (member (string-ref s n) t))
+             (set! n (1- n))
+          )
+          (substring s 0 (1+ n))
+       )
+      ]
+   )
+)
+
+(define string-trim
+   (case-lambda
+      [(s)
+       (string-trim s '(#\space))
+      ]
+
+      [(s t)
+       (string-trim-left (string-trim-right s t) t)
+      ]
+   )
+)
+
 (define % modulo)
 
 (define fmt format)
@@ -289,14 +345,6 @@
 )
 
 (define sym->str symbol->string)
-
-(define-syntax (while stx)
-  (syntax-case stx ()
-	       ((_ condition expression ...)
-		#`(do ()
-		    ((not condition))
-		    expression
-		    ...))))
 
 (define err->str
    (lambda (e)
