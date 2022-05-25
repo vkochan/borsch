@@ -19,6 +19,7 @@
 (load "mode/dirb.ss")
 (load "mode/scheme.ss")
 (load "mode/c.ss")
+(load "mode/dts.ss")
 
 (define open-repl
    (lambda ()

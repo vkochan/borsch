@@ -34,9 +34,11 @@ typedef struct SyntaxParser
 } SyntaxParser;
 
 TSLanguage *tree_sitter_c();
+TSLanguage *tree_sitter_devicetree();
 
 static SyntaxLang langs[] = {
 	{ "c", tree_sitter_c, },
+	{ "dts", tree_sitter_devicetree, },
 	{ NULL, NULL, NULL, 0 }
 };
 
