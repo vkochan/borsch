@@ -949,6 +949,17 @@
    )
 )
 
+(define extract-object
+   (case-lambda
+      [()
+       (extract-object (cursor))]
+
+      [(s)
+       (string-trim (extract-longword s)
+                    '(#\space #\< #\> #\( #\) #\[ #\] #\" #\'))]
+   )
+)
+
 (define extract-line
    (case-lambda
       [()

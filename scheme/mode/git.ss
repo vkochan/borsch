@@ -611,7 +611,7 @@
 (define git-show-commit
    (lambda ()
       (move-line-begin)
-      (let ([id (extract-word)])
+      (let ([id (extract-object)])
          (let ([b (buffer-create)])
             (text-mode)
             (buffer-set-name (format "commit: ~a" id))
