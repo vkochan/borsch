@@ -244,7 +244,7 @@
    (lambda (status file)
       (let ([b (buffer-create file)])
          (with-current-buffer b
-            (text-mode)
+            (diff-mode)
             (buffer-set-mode-name "Diff")
             (insert
                (git-cmd-read
@@ -613,7 +613,7 @@
       (move-line-begin)
       (let ([id (extract-object)])
          (let ([b (buffer-create)])
-            (text-mode)
+            (diff-mode)
             (buffer-set-name (format "commit: ~a" id))
             (insert (git-cmd-read (format "show ~a" id)))
             (buffer-set-readonly #t)
