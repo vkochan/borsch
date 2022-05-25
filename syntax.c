@@ -35,10 +35,12 @@ typedef struct SyntaxParser
 
 TSLanguage *tree_sitter_c();
 TSLanguage *tree_sitter_devicetree();
+TSLanguage *tree_sitter_diff();
 
 static SyntaxLang langs[] = {
 	{ "c", tree_sitter_c, },
 	{ "dts", tree_sitter_devicetree, },
+	{ "diff", tree_sitter_diff, },
 	{ NULL, NULL, NULL, 0 }
 };
 
@@ -231,8 +233,9 @@ int syntax_parser_parse(SyntaxParser *parser)
 	/* old_tree = parser->tree; */
 
 	new_tree = ts_parser_parse(parser->ts_parser, old_tree, input);
-	if (!new_tree)
+	if (!new_tree) {
 		return -1;
+	}
 
 	if (old_tree)
 		new_changes = ts_tree_get_changed_ranges(old_tree, new_tree, &n_changes);

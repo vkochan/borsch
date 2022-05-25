@@ -16,7 +16,9 @@ SCH_SCRIPTS = main.ss
 LDFLAGS += -L ./text -L ./ui
 LIBS += -ltext -lui -ltree-sitter
 
-SRC += parser/c/parser.c parser/devicetree/parser.c
+SRC += parser/c/parser.c \
+       parser/devicetree/parser.c \
+       parser/diff/parser.c
 
 CFLAGS += -I$(SCH_PATH) \
    -DPROGNAME='"${PROGNAME}"' \
