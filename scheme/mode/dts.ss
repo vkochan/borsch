@@ -1,6 +1,4 @@
 (define-mode dts-mode "DTS" text-mode
-   (bind-key-local "C-c C-c" c-mode-compile-buffer)
-   (bind-key-local "C-c C-r" c-mode-compile-and-run-buffer)
    (syntax-set-lang 'dts)
 )
 
