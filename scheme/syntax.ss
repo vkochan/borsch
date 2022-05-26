@@ -29,6 +29,13 @@
    )
 )
 
+(define syntax-set-style
+   (lambda (lang qry style)
+      (syntax-delete-style lang qry)
+      (syntax-add-style lang qry style)
+   )
+)
+
 (define syntax-delete-all-styles
    (lambda (lang)
       (call-foreign

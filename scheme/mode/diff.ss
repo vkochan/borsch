@@ -15,7 +15,7 @@
 (define diff-syntax-context-style '(:fg "cyan"))
 (define diff-syntax-location-style '(:fg "magenta"))
 
-(syntax-add-style 'diff diff-syntax-addition-match diff-syntax-addition-style)
-(syntax-add-style 'diff diff-syntax-deletion-match diff-syntax-deletion-style)
-(syntax-add-style 'diff diff-syntax-context-match diff-syntax-context-style)
-(syntax-add-style 'diff diff-syntax-location-match diff-syntax-location-style)
+(syntax-set-style 'diff diff-syntax-addition-match diff-syntax-addition-style)
+(syntax-set-style 'diff diff-syntax-deletion-match diff-syntax-deletion-style)
+(syntax-set-style 'diff diff-syntax-context-match diff-syntax-context-style)
+(syntax-set-style 'diff diff-syntax-location-match diff-syntax-location-style)
