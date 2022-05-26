@@ -13,7 +13,7 @@
 (define diff-syntax-addition-style '(:fg "green"))
 (define diff-syntax-deletion-style '(:fg "red"))
 (define diff-syntax-context-style '(:fg "cyan"))
-(define diff-syntax-location-style '(:fg "magenta"))
+(define diff-syntax-location-style '(:fg "blue"))
 
 (syntax-set-style 'diff diff-syntax-addition-match diff-syntax-addition-style)
 (syntax-set-style 'diff diff-syntax-deletion-match diff-syntax-deletion-style)
