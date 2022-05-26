@@ -18,7 +18,8 @@ LIBS += -ltext -lui -ltree-sitter
 
 SRC += parser/c/parser.c \
        parser/devicetree/parser.c \
-       parser/diff/parser.c
+       parser/diff/parser.c \
+       parser/scheme/parser.c
 
 CFLAGS += -I$(SCH_PATH) \
    -DPROGNAME='"${PROGNAME}"' \

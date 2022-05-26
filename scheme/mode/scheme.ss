@@ -26,4 +26,49 @@
 
 (define-mode scheme-mode "Scheme" text-mode
    (bind-key-local "C-c C-c" scheme-mode-eval-buffer)
+   (syntax-set-lang 'scheme)
 )
+
+(add-to-list 'file-ext-mode '("scm" . scheme-mode))
+(add-to-list 'file-ext-mode '("ss" . scheme-mode))
+
+(define scheme-syntax-function-match "(list . (symbol) @function)")
+(define scheme-syntax-number-match "(number) @number")
+(define scheme-syntax-char-match   "(character) @character")
+(define scheme-syntax-constant-builtin-match "(boolean) @constant.builtin")
+(define scheme-syntax-symbol-match "(abbreviation  \"'\" (symbol)) @constant")
+(define scheme-syntax-string-match "[(string) (character)] @string")
+(define scheme-syntax-comment-match "[(comment) (block_comment) (directive)] @comment")
+(define scheme-syntax-bracket-match "[\"(\" \")\" \"[\" \"]\" \"{\" \"}\"] @punctuation.bracket")
+(define scheme-syntax-keyword-match
+   "(list
+     .
+     (symbol) @keyword
+     (#match? @keyword
+      \"^((define)|(let)|(let\\*)|(lambda)|(if)|(cond)|(case)|(else)|(and)|(or)|(not)|(set!)|(begin)|(when))$\"))"
+)
+(define scheme-syntax-operator-match
+   "(list
+     .
+     (symbol) @operator
+     (#match? @operator \"^([+*/<>=-]|(<=)|(>=))$\"))"
+)
+
+(define scheme-syntax-keyword-style             '(:fg "green"))
+(define scheme-syntax-string-style              '(:fg "bright-yellow"))
+(define scheme-syntax-function-style            '(:fg "cyan"))
+(define scheme-syntax-operator-style            '(:fg "yellow" :bg "bold"))
+(define scheme-syntax-bracket-style             '(:fg "yellow" :bg "bold"))
+(define scheme-syntax-comment-style             '(:fg "bright-black"))
+(define scheme-syntax-number-style              '(:fg "blue"))
+(define scheme-syntax-symbol-style              '(:fg "cyan"))
+(define scheme-syntax-constant-builtin-style    '(:fg "blue"))
+
+(syntax-add-style 'scheme scheme-syntax-string-match scheme-syntax-string-style)
+(syntax-add-style 'scheme scheme-syntax-function-match scheme-syntax-function-style)
+(syntax-add-style 'scheme scheme-syntax-keyword-match scheme-syntax-keyword-style)
+(syntax-add-style 'scheme scheme-syntax-comment-match scheme-syntax-comment-style)
+(syntax-add-style 'scheme scheme-syntax-number-match scheme-syntax-number-style)
+(syntax-add-style 'scheme scheme-syntax-symbol-match scheme-syntax-symbol-style)
+(syntax-add-style 'scheme scheme-syntax-constant-builtin-match scheme-syntax-constant-builtin-style)
+(syntax-add-style 'scheme scheme-syntax-bracket-match scheme-syntax-bracket-style)
