@@ -1,3 +1,4 @@
+(load "pregexp.scm")
 (load "common.ss")
 (load "style.ss")
 (load "keymap.ss")
