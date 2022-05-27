@@ -2,6 +2,8 @@
 (define dirb-file-executable-style '(:fg "yellow" :attr "bold"))
 (define dirb-file-regular-style '(:fg "white"))
 
+(define dirb-selection-list (list))
+
 (define dirb-get-entry
    (lambda (dir)
       (let (
@@ -171,13 +173,13 @@
 
 (define dirb-get-selection
    (lambda ()
-      (get-local selected)
+      dirb-selection-list
    )
 )
 
 (define dirb-set-selection
    (lambda (v)
-      (set-local! selected v)
+      (set! dirb-selection-list v)
    )
 )
 
@@ -485,7 +487,6 @@
    (define-local current-dir (view-cwd))
    (define-local show-hidden #f)
    (define-local prev-cursor (make-stack))
-   (define-local selected (list))
    (define-local window-draw-hook dirb-draw-selection)
    (define-local defval #f)
    (define-local buffer-reload-func dirb-reload)
