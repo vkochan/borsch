@@ -22,6 +22,7 @@
 (load "mode/c.ss")
 (load "mode/dts.ss")
 (load "mode/diff.ss")
+(load "mode/gnumake.ss")
 
 (define open-repl
    (lambda ()

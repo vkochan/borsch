@@ -37,12 +37,14 @@ TSLanguage *tree_sitter_c();
 TSLanguage *tree_sitter_devicetree();
 TSLanguage *tree_sitter_diff();
 TSLanguage *tree_sitter_scheme();
+TSLanguage *tree_sitter_make();
 
 static SyntaxLang langs[] = {
 	{ "c", tree_sitter_c, },
 	{ "dts", tree_sitter_devicetree, },
 	{ "diff", tree_sitter_diff, },
 	{ "scheme", tree_sitter_scheme, },
+	{ "gnumake", tree_sitter_make, },
 	{ NULL, NULL, NULL, 0 }
 };
 
