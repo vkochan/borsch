@@ -29,8 +29,8 @@
    (syntax-set-lang 'scheme)
 )
 
-(add-to-list 'file-ext-mode '("scm" . scheme-mode))
-(add-to-list 'file-ext-mode '("ss" . scheme-mode))
+(add-to-list 'file-match-mode '(".*\\.scm" . scheme-mode))
+(add-to-list 'file-match-mode '(".*\\.ss" . scheme-mode))
 
 (define scheme-syntax-function-match "(list . (symbol) @function)")
 (define scheme-syntax-number-match "(number) @number")

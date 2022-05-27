@@ -57,7 +57,7 @@
 
 (define __cs_buf_search_regex (foreign-procedure "cs_buf_search_regex" (int int string int) scheme-object))
 
-(define file-ext-mode (list))
+(define file-match-mode (list))
 
 (define mode-gen-map-symb
    (lambda (m)
@@ -348,14 +348,14 @@
       (let ([ok (call-foreign (__cs_buf_file_open (current-buffer) f)) ])
          (when ok
             (for-each
-               (lambda (ext-mode)
-                  (let ([ext (path-extension (buffer-filename))])
-                     (when (string=? ext (car ext-mode))
-                        ((top-level-value (cdr ext-mode)))
+               (lambda (match)
+                  (let ([fname (buffer-filename)])
+                     (when (pregexp-match (car match) fname)
+                        ((top-level-value (cdr match)))
                      ) 
                   )
                )
-               file-ext-mode
+               file-match-mode
             )
          )
       )
