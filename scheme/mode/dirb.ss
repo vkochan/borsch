@@ -169,9 +169,15 @@
    )
 )
 
-(define dirb-list-selection
+(define dirb-get-selection
    (lambda ()
       (get-local selected)
+   )
+)
+
+(define dirb-set-selection
+   (lambda (v)
+      (set-local! selected v)
    )
 )
 
@@ -201,7 +207,7 @@
 
 (define dirb-clear-selection
    (lambda ()
-      (set-local! selected (list))
+      (dirb-set-selection (list))
       (dirb-draw-selection (current-window))
    )
 )
@@ -226,7 +232,7 @@
 
 (define dirb-paste-selection
    (lambda ()
-      (let ([count (length (dirb-list-selection))])
+      (let ([count (length (dirb-get-selection))])
          (if (> count 0)
             (begin
                (if (> count 1)
@@ -234,10 +240,10 @@
                      (lambda (p)
                         (system (format "cp -r ~a ~a" p (dirb-current-dir)))
                      )
-                     (dirb-list-selection)
+                     (dirb-get-selection)
                   )
                   ;; else - single file, check if copy to same dir
-                  (let ([p (first (dirb-list-selection))])
+                  (let ([p (first (dirb-get-selection))])
                      (if (equal? (path-parent p) (dirb-current-dir))
                         (begin
                            (set-local! defval (path-last p))
@@ -286,12 +292,12 @@
                (lambda (p)
                   (equal? (path-parent p) (dirb-current-dir))
                )
-               (dirb-list-selection)
+               (dirb-get-selection)
             )
          )
       )
       
-      (let ([count (length (dirb-list-selection))])
+      (let ([count (length (dirb-get-selection))])
          (if (> count 0)
             (begin
                (if (not (has-same-dest?))
@@ -304,7 +310,7 @@
                               (system (format "mv ~a ~a" p dest))
                            )
                         )
-                        (dirb-list-selection)
+                        (dirb-get-selection)
                      )
                      (dirb-open-dir (dirb-current-dir))
                      (dirb-clear-selection)
@@ -327,14 +333,14 @@
 
 (define dirb-delete-selection
    (lambda ()
-      (minibuf-ask (format "Delete selected (~d) entry(s) ?" (length (dirb-list-selection)))
+      (minibuf-ask (format "Delete selected (~d) entry(s) ?" (length (dirb-get-selection)))
          (lambda (v)
             (when (eq? v 'yes)
                (for-each
                   (lambda (p)
                      (rm-rf p)
                   )
-                  (dirb-list-selection)
+                  (dirb-get-selection)
                )
                (dirb-clear-selection)
                (dirb-open-dir (dirb-current-dir))
@@ -346,7 +352,7 @@
 
 (define dirb-copy-path-selection
    (lambda ()
-      (let ([count (length (dirb-list-selection))])
+      (let ([count (length (dirb-get-selection))])
          (if (> count 0)
             (begin
                (copybuf-copy "")
@@ -354,7 +360,7 @@
                   (lambda (p)
                      (copybuf-append (format (if (= count 1) "~a" "~a\n") p))
                   )
-                  (dirb-list-selection)
+                  (dirb-get-selection)
                )
                (dirb-clear-selection)
             )
@@ -369,7 +375,7 @@
 
 (define dirb-delete-entry
    (lambda ()
-      (if (> (length (dirb-list-selection)) 0)
+      (if (> (length (dirb-get-selection)) 0)
          (dirb-delete-selection)
          ;; else
          (dirb-delete-entry-cursor)
@@ -404,7 +410,7 @@
 
 (define dirb-draw-selection
    (lambda (w)
-      (let ([slist (get-local selected)])
+      (let ([slist (dirb-get-selection)])
          (if (> (length slist) 0)
             (window-set-sidebar-width w 2)
             ;; else
@@ -437,7 +443,7 @@
 (define dirb-select-entry
    (lambda ()
       (let (
-            [slist (get-local selected)]
+            [slist (dirb-get-selection)]
             [path (dirb-entry-path)]
            )
          (if (member path slist)
@@ -445,7 +451,7 @@
             ;; else
             (set! slist (append slist (list path)))
          )
-         (set-local! selected slist)
+         (dirb-set-selection slist)
          (dirb-draw-selection (current-window))
       )
    )
