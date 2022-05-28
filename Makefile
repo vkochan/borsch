@@ -20,7 +20,9 @@ SRC += parser/c/parser.c \
        parser/devicetree/parser.c \
        parser/diff/parser.c \
        parser/scheme/parser.c \
-       parser/make/parser.c
+       parser/make/parser.c \
+       parser/org/scanner.c \
+       parser/org/parser.c
 
 CFLAGS += -I$(SCH_PATH) \
    -DPROGNAME='"${PROGNAME}"' \

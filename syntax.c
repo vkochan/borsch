@@ -38,6 +38,7 @@ TSLanguage *tree_sitter_devicetree();
 TSLanguage *tree_sitter_diff();
 TSLanguage *tree_sitter_scheme();
 TSLanguage *tree_sitter_make();
+TSLanguage *tree_sitter_org();
 
 static SyntaxLang langs[] = {
 	{ "c", tree_sitter_c, },
@@ -45,6 +46,7 @@ static SyntaxLang langs[] = {
 	{ "diff", tree_sitter_diff, },
 	{ "scheme", tree_sitter_scheme, },
 	{ "gnumake", tree_sitter_make, },
+	{ "org", tree_sitter_org, },
 	{ NULL, NULL, NULL, 0 }
 };
 
