@@ -54,10 +54,11 @@
          [(equal? s "normal")    (bit 0)]
          [(equal? s "bold")      (bit 1)]
          [(equal? s "dim")       (bit 2)]
-         [(equal? s "underline") (bit 3)]
-         [(equal? s "blink")     (bit 4)]
-         [(equal? s "reverse")   (bit 5)]
-         [(equal? s "invisible") (bit 6)]
+         [(equal? s "italic")    (bit 3)]
+         [(equal? s "underline") (bit 4)]
+         [(equal? s "blink")     (bit 5)]
+         [(equal? s "reverse")   (bit 6)]
+         [(equal? s "invisible") (bit 7)]
          [else 0]
       )
    )
