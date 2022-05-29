@@ -3760,10 +3760,8 @@ int stx_lang_style_add(const char *lang, int fg, int bg, int attr, const char *r
 	style->bg = bg;
 
 	err = syntax_lang_rule_add(lang, SYNTAX_RULE_TYPE_STYLE, rule, style);
-	if (err) {
-		free(style);
+	if (err)
 		return err;
-	}
 
 	return 0;
 }

@@ -3,6 +3,13 @@
 
 typedef struct SyntaxParser SyntaxParser;
 
+typedef struct
+{
+	const char * (* chunk_read)(void *payload, uint32_t index, uint32_t *size);
+	size_t       (* text_read)(void *payload, size_t pos, size_t len, char *buf);
+	void 	*payload;
+} SyntaxInput;
+
 int syntax_init(void);
 void syntax_cleanup(void);
 
@@ -14,10 +21,7 @@ SyntaxParser *syntax_parser_new(const char *lang_name);
 
 void syntax_parser_delete(SyntaxParser *parser);
 
-void syntax_parser_input_set(SyntaxParser *parser, void *payload,
-			     const char * (* read)(void *payload,
-						   uint32_t index,
-						   uint32_t *size));
+void syntax_parser_input_set(SyntaxParser *parser, SyntaxInput *input);
 
 int syntax_parser_parse(SyntaxParser *parser);
 

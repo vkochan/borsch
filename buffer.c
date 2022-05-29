@@ -68,7 +68,7 @@ static int buf_count;
 
 void buffer_cursor_set(Buffer *buf, size_t pos);
 
-static const char *buffer_parser_read(void *payload, uint32_t byte_index, uint32_t *bytes_read)
+static const char *buffer_parser_chunk_read(void *payload, uint32_t byte_index, uint32_t *bytes_read)
 {
 	Buffer *buf = payload;
 	const Text *txt = buf->text;
@@ -83,6 +83,13 @@ static const char *buffer_parser_read(void *payload, uint32_t byte_index, uint32
 
 	*bytes_read = it.end - it.text;
 	return it.text;
+}
+
+static size_t buffer_parser_text_read(void *payload, size_t pos, size_t len, char *buf)
+{
+	Buffer *_buf = payload;
+
+	return text_bytes_get(_buf->text, pos, len, buf);
 }
 
 static int buffer_id_gen(void)
@@ -848,6 +855,12 @@ size_t buffer_search_regex(Buffer *buf, size_t pos, const char *pattern, int dir
 
 int buffer_parser_set(Buffer *buf, const char *lang)
 {
+	SyntaxInput input = {
+		.chunk_read = buffer_parser_chunk_read,
+		.text_read = buffer_parser_text_read,
+		.payload = buf,
+	};
+
 	if (!lang || !strlen(lang)) {
 		syntax_parser_delete(buf->parser);
 		buf->parser = NULL;
@@ -858,7 +871,7 @@ int buffer_parser_set(Buffer *buf, const char *lang)
 	if (!buf->parser)
 		return -1;
 
-	syntax_parser_input_set(buf->parser, buf, buffer_parser_read);
+	syntax_parser_input_set(buf->parser, &input);
 
 	return syntax_parser_parse(buf->parser);
 }
