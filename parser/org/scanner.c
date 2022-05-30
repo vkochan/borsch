@@ -98,21 +98,21 @@ static unsigned scanner_serialize(Scanner *scanner, char *buffer)
     buffer[i++] = indent_count;
 
     iter_idx = 1;
-    end_idx = scanner_stack_size(&scanner->indent_length_stack);
+    end_idx = scanner_stack_size(&scanner->indent_length_stack) - 1;
 
     for (; iter_idx <= end_idx && i < TREE_SITTER_SERIALIZATION_BUFFER_SIZE; iter_idx++) {
       buffer[i++] = scanner_stack_get(&scanner->indent_length_stack, iter_idx);
     }
 
     iter_idx = 1;
-    end_idx = scanner_stack_size(&scanner->bullet_stack);
+    end_idx = scanner_stack_size(&scanner->bullet_stack) - 1;
 
     for (; iter_idx <= end_idx && i < TREE_SITTER_SERIALIZATION_BUFFER_SIZE; iter_idx++) {
       buffer[i++] = scanner_stack_get(&scanner->bullet_stack, iter_idx);
     }
 
     iter_idx = 1;
-    end_idx = scanner_stack_size(&scanner->section_stack);
+    end_idx = scanner_stack_size(&scanner->section_stack) - 1;
 
     for (; iter_idx <= end_idx && i < TREE_SITTER_SERIALIZATION_BUFFER_SIZE; iter_idx++) {
       buffer[i++] = scanner_stack_get(&scanner->section_stack, iter_idx);
