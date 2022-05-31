@@ -1,3 +1,49 @@
+(define __cs_style_add (foreign-procedure "cs_style_add" (string int int int) scheme-object))
+(define __cs_style_set (foreign-procedure "cs_style_set" (string int int int) scheme-object))
+(define __cs_style_get (foreign-procedure "cs_style_get" (string) scheme-object))
+
+(define style-add
+   (lambda (symb prop)
+      (let ([lst (style->list prop)])
+         (call-foreign (__cs_style_add (symbol->string symb)
+                                       (list-ref lst 0)
+                                       (list-ref lst 1)
+                                       (list-ref lst 2)
+                       )
+         )
+      )
+   )
+)
+
+(define style-modify
+   (lambda (symb prop)
+      (let ([lst (style->list prop)])
+         (call-foreign (__cs_style_set (symbol->string symb)
+                                       (list-ref lst 0)
+                                       (list-ref lst 1)
+                                       (list-ref lst 2)
+                       )
+         )
+      )
+   )
+)
+
+(define-syntax define-style
+   (syntax-rules ()
+      ((_ name prop ...)
+         (style-add name `(prop ...))
+      )
+   )
+)
+
+(define-syntax style-set
+   (syntax-rules ()
+      ((_ name prop ...)
+         (style-modify name `(prop ...))
+      )
+   )
+)
+
 (define color-name->number
    (lambda (c)
       (cond

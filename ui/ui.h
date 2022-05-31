@@ -116,6 +116,7 @@ struct Ui {
 	void (*cursor_enable)(Ui*, bool enable);
 	short (*color_make)(Ui *ui, short fg, short bg);
 	short (*colors_max_get)(Ui *ui);
+	CellStyle (*get_default_cell_style)(Ui *ui);
 };
 
 struct UiWin {

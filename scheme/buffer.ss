@@ -26,7 +26,7 @@
 (define __cs_buf_text_bg_get (foreign-procedure "cs_buf_text_bg_get" (int) scheme-object))
 (define __cs_buf_text_style_get (foreign-procedure "cs_buf_text_style_get" (int) scheme-object))
 
-(define __cs_buf_prop_style_add (foreign-procedure "cs_buf_prop_style_add" (int int int int int int int) scheme-object))
+(define __cs_buf_prop_style_add (foreign-procedure "cs_buf_prop_style_add" (int int int int int string int int) scheme-object))
 (define __cs_buf_prop_kmap_add (foreign-procedure "cs_buf_prop_kmap_add" (int int int int) scheme-object))
 (define __cs_buf_prop_del (foreign-procedure "cs_buf_prop_del" (int int int int) void))
 
@@ -483,12 +483,21 @@
 
 (define add-text-style-property
    (lambda (s e a)
-      (let ([l (style->list a)])
+      (let ([l (if (symbol? a)
+                   (list -1 -1 -1)
+                   (style->list a)
+               )
+            ]
+           )
          (call-foreign (__cs_buf_prop_style_add (current-buffer)
 				  1
                                   (list-ref l 0)
                                   (list-ref l 1)
                                   (list-ref l 2)
+                                  (if (symbol? a)
+                                      (symbol->string a)
+                                      #f
+                                  )
                                   s e))
       )
    )
@@ -529,7 +538,7 @@
 
 (define highlight-range
    (lambda (s e)
-      (call-foreign (__cs_buf_prop_style_add (current-buffer) 2 -1 -1 -1 s e))
+      (call-foreign (__cs_buf_prop_style_add (current-buffer) 2 -1 -1 -1 #f s e))
    )
 )
 

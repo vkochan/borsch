@@ -616,9 +616,9 @@ ptr scheme_buf_is_visible(int bid)
 	return Sfalse;
 }
 
-ptr scheme_buf_prop_style_add(int bid, int type, int fg, int bg, int attr, int start, int end)
+ptr scheme_buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end)
 {
-	int ret = buf_prop_style_add(bid, type, fg, bg, attr, start, end);
+	int ret = buf_prop_style_add(bid, type, fg, bg, attr, style_name, start, end);
 
 	if (ret == 0)
 		Sinteger(ret);
@@ -681,9 +681,9 @@ ptr scheme_buf_parser_set(int bid, const char *lang)
 	return Strue;
 }
 
-ptr scheme_stx_lang_style_add(const char *lang, int fg, int bg, int attr, const char *match)
+ptr scheme_stx_lang_style_add(const char *lang, int fg, int bg, int attr, const char *style_name, const char *match)
 {
-	int ret = stx_lang_style_add(lang, fg, bg, attr, match);
+	int ret = stx_lang_style_add(lang, fg, bg, attr, style_name, match);
 
 	if (ret == 0)
 		return Strue;
@@ -698,6 +698,61 @@ void scheme_stx_lang_style_del(const char *lang, const char *match)
 void scheme_stx_lang_style_clear(const char *lang)
 {
 	stx_lang_style_clear(lang);
+}
+
+ptr scheme_style_add(const char *name, int fg, int bg, int attr)
+{
+	Style style = {
+		.name = name,
+		.attr = attr,
+		.fg = fg,
+		.bg = bg,
+	};
+	int id;
+
+	id = style_add(&style);
+	if (id >= 0) {
+		return Sinteger(id);
+	}
+
+	return Sfalse;
+}
+
+ptr scheme_style_set(const char *name, int fg, int bg, int attr)
+{
+	Style *style;
+
+	style = style_get_by_name(name);
+	if (style) {
+		if (fg != -1)
+			style->fg = fg;
+		if (bg != -1)
+			style->bg = bg;
+		if (attr)
+			style->attr = attr;
+
+		int err = style_update(style->id, style);
+		if (err) {
+			return Sfalse;
+		}
+		return Strue;
+	}
+
+	return Sfalse;
+}
+
+ptr scheme_style_get(const char *name)
+{
+	Style *style;
+
+	style = style_get_by_name(name);
+	if (style) {
+		return Scons(Sinteger(style->fg),
+				Scons(Sinteger(style->bg),
+					Scons(Sinteger(style->attr), Snil)));
+	}
+
+	return Sfalse;
 }
 
 ptr scheme_minibuf_create(void)
@@ -993,6 +1048,10 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_stx_lang_style_add", scheme_stx_lang_style_add);
 	Sregister_symbol("cs_stx_lang_style_del", scheme_stx_lang_style_del);
 	Sregister_symbol("cs_stx_lang_style_clear", scheme_stx_lang_style_clear);
+
+	Sregister_symbol("cs_style_add",  scheme_style_add);
+	Sregister_symbol("cs_style_set",  scheme_style_set);
+	Sregister_symbol("cs_style_get",  scheme_style_get);
 
 	Sregister_symbol("cs_minibuf_create", scheme_minibuf_create);
 	Sregister_symbol("cs_topbar_create", scheme_topbar_create);

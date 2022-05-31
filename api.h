@@ -28,6 +28,14 @@ typedef struct {
 	int          oid;
 } event_t;
 
+typedef struct {
+	const char *name;
+	short fg;
+	short bg;
+	int attr;
+	int id;
+} Style;
+
 typedef void (*bind_key_cb_t)(void);
 
 int win_get_by_coord(int x, int y);
@@ -68,6 +76,13 @@ void win_sidebar_set(int wid, int width);
 int win_sidebar_get(int wid);
 void win_sidebar_draw(int wid, int x, int y, const char *text, short fg, short bg, int attr);
 void win_update(int wid);
+
+Style *style_new(void);
+
+int style_add(Style *style);
+int style_update(int id, Style *update);
+Style *style_get_by_id(int id);
+Style *style_get_by_name(const char *name);
 
 int kmap_add(int pid);
 int kmap_parent_set(int kid, char *name, int pid);
@@ -116,7 +131,7 @@ void buf_mark_clear(int bid);
 bool buf_is_term(int bid);
 bool buf_is_visible(int bid);
 
-int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, int start, int end);
+int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end);
 int buf_prop_kmap_add(int bid, int kid, int start, int end);
 void buf_prop_del(int bid, int type, int start, int end);
 /* void buf_prop_walk(int bid, int type, int start, int end, void *arg, */
@@ -134,7 +149,7 @@ size_t buf_search_regex(int bid, size_t pos, const char *pattern, int dir);
 
 int buf_parser_set(int bid, const char *lang);
 
-int stx_lang_style_add(const char *lang, int fg, int bg, int attr, const char *rule);
+int stx_lang_style_add(const char *lang, int fg, int bg, int attr, const char *style_name, const char *rule);
 void stx_lang_style_del(const char *lang, const char *rule);
 void stx_lang_style_clear(const char *lang);
 

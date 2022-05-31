@@ -37,6 +37,7 @@
 #include <errno.h>
 #include <pwd.h>
 
+#include "array.h"
 #include "event.h"
 #include "buffer.h"
 #include "keymap.h"
@@ -84,12 +85,6 @@ struct Window {
 	unsigned int tags;
 	bool highlight_mark;
 };
-
-typedef struct {
-	short fg;
-	short bg;
-	int attr;
-} StyleProperty;
 
 typedef struct {
 	short fg;
@@ -362,6 +357,25 @@ static int min_align = MIN_ALIGN_HORIZ;
 static Cmd commands[] = {
 	{ "eval", { doeval, { NULL } } },
 };
+
+static Array style_array;
+
+static int style_init(void)
+{
+	Style default_style = {
+		.fg = UI_TEXT_COLOR_WHITE,
+		.bg = UI_TEXT_COLOR_BLACK,
+		.name = "default",
+	};
+
+	array_init_sized(&style_array, sizeof(Style));
+	style_add(&default_style);
+}
+
+static void style_cleanup(void)
+{
+	array_release(&style_array);
+}
 
 static void
 eprint(const char *errstr, ...) {
@@ -1083,22 +1097,36 @@ static void init_default_keymap(void)
 	keymap_bind(win_min_kmap, "x", killwindow, NULL);
 }
 
+static CellStyle get_default_cell_style(Ui *ui)
+{
+	Style *default_style = style_get_by_id(0);
+	CellStyle cell_style = {
+		.attr = default_style->attr,
+		.fg = default_style->fg,
+		.bg = default_style->bg,
+	};
+
+	return cell_style;
+}
+
 static void
 setup(void) {
 	shell = getshell();
 	setlocale(LC_CTYPE, "");
 
+	style_init();
+
 	ui = ui_term_new();
+	ui->get_default_cell_style = get_default_cell_style;
 	ui_init(ui);
 
 	init_default_keymap();
-
 	mouse_setup();
-
 	syntax_init();
-
+	style_init();
 	vt_init();
 	vt_keytable_set(keytable, LENGTH(keytable));
+
 	for (unsigned int i = 0; i < LENGTH(colors); i++) {
 		if (COLORS == 256) {
 			if (colors[i].fg256)
@@ -1237,6 +1265,7 @@ cleanup(void) {
 	keymap_free(global_kmap);
 	vt_shutdown();
 	syntax_cleanup();
+	style_cleanup();
 	ui_free(ui);
 	if (cmdfifo.fd > 0)
 		close(cmdfifo.fd);
@@ -1254,9 +1283,11 @@ cleanup(void) {
 
 static void __win_buf_attach(Window *w, Buffer *buf)
 {
+#if 0
 	ui_window_text_style_set(w->win, buffer_text_style_get(buf));
 	ui_window_text_fg_set(w->win, buffer_text_fg_get(buf));
 	ui_window_text_bg_set(w->win, buffer_text_bg_get(buf));
+#endif
 }
 
 static char *getcwd_by_pid(Window *c, char *buf) {
@@ -2364,18 +2395,39 @@ void win_update(int wid)
 	}
 }
 
+static void __style_draw(View *view, size_t start, size_t end, Style *style)
+{
+	Style *default_style = style_get_by_id(0);
+	Style *bind_style;
+	CellStyle cell_style;
+
+	if (style->id != -1) {
+		bind_style = style_get_by_id(style->id);
+		if (bind_style)
+			style = bind_style;
+	}
+
+	cell_style.attr = style->attr;
+	cell_style.fg = style->fg;
+	cell_style.bg = style->bg;
+
+	if (cell_style.attr == 0)
+		cell_style.attr = default_style->attr;
+	if (cell_style.fg == -1)
+		cell_style.fg = default_style->fg;
+	if (cell_style.bg == -1)
+		cell_style.bg = default_style->bg;
+
+	view_style(view, cell_style, start, end);
+}
+
 static int style_prop_draw(Buffer *buf, int id, size_t start, size_t end, void *data,
 		void *arg)
 {
-	StyleProperty *prop = data;
+	Style *style = data;
 	View *view = arg;
-	CellStyle style = {
-		.attr = prop->attr,
-		.fg = prop->fg,
-		.bg = prop->bg,
-	};
 
-	view_style(view, style, start, end);
+	__style_draw(view, start, end, style);
 
 	return 0;
 }
@@ -2383,15 +2435,10 @@ static int style_prop_draw(Buffer *buf, int id, size_t start, size_t end, void *
 static int style_syntax_draw(SyntaxParser *parser, int id, size_t start, size_t end, void *data,
 		void *arg)
 {
-	StyleProperty *prop = data;
+	Style *style = data;
 	View *view = arg;
-	CellStyle style = {
-		.attr = prop->attr,
-		.fg = prop->fg,
-		.bg = prop->bg,
-	};
 
-	view_style(view, style, start, end);
+	__style_draw(view, start, end, style);
 
 	return 0;
 }
@@ -2402,6 +2449,7 @@ static void on_view_update_cb(UiWin *win)
 	Filerange v = view_viewport_get(w->view);
 	char *eof_sym = "~";
 	size_t eof_len = strlen(eof_sym);
+	Style *default_style = style_get_by_id(0);
 
 	buffer_syntax_rules_walk(w->buf, SYNTAX_RULE_TYPE_STYLE,
 			v.start, v.end, w->view, style_syntax_draw);
@@ -2422,8 +2470,8 @@ static void on_view_update_cb(UiWin *win)
 	}
 
 	for (Line *l = view_lines_last(w->view)->next; l; l = l->next) {
-		l->cells[0].style.fg = ui_window_text_fg_get(win);
-		l->cells[0].style.bg = ui_window_text_bg_get(win);
+		l->cells[0].style.fg = default_style->fg;
+		l->cells[0].style.bg = default_style->bg;
 		strncpy(l->cells[0].data, eof_sym, eof_len);
 		l->cells[0].len = eof_len;
 	}
@@ -2853,6 +2901,73 @@ void win_buf_switch(int wid, int bid)
 		w->buf = b;
 		buffer_ref_get(w->buf);
 	}
+}
+
+Style *style_new(void)
+{
+	Style *style;
+
+	style = calloc(1, sizeof(*style));
+	if (!style)
+		return NULL;
+
+	style->id = -1;
+	style->fg = -1;
+	style->bg = -1;
+
+	return style;
+}
+
+int style_add(Style *style)
+{
+	if (style->name && style->name[0] && style_get_by_name(style->name)) {
+		return -1;
+	}
+
+	if (array_add(&style_array, style)) {
+		int id = array_length(&style_array) - 1;
+		Style *added = array_get(&style_array, id);
+		
+		added->id = id;
+		return id;
+	} else {
+		return -1;
+	}
+}
+
+int style_update(int id, Style *update)
+{
+	Style *style;
+
+	style = style_get_by_id(id);
+	if (!style) {
+		return -1;
+	}
+
+	*style = *update;
+	style->id = id;
+
+	return 0;
+}
+
+Style *style_get_by_id(int id)
+{
+	return array_get(&style_array, id);
+}
+
+Style *style_get_by_name(const char *name)
+{
+	if (!name || !name[0])
+		return NULL;
+
+	for (int i = 0; i < array_length(&style_array); i++) {
+		Style *style = array_get(&style_array, i);
+
+		if (strcmp(style->name, name) == 0)
+			return style;
+	}
+
+	return NULL;
 }
 
 int kmap_add(int pid)
@@ -3612,22 +3727,27 @@ bool buf_is_visible(int bid)
 	return false;
 }
 
-int buf_prop_style_add(int bid, int type, int fg, int bg, int attr,  int start, int end)
+int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end)
 {
 	Buffer *buf = buffer_by_id(bid);
-	StyleProperty *style;
+	Style *style, *style_bind;
 	int err;
 
 	if (!buf)
 		return -1;
 
-	style = calloc(1, sizeof(StyleProperty));
+	style = style_new();
 	if (!style)
 		return -1;
 
-	style->attr = attr;
-	style->fg = fg;
-	style->bg = bg;
+	style_bind = style_get_by_name(style_name);
+	if (style_bind) {
+		style->id = style_bind->id;
+	} else {
+		style->attr = attr;
+		style->fg = fg;
+		style->bg = bg;
+	}
 
 	if (type == PROPERTY_TYPE_TEXT_HIGHLIGHT) {
 		style->attr = 0;
@@ -3746,18 +3866,23 @@ int buf_parser_set(int bid, const char *lang)
 	return -1;
 }
 
-int stx_lang_style_add(const char *lang, int fg, int bg, int attr, const char *rule)
+int stx_lang_style_add(const char *lang, int fg, int bg, int attr, const char *style_name, const char *rule)
 {
-	StyleProperty *style;
+	Style *style, *style_bind;
 	int err;
 
-	style = calloc(1, sizeof(StyleProperty));
+	style = style_new();
 	if (!style)
 		return -1;
 
-	style->attr = attr;
-	style->fg = fg;
-	style->bg = bg;
+	style_bind = style_get_by_name(style_name);
+	if (style_bind) {
+		style->id = style_bind->id;
+	} else {
+		style->attr = attr;
+		style->fg = fg;
+		style->bg = bg;
+	}
 
 	err = syntax_lang_rule_add(lang, SYNTAX_RULE_TYPE_STYLE, rule, style);
 	if (err)

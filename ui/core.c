@@ -107,7 +107,7 @@ static CellStyle ui_window_style_get(UiWin *win, enum UiStyle style)
 		.bg = win->curr_bg,
 	};
 
-	return st;
+	return win->ui->get_default_cell_style(win->ui);
 }
 
 UiWin *ui_window_new(Ui *ui, View *view)
