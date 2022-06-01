@@ -117,10 +117,6 @@
 (minibuf-create)
 (topbar-create)
 
-;(with-current-buffer topbar-buffer
-;   (insert "[a][b][c]")
-;)
-
 (view-set-cwd (current-directory))
 
 ;;;;;;;;;;;;;;;;;;;;;;;
