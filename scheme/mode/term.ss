@@ -79,10 +79,10 @@
 (define term
    (case-lambda
       [()
-       (term #f)]
+       (term #f "" (current-cwd))]
 
       [(prog)
-       (term prog "")]
+       (term prog "" (current-cwd))]
 
       [(prog title)
        (term prog title (current-cwd))]
