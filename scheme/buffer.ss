@@ -538,7 +538,7 @@
 
 (define highlight-range
    (lambda (s e)
-      (call-foreign (__cs_buf_prop_style_add (current-buffer) 2 -1 -1 -1 #f s e))
+      (call-foreign (__cs_buf_prop_style_add (current-buffer) 2 -1 -1 -1 "highlight" s e))
    )
 )
 

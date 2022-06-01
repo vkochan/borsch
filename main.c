@@ -367,9 +367,15 @@ static int style_init(void)
 		.bg = UI_TEXT_COLOR_BLACK,
 		.name = "default",
 	};
+	Style highlight_style = {
+		.fg = UI_TEXT_COLOR_WHITE,
+		.bg = UI_TEXT_COLOR_BLUE,
+		.name = "highlight",
+	};
 
 	array_init_sized(&style_array, sizeof(Style));
 	style_add(&default_style);
+	style_add(&highlight_style);
 }
 
 static void style_cleanup(void)
@@ -2461,12 +2467,14 @@ static void on_view_update_cb(UiWin *win)
 	if (w->highlight_mark) {
 		size_t start = buffer_mark_get(w->buf);
 		size_t end = buffer_cursor_get(w->buf);
-		CellStyle style = {
-			.fg = UI_TEXT_COLOR_WHITE,
-			.bg = UI_TEXT_COLOR_BLUE,
+		Style *highlight_style = style_get_by_id(1);
+		CellStyle cell_style = {
+			.attr = highlight_style->attr,
+			.fg = highlight_style->fg,
+			.bg = highlight_style->bg,
 		};
 
-		view_style(w->view, style, MIN(start, end), MAX(start, end));
+		view_style(w->view, cell_style, MIN(start, end), MAX(start, end));
 	}
 
 	for (Line *l = view_lines_last(w->view)->next; l; l = l->next) {
@@ -3747,12 +3755,6 @@ int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *
 		style->attr = attr;
 		style->fg = fg;
 		style->bg = bg;
-	}
-
-	if (type == PROPERTY_TYPE_TEXT_HIGHLIGHT) {
-		style->attr = 0;
-		style->fg = UI_TEXT_COLOR_WHITE;
-		style->bg = UI_TEXT_COLOR_BLUE;
 	}
 
 	err = buffer_property_add(buf, type, start, end, style);
