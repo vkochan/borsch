@@ -610,7 +610,6 @@
 
 (define git-show-commit
    (lambda ()
-      (move-line-begin)
       (let ([id (extract-object)])
          (let ([b (buffer-create)])
             (diff-mode)
@@ -625,7 +624,7 @@
 
 (define git-log-mode-map
    (let ([map (make-keymap)])
-      (bind-key map "<Enter>" git-show-commit)
+      (bind-key map "<Enter>" (lambda () (move-line-begin) (git-show-commit)))
       map
    )
 )
