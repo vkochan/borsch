@@ -31,7 +31,7 @@
 (define-syntax define-style
    (syntax-rules ()
       ((_ name prop ...)
-         (style-add name `(prop ...))
+         (style-add 'name `(prop ...))
       )
    )
 )
@@ -39,7 +39,7 @@
 (define-syntax style-set
    (syntax-rules ()
       ((_ name prop ...)
-         (style-modify name `(prop ...))
+         (style-modify 'name `(prop ...))
       )
    )
 )
