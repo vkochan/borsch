@@ -20,7 +20,11 @@
 
 (define scheme-mode-eval-buffer
    (lambda ()
-      (scheme-mode-eval (buffer-string))
+      (if (mark-is-set?)
+         (scheme-mode-eval (mark-extract))
+         ;; else
+         (scheme-mode-eval (buffer-string))
+      )
    )
 )
 
