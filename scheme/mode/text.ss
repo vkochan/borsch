@@ -21,6 +21,7 @@
          (text-mode-set-keymap 'text-mode-ins-local-map)
          (buffer-set-state-name "<I>")
          (enable-insert #t)
+         (mark-clear)
       )
    )
 )
