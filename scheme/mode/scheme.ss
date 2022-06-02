@@ -1,4 +1,4 @@
-(define scheme-mode-eval
+(define scheme-eval
    (lambda (s)
       (let (
             [code (open-string-input-port (format "(begin ~a)" s))]
@@ -18,18 +18,18 @@
    )
 )
 
-(define scheme-mode-eval-buffer
+(define scheme-eval-buffer
    (lambda ()
       (if (mark-is-set?)
-         (scheme-mode-eval (mark-extract))
+         (scheme-eval (mark-extract))
          ;; else
-         (scheme-mode-eval (buffer-string))
+         (scheme-eval (buffer-string))
       )
    )
 )
 
 (define-mode scheme-mode "Scheme" text-mode
-   (bind-key-local "C-c C-c" scheme-mode-eval-buffer)
+   (bind-key-local "C-c C-c" scheme-eval-buffer)
    (syntax-set-lang 'scheme)
 )
 
