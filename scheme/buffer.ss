@@ -1386,6 +1386,14 @@
    )
 )
 
+(define mark-extract
+   (lambda ()
+      (let ([r (mark-get-range)])
+         (buffer-string (car r) (cadr r))
+      )
+   )
+)
+
 (define mark-delete
    (lambda ()
       (let ([r (mark-get-range)])
