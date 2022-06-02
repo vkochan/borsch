@@ -328,6 +328,18 @@
    )
 )
 
+(define buffer-get-or-create
+   (lambda (name)
+      (let ([buf (buffer-get name)])
+         (if buf
+            buf
+            ;; else
+            (buffer-create name)
+         )
+      )
+   )
+)
+
 (define buffer-open-file
    (lambda (f)
       (let ([ok (call-foreign (__cs_buf_file_open (current-buffer) f)) ])
