@@ -169,21 +169,6 @@
    )
 )
 
-(define-syntax (with-current-buffer stx)
-   (syntax-case stx ()
-      ((_ buf exp ...)
-       #`(let ([b buf])
-            (fluid-let ([current-buffer (lambda () b)])
-               (begin
-                  exp
-                  ...
-               )
-            )
-         )
-      )
-   )
-)
-
 (define *buffer-enable-eof* #t)
 
 (define cursor
