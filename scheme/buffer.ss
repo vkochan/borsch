@@ -43,6 +43,7 @@
 (define __cs_buf_mark_set (foreign-procedure "cs_buf_mark_set" (int int) void))
 (define __cs_buf_mark_get (foreign-procedure "cs_buf_mark_get" (int) scheme-object))
 (define __cs_buf_mark_clear (foreign-procedure "cs_buf_mark_clear" (int) void))
+(define __cs_buf_mark_is_set (foreign-procedure "cs_buf_mark_is_set" (int) scheme-object))
 
 (define __cs_win_mark_highlight (foreign-procedure __collect_safe "cs_win_mark_highlight" (int boolean) void))
 
@@ -1360,6 +1361,12 @@
 (define mark-clear
    (lambda ()
       (call-foreign (__cs_buf_mark_clear (current-buffer)))
+   )
+)
+
+(define mark-is-set?
+   (lambda ()
+      (call-foreign (__cs_buf_mark_is_set (current-buffer)))
    )
 )
 

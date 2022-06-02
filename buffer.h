@@ -67,6 +67,7 @@ void buffer_mode_name_set(Buffer *buf, char *name);
 char *buffer_state_name_get(Buffer *buf);
 void buffer_state_name_set(Buffer *buf, char *name);
 void buffer_mark_set(Buffer *buf, size_t pos);
+bool buffer_is_mark_set(Buffer *buf);
 void buffer_mark_clear(Buffer *buf);
 size_t buffer_mark_get(Buffer *buf);
 void buffer_term_set(Buffer *buf, Vt *vt);

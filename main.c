@@ -3693,6 +3693,15 @@ void buf_mark_set(int bid, size_t pos)
 		buffer_mark_set(buf, pos);
 }
 
+bool buf_mark_is_set(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		return buffer_is_mark_set(buf);
+	return false;
+}
+
 size_t buf_mark_get(int bid)
 {
 	Buffer *buf = buffer_by_id(bid);

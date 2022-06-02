@@ -56,6 +56,7 @@ typedef struct Buffer {
 	pid_t pid;
 	volatile sig_atomic_t is_died;
 	size_t mark;
+	bool is_mark_set;
 	TextProperty *min_prop;
 	TextProperty *max_prop;
 	TextProperty props;
@@ -309,7 +310,7 @@ Buffer *buffer_by_id(int bid)
 
 void buffer_cursor_set(Buffer *buf, size_t pos)
 {
-	if (buf->mark == EPOS)
+	if (!buf->is_mark_set)
 		buf->mark = pos;
 	if (pos > text_end(buf->text, 0))
 		pos = text_end(buf->text, 0);
@@ -580,13 +581,20 @@ void buffer_state_name_set(Buffer *buf, char *name)
 	strncpy(buf->state, name, sizeof(buf->state));
 }
 
+bool buffer_is_mark_set(Buffer *buf)
+{
+	return buf->is_mark_set;
+}
+
 void buffer_mark_set(Buffer *buf, size_t pos)
 {
+	buf->is_mark_set = true;
 	buf->mark = pos;
 }
 
 void buffer_mark_clear(Buffer *buf)
 {
+	buf->is_mark_set = false;
 	buf->mark = EPOS;
 }
 

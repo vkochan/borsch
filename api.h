@@ -126,6 +126,7 @@ char *buf_file_get(int bid);
 
 int buf_save(int bid);
 void buf_mark_set(int bid, size_t pos);
+bool buf_mark_is_set(int bid);
 size_t buf_mark_get(int bid);
 void buf_mark_clear(int bid);
 bool buf_is_term(int bid);

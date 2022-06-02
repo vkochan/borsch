@@ -587,6 +587,11 @@ ptr scheme_buf_save(int bid)
 	return Sboolean(buf_save(bid));
 }
 
+ptr scheme_buf_mark_is_set(int bid)
+{
+	return Sboolean(buf_mark_is_set(bid));
+}
+
 void scheme_buf_mark_set(int bid, size_t pos)
 {
 	buf_mark_set(bid, pos);
@@ -1028,6 +1033,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_file_get", scheme_buf_file_get);
 	Sregister_symbol("cs_buf_save", scheme_buf_save);
 	Sregister_symbol("cs_buf_mark_set", scheme_buf_mark_set);
+	Sregister_symbol("cs_buf_mark_is_set", scheme_buf_mark_is_set);
 	Sregister_symbol("cs_buf_mark_get", scheme_buf_mark_get);
 	Sregister_symbol("cs_buf_mark_clear", scheme_buf_mark_clear);
 	Sregister_symbol("cs_buf_is_term", scheme_buf_is_term);
