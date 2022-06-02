@@ -70,6 +70,24 @@ KeyMap *keymap_by_name(char *name)
 	return NULL;
 }
 
+static int __keymap_code(char *key)
+{
+	if (strcmp(key, "<Space>") == 0) {
+		return ' ';
+	} else if (strcmp(key, "<Enter>") == 0) {
+		return '\r';
+	} else if (strcmp(key, "<Tab>") == 0) {
+		return '\t';
+	} else if (strcmp(key, "<Backspace>") == 0) {
+		/* TODO: make it term specific and remove curses.h inclusion */
+		return KEY_BACKSPACE;
+	} else if (strcmp(key, "<Esc>") == 0) {
+		return 27;
+	} else {
+		return key[0];
+	}
+}
+
 static int keymap_parse(KeyBinding *kbd, char *key)
 {
 	char *tok_ptr = key;
@@ -82,24 +100,13 @@ static int keymap_parse(KeyBinding *kbd, char *key)
 	tok = strtok_r(tmp, " ", &tok_ptr);
 
 	for (i = 0; i < MAX_KEYS && tok; i++) {
-		if (strlen(tok) == 3 && tok[0] == 'C' && tok[1] == '-') {
-			kbd->keys[i] = CTRL(tok[2]);
-		} else if (strlen(tok) == 3 && tok[0] == 'M' && tok[1] == '-') {
+		if (strlen(tok) >= 3 && tok[0] == 'C' && tok[1] == '-') {
+			kbd->keys[i] = CTRL(__keymap_code(&tok[2]));
+		} else if (strlen(tok) >= 3 && tok[0] == 'M' && tok[1] == '-') {
 			kbd->keys[i++] = ALT;
-			kbd->keys[i] = tok[2];
-		} else if (strcmp(tok, "<Space>") == 0) {
-			kbd->keys[i] = ' ';
-		} else if (strcmp(tok, "<Enter>") == 0) {
-			kbd->keys[i] = '\r';
-		} else if (strcmp(tok, "<Tab>") == 0) {
-			kbd->keys[i] = '\t';
-		} else if (strcmp(tok, "<Backspace>") == 0) {
-			/* TODO: make it term specific and remove curses.h inclusion */
-			kbd->keys[i] = KEY_BACKSPACE;
-		} else if (strcmp(tok, "<Esc>") == 0) {
-			kbd->keys[i] = 27;
+			kbd->keys[i] = __keymap_code(&tok[2]);
 		} else {
-			kbd->keys[i] = tok[0];
+			kbd->keys[i] = __keymap_code(tok);;
 		}
 
 		tok = strtok_r(NULL, " ", &tok_ptr);
