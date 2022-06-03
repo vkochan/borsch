@@ -69,7 +69,7 @@
 (define dts-syntax-keywords-style      '(:fg "green"))
 (define dts-syntax-bracket-style       '(:fg "yellow"))
 (define dts-syntax-delimiter-style     '(:fg "white"))
-(define dts-syntax-operator-style      '(:fg "yellow" :bg "bold"))
+(define dts-syntax-operator-style      '(:fg "yellow" :attr "bold"))
 (define dts-syntax-comment-style       '(:fg "bright-black"))
 (define dts-syntax-reference-style     '(:fg "red"))
 (define dts-syntax-address-style       '(:fg "blue"))

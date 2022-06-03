@@ -217,7 +217,7 @@
 )
 
 (define gnumake-syntax-bracket-style          '(:fg "yellow"))
-(define gnumake-syntax-special-style          '(:fg "bright-yellow" :bg "bold"))
+(define gnumake-syntax-special-style          '(:fg "bright-yellow" :attr "bold"))
 (define gnumake-syntax-operator-style         '(:fg "green"))
 (define gnumake-syntax-string-style           '(:fg "bright-yellow"))
 (define gnumake-syntax-conditional-style      '(:fg "green"))
