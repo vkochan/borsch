@@ -223,14 +223,44 @@
    )
 )
 
+(define text-mode-visual-line-fixup
+   (lambda ()
+      (if (>= (cursor) (mark-get))
+         (begin
+            (mark-set (line-begin-pos (mark-get)))
+            (move-line-end)
+         )
+         ;; else
+         (begin
+            (mark-set (line-end-pos (mark-get)))
+            (move-line-begin)
+         )
+      )
+   )
+)
+
+(define text-mode-visual-line-move-up
+   (lambda ()
+      (move-line-up)
+      (text-mode-visual-line-fixup)
+   )
+)
+
+(define text-mode-visual-line-move-down
+   (lambda ()
+      (move-line-down)
+      (text-mode-visual-line-fixup)
+   )
+)
+
 (define text-mode-visual-linewise-map
    (let ([map (make-keymap)])
       (bind-key map "<Esc>" text-mode-normal)
       (bind-key map "x" (lambda () (mark-delete) (text-mode-normal)))
       (bind-key map "d" (lambda () (mark-delete) (text-mode-normal)))
       (bind-key map "l" (lambda () (move-line-down)))
-      (bind-key map "j" (lambda () (move-line-down) (move-line-end)))
-      (bind-key map "k" (lambda () (move-line-up) (move-line-end)))
+      (bind-key map "j" (lambda () (text-mode-visual-line-move-down)))
+      (bind-key map "k" (lambda () (text-mode-visual-line-move-up)))
       (bind-key map "y" (lambda () (mark-copy-linewise) (text-mode-normal)))
       (bind-key map "a" (lambda () (mark-copy-append) (text-mode-normal)))
       (bind-key map "A" (lambda () (mark-copy-append-linewise) (text-mode-normal)))

@@ -858,8 +858,12 @@
 )
 
 (define line-end-pos
-   (lambda ()
-      (text-obj-pos (current-buffer) (cursor) #\1 1)
+   (case-lambda
+      [()
+      (text-obj-pos (current-buffer) (cursor) #\1 1)]
+
+      [(s)
+      (text-obj-pos (current-buffer) s #\1 1)]
    )
 )
 
