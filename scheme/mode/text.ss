@@ -4,9 +4,9 @@
    )
 )
 
-(define text-mode-cmd
+(define text-mode-normal
    (lambda ()
-      (text-mode-set-keymap 'text-mode-cmd-local-map)
+      (text-mode-set-keymap 'text-mode-normal-local-map)
       (buffer-set-state-name "")
       (buffer-snapshot)
       (enable-insert #f)
@@ -15,10 +15,10 @@
    )
 )
 
-(define text-mode-ins
+(define text-mode-insert
    (lambda ()
       (buffer-modify
-         (text-mode-set-keymap 'text-mode-ins-local-map)
+         (text-mode-set-keymap 'text-mode-insert-local-map)
          (buffer-set-state-name "<I>")
          (enable-insert #t)
          (mark-clear)
@@ -26,9 +26,9 @@
    )
 )
 
-(define text-mode-vis
+(define text-mode-visual
    (lambda ()
-      (text-mode-set-keymap 'text-mode-vis-local-map)
+      (text-mode-set-keymap 'text-mode-visual-local-map)
       (buffer-set-state-name "<V>")
       (enable-insert #f)
       (mark-set)
@@ -36,9 +36,9 @@
    )
 )
 
-(define text-mode-vis-linewise
+(define text-mode-visual-linewise
    (lambda ()
-      (text-mode-set-keymap 'text-mode-vis-linewise-local-map)
+      (text-mode-set-keymap 'text-mode-visual-linewise-local-map)
       (buffer-set-state-name "<V *L*>")
       (enable-insert #f)
       (mark-set (line-begin-pos))
@@ -132,7 +132,7 @@
    )
 )
 
-(define text-mode-cmd-map
+(define text-mode-normal-map
    (let ([map (make-keymap)])
       (bind-key map "h" (lambda () (move-prev-char)))
       (bind-key map "l" (lambda () (move-next-char)))
@@ -166,23 +166,23 @@
       (bind-key map "C-d" (lambda () (cursor-set (window-scroll-halfpage-down))))
       (bind-key map "C-f" (lambda () (cursor-set (window-scroll-page-down))))
       (bind-key map "C-b" (lambda () (cursor-set (window-scroll-page-up))))
-      (bind-key map "i" (lambda () (text-mode-ins)))
-      (bind-key map "a" (lambda () (move-next-char) (text-mode-ins)))
-      (bind-key map "A" (lambda () (move-line-end) (text-mode-ins)))
-      (bind-key map "o" (lambda () (insert-empty-line) (text-mode-ins)))
-      (bind-key map "O" (lambda () (insert-empty-line-up) (text-mode-ins)))
-      (bind-key map "C" (lambda () (delete-line-end) (text-mode-ins)))
-      (bind-key map "c w" (lambda () (delete-word) (text-mode-ins)))
-      (bind-key map "c W" (lambda () (delete-longword) (text-mode-ins)))
-      (bind-key map "c e" (lambda () (delete-word-end) (text-mode-ins)))
-      (bind-key map "c E" (lambda () (delete-longword-end) (text-mode-ins)))
-      (bind-key map "c b" (lambda () (delete-prev-word) (text-mode-ins)))
-      (bind-key map "c B" (lambda () (delete-prev-longword) (text-mode-ins)))
-      (bind-key map "c 0" (lambda () (delete-line-begin) (text-mode-ins)))
-      (bind-key map "c $" (lambda () (delete-line-end) (text-mode-ins)))
-      (bind-key map "S" (lambda () (move-line-begin) (delete-line-end) (text-mode-ins)))
-      (bind-key map "v" (lambda () (text-mode-vis)))
-      (bind-key map "V" (lambda () (text-mode-vis-linewise)))
+      (bind-key map "i" (lambda () (text-mode-insert)))
+      (bind-key map "a" (lambda () (move-next-char) (text-mode-insert)))
+      (bind-key map "A" (lambda () (move-line-end) (text-mode-insert)))
+      (bind-key map "o" (lambda () (insert-empty-line) (text-mode-insert)))
+      (bind-key map "O" (lambda () (insert-empty-line-up) (text-mode-insert)))
+      (bind-key map "C" (lambda () (delete-line-end) (text-mode-insert)))
+      (bind-key map "c w" (lambda () (delete-word) (text-mode-insert)))
+      (bind-key map "c W" (lambda () (delete-longword) (text-mode-insert)))
+      (bind-key map "c e" (lambda () (delete-word-end) (text-mode-insert)))
+      (bind-key map "c E" (lambda () (delete-longword-end) (text-mode-insert)))
+      (bind-key map "c b" (lambda () (delete-prev-word) (text-mode-insert)))
+      (bind-key map "c B" (lambda () (delete-prev-longword) (text-mode-insert)))
+      (bind-key map "c 0" (lambda () (delete-line-begin) (text-mode-insert)))
+      (bind-key map "c $" (lambda () (delete-line-end) (text-mode-insert)))
+      (bind-key map "S" (lambda () (move-line-begin) (delete-line-end) (text-mode-insert)))
+      (bind-key map "v" (lambda () (text-mode-visual)))
+      (bind-key map "V" (lambda () (text-mode-visual-linewise)))
       (bind-key map "p" (lambda () (copybuf-paste) (buffer-snapshot)))
       (bind-key map "P" (lambda () (copybuf-paste-before) (buffer-snapshot)))
       (bind-key map "Y" (lambda () (copy-line)))
@@ -202,38 +202,38 @@
    )
 )
 
-(define text-mode-ins-map
+(define text-mode-insert-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" (lambda () (insert-nl)))
       (bind-key map "<Backspace>" (lambda () (delete-prev-char)))
-      (bind-key map "<Esc>" text-mode-cmd)
+      (bind-key map "<Esc>" text-mode-normal)
       map
    )
 )
 
-(define text-mode-vis-map
-   (let ([map (make-keymap 'text-mode-cmd-map)])
-      (bind-key map "<Esc>" text-mode-cmd)
-      (bind-key map "x" (lambda () (mark-delete) (text-mode-cmd)))
-      (bind-key map "d" (lambda () (mark-delete) (text-mode-cmd)))
-      (bind-key map "y" (lambda () (mark-copy) (text-mode-cmd)))
-      (bind-key map "a" (lambda () (mark-copy-append) (text-mode-cmd)))
-      (bind-key map "A" (lambda () (mark-copy-append-linewise) (text-mode-cmd)))
+(define text-mode-visual-map
+   (let ([map (make-keymap 'text-mode-normal-map)])
+      (bind-key map "<Esc>" text-mode-normal)
+      (bind-key map "x" (lambda () (mark-delete) (text-mode-normal)))
+      (bind-key map "d" (lambda () (mark-delete) (text-mode-normal)))
+      (bind-key map "y" (lambda () (mark-copy) (text-mode-normal)))
+      (bind-key map "a" (lambda () (mark-copy-append) (text-mode-normal)))
+      (bind-key map "A" (lambda () (mark-copy-append-linewise) (text-mode-normal)))
       map
    )
 )
 
-(define text-mode-vis-linewise-map
+(define text-mode-visual-linewise-map
    (let ([map (make-keymap)])
-      (bind-key map "<Esc>" text-mode-cmd)
-      (bind-key map "x" (lambda () (mark-delete) (text-mode-cmd)))
-      (bind-key map "d" (lambda () (mark-delete) (text-mode-cmd)))
+      (bind-key map "<Esc>" text-mode-normal)
+      (bind-key map "x" (lambda () (mark-delete) (text-mode-normal)))
+      (bind-key map "d" (lambda () (mark-delete) (text-mode-normal)))
       (bind-key map "l" (lambda () (move-line-down)))
       (bind-key map "j" (lambda () (move-line-down) (move-line-end)))
       (bind-key map "k" (lambda () (move-line-up) (move-line-end)))
-      (bind-key map "y" (lambda () (mark-copy-linewise) (text-mode-cmd)))
-      (bind-key map "a" (lambda () (mark-copy-append) (text-mode-cmd)))
-      (bind-key map "A" (lambda () (mark-copy-append-linewise) (text-mode-cmd)))
+      (bind-key map "y" (lambda () (mark-copy-linewise) (text-mode-normal)))
+      (bind-key map "a" (lambda () (mark-copy-append) (text-mode-normal)))
+      (bind-key map "A" (lambda () (mark-copy-append-linewise) (text-mode-normal)))
       (bind-key map "G" (lambda () (move-buffer-end)))
       map
    )
@@ -291,22 +291,22 @@
       )
    )
 
-   (or (local-bound? text-mode-vis-local-map)
-       (define-local text-mode-vis-local-map (make-keymap 'text-mode-vis-map)))
+   (or (local-bound? text-mode-visual-local-map)
+       (define-local text-mode-visual-local-map (make-keymap 'text-mode-visual-map)))
 
-   (or (local-bound? text-mode-vis-linewise-local-map)
-       (define-local text-mode-vis-linewise-local-map (make-keymap 'text-mode-vis-linewise-map)))
+   (or (local-bound? text-mode-visual-linewise-local-map)
+       (define-local text-mode-visual-linewise-local-map (make-keymap 'text-mode-visual-linewise-map)))
 
-   (or (local-bound? text-mode-cmd-local-map)
-       (define-local text-mode-cmd-local-map (make-keymap 'text-mode-cmd-map)))
+   (or (local-bound? text-mode-normal-local-map)
+       (define-local text-mode-normal-local-map (make-keymap 'text-mode-normal-map)))
 
-   (or (local-bound? text-mode-ins-local-map)
-       (define-local text-mode-ins-local-map (make-keymap 'text-mode-ins-map)))
+   (or (local-bound? text-mode-insert-local-map)
+       (define-local text-mode-insert-local-map (make-keymap 'text-mode-insert-map)))
 
    (or (local-bound? buffer-reload-func)
        (define-local buffer-reload-func buffer-reload-file))
 
    (define-local window-draw-hook text-mode-linenum-draw)
    (define-local linenum-enable #t)
-   (text-mode-cmd)
+   (text-mode-normal)
 )

@@ -657,6 +657,6 @@
    )
 )
 
-(bind-key text-mode-cmd-map "g l" (lambda () (git-show-log (buffer-filename))))
-(bind-key text-mode-cmd-map "g d" (lambda () (git-status-diff-file 'unstaged (buffer-filename))))
-(bind-key text-mode-cmd-map "g c" (lambda () (git-show-commit)))
+(bind-key text-mode-normal-map "g l" (lambda () (git-show-log (buffer-filename))))
+(bind-key text-mode-normal-map "g d" (lambda () (git-status-diff-file 'unstaged (buffer-filename))))
+(bind-key text-mode-normal-map "g c" (lambda () (git-show-commit)))
