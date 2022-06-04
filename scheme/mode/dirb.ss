@@ -459,6 +459,15 @@
    )
 )
 
+(define dirb-create-tar-archive
+   (lambda ()
+      (let ([path (dirb-entry-path)])
+         (system (format "tar -czf ~a.tar.gz ~a" path path))
+         (dirb-open-dir (dirb-current-dir))
+      )
+   )
+)
+
 (define dirb-mode-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" dirb-open-entry)
@@ -479,6 +488,7 @@
       (bind-key map "<Space>" dirb-select-entry)
       (bind-key map "<Esc>" dirb-clear-selection)
       (bind-key map "`" (lambda () (term #f "" (dirb-current-dir))))
+      (bind-key map "c" dirb-create-tar-archive)
       map
    )
 )
