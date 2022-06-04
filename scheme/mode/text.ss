@@ -207,6 +207,7 @@
       (bind-key map "<Enter>" (lambda () (insert-nl)))
       (bind-key map "<Backspace>" (lambda () (delete-prev-char)))
       (bind-key map "<Esc>" text-mode-normal)
+      (bind-key map "M-<Space>" text-mode-normal)
       map
    )
 )
@@ -214,6 +215,7 @@
 (define text-mode-visual-map
    (let ([map (make-keymap 'text-mode-normal-map)])
       (bind-key map "<Esc>" text-mode-normal)
+      (bind-key map "M-<Space>" text-mode-normal)
       (bind-key map "x" (lambda () (mark-delete) (text-mode-normal)))
       (bind-key map "d" (lambda () (mark-delete) (text-mode-normal)))
       (bind-key map "y" (lambda () (mark-copy) (text-mode-normal)))
@@ -255,7 +257,7 @@
 
 (define text-mode-visual-linewise-map
    (let ([map (make-keymap)])
-      (bind-key map "<Esc>" text-mode-normal)
+      (bind-key map "M-<Space>" text-mode-normal)
       (bind-key map "x" (lambda () (mark-delete) (text-mode-normal)))
       (bind-key map "d" (lambda () (mark-delete) (text-mode-normal)))
       (bind-key map "l" (lambda () (move-line-down)))
