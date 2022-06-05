@@ -462,7 +462,7 @@
 (define dirb-create-tar-archive
    (lambda ()
       (let ([path (dirb-entry-path)])
-         (system (format "tar -czf ~a.tar.gz ~a" path path))
+         (system (format "tar -czf ~a.tar.gz -C ~a ~a" path (dirb-current-dir) (path-last path)))
          (dirb-open-dir (dirb-current-dir))
       )
    )
