@@ -86,7 +86,7 @@
 
 (define dirb-reload
    (lambda ()
-      (dirb-open-dir (dirb-current-dir))
+      (save-cursor (dirb-open-dir (dirb-current-dir)))
    )
 )
 
@@ -148,7 +148,7 @@
    (lambda ()
       (set-local! show-hidden
          (not (get-local show-hidden)))
-      (dirb-open-dir (dirb-current-dir))
+      (dirb-reload)
    )
 )
 
@@ -190,7 +190,7 @@
             (let ([p (open-output-file (string-append (dirb-current-dir) "/" f))])
                (close-port p)
             )
-            (dirb-open-dir (dirb-current-dir))
+            (dirb-reload)
          )
       )
    )
@@ -201,7 +201,7 @@
       (minibuf-read "new dir:"
          (lambda (f)
             (mkdir (string-append (dirb-current-dir) "/" f))
-            (dirb-open-dir (dirb-current-dir))
+            (dirb-reload)
          )
       )
    )
@@ -224,7 +224,7 @@
                  )
                (when (eq? v 'yes)
                   (rm-rf p)
-                  (dirb-open-dir (dirb-current-dir))
+                  (dirb-reload)
                )
             )
          )
@@ -256,7 +256,7 @@
                                        [new (string-append (dirb-current-dir) "/" v)]
                                       )
                                     (system (format "cp -r ~a ~a" old new))
-                                    (dirb-open-dir (dirb-current-dir))
+                                    (dirb-reload)
                                     (dirb-clear-selection)
                                  )
                               )
@@ -264,7 +264,7 @@
                         )
                         ;; else
                         (begin
-                           (dirb-open-dir (dirb-current-dir))
+                           (dirb-reload)
                            (dirb-clear-selection)
                            (system (format "cp -r ~a ~a" p (dirb-current-dir)))
                            (message (format "~d files were copied" count))
@@ -272,7 +272,7 @@
                      )
                   )
                )
-               (dirb-open-dir (dirb-current-dir))
+               (dirb-reload)
                (dirb-clear-selection)
                (message (format "~d files were copied" count))
             )
@@ -345,7 +345,7 @@
                   (dirb-get-selection)
                )
                (dirb-clear-selection)
-               (dirb-open-dir (dirb-current-dir))
+               (dirb-reload)
             )
          )
       )
@@ -396,7 +396,7 @@
                      [new (string-append (dirb-current-dir) "/" v)]
                     )
                   (rename-file old new)
-                  (dirb-open-dir (dirb-current-dir))
+                  (dirb-reload)
                )
             )
          )
@@ -463,7 +463,7 @@
    (lambda ()
       (let ([path (dirb-entry-path)])
          (system (format "tar -czf ~a.tar.gz -C ~a ~a" path (dirb-current-dir) (path-last path)))
-         (dirb-open-dir (dirb-current-dir))
+         (dirb-reload)
       )
    )
 )
@@ -477,7 +477,7 @@
          (if match
             (begin
                (system (format "tar -xf ~a -C ~a" path (dirb-current-dir)))
-               (dirb-open-dir (dirb-current-dir))
+               (dirb-reload)
             )
             ;; else
             (message "file archive is not supported")
