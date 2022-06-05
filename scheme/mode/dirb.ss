@@ -468,6 +468,24 @@
    )
 )
 
+(define dirb-extract-tar-archive
+   (lambda ()
+      (let* (
+             [path (dirb-entry-path)]
+             [match (pregexp-match ".*\\.(tar)$|.*\\.(tar\\.gz)$" path)]
+            )
+         (if match
+            (begin
+               (system (format "tar -xf ~a -C ~a" path (dirb-current-dir)))
+               (dirb-open-dir (dirb-current-dir))
+            )
+            ;; else
+            (message "file archive is not supported")
+         )
+      )
+   )
+)
+
 (define dirb-mode-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" dirb-open-entry)
@@ -489,6 +507,7 @@
       (bind-key map "<Esc>" dirb-clear-selection)
       (bind-key map "`" (lambda () (term #f "" (dirb-current-dir))))
       (bind-key map "c" dirb-create-tar-archive)
+      (bind-key map "x" dirb-extract-tar-archive)
       map
    )
 )
