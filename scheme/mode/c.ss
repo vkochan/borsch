@@ -1,10 +1,10 @@
-(define c-mode-compile-buffer
+(define c-compile-buffer
    (lambda ()
       (term (format "(gcc -c ~a) || read" (buffer-filename)))
    )
 )
 
-(define c-mode-compile-and-run-buffer
+(define c-compile-and-run-buffer
    (lambda ()
       (let (
             [prog (path-root (buffer-filename))]
@@ -16,8 +16,8 @@
 )
 
 (define-mode c-mode "C" text-mode
-   (bind-key-local "C-c C-c" c-mode-compile-buffer)
-   (bind-key-local "C-c C-r" c-mode-compile-and-run-buffer)
+   (bind-key-local "C-c C-c" c-compile-buffer)
+   (bind-key-local "C-c C-r" c-compile-and-run-buffer)
    (syntax-set-lang 'c)
 )
 
