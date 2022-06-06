@@ -1698,10 +1698,20 @@
    )
 )
 
+(define extract-word-for-search
+   (lambda ()
+      (if (local-bound? extract-word-for-search)
+         ((get-local extract-word-for-search))
+         ;; else
+         (extract-word)
+      )
+   )
+)
+
 (define search-word-forward
    (case-lambda
       [()
-       (search-word-forward (extract-word))]
+       (search-word-forward (extract-word-for-search))]
 
       [(w)
        (search-word-direction w +1)]
@@ -1711,7 +1721,7 @@
 (define search-word-backward
    (case-lambda
       [()
-       (search-word-backward (extract-word))]
+       (search-word-backward (extract-word-for-search))]
 
       [(w)
        (search-word-direction w -1)]
