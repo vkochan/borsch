@@ -127,7 +127,7 @@
 (bind-key "M-l"         window-select-right)
 (bind-key "M-j"         window-select-lower)
 (bind-key "M-k"         window-select-upper)
-(bind-key "M-d"         window-delete)
+(bind-key "M-w d"       window-delete)
 (bind-key "M-w h"       window-select-left)
 (bind-key "M-w l"       window-select-right)
 (bind-key "M-w j"       window-select-lower)
