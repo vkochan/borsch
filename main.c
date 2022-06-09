@@ -111,7 +111,7 @@ typedef struct {
 	const char *args[3];
 } Action;
 
-#define MAX_KEYS 3
+#define MAX_KEYS 4
 
 typedef unsigned int KeyCombo[MAX_KEYS];
 
@@ -1967,7 +1967,33 @@ static KeyMap *buf_keymap_get(Buffer *buf)
 	return buffer_keymap_get(buf);
 }
 
-static void handle_keypress(int fd, void *arg) {
+static bool keybuf_enqueue(KeyBuf *kbuf, int key)
+{
+	if (kbuf->key_index >= MAX_KEYS)
+		return false;
+
+	kbuf->keys[kbuf->key_index++] = key;
+	return true;
+}
+
+static void keybuf_clear(KeyBuf *kbuf)
+{
+	memset(kbuf->keys, 0, sizeof(kbuf->keys));
+	kbuf->key_index = 0;
+}
+
+static void keybuf_flush(KeyBuf *kbuf)
+{
+	for (int i = 0; i < kbuf->key_index; i++) {
+		keypress(kbuf->keys[i]);
+	}
+
+	keybuf_clear(kbuf);
+}
+
+static void handle_keypress(int fd, void *arg)
+{
+	KeyBinding *kbd = NULL;
 	KeyBuf *kbuf = arg;
 	int alt_code;
 	event_t evt;
@@ -1993,35 +2019,41 @@ reenter:
 		alt_code = getch();
 		nodelay(stdscr, FALSE);
 		if (alt_code > 0) {
-			kbuf->keys[kbuf->key_index++] = code;
+			if (!keybuf_enqueue(kbuf, code)) {
+				keybuf_flush(kbuf);
+				return;	
+			}
 			code = alt_code;
 		}
 	}
 
-	if (code >= 0) {
-		kbuf->keys[kbuf->key_index++] = code;
-		KeyBinding *kbd = NULL;
-		if (code == KEY_MOUSE) {
-			kbuf->key_index = 0;
-			handle_mouse();
-		} else if ((kbd = keymap_match(curr_kmap, kbuf->keys, kbuf->key_index))) {
-			if (keymap_kbd_is_map(kbd)) {
-				curr_kmap = keymap_kbd_map_get(kbd);
-				memset(kbuf->keys, 0, sizeof(kbuf->keys));
-				kbuf->key_index = 0;
-				goto reenter;
-			}
+	if (code < 0)
+		return;
 
-			if (keymap_kbd_len(kbd) == kbuf->key_index) {
-				keymap_kbd_action(kbd);
-				memset(kbuf->keys, 0, sizeof(kbuf->keys));
-				kbuf->key_index = 0;
-			}
-		} else {
-			kbuf->key_index = 0;
-			memset(kbuf->keys, 0, sizeof(kbuf->keys));
-			keypress(code);
+	if (code == KEY_MOUSE) {
+		handle_mouse();
+		return;
+	}
+
+
+	if (!keybuf_enqueue(kbuf, code)) {
+		keybuf_flush(kbuf);
+		return;	
+	}
+
+	if ((kbd = keymap_match(curr_kmap, kbuf->keys, kbuf->key_index))) {
+		if (keymap_kbd_is_map(kbd)) {
+			curr_kmap = keymap_kbd_map_get(kbd);
+			keybuf_clear(kbuf);
+			goto reenter;
 		}
+
+		if (keymap_kbd_len(kbd) == kbuf->key_index) {
+			keymap_kbd_action(kbd);
+			keybuf_clear(kbuf);
+		}
+	} else {
+		keybuf_flush(kbuf);
 	}
 }
 
