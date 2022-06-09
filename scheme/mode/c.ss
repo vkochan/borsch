@@ -1,6 +1,6 @@
 (define c-compile-options
    (lambda ()
-      (or (get-local c-compile-options) "")
+      (get-local c-compile-options "")
    )
 )
 
@@ -24,7 +24,6 @@
 (define-mode c-mode "C" text-mode
    (bind-key-local "C-c C-c" c-compile-buffer)
    (bind-key-local "C-c C-r" c-compile-and-run-buffer)
-   (define-local c-compile-options #f)
    (syntax-set-lang 'c)
 )
 
