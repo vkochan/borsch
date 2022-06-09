@@ -58,6 +58,8 @@
 
 (define __cs_buf_search_regex (foreign-procedure "cs_buf_search_regex" (int int string int) scheme-object))
 
+(define %dir-locals-ht (make-hashtable string-hash string=?))
+
 (define file-match-mode (list))
 
 (define mode-gen-map-symb
@@ -1468,15 +1470,80 @@
    )
 )
 
+(define dir-local-symbol-bound?
+   (case-lambda
+      [(sym)
+       (dir-local-symbol-bound? (current-cwd) sym)
+      ]
+
+      [(dir sym)
+       (let (
+             [dir-env (hashtable-ref %dir-locals-ht dir #f)]
+            )
+          (and dir-env (top-level-bound? sym dir-env))
+       )
+      ]
+   )
+)
+
+(define dir-get-local-symbol
+   (lambda (sym)
+      (let (
+            [dir-env (hashtable-ref %dir-locals-ht (path-parent (buffer-filename)) #f)]
+           )
+         (if (and dir-env (top-level-bound? sym dir-env))
+            (top-level-value sym dir-env)
+            ;; else
+            (let (
+                  [cwd-env (hashtable-ref %dir-locals-ht (current-cwd) #f)]
+                 )
+               (top-level-value sym cwd-env)
+            )
+         )
+      )
+   )
+)
+
+(define dir-set-local-symbol!
+   (lambda (dir sym val)
+      (let (
+            [dir-env (hashtable-ref %dir-locals-ht dir #f)]
+           )
+         (if dir-env
+            (set-top-level-value! sym val dir-env)
+            ;; else
+            (let ([env (copy-environment (scheme-environment))])
+               (hashtable-set! %dir-locals-ht dir env)
+               (define-top-level-value sym val env)
+            )
+         )
+      )
+   )
+)
+
+(define-syntax (dir-set-local! stx)
+   (syntax-case stx ()
+	       ((_ dir sym val)
+		#`(dir-set-local-symbol! dir 'sym val)
+               )
+   )
+)
+
 (define local-symbol-bound?
    (lambda (sym)
-      (top-level-bound? sym (buffer-env))
+      (or (top-level-bound? sym (buffer-env))
+          (dir-local-symbol-bound? (current-cwd) sym)
+          (dir-local-symbol-bound? (path-parent (buffer-filename)) sym))
    )
 )
 
 (define get-local-symbol
    (lambda (sym)
-      (top-level-value sym (buffer-env))
+      (if (top-level-bound? sym (buffer-env))
+         (top-level-value sym (buffer-env))
+         ;; else
+         (dir-get-local-symbol sym)
+      )
    )
 )
 
