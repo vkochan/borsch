@@ -20,13 +20,11 @@
 
 static void* (*symb_resolver)(keymap_symb_t type, char *name);
 
-typedef unsigned int KeyCombo[MAX_KEYS];
-
 typedef struct KeyMap KeyMap;
 
 typedef struct KeyBinding {
 	struct KeyBinding *next;
-	KeyCombo keys;
+	KeyCode keys[MAX_KEYS];
 	void (*act)(void);
 	int len;
 	char map_name[64];
@@ -101,12 +99,12 @@ static int keymap_parse(KeyBinding *kbd, char *key)
 
 	for (i = 0; i < MAX_KEYS && tok; i++) {
 		if (strlen(tok) >= 3 && tok[0] == 'C' && tok[1] == '-') {
-			kbd->keys[i] = CTRL(__keymap_code(&tok[2]));
+			kbd->keys[i].code = CTRL(__keymap_code(&tok[2]));
 		} else if (strlen(tok) >= 3 && tok[0] == 'M' && tok[1] == '-') {
-			kbd->keys[i++] = ALT;
-			kbd->keys[i] = __keymap_code(&tok[2]);
+			kbd->keys[i++].code = ALT;
+			kbd->keys[i].code = __keymap_code(&tok[2]);
 		} else {
-			kbd->keys[i] = __keymap_code(tok);;
+			kbd->keys[i].code = __keymap_code(tok);;
 		}
 
 		tok = strtok_r(NULL, " ", &tok_ptr);
@@ -131,7 +129,7 @@ KeyBinding *keymap_find(KeyMap *map, char *key)
 			continue;
 
 		for (i = 0; i < len; i++)
-			if (it->keys[i] == kbd.keys[i])
+			if (it->keys[i].code == kbd.keys[i].code)
 				match++;
 
 		if (match == kbd.len)
@@ -143,7 +141,7 @@ KeyBinding *keymap_find(KeyMap *map, char *key)
 
 /* TODO: optimize to store found map for next matching to do not run over all
  *       parents */
-KeyBinding *keymap_match(KeyMap *map, int *key, int len)
+KeyBinding *keymap_match(KeyMap *map, KeyCode *keys, int len)
 {
 	KeyBinding *it;
 	KeyMap *parent;
@@ -153,7 +151,7 @@ KeyBinding *keymap_match(KeyMap *map, int *key, int len)
 
 	for (it = map->kbd_list; it; it = it->next) {
 		for (m = i = 0; i < len; i++) {
-			if (it->keys[i] == key[i])
+			if (it->keys[i].code == keys[i].code)
 				m++;
 		}
 
@@ -163,7 +161,7 @@ KeyBinding *keymap_match(KeyMap *map, int *key, int len)
 
 	parent = keymap_parent_get(map);
 	if (parent)
-		return keymap_match(parent, key, len);
+		return keymap_match(parent, keys, len);
 
 	return NULL;
 }

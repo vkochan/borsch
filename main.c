@@ -113,8 +113,6 @@ typedef struct {
 
 #define MAX_KEYS 4
 
-typedef unsigned int KeyCombo[MAX_KEYS];
-
 typedef struct {
 	mmask_t mask;
 	Action action;
@@ -127,7 +125,7 @@ typedef struct {
 
 typedef struct {
 	unsigned int key_index;
-	KeyCombo keys;
+	KeyCode keys[MAX_KEYS];
 } KeyBuf;
 
 static KeyBuf kbuf;
@@ -1972,7 +1970,7 @@ static bool keybuf_enqueue(KeyBuf *kbuf, int key)
 	if (kbuf->key_index >= MAX_KEYS)
 		return false;
 
-	kbuf->keys[kbuf->key_index++] = key;
+	kbuf->keys[kbuf->key_index++].code = key;
 	return true;
 }
 
@@ -1985,7 +1983,7 @@ static void keybuf_clear(KeyBuf *kbuf)
 static void keybuf_flush(KeyBuf *kbuf)
 {
 	for (int i = 0; i < kbuf->key_index; i++) {
-		keypress(kbuf->keys[i]);
+		keypress(kbuf->keys[i].code);
 	}
 
 	keybuf_clear(kbuf);

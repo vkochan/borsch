@@ -11,12 +11,16 @@ typedef enum {
 typedef struct KeyBinding KeyBinding;
 typedef struct KeyMap KeyMap;
 
+typedef struct {
+	int code;
+} KeyCode;
+
 void keymap_ref_get(KeyMap *map);
 void keymap_ref_put(KeyMap *map);
 KeyMap *keymap_new(KeyMap *parent);
 void keymap_free(KeyMap *map);
 KeyBinding *keymap_find(KeyMap *map, char *key);
-KeyBinding *keymap_match(KeyMap *map, int *keys, int len);
+KeyBinding *keymap_match(KeyMap *map, KeyCode *keys, int len);
 bool keymap_kbd_is_map(KeyBinding *kbd);
 KeyMap *keymap_kbd_map_get(KeyBinding *kbd);
 int keymap_kbd_len(KeyBinding *kbd);
