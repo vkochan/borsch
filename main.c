@@ -1965,12 +1965,17 @@ static KeyMap *buf_keymap_get(Buffer *buf)
 	return buffer_keymap_get(buf);
 }
 
-static bool keybuf_enqueue(KeyBuf *kbuf, int key)
+static bool keybuf_enqueue(KeyBuf *kbuf, int code, int flags)
 {
+	KeyCode *key;
+
 	if (kbuf->key_index >= MAX_KEYS)
 		return false;
 
-	kbuf->keys[kbuf->key_index++].code = key;
+	key = &kbuf->keys[kbuf->key_index++];
+
+	key->flags = flags;
+	key->code = code;
 	return true;
 }
 
@@ -1983,7 +1988,15 @@ static void keybuf_clear(KeyBuf *kbuf)
 static void keybuf_flush(KeyBuf *kbuf)
 {
 	for (int i = 0; i < kbuf->key_index; i++) {
-		keypress(kbuf->keys[i].code);
+		KeyCode *key = &kbuf->keys[i];
+		int code = key->code;
+
+		if (key->flags & KEY_MOD_F_CTL)
+			code = CTRL(code);
+		else if (key->flags & KEY_MOD_F_ALT)
+			keypress(ALT);
+
+		keypress(code);
 	}
 
 	keybuf_clear(kbuf);
@@ -1995,6 +2008,7 @@ static void handle_keypress(int fd, void *arg)
 	KeyBuf *kbuf = arg;
 	int alt_code;
 	event_t evt;
+	int flags;
 	int code;
 
 	if (!current_window()) {
@@ -2007,6 +2021,7 @@ static void handle_keypress(int fd, void *arg)
 
 reenter:
 	code = getch();
+	flags = 0;
 
 	evt.eid = EVT_KEY_PRESS;
 	evt.oid = code;
@@ -2017,12 +2032,12 @@ reenter:
 		alt_code = getch();
 		nodelay(stdscr, FALSE);
 		if (alt_code > 0) {
-			if (!keybuf_enqueue(kbuf, code)) {
-				keybuf_flush(kbuf);
-				return;	
-			}
+			flags |= KEY_MOD_F_ALT;
 			code = alt_code;
 		}
+	} else if (code < 0x1f) {
+		flags |= KEY_MOD_F_CTL;
+		code = code + 0x60;
 	}
 
 	if (code < 0)
@@ -2034,7 +2049,7 @@ reenter:
 	}
 
 
-	if (!keybuf_enqueue(kbuf, code)) {
+	if (!keybuf_enqueue(kbuf, code, flags)) {
 		keybuf_flush(kbuf);
 		return;	
 	}

@@ -9,15 +9,6 @@
 
 #define MAX_KEYS 3
 
-#define ALT	27
-#if defined CTRL && defined _AIX
-  #undef CTRL
-#endif
-#ifndef CTRL
-  #define CTRL(k)   ((k) & 0x1F)
-#endif
-#define CTRL_ALT(k) ((k) + (129 - 'a'))
-
 static void* (*symb_resolver)(keymap_symb_t type, char *name);
 
 typedef struct KeyMap KeyMap;
@@ -99,9 +90,10 @@ static int keymap_parse(KeyBinding *kbd, char *key)
 
 	for (i = 0; i < MAX_KEYS && tok; i++) {
 		if (strlen(tok) >= 3 && tok[0] == 'C' && tok[1] == '-') {
-			kbd->keys[i].code = CTRL(__keymap_code(&tok[2]));
+			kbd->keys[i].flags = KEY_MOD_F_CTL;
+			kbd->keys[i].code = __keymap_code(&tok[2]);
 		} else if (strlen(tok) >= 3 && tok[0] == 'M' && tok[1] == '-') {
-			kbd->keys[i++].code = ALT;
+			kbd->keys[i].flags = KEY_MOD_F_ALT;
 			kbd->keys[i].code = __keymap_code(&tok[2]);
 		} else {
 			kbd->keys[i].code = __keymap_code(tok);;
@@ -112,6 +104,11 @@ static int keymap_parse(KeyBinding *kbd, char *key)
 
 	kbd->len = i;
 	return 0;
+}
+
+static bool keycode_equal(KeyCode *k1, KeyCode *k2)
+{
+	return k1->code == k2->code && k1->flags == k2->flags;
 }
 
 KeyBinding *keymap_find(KeyMap *map, char *key)
@@ -129,7 +126,7 @@ KeyBinding *keymap_find(KeyMap *map, char *key)
 			continue;
 
 		for (i = 0; i < len; i++)
-			if (it->keys[i].code == kbd.keys[i].code)
+			if (keycode_equal(&it->keys[i], &kbd.keys[i]))
 				match++;
 
 		if (match == kbd.len)
@@ -151,7 +148,7 @@ KeyBinding *keymap_match(KeyMap *map, KeyCode *keys, int len)
 
 	for (it = map->kbd_list; it; it = it->next) {
 		for (m = i = 0; i < len; i++) {
-			if (it->keys[i].code == keys[i].code)
+			if (keycode_equal(&it->keys[i], &keys[i]))
 				m++;
 		}
 

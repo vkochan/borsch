@@ -11,7 +11,11 @@ typedef enum {
 typedef struct KeyBinding KeyBinding;
 typedef struct KeyMap KeyMap;
 
+#define KEY_MOD_F_ALT		1
+#define KEY_MOD_F_CTL		2
+
 typedef struct {
+	int flags;
 	int code;
 } KeyCode;
 
