@@ -2,7 +2,7 @@
    (syntax-set-lang 'gnumake)
 )
 
-(add-to-list 'file-match-mode '("GNUMakefile|Makefile|.*\\.mk" . gnumake-mode))
+(add-to-list 'file-match-mode '("GNUMakefile|Makefile|.*\\.mk$" . gnumake-mode))
 
 (define gnumake-syntax-bracket-match
    "[
