@@ -65,23 +65,29 @@
    )
 )
 
+(define file-open
+   (lambda (p)
+      (if (file-regular? p)
+         (let ([b (buffer-create)])
+            (with-current-buffer b
+               (text-mode)
+               (buffer-open-file p)
+               (move-line-num l)
+            )
+         )
+         ;; else
+         (if (file-directory? p)
+            (dirb p)
+         )
+      )
+   )
+)
+
 (define file-open-at-cursor
    (lambda ()
       (let-values ([(f l) (get-file-location (extract-object))])
          (let ([p (if (equal? #\/ (string-ref f 0)) f (string-append (buffer-cwd) "/" f))])
-            (if (file-regular? p)
-               (let ([b (buffer-create)])
-                  (with-current-buffer b
-                     (text-mode)
-                     (buffer-open-file p)
-                     (move-line-num l)
-                  )
-               )
-               ;; else
-               (if (file-directory? p)
-                  (dirb p)
-               )
-            )
+            (file-open p)
          )
       )
    )
@@ -212,6 +218,20 @@
    )
 )
 
+(define text-mode-visual-file-open
+   (lambda ()
+      (let* (
+             [f (mark-extract)]
+             [p (if (equal? #\/ (string-ref f 0)) f (string-append (buffer-cwd) "/" f))]
+            )
+         (text-mode-normal)
+         (when (file-exists? p)
+            (file-open p)
+         )
+      )
+   )
+)
+
 (define text-mode-visual-map
    (let ([map (make-keymap 'text-mode-normal-map)])
       (bind-key map "<Esc>" text-mode-normal)
@@ -221,6 +241,7 @@
       (bind-key map "y" (lambda () (mark-copy) (text-mode-normal)))
       (bind-key map "a" (lambda () (mark-copy-append) (text-mode-normal)))
       (bind-key map "A" (lambda () (mark-copy-append-linewise) (text-mode-normal)))
+      (bind-key map "g f" text-mode-visual-file-open)
       map
    )
 )
