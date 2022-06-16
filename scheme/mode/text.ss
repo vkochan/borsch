@@ -198,6 +198,7 @@
       (bind-key map "u" (lambda () (buffer-undo)))
       (bind-key map "g f" (lambda () (file-open-at-cursor)))
       (bind-key map "g r" (lambda () (if (local-bound? buffer-reload-func) ((get-local buffer-reload-func)))))
+      (bind-key map "g ^" (lambda () (dirb (path-parent (buffer-filename)))))
       (bind-key map "*" (lambda () (search-word-forward)))
       (bind-key map "/" (lambda () (search-regex-read)))
       (bind-key map "n" (lambda () (search-next)))
