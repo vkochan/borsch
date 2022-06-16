@@ -212,31 +212,51 @@
 
 (define git-add-file-cmd
    (lambda (f)
-      (git-cmd-read (format "add ~a" f))
+      (git-cmd-read (format "add ~a" (string-join f " ")))
    )
 )
 
 (define git-stage-file-cmd
    (lambda (f)
-      (git-cmd-read (format "add -- ~a" f))
+      (git-cmd-read (format "add -- ~a" (string-join f " ")))
    )
 )
 
 (define git-revert-file-cmd
    (lambda (f)
-      (git-cmd-read (format "checkout -- ~a" f))
+      (git-cmd-read (format "checkout -- ~a" (string-join f " ")))
    )
 )
 
 (define git-unstage-file-cmd
    (lambda (f)
-      (git-cmd-read (format "reset -- ~a" f))
+      (git-cmd-read (format "reset -- ~a" (string-join f " ")))
    )
 )
 
 (define git-untrack-file-cmd
    (lambda (f)
-      (git-cmd (format "rm --cached ~a" f))
+      (git-cmd (format "rm --cached ~a" (string-join f " ")))
+   )
+)
+
+(define git-status-diff
+   (lambda (status)
+      (let ([b (buffer-create)])
+         (with-current-buffer b
+            (diff-mode)
+            (buffer-set-mode-name (if (eq? status 'staged) "Diff Staged" "Diff Unstaged"))
+            (insert
+               (git-cmd-read
+                  (format "diff ~a"
+                     (if (eq? status 'staged) "--cached" "")
+                  )
+               )
+            )
+            (buffer-set-readonly #t)
+            (move-buffer-begin)
+         )
+      )
    )
 )
 
@@ -261,6 +281,31 @@
    )
 )
 
+(define git-staged-diff-all
+   (lambda ()
+      (git-status-diff 'staged)
+   )
+)
+
+(define git-staged-all-update
+   (lambda ()
+      (let ([ls (get-local staged-list)])
+         (when (not (equal? (length ls) 0))
+            (git-unstage-file-cmd ls)
+            (git-show-status)
+         )
+      )
+   )
+)
+
+(define git-staged-all-map
+   (let ([map (make-keymap)])
+      (bind-key map "u" git-staged-all-update)
+      (bind-key map "<Enter>" git-staged-diff-all)
+      map
+   )
+)
+
 (define git-staged-file-update
    (lambda ()
       (move-line-begin)
@@ -282,6 +327,49 @@
    (let ([map (make-keymap)])
       (bind-key map "u" git-staged-file-update)
       (bind-key map "<Enter>" git-staged-diff-file)
+      map
+   )
+)
+
+(define git-unstaged-all-update
+   (lambda ()
+      (let ([ls (get-local unstaged-list)])
+         (when (not (equal? (length ls) 0))
+            (git-stage-file-cmd ls)
+            (git-show-status)
+         )
+      )
+   )
+)
+
+(define git-unstaged-all-revert
+   (lambda ()
+      (let ([ls (get-local unstaged-list)])
+         (when (not (equal? (length ls) 0))
+            (minibuf-ask "Revert all unstaged files ?"
+               (lambda (v)
+                  (when (eq? v 'yes)
+                     (git-revert-file-cmd ls)
+                     (git-show-status)
+                  )
+               )
+            )
+         )
+      )
+   )
+)
+
+(define git-unstaged-diff-all
+   (lambda ()
+      (git-status-diff 'unstaged)
+   )
+)
+
+(define git-unstaged-all-map
+   (let ([map (make-keymap)])
+      (bind-key map "u" git-unstaged-all-update)
+      (bind-key map "!" git-unstaged-all-revert)
+      (bind-key map "<Enter>" git-unstaged-diff-all)
       map
    )
 )
@@ -346,7 +434,7 @@
    (lambda ()
       (let ([ls (get-local staged-list)])
          (when (not (equal? (length ls) 0))
-            (insert (format "Staged (~a):\n" (length ls)) '(style (:attr "bold")))
+            (insert (format "Staged (~a):\n" (length ls)) '(style (:attr "bold")) `(keymap ,git-staged-all-map))
 	    (for-each
                (lambda (f)
                   (insert (format "~a ~a\n" (git-staged-file-status f) f) `(keymap ,git-staged-file-map))
@@ -362,7 +450,7 @@
    (lambda ()
       (let ([ls (get-local unstaged-list)])
          (when (not (equal? (length ls) 0))
-            (insert (format "Not staged (~a):\n" (length ls)) '(style (:attr "bold")))
+            (insert (format "Not staged (~a):\n" (length ls)) '(style (:attr "bold")) `(keymap ,git-unstaged-all-map))
 	    (for-each
                (lambda (f)
                   (insert (format "~a ~a\n" (git-unstaged-file-status f) f) `(keymap ,git-unstaged-file-map))
