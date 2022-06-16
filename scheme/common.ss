@@ -292,6 +292,29 @@
    )
 )
 
+(define string-join
+   (lambda (s j)
+      (if (list? s)
+         (let ([r ""] [i 0])
+            (for-each
+               (lambda (e)
+                  (if (= i 0)
+                     (set! r e)
+                     ;; else
+                     (set! r (string-append r j e))
+                  )
+                  (set! i (1+ i))
+               )
+               s
+            )
+            r
+         )
+         ;; else
+         s
+      )
+   )
+)
+
 (define % modulo)
 
 (define fmt format)
