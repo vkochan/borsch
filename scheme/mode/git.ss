@@ -652,6 +652,7 @@
                   (add-text-property (cursor) (word-end-pos) '(style (:fg "green")))
                )
             )
+            (move-buffer-begin)
           )
         )
       ]
