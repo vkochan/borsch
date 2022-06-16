@@ -261,7 +261,7 @@
    )
 )
 
-(define git-staged-update
+(define git-staged-file-update
    (lambda ()
       (move-line-begin)
       (move-next-longword)
@@ -278,15 +278,15 @@
    )
 )
 
-(define git-staged-map
+(define git-staged-file-map
    (let ([map (make-keymap)])
-      (bind-key map "u" git-staged-update)
+      (bind-key map "u" git-staged-file-update)
       (bind-key map "<Enter>" git-staged-diff-file)
       map
    )
 )
 
-(define git-unstaged-update
+(define git-unstaged-file-update
    (lambda ()
       (move-line-begin)
       (move-next-longword)
@@ -303,7 +303,7 @@
    )
 )
 
-(define git-unstaged-revert
+(define git-unstaged-file-revert
    (lambda ()
       (minibuf-ask "Revert selected file ?"
          (lambda (v)
@@ -318,16 +318,16 @@
    )
 )
 
-(define git-unstaged-map
+(define git-unstaged-file-map
    (let ([map (make-keymap)])
-      (bind-key map "u" git-unstaged-update)
-      (bind-key map "!" git-unstaged-revert)
+      (bind-key map "u" git-unstaged-file-update)
+      (bind-key map "!" git-unstaged-file-revert)
       (bind-key map "<Enter>" git-unstaged-diff-file)
       map
    )
 )
 
-(define git-untracked-update
+(define git-untracked-file-update
    (lambda ()
       (move-line-begin)
       (git-add-file-cmd (extract-longword))
@@ -335,9 +335,9 @@
    )
 )
 
-(define git-untracked-map
+(define git-untracked-file-map
    (let ([map (make-keymap)])
-      (bind-key map "u" git-untracked-update)
+      (bind-key map "u" git-untracked-file-update)
       map
    )
 )
@@ -349,7 +349,7 @@
             (insert (format "Staged (~a):\n" (length ls)) '(style (:attr "bold")))
 	    (for-each
                (lambda (f)
-                  (insert (format "~a ~a\n" (git-staged-file-status f) f) `(keymap ,git-staged-map))
+                  (insert (format "~a ~a\n" (git-staged-file-status f) f) `(keymap ,git-staged-file-map))
                ) ls
             )
             (insert "\n")
@@ -365,7 +365,7 @@
             (insert (format "Not staged (~a):\n" (length ls)) '(style (:attr "bold")))
 	    (for-each
                (lambda (f)
-                  (insert (format "~a ~a\n" (git-unstaged-file-status f) f) `(keymap ,git-unstaged-map))
+                  (insert (format "~a ~a\n" (git-unstaged-file-status f) f) `(keymap ,git-unstaged-file-map))
                ) ls
             )
             (insert "\n")
@@ -397,7 +397,7 @@
             (insert (format "Untracked (~a):\n" (length ls)) '(style (:attr "bold")))
 	    (for-each
                (lambda (f)
-                  (insert (format "~a\n" f) `(keymap ,git-untracked-map))
+                  (insert (format "~a\n" f) `(keymap ,git-untracked-file-map))
                ) ls
             )
             (insert "\n")
