@@ -255,6 +255,7 @@
                )
             )
             (buffer-set-readonly #t)
+            (move-buffer-begin)
          )
       )
    )
