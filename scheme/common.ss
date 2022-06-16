@@ -6,7 +6,8 @@
 (define-syntax (call-foreign stx)
    (syntax-case stx ()
       ((_ exp ...)
-       #`(with-mutex foreign-mutex
+       ;;#`(with-mutex foreign-mutex
+       #`(begin
             exp
 	    ...
          )
