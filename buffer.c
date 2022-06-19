@@ -177,9 +177,12 @@ bool buffer_del(Buffer *buf)
 		buf->ref_count--;
 
 	if (!buf->ref_count) {
-		if (buf->term)
-			vt_destroy(buf->term);
 		buffer_list_del(buf);
+		if (buf->term) {
+        		if (buffer_pid_get(buf))
+				kill(-buffer_pid_get(buf), SIGKILL);
+			vt_destroy(buf->term);
+		}
 		/* TODO: check if buffer is not saved and ask user to save it */
 		syntax_parser_delete(buf->parser);
 		keymap_free(buf->keymap);

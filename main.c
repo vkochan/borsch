@@ -1226,8 +1226,6 @@ static void __buf_del(Buffer *buf)
 	buffer_property_remove_cb(buf, PROPERTY_TYPE_ALL, EPOS, EPOS, NULL, buf_prop_del_cb);
 	buffer_ref_put(buf);
 	if (buffer_del(buf)) {
-        	if (buffer_pid_get(buf))
-			kill(-buffer_pid_get(buf), SIGKILL);
 		if (pty >= 0)
 			event_fd_handler_unregister(pty);
 		scheme_env_free(env);
@@ -1366,11 +1364,11 @@ static void handle_vt(int fd, void *arg) {
 
 static void process_attach(Vt *vt, Window *w)
 {
-	vt_title_handler_set(vt, term_title_handler);
-	vt_urgent_handler_set(vt, term_urgent_handler);
+	ui_window_on_view_update_set(w->win, NULL);
+	ui_window_sidebar_width_set(w->win, 0);
 	ui_window_ops_draw_set(w->win, vt_draw);
 	ui_window_priv_set(w->win, vt);
-	buffer_term_set(w->buf, vt);
+
 	vt_attach(vt, w->win);
 	vt_data_set(vt, w);
 	vt_dirty(vt);
@@ -1400,6 +1398,10 @@ static Vt *process_create(Window *w, const char *prog, const char *cwd, int *std
 	if (!term) {
 		return NULL;
 	}
+	vt_urgent_handler_set(term, term_urgent_handler);
+	vt_title_handler_set(term, term_title_handler);
+
+	buffer_term_set(w->buf, term);
 	process_attach(term, w);
 
 	vt_forkpty(term, shell, pargs, cwd, env, stdin, stdout);
@@ -2582,16 +2584,7 @@ int win_new(int bid)
 	}
 
 	if (buffer_term_get(c->buf)) {
-		Vt *term = buffer_term_get(c->buf);
-
-		vt_title_handler_set(term, term_title_handler);
-		vt_urgent_handler_set(term, term_urgent_handler);
-		ui_window_ops_draw_set(c->win, vt_draw);
-		ui_window_priv_set(c->win, term);
-		buffer_term_set(c->buf, term);
-		vt_attach(term, c->win);
-		vt_data_set(term, c);
-		vt_dirty(term);
+		process_attach(buffer_term_get(c->buf), c);
 	} else {
 		ui_window_priv_set(c->win, c);
 		ui_window_on_view_update_set(c->win, on_view_update_cb);
@@ -2945,14 +2938,7 @@ void win_buf_switch(int wid, int bid)
 		buffer_ref_put(w->buf);
 
 		if (buffer_term_get(b)) {
-			Vt *term = buffer_term_get(b);
-
-			ui_window_on_view_update_set(w->win, NULL);
-			ui_window_sidebar_width_set(w->win, 0);
-			ui_window_priv_set(w->win, term);
-			ui_window_ops_draw_set(w->win, vt_draw);
-			vt_data_set(term, w);
-			vt_dirty(term);
+			process_attach(buffer_term_get(b), w);
 		} else {
 			ui_window_on_view_update_set(w->win, on_view_update_cb);
 			ui_window_ops_draw_set(w->win, NULL);
