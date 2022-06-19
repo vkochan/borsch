@@ -1364,7 +1364,8 @@ static void handle_vt(int fd, void *arg) {
 	}
 }
 
-int term_create(const char *prog, const char *title, const char *cwd) {
+static Vt *process_create(Window *w, const char *prog, const char *cwd, int *stdin, int *stdout)
+{
 	const char *pargs[4] = { shell, NULL };
 	char buf[8];
 	const char *env[] = {
@@ -1376,20 +1377,48 @@ int term_create(const char *prog, const char *title, const char *cwd) {
 	pid_t pid;
 	Vt *term;
 
-	if (get_popup())
-		return -1;
+	snprintf(buf, sizeof buf, "%d", w->id);
 
 	if (prog) {
 		pargs[1] = "-c";
 		pargs[2] = prog;
 		pargs[3] = NULL;
 	}
+
+	term = vt_create(ui_height_get(ui), ui_width_get(ui), scr_history);
+	if (!term) {
+		return NULL;
+	}
+
+	ui_window_ops_draw_set(w->win, vt_draw);
+	ui_window_priv_set(w->win, term);
+	buffer_term_set(w->buf, term);
+	vt_attach(term, w->win);
+
+	pid = vt_forkpty(term, shell, pargs, cwd, env, stdin, stdout);
+	buffer_pid_set(w->buf, pid);
+
+	event_fd_handler_register(vt_pty_get(term), handle_vt, w->buf);
+
+	vt_data_set(term, w);
+	vt_title_handler_set(term, term_title_handler);
+	vt_urgent_handler_set(term, term_urgent_handler);
+
+	return term;
+}
+
+int term_create(const char *prog, const char *title, const char *cwd) {
+	char tmppath[PATH_MAX];
+	char tmp[256];
+
+	if (get_popup())
+		return -1;
+
 	Window *c = calloc(1, sizeof(Window));
 	if (!c)
 		return -1;
 	c->tags = tagset[seltags];
 	c->id = ++cmdfifo.id;
-	snprintf(buf, sizeof buf, "%d", c->id);
 
 	c->buf = __buf_new(title, global_kmap);
 	if (!c->buf) {
@@ -1413,8 +1442,7 @@ int term_create(const char *prog, const char *title, const char *cwd) {
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
 
-	term = vt_create(ui_height_get(ui), ui_width_get(ui), scr_history);
-	if (!term) {
+	if (!process_create(c, prog, cwd, NULL, NULL)) {
 		view_free(c->view);
 		__buf_del(c->buf);
 		free(c);
@@ -1422,10 +1450,6 @@ int term_create(const char *prog, const char *title, const char *cwd) {
 	}
 
 	ui_window_has_title_set(c->win, true);
-	ui_window_ops_draw_set(c->win, vt_draw);
-	ui_window_priv_set(c->win, term);
-	buffer_term_set(c->buf, term);
-	vt_attach(term, c->win);
 
 	if (prog) {
 		c->cmd = prog;
@@ -1438,17 +1462,8 @@ int term_create(const char *prog, const char *title, const char *cwd) {
 		c->cmd = shell;
 	}
 
-	pid = vt_forkpty(term, shell, pargs, cwd, env, NULL, NULL);
-	buffer_pid_set(c->buf, pid);
-
-	event_fd_handler_register(vt_pty_get(term), handle_vt, c->buf);
-
-	vt_data_set(term, c);
-	vt_title_handler_set(term, term_title_handler);
-	vt_urgent_handler_set(term, term_urgent_handler);
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
-	debug("window with pid %d forked\n", pid);
 	attach(c);
 	focus(c);
 	arrange();
