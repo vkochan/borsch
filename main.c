@@ -1364,6 +1364,18 @@ static void handle_vt(int fd, void *arg) {
 	}
 }
 
+static void process_attach(Vt *vt, Window *w)
+{
+	vt_title_handler_set(vt, term_title_handler);
+	vt_urgent_handler_set(vt, term_urgent_handler);
+	ui_window_ops_draw_set(w->win, vt_draw);
+	ui_window_priv_set(w->win, vt);
+	buffer_term_set(w->buf, vt);
+	vt_attach(vt, w->win);
+	vt_data_set(vt, w);
+	vt_dirty(vt);
+}
+
 static Vt *process_create(Window *w, const char *prog, const char *cwd, int *stdin, int *stdout)
 {
 	const char *pargs[4] = { shell, NULL };
@@ -1374,7 +1386,6 @@ static Vt *process_create(Window *w, const char *prog, const char *cwd, int *std
 	};
 	char tmppath[PATH_MAX];
 	char tmp[256];
-	pid_t pid;
 	Vt *term;
 
 	snprintf(buf, sizeof buf, "%d", w->id);
@@ -1389,20 +1400,11 @@ static Vt *process_create(Window *w, const char *prog, const char *cwd, int *std
 	if (!term) {
 		return NULL;
 	}
+	process_attach(term, w);
 
-	ui_window_ops_draw_set(w->win, vt_draw);
-	ui_window_priv_set(w->win, term);
-	buffer_term_set(w->buf, term);
-	vt_attach(term, w->win);
-
-	pid = vt_forkpty(term, shell, pargs, cwd, env, stdin, stdout);
-	buffer_pid_set(w->buf, pid);
+	vt_forkpty(term, shell, pargs, cwd, env, stdin, stdout);
 
 	event_fd_handler_register(vt_pty_get(term), handle_vt, w->buf);
-
-	vt_data_set(term, w);
-	vt_title_handler_set(term, term_title_handler);
-	vt_urgent_handler_set(term, term_urgent_handler);
 
 	return term;
 }

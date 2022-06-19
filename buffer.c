@@ -53,7 +53,6 @@ typedef struct Buffer {
 	bool is_dirty;
 	File file;
 	Vt *term;
-	pid_t pid;
 	volatile sig_atomic_t is_died;
 	size_t mark;
 	bool is_mark_set;
@@ -613,14 +612,12 @@ Vt *buffer_term_get(Buffer *buf)
 	return buf->term;
 }
 
-void buffer_pid_set(Buffer *buf, pid_t pid)
-{
-	buf->pid = pid;
-}
-
 pid_t buffer_pid_get(Buffer *buf)
 {
-	return buf->pid;
+	if (buf->term)
+		return vt_pid_get(buf->term);
+	else
+		return 0;
 }
 
 Buffer *buffer_by_pid(pid_t pid)
@@ -628,7 +625,9 @@ Buffer *buffer_by_pid(pid_t pid)
 	Buffer *buf;
 
 	for (buf = buf_list.next; buf; buf = buf->next) {
-		if (buf->pid == pid)
+		pid_t buf_pid = buffer_pid_get(buf);
+
+		if (buf_pid && buf_pid == pid)
 			return buf;
 	}
 
