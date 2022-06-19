@@ -1226,6 +1226,8 @@ static void __buf_del(Buffer *buf)
 	buffer_property_remove_cb(buf, PROPERTY_TYPE_ALL, EPOS, EPOS, NULL, buf_prop_del_cb);
 	buffer_ref_put(buf);
 	if (buffer_del(buf)) {
+        	if (buffer_pid_get(buf))
+			kill(-buffer_pid_get(buf), SIGKILL);
 		if (pty >= 0)
 			event_fd_handler_unregister(pty);
 		scheme_env_free(env);
@@ -2600,10 +2602,9 @@ void win_del(int wid)
 {
 	Window *c = window_get_by_id(wid);
 
-	if (c && buffer_pid_get(c->buf))
-		kill(-buffer_pid_get(c->buf), SIGKILL);
-	else
+	if (c) {
 		destroy(c);
+	}
 }
 
 void win_close(int wid)
