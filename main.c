@@ -1522,17 +1522,11 @@ focuslast(const char *args[]) {
 static void
 killwindow(void) {
 	Window *target = current_window();
-	pid_t pid;
 
 	if (!target)
 		return;
 
-	pid = buffer_pid_get(target->buf);
-	if (!pid)
-		return;
-
-	debug("killing window with pid: %d\n", pid);
-	kill(-pid, SIGKILL);
+	destroy(target);
 }
 
 static void killother(const char *args[]) {
