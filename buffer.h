@@ -7,7 +7,7 @@
 typedef struct SyntaxParser SyntaxParser;
 typedef struct Buffer Buffer;
 typedef struct KeyMap KeyMap;
-typedef struct Vt Vt;
+typedef struct Process Process;
 
 typedef enum {
 	PROPERTY_TYPE_TEXT_STYLE	= 1,
@@ -70,10 +70,8 @@ void buffer_mark_set(Buffer *buf, size_t pos);
 bool buffer_is_mark_set(Buffer *buf);
 void buffer_mark_clear(Buffer *buf);
 size_t buffer_mark_get(Buffer *buf);
-void buffer_term_set(Buffer *buf, Vt *vt);
-Vt *buffer_term_get(Buffer *buf);
-pid_t buffer_pid_get(Buffer *buf);
-Buffer *buffer_by_pid(pid_t pid);
+void buffer_proc_set(Buffer *buf, Process *proc);
+Process *buffer_proc_get(Buffer *buf);
 void buffer_died_set(Buffer *buf, bool died);
 bool buffer_is_died(Buffer *buf);
 int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *data);

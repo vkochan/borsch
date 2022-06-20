@@ -331,6 +331,21 @@ typedef struct {
 	Window *popup[LENGTH(tags) + 1];
 } Pertag;
 
+typedef struct Process
+{
+	struct Process *next;
+	struct Process *prev;
+	Vt 		*term;
+	int 		in;
+	int 		out;
+	int 		err;
+	pid_t 		pid;
+	Window 		*win;
+	Buffer 		*buf;
+} Process;
+
+static Process proc_list;
+
 /* global variables */
 static const char *prog_name = PROGNAME;
 static Pertag pertag;
@@ -357,6 +372,176 @@ static Cmd commands[] = {
 };
 
 static Array style_array;
+
+static void draw(Window *c, bool force);
+static void draw_title(Window *c);
+static void drawbar(void);
+static bool isarrange(void (*func)());
+static Window *current_window(void);
+static bool isvisible(Window *c);
+
+
+static void
+term_title_handler(Vt *term, const char *title) {
+	/* Window *c = (Window *)vt_data_get(term); */
+	/* if (title) */
+	/* 	strncpy(c->title, title, sizeof(c->title) - 1); */
+	/* c->title[title ? sizeof(c->title) - 1 : 0] = '\0'; */
+	/* settitle(c); */
+	/* if (!isarrange(fullscreen)) */
+	/* 	draw_title(c); */
+}
+
+static void
+term_urgent_handler(Vt *term) {
+	Window *c = (Window *)vt_data_get(term);
+	c->urgent = true;
+	printf("\a");
+	fflush(stdout);
+	drawbar();
+	if (!isarrange(fullscreen) && current_window() != c && isvisible(c))
+		draw_title(c);
+}
+
+static void process_handle_vt(int fd, void *arg) {
+	Process *proc = arg;
+	Buffer *buf = proc->buf;
+	pid_t pid;
+
+	if (!vt_is_processed(proc->term)) {
+		if (vt_process(proc->term) < 0 && errno == EIO) {
+			if (buf)
+				buffer_died_set(buf, true);
+		} else {
+			if (buf)
+				buffer_dirty_set(buf, true);
+			vt_processed_set(proc->term, true);
+		}
+	}
+}
+
+static Process *process_alloc(void)
+{
+	Process *proc = calloc(1, sizeof(Process));
+
+	if (!proc)
+		return NULL;
+
+	proc->in = -1;
+	proc->out = -1;
+	proc->err = -1;
+
+	return proc;
+}
+
+static void process_free(Process *proc)
+{
+	free(proc);
+}
+
+static void process_insert(Process *proc)
+{
+	proc->next = proc_list.next;
+	proc->prev = &proc_list;
+
+	if (proc_list.next)
+		proc_list.next->prev = proc;
+}
+
+static void process_remove(Process *proc)
+{
+	if (proc->prev)
+		proc->prev->next = proc->next;
+	if (proc->next)
+		proc->next->prev = proc->prev;
+}
+
+static void process_attach_win(Process *proc, Window *w)
+{
+	proc->win = w;
+
+	ui_window_on_view_update_set(w->win, NULL);
+	ui_window_sidebar_width_set(w->win, 0);
+	ui_window_ops_draw_set(w->win, vt_draw);
+	ui_window_priv_set(w->win, proc->term);
+
+	vt_attach(proc->term, w->win);
+	vt_data_set(proc->term, w);
+	vt_dirty(proc->term);
+}
+
+static Process *process_create(const char *prog, const char *cwd, int *stdin, int *stdout)
+{
+	const char *pargs[4] = { shell, NULL };
+	Process *proc;
+	Vt *term;
+
+	if (prog) {
+		pargs[1] = "-c";
+		pargs[2] = prog;
+		pargs[3] = NULL;
+	}
+
+	proc = process_alloc();
+	if (!proc)
+		return NULL;
+
+	term = vt_create(ui_height_get(ui), ui_width_get(ui), scr_history);
+	if (!term) {
+		process_free(proc);
+		return NULL;
+	}
+	vt_urgent_handler_set(term, term_urgent_handler);
+	vt_title_handler_set(term, term_title_handler);
+
+	proc->term = term;
+
+	proc->pid = vt_forkpty(term, shell, pargs, cwd, NULL, stdin, stdout);
+
+	event_fd_handler_register(vt_pty_get(term), process_handle_vt, proc);
+
+	return proc;
+}
+
+Buffer *process_buffer_get(Process *proc)
+{
+	return proc->buf;
+}
+
+void process_buffer_set(Process *proc, Buffer *buf)
+{
+	proc->buf = buf;
+}
+
+Vt *process_term_get(Process *proc)
+{
+	return proc->term;
+}
+
+pid_t process_pid_get(Process *proc)
+{
+	proc->pid;
+}
+
+Process *process_by_pid(pid_t pid)
+{
+	for (Process *proc = proc_list.next; proc; proc = proc->next) {
+		if (proc->pid == pid)
+			return proc;
+	}
+
+	return NULL;
+}
+
+void process_destroy(Process *proc)
+{
+	process_remove(proc);
+	if (proc->term) {
+		event_fd_handler_unregister(vt_pty_get(proc->term));
+		vt_destroy(proc->term);
+	}
+	process_free(proc);
+}
 
 static int style_init(void)
 {
@@ -508,8 +693,6 @@ update_screen_size(void) {
 	if (minibuf)
 		ui_window_move(minibuf->win, 0, ui_height_get(ui)-dec_h);
 }
-
-static void draw(Window *c, bool force);
 
 static void
 drawbar(void) {
@@ -792,6 +975,7 @@ focus(Window *c) {
 	}
 
 	if (c) {
+		Process *proc = buffer_proc_get(c->buf);
 		Selection *s;
 
 		detachstack(c);
@@ -799,8 +983,8 @@ focus(Window *c) {
 		settitle(c);
 		c->urgent = false;
 
-		if (buffer_term_get(c->buf) && buffer_ref_count(c->buf) > 2) {
-			vt_resize(buffer_term_get(c->buf),
+		if (proc && buffer_ref_count(c->buf) > 2) {
+			vt_resize(process_term_get(proc),
 					ui_window_height_get(c->win) - ui_window_has_title(c->win),
 					ui_window_width_get(c->win));
 		}
@@ -812,9 +996,9 @@ focus(Window *c) {
 			ui_window_refresh(c->win);
 		}
 
-		if (buffer_term_get(c->buf)) {
+		if (proc) {
 			ui_cursor_enable(ui, c && !c->minimized &&
-					vt_cursor_visible(buffer_term_get(c->buf)));
+					vt_cursor_visible(process_term_get(proc)));
 		} else {
 			size_t curs_view = view_cursor_get(c->view);
 
@@ -826,37 +1010,17 @@ focus(Window *c) {
 }
 
 static void
-term_title_handler(Vt *term, const char *title) {
-	/* Window *c = (Window *)vt_data_get(term); */
-	/* if (title) */
-	/* 	strncpy(c->title, title, sizeof(c->title) - 1); */
-	/* c->title[title ? sizeof(c->title) - 1 : 0] = '\0'; */
-	/* settitle(c); */
-	/* if (!isarrange(fullscreen)) */
-	/* 	draw_title(c); */
-}
-
-static void
-term_urgent_handler(Vt *term) {
-	Window *c = (Window *)vt_data_get(term);
-	c->urgent = true;
-	printf("\a");
-	fflush(stdout);
-	drawbar();
-	if (!isarrange(fullscreen) && current_window() != c && isvisible(c))
-		draw_title(c);
-}
-
-static void
 resize_window(Window *c, int w, int h) {
 	ui_window_resize(c->win, w, h);
 
-	if (buffer_term_get(c->buf)) {
+	if (buffer_proc_get(c->buf)) {
+		Process *proc = buffer_proc_get(c->buf);
+
 		if (c == get_popup()) {
 			w-=-2;
 			h--;
 		}
-		vt_resize(buffer_term_get(c->buf), h - ui_window_has_title(c->win), w);
+		vt_resize(process_term_get(proc), h - ui_window_has_title(c->win), w);
 	}
 }
 
@@ -893,7 +1057,7 @@ sigchld_handler(int sig) {
 	pid_t pid;
 
 	while ((pid = waitpid(-1, &status, WNOHANG)) != 0) {
-		Buffer *buf;
+		Process *proc;
 
 		if (pid == -1) {
 			if (errno == ECHILD) {
@@ -906,9 +1070,12 @@ sigchld_handler(int sig) {
 
 		debug("child with pid %d died\n", pid);
 
-		buf = buffer_by_pid(pid);
-		if (buf)
-			buffer_died_set(buf, true);
+		proc = process_by_pid(pid);
+		if (proc) {
+			Buffer *buf = process_buffer_get(proc);
+			if (buf)
+				buffer_died_set(buf, true);
+		}
 	}
 
 	errno = errsv;
@@ -1014,11 +1181,11 @@ keypress(int code) {
 
 	for (Window *c = pertag.runinall[pertag.curtag] ? nextvisible(windows) : current_window(); c; c = nextvisible(c->next)) {
 		if (is_content_visible(c)) {
-			Vt *term = buffer_term_get(c->buf);
-
 			c->urgent = false;
 
-			if (buffer_term_get(c->buf)) {
+			if (buffer_proc_get(c->buf)) {
+				Vt *term = process_term_get(buffer_proc_get(c->buf));
+
 				if (code == '\e')
 					vt_write(term, buf, len);
 				else
@@ -1215,19 +1382,15 @@ void buf_prop_del_cb(Buffer *buf, size_t type, size_t start, size_t end,
 
 static void __buf_del(Buffer *buf)
 {
-	int pty = -1;
 	void *env;
-
-	if (buffer_term_get(buf))
-		pty = vt_pty_get(buffer_term_get(buf));
 
 	env = buffer_env_get(buf);
 
 	buffer_property_remove_cb(buf, PROPERTY_TYPE_ALL, EPOS, EPOS, NULL, buf_prop_del_cb);
 	buffer_ref_put(buf);
 	if (buffer_del(buf)) {
-		if (pty >= 0)
-			event_fd_handler_unregister(pty);
+		if (buffer_proc_get(buf))
+			process_destroy(buffer_proc_get(buf));
 		scheme_env_free(env);
 	}
 }
@@ -1297,8 +1460,9 @@ static void __win_buf_attach(Window *w, Buffer *buf)
 static char *getcwd_by_pid(Window *c, char *buf) {
 	if (!c)
 		return NULL;
+	Process *proc = buffer_proc_get(c->buf);
 	char tmp[32];
-	snprintf(tmp, sizeof(tmp), "/proc/%d/cwd", buffer_pid_get(c->buf));
+	snprintf(tmp, sizeof(tmp), "/proc/%d/cwd", process_pid_get(proc));
 	return realpath(tmp, buf);
 }
 
@@ -1315,7 +1479,7 @@ synctitle(Window *c)
 	int ret;
 	int fd;
 
-	pty = vt_pty_get(buffer_term_get(c->buf));
+	pty = vt_pty_get(process_term_get(buffer_proc_get(c->buf)));
 
 	pid = tcgetpgrp(pty);
 	if (pid == -1)
@@ -1344,74 +1508,8 @@ done:
 	close(fd);
 }
 
-static void handle_vt(int fd, void *arg) {
-	Buffer *buf = arg;
-	pid_t pid;
-	Vt *term;
-
-	term = buffer_term_get(buf);
-	pid = buffer_pid_get(buf);
-
-	if (!vt_is_processed(term)) {
-		if (vt_process(term) < 0 && errno == EIO) {
-			buffer_died_set(buf, true);
-		} else {
-			buffer_dirty_set(buf, true);
-			vt_processed_set(term, true);
-		}
-	}
-}
-
-static void process_attach(Vt *vt, Window *w)
-{
-	ui_window_on_view_update_set(w->win, NULL);
-	ui_window_sidebar_width_set(w->win, 0);
-	ui_window_ops_draw_set(w->win, vt_draw);
-	ui_window_priv_set(w->win, vt);
-
-	vt_attach(vt, w->win);
-	vt_data_set(vt, w);
-	vt_dirty(vt);
-}
-
-static Vt *process_create(Window *w, const char *prog, const char *cwd, int *stdin, int *stdout)
-{
-	const char *pargs[4] = { shell, NULL };
-	char buf[8];
-	const char *env[] = {
-		"BORSCH_WINDOW_ID", buf,
-		NULL
-	};
-	char tmppath[PATH_MAX];
-	char tmp[256];
-	Vt *term;
-
-	snprintf(buf, sizeof buf, "%d", w->id);
-
-	if (prog) {
-		pargs[1] = "-c";
-		pargs[2] = prog;
-		pargs[3] = NULL;
-	}
-
-	term = vt_create(ui_height_get(ui), ui_width_get(ui), scr_history);
-	if (!term) {
-		return NULL;
-	}
-	vt_urgent_handler_set(term, term_urgent_handler);
-	vt_title_handler_set(term, term_title_handler);
-
-	buffer_term_set(w->buf, term);
-	process_attach(term, w);
-
-	vt_forkpty(term, shell, pargs, cwd, env, stdin, stdout);
-
-	event_fd_handler_register(vt_pty_get(term), handle_vt, w->buf);
-
-	return term;
-}
-
 int term_create(const char *prog, const char *title, const char *cwd) {
+	Process *proc;
 	char tmppath[PATH_MAX];
 	char tmp[256];
 
@@ -1446,14 +1544,17 @@ int term_create(const char *prog, const char *title, const char *cwd) {
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
 
-	if (!process_create(c, prog, cwd, NULL, NULL)) {
+	proc = process_create(prog, cwd, NULL, NULL);
+	if (!proc) {
 		view_free(c->view);
 		__buf_del(c->buf);
 		free(c);
 		return -1;
 	}
-
 	ui_window_has_title_set(c->win, true);
+	process_buffer_set(proc, c->buf);
+	buffer_proc_set(c->buf, proc);
+	process_attach_win(proc, c);
 
 	if (prog) {
 		c->cmd = prog;
@@ -1555,7 +1656,7 @@ static void killother(const char *args[]) {
 	for (n = 0, c = nextvisible(windows); c; c = nextvisible(c->next)) {
 		if (ismastersticky(c) || current_window() == c)
 			continue;
-		kill(-(buffer_pid_get(c->buf)), SIGKILL);
+		destroy(c);
 	}
 }
 
@@ -1569,8 +1670,10 @@ static void
 redraw(const char *args[]) {
 	for (Window *c = windows; c; c = c->next) {
 		if (!c->minimized) {
-			if (buffer_term_get(c->buf))
-				vt_dirty(buffer_term_get(c->buf));
+			Process *proc = buffer_proc_get(c->buf);
+
+			if (proc)
+				vt_dirty(process_term_get(proc));
 			ui_window_redraw(c->win);
 		}
 	}
@@ -1582,13 +1685,17 @@ redraw(const char *args[]) {
 static void
 scrollback(const char *args[]) {
 	int w_h = ui_window_height_get(current_window()->win);
+	Process *proc;
 	Vt *term;
 
 	if (!is_content_visible(current_window()))
 		return;
 
-	term = buffer_term_get(current_window()->buf);
+	proc = buffer_proc_get(current_window()->buf);
+	if (!proc)
+		return;
 
+	term = process_term_get(proc);
 	if (term)
 		if (!args[0] || atoi(args[0]) < 0)
 			vt_scroll(term, -w_h/2);
@@ -1670,8 +1777,9 @@ toggleminimize(void)
 		for (c = nextvisible(windows); c && (t = nextvisible(c->next)) && !t->minimized; c = t);
 		attachafter(m, c);
 	} else { /* window is no longer minimized, move it to the master area */
-		if (buffer_term_get(m->buf))
-			vt_dirty(buffer_term_get(m->buf));
+		Process *proc = buffer_proc_get(m->buf);
+		if (proc)
+			vt_dirty(process_term_get(proc));
 		detach(m);
 		attach(m);
 	}
@@ -1892,8 +2000,10 @@ handle_mouse(void) {
 
 	debug("mouse x:%d y:%d cx:%d cy:%d mask:%d\n", event.x, event.y, event.x - w_x, event.y - w_y, event.bstate);
 
-	if (buffer_term_get(msel->buf))
-		vt_mouse(buffer_term_get(msel->buf), event.x - w_x, event.y - w_y, event.bstate);
+	if (buffer_proc_get(msel->buf)) {
+		Process *proc = buffer_proc_get(msel->buf);
+		vt_mouse(process_term_get(proc), event.x - w_x, event.y - w_y, event.bstate);
+	}
 
 	for (i = 0; i < LENGTH(buttons); i++) {
 		if (event.bstate & buttons[i].mask)
@@ -2120,9 +2230,9 @@ int main(int argc, char *argv[]) {
 				c = t;
 				continue;
 			}
-			if (buffer_term_get(c->buf)) {
-				int pty = vt_pty_get(buffer_term_get(c->buf));
-				vt_processed_set(buffer_term_get(c->buf), false);
+			if (buffer_proc_get(c->buf)) {
+				Process *proc = buffer_proc_get(c->buf);
+				vt_processed_set(process_term_get(proc), false);
 			}
 			c = c->next;
 		}
@@ -2148,11 +2258,8 @@ int main(int argc, char *argv[]) {
 		}
 
 		for (Window *c = windows; c; c = c->next) {
-			pid_t pid = buffer_pid_get(c->buf);
-			Vt *term = buffer_term_get(c->buf);
-
 			if (is_content_visible(c)) {
-				if (pid && !buffer_name_is_locked(c->buf))
+				if (buffer_proc_get(c->buf) && !buffer_name_is_locked(c->buf))
 					synctitle(c);
 				if (c != current_window()) {
 					draw(c, false);
@@ -2167,8 +2274,9 @@ int main(int argc, char *argv[]) {
 		if (is_content_visible(current_window())) {
 			int x, y;
 
-			if (buffer_term_get(current_window()->buf)) {
-				ui_cursor_enable(ui, vt_cursor_visible(buffer_term_get(current_window()->buf)));
+			if (buffer_proc_get(current_window()->buf)) {
+				Process *proc = buffer_proc_get(current_window()->buf);
+				ui_cursor_enable(ui, vt_cursor_visible(process_term_get(proc)));
 			} else {
 				ui_cursor_enable(ui, true);
 			}
@@ -2583,8 +2691,8 @@ int win_new(int bid)
 		return -1;
 	}
 
-	if (buffer_term_get(c->buf)) {
-		process_attach(buffer_term_get(c->buf), c);
+	if (buffer_proc_get(c->buf)) {
+		process_attach_win(buffer_proc_get(c->buf), c);
 	} else {
 		ui_window_priv_set(c->win, c);
 		ui_window_on_view_update_set(c->win, on_view_update_cb);
@@ -2860,7 +2968,7 @@ void win_popup(int wid, bool enable)
 
 	if (w) {
 		/* TODO: add support for term window */
-		if (buffer_term_get(w->buf))
+		if (buffer_proc_get(w->buf))
 			return;
 
 		if (enable) {
@@ -2937,8 +3045,8 @@ void win_buf_switch(int wid, int bid)
 	if (w && b && w->buf != b) {
 		buffer_ref_put(w->buf);
 
-		if (buffer_term_get(b)) {
-			process_attach(buffer_term_get(b), w);
+		if (buffer_proc_get(b)) {
+			process_attach_win(buffer_proc_get(b), w);
 		} else {
 			ui_window_on_view_update_set(w->win, on_view_update_cb);
 			ui_window_ops_draw_set(w->win, NULL);
@@ -3768,7 +3876,7 @@ bool buf_is_term(int bid)
 	Buffer *buf = buffer_by_id(bid);
 
 	if (buf)
-		return buffer_term_get(buf) != NULL;
+		return buffer_proc_get(buf) != NULL;
 
 	return false;
 }
@@ -4017,8 +4125,11 @@ int term_keys_send(int bid, char *keys)
 	if (!buf)
 		return -1;
 
-	if (buffer_term_get(buf))
-		vt_write(buffer_term_get(buf), keys, strlen(keys));
+	if (buffer_proc_get(buf)) {
+		Process *proc = buffer_proc_get(buf);
+
+		vt_write(process_term_get(proc), keys, strlen(keys));
+	}
 	return 0;
 }
 
@@ -4029,8 +4140,11 @@ int term_text_send(int bid, char *text)
 	if (!buf)
 		return -1;
 
-	if (buffer_term_get(buf))
-		vt_write(buffer_term_get(buf), text, strlen(text));
+	if (buffer_proc_get(buf)) {
+		Process *proc = buffer_proc_get(buf);
+
+		vt_write(process_term_get(proc), text, strlen(text));
+	}
 	return 0;
 }
 
@@ -4038,8 +4152,9 @@ int term_text_get(int bid, char **buf, size_t *len)
 {
 	Buffer *b = buffer_by_id(bid);
 
-	if (b && buffer_term_get(b)) {
-		*len = vt_content_get(buffer_term_get(b), buf, false);
+	if (b && buffer_proc_get(b)) {
+		Process *proc = buffer_proc_get(b);
+		*len = vt_content_get(process_term_get(proc), buf, false);
 		return 0;
 	} else {
 		return -1;

@@ -1491,6 +1491,8 @@ void vt_destroy(Vt *t)
 		return;
 	buffer_free(&t->buffer_normal);
 	buffer_free(&t->buffer_alternate);
+	if (t->pid)
+		kill(-t->pid, SIGKILL);
 	close(t->pty);
 	free(t);
 }

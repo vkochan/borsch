@@ -52,7 +52,7 @@ typedef struct Buffer {
 	bool is_read_only;
 	bool is_dirty;
 	File file;
-	Vt *term;
+	Process *proc;
 	volatile sig_atomic_t is_died;
 	size_t mark;
 	bool is_mark_set;
@@ -178,11 +178,6 @@ bool buffer_del(Buffer *buf)
 
 	if (!buf->ref_count) {
 		buffer_list_del(buf);
-		if (buf->term) {
-        		if (buffer_pid_get(buf))
-				kill(-buffer_pid_get(buf), SIGKILL);
-			vt_destroy(buf->term);
-		}
 		/* TODO: check if buffer is not saved and ask user to save it */
 		syntax_parser_delete(buf->parser);
 		keymap_free(buf->keymap);
@@ -605,36 +600,14 @@ size_t buffer_mark_get(Buffer *buf)
 	return buf->mark;
 }
 
-void buffer_term_set(Buffer *buf, Vt *term)
+void buffer_proc_set(Buffer *buf, Process *proc)
 {
-	buf->term = term;
+	buf->proc = proc;
 }
 
-Vt *buffer_term_get(Buffer *buf)
+Process *buffer_proc_get(Buffer *buf)
 {
-	return buf->term;
-}
-
-pid_t buffer_pid_get(Buffer *buf)
-{
-	if (buf->term)
-		return vt_pid_get(buf->term);
-	else
-		return 0;
-}
-
-Buffer *buffer_by_pid(pid_t pid)
-{
-	Buffer *buf;
-
-	for (buf = buf_list.next; buf; buf = buf->next) {
-		pid_t buf_pid = buffer_pid_get(buf);
-
-		if (buf_pid && buf_pid == pid)
-			return buf;
-	}
-
-	return NULL;
+	return buf->proc;
 }
 
 void buffer_died_set(Buffer *buf, bool died)
