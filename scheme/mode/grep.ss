@@ -49,7 +49,7 @@
              (buffer-set-mode-name "Grep")
              (erase-buffer)
           )
-          (process-start b cmd)
+          (process-create cmd b)
           #t
        )
       ]

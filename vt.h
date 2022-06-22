@@ -43,12 +43,14 @@ void vt_data_set(Vt*, void *);
 void *vt_data_get(Vt*);
 
 Vt *vt_create(int rows, int cols, int scroll_buf_sz);
+void vt_size_get(Vt *vt, int *rows, int *cols);
 void vt_attach(Vt *vt, UiWin *uiwin);
 void vt_draw(UiWin *win);
 void vt_resize(Vt*, int rows, int cols);
 void vt_destroy(Vt*);
 pid_t vt_forkpty(Vt*, const char *p, const char *argv[], const char *cwd, const char *env[], int *to, int *from);
 int vt_pty_get(Vt*);
+void vt_pty_set(Vt*, int);
 bool vt_cursor_visible(Vt*);
 
 int vt_process(Vt *);
@@ -63,6 +65,7 @@ void vt_scroll(Vt*, int rows);
 void vt_noscroll(Vt*);
 
 pid_t vt_pid_get(Vt*);
+void vt_pid_set(Vt*, pid_t);
 size_t vt_content_get(Vt*, char **s, bool colored);
 int vt_content_start(Vt*);
 

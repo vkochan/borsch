@@ -14,6 +14,7 @@
  *
  * See LICENSE for details.
  */
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdint.h>
@@ -36,6 +37,13 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <pwd.h>
+#if defined(__linux__) || defined(__CYGWIN__)
+# include <pty.h>
+#elif defined(__FreeBSD__) || defined(__DragonFly__)
+# include <libutil.h>
+#elif defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
+# include <util.h>
+#endif
 
 #include "array.h"
 #include "event.h"
@@ -50,6 +58,12 @@
 #endif
 #include "api.h"
 #include "vt.h"
+
+#ifdef _AIX
+# include "forkpty-aix.c"
+#elif defined __sun
+# include "forkpty-sunos.c"
+#endif
 
 #ifdef PDCURSES
 int ESCDELAY;
@@ -71,6 +85,7 @@ typedef struct {
 
 typedef struct Window Window;
 struct Window {
+	Buffer *prev_buf;
 	Buffer *buf;
 	View *view;
 	UiWin *win;
@@ -333,18 +348,23 @@ typedef struct {
 
 typedef struct Process
 {
-	struct Process *next;
-	struct Process *prev;
-	Vt 		*term;
-	int 		in;
-	int 		out;
-	int 		err;
-	pid_t 		pid;
-	Window 		*win;
-	Buffer 		*buf;
+	struct Process 		*next;
+	struct Process 		*prev;
+	char			*prog;
+	char			*cwd;
+	Vt 			*term;
+	int			status;
+	int 			in;
+	int 			out;
+	int 			err;
+	pid_t 			pid;
+	Window 			*win;
+	Buffer 			*buf;
+	volatile sig_atomic_t 	is_died;
 } Process;
 
 static Process proc_list;
+static int proc_fd[2];
 
 /* global variables */
 static const char *prog_name = PROGNAME;
@@ -380,6 +400,7 @@ static bool isarrange(void (*func)());
 static Window *current_window(void);
 static bool isvisible(Window *c);
 
+static char term_name[32];
 
 static void
 term_title_handler(Vt *term, const char *title) {
@@ -403,19 +424,23 @@ term_urgent_handler(Vt *term) {
 		draw_title(c);
 }
 
+static void process_died_set(Process *proc, bool is_died);
+Buffer *process_buffer_get(Process *proc);
+void process_destroy(Process *proc);
+int process_kill(Process *proc);
+
 static void process_handle_vt(int fd, void *arg) {
 	Process *proc = arg;
-	Buffer *buf = proc->buf;
-	pid_t pid;
+	Buffer *buf = process_buffer_get(proc);
 
 	if (!vt_is_processed(proc->term)) {
 		if (vt_process(proc->term) < 0 && errno == EIO) {
-			if (buf)
-				buffer_died_set(buf, true);
+			process_destroy(proc);
 		} else {
-			if (buf)
+			if (buf) {
+				vt_processed_set(proc->term, true);
 				buffer_dirty_set(buf, true);
-			vt_processed_set(proc->term, true);
+			}
 		}
 	}
 }
@@ -427,6 +452,8 @@ static Process *process_alloc(void)
 	if (!proc)
 		return NULL;
 
+	proc->status = -1;
+	proc->pid = -1;
 	proc->in = -1;
 	proc->out = -1;
 	proc->err = -1;
@@ -436,6 +463,8 @@ static Process *process_alloc(void)
 
 static void process_free(Process *proc)
 {
+	free(proc->prog);
+	free(proc->cwd);
 	free(proc);
 }
 
@@ -446,6 +475,7 @@ static void process_insert(Process *proc)
 
 	if (proc_list.next)
 		proc_list.next->prev = proc;
+	proc_list.next = proc;
 }
 
 static void process_remove(Process *proc)
@@ -454,6 +484,26 @@ static void process_remove(Process *proc)
 		proc->prev->next = proc->next;
 	if (proc->next)
 		proc->next->prev = proc->prev;
+}
+
+static void process_died_set(Process *proc, bool is_died)
+{
+	proc->is_died = is_died;
+}
+
+static bool process_is_died(Process *proc)
+{
+	return proc->is_died;
+}
+
+static int process_status_get(Process *proc)
+{
+	return proc->status;
+}
+
+static void process_status_set(Process *proc, int status)
+{
+	proc->status = status;
 }
 
 static void process_attach_win(Process *proc, Window *w)
@@ -470,11 +520,126 @@ static void process_attach_win(Process *proc, Window *w)
 	vt_dirty(proc->term);
 }
 
-static Process *process_create(const char *prog, const char *cwd, int *stdin, int *stdout)
+int process_kill(Process *proc)
+{
+	pid_t pid = proc->pid;
+	int status = -1;
+	event_t evt;
+
+	if (pid != -1 && !proc->is_died) {
+		kill(-pid, SIGKILL);
+		waitpid(pid, &status, 0);
+		process_died_set(proc, true);
+
+		if (proc->term) {
+			event_fd_handler_unregister(vt_pty_get(proc->term));
+			vt_destroy(proc->term);
+		}
+		if (WIFEXITED(status)) {
+			process_status_set(proc, WEXITSTATUS(status));
+		}
+		return 0;
+	}
+
+	return status;
+}
+
+void process_destroy(Process *proc)
+{
+	process_kill(proc);
+	process_remove(proc);
+	process_free(proc);
+}
+
+static pid_t __process_fork(const char *p, const char *argv[], const char *cwd, const char *env[], int *to, int *from, int *err, Vt *vt)
+{
+	int vt2ed[2], ed2vt[2];
+	struct winsize ws;
+	pid_t pid;
+
+	if (to && pipe2(vt2ed, O_NONBLOCK)) {
+		*to = -1;
+		to = NULL;
+	}
+	if (from && pipe2(ed2vt, O_NONBLOCK)) {
+		*from = -1;
+		from = NULL;
+	}
+
+	if (vt) {
+		int rows, cols;
+		int pty;
+
+		vt_size_get(vt, &rows, &cols);
+		ws.ws_xpixel = ws.ws_ypixel = 0;
+		ws.ws_row = rows;
+		ws.ws_col = cols;
+
+		pid = forkpty(&pty, NULL, NULL, &ws);
+		vt_pty_set(vt, pty);
+		vt_pid_set(vt, pid);
+	} else {
+		pid = fork();
+	}
+
+	if (pid < 0)
+		return -1;
+
+	if (pid == 0) {
+		setsid();
+
+		sigset_t emptyset;
+		sigemptyset(&emptyset);
+		sigprocmask(SIG_SETMASK, &emptyset, NULL);
+
+		if (to) {
+			close(vt2ed[1]);
+			dup2(vt2ed[0], STDIN_FILENO);
+			close(vt2ed[0]);
+		}
+
+		if (from) {
+			close(ed2vt[0]);
+			dup2(ed2vt[1], STDOUT_FILENO);
+			dup2(ed2vt[1], STDERR_FILENO);
+			close(ed2vt[1]);
+		}
+
+		int maxfd = sysconf(_SC_OPEN_MAX);
+		for (int fd = 3; fd < maxfd; fd++)
+			if (close(fd) == -1 && errno == EBADF)
+				break;
+
+		for (const char **envp = env; envp && envp[0]; envp += 2)
+			setenv(envp[0], envp[1], 1);
+		setenv("TERM", term_name, 1);
+
+		if (cwd)
+			chdir(cwd);
+
+		execvp(p, (char *const *)argv);
+		fprintf(stderr, "\nexecv() failed.\nCommand: '%s'\n", argv[0]);
+		exit(1);
+	}
+
+	if (to) {
+		close(vt2ed[0]);
+		*to = vt2ed[1];
+	}
+
+	if (from) {
+		close(ed2vt[1]);
+		*from = ed2vt[0];
+	}
+
+	return pid;
+}
+
+static Process *process_create(const char *prog, const char *cwd, int *in, int *out, bool pty)
 {
 	const char *pargs[4] = { shell, NULL };
+	Vt *term = NULL;
 	Process *proc;
-	Vt *term;
 
 	if (prog) {
 		pargs[1] = "-c";
@@ -486,19 +651,36 @@ static Process *process_create(const char *prog, const char *cwd, int *stdin, in
 	if (!proc)
 		return NULL;
 
-	term = vt_create(ui_height_get(ui), ui_width_get(ui), scr_history);
-	if (!term) {
-		process_free(proc);
-		return NULL;
+	if (pty) {
+		term = vt_create(ui_height_get(ui), ui_width_get(ui), scr_history);
+		if (!term) {
+			process_free(proc);
+			return NULL;
+		}
+		vt_urgent_handler_set(term, term_urgent_handler);
+		vt_title_handler_set(term, term_title_handler);
 	}
-	vt_urgent_handler_set(term, term_urgent_handler);
-	vt_title_handler_set(term, term_title_handler);
 
+	if (prog)
+		proc->prog = strdup(prog);
+	if (cwd)
+		proc->cwd = strdup(cwd);
 	proc->term = term;
 
-	proc->pid = vt_forkpty(term, shell, pargs, cwd, NULL, stdin, stdout);
+	proc->pid = __process_fork(shell, pargs, cwd, NULL, in, out, NULL, term);
+	if (proc->pid == -1) {
+		process_destroy(proc);
+		return NULL;
+	}
+	if (in)
+		proc->in = *in;
+	if (out)
+		proc->out = *out;
 
-	event_fd_handler_register(vt_pty_get(term), process_handle_vt, proc);
+	if (term)
+		event_fd_handler_register(vt_pty_get(term), process_handle_vt, proc);
+
+	process_insert(proc);
 
 	return proc;
 }
@@ -520,7 +702,7 @@ Vt *process_term_get(Process *proc)
 
 pid_t process_pid_get(Process *proc)
 {
-	proc->pid;
+	return proc->pid;
 }
 
 Process *process_by_pid(pid_t pid)
@@ -531,16 +713,6 @@ Process *process_by_pid(pid_t pid)
 	}
 
 	return NULL;
-}
-
-void process_destroy(Process *proc)
-{
-	process_remove(proc);
-	if (proc->term) {
-		event_fd_handler_unregister(vt_pty_get(proc->term));
-		vt_destroy(proc->term);
-	}
-	process_free(proc);
 }
 
 static int style_init(void)
@@ -1084,13 +1256,13 @@ sigchld_handler(int sig) {
 			break;
 		}
 
-		debug("child with pid %d died\n", pid);
-
 		proc = process_by_pid(pid);
 		if (proc) {
-			Buffer *buf = process_buffer_get(proc);
-			if (buf)
-				buffer_died_set(buf, true);
+			if (WIFEXITED(status)) {
+				process_status_set(proc, WEXITSTATUS(status));
+			}
+			process_died_set(proc, true);
+			write(proc_fd[1], &pid, sizeof(pid));
 		}
 	}
 
@@ -1301,6 +1473,11 @@ setup(void) {
 	shell = getshell();
 	setlocale(LC_CTYPE, "");
 
+	char *term = getenv("BORSCH_TERM");
+	if (!term)
+		term = "borsch";
+	snprintf(term_name, sizeof term_name, "%s%s", term, COLORS >= 256 ? "-256color" : "");
+
 	style_init();
 
 	ui = ui_term_new();
@@ -1421,6 +1598,7 @@ destroy(Window *w) {
 
 static void
 cleanup(void) {
+	Process *proc;
 	Buffer *b;
 	int i;
 
@@ -1442,6 +1620,15 @@ cleanup(void) {
 		Buffer *nextb = buffer_next_get(b);
 		__buf_del(b);
 		b = nextb;
+	}
+
+	proc = proc_list.next;
+	while (proc) {
+		Process *next = proc->next;
+
+		process_destroy(proc);
+	
+		proc = next;
 	}
 
 	keymap_free(win_min_kmap);
@@ -1560,7 +1747,7 @@ int term_create(const char *prog, const char *title, const char *cwd) {
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
 
-	proc = process_create(prog, cwd, NULL, NULL);
+	proc = process_create(prog, cwd, NULL, NULL, true);
 	if (!proc) {
 		view_free(c->view);
 		__buf_del(c->buf);
@@ -2211,6 +2398,20 @@ reenter:
 	}
 }
 
+static void handle_sigchld_io(int fd, void *arg)
+{
+	event_t evt;
+	ssize_t len;
+	pid_t pid;
+
+	len = read(fd, &pid, sizeof(pid));
+	if (len == sizeof(pid)) {
+		evt.eid = EVT_PROC_EXIT;
+		evt.oid = pid;
+		scheme_event_handle(evt);
+	}
+}
+
 int main(int argc, char *argv[]) {
 	sigset_t blockset;
 	event_t evt;
@@ -2222,40 +2423,42 @@ int main(int argc, char *argv[]) {
 
 	sigemptyset(&blockset);
 	sigaddset(&blockset, SIGWINCH);
-	sigaddset(&blockset, SIGCHLD);
 	sigprocmask(SIG_BLOCK, &blockset, NULL);
 
 	if (cmdfifo.fd != -1)
 		event_fd_handler_register(cmdfifo.fd, handle_cmdfifo, NULL);
+
+	pipe2(proc_fd, O_NONBLOCK);
+	event_fd_handler_register(proc_fd[0], handle_sigchld_io, NULL);
 
 	event_fd_handler_register(STDIN_FILENO, handle_keypress, &kbuf);
 
 	update_screen_size();
 
 	while (running) {
+		Process *proc = proc_list.next;
+
 		if (ui_resize(ui)) {
 			update_screen_size();
 			redraw(NULL);
 			continue;
 		}
 
+		while (proc) {
+			Process *next = proc->next;
+
+			if (process_is_died(proc))
+				process_destroy(proc);
+	
+			proc = next;
+		}
+
 		for (Window *c = windows; c; ) {
-			if (buffer_is_died(c->buf)) {
-				Window *t = c->next;
-				destroy(c);
-				c = t;
-				continue;
-			}
 			if (buffer_proc_get(c->buf)) {
 				Process *proc = buffer_proc_get(c->buf);
 				vt_processed_set(process_term_get(proc), false);
 			}
 			c = c->next;
-		}
-		if (get_popup()) {
-			if (buffer_is_died(get_popup()->buf)) {
-				destroy(get_popup());
-			}
 		}
 		/* TODO: what to do with a died buffers ? */
 
@@ -2324,6 +2527,31 @@ static Window *window_get_by_id(int id)
 		return topbar;
 
 	return NULL;
+}
+
+static void on_view_update_cb(UiWin *win);
+
+static void window_switch_buf(Window *w, Buffer *b)
+{
+	if (w && b && w->buf != b) {
+		buffer_ref_put(w->buf);
+
+		if (buffer_proc_get(b)) {
+			process_attach_win(buffer_proc_get(b), w);
+		} else {
+			ui_window_on_view_update_set(w->win, on_view_update_cb);
+			ui_window_ops_draw_set(w->win, NULL);
+			ui_window_priv_set(w->win, w);
+		}
+
+		__win_buf_attach(w, b);
+
+		view_reload(w->view, buffer_text_get(b));
+		buffer_dirty_set(b, true);
+		w->prev_buf = w->buf;
+		w->buf = b;
+		buffer_ref_get(w->buf);
+	}
 }
 
 /* External API */
@@ -3058,24 +3286,7 @@ void win_buf_switch(int wid, int bid)
 	Window *w = window_get_by_id(wid);
 	Buffer *b = buffer_by_id(bid);
 
-	if (w && b && w->buf != b) {
-		buffer_ref_put(w->buf);
-
-		if (buffer_proc_get(b)) {
-			process_attach_win(buffer_proc_get(b), w);
-		} else {
-			ui_window_on_view_update_set(w->win, on_view_update_cb);
-			ui_window_ops_draw_set(w->win, NULL);
-			ui_window_priv_set(w->win, w);
-		}
-
-		__win_buf_attach(w, b);
-
-		view_reload(w->view, buffer_text_get(b));
-		buffer_dirty_set(b, true);
-		w->buf = b;
-		buffer_ref_get(w->buf);
-	}
+	window_switch_buf(w, b);
 }
 
 Style *style_new(void)
@@ -4345,7 +4556,6 @@ int fifo_create(void)
 
 	if (stat(rundir, &st)) {
 		if (mkdir(rundir, 0777)) {
-			fprintf(stderr, "could not create %s\n", rundir);
 			return -1;
 		}
 	}
@@ -4383,7 +4593,18 @@ void evt_fd_handler_del(int fd)
 	event_fd_handler_unregister(fd);
 }
 
-bool process_is_alive(pid_t pid)
+pid_t proc_create(const char *prog, const char *cwd, int *in, int *out, int *err, char **env, bool async)
+{
+	Process *proc;
+
+	proc = process_create(prog, cwd, in, out, false);
+	if (!proc)
+		return -1;	
+
+	return process_pid_get(proc);
+}
+
+bool proc_is_alive(pid_t pid)
 {
 	int status;
 	pid_t ret;
@@ -4394,6 +4615,36 @@ bool process_is_alive(pid_t pid)
 	} else {
 		return true;
 	}
+}
+
+void proc_del(pid_t pid)
+{
+	Process *proc = process_by_pid(pid);
+
+	if (proc) {
+		process_destroy(proc);
+	}
+}
+
+int proc_wait(pid_t pid, int *status)
+{
+	Process *proc = process_by_pid(pid);
+
+	if (!proc)
+		return -1;
+
+	if (proc->is_died) {
+		*status = proc->status;
+		return 0;
+	}
+
+	pid = waitpid(proc->pid, status, 0);
+	if (pid == proc->pid && WIFEXITED(*status)) {
+		*status = WEXITSTATUS(*status);
+		return 0;
+	}
+
+	return -1;
 }
 
 void do_quit(void)

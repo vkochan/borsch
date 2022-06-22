@@ -941,9 +941,49 @@ void scheme_timer_time_set(int fd, unsigned long sec, unsigned long nsec)
 	timer_time_set(fd, sec, nsec);
 }
 
+ptr scheme_process_create(const char *prog, const char *cwd, bool redir_in, bool redir_out, bool redir_err, char *env, bool async)
+{
+	int *in_ptr = NULL, *out_ptr = NULL, *err_ptr = NULL;
+	int in = -1, out = -1, err = -1;
+	pid_t pid;
+	ptr ret;
+	
+	if (redir_in)
+		in_ptr = &in;
+	if (redir_out)
+		out_ptr = &out;
+	if (redir_err)
+		err_ptr = &err;
+
+	pid = proc_create(prog, cwd, in_ptr, out_ptr, err_ptr, NULL, async);
+	if (pid == -1)
+		return Sfalse;
+
+	return Scons(Sinteger(in),
+			Scons(Sinteger(out),
+				Scons(Sinteger(err),
+					Scons(Sinteger(pid), Snil))));
+}
+
+void scheme_process_delete(int pid)
+{
+	proc_del(pid);
+}
+
+ptr scheme_process_wait(int pid)
+{
+	int status = -1;
+	int err;
+
+	err = proc_wait(pid, &status);
+	if (err)
+		return Sfalse;
+	return Sinteger(status);
+}
+
 ptr scheme_process_is_alive(int pid)
 {
-	return Sboolean(process_is_alive(pid));
+	return Sboolean(proc_is_alive(pid));
 }
 
 void scheme_do_quit(void)
@@ -1095,6 +1135,9 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_timer_time_set", scheme_timer_time_set);
 
 	Sregister_symbol("cs_process_is_alive", scheme_process_is_alive);
+	Sregister_symbol("cs_process_create", scheme_process_create);
+	Sregister_symbol("cs_process_del", scheme_process_delete);
+	Sregister_symbol("cs_process_wait", scheme_process_wait);
 
 	Sregister_symbol("cs_do_quit", scheme_do_quit);
 }

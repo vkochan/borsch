@@ -43,12 +43,6 @@
 
 #include "vt.h"
 
-#ifdef _AIX
-# include "forkpty-aix.c"
-#elif defined __sun
-# include "forkpty-sunos.c"
-#endif
-
 #ifndef NCURSES_ACS
 # ifdef PDCURSES
 #  define NCURSES_ACS(c) (acs_map[(unsigned char)(c)])
@@ -1465,6 +1459,12 @@ Vt *vt_create(int rows, int cols, int scroll_size)
 	return t;
 }
 
+void vt_size_get(Vt *vt, int *rows, int *cols)
+{
+	*rows = vt->buffer->rows;
+	*cols = vt->buffer->cols;
+}
+
 void vt_attach(Vt *vt, UiWin *uiwin)
 {
 	vt->win = uiwin;
@@ -1491,8 +1491,6 @@ void vt_destroy(Vt *t)
 		return;
 	buffer_free(&t->buffer_normal);
 	buffer_free(&t->buffer_alternate);
-	if (t->pid)
-		kill(-t->pid, SIGKILL);
 	close(t->pty);
 	free(t);
 }
@@ -1584,79 +1582,14 @@ void vt_noscroll(Vt *t)
 		vt_scroll(t, scroll_below);
 }
 
-pid_t vt_forkpty(Vt *t, const char *p, const char *argv[], const char *cwd, const char *env[], int *to, int *from)
-{
-	int vt2ed[2], ed2vt[2];
-	struct winsize ws;
-	ws.ws_row = t->buffer->rows;
-	ws.ws_col = t->buffer->cols;
-	ws.ws_xpixel = ws.ws_ypixel = 0;
-
-	if (to && pipe(vt2ed)) {
-		*to = -1;
-		to = NULL;
-	}
-	if (from && pipe(ed2vt)) {
-		*from = -1;
-		from = NULL;
-	}
-
-	pid_t pid = forkpty(&t->pty, NULL, NULL, &ws);
-	if (pid < 0)
-		return -1;
-
-	if (pid == 0) {
-		setsid();
-
-		sigset_t emptyset;
-		sigemptyset(&emptyset);
-		sigprocmask(SIG_SETMASK, &emptyset, NULL);
-
-		if (to) {
-			close(vt2ed[1]);
-			dup2(vt2ed[0], STDIN_FILENO);
-			close(vt2ed[0]);
-		}
-
-		if (from) {
-			close(ed2vt[0]);
-			dup2(ed2vt[1], STDOUT_FILENO);
-			close(ed2vt[1]);
-		}
-
-		int maxfd = sysconf(_SC_OPEN_MAX);
-		for (int fd = 3; fd < maxfd; fd++)
-			if (close(fd) == -1 && errno == EBADF)
-				break;
-
-		for (const char **envp = env; envp && envp[0]; envp += 2)
-			setenv(envp[0], envp[1], 1);
-		setenv("TERM", vt_term, 1);
-
-		if (cwd)
-			chdir(cwd);
-
-		execvp(p, (char *const *)argv);
-		fprintf(stderr, "\nexecv() failed.\nCommand: '%s'\n", argv[0]);
-		exit(1);
-	}
-
-	if (to) {
-		close(vt2ed[0]);
-		*to = vt2ed[1];
-	}
-
-	if (from) {
-		close(ed2vt[1]);
-		*from = ed2vt[0];
-	}
-
-	return t->pid = pid;
-}
-
 int vt_pty_get(Vt *t)
 {
 	return t->pty;
+}
+
+void vt_pty_set(Vt *t, int pty)
+{
+	t->pty = pty;
 }
 
 ssize_t vt_write(Vt *t, const char *buf, size_t len)
@@ -1801,6 +1734,11 @@ bool vt_cursor_visible(Vt *t)
 pid_t vt_pid_get(Vt *t)
 {
 	return t->pid;
+}
+
+void vt_pid_set(Vt *t, pid_t pid)
+{
+	t->pid = pid;
 }
 
 size_t vt_content_get(Vt *t, char **buf, bool colored)

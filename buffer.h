@@ -72,8 +72,6 @@ void buffer_mark_clear(Buffer *buf);
 size_t buffer_mark_get(Buffer *buf);
 void buffer_proc_set(Buffer *buf, Process *proc);
 Process *buffer_proc_get(Buffer *buf);
-void buffer_died_set(Buffer *buf, bool died);
-bool buffer_is_died(Buffer *buf);
 int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *data);
 void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, void *arg,
 		int (*cb) (Buffer *buf, int type, size_t start, size_t end, void *data, void *arg));

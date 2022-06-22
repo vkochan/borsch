@@ -7,9 +7,9 @@
 (define git-branch-name
    (lambda ()
       (let (
-            [out (process-read (format "git -C ~a rev-parse --abbrev-ref HEAD 2> /dev/null" (view-cwd)))]
+            [out (process-get-output (format "git -C ~a rev-parse --abbrev-ref HEAD 2> /dev/null" (view-cwd)))]
            )
-         (string-remove-nl out)
+         (string-remove-nl (list-ref out 1))
       )
    )
 )
@@ -17,20 +17,20 @@
 (define git-short-status
    (lambda ()
       (let (
-            [out (process-read (format "git -C ~a status 2> /dev/null" (view-cwd)))]
+            [out (process-get-output (format "git -C ~a status 2> /dev/null" (view-cwd)))]
             [branch (git-branch-name)]
             [status ""]
            )
-         (when (string-contains? out "modified")
+         (when (string-contains? (list-ref out 1) "modified")
             (set! status (format "~a+" status))
          )
-         (when (string-contains? out "ahead")
+         (when (string-contains? (list-ref out 1) "ahead")
             (set! status (format "~a>" status))
          )
-         (when (string-contains? out "behind")
+         (when (string-contains? (list-ref out 1) "behind")
             (set! status (format "~a<" status))
          )
-         (when (string-contains? out "diverged")
+         (when (string-contains? (list-ref out 1) "diverged")
             (set! status (format "~a!" status))
          )
          (if (equal? status "")
@@ -50,7 +50,7 @@
 
 (define git-cmd-read
    (lambda (cmd)
-      (process-read (git-cmd-format cmd))
+      (list-ref (process-get-output (git-cmd-format cmd)) 1)
    )
 )
 
@@ -538,8 +538,8 @@
                 (buffer-set-mode-name "Git Commit")
                 (bind-key-local "C-c C-c"
                    (lambda ()
-                      (process-write (format "git -C ~a commit ~a -F -" (view-cwd) opt)
-                                     (buffer-string))
+                      (process-with-input (format "git -C ~a commit ~a -F -" (view-cwd) opt)
+                                          (buffer-string))
                       (with-current-buffer (get-local status-buffer)
                          (git-show-status)
                       )
@@ -571,7 +571,7 @@
    (lambda ()
       (let ([b (buffer-create)])
          (text-mode)
-         (process-start b (git-cmd-format "pull"))
+         (process-create (git-cmd-format "pull") b)
       )
    )
 )

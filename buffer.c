@@ -53,7 +53,6 @@ typedef struct Buffer {
 	bool is_dirty;
 	File file;
 	Process *proc;
-	volatile sig_atomic_t is_died;
 	size_t mark;
 	bool is_mark_set;
 	TextProperty *min_prop;
@@ -610,16 +609,6 @@ void buffer_proc_set(Buffer *buf, Process *proc)
 Process *buffer_proc_get(Buffer *buf)
 {
 	return buf->proc;
-}
-
-void buffer_died_set(Buffer *buf, bool died)
-{
-	buf->is_died = died;
-}
-
-bool buffer_is_died(Buffer *buf)
-{
-	return buf->is_died;
 }
 
 static void text_property_insert_after(TextProperty *head, TextProperty *prop)

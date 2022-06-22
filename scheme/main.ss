@@ -40,6 +40,7 @@
 		[2    'pre-draw-hook ]
 		[3    'post-draw-hook ]
 		[100  'key-press-hook   ]
+		[200  'process-exit-hook   ]
 		[else #f]
              )
           )

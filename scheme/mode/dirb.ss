@@ -22,7 +22,7 @@
    (lambda (dir)
       (let ([opts (if (get-local show-hidden) "-a" "")])
          (string-split
-            (process-read (format "ls -1 ~a ~a" opts dir))
+            (list-ref (process-get-output (format "ls -1 ~a ~a" opts dir)) 1)
             #\newline)
       )
    )

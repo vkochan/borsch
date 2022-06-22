@@ -8,6 +8,7 @@ typedef enum {
 	EVT_PRE_DRAW     = 2,
 	EVT_POST_DRAW	 = 3,
 	EVT_KEY_PRESS    = 100,
+	EVT_PROC_EXIT    = 200,
 } event_id_t;
 
 typedef enum {
@@ -185,7 +186,10 @@ int fifo_create(void);
 int evt_fd_handler_add(int fd, void (*fn)(int fd, void *), void *);
 void evt_fd_handler_del(int fd);
 
-bool process_is_alive(pid_t pid);
+pid_t proc_create(const char *prog, const char *cwd, int *in, int *out, int *err, char **env, bool async);
+bool proc_is_alive(pid_t pid);
+int proc_wait(pid_t pid, int *status);
+void proc_del(pid_t pid);
 
 void do_quit(void);
 
