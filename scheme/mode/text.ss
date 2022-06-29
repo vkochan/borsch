@@ -72,7 +72,6 @@
             (with-current-buffer b
                (text-mode)
                (buffer-open-file p)
-               (move-line-num l)
             )
          )
          ;; else
@@ -88,6 +87,7 @@
       (let-values ([(f l) (get-file-location (extract-object))])
          (let ([p (if (equal? #\/ (string-ref f 0)) f (string-append (buffer-cwd) "/" f))])
             (file-open p)
+            (move-line-num l)
          )
       )
    )
