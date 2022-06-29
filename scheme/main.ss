@@ -86,6 +86,20 @@
    )
 )
 
+(define open-file-prompt
+   (lambda ()
+      (minibuf-read "open file:"
+         (lambda (f)
+            (if (file-exists? f)
+               (file-open f)
+               ;; else
+               (message (format "File ~a does not exist" f))
+            )
+         )
+      )
+   )
+)
+
 (add-hook 'window-draw-hook
    (lambda (w)
       (let ([b (window-buffer w)])
@@ -190,6 +204,7 @@
 (bind-key "C-g b"   layout-switch-bstack)
 (bind-key "C-g m"   window-toggle-maximized)
 (bind-key "C-g n"   new-text-buffer)
+(bind-key "C-g o"   open-file-prompt)
 
 (bind-key "C-x b s" buffer-switch)
 (bind-key "C-x b c" window-close)
