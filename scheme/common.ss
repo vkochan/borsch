@@ -93,6 +93,18 @@
    )
 )
 
+(define path-exists?
+   (lambda (f)
+      (file-exists?
+         (if (equal? (string-ref f 0) #\/)
+            f
+            ;; else
+            (string-append (current-cwd) "/" f)
+         )
+      )
+   )
+)
+
 (define rm
    (lambda (f)
       (if (is-dir? f)
