@@ -322,6 +322,8 @@ size_t buffer_cursor_get(Buffer *buf)
 
 char *buffer_name_get(Buffer *buf)
 {
+	if (buf->file.path)
+		return buf->file.path;
 	return buf->name;
 }
 
@@ -345,7 +347,7 @@ Buffer *buffer_by_name(const char *name)
 	Buffer *buf;
 
 	for (buf = buf_list.next; buf; buf = buf->next) {
-		if (strcmp(buf->name, name) == 0)
+		if (strcmp(buffer_name_get(buf), name) == 0)
 			return buf;
 	}
 

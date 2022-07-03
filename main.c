@@ -707,9 +707,11 @@ static void draw_title(Window *c) {
 	int x, y, maxlen, title_y, title_x;
 	int w_w = ui_window_width_get(c->win);
 	int has_border = ui_window_border_is_enabled(c->win);
+	size_t status_len, name_len;
+	char status[100];
 	char title[256];
-	char tmp[256];
-	size_t len;
+	char name[100];
+	char *name_ptr;
 
 	if (!ui_window_has_title(c->win))
 		return;
@@ -733,19 +735,34 @@ static void draw_title(Window *c) {
 	maxlen = ui_window_width_get(c->win) - 10;
 	if (maxlen < 0)
 		maxlen = 0;
-	strncpy(tmp, window_get_title(c), sizeof(tmp));
-	if ((size_t)maxlen < strlen(tmp)) {
-		tmp[maxlen] = '\0';
-	}
+	strncpy(name, buffer_name_get(c->buf), sizeof(name));
 
-	len = snprintf(title, sizeof(title), "%s%s %s  [%d|%s%s]%s",
+	status_len = snprintf(status, sizeof(status), "%s%s %s  [%d|%s]%s",
 			buffer_is_modified(c->buf) ? "[+] " : "",
 			buffer_mode_name_get(c->buf),
 			buffer_state_name_get(c->buf),
 			c->order,
 			ismastersticky(c) ? "*" : "",
-			tmp[0] ? tmp : "",
 			buffer_is_readonly(c->buf) ? "[RO]" : "");
+
+	if (maxlen)
+		name_len = maxlen - status_len - 1;
+	else
+		name_len = strlen(name);
+
+	name_ptr = name;
+
+	if (name_len < strlen(name))
+		name_ptr += strlen(name) - name_len;
+
+	if (name_len >= 3 && name_len < strlen(buffer_name_get(c->buf))) {
+		name_ptr[0] = '.';
+		name_ptr[1] = '.';
+		name_ptr[2] = '.';
+	}
+
+	snprintf(title, sizeof(title), "%s %s", status, name_ptr);
+
 	ui_window_draw_text_attr(c->win, 0, title_y, title, w_w,
 			title_fg, title_bg,
 			UI_TEXT_STYLE_NORMAL);
