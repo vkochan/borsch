@@ -783,7 +783,6 @@ draw(Window *c, bool force) {
 
 		buf_update(c);
 
-		ui_window_redraw(c->win);
 		ui_window_draw(c->win);
 
 		evt.eid = EVT_WIN_DRAW;
