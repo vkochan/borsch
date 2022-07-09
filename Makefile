@@ -63,18 +63,20 @@ ifeq ($(DEBUG),1)
 CFLAGS += -UNDEBUG -O0 -g -ggdb -Wall -Wextra -Wno-unused-parameter
 endif
 
+.PHONY: libtext libui
+
 all: ${PROGNAME}
 
-${PROGNAME}: ${OBJS} libui.a libtext.a
+${PROGNAME}: ${OBJS} libui libtext
 	${CC} ${CFLAGS} ${LDFLAGS} ${OBJS} ${LIBS} -o $@
 
 %.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
-libtext.a:
+libtext:
 	$(MAKE) -C text/
 
-libui.a:
+libui:
 	$(MAKE) -C ui/
 
 man:
