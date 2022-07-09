@@ -20,8 +20,8 @@ SRCS += scheme.c
 
 SCH_SCRIPTS = main.ss
 
-LDFLAGS += -L ./text -L ./ui
-LIBS += -ltext -lui -ltree-sitter
+LDFLAGS += -L ./text -L ./ui -L ./complete
+LIBS += -ltext -lui -ltree-sitter -lcomplete
 
 SRCS += parser/c/parser.c \
        parser/devicetree/parser.c \
@@ -63,7 +63,7 @@ ifeq ($(DEBUG),1)
 CFLAGS += -UNDEBUG -O0 -g -ggdb -Wall -Wextra -Wno-unused-parameter
 endif
 
-.PHONY: libtext libui
+.PHONY: libtext libui libcomplete
 
 all: ${PROGNAME}
 
@@ -72,6 +72,9 @@ ${PROGNAME}: ${OBJS} libui libtext
 
 %.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+
+libcomplete:
+	$(MAKE) -C complete/
 
 libtext:
 	$(MAKE) -C text/
@@ -90,6 +93,7 @@ debug: clean
 
 clean:
 	@echo cleaning
+	@$(MAKE) -C complete/ clean
 	@$(MAKE) -C text/ clean
 	@$(MAKE) -C ui/ clean
 	@rm -f ${PROGNAME} 
