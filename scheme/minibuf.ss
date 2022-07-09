@@ -105,6 +105,12 @@
    )
 )
 
+(define minibuf-insert-char
+   (lambda (char)
+      (insert (string char))
+   )
+)
+
 (define minibuf-create
    (lambda ()
       (let ([m (call-foreign (__cs_minibuf_create))])
@@ -112,6 +118,7 @@
          (set! minibuf-window m)
 
          (with-current-buffer minibuf-buffer
+            (define-local text-insert-hook minibuf-insert-char)
             (define-local input-mode #f)
             (define-local func-value #f)
             (define-local prompt-pos 0)
