@@ -14,7 +14,7 @@ SCH_VERSION := $(shell echo "(scheme-version)" | scheme -q | sed -e 's|"||g' | c
 SCH_MACHINE := $(shell echo "(machine-type)" | scheme -q)
 SCH_PREFIX ?= /usr
 SCH_PATH = $(SCH_PREFIX)/lib/csv$(SCH_VERSION)/$(SCH_MACHINE)
-LIBS += -lpthread -luuid -ldl -lm
+LIBS += -lpthread -luuid -ldl -lm $(SCH_PATH)/kernel.o
 BIN += ${PROGNAME}-eval
 SRCS += scheme.c
 
@@ -35,7 +35,6 @@ CFLAGS += -I$(SCH_PATH) \
    -DPROGNAME='"${PROGNAME}"' \
    -DLIB_PATH='"'"${DESTDIR}${LIB_PREFIX}"'"'
 
-OBJS += $(SCH_PATH)/kernel.o
 OBJS += ${SRCS:.c=.o}
 
 define install_scheme
