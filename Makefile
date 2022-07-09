@@ -1,6 +1,6 @@
 include config.mk
 
-SRC = main.c \
+SRCS = main.c \
       vt.c \
       array.c \
       view.c \
@@ -15,16 +15,15 @@ SCH_MACHINE := $(shell echo "(machine-type)" | scheme -q)
 SCH_PREFIX ?= /usr
 SCH_PATH = $(SCH_PREFIX)/lib/csv$(SCH_VERSION)/$(SCH_MACHINE)
 LIBS += -lpthread -luuid -ldl -lm
-OBJS += $(SCH_PATH)/kernel.o
 BIN += ${PROGNAME}-eval
-SRC += scheme.c
+SRCS += scheme.c
 
 SCH_SCRIPTS = main.ss
 
 LDFLAGS += -L ./text -L ./ui
 LIBS += -ltext -lui -ltree-sitter
 
-SRC += parser/c/parser.c \
+SRCS += parser/c/parser.c \
        parser/devicetree/parser.c \
        parser/diff/parser.c \
        parser/scheme/parser.c \
@@ -35,6 +34,9 @@ SRC += parser/c/parser.c \
 CFLAGS += -I$(SCH_PATH) \
    -DPROGNAME='"${PROGNAME}"' \
    -DLIB_PATH='"'"${DESTDIR}${LIB_PREFIX}"'"'
+
+OBJS += $(SCH_PATH)/kernel.o
+OBJS += ${SRCS:.c=.o}
 
 define install_scheme
 	@echo installing scheme scripts
@@ -64,8 +66,11 @@ endif
 
 all: ${PROGNAME}
 
-${PROGNAME}: libui.a libtext.a config.mk *.c *.h
-	${CC} ${CFLAGS} ${SRC} ${LDFLAGS} ${OBJS} ${LIBS} -o $@
+${PROGNAME}: ${OBJS} libui.a libtext.a
+	${CC} ${CFLAGS} ${LDFLAGS} ${OBJS} ${LIBS} -o $@
+
+%.o: %.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
 libtext.a:
 	$(MAKE) -C text/
@@ -87,6 +92,7 @@ clean:
 	@$(MAKE) -C text/ clean
 	@$(MAKE) -C ui/ clean
 	@rm -f ${PROGNAME} 
+	@rm -f ${OBJS}
 
 dist: clean
 	@echo creating dist tarball
