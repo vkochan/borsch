@@ -11,7 +11,7 @@
 
 (define __cs_evt_fd_handler_del (foreign-procedure __collect_safe "cs_evt_fd_handler_del" (int) void))
 
-(define-record-type process (fields port-in port-out port-err pid buffer on-ready (mutable cb)))
+(define-record-type process (fields port-in port-out port-err pid buffer on-exit (mutable cb)))
 
 (define %process-pid-ht (make-eq-hashtable))
 (define %process-fd-ht (make-eq-hashtable))
@@ -74,7 +74,7 @@
        (process-create prog buf #f)
       ]
 
-      [(prog buf on-ready)
+      [(prog buf on-exit)
        (let (
              [p (call-foreign (__cs_process_create prog (current-cwd) #t #t #f "" #t))]
             )
@@ -89,7 +89,7 @@
                    [port-out (if (eq? out-fd -1) #f (open-fd-input-port out-fd (buffer-mode block) (native-transcoder)))]
                    [port-err (if (eq? err-fd -1) #f (open-fd-input-port err-fd (buffer-mode block) (native-transcoder)))]
                   )
-                (let ([proc (make-process port-in port-out port-err pid buf on-ready #f)])
+                (let ([proc (make-process port-in port-out port-err pid buf on-exit #f)])
                    (hashtable-set! %process-pid-ht pid proc)
                    (when buf
                       (let ([cb (__process-fd-cb)])
@@ -231,8 +231,8 @@
                (close-port (process-port-out proc))
                (close-port (process-port-in proc))
             )
-            (when (process-on-ready proc)
-               ((process-on-ready proc) (process-buffer proc))
+            (when (process-on-exit proc)
+               ((process-on-exit proc) (process-buffer proc))
                (unlock-object (process-cb proc))
             )
             (hashtable-delete! %process-pid-ht pid)
