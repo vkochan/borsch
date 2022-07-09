@@ -338,6 +338,12 @@
    )
 )
 
+(define text-mode-insert-char
+   (lambda (char)
+      (insert (string char))
+   )
+)
+
 (define-mode text-mode "Text" #f
    (when (not (local-bound? text-mode-map))
       (let ([map (make-keymap)])
@@ -362,6 +368,7 @@
        (define-local buffer-reload-func buffer-reload-file))
 
    (define-local window-draw-hook text-mode-linenum-draw)
+   (define-local text-insert-hook text-mode-insert-char)
    (define-local linenum-enable #t)
    (text-mode-normal)
 )

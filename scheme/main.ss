@@ -40,6 +40,7 @@
 		[2    'pre-draw-hook ]
 		[3    'post-draw-hook ]
 		[100  'key-press-hook   ]
+		[101  'text-insert-hook   ]
 		[200  'process-exit-hook   ]
 		[else #f]
              )
@@ -56,6 +57,18 @@
              )
           )
        )
+   )
+)
+
+(add-hook 'text-insert-hook
+   (lambda (code)
+      (let ([b (current-buffer)])
+         (when b
+            (when (local-bound? text-insert-hook)
+               ((get-local text-insert-hook) (integer->char code))
+            )
+         )
+      )
    )
 )
 

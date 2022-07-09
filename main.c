@@ -1381,9 +1381,11 @@ keypress(int code) {
 				if (key != -1)
 					vt_keypress(term, key);
 			} else if (buffer_text_input_is_enabled(c->buf)) {
-				size_t pos = buffer_cursor_get(c->buf);
-				if (key == -1 && code <= UCHAR_MAX)
-					buffer_text_insert_len(c->buf, pos, (char *)&code, 1);
+				event_t evt;
+
+				evt.eid = EVT_TEXT_INSERT;
+				evt.oid = code;
+				scheme_event_handle(evt);
 			}
 		}
 		if (!pertag.runinall[pertag.curtag])
