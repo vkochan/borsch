@@ -1,6 +1,7 @@
 (define dirb-dir-style '(:fg "blue" :attr "bold"))
 (define dirb-file-executable-style '(:fg "yellow" :attr "bold"))
 (define dirb-file-regular-style '(:fg "white"))
+(define dirb-external-opener "xdg-open")
 
 (define dirb-selection-list (list))
 
@@ -486,6 +487,14 @@
    )
 )
 
+(define dirb-open-entry-externally
+   (lambda ()
+      (let ([path (dirb-entry-path)])
+         (system (format "~a ~s" dirb-external-opener path))
+      )
+   )
+)
+
 (define dirb-mode-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" dirb-open-entry)
@@ -508,6 +517,7 @@
       (bind-key map "`" (lambda () (term #f "" (dirb-current-dir))))
       (bind-key map "c" dirb-create-tar-archive)
       (bind-key map "x" dirb-extract-tar-archive)
+      (bind-key map "o" dirb-open-entry-externally)
       map
    )
 )
