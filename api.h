@@ -68,6 +68,7 @@ int win_buf_get(int wid);
 void win_mark_highlight(int wid, bool enable);
 void win_popup(int wid, bool enable);
 void win_size_set(int wid, int width, int height);
+int win_size_get(int wid, int *width, int *height);
 void win_border_set(int wid, bool enable);
 void win_buf_switch(int wid, int bid);
 int win_prev_selected(void);

@@ -3274,6 +3274,21 @@ void win_size_set(int wid, int width, int height)
 	}
 }
 
+int win_size_get(int wid, int *width, int *height)
+{
+	Window *w = window_get_by_id(wid);
+
+	if (w) {
+		if (width)
+			*width = ui_window_width_get(w->win);
+		if (height)
+			*height = ui_window_height_get(w->win);
+		return 0;
+	}
+
+	return -1;
+}
+
 void win_border_set(int wid, bool enable)
 {
 	Window *w = window_get_by_id(wid);

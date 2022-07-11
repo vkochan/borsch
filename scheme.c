@@ -253,6 +253,28 @@ void scheme_win_size_set(int wid, int width, int height)
 	win_size_set(wid, width, height);
 }
 
+ptr scheme_win_width_get(int wid)
+{
+	int width;
+	int err;
+
+	err = win_size_get(wid, &width, NULL);
+	if (err)
+		return Sfalse;
+	return Sinteger(width);
+}
+
+ptr scheme_win_height_get(int wid)
+{
+	int height;
+	int err;
+
+	err = win_size_get(wid, NULL, &height);
+	if (err)
+		return Sfalse;
+	return Sinteger(height);
+}
+
 void scheme_win_border_set(int wid, bool enable)
 {
 	win_border_set(wid, enable);
@@ -1021,6 +1043,8 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_mark_highlight", scheme_win_mark_highlight);
 	Sregister_symbol("cs_win_popup", scheme_win_popup);
 	Sregister_symbol("cs_win_size_set", scheme_win_size_set);
+	Sregister_symbol("cs_win_width_get", scheme_win_width_get);
+	Sregister_symbol("cs_win_height_get", scheme_win_height_get);
 	Sregister_symbol("cs_win_border_set", scheme_win_border_set);
 	Sregister_symbol("cs_win_buf_switch", scheme_win_buf_switch);
 	Sregister_symbol("cs_win_prev_selected", scheme_win_prev_selected);
