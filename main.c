@@ -557,11 +557,11 @@ static pid_t __process_fork(const char *p, const char *argv[], const char *cwd, 
 	struct winsize ws;
 	pid_t pid;
 
-	if (to && pipe2(vt2ed, O_NONBLOCK)) {
+	if (to && pipe(vt2ed)) {
 		*to = -1;
 		to = NULL;
 	}
-	if (from && pipe2(ed2vt, O_NONBLOCK)) {
+	if (from && pipe(ed2vt)) {
 		*from = -1;
 		from = NULL;
 	}

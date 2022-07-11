@@ -36,6 +36,27 @@
    )
 )
 
+(define __process-on-read-sync
+   (lambda (proc)
+      (let (
+            [proc-out (process-port-out proc)]
+            [buf      (process-buffer proc)]
+           )
+         (let ([s (get-string-some proc-out)])
+            (while (not (eof-object? s))
+               (with-current-buffer buf
+                  (save-cursor
+                     (move-buffer-end)
+                     (insert s)
+                  )
+               )
+               (set! s (get-string-some proc-out))
+            )
+         )
+      )
+   )
+)
+
 (define __process-fd-handle
    (lambda (fd)
       (let ([proc (hashtable-ref %process-fd-ht fd #f)])
@@ -223,7 +244,7 @@
       (let ([proc (hashtable-ref %process-pid-ht pid #f)])
          (when proc
             (when (process-buffer proc)
-               (__process-on-read-async proc)
+               (__process-on-read-sync proc)
                (let ([fd (port-file-descriptor (process-port-out proc))])
                   (hashtable-delete! %process-fd-ht fd)
                   (call-foreign (__cs_evt_fd_handler_del fd))
