@@ -184,7 +184,18 @@
 
 (define git-list-untracked
    (lambda ()
-      (git-cmd-list "ls-files -z --full-name --other")
+      (let ([lst '()])
+         (for-each
+            (lambda (x)
+               (let ([line (string-split x #\space)])
+                  (when (equal? "??" (list-ref line 0))
+                     (set! lst (append lst (list (list-ref line 1))))
+                  )
+               )
+            ) (git-cmd-list "status --porcelain -unormal -z")
+         )
+         lst
+      )
    )
 )
 
