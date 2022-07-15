@@ -300,36 +300,28 @@
          (begin
             (let ([b (window-buffer w)])
                (with-current-buffer b
-                  (let* (
-                         [end (line-begin-pos (window-viewport-end w))]
-                         [coord (window-viewport-coord w end)]
-                        )
-                     (if coord
-                        (count-digits-num (list-ref coord 2))
-                        ;; else
-                        0
-                     )
-                  )
+                  (count-digits-num (buffer-line-num (buffer-end-pos)))
                )
             )
          )
-         ;; else
-         0
-      )
+       )
    )
 )
 
 (define text-mode-linenum-draw
    (lambda (w)
       (when (and (local-bound? linenum-enable) (get-local linenum-enable))
-         (let ([width (1+ (text-mode-linenum-width w))])
+         (let ([width (text-mode-linenum-width w)])
             (when (not (eq? width (window-sidebar-width w)))
-               (window-set-sidebar-width w width)
+               (window-set-sidebar-width w (1+ width))
             )
             (let ([lines (window-viewport-lines-coord w)])
                (for-each
                   (lambda (c)
-                     (window-draw-sidebar w 0 (list-ref c 1) (format "~a" (list-ref c 2)))
+                     (let ([line (list-ref c 2)])
+                        (window-draw-sidebar w 0 (list-ref c 1)
+                                                 (format (string-append "~" (number->string width) "@a") line))
+                     )
                   ) lines
                )
             )

@@ -945,27 +945,33 @@ static void draw_title(Window *c) {
 static void buf_update(Window *w);
 
 static void
-draw(Window *c, bool force) {
+__draw(Window *c, bool force, bool fire_event) {
 	if ((force || buffer_is_dirty(c->buf) && is_content_visible(c)) || c == get_popup()) {
-		event_t evt;
-
 		/* we assume that it will be set on EVT_WIN_DRAW */
 		/* ui_window_sidebar_width_set(c->win, 0); */
 		ui_window_clear(c->win);
 
 		buf_update(c);
 
-		ui_window_draw(c->win);
+		if (fire_event) {
+			event_t evt;
 
-		evt.eid = EVT_WIN_DRAW;
-		evt.oid = c->id;
-		scheme_event_handle(evt);
+			evt.eid = EVT_WIN_DRAW;
+			evt.oid = c->id;
+			scheme_event_handle(evt);
+		}
+
+		ui_window_draw(c->win);
 
 		if (!isarrange(fullscreen) || c == current_window())
 			draw_title(c);
 
 		ui_window_refresh(c->win);
 	}
+}
+
+static void draw(Window *c, bool force) {
+	__draw(c, force, true);
 }
 
 static void
@@ -2782,7 +2788,7 @@ void win_sidebar_set(int wid, int width)
 	if (w && width != ui_window_sidebar_width_get(w->win)) {
 		ui_window_sidebar_width_set(w->win, width);
 		buffer_dirty_set(w->buf, true);
-                draw(w, true);
+		__draw(w, true, false);
 	}
 }
 
@@ -3997,6 +4003,17 @@ void buf_cursor_set(int bid, size_t pos)
 		/* just to make UI update */
 		buffer_dirty_set(buf, true);
 	}
+}
+
+size_t buf_line_num(int bid, size_t pos)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		return buffer_line_num(buf, pos);
+	}
+
+	return EPOS;
 }
 
 void buf_input_enable(int bid, bool enable)

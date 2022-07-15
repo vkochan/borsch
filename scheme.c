@@ -570,6 +570,16 @@ void scheme_buf_cursor_set(int bid, size_t pos)
 	buf_cursor_set(bid, pos);
 }
 
+ptr scheme_buf_line_num(int bid, size_t pos)
+{
+	size_t line = buf_line_num(bid, pos);
+
+	if (line != EPOS)
+		return Sinteger(line);
+
+	return Sfalse;
+}
+
 void scheme_buf_text_input_enable(int bid, bool enable)
 {
 	buf_input_enable(bid, enable);
@@ -1092,6 +1102,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_state_name_set", scheme_buf_state_name_set);
 	Sregister_symbol("cs_buf_cursor_get", scheme_buf_cursor_get);
 	Sregister_symbol("cs_buf_cursor_set", scheme_buf_cursor_set);
+	Sregister_symbol("cs_buf_line_num", scheme_buf_line_num);
 	Sregister_symbol("cs_buf_file_open", scheme_buf_file_open);
 	Sregister_symbol("cs_buf_file_set", scheme_buf_file_set);
 	Sregister_symbol("cs_buf_file_get", scheme_buf_file_get);

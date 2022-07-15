@@ -319,6 +319,11 @@ size_t buffer_cursor_get(Buffer *buf)
 	return buf->cursor;
 }
 
+size_t buffer_line_num(Buffer *buf, size_t pos)
+{
+	return text_lineno_by_pos(buf->text, pos);
+}
+
 char *buffer_name_get(Buffer *buf)
 {
 	if (buf->file.path)

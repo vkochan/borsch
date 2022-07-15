@@ -37,6 +37,7 @@ int buffer_id_get(Buffer *buf);
 Buffer *buffer_by_id(int bid);
 void buffer_cursor_set(Buffer *buf, size_t pos);
 size_t buffer_cursor_get(Buffer *buf);
+size_t buffer_line_num(Buffer *buf, size_t pos);
 char *buffer_name_get(Buffer *buf);
 void buffer_name_set(Buffer *buf, const char *name);
 void buffer_name_lock(Buffer *buf, bool lock);
