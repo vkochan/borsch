@@ -6,6 +6,7 @@
 (load "view.ss")
 (load "window.ss")
 (load "buffer.ss")
+(load "complete.ss")
 (load "prompt.ss")
 (load "copybuf.ss")
 (load "topbar.ss")

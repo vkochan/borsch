@@ -252,3 +252,24 @@
       )
    )
 )
+
+(define minibuf-complete-handle
+   (lambda (o)
+      (set-local! input-mode #f)
+      ((get-local func-value) o)
+   )
+)
+
+(define minibuf-complete
+   (lambda (lst fn)
+      (let ()
+         (with-current-buffer minibuf-buffer
+            (set-local! input-mode #t)
+            (set-local! func-value fn)
+            (complete lst minibuf-complete-handle)
+         )
+         (window-set-height minibuf-window 10)
+         (window-select minibuf-window)
+      )
+   )
+)
