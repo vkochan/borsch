@@ -285,7 +285,7 @@
             (set-local! orig-win (current-window))
             (complete lst minibuf-complete-handle)
          )
-         (window-set-height minibuf-window 10)
+         (window-set-height minibuf-window 11)
          (window-select minibuf-window)
       )
    )
