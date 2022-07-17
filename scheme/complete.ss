@@ -186,8 +186,3 @@
       ]
    )
 )
-
-;;(with-current-buffer (buffer-create "xxxx")
-;;   (complete '("one" "two" "three" "four" "five") (lambda (o) (message (format "selected:~a" o))))
-;;)
-;;(minibuf-complete '("one" "two" "three" "four" "five") (lambda (o) (message (format "selected:~a" o))))
