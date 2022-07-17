@@ -266,7 +266,7 @@
          (set-local! input-mode #f)
          (window-set-height minibuf-window 1)
          (window-select w)
-         (with-current-buffer b
+         (when o
             (fn o)
          )
       )
