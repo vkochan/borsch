@@ -42,9 +42,9 @@
             (for-each
                (lambda (x)
                   (if (= line-idx sel)
-                     (insert (format "\n> ~a" x))
+                     (insert (format "\n> ~a" x) '(style (:attr "bold" :fg "blue")))
                      ;; else
-                     (insert (format "\n~a" x))
+                     (insert (format "\n  ~a" x))
                   )
                   (set! line-idx (1+ line-idx))
                ) lst
