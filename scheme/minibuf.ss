@@ -123,6 +123,7 @@
             (define-local func-value #f)
             (define-local prompt-pos 0)
             (define-local orig-buf 0)
+            (define-local orig-win 0)
             (enable-insert #t)
          )
       )
@@ -255,17 +256,33 @@
 
 (define minibuf-complete-handle
    (lambda (o)
-      (set-local! input-mode #f)
-      ((get-local func-value) o)
+      (let (
+            [fn (get-local func-value)]
+            [b (get-local orig-buf)]
+            [w (get-local orig-win)]
+           )
+         (enable-insert #f)
+         (erase-buffer)
+         (set-local! input-mode #f)
+         (window-set-height minibuf-window 1)
+         (window-select w)
+         (with-current-buffer b
+            (fn o)
+         )
+      )
    )
 )
 
 (define minibuf-complete
    (lambda (lst fn)
-      (let ()
+      (let (
+            [b (current-buffer)]
+           )
          (with-current-buffer minibuf-buffer
             (set-local! input-mode #t)
             (set-local! func-value fn)
+            (set-local! orig-buf b)
+            (set-local! orig-win (current-window))
             (complete lst minibuf-complete-handle)
          )
          (window-set-height minibuf-window 10)
