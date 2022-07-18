@@ -88,15 +88,35 @@
    )
 )
 
-(define complete-select-value
+(define complete-selected-value
    (lambda ()
       (let (
             [lst-idx (get-local complete-index)]
             [result (get-local complete-result)]
            )
-         (set-local! text-insert-hook #f)
-         ((get-local complete-fn) (first (list-tail result lst-idx)))
+         (first (list-tail result lst-idx))
       )
+   )
+)
+
+(define complete-select-value
+   (lambda ()
+      (let ()
+         (set-local! text-insert-hook #f)
+         ((get-local complete-fn) (complete-selected-value))
+      )
+   )
+)
+
+(define complete-copy-value
+   (lambda ()
+      (copybuf-put (complete-selected-value))
+   )
+)
+
+(define complete-append-value
+   (lambda ()
+      (copybuf-append (format "\n~a" (complete-selected-value)))
    )
 )
 
@@ -155,6 +175,8 @@
       (bind-key map "<Backspace>" complete-prompt-delete-prev-char)
       (bind-key map "<Enter>" complete-select-value)
       (bind-key map "<Esc>" complete-cancel)
+      (bind-key map "C-y" complete-copy-value)
+      (bind-key map "C-a" complete-append-value)
       (bind-key map "C-h" complete-prompt-move-prev-char)
       (bind-key map "C-l" complete-prompt-move-next-char)
       (bind-key map "C-j" complete-list-move-down)
