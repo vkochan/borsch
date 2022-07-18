@@ -74,6 +74,7 @@ void win_buf_switch(int wid, int bid);
 int win_prev_selected(void);
 int win_viewport_pos(int wid, char type);
 int win_viewport_coord(int wid, int pos, int *l, int *x, int *y);
+int win_viewport_size_get(int wid, int *width, int *height);
 int win_scroll(int wid, char type, int n);
 void win_sidebar_set(int wid, int width);
 int win_sidebar_get(int wid);
