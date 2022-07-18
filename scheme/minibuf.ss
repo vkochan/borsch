@@ -177,6 +177,7 @@
          (with-current-buffer minibuf-buffer
             (erase-buffer)
             (insert str)
+            (set-local! text-insert-hook minibuf-insert-char)
             (set-local! prompt-pos (cursor))
             (set-local! input-mode #t)
             (set-local! func-value fn)

@@ -83,6 +83,7 @@
 
 (define complete-cancel
    (lambda ()
+      (set-local! text-insert-hook #f)
       ((get-local complete-fn) #f)
    )
 )
@@ -93,6 +94,7 @@
             [lst-idx (get-local complete-index)]
             [result (get-local complete-result)]
            )
+         (set-local! text-insert-hook #f)
          ((get-local complete-fn) (first (list-tail result lst-idx)))
       )
    )
