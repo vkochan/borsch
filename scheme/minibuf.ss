@@ -288,10 +288,10 @@
             (set-local! func-value fn)
             (set-local! orig-buf b)
             (set-local! orig-win (current-window))
+            (window-set-height minibuf-window 11)
+            (window-select minibuf-window)
             (complete lst minibuf-complete-handle prompt)
          )
-         (window-set-height minibuf-window 11)
-         (window-select minibuf-window)
       )
      ]
    )
