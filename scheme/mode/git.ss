@@ -547,7 +547,7 @@
                    (insert (git-cmd-read "log --format=%B -n 1 HEAD"))
                 )
                 (save-cursor
-                   (run-hooks 'git-commit-edit)
+                   (run-hooks 'git-commit-edit-hook)
                 )
                 (buffer-set-mode-name "Git Commit")
                 (bind-key-local "C-c C-c"
