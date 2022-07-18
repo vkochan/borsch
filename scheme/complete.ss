@@ -165,11 +165,15 @@
 (define complete
    (case-lambda
       [(ls fn)
+       (complete ls fn "")
+      ]
+
+      [(ls fn prompt)
        (let ()
          (define-local text-insert-hook complete-insert-char)
          (define-local complete-prompt-cursor 0)
          (define-local complete-prompt-pos 0)
-         (define-local complete-prompt ":")
+         (define-local complete-prompt (format "~a:" prompt))
          (define-local complete-text "")
          (define-local complete-index 0)
          (define-local complete-max-lines 10)
