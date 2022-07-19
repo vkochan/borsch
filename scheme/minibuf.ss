@@ -248,25 +248,6 @@
    )
 )
 
-(define minibuf-cmd
-   (lambda ()
-      (with-current-buffer minibuf-buffer
-         (enable-insert #t)
-      )
-      (minibuf-interactive-func 'minibuf-prompt-map ":" #f
-         (lambda (val)
-            (let ([line (string->number val)])
-               (if line
-                  (move-line-num line)
-                  ;; else
-                  (message "Unknown command")
-               )
-            )
-         )
-      )
-   )
-)
-
 (define minibuf-complete-handle
    (lambda (o)
       (let (

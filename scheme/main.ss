@@ -6,6 +6,7 @@
 (load "view.ss")
 (load "window.ss")
 (load "buffer.ss")
+(load "command.ss")
 (load "complete.ss")
 (load "prompt.ss")
 (load "copybuf.ss")
@@ -139,6 +140,23 @@
          (when (file-exists? local-script)
             (load local-script)
          )
+      )
+   )
+)
+
+(define minibuf-cmd
+   (lambda ()
+      (minibuf-complete
+         (map
+            (lambda (c)
+               (cons (command-name c) c)
+            )
+            command-list
+         )
+         (lambda (c)
+            ((command-func c))
+         )
+         "Cmd"
       )
    )
 )
