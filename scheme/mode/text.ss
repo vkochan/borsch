@@ -138,6 +138,22 @@
    )
 )
 
+(define text-mode-command
+   (lambda ()
+      (minibuf-read ":"
+        (lambda (val)
+            (let ([line (string->number val)])
+               (if line
+                  (move-line-num line)
+                  ;; else
+                  (message "Unknown command")
+               )
+            )
+         )
+      )
+   )
+)
+
 (define text-mode-normal-map
    (let ([map (make-keymap)])
       (bind-key map "h" (lambda () (move-prev-char)))
@@ -204,7 +220,7 @@
       (bind-key map "n" (lambda () (search-next)))
       (bind-key map "N" (lambda () (search-prev)))
       (bind-key map "C-s" (lambda () (text-mode-save-file)))
-      (bind-key map ":" (lambda () (minibuf-cmd)))
+      (bind-key map ":" (lambda () (text-mode-command)))
       map
    )
 )
