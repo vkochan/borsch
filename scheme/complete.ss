@@ -1,3 +1,23 @@
+(define complete-item-name
+   (lambda (i)
+      (if (pair? i)
+         (car i)
+         ;; else
+         i
+      )
+   )
+)
+
+(define complete-item-value
+   (lambda (i)
+      (if (pair? i)
+         (cdr i)
+         ;; else
+         i
+      )
+   )
+)
+
 (define complete-match
    (lambda ()
       (let (
@@ -8,7 +28,7 @@
          (set-local! complete-result
                      (filter
                         (lambda (x)
-                           (string-contains? x text)
+                           (string-contains? (complete-item-name x) text)
                         ) lst
                      )
          )
@@ -41,10 +61,12 @@
          (when (not (null? lst))
             (for-each
                (lambda (x)
-                  (if (= line-idx sel)
-                     (insert (format "\n> ~a" x) '(style (:attr "bold" :fg "blue")))
-                     ;; else
-                     (insert (format "\n  ~a" x))
+                  (let ([name (complete-item-name x)])
+                     (if (= line-idx sel)
+                        (insert (format "\n> ~a" name) '(style (:attr "bold" :fg "blue")))
+                        ;; else
+                        (insert (format "\n  ~a" name))
+                     )
                   )
                   (set! line-idx (1+ line-idx))
                ) lst
@@ -94,7 +116,7 @@
             [lst-idx (get-local complete-index)]
             [result (get-local complete-result)]
            )
-         (first (list-tail result lst-idx))
+         (complete-item-value (first (list-tail result lst-idx)))
       )
    )
 )
