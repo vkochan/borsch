@@ -216,7 +216,7 @@
    )
 )
 
-(define minibuf-eval
+(define try-eval->string
    (lambda (s)
       (let (
             [code (open-string-input-port s)]
@@ -230,8 +230,20 @@
                    )
          )
          (close-port code)
-         (set! out (string-append out (second ret)))
-         (message out)
+         (string-append out (second ret))
+      )
+   )
+)
+
+(define minibuf-eval
+   (lambda ()
+      (with-current-buffer minibuf-buffer
+         (enable-insert #t)
+      )
+      (minibuf-interactive-func 'minibuf-prompt-map "Eval:" #f
+         (lambda (val)
+            (message (try-eval->string val))
+         )
       )
    )
 )
@@ -247,7 +259,7 @@
                (if line
                   (move-line-num line)
                   ;; else
-                  (minibuf-eval val)
+                  (message "Unknown command")
                )
             )
          )

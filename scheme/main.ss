@@ -233,6 +233,7 @@
 (bind-key "C-x g l" git-show-log)
 (bind-key "C-x g u" git-pull-changes-and-show)
 
+(bind-key "M-e" minibuf-eval)
 (bind-key "M-x" minibuf-cmd)
 
 (bind-key "C-x f d" dirb)
