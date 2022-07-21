@@ -155,7 +155,7 @@
 
 (define buffer-keymap
    (lambda ()
-      (keymap-get-parent (%buffer-local-keymap))
+      (keymap-parent (%buffer-local-keymap))
    )
 )
 
