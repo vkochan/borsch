@@ -21,14 +21,23 @@
 (define complete-match
    (lambda ()
       (let (
-            [text (get-local complete-text)]
+            [text-lst (string-split (get-local complete-text) #\space)]
             [lst (get-local complete-list)]
            )
          (set-local! complete-index 0)
          (set-local! complete-result
                      (filter
                         (lambda (x)
-                           (string-contains? (complete-item-name x) text)
+                           (let ([nmatch 0])
+                              (for-each
+                                 (lambda (t)
+                                    (when (string-contains? (complete-item-name x) t)
+                                       (set! nmatch (1+ nmatch))
+                                    )
+                                 ) text-lst
+                              )
+                              (eq? nmatch (length text-lst))
+                           )
                         ) lst
                      )
          )
