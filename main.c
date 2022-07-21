@@ -3413,13 +3413,13 @@ int kmap_parent_set(int kid, char *name, int pid)
 	KeyMap *kmap = keymap_by_id(kid);
 
 	if (kmap) {
+		keymap_parent_name_set(kmap, name);
+
 		if (pid > 0) {
 			KeyMap *parent = keymap_by_id(pid);
 			if (parent) {
 				keymap_parent_set(kmap, parent);
 			}
-		} else {
-			keymap_parent_name_set(kmap, name);
 		}
 		return 0;
 	}
