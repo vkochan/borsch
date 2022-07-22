@@ -26,9 +26,8 @@
       (let (
             [cmd (make-command name func)]
            )
-         (when (not (find-command name))
-            (set! command-list (append command-list (list cmd)))
-         )
+         (remove-command name)
+         (set! command-list (append command-list (list cmd)))
       )
    )
 )
