@@ -30,7 +30,7 @@
 
 (define scheme-extract-word-for-search
    (lambda ()
-      (pregexp-replace* "\\(|\\)" (extract-longword) "")
+      (pregexp-replace* "\\[|\\]|\\'|\\(|\\)" (extract-longword) "")
    )
 )
 
