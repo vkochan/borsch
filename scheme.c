@@ -37,6 +37,16 @@ static int scheme_run_script(const char *path)
 	return 0;
 }
 
+static int scheme_run_user_script(const char *path)
+{
+	struct stat st;
+
+	if (stat(path, &st) == 0)
+		CALL1("__load_script", Sstring(path));
+
+	return 0;
+}
+
 static int scheme_run_init_script(void)
 {
 	char *home = getenv("HOME");
@@ -54,7 +64,7 @@ static int scheme_run_init_script(void)
         strncat(path, home, sizeof(path));
 	strncat(path+home_len, SCHEME_INIT_SCRIPT, sizeof(path) - home_len);
 
-	return scheme_run_script(path);
+	return scheme_run_user_script(path);
 }
 
 /* Scheme foreign interface */
@@ -1229,7 +1239,7 @@ int scheme_init(const char *init_script)
 		return err;
 
 	if (init_script && strlen(init_script))
-		err = scheme_run_script(init_script);
+		err = scheme_run_user_script(init_script);
 	else
 		err = scheme_run_init_script();
 	if (err)

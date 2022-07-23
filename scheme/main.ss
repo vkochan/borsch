@@ -33,6 +33,12 @@
    )
 )
 
+(define __load_script
+   (lambda (path)
+      (try load path)
+   )
+)
+
 (define __on-event-handler
    (lambda (ev oid)
        (define __evt->symb
