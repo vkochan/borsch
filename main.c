@@ -424,6 +424,7 @@ term_urgent_handler(Vt *term) {
 		draw_title(c);
 }
 
+static void destroy(Window *w);
 static void process_died_set(Process *proc, bool is_died);
 Buffer *process_buffer_get(Process *proc);
 void process_destroy(Process *proc);
@@ -435,7 +436,9 @@ static void process_handle_vt(int fd, void *arg) {
 
 	if (!vt_is_processed(proc->term)) {
 		if (vt_process(proc->term) < 0 && errno == EIO) {
+			Window *win = proc->win;
 			process_destroy(proc);
+			destroy(win);
 		} else {
 			if (buf) {
 				vt_processed_set(proc->term, true);
@@ -546,6 +549,8 @@ int process_kill(Process *proc)
 
 void process_destroy(Process *proc)
 {
+	if (proc->buf)
+		buffer_proc_set(proc->buf, NULL);
 	process_kill(proc);
 	process_remove(proc);
 	process_free(proc);
@@ -1267,8 +1272,10 @@ sigchld_handler(int sig) {
 			if (WIFEXITED(status)) {
 				process_status_set(proc, WEXITSTATUS(status));
 			}
-			process_died_set(proc, true);
-			write(proc_fd[1], &pid, sizeof(pid));
+			if (!proc->term) {
+				process_died_set(proc, true);
+				write(proc_fd[1], &pid, sizeof(pid));
+			}
 		}
 	}
 
