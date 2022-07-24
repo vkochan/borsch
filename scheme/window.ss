@@ -222,8 +222,10 @@
 
 (define window-select
    (lambda (wid)
-      (call-foreign (__cs_win_current_set wid))
-      (run-hooks 'window-select-hook wid)
+      (when wid
+         (call-foreign (__cs_win_current_set wid))
+         (run-hooks 'window-select-hook wid)
+      )
    )
 )
 
