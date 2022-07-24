@@ -10,8 +10,8 @@ SRCS = main.c \
       timer.c \
       syntax.c
 
-SCH_VERSION := $(shell echo "(scheme-version)" | scheme -q | sed -e 's|"||g' | cut -d ' ' -f4)
-SCH_MACHINE := $(shell echo "(machine-type)" | scheme -q)
+SCH_VERSION := $(shell ./scripts/get_scheme_version.sh)
+SCH_MACHINE := $(shell ./scripts/get_scheme_machine.sh)
 SCH_PREFIX ?= /usr
 SCH_PATH = $(SCH_PREFIX)/lib/csv$(SCH_VERSION)/$(SCH_MACHINE)
 LIBS += -lpthread -luuid -ldl -lm
