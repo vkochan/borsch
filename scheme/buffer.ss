@@ -1469,6 +1469,31 @@
    )
 )
 
+(define buffer-window
+   (case-lambda
+      [()
+       (buffer-window (current-buffer))
+      ]
+
+      [(b)
+       (let (
+             [win-lst (filter
+                         (lambda (w)
+                            (equal? (window-buffer (first w)) b)
+                         ) (window-list)
+                      )
+             ]
+            )
+          (if (null? win-lst)
+             #f
+             ;; else
+             (first (first win-lst))
+          )
+       )
+      ]
+   )
+)
+
 (define-syntax (define-local stx)
    (syntax-case stx ()
 	       ((_ s v)
