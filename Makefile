@@ -14,7 +14,7 @@ SCH_VERSION := $(shell echo "(scheme-version)" | scheme -q | sed -e 's|"||g' | c
 SCH_MACHINE := $(shell echo "(machine-type)" | scheme -q)
 SCH_PREFIX ?= /usr
 SCH_PATH = $(SCH_PREFIX)/lib/csv$(SCH_VERSION)/$(SCH_MACHINE)
-LIBS += -lpthread -luuid -ldl -lm $(SCH_PATH)/kernel.o
+LIBS += -lpthread -luuid -ldl -lm
 BIN += ${PROGNAME}-eval
 SRCS += scheme.c
 
@@ -68,7 +68,7 @@ endif
 all: ${PROGNAME}
 
 ${PROGNAME}: ${OBJS} libui libtext
-	${CC} ${CFLAGS} ${LDFLAGS} ${OBJS} ${LIBS} -o $@
+	${CC} ${CFLAGS} ${LDFLAGS} $(SCH_PATH)/kernel.o ${OBJS} ${LIBS} -o $@
 
 %.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
