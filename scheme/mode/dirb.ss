@@ -514,7 +514,7 @@
       (bind-key map "s" dirb-grep)
       (bind-key map "<Space>" dirb-select-entry)
       (bind-key map "<Esc>" dirb-clear-selection)
-      (bind-key map "`" (lambda () (term #f "" (dirb-current-dir))))
+      (bind-key map "`" (lambda () (vterm #f "" (dirb-current-dir))))
       (bind-key map "c" dirb-create-tar-archive)
       (bind-key map "x" dirb-extract-tar-archive)
       (bind-key map "o" dirb-open-entry-externally)

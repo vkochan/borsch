@@ -312,7 +312,7 @@
 
 (define text-mode-linenum-width
    (lambda (w)
-      (if (not (buffer-is-term? (window-buffer w)))
+      (if (not (buffer-is-vterm? (window-buffer w)))
          (begin
             (let ([b (window-buffer w)])
                (with-current-buffer b

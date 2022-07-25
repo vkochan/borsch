@@ -634,7 +634,7 @@
 
 (define window-viewport-lines-coord
    (lambda (w)
-      (when (not (buffer-is-term? (window-buffer w)))
+      (when (not (buffer-is-vterm? (window-buffer w)))
          (let (
                [b (window-buffer w)]
               )

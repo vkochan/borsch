@@ -910,7 +910,7 @@
    )
 )
 
-(define buffer-is-term?
+(define buffer-is-vterm?
    (case-lambda
       [()
        (call-foreign (__cs_buf_is_term (current-buffer)))]
@@ -1829,7 +1829,7 @@
 
 (define search-regex-read
    (lambda ()
-      (when (not (buffer-is-term?))
+      (when (not (buffer-is-vterm?))
          (minibuf-read "/"
             (lambda (r)
                (set! search-reg r)

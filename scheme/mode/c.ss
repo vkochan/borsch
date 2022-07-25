@@ -6,7 +6,7 @@
 
 (define c-compile-buffer
    (lambda ()
-      (term (format "(gcc ~a -c ~a) || read" (c-compile-options) (buffer-filename)))
+      (vterm (format "(gcc ~a -c ~a) || read" (c-compile-options) (buffer-filename)))
    )
 )
 
@@ -16,7 +16,7 @@
             [prog (path-root (buffer-filename))]
             [file (buffer-filename)]
            )
-         (term (format "(gcc ~a ~a -o ~a && ~a) ; read" (c-compile-options) file prog prog))
+         (vterm (format "(gcc ~a ~a -o ~a && ~a) ; read" (c-compile-options) file prog prog))
       )
    )
 )

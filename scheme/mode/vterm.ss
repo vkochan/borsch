@@ -3,7 +3,7 @@
 (define __cs_term_create (foreign-procedure "cs_term_create" (string string string) scheme-object))
 (define __cs_term_text_get (foreign-procedure "cs_term_text_get" (int) scheme-object))
 
-(define term-send-keys
+(define vterm-send-keys
    (case-lambda
       [(keys)
        (call-foreign (__cs_term_keys_send (current-buffer) keys))]
@@ -13,7 +13,7 @@
    )
 )
 
-(define term-send-text
+(define vterm-send-text
    (case-lambda
       [(text)
        (call-foreign (__cs_term_text_send (current-buffer) text))]
@@ -23,27 +23,27 @@
    )
 )
 
-(define term-string
+(define vterm-string
    (case-lambda
       [()
-       (term-string (current-buffer))]
+       (vterm-string (current-buffer))]
 
       [(b)
        (call-foreign (__cs_term_text_get b))]
    )
 )
 
-(define term-mode-copy-enter
+(define vterm-mode-copy-enter
    (lambda ()
       (let* (
              [b (buffer-new)]
              [c (current-buffer)]
-             [s (term-string c)]
+             [s (vterm-string c)]
             )
          (with-current-buffer b
             (text-mode)
-            (bind-key-local "<Esc>" term-mode-copy-exit)
-            (bind-key-local "q" term-mode-copy-exit)
+            (bind-key-local "<Esc>" vterm-mode-copy-exit)
+            (bind-key-local "q" vterm-mode-copy-exit)
             (buffer-set-name "Term Copy")
             (define-local orig-buf c)
             (window-switch-buffer b)
@@ -53,7 +53,7 @@
    )
 )
 
-(define term-mode-copy-exit
+(define vterm-mode-copy-exit
    (lambda ()
       (let ([c (current-buffer)])
          (window-switch-buffer (get-local orig-buf))
@@ -62,39 +62,39 @@
    )
 )
 
-(define term-mode-paste
+(define vterm-mode-paste
    (lambda ()
-      (term-send-text copybuf-reg)
+      (vterm-send-text copybuf-reg)
    )
 )
 
-(define term-mode-map
+(define vterm-mode-map
   (let ([map (make-keymap)])
-     (bind-key map "C-y" term-mode-copy-enter)
-     (bind-key map "C-p" term-mode-paste)
+     (bind-key map "C-y" vterm-mode-copy-enter)
+     (bind-key map "C-p" vterm-mode-paste)
      map
   )
 )
 
-(define term
+(define vterm
    (case-lambda
       [()
-       (term #f "" (current-cwd))]
+       (vterm #f "" (current-cwd))]
 
       [(prog)
-       (term prog "" (current-cwd))]
+       (vterm prog "" (current-cwd))]
 
       [(prog title)
-       (term prog title (current-cwd))]
+       (vterm prog title (current-cwd))]
 
       [(prog title cwd)
        (let* (
               [w (call-foreign (__cs_term_create prog title cwd))]
               [b (window-buffer w)]
              )
-          (define-local major-mode 'term-mode)
-          (buffer-set-keymap 'term-mode-map)
-          (buffer-set-mode-name "Term")
+          (define-local major-mode 'vterm-mode)
+          (buffer-set-keymap 'vterm-mode-map)
+          (buffer-set-mode-name "VTerm")
           (run-hooks 'window-create-hook w)
           w
        )

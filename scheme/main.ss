@@ -18,7 +18,7 @@
 (load "mode/text.ss")
 (load "mode/git.ss")
 (load "mode/grep.ss")
-(load "mode/term.ss")
+(load "mode/vterm.ss")
 (load "mode/dirb.ss")
 (load "mode/scheme.ss")
 (load "mode/c.ss")
@@ -29,7 +29,7 @@
 
 (define open-repl
    (lambda ()
-      (term "borsch-eval -i" "eval")
+      (vterm "borsch-eval -i" "eval")
    )
 )
 
@@ -212,7 +212,7 @@
 (bind-key "M-9"         view-switch-9)
 (bind-key "M-0"         view-switch-all)
 
-(bind-key "C-g c"       term)
+(bind-key "C-g c"       vterm)
 (bind-key "C-g C-x"     open-repl)
 (bind-key "C-g x x"     window-delete)
 (bind-key "C-g h"       window-select-left)
@@ -269,4 +269,4 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; start with a terminal
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(term)
+(vterm)
