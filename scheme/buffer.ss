@@ -975,8 +975,19 @@
        (extract-object (cursor))]
 
       [(s)
-       (string-trim (extract-longword s)
-                    '(#\space #\< #\> #\( #\) #\[ #\] #\" #\'))]
+       (let ([obj (if (selection-is-set?)
+                      (let ([sel (selection-extract)])
+                         (selection-clear)
+                         sel
+                      )
+                      ;else
+                      (extract-longword s)
+                  )
+             ])
+          (string-trim (extract-longword s)
+                       '(#\space #\< #\> #\( #\) #\[ #\] #\" #\'))
+       )
+      ]
    )
 )
 
