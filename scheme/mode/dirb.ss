@@ -107,6 +107,20 @@
     )
 )
 
+(define dirb-next-entry
+    (lambda ()
+       (move-line-down)
+       (move-line-begin)
+    )
+)
+
+(define dirb-prev-entry
+    (lambda ()
+       (move-line-up)
+       (move-line-begin)
+    )
+)
+
 (define dirb-entry-path
     (case-lambda 
        [()
@@ -499,6 +513,9 @@
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" dirb-open-entry)
       (bind-key map "h" dirb-open-parent)
+      (bind-key map "j" dirb-next-entry)
+      (bind-key map "j" dirb-prev-entry)
+      (bind-key map "j" dirb-next-entry)
       (bind-key map "l" dirb-open-entry)
       (bind-key map "." dirb-show-hidden)
       (bind-key map "~" dirb-goto-home)
