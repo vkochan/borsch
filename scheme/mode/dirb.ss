@@ -568,3 +568,5 @@
       ]
    )
 )
+
+(bind-key text-mode-normal-map "g d" (lambda () (dirb (path-parent (buffer-filename)))))
