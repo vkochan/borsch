@@ -1355,108 +1355,6 @@
    )
 )
 
-(define selection-set
-   (case-lambda
-      [()
-       (call-foreign (__cs_buf_mark_set (current-buffer) (cursor)))]
-
-      [(s)
-       (call-foreign (__cs_buf_mark_set (current-buffer) s))]
-   )
-)
-
-(define selection-get
-   (lambda ()
-      (call-foreign (__cs_buf_mark_get (current-buffer)))
-   )
-)
-
-(define selection-clear
-   (lambda ()
-      (call-foreign (__cs_buf_mark_clear (current-buffer)))
-   )
-)
-
-(define selection-is-set?
-   (lambda ()
-      (call-foreign (__cs_buf_mark_is_set (current-buffer)))
-   )
-)
-
-(define selection-get-range
-   (lambda ()
-      (let (
-            [m (selection-get)]
-            [c (cursor)]
-           )
-           (let (
-                 [s (min m c)]
-                 [e (max m c)]
-                )
-	      (list s (next-char-pos e))
-           )
-      )
-   )
-)
-
-(define selection-extract
-   (lambda ()
-      (let ([r (selection-get-range)])
-         (buffer-string (car r) (cadr r))
-      )
-   )
-)
-
-(define selection-delete
-   (lambda ()
-      (let ([r (selection-get-range)])
-         (delete-range (car r) (cadr r))
-      )
-   )
-)
-
-(define selection-copy
-   (lambda ()
-      (let ([r (selection-get-range)])
-           (copybuf-copy (buffer-string (car r) (cadr r)))
-      )
-   )
-)
-
-(define selection-copy-append
-   (lambda ()
-      (let ([r (selection-get-range)])
-           (copybuf-append (buffer-string (car r) (cadr r)))
-      )
-   )
-)
-
-(define selection-copy-linewise
-   (lambda ()
-      (let ([r (selection-get-range)])
-           (copybuf-copy (buffer-string (car r) (cadr r)) #t)
-      )
-   )
-)
-
-(define selection-copy-append-linewise
-   (lambda ()
-      (let ([r (selection-get-range)])
-           (copybuf-append (buffer-string (car r) (cadr r)) #t)
-      )
-   )
-)
-
-(define selection-highlight
-   (case-lambda
-      [(e)
-       (selection-highlight (__cs_win_current_get) e)]
-
-      [(wid e)
-       (when wid (call-foreign (__cs_win_mark_highlight wid e)))]
-   )
-)
-
 (define copy-line
    (lambda ()
       (copybuf-copy (buffer-string (line-begin-pos) (1+ (line-end-pos))) #t)
@@ -1609,6 +1507,111 @@
 	       ((_ s)
 		#`(local-symbol-bound? 's)
                )
+   )
+)
+
+(define selection-set
+   (case-lambda
+      [()
+       (call-foreign (__cs_buf_mark_set (current-buffer) (cursor)))]
+
+      [(s)
+       (call-foreign (__cs_buf_mark_set (current-buffer) s))]
+   )
+)
+
+(define selection-get
+   (lambda ()
+      (call-foreign (__cs_buf_mark_get (current-buffer)))
+   )
+)
+
+(define selection-is-set?
+   (lambda ()
+      (call-foreign (__cs_buf_mark_is_set (current-buffer)))
+   )
+)
+
+(define selection-get-range
+   (lambda ()
+      (let (
+            [m (selection-get)]
+            [c (cursor)]
+           )
+           (let (
+                 [s (min m c)]
+                 [e (max m c)]
+                )
+	      (list s (next-char-pos e))
+           )
+      )
+   )
+)
+
+(define selection-extract
+   (lambda ()
+      (let ([r (selection-get-range)])
+         (buffer-string (car r) (cadr r))
+      )
+   )
+)
+
+(define selection-delete
+   (lambda ()
+      (let ([r (selection-get-range)])
+         (delete-range (car r) (cadr r))
+      )
+   )
+)
+
+(define selection-copy
+   (lambda ()
+      (let ([r (selection-get-range)])
+           (copybuf-copy (buffer-string (car r) (cadr r)))
+      )
+   )
+)
+
+(define selection-copy-append
+   (lambda ()
+      (let ([r (selection-get-range)])
+           (copybuf-append (buffer-string (car r) (cadr r)))
+      )
+   )
+)
+
+(define selection-copy-linewise
+   (lambda ()
+      (let ([r (selection-get-range)])
+           (copybuf-copy (buffer-string (car r) (cadr r)) #t)
+      )
+   )
+)
+
+(define selection-copy-append-linewise
+   (lambda ()
+      (let ([r (selection-get-range)])
+           (copybuf-append (buffer-string (car r) (cadr r)) #t)
+      )
+   )
+)
+
+(define selection-highlight
+   (case-lambda
+      [(e)
+       (selection-highlight (__cs_win_current_get) e)]
+
+      [(wid e)
+       (when wid (call-foreign (__cs_win_mark_highlight wid e)))]
+   )
+)
+
+(define selection-clear
+   (lambda ()
+      (when (local-bound? selection-clear-hook)
+         ((get-local selection-clear-hook))
+      )
+      (call-foreign (__cs_buf_mark_clear (current-buffer)))
    )
 )
 

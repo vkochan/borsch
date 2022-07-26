@@ -10,7 +10,6 @@
       (buffer-set-state-name "")
       (buffer-snapshot)
       (enable-insert #f)
-      (selection-clear)
       (selection-highlight #f)
    )
 )
@@ -21,7 +20,6 @@
          (text-mode-set-keymap 'text-mode-insert-local-map)
          (buffer-set-state-name "<I>")
          (enable-insert #t)
-         (selection-clear)
       )
    )
 )
@@ -241,7 +239,7 @@
              [f (selection-extract)]
              [p (if (equal? #\/ (string-ref f 0)) f (string-append (buffer-cwd) "/" f))]
             )
-         (text-mode-normal)
+         (selection-clear)
          (when (file-exists? p)
             (file-open p)
          )
@@ -251,13 +249,13 @@
 
 (define text-mode-visual-map
    (let ([map (make-keymap 'text-mode-normal-map)])
-      (bind-key map "<Esc>" text-mode-normal)
-      (bind-key map "M-<Space>" text-mode-normal)
-      (bind-key map "x" (lambda () (selection-delete) (text-mode-normal)))
-      (bind-key map "d" (lambda () (selection-delete) (text-mode-normal)))
-      (bind-key map "y" (lambda () (selection-copy) (text-mode-normal)))
-      (bind-key map "a" (lambda () (selection-copy-append) (text-mode-normal)))
-      (bind-key map "A" (lambda () (selection-copy-append-linewise) (text-mode-normal)))
+      (bind-key map "<Esc>" selection-clear)
+      (bind-key map "M-<Space>" selection-clear)
+      (bind-key map "x" (lambda () (selection-delete) (selection-clear)))
+      (bind-key map "d" (lambda () (selection-delete) (selection-clear)))
+      (bind-key map "y" (lambda () (selection-copy) (selection-clear)))
+      (bind-key map "a" (lambda () (selection-copy-append) (selection-clear)))
+      (bind-key map "A" (lambda () (selection-copy-append-linewise) (selection-clear)))
       (bind-key map "g f" text-mode-visual-file-open)
       map
    )
@@ -295,16 +293,16 @@
 
 (define text-mode-visual-linewise-map
    (let ([map (make-keymap)])
-      (bind-key map "<Esc>" text-mode-normal)
-      (bind-key map "M-<Space>" text-mode-normal)
-      (bind-key map "x" (lambda () (selection-delete) (text-mode-normal)))
-      (bind-key map "d" (lambda () (selection-delete) (text-mode-normal)))
+      (bind-key map "<Esc>" selection-clear)
+      (bind-key map "M-<Space>" selection-clear)
+      (bind-key map "x" (lambda () (selection-delete) (selection-clear)))
+      (bind-key map "d" (lambda () (selection-delete) (selection-clear)))
       (bind-key map "l" (lambda () (move-line-down)))
       (bind-key map "j" (lambda () (text-mode-visual-line-move-down)))
       (bind-key map "k" (lambda () (text-mode-visual-line-move-up)))
-      (bind-key map "y" (lambda () (selection-copy-linewise) (text-mode-normal)))
-      (bind-key map "a" (lambda () (selection-copy-append) (text-mode-normal)))
-      (bind-key map "A" (lambda () (selection-copy-append-linewise) (text-mode-normal)))
+      (bind-key map "y" (lambda () (selection-copy-linewise) (selection-clear)))
+      (bind-key map "a" (lambda () (selection-copy-append) (selection-clear)))
+      (bind-key map "A" (lambda () (selection-copy-append-linewise) (selection-clear)))
       (bind-key map "G" (lambda () (move-buffer-end)))
       map
    )
@@ -377,6 +375,7 @@
 
    (define-local window-draw-hook text-mode-linenum-draw)
    (define-local text-insert-hook text-mode-insert-char)
+   (define-local selection-clear-hook text-mode-normal)
    (define-local linenum-enable #t)
    (text-mode-normal)
 )
