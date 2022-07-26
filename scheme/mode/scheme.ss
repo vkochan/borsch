@@ -21,7 +21,10 @@
 (define scheme-eval-buffer
    (lambda ()
       (if (selection-is-set?)
-         (scheme-eval (selection-extract))
+         (let ([sel (selection-extract)])
+            (selection-clear)
+            (scheme-eval sel)
+         )
          ;; else
          (scheme-eval (buffer-string))
       )
