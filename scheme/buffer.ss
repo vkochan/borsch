@@ -1355,7 +1355,7 @@
    )
 )
 
-(define mark-set
+(define selection-set
    (case-lambda
       [()
        (call-foreign (__cs_buf_mark_set (current-buffer) (cursor)))]
@@ -1365,28 +1365,28 @@
    )
 )
 
-(define mark-get
+(define selection-get
    (lambda ()
       (call-foreign (__cs_buf_mark_get (current-buffer)))
    )
 )
 
-(define mark-clear
+(define selection-clear
    (lambda ()
       (call-foreign (__cs_buf_mark_clear (current-buffer)))
    )
 )
 
-(define mark-is-set?
+(define selection-is-set?
    (lambda ()
       (call-foreign (__cs_buf_mark_is_set (current-buffer)))
    )
 )
 
-(define mark-get-range
+(define selection-get-range
    (lambda ()
       (let (
-            [m (mark-get)]
+            [m (selection-get)]
             [c (cursor)]
            )
            (let (
@@ -1399,58 +1399,58 @@
    )
 )
 
-(define mark-extract
+(define selection-extract
    (lambda ()
-      (let ([r (mark-get-range)])
+      (let ([r (selection-get-range)])
          (buffer-string (car r) (cadr r))
       )
    )
 )
 
-(define mark-delete
+(define selection-delete
    (lambda ()
-      (let ([r (mark-get-range)])
+      (let ([r (selection-get-range)])
          (delete-range (car r) (cadr r))
       )
    )
 )
 
-(define mark-copy
+(define selection-copy
    (lambda ()
-      (let ([r (mark-get-range)])
+      (let ([r (selection-get-range)])
            (copybuf-copy (buffer-string (car r) (cadr r)))
       )
    )
 )
 
-(define mark-copy-append
+(define selection-copy-append
    (lambda ()
-      (let ([r (mark-get-range)])
+      (let ([r (selection-get-range)])
            (copybuf-append (buffer-string (car r) (cadr r)))
       )
    )
 )
 
-(define mark-copy-linewise
+(define selection-copy-linewise
    (lambda ()
-      (let ([r (mark-get-range)])
+      (let ([r (selection-get-range)])
            (copybuf-copy (buffer-string (car r) (cadr r)) #t)
       )
    )
 )
 
-(define mark-copy-append-linewise
+(define selection-copy-append-linewise
    (lambda ()
-      (let ([r (mark-get-range)])
+      (let ([r (selection-get-range)])
            (copybuf-append (buffer-string (car r) (cadr r)) #t)
       )
    )
 )
 
-(define mark-highlight
+(define selection-highlight
    (case-lambda
       [(e)
-       (mark-highlight (__cs_win_current_get) e)]
+       (selection-highlight (__cs_win_current_get) e)]
 
       [(wid e)
        (when wid (call-foreign (__cs_win_mark_highlight wid e)))]

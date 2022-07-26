@@ -10,8 +10,8 @@
       (buffer-set-state-name "")
       (buffer-snapshot)
       (enable-insert #f)
-      (mark-clear)
-      (mark-highlight #f)
+      (selection-clear)
+      (selection-highlight #f)
    )
 )
 
@@ -21,7 +21,7 @@
          (text-mode-set-keymap 'text-mode-insert-local-map)
          (buffer-set-state-name "<I>")
          (enable-insert #t)
-         (mark-clear)
+         (selection-clear)
       )
    )
 )
@@ -31,8 +31,8 @@
       (text-mode-set-keymap 'text-mode-visual-local-map)
       (buffer-set-state-name "<V>")
       (enable-insert #f)
-      (mark-set)
-      (mark-highlight #t)
+      (selection-set)
+      (selection-highlight #t)
    )
 )
 
@@ -41,9 +41,9 @@
       (text-mode-set-keymap 'text-mode-visual-linewise-local-map)
       (buffer-set-state-name "<V *L*>")
       (enable-insert #f)
-      (mark-set (line-begin-pos))
+      (selection-set (line-begin-pos))
       (move-line-end)
-      (mark-highlight #t)
+      (selection-highlight #t)
    )
 )
 
@@ -238,7 +238,7 @@
 (define text-mode-visual-file-open
    (lambda ()
       (let* (
-             [f (mark-extract)]
+             [f (selection-extract)]
              [p (if (equal? #\/ (string-ref f 0)) f (string-append (buffer-cwd) "/" f))]
             )
          (text-mode-normal)
@@ -253,11 +253,11 @@
    (let ([map (make-keymap 'text-mode-normal-map)])
       (bind-key map "<Esc>" text-mode-normal)
       (bind-key map "M-<Space>" text-mode-normal)
-      (bind-key map "x" (lambda () (mark-delete) (text-mode-normal)))
-      (bind-key map "d" (lambda () (mark-delete) (text-mode-normal)))
-      (bind-key map "y" (lambda () (mark-copy) (text-mode-normal)))
-      (bind-key map "a" (lambda () (mark-copy-append) (text-mode-normal)))
-      (bind-key map "A" (lambda () (mark-copy-append-linewise) (text-mode-normal)))
+      (bind-key map "x" (lambda () (selection-delete) (text-mode-normal)))
+      (bind-key map "d" (lambda () (selection-delete) (text-mode-normal)))
+      (bind-key map "y" (lambda () (selection-copy) (text-mode-normal)))
+      (bind-key map "a" (lambda () (selection-copy-append) (text-mode-normal)))
+      (bind-key map "A" (lambda () (selection-copy-append-linewise) (text-mode-normal)))
       (bind-key map "g f" text-mode-visual-file-open)
       map
    )
@@ -265,14 +265,14 @@
 
 (define text-mode-visual-line-fixup
    (lambda ()
-      (if (>= (cursor) (mark-get))
+      (if (>= (cursor) (selection-get))
          (begin
-            (mark-set (line-begin-pos (mark-get)))
+            (selection-set (line-begin-pos (selection-get)))
             (move-line-end)
          )
          ;; else
          (begin
-            (mark-set (line-end-pos (mark-get)))
+            (selection-set (line-end-pos (selection-get)))
             (move-line-begin)
          )
       )
@@ -297,14 +297,14 @@
    (let ([map (make-keymap)])
       (bind-key map "<Esc>" text-mode-normal)
       (bind-key map "M-<Space>" text-mode-normal)
-      (bind-key map "x" (lambda () (mark-delete) (text-mode-normal)))
-      (bind-key map "d" (lambda () (mark-delete) (text-mode-normal)))
+      (bind-key map "x" (lambda () (selection-delete) (text-mode-normal)))
+      (bind-key map "d" (lambda () (selection-delete) (text-mode-normal)))
       (bind-key map "l" (lambda () (move-line-down)))
       (bind-key map "j" (lambda () (text-mode-visual-line-move-down)))
       (bind-key map "k" (lambda () (text-mode-visual-line-move-up)))
-      (bind-key map "y" (lambda () (mark-copy-linewise) (text-mode-normal)))
-      (bind-key map "a" (lambda () (mark-copy-append) (text-mode-normal)))
-      (bind-key map "A" (lambda () (mark-copy-append-linewise) (text-mode-normal)))
+      (bind-key map "y" (lambda () (selection-copy-linewise) (text-mode-normal)))
+      (bind-key map "a" (lambda () (selection-copy-append) (text-mode-normal)))
+      (bind-key map "A" (lambda () (selection-copy-append-linewise) (text-mode-normal)))
       (bind-key map "G" (lambda () (move-buffer-end)))
       map
    )

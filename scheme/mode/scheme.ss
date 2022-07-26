@@ -20,8 +20,8 @@
 
 (define scheme-eval-buffer
    (lambda ()
-      (if (mark-is-set?)
-         (scheme-eval (mark-extract))
+      (if (selection-is-set?)
+         (scheme-eval (selection-extract))
          ;; else
          (scheme-eval (buffer-string))
       )
