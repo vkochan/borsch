@@ -761,6 +761,59 @@
    )
 )
 
+(define git-insert-blame
+   (case-lambda
+      [(file start end)
+       (let ([ls (git-cmd-read (format "blame --root ~a -L~a,~a" file start end))])
+          (buffer-set-readonly #f)
+          (insert ls)
+          (buffer-set-readonly #t)
+       )
+      ]
+   )
+)
+
+(define git-blame-mode-map
+   (let ([map (make-keymap)])
+      (bind-key map "<Enter>" (lambda () (move-line-begin) (git-show-commit)))
+      map
+   )
+)
+
+(define-mode git-blame-mode "Git Blame" text-mode
+   (buffer-set-readonly #t)
+   (set-local! linenum-enable #f)
+   (git-insert-blame (buffer-name) (get-local git-blame-start) (get-local git-blame-end))
+   (move-buffer-begin)
+   (move-each-line
+      (lambda ()
+         (add-text-property (cursor) (word-end-pos) '(style (:fg "green")))
+      )
+   )
+   (move-buffer-begin)
+)
+
+(define git-blame
+   (lambda ()
+      (let (
+            [start (buffer-line-num (selection-get))]
+            [end   (buffer-line-num (cursor))]
+           )
+         (selection-clear)
+
+         (let ([b (buffer-create (buffer-filename))])
+            (with-current-buffer b
+               (define-local git-blame-start start)
+               (define-local git-blame-end end)
+               (git-blame-mode)
+            )
+         )
+      )
+   )
+)
+
 (bind-key text-mode-normal-map "g l" (lambda () (git-show-log (buffer-filename))))
 (bind-key text-mode-normal-map "g d" (lambda () (git-status-diff-file 'unstaged (buffer-filename))))
 (bind-key text-mode-normal-map "g c" (lambda () (git-show-commit)))
+(bind-key text-mode-normal-map "g b" (lambda () (git-blame)))
+(bind-key text-mode-visual-linewise-map "g b" (lambda () (git-blame)))
