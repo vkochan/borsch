@@ -27,6 +27,8 @@
 (load "mode/gnumake.ss")
 (load "mode/org.ss")
 
+(define message-recent "")
+
 (define open-repl
    (lambda ()
       (vterm "borsch-eval -i" "eval")
@@ -150,6 +152,12 @@
    )
 )
 
+(add-hook 'on-message-hook
+   (lambda (m)
+      (set! message-recent m)
+   )
+)
+
 (define minibuf-cmd
    (lambda ()
       (minibuf-complete
@@ -249,6 +257,7 @@
 (bind-key "C-x b c" window-close)
 (bind-key "C-x b o" buffer-open)
 
+(bind-key "C-g y m" (lambda () (copybuf-put (pregexp-replace "\n$" message-recent ""))))
 (bind-key "C-g y w" (lambda () (copybuf-put (current-cwd))))
 
 (bind-key "C-x g s" git-status)
