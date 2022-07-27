@@ -152,7 +152,7 @@
    )
 )
 
-(add-hook 'on-message-hook
+(add-hook 'message-hook
    (lambda (m)
       (set! message-recent m)
    )

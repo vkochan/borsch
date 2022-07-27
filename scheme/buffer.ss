@@ -1748,7 +1748,7 @@
                (insert (format "~a\n" s))
             )
          )
-         (run-hooks 'on-message-hook s)
+         (run-hooks 'message-hook s)
       )
    )
 )

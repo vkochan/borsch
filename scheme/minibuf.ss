@@ -130,7 +130,7 @@
    )
 )
 
-(add-hook 'on-message-hook
+(add-hook 'message-hook
    (lambda (m)
       (when minibuf-buffer
          (window-set-height minibuf-window (1+ (lines-count m)))
