@@ -175,6 +175,124 @@
 
 (define *buffer-enable-eof* #t)
 
+(define-syntax (define-local stx)
+   (syntax-case stx ()
+	       ((_ s v)
+		#`(define-top-level-value 's v (buffer-env))
+               )
+   )
+)
+
+(define dir-local-symbol-bound?
+   (case-lambda
+      [(sym)
+       (dir-local-symbol-bound? (current-cwd) sym)
+      ]
+
+      [(dir sym)
+       (let (
+             [dir-env (hashtable-ref %dir-locals-ht dir #f)]
+            )
+          (and dir-env (top-level-bound? sym dir-env))
+       )
+      ]
+   )
+)
+
+(define dir-get-local-symbol
+   (lambda (sym)
+      (let (
+            [dir-env (hashtable-ref %dir-locals-ht (path-parent (buffer-filename)) #f)]
+           )
+         (if (and dir-env (top-level-bound? sym dir-env))
+            (top-level-value sym dir-env)
+            ;; else
+            (let (
+                  [cwd-env (hashtable-ref %dir-locals-ht (current-cwd) #f)]
+                 )
+               (top-level-value sym cwd-env)
+            )
+         )
+      )
+   )
+)
+
+(define dir-set-local-symbol!
+   (lambda (dir sym val)
+      (let (
+            [dir-env (hashtable-ref %dir-locals-ht dir #f)]
+           )
+         (if dir-env
+            (set-top-level-value! sym val dir-env)
+            ;; else
+            (let ([env (copy-environment (scheme-environment))])
+               (hashtable-set! %dir-locals-ht dir env)
+               (define-top-level-value sym val env)
+            )
+         )
+      )
+   )
+)
+
+(define-syntax (dir-set-local! stx)
+   (syntax-case stx ()
+	       ((_ dir sym val)
+		#`(dir-set-local-symbol! dir 'sym val)
+               )
+   )
+)
+
+(define local-symbol-bound?
+   (lambda (sym)
+      (or (top-level-bound? sym (buffer-env))
+          (dir-local-symbol-bound? (current-cwd) sym)
+          (dir-local-symbol-bound? (path-parent (buffer-filename)) sym))
+   )
+)
+
+(define get-local-symbol
+   (lambda (sym)
+      (if (top-level-bound? sym (buffer-env))
+         (top-level-value sym (buffer-env))
+         ;; else
+         (dir-get-local-symbol sym)
+      )
+   )
+)
+
+(define set-local-symbol!
+   (lambda (sym val)
+      (set-top-level-value! sym val (buffer-env))
+   )
+)
+
+(define-syntax (get-local stx)
+   (syntax-case stx ()
+	       ((_ s)
+		#`(get-local-symbol 's)
+               )
+	       ((_ s e)
+		#`(if (local-bound? s) (get-local s) e)
+               )
+   )
+)
+
+(define-syntax (set-local! stx)
+   (syntax-case stx ()
+	       ((_ s v)
+		#`(set-local-symbol! 's v)
+               )
+   )
+)
+
+(define-syntax (local-bound? stx)
+   (syntax-case stx ()
+	       ((_ s)
+		#`(local-symbol-bound? 's)
+               )
+   )
+)
+
 (define cursor
    (lambda ()
       (call-foreign (__cs_buf_cursor_get (current-buffer)))
@@ -895,8 +1013,11 @@
                           (buffer-begin-pos)
                           (- (buffer-end-pos) (buffer-begin-pos))))]
 
-      [(s e)
-       (call-foreign (__cs_buf_text_get (current-buffer) s (- e s)))]
+      [(start end)
+       (let ([start (min start end)] [end (max start end)])
+          (call-foreign (__cs_buf_text_get (current-buffer) start (- end start)))
+       )
+      ]
    )
 )
 
@@ -1199,9 +1320,39 @@
    )
 )
 
+(define-syntax (extract-deletion stx)
+   (syntax-case stx ()
+      ((_ exp ...)
+       #`(let ([del-text ""])
+            (let (
+                  [del-hook (lambda (start end)
+                               (let ([text (buffer-string start end)])
+                                  (set! del-text (string-append del-text text))
+                               )
+                            )
+                  ]
+                 )
+               (define-local text-delete-hook del-hook)
+               (begin
+                  exp
+                  ...
+               )
+               (set-local! text-delete-hook #f)
+               del-text
+            )
+         )
+      )
+   )
+)
+
 (define delete-range
    (lambda (s e)
-      (buffer-modify (call-foreign (__cs_buf_text_range_del (current-buffer) s e)))
+      (buffer-modify
+         (when (local-bound? text-delete-hook)
+            ((get-local text-delete-hook) s e)
+         )
+         (call-foreign (__cs_buf_text_range_del (current-buffer) s e))
+      )
    )
 )
 
@@ -1400,124 +1551,6 @@
           )
        )
       ]
-   )
-)
-
-(define-syntax (define-local stx)
-   (syntax-case stx ()
-	       ((_ s v)
-		#`(define-top-level-value 's v (buffer-env))
-               )
-   )
-)
-
-(define dir-local-symbol-bound?
-   (case-lambda
-      [(sym)
-       (dir-local-symbol-bound? (current-cwd) sym)
-      ]
-
-      [(dir sym)
-       (let (
-             [dir-env (hashtable-ref %dir-locals-ht dir #f)]
-            )
-          (and dir-env (top-level-bound? sym dir-env))
-       )
-      ]
-   )
-)
-
-(define dir-get-local-symbol
-   (lambda (sym)
-      (let (
-            [dir-env (hashtable-ref %dir-locals-ht (path-parent (buffer-filename)) #f)]
-           )
-         (if (and dir-env (top-level-bound? sym dir-env))
-            (top-level-value sym dir-env)
-            ;; else
-            (let (
-                  [cwd-env (hashtable-ref %dir-locals-ht (current-cwd) #f)]
-                 )
-               (top-level-value sym cwd-env)
-            )
-         )
-      )
-   )
-)
-
-(define dir-set-local-symbol!
-   (lambda (dir sym val)
-      (let (
-            [dir-env (hashtable-ref %dir-locals-ht dir #f)]
-           )
-         (if dir-env
-            (set-top-level-value! sym val dir-env)
-            ;; else
-            (let ([env (copy-environment (scheme-environment))])
-               (hashtable-set! %dir-locals-ht dir env)
-               (define-top-level-value sym val env)
-            )
-         )
-      )
-   )
-)
-
-(define-syntax (dir-set-local! stx)
-   (syntax-case stx ()
-	       ((_ dir sym val)
-		#`(dir-set-local-symbol! dir 'sym val)
-               )
-   )
-)
-
-(define local-symbol-bound?
-   (lambda (sym)
-      (or (top-level-bound? sym (buffer-env))
-          (dir-local-symbol-bound? (current-cwd) sym)
-          (dir-local-symbol-bound? (path-parent (buffer-filename)) sym))
-   )
-)
-
-(define get-local-symbol
-   (lambda (sym)
-      (if (top-level-bound? sym (buffer-env))
-         (top-level-value sym (buffer-env))
-         ;; else
-         (dir-get-local-symbol sym)
-      )
-   )
-)
-
-(define set-local-symbol!
-   (lambda (sym val)
-      (set-top-level-value! sym val (buffer-env))
-   )
-)
-
-(define-syntax (get-local stx)
-   (syntax-case stx ()
-	       ((_ s)
-		#`(get-local-symbol 's)
-               )
-	       ((_ s e)
-		#`(if (local-bound? s) (get-local s) e)
-               )
-   )
-)
-
-(define-syntax (set-local! stx)
-   (syntax-case stx ()
-	       ((_ s v)
-		#`(set-local-symbol! 's v)
-               )
-   )
-)
-
-(define-syntax (local-bound? stx)
-   (syntax-case stx ()
-	       ((_ s)
-		#`(local-symbol-bound? 's)
-               )
    )
 )
 
