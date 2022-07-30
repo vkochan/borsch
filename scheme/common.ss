@@ -93,15 +93,25 @@
    )
 )
 
-(define path-exists?
+(define path-expand
    (lambda (f)
-      (file-exists?
-         (if (equal? (string-ref f 0) #\/)
+      (let ([root (path-first f)])
+         (if (equal? root "/")
             f
             ;; else
-            (string-append (current-cwd) "/" f)
+            (if (equal? root "~")
+               (format "~a/~a" (getenv "HOME") (path-rest f))
+               ;; else
+               (string-append (current-cwd) "/" f)
+            )
          )
       )
+   )
+)
+
+(define path-exists?
+   (lambda (f)
+      (file-exists? (path-expand f))
    )
 )
 
