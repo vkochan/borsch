@@ -103,16 +103,20 @@
 
 (define file-open
    (lambda (p)
-      (if (file-regular? p)
-         (let ([b (buffer-create)])
-            (with-current-buffer b
-               (text-mode)
-               (buffer-open-file p)
+      (let ([p (path-expand p)])
+         (if (file-regular? p)
+            (let ([b (buffer-create)])
+               (with-current-buffer b
+                  (text-mode)
+                  (buffer-open-file p)
+               )
             )
-         )
-         ;; else
-         (if (file-directory? p)
-            (dirb p)
+            ;; else
+            (if (file-directory? p)
+               (dirb p)
+               ;; else
+               (message (format "path does not exist: ~a" p))
+            )
          )
       )
    )

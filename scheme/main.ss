@@ -114,11 +114,7 @@
    (lambda ()
       (minibuf-read "open file:"
          (lambda (f)
-            (if (path-exists? f)
-               (file-open f)
-               ;; else
-               (message (format "File ~a does not exist" f))
-            )
+            (file-open f)
          )
       )
    )
