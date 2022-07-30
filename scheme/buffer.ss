@@ -1348,8 +1348,10 @@
 (define delete-range
    (lambda (s e)
       (buffer-modify
-         (when (local-bound? text-delete-hook)
-            ((get-local text-delete-hook) s e)
+         (let ([del-hook (get-local text-delete-hook #f)])
+            (when del-hook 
+               (del-hook s e)
+            )
          )
          (call-foreign (__cs_buf_text_range_del (current-buffer) s e))
       )
