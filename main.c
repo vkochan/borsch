@@ -182,7 +182,7 @@ extern int scheme_eval_file(const char *scm_in, const char *out);
 extern void *scheme_env_alloc(void);
 extern void scheme_env_free(void *env);
 
-static char *scheme_init_script;
+static char *scheme_init_script = "";
 
 /* commands for use by keybindings */
 static void focusn(const char *args[]);
@@ -2278,6 +2278,8 @@ parse_args(int argc, char *argv[]) {
 		if (strcmp(argv[arg], "-i") == 0) {
 			scheme_init_script = argv[arg+1];
 			arg++;
+		} else if (strcmp(argv[arg], "-n") == 0) {
+			scheme_init_script = NULL;
 		}
 	}
 
