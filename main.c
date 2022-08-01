@@ -346,6 +346,12 @@ typedef struct {
 	Window *popup[LENGTH(tags) + 1];
 } Pertag;
 
+typedef struct
+{
+	pid_t 			pid;
+	int			status;
+} ProcessInfo;
+
 typedef struct Process
 {
 	struct Process 		*next;
@@ -1251,13 +1257,12 @@ get_window_by_coord(unsigned int x, unsigned int y) {
 
 static void
 sigchld_handler(int sig) {
+	ProcessInfo pinfo;
 	int errsv = errno;
 	int status;
 	pid_t pid;
 
 	while ((pid = waitpid(-1, &status, WNOHANG)) != 0) {
-		Process *proc;
-
 		if (pid == -1) {
 			if (errno == ECHILD) {
 				/* no more child processes */
@@ -1266,17 +1271,9 @@ sigchld_handler(int sig) {
 			eprint("waitpid: %s\n", strerror(errno));
 			break;
 		}
-
-		proc = process_by_pid(pid);
-		if (proc) {
-			if (WIFEXITED(status)) {
-				process_status_set(proc, WEXITSTATUS(status));
-			}
-			if (!proc->term) {
-				process_died_set(proc, true);
-				write(proc_fd[1], &pid, sizeof(pid));
-			}
-		}
+		pinfo.status = status;
+		pinfo.pid = pid;
+		write(proc_fd[1], &pinfo, sizeof(pinfo));
 	}
 
 	errno = errsv;
@@ -2415,15 +2412,24 @@ reenter:
 
 static void handle_sigchld_io(int fd, void *arg)
 {
+	ProcessInfo pinfo;
 	event_t evt;
 	ssize_t len;
-	pid_t pid;
 
-	len = read(fd, &pid, sizeof(pid));
-	if (len == sizeof(pid)) {
-		evt.eid = EVT_PROC_EXIT;
-		evt.oid = pid;
-		scheme_event_handle(evt);
+	len = read(fd, &pinfo, sizeof(pinfo));
+	if (len == sizeof(pinfo)) {
+		Process *proc = process_by_pid(pinfo.pid);
+		if (proc) {
+			if (WIFEXITED(pinfo.status)) {
+				process_status_set(proc, WEXITSTATUS(pinfo.status));
+			}
+			if (!proc->term) {
+				process_died_set(proc, true);
+				evt.eid = EVT_PROC_EXIT;
+				evt.oid = pinfo.pid;
+				scheme_event_handle(evt);
+			}
+		}
 	}
 }
 
