@@ -891,6 +891,8 @@ static void draw_title(Window *c) {
 	int w_w = ui_window_width_get(c->win);
 	int has_border = ui_window_border_is_enabled(c->win);
 	size_t status_len, name_len;
+	Selection *view_cursor = view_selections_primary_get(c->view);
+	size_t line, col;
 	char status[100];
 	char title[256];
 	char name[100];
@@ -920,7 +922,12 @@ static void draw_title(Window *c) {
 		maxlen = 0;
 	strncpy(name, buffer_name_get(c->buf), sizeof(name));
 
-	status_len = snprintf(status, sizeof(status), "%s%s %s  [%d|%s]%s",
+	line = view_cursors_line(view_cursor);
+	col = view_cursors_col(view_cursor);
+
+	status_len = snprintf(status, sizeof(status), "[%d:%d] %s%s %s  [%d|%s]%s",
+			line,
+			col,
 			buffer_is_modified(c->buf) ? "[+] " : "",
 			buffer_mode_name_get(c->buf),
 			buffer_state_name_get(c->buf),
