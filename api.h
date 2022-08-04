@@ -40,6 +40,14 @@ typedef struct {
 
 typedef void (*bind_key_cb_t)(void);
 
+void eprint(const char *errstr, ...);
+
+#ifdef NDEBUG
+ #define debug(format, args...)
+#else
+ #define debug eprint
+#endif
+
 int win_get_by_coord(int x, int y);
 bool win_is_visible(int wid);
 int win_first_get(void);

@@ -169,12 +169,6 @@ static Ui *ui;
 #define MIN(x, y)   ((x) < (y) ? (x) : (y))
 #define TAGMASK     ((1 << LENGTH(tags)) - 1)
 
-#ifdef NDEBUG
- #define debug(format, args...)
-#else
- #define debug eprint
-#endif
-
 extern int scheme_init(const char *);
 extern void scheme_uninit(void);
 extern int scheme_event_handle(event_t evt);
@@ -749,8 +743,7 @@ static void style_cleanup(void)
 	array_release(&style_array);
 }
 
-static void
-eprint(const char *errstr, ...) {
+void eprint(const char *errstr, ...) {
 	va_list ap;
 	va_start(ap, errstr);
 	vfprintf(stderr, errstr, ap);
@@ -2411,7 +2404,9 @@ reenter:
 		}
 
 		if (keymap_kbd_len(kbd) == kbuf->key_index) {
+			debug("kbd action: enter\n");
 			keymap_kbd_action(kbd);
+			debug("kbd action: exit\n");
 			keybuf_clear(kbuf);
 		}
 	} else {

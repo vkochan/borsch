@@ -1270,10 +1270,11 @@ void scheme_uninit(void)
 
 int scheme_event_handle(event_t evt)
 {
-
+	debug("scheme: event: enter: eid=%d, oid=%d\n", evt.eid, evt.oid);
 	Scall2(Stop_level_value(Sstring_to_symbol("__on-event-handler")),
 			Sinteger(evt.eid),
 			Sinteger(evt.oid));
+	debug("scheme: event: exit\n");
 	return 0;
 }
 
