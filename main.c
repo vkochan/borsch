@@ -1611,8 +1611,8 @@ static void
 destroy(Window *w) {
 	Buffer *buf = w->buf;
 
-	__buf_del(buf);
 	__win_del(w);
+	__buf_del(buf);
 }
 
 static void
@@ -3013,8 +3013,9 @@ void win_close(int wid)
 	Window *w = window_get_by_id(wid);
 
 	if (w) {
-		buffer_ref_put(w->buf);
+		Buffer *buf = w->buf;
 		__win_del(w);
+		buffer_ref_put(buf);
 	}
 }
 
