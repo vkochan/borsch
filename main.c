@@ -958,6 +958,7 @@ static void buf_update(Window *w);
 static void
 __draw(Window *c, bool force, bool fire_event) {
 	if ((force || buffer_is_dirty(c->buf) && is_content_visible(c)) || c == get_popup()) {
+		debug("%s: buffer name: %s\n", __func__, buffer_name_get(c->buf));
 		/* we assume that it will be set on EVT_WIN_DRAW */
 		/* ui_window_sidebar_width_set(c->win, 0); */
 		ui_window_clear(c->win);
