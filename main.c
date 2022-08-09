@@ -1724,6 +1724,16 @@ done:
 	close(fd);
 }
 
+static void vt_handler(Vt *vt, wchar_t ch, void *arg)
+{
+	Buffer *buf = arg;
+	event_t evt;
+
+	evt.eid = EVT_VTERM_PROCESS;
+	evt.oid = buffer_id_get(buf);
+	scheme_event_handle(evt);
+}
+
 int term_create(const char *prog, const char *title, const char *cwd) {
 	Process *proc;
 	char tmppath[PATH_MAX];
@@ -4454,6 +4464,39 @@ int term_text_get(int bid, char **buf, size_t *len)
 	} else {
 		return -1;
 	}
+}
+
+int term_current_line_get(int bid, char **buf, size_t *len)
+{
+	Buffer *b = buffer_by_id(bid);
+
+	if (b && buffer_proc_get(b)) {
+		Process *proc = buffer_proc_get(b);
+		*len = vt_current_line_get(process_term_get(proc), buf);
+		return 0;
+	} else {
+		return -1;
+	}
+}
+
+int term_handler_enable(int bid, bool enable)
+{
+	Buffer *b = buffer_by_id(bid);
+
+	if (b && buffer_proc_get(b)) {
+		Process *proc = buffer_proc_get(b);
+		Vt *vt = process_term_get(proc);
+
+		if (enable) {
+			vt_handler_set(vt, vt_handler, b);
+		} else {
+			vt_handler_set(vt, NULL, NULL);
+		} 
+
+		return 0;
+	}
+
+	return -1;
 }
 
 int view_current_get(void)

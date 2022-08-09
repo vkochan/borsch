@@ -10,6 +10,7 @@ typedef enum {
 	EVT_KEY_PRESS    = 100,
 	EVT_TEXT_INSERT  = 101,
 	EVT_PROC_EXIT    = 200,
+	EVT_VTERM_PROCESS = 300,
 } event_id_t;
 
 typedef enum {
@@ -174,6 +175,8 @@ int term_create(const char *prog, const char *title, const char *cwd);
 int term_keys_send(int bid, char *keys);
 int term_text_send(int bid, char *text);
 int term_text_get(int bid, char **buf, size_t *len);
+int term_current_line_get(int bid, char **buf, size_t *len);
+int term_handler_enable(int bid, bool enable);
 
 int view_current_get(void);
 int view_current_set(int tag);

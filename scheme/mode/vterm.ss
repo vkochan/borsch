@@ -2,6 +2,8 @@
 (define __cs_term_text_send (foreign-procedure "cs_term_text_send" (int string) int))
 (define __cs_term_create (foreign-procedure "cs_term_create" (string string string) scheme-object))
 (define __cs_term_text_get (foreign-procedure "cs_term_text_get" (int) scheme-object))
+(define __cs_term_current_line_get (foreign-procedure "cs_term_current_line_get" (int) scheme-object))
+(define __cs_term_handler_enable (foreign-procedure "cs_term_handler_enable" (int boolean) scheme-object))
 
 (define vterm-send-keys
    (case-lambda
@@ -30,6 +32,16 @@
 
       [(b)
        (call-foreign (__cs_term_text_get b))]
+   )
+)
+
+(define vterm-current-line
+   (case-lambda
+      [()
+       (vterm-current-line (current-buffer))]
+
+      [(b)
+       (call-foreign (__cs_term_current_line_get b))]
    )
 )
 
@@ -93,11 +105,27 @@
               [b (window-buffer w)]
              )
           (define-local major-mode 'vterm-mode)
+          (define-local vterm-handler-func #f)
           (buffer-set-keymap 'vterm-mode-map)
           (buffer-set-mode-name "VTerm")
           (run-hooks 'window-create-hook w)
           w
        )
+      ]
+   )
+)
+
+(define vterm-set-handler
+   (case-lambda
+      [(fn)
+       (vterm-set-handler (current-buffer) fn)
+      ]
+
+      [(bid fn)
+       (with-current-buffer bid
+          (set-local! vterm-handler-func fn)
+       )
+       (call-foreign (__cs_term_handler_enable bid (or fn)))
       ]
    )
 )

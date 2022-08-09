@@ -67,6 +67,8 @@ void vt_noscroll(Vt*);
 pid_t vt_pid_get(Vt*);
 void vt_pid_set(Vt*, pid_t);
 size_t vt_content_get(Vt*, char **s, bool colored);
+size_t vt_current_line_get(Vt*, char **s);
 int vt_content_start(Vt*);
+void vt_handler_set(Vt *, void (*h)(Vt *vt, wchar_t ch, void *arg), void *arg);
 
 #endif /* VT_H */

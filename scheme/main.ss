@@ -52,6 +52,7 @@
 		[100  'key-press-hook   ]
 		[101  'text-insert-hook   ]
 		[200  'process-exit-hook   ]
+		[300  'vterm-process-hook   ]
 		[else #f]
              )
           )
@@ -63,7 +64,19 @@
                      (eq? h 'pre-draw-hook))
                 (run-hooks h)
                 ;; else
-                (run-hooks h oid)
+		(if (eq? h 'vterm-process-hook)
+                   (begin
+                      (with-current-buffer oid
+                         (let ([fn (get-local vterm-handler-func #f)])
+                            (when fn
+                               (fn)
+                            )
+                         )
+                      )
+                   )
+                   ;; else
+                   (run-hooks h oid)
+		)
              )
           )
        )

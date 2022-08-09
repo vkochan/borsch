@@ -877,6 +877,28 @@ ptr scheme_term_text_get(int bid)
 	return s;
 }
 
+ptr scheme_term_current_line_get(int bid)
+{
+	char *text = NULL;
+	size_t len;
+	int err;
+	ptr s;
+
+	err = term_current_line_get(bid, &text, &len);
+	if (err) {
+		return Sfalse;
+	}
+
+	s = Sstring_utf8(text, len);
+	free(text);
+	return s;
+}
+
+void scheme_term_handler_enable(int bid, bool enable)
+{
+	term_handler_enable(bid, enable);
+}
+
 int scheme_view_current_get(void)
 {
 	return view_current_get();
@@ -1175,6 +1197,8 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_term_keys_send", scheme_term_keys_send);
 	Sregister_symbol("cs_term_text_send", scheme_term_text_send);
 	Sregister_symbol("cs_term_text_get", scheme_term_text_get);
+	Sregister_symbol("cs_term_current_line_get", scheme_term_current_line_get);
+	Sregister_symbol("cs_term_handler_enable", scheme_term_handler_enable);
 
 	Sregister_symbol("cs_view_current_get", scheme_view_current_get);
 	Sregister_symbol("cs_view_current_set", scheme_view_current_set);

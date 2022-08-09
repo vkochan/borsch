@@ -183,6 +183,8 @@ struct Vt {
 	vt_urgent_handler_t urgent_handler; /* hook which is called upon bell */
 	void *data;              /* user supplied data */
 	bool processed;
+	void (*vt_handler)(Vt *vt, wchar_t ch, void *arg);
+	void *vt_handler_arg;
 };
 
 static const char *keytable[KEY_MAX+1] = {
@@ -1421,6 +1423,9 @@ int vt_process(Vt *t)
 
 		pos += len ? len : 1;
 		put_wc(t, wc);
+
+		if (t->vt_handler)
+			t->vt_handler(t, wc, t->vt_handler_arg);
 	}
 
 	t->rlen -= pos;
@@ -1741,7 +1746,7 @@ void vt_pid_set(Vt *t, pid_t pid)
 	t->pid = pid;
 }
 
-size_t vt_content_get(Vt *t, char **buf, bool colored)
+size_t __vt_content_get(Vt *t, VtRow *first_row, VtRow *(*iter_next_row)(VtBuffer*, VtRow*), char **buf, bool colored, bool add_eol)
 {
 	VtBuffer *b = t->buffer;
 	int lines = b->scroll_above + b->scroll_below + b->rows + 1;
@@ -1755,7 +1760,7 @@ size_t vt_content_get(Vt *t, char **buf, bool colored)
 	char *s = *buf;
 	VtCell *prev_cell = NULL;
 
-	for (VtRow *row = buffer_row_first(b); row; row = buffer_row_next(b, row)) {
+	for (VtRow *row = first_row; row; row = iter_next_row ? iter_next_row(b, row) : NULL) {
 		size_t len = 0;
 		char *last_non_space = s;
 		for (int col = 0; col < b->cols; col++) {
@@ -1805,13 +1810,30 @@ size_t vt_content_get(Vt *t, char **buf, bool colored)
 		}
 
 		s = last_non_space;
-		*s++ = '\n';
+		if (add_eol)
+			*s++ = '\n';
 	}
 
 	return s - *buf;
 }
 
+size_t vt_content_get(Vt *t, char **buf, bool colored)
+{
+	return __vt_content_get(t, buffer_row_first(t->buffer), buffer_row_next, buf, colored, true);
+}
+
+size_t vt_current_line_get(Vt *t, char **buf)
+{
+	return __vt_content_get(t, t->buffer->curs_row, NULL, buf, false, false);
+}
+
 int vt_content_start(Vt *t)
 {
 	return t->buffer->scroll_above;
+}
+
+void vt_handler_set(Vt *vt, void (*h)(Vt *vt, wchar_t ch, void *arg), void *arg)
+{
+	vt->vt_handler_arg = arg;
+	vt->vt_handler = h;
 }
