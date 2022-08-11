@@ -203,6 +203,7 @@ void evt_fd_handler_del(int fd);
 
 pid_t proc_create(const char *prog, const char *cwd, int *in, int *out, int *err, char **env, bool async);
 bool proc_is_alive(pid_t pid);
+int proc_status_get(pid_t pid);
 int proc_wait(pid_t pid, int *status);
 void proc_del(pid_t pid);
 

@@ -1072,6 +1072,11 @@ ptr scheme_process_is_alive(int pid)
 	return Sboolean(proc_is_alive(pid));
 }
 
+ptr scheme_process_status_get(int pid)
+{
+	return Sinteger(proc_status_get(pid));
+}
+
 void scheme_do_quit(void)
 {
 	do_quit();
@@ -1228,6 +1233,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_timer_time_set", scheme_timer_time_set);
 
 	Sregister_symbol("cs_process_is_alive", scheme_process_is_alive);
+	Sregister_symbol("cs_process_status_get", scheme_process_status_get);
 	Sregister_symbol("cs_process_create", scheme_process_create);
 	Sregister_symbol("cs_process_del", scheme_process_delete);
 	Sregister_symbol("cs_process_wait", scheme_process_wait);

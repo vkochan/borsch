@@ -4728,6 +4728,16 @@ bool proc_is_alive(pid_t pid)
 	}
 }
 
+int proc_status_get(pid_t pid)
+{
+	Process *proc = process_by_pid(pid);
+
+	if (proc) {
+		return process_status_get(proc);
+	}
+	return -1;
+}
+
 void proc_del(pid_t pid)
 {
 	Process *proc = process_by_pid(pid);

@@ -5,6 +5,8 @@
 
 (define __cs_process_is_alive (foreign-procedure __collect_safe "cs_process_is_alive" (int) scheme-object))
 
+(define __cs_process_status_get (foreign-procedure __collect_safe "cs_process_status_get" (int) scheme-object))
+
 (define __cs_process_del (foreign-procedure "cs_process_del" (int) void))
 
 (define __cs_evt_fd_handler_add (foreign-procedure __collect_safe "cs_evt_fd_handler_add" (int void*) int))
@@ -85,6 +87,12 @@
    )
 )
 
+(define process-status
+   (lambda (pid)
+      (call-foreign (__cs_process_status_get pid))
+   )
+)
+
 (define process-create
    (case-lambda
       [(prog)
@@ -133,7 +141,7 @@
       ((_ cmd exp ...)
        #`(let ([b (buffer-new)])
             (process-create cmd b
-               (lambda (b)
+               (lambda (proc-status buf-out)
                   (begin
                      exp
 		     ...
@@ -151,7 +159,7 @@
       ((_ cmd buf exp ...)
        #`(let ([b buf])
             (process-create cmd b
-               (lambda (b)
+               (lambda (proc-status buf-out)
                   (begin
                      exp
 		     ...
@@ -253,7 +261,7 @@
                (close-port (process-port-in proc))
             )
             (when (process-on-exit proc)
-               ((process-on-exit proc) (process-buffer proc))
+               ((process-on-exit proc) (process-status pid) (process-buffer proc))
                (unlock-object (process-cb proc))
             )
             (hashtable-delete! %process-pid-ht pid)
