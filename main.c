@@ -3503,6 +3503,11 @@ int buf_new(char *name)
 	return 0;
 }
 
+bool buf_is_valid(int bid)
+{
+	return !!buffer_by_id(bid);
+}
+
 void buf_del(int bid)
 {
 	Buffer *buf = buffer_by_id(bid);

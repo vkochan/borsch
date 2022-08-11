@@ -1,4 +1,5 @@
 (define __cs_buf_new (foreign-procedure "cs_buf_new" (string) scheme-object))
+(define __cs_buf_is_valid (foreign-procedure "cs_buf_is_valid" (int) scheme-object))
 (define __cs_buf_del (foreign-procedure __collect_safe "cs_buf_del" (int) void))
 (define __cs_buf_kmap_get (foreign-procedure __collect_safe "cs_buf_kmap_get" (int) scheme-object))
 (define __cs_buf_kmap_set (foreign-procedure "cs_buf_kmap_set" (int string) scheme-object))
@@ -437,6 +438,12 @@
           b
        )
       ]
+   )
+)
+
+(define buffer-is-valid?
+   (lambda (bid)
+      (call-foreign (__cs_buf_is_valid bid))
    )
 )
 

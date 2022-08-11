@@ -410,6 +410,11 @@ ptr scheme_buf_new(char *name)
 	return Sfalse;
 }
 
+ptr scheme_buf_is_valid(int bid)
+{
+	return Sboolean(buf_is_valid(bid));
+}
+
 void scheme_buf_del(int bid)
 {
 	buf_del(bid);
@@ -1133,6 +1138,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_kmap_del", scheme_kmap_del);
 
 	Sregister_symbol("cs_buf_new", scheme_buf_new);
+	Sregister_symbol("cs_buf_is_valid", scheme_buf_is_valid);
 	Sregister_symbol("cs_buf_del", scheme_buf_del);
 	Sregister_symbol("cs_buf_kmap_get", scheme_buf_kmap_get);
 	Sregister_symbol("cs_buf_kmap_set", scheme_buf_kmap_set);
