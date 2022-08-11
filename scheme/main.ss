@@ -69,7 +69,7 @@
                       (with-current-buffer oid
                          (let ([fn (get-local vterm-handler-func #f)])
                             (when fn
-                               (fn)
+                               (try fn)
                             )
                          )
                       )
