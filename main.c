@@ -547,6 +547,11 @@ int process_kill(Process *proc)
 	return status;
 }
 
+void process_kill_async(Process *proc)
+{
+	kill(-proc->pid, SIGKILL);
+}
+
 void process_destroy(Process *proc)
 {
 	if (proc->buf)
@@ -4763,6 +4768,15 @@ void proc_del(pid_t pid)
 
 	if (proc) {
 		process_destroy(proc);
+	}
+}
+
+void proc_kill(pid_t pid)
+{
+	Process *proc = process_by_pid(pid);
+
+	if (proc) {
+		process_kill_async(proc);
 	}
 }
 

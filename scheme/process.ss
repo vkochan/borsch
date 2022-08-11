@@ -9,6 +9,8 @@
 
 (define __cs_process_del (foreign-procedure "cs_process_del" (int) void))
 
+(define __cs_process_kill (foreign-procedure "cs_process_kill" (int) void))
+
 (define __cs_evt_fd_handler_add (foreign-procedure __collect_safe "cs_evt_fd_handler_add" (int void*) int))
 
 (define __cs_evt_fd_handler_del (foreign-procedure __collect_safe "cs_evt_fd_handler_del" (int) void))
@@ -27,6 +29,18 @@
 (define %process-pid-ht (make-eq-hashtable))
 (define %process-fd-ht (make-eq-hashtable))
 
+(define process-is-alive?
+   (lambda (pid)
+      (call-foreign (__cs_process_is_alive pid))
+   )
+)
+
+(define process-kill
+   (lambda (pid)
+      (call-foreign (__cs_process_kill pid))
+   )
+)
+
 (define __process-on-read-async
    (lambda (proc)
       (let (
@@ -35,10 +49,16 @@
            )
          (let ([s (get-string-some proc-out)])
             (when (not (eof-object? s))
-               (with-current-buffer buf
-                  (save-cursor
-                     (move-buffer-end)
-                     (insert s)
+               (if (buffer-is-valid? buf)
+                  (with-current-buffer buf
+                     (save-cursor
+                        (move-buffer-end)
+                        (insert s)
+                     )
+                  )
+                  ;; else
+                  (begin
+                     (process-kill (process-pid proc))
                   )
                )
             )
@@ -269,10 +289,15 @@
 
 (define on-process-exit
    (lambda (pid)
-      (let ([proc (hashtable-ref %process-pid-ht pid #f)])
+      (let (
+            [proc (hashtable-ref %process-pid-ht pid #f)]
+            [alive? (process-is-alive? pid)]
+           )
          (when proc
             (when (process-buffer-out proc)
-               (__process-on-read-sync (process-port-out proc) (process-buffer-out proc))
+               (when alive?
+                  (__process-on-read-sync (process-port-out proc) (process-buffer-out proc))
+               )
                (let ([fd (port-file-descriptor (process-port-out proc))])
                   (hashtable-delete! %process-fd-ht fd)
                   (call-foreign (__cs_evt_fd_handler_del fd))
@@ -280,7 +305,9 @@
                (close-port (process-port-out proc))
             )
             (when (process-buffer-err proc)
-               (__process-on-read-sync (process-port-err proc) (process-buffer-err proc))
+               (when alive?
+                  (__process-on-read-sync (process-port-err proc) (process-buffer-err proc))
+               )
                (let ([fd (port-file-descriptor (process-port-err proc))])
                   (hashtable-delete! %process-fd-ht fd)
                   (call-foreign (__cs_evt_fd_handler_del fd))
@@ -289,10 +316,12 @@
             )
             (close-port (process-port-in proc))
             (when (process-on-exit proc)
-               ((process-on-exit proc)
-                   (process-status pid)
-                   (process-buffer-out proc)
-                   (process-buffer-err proc)
+               (when alive?
+                  ((process-on-exit proc)
+                      (process-status pid)
+                      (process-buffer-out proc)
+                      (process-buffer-err proc)
+                  )
                )
                (unlock-object (process-cb proc))
             )
