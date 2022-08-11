@@ -558,15 +558,19 @@ void process_destroy(Process *proc)
 
 static pid_t __process_fork(const char *p, const char *argv[], const char *cwd, const char *env[], int *to, int *from, int *err, Vt *vt)
 {
-	int vt2ed[2], ed2vt[2];
+	int vt2in[2], err2vt[2], out2vt[2];
 	struct winsize ws;
 	pid_t pid;
 
-	if (to && pipe(vt2ed)) {
+	if (to && pipe(vt2in)) {
 		*to = -1;
 		to = NULL;
 	}
-	if (from && pipe(ed2vt)) {
+	if (err && pipe(err2vt)) {
+		*err = -1;
+		err = NULL;
+	}
+	if (from && pipe(out2vt)) {
 		*from = -1;
 		from = NULL;
 	}
@@ -598,16 +602,21 @@ static pid_t __process_fork(const char *p, const char *argv[], const char *cwd, 
 		sigprocmask(SIG_SETMASK, &emptyset, NULL);
 
 		if (to) {
-			close(vt2ed[1]);
-			dup2(vt2ed[0], STDIN_FILENO);
-			close(vt2ed[0]);
+			close(vt2in[1]);
+			dup2(vt2in[0], STDIN_FILENO);
+			close(vt2in[0]);
 		}
-
+		if (err) {
+			close(err2vt[0]);
+			dup2(err2vt[1], STDERR_FILENO);
+			close(err2vt[1]);
+		} else {
+			dup2(out2vt[1], STDERR_FILENO);
+		}
 		if (from) {
-			close(ed2vt[0]);
-			dup2(ed2vt[1], STDOUT_FILENO);
-			dup2(ed2vt[1], STDERR_FILENO);
-			close(ed2vt[1]);
+			close(out2vt[0]);
+			dup2(out2vt[1], STDOUT_FILENO);
+			close(out2vt[1]);
 		}
 
 		int maxfd = sysconf(_SC_OPEN_MAX);
@@ -628,19 +637,22 @@ static pid_t __process_fork(const char *p, const char *argv[], const char *cwd, 
 	}
 
 	if (to) {
-		close(vt2ed[0]);
-		*to = vt2ed[1];
+		close(vt2in[0]);
+		*to = vt2in[1];
 	}
-
+	if (err) {
+		close(err2vt[1]);
+		*err = err2vt[0];
+	}
 	if (from) {
-		close(ed2vt[1]);
-		*from = ed2vt[0];
+		close(out2vt[1]);
+		*from = out2vt[0];
 	}
 
 	return pid;
 }
 
-static Process *process_create(const char *prog, const char *cwd, int *in, int *out, bool pty)
+static Process *process_create(const char *prog, const char *cwd, int *in, int *out, int *err, bool pty)
 {
 	const char *pargs[4] = { shell, NULL };
 	Vt *term = NULL;
@@ -672,7 +684,7 @@ static Process *process_create(const char *prog, const char *cwd, int *in, int *
 		proc->cwd = strdup(cwd);
 	proc->term = term;
 
-	proc->pid = __process_fork(shell, pargs, cwd, NULL, in, out, NULL, term);
+	proc->pid = __process_fork(shell, pargs, cwd, NULL, in, out, err, term);
 	if (proc->pid == -1) {
 		process_destroy(proc);
 		return NULL;
@@ -681,6 +693,8 @@ static Process *process_create(const char *prog, const char *cwd, int *in, int *
 		proc->in = *in;
 	if (out)
 		proc->out = *out;
+	if (err)
+		proc->err = *err;
 
 	if (term)
 		event_fd_handler_register(vt_pty_get(term), process_handle_vt, proc);
@@ -1770,7 +1784,7 @@ int term_create(const char *prog, const char *title, const char *cwd) {
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
 
-	proc = process_create(prog, cwd, NULL, NULL, true);
+	proc = process_create(prog, cwd, NULL, NULL, NULL, true);
 	if (!proc) {
 		view_free(c->view);
 		__buf_del(c->buf);
@@ -4708,7 +4722,7 @@ pid_t proc_create(const char *prog, const char *cwd, int *in, int *out, int *err
 {
 	Process *proc;
 
-	proc = process_create(prog, cwd, in, out, false);
+	proc = process_create(prog, cwd, in, out, err, false);
 	if (!proc)
 		return -1;	
 
