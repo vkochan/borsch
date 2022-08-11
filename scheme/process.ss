@@ -13,7 +13,7 @@
 
 (define __cs_evt_fd_handler_del (foreign-procedure __collect_safe "cs_evt_fd_handler_del" (int) void))
 
-(define-record-type process (fields port-in port-out port-err pid buffer on-exit (mutable cb)))
+(define-record-type process (fields port-in port-out port-err pid buffer-out on-exit (mutable cb)))
 
 (define %process-pid-ht (make-eq-hashtable))
 (define %process-fd-ht (make-eq-hashtable))
@@ -22,7 +22,7 @@
    (lambda (proc)
       (let (
             [proc-out (process-port-out proc)]
-            [buf      (process-buffer proc)]
+            [buf      (process-buffer-out proc)]
            )
          (let ([s (get-string-some proc-out)])
             (when (not (eof-object? s))
@@ -42,7 +42,7 @@
    (lambda (proc)
       (let (
             [proc-out (process-port-out proc)]
-            [buf      (process-buffer proc)]
+            [buf      (process-buffer-out proc)]
            )
          (let ([s (get-string-some proc-out)])
             (while (not (eof-object? s))
@@ -99,11 +99,11 @@
        (process-create prog #f #f)
       ]
 
-      [(prog buf)
-       (process-create prog buf #f)
+      [(prog buf-out)
+       (process-create prog buf-out #f)
       ]
 
-      [(prog buf on-exit)
+      [(prog buf-out on-exit)
        (let (
              [p (call-foreign (__cs_process_create prog (current-cwd) #t #t #f "" #t))]
             )
@@ -118,9 +118,9 @@
                    [port-out (if (eq? out-fd -1) #f (open-fd-input-port out-fd (buffer-mode block) (native-transcoder)))]
                    [port-err (if (eq? err-fd -1) #f (open-fd-input-port err-fd (buffer-mode block) (native-transcoder)))]
                   )
-                (let ([proc (make-process port-in port-out port-err pid buf on-exit #f)])
+                (let ([proc (make-process port-in port-out port-err pid buf-out on-exit #f)])
                    (hashtable-set! %process-pid-ht pid proc)
-                   (when buf
+                   (when buf-out
                       (let ([cb (__process-fd-cb)])
                          (process-cb-set! proc cb)
                          (hashtable-set! %process-fd-ht out-fd proc)
@@ -251,7 +251,7 @@
    (lambda (pid)
       (let ([proc (hashtable-ref %process-pid-ht pid #f)])
          (when proc
-            (when (process-buffer proc)
+            (when (process-buffer-out proc)
                (__process-on-read-sync proc)
                (let ([fd (port-file-descriptor (process-port-out proc))])
                   (hashtable-delete! %process-fd-ht fd)
@@ -261,7 +261,7 @@
                (close-port (process-port-in proc))
             )
             (when (process-on-exit proc)
-               ((process-on-exit proc) (process-status pid) (process-buffer proc))
+               ((process-on-exit proc) (process-status pid) (process-buffer-out proc))
                (unlock-object (process-cb proc))
             )
             (hashtable-delete! %process-pid-ht pid)
