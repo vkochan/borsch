@@ -482,7 +482,9 @@
          (let ([hook-list (top-level-value symb)])
             (for-each
                (lambda (h)
-                  (apply try (append (list h) args))
+                  (let ([fn (if (symbol? h) (eval h) h)])
+                     (apply try (append (list fn) args))
+                  )
                ) hook-list
             )
          )
