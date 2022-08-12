@@ -15,6 +15,55 @@
 
 (define __cs_evt_fd_handler_del (foreign-procedure __collect_safe "cs_evt_fd_handler_del" (int) void))
 
+(define __process-environment (list (cons "QWE" "ASD")))
+
+(define process-environment
+   (lambda ()
+      __process-environment
+   )
+)
+
+(define process-set-environment
+   (lambda (name value)
+      (let ([var (assoc name (process-environment))])
+         (if var
+            (set-cdr! var value)
+            ;; else
+            (set! __process-environment (append (process-environment) (list (cons name value))))
+         )
+      )
+   )
+)
+
+(define process-get-environment
+   (lambda (name value)
+      (let ([var (assoc name (process-environment))])
+         (if var (cdr var) #f)
+      )
+   )
+)
+
+(define-syntax (with-process-environment stx)
+   (syntax-case stx ()
+      ((_ env exp ...)
+       #`(let ([e (process-environment)])
+            (fluid-let ([__process-environment e])
+               (for-each
+                  (lambda (v)
+                     (process-set-environment (car v) (cdr v))
+                  )
+                  env
+               )
+               (begin
+                  exp
+                  ...
+               )
+            )
+         )
+      )
+   )
+)
+
 (define-record-type process
                        (fields port-in
                                port-out
@@ -138,7 +187,7 @@
 
       [(prog buf-out buf-err on-exit)
        (let*(
-             [env (map (lambda (p) (format "~a=~a" (car p) (cdr p))) os-environment)]
+             [env (process-environment)]
              [p (call-foreign (__cs_process_create prog (current-cwd) #t #t (not (equal? buf-err #f)) env #t))]
             )
           (let (

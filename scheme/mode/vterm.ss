@@ -101,7 +101,7 @@
 
       [(prog title cwd)
        (let* (
-              [env (map (lambda (p) (format "~a=~a" (car p) (cdr p))) os-environment)]
+              [env (process-environment)]
               [w (call-foreign (__cs_term_create prog title cwd env))]
               [b (window-buffer w)]
              )

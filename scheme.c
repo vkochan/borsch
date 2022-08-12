@@ -847,14 +847,19 @@ ptr scheme_topbar_create(void)
 
 static char *scheme_string_to_cptr(ptr str)
 {
-	size_t str_len = Sstring_length(str);
+	size_t str_len;
 	char *cptr;
+
+	if (!Sstringp(str))
+		return NULL;
+
+	str_len = Sstring_length(str);
 
 	cptr = calloc(1, str_len + 1);
 	if (!cptr)
 		return NULL;
 
-	for (int i; i < str_len; i++) {
+	for (int i = 0; i < str_len; i++) {
 		char c = Sstring_ref(str, i);
 		cptr[i] = c;
 	}
@@ -867,15 +872,17 @@ static char **scheme_list_to_env(ptr list, char **env, int i)
 	char *name, *value;
 	ptr var;
 
-	env = realloc(env, sizeof(char **) * (i + 1));
+	env = realloc(env, sizeof(char **) * (i + 2));
 	env[i] = NULL;
 
 	if (Snullp(list))
 		return env;
 
-	env[i] = scheme_string_to_cptr(Scar(list));
+	var = Scar(list);
+	env[i] = scheme_string_to_cptr(Scar(var));
+	env[i+1] = scheme_string_to_cptr(Scdr(var));
 
-	return scheme_list_to_env(Scdr(list), env, i + 1);
+	return scheme_list_to_env(Scdr(list), env, i + 2);
 }
 
 ptr scheme_term_create(char *prog, char *title, char *cwd, ptr env)
