@@ -351,6 +351,7 @@ typedef struct Process
 	struct Process 		*next;
 	struct Process 		*prev;
 	char			*prog;
+	char			**env;
 	char			*cwd;
 	Vt 			*term;
 	int			status;
@@ -466,6 +467,11 @@ static Process *process_alloc(void)
 
 static void process_free(Process *proc)
 {
+	if (proc->env) {
+		for (char **env = proc->env; *env; env++)
+			free(*env);
+		free(proc->env);
+	}
 	free(proc->prog);
 	free(proc->cwd);
 	free(proc);
@@ -657,7 +663,7 @@ static pid_t __process_fork(const char *p, const char *argv[], const char *cwd, 
 	return pid;
 }
 
-static Process *process_create(const char *prog, const char *cwd, int *in, int *out, int *err, bool pty)
+static Process *process_create(const char *prog, const char *cwd, int *in, int *out, int *err, char **env, bool pty)
 {
 	const char *pargs[4] = { shell, NULL };
 	Vt *term = NULL;
@@ -688,8 +694,9 @@ static Process *process_create(const char *prog, const char *cwd, int *in, int *
 	if (cwd)
 		proc->cwd = strdup(cwd);
 	proc->term = term;
+	proc->env = env;
 
-	proc->pid = __process_fork(shell, pargs, cwd, NULL, in, out, err, term);
+	proc->pid = __process_fork(shell, pargs, cwd, env, in, out, err, term);
 	if (proc->pid == -1) {
 		process_destroy(proc);
 		return NULL;
@@ -1753,7 +1760,7 @@ static void vt_handler(Vt *vt, wchar_t ch, void *arg)
 	scheme_event_handle(evt);
 }
 
-int term_create(const char *prog, const char *title, const char *cwd) {
+int term_create(const char *prog, const char *title, const char *cwd, char **env) {
 	Process *proc;
 	char tmppath[PATH_MAX];
 	char tmp[256];
@@ -1789,7 +1796,7 @@ int term_create(const char *prog, const char *title, const char *cwd) {
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
 
-	proc = process_create(prog, cwd, NULL, NULL, NULL, true);
+	proc = process_create(prog, cwd, NULL, NULL, NULL, env, true);
 	if (!proc) {
 		view_free(c->view);
 		__buf_del(c->buf);
@@ -4732,7 +4739,7 @@ pid_t proc_create(const char *prog, const char *cwd, int *in, int *out, int *err
 {
 	Process *proc;
 
-	proc = process_create(prog, cwd, in, out, err, false);
+	proc = process_create(prog, cwd, in, out, err, env, false);
 	if (!proc)
 		return -1;	
 

@@ -845,9 +845,42 @@ ptr scheme_topbar_create(void)
 	return Sfalse;
 }
 
-ptr scheme_term_create(char *prog, char *title, char *cwd)
+static char *scheme_string_to_cptr(ptr str)
 {
-	int ret = term_create(prog, title, cwd);
+	size_t str_len = Sstring_length(str);
+	char *cptr;
+
+	cptr = calloc(1, str_len + 1);
+	if (!cptr)
+		return NULL;
+
+	for (int i; i < str_len; i++) {
+		char c = Sstring_ref(str, i);
+		cptr[i] = c;
+	}
+
+	return cptr;
+}
+
+static char **scheme_list_to_env(ptr list, char **env, int i)
+{
+	char *name, *value;
+	ptr var;
+
+	env = realloc(env, sizeof(char **) * (i + 1));
+	env[i] = NULL;
+
+	if (Snullp(list))
+		return env;
+
+	env[i] = scheme_string_to_cptr(Scar(list));
+
+	return scheme_list_to_env(Scdr(list), env, i + 1);
+}
+
+ptr scheme_term_create(char *prog, char *title, char *cwd, ptr env)
+{
+	int ret = term_create(prog, title, cwd, scheme_list_to_env(env, NULL, 0));
 
 	if (ret)
 		return Sinteger(ret);
@@ -1032,7 +1065,7 @@ void scheme_timer_time_set(int fd, unsigned long sec, unsigned long nsec)
 	timer_time_set(fd, sec, nsec);
 }
 
-ptr scheme_process_create(const char *prog, const char *cwd, bool redir_in, bool redir_out, bool redir_err, char *env, bool async)
+ptr scheme_process_create(const char *prog, const char *cwd, bool redir_in, bool redir_out, bool redir_err, ptr env, bool async)
 {
 	int *in_ptr = NULL, *out_ptr = NULL, *err_ptr = NULL;
 	int in = -1, out = -1, err = -1;
@@ -1046,7 +1079,7 @@ ptr scheme_process_create(const char *prog, const char *cwd, bool redir_in, bool
 	if (redir_err)
 		err_ptr = &err;
 
-	pid = proc_create(prog, cwd, in_ptr, out_ptr, err_ptr, NULL, async);
+	pid = proc_create(prog, cwd, in_ptr, out_ptr, err_ptr, scheme_list_to_env(env, NULL, 0), async);
 	if (pid == -1)
 		return Sfalse;
 
@@ -1089,7 +1122,7 @@ ptr scheme_process_status_get(int pid)
 
 extern char **environ;
 
-static ptr scheme_os_environment_list(const char **env)
+static ptr scheme_os_environment_list(char **env)
 {
 	char *name, *value;
 	ptr var = Snil;

@@ -1,5 +1,5 @@
 (define __cs_process_create (foreign-procedure "cs_process_create"
-				(string string boolean boolean boolean string boolean) scheme-object))
+				(string string boolean boolean boolean scheme-object boolean) scheme-object))
 
 (define __cs_process_wait (foreign-procedure "cs_process_wait" (int) scheme-object))
 
@@ -137,8 +137,9 @@
       ]
 
       [(prog buf-out buf-err on-exit)
-       (let (
-             [p (call-foreign (__cs_process_create prog (current-cwd) #t #t (not (equal? buf-err #f)) "" #t))]
+       (let*(
+             [env (map (lambda (p) (format "~a=~a" (car p) (cdr p))) os-environment)]
+             [p (call-foreign (__cs_process_create prog (current-cwd) #t #t (not (equal? buf-err #f)) env #t))]
             )
           (let (
                 [in-fd  (list-ref p 0)]
