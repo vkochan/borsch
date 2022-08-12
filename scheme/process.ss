@@ -15,7 +15,7 @@
 
 (define __cs_evt_fd_handler_del (foreign-procedure __collect_safe "cs_evt_fd_handler_del" (int) void))
 
-(define __process-environment (list (cons "QWE" "ASD")))
+(define __process-environment '())
 
 (define process-environment
    (lambda ()
