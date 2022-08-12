@@ -55,3 +55,5 @@
       ]
    )
 )
+
+(bind-key text-mode-normal-map "g s" (lambda () (grep (extract-word-for-search))))
