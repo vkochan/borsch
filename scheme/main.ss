@@ -12,6 +12,7 @@
 (load "copybuf.ss")
 (load "topbar.ss")
 (load "minibuf.ss")
+(load "os.ss")
 (load "process.ss")
 (load "timer.ss")
 (load "syntax.ss")

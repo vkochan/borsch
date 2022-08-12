@@ -1087,6 +1087,35 @@ ptr scheme_process_status_get(int pid)
 	return Sinteger(proc_status_get(pid));
 }
 
+extern char **environ;
+
+static ptr scheme_os_environment_list(const char **env)
+{
+	char *name, *value;
+	ptr var = Snil;
+	char *tok;
+
+	if (!env || !*env)
+		return Snil;
+
+	tok = strchr(*env, '=');
+	if (tok) {
+		ptr s_name = Sstring_of_length(*env, tok - *env);
+		ptr s_value = Sstring_of_length(tok + 1, strlen(tok + 1));
+
+		var = Scons(s_name, s_value);
+	} else {
+		return Snil;
+	}
+
+	return Scons(var, scheme_os_environment_list(env+1));
+}
+
+ptr scheme_os_environment_get(void)
+{
+	return scheme_os_environment_list(environ);
+}
+
 void scheme_do_quit(void)
 {
 	do_quit();
@@ -1249,6 +1278,8 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_process_del", scheme_process_delete);
 	Sregister_symbol("cs_process_kill", scheme_process_kill);
 	Sregister_symbol("cs_process_wait", scheme_process_wait);
+
+	Sregister_symbol("cs_os_environment_get", scheme_os_environment_get);
 
 	Sregister_symbol("cs_do_quit", scheme_do_quit);
 }
