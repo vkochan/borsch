@@ -2528,9 +2528,6 @@ int main(int argc, char *argv[]) {
 
 		event_process();
 
-		evt.eid = EVT_PRE_DRAW;
-		scheme_event_handle(evt);
-
 	        if (topbar) {
 		   draw(topbar, true);
 	        }
@@ -2565,9 +2562,6 @@ int main(int argc, char *argv[]) {
 		        ui_window_cursor_get(current_window()->win, &x, &y);
 		        ui_window_cursor_set(current_window()->win, x, y);
 		}
-
-		evt.eid = EVT_POST_DRAW;
-		scheme_event_handle(evt);
 	}
 
 	cleanup();
