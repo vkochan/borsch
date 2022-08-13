@@ -351,7 +351,7 @@ typedef struct Process
 	struct Process 		*next;
 	struct Process 		*prev;
 	char			*prog;
-	char			**env;
+	const char		**env;
 	char			*cwd;
 	Vt 			*term;
 	int			status;
@@ -468,8 +468,8 @@ static Process *process_alloc(void)
 static void process_free(Process *proc)
 {
 	if (proc->env) {
-		for (char **env = proc->env; *env; env++)
-			free(*env);
+		for (const char **env = proc->env; *env; env++)
+			free((char *)*env);
 		free(proc->env);
 	}
 	free(proc->prog);
@@ -663,7 +663,7 @@ static pid_t __process_fork(const char *p, const char *argv[], const char *cwd, 
 	return pid;
 }
 
-static Process *process_create(const char *prog, const char *cwd, int *in, int *out, int *err, char **env, bool pty)
+static Process *process_create(const char *prog, const char *cwd, int *in, int *out, int *err, const char **env, bool pty)
 {
 	const char *pargs[4] = { shell, NULL };
 	Vt *term = NULL;
@@ -1760,7 +1760,7 @@ static void vt_handler(Vt *vt, wchar_t ch, void *arg)
 	scheme_event_handle(evt);
 }
 
-int term_create(const char *prog, const char *title, const char *cwd, char **env) {
+int term_create(const char *prog, const char *title, const char *cwd, const char **env) {
 	Process *proc;
 	char tmppath[PATH_MAX];
 	char tmp[256];
@@ -4729,7 +4729,7 @@ void evt_fd_handler_del(int fd)
 	event_fd_handler_unregister(fd);
 }
 
-pid_t proc_create(const char *prog, const char *cwd, int *in, int *out, int *err, char **env, bool async)
+pid_t proc_create(const char *prog, const char *cwd, int *in, int *out, int *err, const char **env, bool async)
 {
 	Process *proc;
 

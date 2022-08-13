@@ -172,7 +172,7 @@ void stx_lang_style_clear(const char *lang);
 int minibuf_create(void);
 int topbar_create(void);
 
-int term_create(const char *prog, const char *title, const char *cwd, char **env);
+int term_create(const char *prog, const char *title, const char *cwd, const char **env);
 int term_keys_send(int bid, char *keys);
 int term_text_send(int bid, char *text);
 int term_text_get(int bid, char **buf, size_t *len);
@@ -202,7 +202,7 @@ int fifo_create(void);
 int evt_fd_handler_add(int fd, void (*fn)(int fd, void *), void *);
 void evt_fd_handler_del(int fd);
 
-pid_t proc_create(const char *prog, const char *cwd, int *in, int *out, int *err, char **env, bool async);
+pid_t proc_create(const char *prog, const char *cwd, int *in, int *out, int *err, const char **env, bool async);
 bool proc_is_alive(pid_t pid);
 int proc_status_get(pid_t pid);
 int proc_wait(pid_t pid, int *status);
