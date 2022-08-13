@@ -1077,8 +1077,12 @@
        (extract-word (cursor))]
 
       [(s)
-       (let ([r (text-obj-range (current-buffer) s #\w #t)])
-          (buffer-string (car r) (cdr r))
+       (if (local-bound? extract-word)
+          ((get-local extract-word))
+          ;; else
+          (let ([r (text-obj-range (current-buffer) s #\w #t)])
+             (buffer-string (car r) (cdr r))
+          )
        )
       ]
    )
@@ -1853,20 +1857,10 @@
    )
 )
 
-(define extract-word-for-search
-   (lambda ()
-      (if (local-bound? extract-word-for-search)
-         ((get-local extract-word-for-search))
-         ;; else
-         (extract-word)
-      )
-   )
-)
-
 (define search-word-forward
    (case-lambda
       [()
-       (search-word-forward (extract-word-for-search))]
+       (search-word-forward (extract-word))]
 
       [(w)
        (search-word-direction w +1)]
@@ -1876,7 +1870,7 @@
 (define search-word-backward
    (case-lambda
       [()
-       (search-word-backward (extract-word-for-search))]
+       (search-word-backward (extract-word))]
 
       [(w)
        (search-word-direction w -1)]
