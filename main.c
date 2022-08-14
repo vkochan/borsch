@@ -635,9 +635,9 @@ static pid_t __process_fork(const char *p, const char *argv[], const char *cwd, 
 			if (close(fd) == -1 && errno == EBADF)
 				break;
 
+		setenv("TERM", term_name, 1);
 		for (const char **envp = env; envp && envp[0]; envp += 2)
 			setenv(envp[0], envp[1], 1);
-		setenv("TERM", term_name, 1);
 
 		if (cwd)
 			chdir(cwd);
