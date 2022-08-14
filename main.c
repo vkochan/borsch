@@ -2464,7 +2464,7 @@ static void handle_sigchld_io(int fd, void *arg)
 			if (WIFEXITED(pinfo.status)) {
 				process_status_set(proc, WEXITSTATUS(pinfo.status));
 			}
-			if (!proc->term) {
+			if (!process_buffer_get(proc)) {
 				process_died_set(proc, true);
 				evt.eid = EVT_PROC_EXIT;
 				evt.oid = pinfo.pid;
