@@ -72,7 +72,7 @@
                                buffer-out
                                buffer-err
                                on-exit
-                               (mutable cb)
+                               (mutable port-reader)
                         ))
 
 (define %process-pid-ht (make-eq-hashtable))
@@ -147,7 +147,7 @@
    )
 )
 
-(define __process-fd-cb
+(define __make-process-reader
    (lambda ()
       (let ([code (foreign-callable (lambda (fd obj) (__process-fd-handle fd)) (int void*) void)])
 	 (lock-object code)
@@ -191,6 +191,7 @@
              [p (call-foreign (__cs_process_create prog (current-cwd) #t #t (not (equal? buf-err #f)) env #t))]
             )
           (let (
+                [reader (if (or buf-out buf-err) (__make-process-reader) #f)]
                 [in-fd  (list-ref p 0)]
                 [out-fd (list-ref p 1)]
                 [err-fd (list-ref p 2)]
@@ -201,21 +202,15 @@
                    [port-out (if (eq? out-fd -1) #f (open-fd-input-port out-fd (buffer-mode block) (native-transcoder)))]
                    [port-err (if (eq? err-fd -1) #f (open-fd-input-port err-fd (buffer-mode block) (native-transcoder)))]
                   )
-                (let ([proc (make-process port-in port-out port-err pid buf-out buf-err on-exit #f)])
+                (let ([proc (make-process port-in port-out port-err pid buf-out buf-err on-exit reader)])
                    (hashtable-set! %process-pid-ht pid proc)
                    (when buf-out
-                      (let ([cb (__process-fd-cb)])
-                         (process-cb-set! proc cb)
-                         (hashtable-set! %process-fd-ht out-fd proc)
-                         (call-foreign (__cs_evt_fd_handler_add out-fd (foreign-callable-entry-point cb)))
-                      )
+                      (hashtable-set! %process-fd-ht out-fd proc)
+                      (call-foreign (__cs_evt_fd_handler_add out-fd (foreign-callable-entry-point reader)))
                    )
                    (when buf-err
-                      (let ([cb (__process-fd-cb)])
-                         (process-cb-set! proc cb)
-                         (hashtable-set! %process-fd-ht err-fd proc)
-                         (call-foreign (__cs_evt_fd_handler_add err-fd (foreign-callable-entry-point cb)))
-                      )
+                      (hashtable-set! %process-fd-ht err-fd proc)
+                      (call-foreign (__cs_evt_fd_handler_add err-fd (foreign-callable-entry-point reader)))
                    )
                    proc
                 )
@@ -373,7 +368,9 @@
                       (process-buffer-err proc)
                   )
                )
-               (unlock-object (process-cb proc))
+            )
+            (when (process-port-reader proc)
+               (unlock-object (process-port-reader proc))
             )
             (hashtable-delete! %process-pid-ht pid)
             (call-foreign (__cs_process_del pid))
