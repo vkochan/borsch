@@ -633,7 +633,7 @@ size_t text_search_forward(Text *txt, size_t pos, Regex *regex) {
 		found = !text_search_range_forward(txt, start, end - start, regex, 1, match, 0);
 	}
 
-	return found ? match[0].start : pos;
+	return found ? match[0].start : EPOS;
 }
 
 size_t text_search_backward(Text *txt, size_t pos, Regex *regex) {
@@ -647,5 +647,5 @@ size_t text_search_backward(Text *txt, size_t pos, Regex *regex) {
 		found = !text_search_range_backward(txt, start, end - start, regex, 1, match, 0);
 	}
 
-	return found ? match[0].start : pos;
+	return found ? match[0].start : EPOS;
 }
