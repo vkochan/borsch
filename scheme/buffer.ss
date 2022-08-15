@@ -302,14 +302,16 @@
 
 (define cursor-set
    (lambda (p)
-      (let ([c p])
-         (when (and (not *buffer-enable-eof*)
-                    (and (> c 0) (>= c (buffer-end-pos)))
-               )
-            (set! c (- (buffer-end-pos) 1))
+      (when p
+         (let ([c p])
+            (when (and (not *buffer-enable-eof*)
+                       (and (> c 0) (>= c (buffer-end-pos)))
+                  )
+               (set! c (- (buffer-end-pos) 1))
+            )
+	    (call-foreign (__cs_buf_cursor_set (current-buffer) c))
+            c
          )
-	 (call-foreign (__cs_buf_cursor_set (current-buffer) c))
-         c
       )
    )
 )

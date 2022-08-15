@@ -743,7 +743,7 @@ ptr scheme_buf_search_regex(int bid, size_t pos, const char *pattern, int dir)
 
 	if (ret != EPOS)
 		return Sinteger(ret);
-	return Sinteger(pos);
+	return Sfalse;
 }
 
 ptr scheme_buf_parser_set(int bid, const char *lang)
