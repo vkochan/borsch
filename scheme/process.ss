@@ -122,15 +122,17 @@
             [proc-out proc-out]
             [buf      buf]
            )
-         (let ([s (get-string-some proc-out)])
-            (while (not (eof-object? s))
-               (with-current-buffer buf
-                  (save-cursor
-                     (move-buffer-end)
-                     (insert s)
+         (when (buffer-is-valid? buf)
+            (let ([s (get-string-some proc-out)])
+               (while (not (eof-object? s))
+                  (with-current-buffer buf
+                     (save-cursor
+                        (move-buffer-end)
+                        (insert s)
+                     )
                   )
+                  (set! s (get-string-some proc-out))
                )
-               (set! s (get-string-some proc-out))
             )
          )
       )
@@ -336,13 +338,10 @@
    (lambda (pid)
       (let (
             [proc (hashtable-ref %process-pid-ht pid #f)]
-            [alive? (process-is-alive? pid)]
            )
          (when proc
             (when (process-buffer-out proc)
-               (when alive?
-                  (__process-on-read-sync (process-port-out proc) (process-buffer-out proc))
-               )
+               (__process-on-read-sync (process-port-out proc) (process-buffer-out proc))
                (let ([fd (port-file-descriptor (process-port-out proc))])
                   (hashtable-delete! %process-fd-ht fd)
                   (call-foreign (__cs_evt_fd_handler_del fd))
@@ -350,9 +349,7 @@
                (close-port (process-port-out proc))
             )
             (when (process-buffer-err proc)
-               (when alive?
-                  (__process-on-read-sync (process-port-err proc) (process-buffer-err proc))
-               )
+               (__process-on-read-sync (process-port-err proc) (process-buffer-err proc))
                (let ([fd (port-file-descriptor (process-port-err proc))])
                   (hashtable-delete! %process-fd-ht fd)
                   (call-foreign (__cs_evt_fd_handler_del fd))
@@ -361,12 +358,10 @@
             )
             (close-port (process-port-in proc))
             (when (process-on-exit proc)
-               (when alive?
-                  ((process-on-exit proc)
-                      (process-status pid)
-                      (process-buffer-out proc)
-                      (process-buffer-err proc)
-                  )
+               ((process-on-exit proc)
+                   (process-status pid)
+                   (process-buffer-out proc)
+                   (process-buffer-err proc)
                )
             )
             (when (process-port-reader proc)
