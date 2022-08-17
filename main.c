@@ -321,10 +321,6 @@ static Button buttons[] = {
 };
 #endif /* CONFIG_MOUSE */
 
-static char const * const keytable[] = {
-	/* add your custom key escape sequences */
-};
-
 #define CWD_MAX		256
 
 typedef struct {
@@ -1528,7 +1524,6 @@ setup(void) {
 	syntax_init();
 	style_init();
 	vt_init();
-	vt_keytable_set(keytable, LENGTH(keytable));
 
 	for (unsigned int i = 0; i < LENGTH(colors); i++) {
 		if (COLORS == 256) {
