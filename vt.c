@@ -1746,11 +1746,9 @@ void vt_pid_set(Vt *t, pid_t pid)
 	t->pid = pid;
 }
 
-size_t __vt_content_get(Vt *t, VtRow *first_row, VtRow *(*iter_next_row)(VtBuffer*, VtRow*), char **buf, bool colored, bool add_eol)
+size_t __vt_content_get(Vt *t, VtRow *first_row, VtRow *(*iter_next_row)(VtBuffer*, VtRow*), char **buf, bool colored, bool add_eol, size_t size)
 {
 	VtBuffer *b = t->buffer;
-	int lines = b->scroll_above + b->scroll_below + b->rows + 1;
-	size_t size = lines * ((b->cols + 1) * ((colored ? 64 : 0) + MB_CUR_MAX));
 	mbstate_t ps;
 	memset(&ps, 0, sizeof(ps));
 
@@ -1819,12 +1817,20 @@ size_t __vt_content_get(Vt *t, VtRow *first_row, VtRow *(*iter_next_row)(VtBuffe
 
 size_t vt_content_get(Vt *t, char **buf, bool colored)
 {
-	return __vt_content_get(t, buffer_row_first(t->buffer), buffer_row_next, buf, colored, true);
+	VtBuffer *b = t->buffer;
+	bool add_eol = true;
+	int lines = b->scroll_above + b->scroll_below + b->rows + 1;
+	size_t size = lines * ((b->cols + 1) * ((colored ? 64 : 0) + MB_CUR_MAX)) + add_eol;
+	return __vt_content_get(t, buffer_row_first(t->buffer), buffer_row_next, buf, colored, add_eol, size);
 }
 
 size_t vt_current_line_get(Vt *t, char **buf)
 {
-	return __vt_content_get(t, t->buffer->curs_row, NULL, buf, false, false);
+	VtBuffer *b = t->buffer;
+	bool colored = false;
+	int lines = b->scroll_above + b->scroll_below + b->rows + 1;
+	size_t size = (b->cols + 1) * ((colored ? 64 : 0) + MB_CUR_MAX);
+	return __vt_content_get(t, t->buffer->curs_row, NULL, buf, colored, false, size);
 }
 
 int vt_content_start(Vt *t)
