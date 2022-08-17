@@ -1,7 +1,7 @@
 include config.mk
 
 SRCS = main.c \
-      vt.c \
+      vt2.c \
       array.c \
       view.c \
       buffer.c \
@@ -20,8 +20,8 @@ SRCS += scheme.c
 
 SCH_SCRIPTS = main.ss
 
-LDFLAGS += -L ./text -L ./ui
-LIBS += -ltext -lui -ltree-sitter
+LDFLAGS += -L ./libvterm/.libs -L ./text -L ./ui
+LIBS += -lvterm -ltext -lui -ltree-sitter
 
 SRCS += parser/c/parser.c \
        parser/devicetree/parser.c \
@@ -34,6 +34,8 @@ SRCS += parser/c/parser.c \
 CFLAGS += -I$(SCH_PATH) \
    -DPROGNAME='"${PROGNAME}"' \
    -DLIB_PATH='"'"${DESTDIR}${LIB_PREFIX}"'"'
+
+CFLAGS += -I./libvterm/include
 
 OBJS += ${SRCS:.c=.o}
 
@@ -63,15 +65,18 @@ ifeq ($(DEBUG),1)
 CFLAGS += -UNDEBUG -O0 -g -ggdb -Wall -Wextra -Wno-unused-parameter
 endif
 
-.PHONY: libtext libui
+.PHONY: libvterm libtext libui
 
 all: ${PROGNAME}
 
-${PROGNAME}: ${OBJS} libui libtext
+${PROGNAME}: ${OBJS} libui libtext libvterm
 	${CC} ${CFLAGS} ${LDFLAGS} $(SCH_PATH)/kernel.o ${OBJS} ${LIBS} -o $@
 
 %.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+
+libvterm:
+	$(MAKE) -C libvterm/
 
 libtext:
 	$(MAKE) -C text/
@@ -90,6 +95,7 @@ debug: clean
 
 clean:
 	@echo cleaning
+	@$(MAKE) -C libvterm/ clean
 	@$(MAKE) -C text/ clean
 	@$(MAKE) -C ui/ clean
 	@rm -f ${PROGNAME} 
