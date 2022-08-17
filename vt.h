@@ -48,7 +48,6 @@ void vt_attach(Vt *vt, UiWin *uiwin);
 void vt_draw(UiWin *win);
 void vt_resize(Vt*, int rows, int cols);
 void vt_destroy(Vt*);
-pid_t vt_forkpty(Vt*, const char *p, const char *argv[], const char *cwd, const char *env[], int *to, int *from);
 int vt_pty_get(Vt*);
 void vt_pty_set(Vt*, int);
 bool vt_cursor_visible(Vt*);
