@@ -43,7 +43,7 @@
 )
 
 (define __on-event-handler
-   (lambda (ev oid)
+   (lambda (ev oid str)
        (define __evt->symb
 	  (lambda (ev)
 	     (case ev
@@ -68,9 +68,9 @@
 		(if (eq? h 'vterm-process-hook)
                    (begin
                       (with-current-buffer oid
-                         (let ([fn (get-local vterm-handler-func #f)])
+                         (let ([fn (get-local vterm-filter-func #f)])
                             (when fn
-                               (try fn)
+                               (try fn str)
                             )
                          )
                       )

@@ -1383,10 +1383,16 @@ void scheme_uninit(void)
 
 int scheme_event_handle(event_t evt)
 {
+	ptr str = Sfalse;
+
+	if (evt.str && evt.len)
+		str = Sstring_utf8(evt.str, evt.len);
+
 	debug("scheme: event: enter: eid=%d, oid=%d\n", evt.eid, evt.oid);
-	Scall2(Stop_level_value(Sstring_to_symbol("__on-event-handler")),
+	Scall3(Stop_level_value(Sstring_to_symbol("__on-event-handler")),
 			Sinteger(evt.eid),
-			Sinteger(evt.oid));
+			Sinteger(evt.oid),
+			str);
 	debug("scheme: event: exit\n");
 	return 0;
 }

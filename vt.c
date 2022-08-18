@@ -183,8 +183,11 @@ struct Vt {
 	vt_urgent_handler_t urgent_handler; /* hook which is called upon bell */
 	void *data;              /* user supplied data */
 	bool processed;
-	void (*vt_handler)(Vt *vt, wchar_t ch, void *arg);
+	void (*vt_handler)(Vt *vt, char *ch, size_t len, void *arg);
 	void *vt_handler_arg;
+	char *filter_buf;
+	size_t filter_buf_len;
+	size_t filter_buf_cap;
 };
 
 static const char *keytable[KEY_MAX+1] = {
@@ -1331,6 +1334,28 @@ static wchar_t get_vt100_graphic(char c)
 	return '\0';
 }
 
+static void append_filter_buf(Vt *vt, wchar_t wc)
+{
+	int start = vt->filter_buf_len;
+	char wb[MB_CUR_MAX];
+	int len;
+
+	len = wctomb(wb, wc);
+	if (len < 1)
+		return;
+
+	vt->filter_buf_len += len;
+
+	if (vt->filter_buf_len > vt->filter_buf_cap) {
+		vt->filter_buf = realloc(vt->filter_buf, sizeof(*vt->filter_buf) * vt->filter_buf_len);
+		vt->filter_buf_cap = vt->filter_buf_len;
+	}
+	if (!vt->filter_buf)
+		return;
+
+	memcpy(vt->filter_buf + start, wb, len);
+}
+
 bool put_wc(Vt *t, wchar_t wc)
 {
 	int width = 0;
@@ -1385,6 +1410,9 @@ bool put_wc(Vt *t, wchar_t wc)
 		b->curs_row->dirty = true;
 		if (width == 2)
 			b->curs_row->cells[b->curs_col++] = blank_cell;
+
+		if (t->vt_handler)
+			append_filter_buf(t, wc);
 	}
 
 	return true;
@@ -1424,13 +1452,16 @@ int vt_process(Vt *t)
 		}
 
 		pos += len ? len : 1;
-		if (put_wc(t, wc))
-			if (t->vt_handler)
-				t->vt_handler(t, wc, t->vt_handler_arg);
+		put_wc(t, wc);
 	}
 
 	t->rlen -= pos;
 	memmove(t->rbuf, t->rbuf + pos, t->rlen);
+
+	if (t->vt_handler) {
+		t->vt_handler(t, t->filter_buf, t->filter_buf_len, t->vt_handler_arg);
+		t->filter_buf_len = 0;
+	}
 	return 0;
 }
 
@@ -1497,6 +1528,7 @@ void vt_destroy(Vt *t)
 		return;
 	buffer_free(&t->buffer_normal);
 	buffer_free(&t->buffer_alternate);
+	free(t->filter_buf);
 	close(t->pty);
 	free(t);
 }
@@ -1839,7 +1871,7 @@ int vt_content_start(Vt *t)
 	return t->buffer->scroll_above;
 }
 
-void vt_handler_set(Vt *vt, void (*h)(Vt *vt, wchar_t ch, void *arg), void *arg)
+void vt_handler_set(Vt *vt, void (*h)(Vt *vt, char *ch, size_t len, void *arg), void *arg)
 {
 	vt->vt_handler_arg = arg;
 	vt->vt_handler = h;

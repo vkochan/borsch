@@ -29,6 +29,8 @@ typedef enum {
 typedef struct {
 	event_id_t   eid;
 	int          oid;
+	char	     *str;
+	size_t	     len;
 } event_t;
 
 typedef struct {

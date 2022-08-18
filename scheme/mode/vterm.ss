@@ -106,7 +106,7 @@
               [b (window-buffer w)]
              )
           (define-local major-mode 'vterm-mode)
-          (define-local vterm-handler-func #f)
+          (define-local vterm-filter-func #f)
           (buffer-set-keymap 'vterm-mode-map)
           (buffer-set-mode-name "VTerm")
           (run-hooks 'window-create-hook w)
@@ -116,15 +116,15 @@
    )
 )
 
-(define vterm-set-handler
+(define vterm-set-filter
    (case-lambda
       [(fn)
-       (vterm-set-handler (current-buffer) fn)
+       (vterm-set-filter (current-buffer) fn)
       ]
 
       [(bid fn)
        (with-current-buffer bid
-          (set-local! vterm-handler-func fn)
+          (set-local! vterm-filter-func fn)
        )
        (call-foreign (__cs_term_handler_enable bid (or fn)))
       ]

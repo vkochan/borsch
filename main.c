@@ -529,7 +529,7 @@ int process_kill(Process *proc)
 {
 	pid_t pid = proc->pid;
 	int status = -1;
-	event_t evt;
+	event_t evt = {};
 
 	if (pid != -1 && !proc->is_died) {
 		kill(-pid, SIGKILL);
@@ -988,7 +988,7 @@ __draw(Window *c, bool force, bool fire_event) {
 		buf_update(c);
 
 		if (fire_event) {
-			event_t evt;
+			event_t evt = {};
 
 			evt.eid = EVT_WIN_DRAW;
 			evt.oid = c->id;
@@ -1414,7 +1414,7 @@ keypress(int code) {
 				if (key != -1)
 					vt_keypress(term, key);
 			} else if (buffer_text_input_is_enabled(c->buf)) {
-				event_t evt;
+				event_t evt = {};
 
 				evt.eid = EVT_TEXT_INSERT;
 				evt.oid = code;
@@ -1745,13 +1745,15 @@ done:
 	close(fd);
 }
 
-static void vt_handler(Vt *vt, wchar_t ch, void *arg)
+static void vt_handler(Vt *vt, char *ch, size_t len, void *arg)
 {
 	Buffer *buf = arg;
-	event_t evt;
+	event_t evt = {};
 
 	evt.eid = EVT_VTERM_PROCESS;
 	evt.oid = buffer_id_get(buf);
+	evt.len = len;
+	evt.str = ch;
 	scheme_event_handle(evt);
 }
 
@@ -2381,7 +2383,7 @@ static void handle_keypress(int fd, void *arg)
 	KeyBinding *kbd = NULL;
 	KeyBuf *kbuf = arg;
 	int alt_code;
-	event_t evt;
+	event_t evt = {};
 	int flags;
 	int code;
 
@@ -2449,7 +2451,7 @@ reenter:
 static void handle_sigchld_io(int fd, void *arg)
 {
 	ProcessInfo pinfo;
-	event_t evt;
+	event_t evt = {};
 	ssize_t len;
 
 	len = read(fd, &pinfo, sizeof(pinfo));
@@ -2471,7 +2473,7 @@ static void handle_sigchld_io(int fd, void *arg)
 
 int main(int argc, char *argv[]) {
 	sigset_t blockset;
-	event_t evt;
+	event_t evt = {};
 
 	setenv("BORSCH", VERSION, 1);
 	if (!parse_args(argc, argv)) {
