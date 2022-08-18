@@ -1331,7 +1331,7 @@ static wchar_t get_vt100_graphic(char c)
 	return '\0';
 }
 
-static void put_wc(Vt *t, wchar_t wc)
+bool put_wc(Vt *t, wchar_t wc)
 {
 	int width = 0;
 
@@ -1359,7 +1359,7 @@ static void put_wc(Vt *t, wchar_t wc)
 			}
 			width = 1;
 		} else if ((width = wcwidth(wc)) < 1) {
-			width = 1;
+			return false;
 		}
 		VtBuffer *b = t->buffer;
 		VtCell blank_cell = { L'\0', b->curattrs, b->curfg, b->curbg };
@@ -1386,6 +1386,8 @@ static void put_wc(Vt *t, wchar_t wc)
 		if (width == 2)
 			b->curs_row->cells[b->curs_col++] = blank_cell;
 	}
+
+	return true;
 }
 
 int vt_process(Vt *t)
@@ -1422,10 +1424,9 @@ int vt_process(Vt *t)
 		}
 
 		pos += len ? len : 1;
-		put_wc(t, wc);
-
-		if (t->vt_handler)
-			t->vt_handler(t, wc, t->vt_handler_arg);
+		if (put_wc(t, wc))
+			if (t->vt_handler)
+				t->vt_handler(t, wc, t->vt_handler_arg);
 	}
 
 	t->rlen -= pos;
