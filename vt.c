@@ -183,8 +183,8 @@ struct Vt {
 	vt_urgent_handler_t urgent_handler; /* hook which is called upon bell */
 	void *data;              /* user supplied data */
 	bool processed;
-	void (*vt_handler)(Vt *vt, char *ch, size_t len, void *arg);
-	void *vt_handler_arg;
+	void (*vt_filter)(Vt *vt, char *ch, size_t len, void *arg);
+	void *vt_filter_arg;
 	char *filter_buf;
 	size_t filter_buf_len;
 	size_t filter_buf_cap;
@@ -1411,7 +1411,7 @@ bool put_wc(Vt *t, wchar_t wc)
 		if (width == 2)
 			b->curs_row->cells[b->curs_col++] = blank_cell;
 
-		if (t->vt_handler)
+		if (t->vt_filter)
 			append_filter_buf(t, wc);
 	}
 
@@ -1458,8 +1458,8 @@ int vt_process(Vt *t)
 	t->rlen -= pos;
 	memmove(t->rbuf, t->rbuf + pos, t->rlen);
 
-	if (t->vt_handler) {
-		t->vt_handler(t, t->filter_buf, t->filter_buf_len, t->vt_handler_arg);
+	if (t->vt_filter) {
+		t->vt_filter(t, t->filter_buf, t->filter_buf_len, t->vt_filter_arg);
 		t->filter_buf_len = 0;
 	}
 	return 0;
@@ -1871,8 +1871,8 @@ int vt_content_start(Vt *t)
 	return t->buffer->scroll_above;
 }
 
-void vt_handler_set(Vt *vt, void (*h)(Vt *vt, char *ch, size_t len, void *arg), void *arg)
+void vt_filter_set(Vt *vt, void (*h)(Vt *vt, char *ch, size_t len, void *arg), void *arg)
 {
-	vt->vt_handler_arg = arg;
-	vt->vt_handler = h;
+	vt->vt_filter_arg = arg;
+	vt->vt_filter = h;
 }

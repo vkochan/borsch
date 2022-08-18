@@ -3,7 +3,7 @@
 (define __cs_term_create (foreign-procedure "cs_term_create" (string string string scheme-object) scheme-object))
 (define __cs_term_text_get (foreign-procedure "cs_term_text_get" (int) scheme-object))
 (define __cs_term_current_line_get (foreign-procedure "cs_term_current_line_get" (int) scheme-object))
-(define __cs_term_handler_enable (foreign-procedure "cs_term_handler_enable" (int boolean) scheme-object))
+(define __cs_term_filter_enable (foreign-procedure "cs_term_filter_enable" (int boolean) scheme-object))
 
 (define vterm-send-keys
    (case-lambda
@@ -126,7 +126,7 @@
        (with-current-buffer bid
           (set-local! vterm-filter-func fn)
        )
-       (call-foreign (__cs_term_handler_enable bid (or fn)))
+       (call-foreign (__cs_term_filter_enable bid (or fn)))
       ]
    )
 )

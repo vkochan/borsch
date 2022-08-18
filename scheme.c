@@ -939,9 +939,9 @@ ptr scheme_term_current_line_get(int bid)
 	return s;
 }
 
-void scheme_term_handler_enable(int bid, bool enable)
+void scheme_term_filter_enable(int bid, bool enable)
 {
-	term_handler_enable(bid, enable);
+	term_filter_enable(bid, enable);
 }
 
 int scheme_view_current_get(void)
@@ -1283,7 +1283,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_term_text_send", scheme_term_text_send);
 	Sregister_symbol("cs_term_text_get", scheme_term_text_get);
 	Sregister_symbol("cs_term_current_line_get", scheme_term_current_line_get);
-	Sregister_symbol("cs_term_handler_enable", scheme_term_handler_enable);
+	Sregister_symbol("cs_term_filter_enable", scheme_term_filter_enable);
 
 	Sregister_symbol("cs_view_current_get", scheme_view_current_get);
 	Sregister_symbol("cs_view_current_set", scheme_view_current_set);

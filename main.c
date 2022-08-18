@@ -1745,7 +1745,7 @@ done:
 	close(fd);
 }
 
-static void vt_handler(Vt *vt, char *ch, size_t len, void *arg)
+static void vt_filter(Vt *vt, char *ch, size_t len, void *arg)
 {
 	Buffer *buf = arg;
 	event_t evt = {};
@@ -4501,7 +4501,7 @@ int term_current_line_get(int bid, char **buf, size_t *len)
 	}
 }
 
-int term_handler_enable(int bid, bool enable)
+int term_filter_enable(int bid, bool enable)
 {
 	Buffer *b = buffer_by_id(bid);
 
@@ -4510,9 +4510,9 @@ int term_handler_enable(int bid, bool enable)
 		Vt *vt = process_term_get(proc);
 
 		if (enable) {
-			vt_handler_set(vt, vt_handler, b);
+			vt_filter_set(vt, vt_filter, b);
 		} else {
-			vt_handler_set(vt, NULL, NULL);
+			vt_filter_set(vt, NULL, NULL);
 		} 
 
 		return 0;
