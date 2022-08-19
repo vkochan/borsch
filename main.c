@@ -99,6 +99,7 @@ struct Window {
 	Window *snext;
 	unsigned int tags;
 	bool highlight_mark;
+	bool pending_draw_evt;
 };
 
 typedef struct {
@@ -219,6 +220,7 @@ static bool show_tagnamebycwd = false;
 
 static void buf_list_update(void);
 
+static bool is_in_kbd_action;
 static KeyMap *win_min_kmap;
 static KeyMap *global_kmap;
 static KeyMap *curr_kmap;
@@ -979,6 +981,11 @@ static void buf_update(Window *w);
 
 static void
 __draw(Window *c, bool force, bool fire_event) {
+	if (is_in_kbd_action) {
+		c->pending_draw_evt = true;
+		return;
+	}
+
 	if ((force || buffer_is_dirty(c->buf) && is_content_visible(c)) || c == get_popup()) {
 		debug("%s: buffer name: %s\n", __func__, buffer_name_get(c->buf));
 		/* we assume that it will be set on EVT_WIN_DRAW */
@@ -2439,12 +2446,21 @@ reenter:
 
 		if (keymap_kbd_len(kbd) == kbuf->key_index) {
 			debug("kbd action: enter\n");
+			is_in_kbd_action = true;
 			keymap_kbd_action(kbd);
 			debug("kbd action: exit\n");
+			is_in_kbd_action = false;
 			keybuf_clear(kbuf);
 		}
 	} else {
 		keybuf_flush(kbuf);
+	}
+
+	for (Window *c = nextvisible(windows); c; c = nextvisible(c->next)) {
+		if (c->pending_draw_evt) {
+			c->pending_draw_evt = false;
+			draw(c, true);
+		}
 	}
 }
 
