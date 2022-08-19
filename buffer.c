@@ -16,8 +16,6 @@
 #include "text/text-regex.h"
 #include "text/text-motions.h"
 
-typedef struct Buffer Buffer;
-
 typedef struct TextProperty {
 	struct TextProperty *prev;
 	struct TextProperty *next;
