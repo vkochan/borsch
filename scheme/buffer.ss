@@ -615,55 +615,60 @@
    )
 )
 
-(define add-text-style-property
-   (lambda (s e a)
-      (let ([l (if (symbol? a)
+(define add-style-property
+   (lambda (start end style)
+      (let ([l (if (symbol? style)
                    (list -1 -1 -1)
-                   (style->list a)
+                   (style->list style)
                )
             ]
            )
-         (call-foreign (__cs_buf_prop_style_add (current-buffer)
-				  1
-                                  (list-ref l 0)
-                                  (list-ref l 1)
-                                  (list-ref l 2)
-                                  (if (symbol? a)
-                                      (symbol->string a)
-                                      #f
-                                  )
-                                  s e))
+         (call-foreign
+            (__cs_buf_prop_style_add
+               (current-buffer)
+               1
+               (list-ref l 0)
+               (list-ref l 1)
+               (list-ref l 2)
+               (if (symbol? style)
+                  (symbol->string style)
+                  #f
+               )
+               start
+               end
+            )
+         )
       )
    )
 )
 
-(define add-text-keymap-property
+(define add-keymap-property
    (lambda (s e k)
       (call-foreign (__cs_buf_prop_kmap_add (current-buffer) k s e))
    )
 )
 
 (define add-text-property
-   (lambda (s e p)
-      (when (equal? 'style (car p))
-         (add-text-style-property s e (cadr p))
+   (lambda (start end prop)
+      (when (equal? 'style (car prop))
+         (add-style-property start end (cadr prop))
       )
-      (when (equal? 'keymap (car p))
-         (add-text-keymap-property s e (cadr p))
+      (when (equal? 'keymap (car prop))
+         (add-keymap-property start end (cadr prop))
       )
    )
 )
 
 (define remove-text-property
    (case-lambda
-      [(s e t)
-       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type t) s e))]
+      [(start end type)
+       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type type) start end))]
 
-      [(s e)
-       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type 'all) s e))]
+      [(start end)
+       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type 'all) start end))]
 
-      [(t)
-       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type t) -1 -1))]
+      [(type)
+       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type type) -1 -1))]
 
       [()
        (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type 'all) -1 -1))]
