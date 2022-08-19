@@ -1394,6 +1394,7 @@ bool put_wc(Vt *t, wchar_t wc)
 		}
 
 		if (b->curs_col >= b->cols) {
+			t->filter_buf_len = 0;
 			b->curs_col = 0;
 			cursor_line_down(t);
 		}
@@ -1460,7 +1461,6 @@ int vt_process(Vt *t)
 
 	if (t->vt_filter) {
 		t->vt_filter(t, t->filter_buf, t->filter_buf_len, t->vt_filter_arg);
-		t->filter_buf_len = 0;
 	}
 	return 0;
 }
