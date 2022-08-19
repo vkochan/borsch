@@ -53,7 +53,7 @@
 		[100  'key-press-hook   ]
 		[101  'text-insert-hook   ]
 		[200  'process-exit-hook   ]
-		[300  'vterm-process-hook   ]
+		[300  'vterm-filter-hook   ]
 		[else #f]
              )
           )
@@ -65,7 +65,7 @@
                      (eq? h 'pre-draw-hook))
                 (run-hooks h)
                 ;; else
-		(if (eq? h 'vterm-process-hook)
+		(if (eq? h 'vterm-filter-hook)
                    (begin
                       (with-current-buffer oid
                          (let ([fn (get-local vterm-filter-func #f)])

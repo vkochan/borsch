@@ -1750,7 +1750,7 @@ static void vt_filter(Vt *vt, char *ch, size_t len, void *arg)
 	Buffer *buf = arg;
 	event_t evt = {};
 
-	evt.eid = EVT_VTERM_PROCESS;
+	evt.eid = EVT_VTERM_FILTER;
 	evt.oid = buffer_id_get(buf);
 	evt.len = len;
 	evt.str = ch;

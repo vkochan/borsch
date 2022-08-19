@@ -10,7 +10,7 @@ typedef enum {
 	EVT_KEY_PRESS    = 100,
 	EVT_TEXT_INSERT  = 101,
 	EVT_PROC_EXIT    = 200,
-	EVT_VTERM_PROCESS = 300,
+	EVT_VTERM_FILTER = 300,
 } event_id_t;
 
 typedef enum {
