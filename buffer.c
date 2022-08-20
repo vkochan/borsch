@@ -24,6 +24,9 @@ typedef struct TextProperty {
 	void *data;
 	int prio;
 	int type;
+	void (*action)(Buffer *buf, struct TextProperty *prop, size_t start, size_t end, void *arg, buffer_property_cb_t cb);
+	char *regex_pattern;
+	Regex *regex;
 } TextProperty;
 
 typedef struct {
@@ -633,13 +636,52 @@ static void text_property_remove(TextProperty *prop)
 		prop->next->prev = prop->prev;
 }
 
-int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *data)
+static void buffer_property_regex_action(Buffer *buf, TextProperty *prop, size_t start, size_t end, void *arg, buffer_property_cb_t cb)
 {
+	bool found;
+	char c;
+
+	if (start > end)
+		return;
+
+	do {
+		int flags = text_byte_get(buf->text, start+1, &c) && c == '\n' ? 0 : REG_NOTBOL;
+		RegexMatch match[1] = {0};
+
+		found = !text_search_range_forward(buf->text, start, end - start, prop->regex, 1, match, flags);
+		if (found)
+			cb(buf, prop->type, match[0].start, match[0].end-1, prop->data, arg);
+
+		start = match[0].end;
+	} while (found);
+}
+
+int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *data, const char *pattern)
+{
+	Regex *regex = NULL;
 	TextProperty *p;
+
+	if (pattern) {
+		int cflags = REG_EXTENDED|REG_NEWLINE;
+		regex = text_regex_new();
+		if (!regex)
+			return -1;
+		if (text_regex_compile(regex, pattern, cflags) != 0) {
+			text_regex_free(regex);
+			return -1;
+		}
+	}
+
 
 	p = calloc(1, sizeof(*p));
 	if (!p)
 		return -1;
+
+	if (regex) {
+		p->action = buffer_property_regex_action;
+		p->regex_pattern = strdup(pattern);
+		p->regex = regex;
+	}
 
 	p->start = start;
 	p->data = data;
@@ -675,7 +717,7 @@ int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *d
 	return 0;
 }
 
-bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t end, void *arg,
+bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern, void *arg,
 		void (*cb)(Buffer *buf, size_t type, size_t start, size_t end,
 			void *data, void *arg))
 {
@@ -686,6 +728,8 @@ bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t en
 	if (start != EPOS && end != EPOS)
 		exp++;
 	if (type)
+		exp++;
+	if (pattern)
 		exp++;
 
 	if (!exp)
@@ -701,6 +745,8 @@ bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t en
 			match++;
 		if (type == PROPERTY_TYPE_ALL)
 			match++;
+		if (pattern && strcmp(pattern, it->regex_pattern) == 0)
+			match++;
 
 		if (match >= exp) {
 			if (cb)
@@ -713,6 +759,8 @@ bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t en
 			if (it == buf->max_prop)
 				buf->max_prop = it->prev;
 
+			text_regex_free(it->regex);
+			free(it->regex_pattern);
 			text_property_remove(it);
 			rem_count++;
 			free(it);
@@ -723,9 +771,9 @@ bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t en
 	return rem_count > 0;
 }
 
-bool buffer_property_remove(Buffer *buf, size_t type, size_t start, size_t end)
+bool buffer_property_remove(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern)
 {
-	if (buffer_property_remove_cb(buf, type, start, end, NULL, NULL)) {
+	if (buffer_property_remove_cb(buf, type, start, end, pattern, NULL, NULL)) {
 		buf->is_dirty = true;
 		return true;
 	}
@@ -733,8 +781,7 @@ bool buffer_property_remove(Buffer *buf, size_t type, size_t start, size_t end)
 	return false;
 }
 
-void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, void *arg,
-		int (*cb) (Buffer *buf, int type, size_t start, size_t end, void *data, void *arg))
+void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, void *arg,	buffer_property_cb_t cb)
 {
 	TextProperty *it = buf->props.next;
 	int exp = 0;
@@ -752,6 +799,11 @@ void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, voi
 
 	for (; it; it = it->next) {
 		int match = 0;
+
+		if (it->regex && it->type == type) {
+			it->action(buf, it, start, end, arg, cb);
+			continue;
+		}
 
 		if (it->end >= start && (it->start >= start && it->start <= end ||
 				start >= it->start && it->start <= end))

@@ -690,27 +690,27 @@ ptr scheme_buf_is_visible(int bid)
 	return Sfalse;
 }
 
-ptr scheme_buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end)
+ptr scheme_buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end, const char *regex)
 {
-	int ret = buf_prop_style_add(bid, type, fg, bg, attr, style_name, start, end);
+	int ret = buf_prop_style_add(bid, type, fg, bg, attr, style_name, start, end, regex);
 
 	if (ret == 0)
 		Sinteger(ret);
 	return Sfalse;
 }
 
-ptr scheme_buf_prop_kmap_add(int bid, int kid, int start, int end)
+ptr scheme_buf_prop_kmap_add(int bid, int kid, int start, int end, const char *regex)
 {
-	int ret = buf_prop_kmap_add(bid, kid, start, end);
+	int ret = buf_prop_kmap_add(bid, kid, start, end, regex);
 
 	if (ret == 0)
 		Sinteger(ret);
 	return Sfalse;
 }
 
-void scheme_buf_prop_del(int bid, int type, int start, int end)
+void scheme_buf_prop_del(int bid, int type, int start, int end, const char *regex)
 {
-	buf_prop_del(bid, type, start, end);
+	buf_prop_del(bid, type, start, end, regex);
 }
 
 ptr scheme_buf_env_get(int bid)

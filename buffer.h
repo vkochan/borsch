@@ -9,6 +9,8 @@ typedef struct Buffer Buffer;
 typedef struct KeyMap KeyMap;
 typedef struct Process Process;
 
+typedef void (*buffer_property_cb_t) (Buffer *buf, int type, size_t start, size_t end, void *data, void *arg);
+
 typedef enum {
 	PROPERTY_TYPE_TEXT_STYLE	= 1,
 	PROPERTY_TYPE_TEXT_HIGHLIGHT	= 2,
@@ -73,11 +75,10 @@ void buffer_mark_clear(Buffer *buf);
 size_t buffer_mark_get(Buffer *buf);
 void buffer_proc_set(Buffer *buf, Process *proc);
 Process *buffer_proc_get(Buffer *buf);
-int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *data);
-void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, void *arg,
-		int (*cb) (Buffer *buf, int type, size_t start, size_t end, void *data, void *arg));
-bool buffer_property_remove(Buffer *buf, size_t type, size_t start, size_t end);
-bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t end, void *arg,
+int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *data, const char *pattern);
+void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, void *arg,	buffer_property_cb_t cb);
+bool buffer_property_remove(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern);
+bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern, void *arg,
 		void (*cb)(Buffer *buf, size_t type, size_t start, size_t end,
 			void *data, void *arg));
 void buffer_env_set(Buffer *buf, void *env);

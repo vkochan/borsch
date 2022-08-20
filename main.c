@@ -1620,7 +1620,7 @@ static void __buf_del(Buffer *buf)
 
 	env = buffer_env_get(buf);
 
-	buffer_property_remove_cb(buf, PROPERTY_TYPE_ALL, EPOS, EPOS, NULL, buf_prop_del_cb);
+	buffer_property_remove_cb(buf, PROPERTY_TYPE_ALL, EPOS, EPOS, NULL, NULL, buf_prop_del_cb);
 	buffer_ref_put(buf);
 	if (buffer_del(buf)) {
 		if (buffer_proc_get(buf))
@@ -4238,7 +4238,7 @@ bool buf_is_visible(int bid)
 	return false;
 }
 
-int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end)
+int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end, const char *regex)
 {
 	Buffer *buf = buffer_by_id(bid);
 	Style *style, *style_bind;
@@ -4260,7 +4260,7 @@ int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *
 		style->bg = bg;
 	}
 
-	err = buffer_property_add(buf, type, start, end, style);
+	err = buffer_property_add(buf, type, start, end, style, regex);
 	if (err) {
 		free(style);
 		return err;
@@ -4271,7 +4271,7 @@ int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *
 }
 
 
-int buf_prop_kmap_add(int bid, int kid, int start, int end)
+int buf_prop_kmap_add(int bid, int kid, int start, int end, const char *regex)
 {
 	Buffer *buf = buffer_by_id(bid);
 	KeyMap *map = keymap_by_id(kid);
@@ -4280,7 +4280,7 @@ int buf_prop_kmap_add(int bid, int kid, int start, int end)
 	if (!map || !buf)
 		return -1;
 
-	err = buffer_property_add(buf, PROPERTY_TYPE_TEXT_KEYMAP, start, end, map);
+	err = buffer_property_add(buf, PROPERTY_TYPE_TEXT_KEYMAP, start, end, map, regex);
 	if (err)
 		return err;
 
@@ -4289,12 +4289,12 @@ int buf_prop_kmap_add(int bid, int kid, int start, int end)
 	return 0;
 }
 
-void buf_prop_del(int bid, int type, int start, int end)
+void buf_prop_del(int bid, int type, int start, int end, const char *regex)
 {
 	Buffer *buf = buffer_by_id(bid);
 
 	buffer_property_remove_cb(buf, type, start == -1 ? EPOS : start,
-			end == -1 ? EPOS : end, NULL, buf_prop_del_cb);
+			end == -1 ? EPOS : end, regex, NULL, buf_prop_del_cb);
 	buffer_dirty_set(buf, true);
 }
 
