@@ -23,13 +23,13 @@ SCH_SCRIPTS = main.ss
 LDFLAGS += -L ./text -L ./ui
 LIBS += -ltext -lui -ltree-sitter
 
-SRCS += parser/c/parser.c \
-       parser/devicetree/parser.c \
-       parser/diff/parser.c \
-       parser/scheme/parser.c \
-       parser/make/parser.c \
-       parser/org/scanner.c \
-       parser/org/parser.c
+SRCS += syntax/c/parser.c \
+       syntax/devicetree/parser.c \
+       syntax/diff/parser.c \
+       syntax/scheme/parser.c \
+       syntax/make/parser.c \
+       syntax/org/scanner.c \
+       syntax/org/parser.c
 
 CFLAGS += -I$(SCH_PATH) \
    -DPROGNAME='"${PROGNAME}"' \
