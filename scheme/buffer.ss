@@ -690,7 +690,7 @@
    )
 )
 
-(define remove-text-property
+(define remove-property
    (case-lambda
       [(start end type)
        (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type type) start end #f))]
@@ -1574,7 +1574,7 @@
             [s (buffer-begin-pos)]
             [e (buffer-end-pos)]
            )
-         (remove-text-property s e)
+         (remove-property s e)
          (delete-range s e)
       )
    )
