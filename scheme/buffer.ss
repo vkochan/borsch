@@ -606,10 +606,10 @@
 (define symbol->text-property-type
    (lambda (s)
       (case s
-         [('style)     1]
-         [('highlight) 2]
-         [('keymap)    3]
-         [('all)       10000]
+         ['style     1]
+         ['highlight 2]
+         ['keymap    3]
+         ['all       10000]
          [else         0]
       )
    )
