@@ -617,15 +617,15 @@
 
 (define add-style-property
    (case-lambda
-      [(regex style)
-       (add-style-property -1 -1 style regex)
+      [(style regex)
+       (add-style-property style -1 -1 regex)
       ]
 
-      [(start end style)
-       (add-style-property start end style #f)
+      [(style start end)
+       (add-style-property style start end #f)
       ]
 
-      [(start end style regex)
+      [(style start end regex)
        (let ([l (if (symbol? style)
                     (list -1 -1 -1)
                     (style->list style)
@@ -655,15 +655,15 @@
 
 (define add-keymap-property
    (case-lambda
-      [(regex kmap)
-       (add-keymap-property -1 -1 kmap regex)
+      [(kmap regex)
+       (add-keymap-property kmap -1 -1 regex)
       ]
 
-      [(start end kmap)
-       (add-keymap-property start end kmap #f)
+      [(kmap start end)
+       (add-keymap-property kmap start end #f)
       ]
 
-      [(start end kmap regex)
+      [(kmap start end regex)
        (call-foreign (__cs_buf_prop_kmap_add (current-buffer) kmap start end regex))
       ]
    )
@@ -672,10 +672,10 @@
 (define add-text-property
    (lambda (start end prop)
       (when (equal? 'style (car prop))
-         (add-style-property start end (cadr prop))
+         (add-style-property (cadr prop) start end )
       )
       (when (equal? 'keymap (car prop))
-         (add-keymap-property start end (cadr prop))
+         (add-keymap-property (cadr prop) start end )
       )
    )
 )
