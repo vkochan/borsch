@@ -1574,7 +1574,7 @@
             [s (buffer-begin-pos)]
             [e (buffer-end-pos)]
            )
-         (remove-property s e)
+         (remove-property 'all)
          (delete-range s e)
       )
    )
