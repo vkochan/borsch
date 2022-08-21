@@ -669,14 +669,24 @@
    )
 )
 
-(define add-text-property
-   (lambda (start end prop)
-      (when (equal? 'style (car prop))
+(define add-property
+   (case-lambda
+      [(regex prop)
+       (add-property -1 -1 regex prop)
+      ]
+
+      [(start end prop)
+       (add-property start end #f prop)
+      ]
+
+      [(start end regex prop)
+       (when (equal? 'style (car prop))
          (add-style-property (cadr prop) start end )
-      )
-      (when (equal? 'keymap (car prop))
+       )
+       (when (equal? 'keymap (car prop))
          (add-keymap-property (cadr prop) start end )
-      )
+       )
+      ]
    )
 )
 
@@ -730,7 +740,7 @@
                (let ([p (- (call-foreign (__cs_buf_text_insert (current-buffer) t)) 1)])
                   (for-each
                      (lambda (a)
-                        (add-text-property c p a)
+                        (add-property c p a)
                      ) s
                   )
                   p
