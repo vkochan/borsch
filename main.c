@@ -3734,6 +3734,18 @@ size_t buf_text_insert(int bid, const char *text)
 	return pos;
 }
 
+size_t buf_text_insert_char(int bid, char ch)
+{
+	Buffer *buf = buffer_by_id(bid);
+	size_t pos = EPOS;
+
+	if (buf) {
+		pos = buffer_text_insert_len(buf, buffer_cursor_get(buf), &ch, 1);
+	}
+
+	return pos;
+}
+
 size_t buf_text_insert_nl(int bid, int pos)
 {
 	Buffer *buf = buffer_by_id(bid);

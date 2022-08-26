@@ -404,7 +404,7 @@
 
 (define text-mode-insert-char
    (lambda (char)
-      (insert (string char))
+      (insert-char char)
    )
 )
 

@@ -118,6 +118,7 @@ void buf_readonly_set(int bid, bool is_readonly);
 bool buf_is_readonly(int bid);
 int buf_by_name(const char *name);
 size_t buf_text_insert(int bid, const char *text);
+size_t buf_text_insert_char(int bid, char ch);
 size_t buf_text_insert_nl(int bid, int pos);
 size_t buf_text_insert_file(int bid, const char *path);
 size_t buf_text_obj_move(int bid, size_t pos, char obj, int n, bool move);

@@ -494,9 +494,20 @@ ptr scheme_buf_by_name(const char *name)
 
 	return Sfalse;
 }
+
 ptr scheme_buf_text_insert(int bid, const char *text)
 {
 	size_t pos = buf_text_insert(bid, text);
+
+	if (pos != EPOS)
+		return Sinteger(pos);
+
+	return Sfalse;
+}
+
+ptr scheme_buf_text_insert_char(int bid, char ch)
+{
+	size_t pos = buf_text_insert_char(bid, ch);
 
 	if (pos != EPOS)
 		return Sinteger(pos);
@@ -1225,6 +1236,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_readonly_set", scheme_buf_readonly_set);
 	Sregister_symbol("cs_buf_by_name", scheme_buf_by_name);
 	Sregister_symbol("cs_buf_text_insert", scheme_buf_text_insert);
+	Sregister_symbol("cs_buf_text_insert_char", scheme_buf_text_insert_char);
 	Sregister_symbol("cs_buf_text_insert_nl", scheme_buf_text_insert_nl);
 	Sregister_symbol("cs_buf_text_insert_file", scheme_buf_text_insert_file);
 	Sregister_symbol("cs_buf_text_obj_pos", scheme_buf_text_obj_pos);
