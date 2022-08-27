@@ -175,22 +175,22 @@
 
 (define process-create
    (case-lambda
-      [(prog)
-       (process-create prog #f #f)
+      [(cmd)
+       (process-create cmd #f #f)
       ]
 
-      [(prog buf-out)
-       (process-create prog buf-out #f)
+      [(cmd buf-out)
+       (process-create cmd buf-out #f)
       ]
 
-      [(prog buf-out on-exit)
-       (process-create prog buf-out #f on-exit)
+      [(cmd buf-out on-exit)
+       (process-create cmd buf-out #f on-exit)
       ]
 
-      [(prog buf-out buf-err on-exit)
+      [(cmd buf-out buf-err on-exit)
        (let*(
              [env (process-environment)]
-             [p (call-foreign (__cs_process_create prog (current-cwd) #t #t (not (equal? buf-err #f)) env #t))]
+             [p (call-foreign (__cs_process_create cmd (current-cwd) #t #t (not (equal? buf-err #f)) env #t))]
             )
           (let (
                 [reader (if (or buf-out buf-err) (__make-process-reader) #f)]
