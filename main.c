@@ -3726,9 +3726,6 @@ size_t buf_text_insert(int bid, const char *text)
 
 	if (buf) {
 		pos = buffer_text_insert(buf, buffer_cursor_get(buf), text);
-		if (minibuf) {
-			draw(minibuf, true);
-		}
 	}
 
 	return pos;
