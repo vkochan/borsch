@@ -5,8 +5,39 @@
 )
 
 (define c-compile-buffer
-   (lambda ()
-      (vterm (format "(gcc ~a -c ~a) || read" (c-compile-options) (buffer-filename)))
+   (case-lambda
+      [()
+       (c-compile-buffer #f)
+      ]
+
+      [(fn)
+       (let ([buf-out (buffer-new)] [buf-err (buffer-new)] [fn fn])
+          (process-create
+             (format "gcc ~a -c ~a" (c-compile-options) (buffer-filename))
+             buf-out
+             buf-err
+             (lambda (status out err)
+                (if (eq? status 0)
+                   (begin
+                      (message "Compilation is successful")
+                      (buffer-delete out)
+                      (buffer-delete err)
+                   )
+                   ;; else
+                   (begin
+                      (buffer-delete out)
+                      (window-create err)
+                      (text-mode)
+                      (message "Compilation failed")
+                   )
+                )
+                (when fn
+                   (fn status out err)
+                )
+             )
+          )
+       )
+      ]
    )
 )
 
@@ -16,7 +47,13 @@
             [prog (path-root (buffer-filename))]
             [file (buffer-filename)]
            )
-         (vterm (format "(gcc ~a ~a -o ~a && ~a) ; read" (c-compile-options) file prog prog))
+         (c-compile-buffer
+            (lambda (status out err)
+               (when (eq? status 0)
+                  (vterm (format "~a ; read" prog))
+               )
+            )
+         )
       )
    )
 )
