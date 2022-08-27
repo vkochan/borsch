@@ -2545,7 +2545,7 @@ int main(int argc, char *argv[]) {
 		   draw(topbar, true);
 	        }
 		if (minibuf) {
-			draw(minibuf, true);
+			draw(minibuf, false);
 		}
 
 		for (Window *c = windows; c; c = c->next) {
