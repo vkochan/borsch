@@ -157,6 +157,16 @@ static bool scanner_dedent(Scanner *scanner, TSLexer *lexer) {
     return true;
 }
 
+static bool in_error_recovery(Scanner *scanner, const bool *valid_symbols) {
+    return (valid_symbols[LISTSTART] &&
+        valid_symbols[LISTEND] &&
+        valid_symbols[LISTITEMEND] &&
+        valid_symbols[BULLET] &&
+        valid_symbols[HLSTARS] &&
+        valid_symbols[SECTIONEND] &&
+        valid_symbols[ENDOFFILE]);
+}
+
 static Bullet getbullet(Scanner *scanner, TSLexer *lexer) {
     if (lexer->lookahead == '-') {
       scanner_advance(scanner, lexer);
@@ -201,6 +211,10 @@ static Bullet getbullet(Scanner *scanner, TSLexer *lexer) {
 }
 
 static bool scanner_scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
+
+  if (in_error_recovery(scanner, valid_symbols))
+    return false;
+
 
   // - Section ends
   int16_t indent_length = 0;
