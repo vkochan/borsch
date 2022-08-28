@@ -934,7 +934,7 @@ static void draw_title(Window *c) {
 				 title_bg, title_bg,
 				 UI_TEXT_STYLE_NORMAL);
 
-	maxlen = ui_window_width_get(c->win) - 10;
+	maxlen = ui_window_width_get(c->win) - 3;
 	if (maxlen < 0)
 		maxlen = 0;
 	strncpy(name, buffer_name_get(c->buf), sizeof(name));
