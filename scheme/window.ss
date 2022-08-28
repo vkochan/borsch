@@ -602,46 +602,46 @@
    )
 )
 
-(define window-viewport-begin
+(define window-begin-pos
    (case-lambda
       [()
-       (window-viewport-begin (current-window))]
+       (window-begin-pos (current-window))]
 
       [(w)
        (call-foreign (__cs_win_viewport_pos w #\H))]
    )
 )
 
-(define window-viewport-end
+(define window-end-pos
    (case-lambda
       [()
-       (window-viewport-end (current-window))]
+       (window-end-pos (current-window))]
 
       [(w)
        (call-foreign (__cs_win_viewport_pos w #\L))]
    )
 )
 
-(define window-viewport-coord
+(define window-pos->coord
    (case-lambda
       [(p)
-       (window-viewport-coord (current-window) p)]
+       (window-pos->coord (current-window) p)]
 
       [(w p)
        (call-foreign (__cs_win_viewport_coord w p))]
    )
 )
 
-(define window-viewport-lines-coord
+(define window-lines-coord
    (lambda (w)
       (when (not (buffer-is-vterm? (window-buffer w)))
          (let (
                [b (window-buffer w)]
               )
                (let* (
-                      [start (window-viewport-begin w)]
-                      [end (line-begin-pos b (window-viewport-end w))]
-                      [coord (window-viewport-coord w start)]
+                      [start (window-begin-pos w)]
+                      [end (line-begin-pos b (window-end-pos w))]
+                      [coord (window-pos->coord w start)]
                       [lst '()]
                      )
                   (while (and (<= start end) (not (= start (buffer-end-pos))))
@@ -655,7 +655,7 @@
                         )
                      )
                      (set! start (next-line-pos b start))
-                     (set! coord (window-viewport-coord w start))
+                     (set! coord (window-pos->coord w start))
                   )
 		  lst
                )
@@ -664,7 +664,7 @@
    )
 )
 
-(define window-viewport-width
+(define window-inner-width
    (case-lambda
       [()
        (call-foreign (__cs_win_viewport_width_get (current-window)))]
@@ -674,7 +674,7 @@
    )
 )
 
-(define window-viewport-height
+(define window-inner-height
    (case-lambda
       [()
        (call-foreign (__cs_win_viewport_height_get (current-window)))]

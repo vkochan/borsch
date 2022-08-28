@@ -231,7 +231,7 @@
          (define-local complete-prompt (format "~a:" prompt))
          (define-local complete-text "")
          (define-local complete-index 0)
-         (define-local complete-max-lines (1- (window-viewport-height)))
+         (define-local complete-max-lines (1- (window-inner-height)))
          (define-local complete-result '())
          (define-local complete-list ls)
          (define-local complete-fn fn)

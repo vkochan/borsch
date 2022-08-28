@@ -434,7 +434,7 @@
             (window-set-sidebar-width w 0)
          )
          (when (> (length slist) 0)
-            (let ([lines (window-viewport-lines-coord w)])
+            (let ([lines (window-lines-coord w)])
                (for-each
                   (lambda (c)
                      (let (
