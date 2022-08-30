@@ -152,6 +152,7 @@ bool buf_is_visible(int bid);
 
 int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end, const char *regex);
 int buf_prop_kmap_add(int bid, int kid, int start, int end, const char *regex);
+int buf_prop_symbol_add(int bid, const char *symbol, int start, int end, const char *regex);
 void buf_prop_del(int bid, int type, int start, int end, const char *regex);
 void buf_prop_walk(int bid, int type, int start, int end, void *arg,
 		void (*cb)(Buffer *buf, int id, size_t start, size_t end, void *data,

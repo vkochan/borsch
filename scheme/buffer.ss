@@ -30,6 +30,7 @@
 
 (define __cs_buf_prop_style_add (foreign-procedure "cs_buf_prop_style_add" (int int int int int string int int string) scheme-object))
 (define __cs_buf_prop_kmap_add (foreign-procedure "cs_buf_prop_kmap_add" (int int int int string) scheme-object))
+(define __cs_buf_prop_symbol_add (foreign-procedure "cs_buf_prop_symbol_add" (int string int int string) scheme-object))
 (define __cs_buf_prop_del (foreign-procedure "cs_buf_prop_del" (int int int int string) void))
 (define __cs_buf_prop_get (foreign-procedure "cs_buf_prop_get" (int int int int) scheme-object))
 
@@ -611,6 +612,7 @@
          ['style     1]
          ['highlight 2]
          ['keymap    3]
+         ['symbol    4]
          ['all       10000]
          [else         0]
       )
@@ -671,6 +673,18 @@
    )
 )
 
+(define add-symbol-property
+   (case-lambda
+      [(symbol start end)
+       (add-symbol-property symbol start end #f)
+      ]
+
+      [(symbol start end regex)
+       (call-foreign (__cs_buf_prop_symbol_add (current-buffer) (symbol->string symbol) start end regex))
+      ]
+   )
+)
+
 (define add-property
    (case-lambda
       [(regex prop)
@@ -687,6 +701,9 @@
        )
        (when (equal? 'keymap (car prop))
          (add-keymap-property (cadr prop) start end )
+       )
+       (when (equal? 'symbol (car prop))
+         (add-symbol-property (cadr prop) start end )
        )
       ]
    )

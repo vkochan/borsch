@@ -4298,6 +4298,23 @@ int buf_prop_kmap_add(int bid, int kid, int start, int end, const char *regex)
 	return 0;
 }
 
+int buf_prop_symbol_add(int bid, const char *symbol, int start, int end, const char *regex)
+{
+	Buffer *buf = buffer_by_id(bid);
+	int err;
+
+	if (!buf) {
+		return -1;
+	}
+
+	err = buffer_property_add(buf, PROPERTY_TYPE_TEXT_SYMBOL, start, end, strdup(symbol), regex);
+	if (err) {
+		return err;
+	}
+
+	return 0;
+}
+
 void buf_prop_del(int bid, int type, int start, int end, const char *regex)
 {
 	Buffer *buf = buffer_by_id(bid);
