@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 
 #include "text/text.h"
+#include "buffer.h"
 #include "keymap.h"
 #include "timer.h"
 #include "api.h"
@@ -724,6 +725,139 @@ void scheme_buf_prop_del(int bid, int type, int start, int end, const char *rege
 	buf_prop_del(bid, type, start, end, regex);
 }
 
+struct scheme_list
+{
+	ptr head;
+	ptr tail;
+};
+
+static void scheme_list_insert(struct scheme_list *slist, ptr data)
+{
+	ptr snew = Scons(data, Snil);
+
+	if (slist->head) {
+		Sset_cdr(slist->tail, snew);
+	} else {
+		slist->head = snew;
+	}
+
+	slist->tail = snew;
+}
+
+static ptr scheme_color_to_name(short color)
+{
+	const char *color_name = "default";
+
+	switch (color) {
+	case UI_TEXT_COLOR_BLACK:
+		color_name = "black"; break;
+	case UI_TEXT_COLOR_RED:
+		color_name = "red"; break;
+	case UI_TEXT_COLOR_GREEN:
+		color_name = "green"; break;
+	case UI_TEXT_COLOR_YELLOW:
+		color_name = "yellow"; break;
+	case UI_TEXT_COLOR_BLUE:
+		color_name = "blue"; break;
+	case UI_TEXT_COLOR_MAGENTA:
+		color_name = "magenta"; break;
+	case UI_TEXT_COLOR_CYAN:
+		color_name = "cyan"; break;
+	case UI_TEXT_COLOR_WHITE:
+		color_name = "white"; break;
+	case UI_TEXT_COLOR_BRIGHT_BLACK:
+		color_name = "bright-black"; break;
+	case UI_TEXT_COLOR_BRIGHT_RED:
+		color_name = "bright-red"; break;
+	case UI_TEXT_COLOR_BRIGHT_GREEN:
+		color_name = "bright-green"; break;
+	case UI_TEXT_COLOR_BRIGHT_YELLOW:
+		color_name = "bright-yellow"; break;
+	case UI_TEXT_COLOR_BRIGHT_BLUE:
+		color_name = "bright-blue"; break;
+	case UI_TEXT_COLOR_BRIGHT_MAGENTA:
+		color_name = "bright-magenta"; break;
+	case UI_TEXT_COLOR_BRIGHT_CYAN:
+		color_name = "bright-cyan"; break;
+	case UI_TEXT_COLOR_BRIGHT_WHITE:
+		color_name = "bright-white"; break;
+	}
+
+	return Sstring(color_name);
+}
+
+/*
+  '(
+      ((:type . style) (:start . 0) (:end . 1) (:fg . "") (:bg . "") (:attr . ""))
+      ((:type . style) (:start . 1) (:end . 2) (:fg . "") (:bg . "") (:attr . ""))
+   )
+*/
+static void scheme_buf_prop_walk(Buffer *buf, int id, size_t start, size_t end, void *data, void *arg)
+{
+	struct scheme_list *plist = arg;
+	ptr sprop = NULL;
+
+	switch (id) {
+	case PROPERTY_TYPE_TEXT_STYLE:
+	{
+		struct scheme_list style_plist = {0};
+		char attr_name[128];
+		Style *style = data;
+
+		attr_name[0] = '\0';
+
+		for (int i = 0; i < UI_TEXT_STYLE_MAX; i++) {
+			const char *a = NULL;
+			int bit = (1 << i);
+
+			if (bit & style->attr) {
+				switch (i) {
+				case UI_TEXT_STYLE_NORMAL: a = "normal"; break;
+				case UI_TEXT_STYLE_BOLD: a = "bold"; break;
+				case UI_TEXT_STYLE_DIM: a = "dim"; break;
+				case UI_TEXT_STYLE_ITALIC: a = "italic"; break;
+				case UI_TEXT_STYLE_UNDERLINE: a = "underline"; break;
+				case UI_TEXT_STYLE_BLINK: a = "blink"; break;
+				case UI_TEXT_STYLE_REVERSE: a = "reverse"; break;
+				case UI_TEXT_STYLE_INVIS: a = "invisible"; break;
+				default: a = "unknown"; break;
+				}
+
+				if (attr_name[0])
+					strncat(attr_name, " ", sizeof(attr_name)-1);
+
+				strncat(attr_name, a, sizeof(attr_name)-1);
+			}
+		}
+
+		scheme_list_insert(&style_plist, Scons(Sstring_to_symbol(":type"),
+						       Sstring_to_symbol("style")));
+		scheme_list_insert(&style_plist, Scons(Sstring_to_symbol(":start"),
+						       Sinteger(start)));
+		scheme_list_insert(&style_plist, Scons(Sstring_to_symbol(":end"),
+						       Sinteger(end)));
+		scheme_list_insert(&style_plist, Scons(Sstring_to_symbol(":fg"),
+						       scheme_color_to_name(style->fg)));
+		scheme_list_insert(&style_plist, Scons(Sstring_to_symbol(":bg"),
+						       scheme_color_to_name(style->bg)));
+		scheme_list_insert(&style_plist, Scons(Sstring_to_symbol(":attr"),
+						       Sstring(attr_name)));
+		scheme_list_insert(plist, style_plist.head);
+		break;
+	}
+
+	}
+}
+
+ptr scheme_buf_prop_get(int bid, int type, int start, int end)
+{
+	struct scheme_list plist = {0};
+
+	buf_prop_walk(bid, type, start, end, &plist, scheme_buf_prop_walk);
+
+	return plist.head ? plist.head : Sfalse;
+}
+
 ptr scheme_buf_env_get(int bid)
 {
 	void *env = buf_env_get(bid);
@@ -1270,6 +1404,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_prop_style_add", scheme_buf_prop_style_add);
 	Sregister_symbol("cs_buf_prop_kmap_add", scheme_buf_prop_kmap_add);
 	Sregister_symbol("cs_buf_prop_del", scheme_buf_prop_del);
+	Sregister_symbol("cs_buf_prop_get", scheme_buf_prop_get);
 
 	Sregister_symbol("cs_buf_env_get", scheme_buf_env_get);
 

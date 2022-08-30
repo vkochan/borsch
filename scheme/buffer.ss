@@ -31,6 +31,7 @@
 (define __cs_buf_prop_style_add (foreign-procedure "cs_buf_prop_style_add" (int int int int int string int int string) scheme-object))
 (define __cs_buf_prop_kmap_add (foreign-procedure "cs_buf_prop_kmap_add" (int int int int string) scheme-object))
 (define __cs_buf_prop_del (foreign-procedure "cs_buf_prop_del" (int int int int string) void))
+(define __cs_buf_prop_get (foreign-procedure "cs_buf_prop_get" (int int int int) scheme-object))
 
 (define __cs_buf_cursor_get (foreign-procedure __collect_safe "cs_buf_cursor_get" (int) scheme-object))
 (define __cs_buf_cursor_set (foreign-procedure __collect_safe "cs_buf_cursor_set" (int int) void))
@@ -715,6 +716,22 @@
 
     [(regex type)
      (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type type) -1 -1 regex))
+    ]
+   )
+)
+
+(define get-property
+   (case-lambda
+    [(start end)
+     (get-property (current-buffer) 'all start end)
+    ]
+
+    [(type start end)
+     (get-property (current-buffer) type start end)
+    ]
+
+    [(buf type start end)
+     (call-foreign (__cs_buf_prop_get buf (symbol->text-property-type type) start end))
     ]
    )
 )

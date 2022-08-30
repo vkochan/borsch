@@ -4307,9 +4307,14 @@ void buf_prop_del(int bid, int type, int start, int end, const char *regex)
 	buffer_dirty_set(buf, true);
 }
 
-/* void buf_prop_walk(int bid, int type, int start, int end, void *arg, */
-/* 			void (*cb)(int bid, int type, int start, int end, void */
-/* 				*arg)); */
+void buf_prop_walk(int bid, int type, int start, int end, void *arg,
+		void (*cb)(Buffer *buf, int id, size_t start, size_t end, void *data,
+				 void *arg))
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	buffer_properties_walk(buf, type, start, end, arg, cb);
+}
 
 void *buf_env_get(int bid)
 {
