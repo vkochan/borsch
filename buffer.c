@@ -850,7 +850,7 @@ void buffer_undo(Buffer *buf)
 	if (buf->is_read_only)
 		return;
 
-	text_undo(buf->text);
+	buffer_cursor_set(buf, text_undo(buf->text));
 	buf->is_dirty = true;
 	buffer_text_changed(buf, 0, text_size(buf->text));
 }
@@ -860,7 +860,7 @@ void buffer_redo(Buffer *buf)
 	if (buf->is_read_only)
 		return;
 
-	text_redo(buf->text);
+	buffer_cursor_set(buf, text_redo(buf->text));
 	buf->is_dirty = true;
 	buffer_text_changed(buf, 0, text_size(buf->text));
 }
