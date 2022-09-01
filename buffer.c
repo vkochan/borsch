@@ -404,11 +404,16 @@ KeyMap *buffer_keymap_get(Buffer *buf)
 
 static void buffer_properties_pos_update(Buffer *buf, size_t pos, int len);
 
+static void buffer_update_parser(Buffer *buf, size_t pos, int len)
+{
+	if (buf->parser)
+		syntax_parser_edit(buf->parser, pos, len);
+}
+
 static void buffer_text_changed(Buffer *buf, size_t pos, int len)
 {
 	buffer_properties_pos_update(buf, pos, len);
-	if (buf->parser)
-		syntax_parser_edit(buf->parser, pos, len);
+	buffer_update_parser(buf, pos, len);
 }
 
 size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text)
@@ -852,7 +857,7 @@ void buffer_undo(Buffer *buf)
 
 	buffer_cursor_set(buf, text_undo(buf->text));
 	buf->is_dirty = true;
-	buffer_text_changed(buf, 0, text_size(buf->text));
+	buffer_update_parser(buf, 0, text_size(buf->text));
 }
 
 void buffer_redo(Buffer *buf)
@@ -862,7 +867,7 @@ void buffer_redo(Buffer *buf)
 
 	buffer_cursor_set(buf, text_redo(buf->text));
 	buf->is_dirty = true;
-	buffer_text_changed(buf, 0, text_size(buf->text));
+	buffer_update_parser(buf, 0, text_size(buf->text));
 }
 
 size_t buffer_search_regex(Buffer *buf, size_t pos, const char *pattern, int dir)
