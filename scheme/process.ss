@@ -65,15 +65,17 @@
 )
 
 (define-record-type process
-                       (fields port-in
-                               port-out
-                               port-err
-                               pid
-                               buffer-out
-                               buffer-err
-                               on-exit
-                               (mutable port-reader)
-                        ))
+   (fields
+      port-in
+      port-out
+      port-err
+      pid
+      buffer-out
+      buffer-err
+      on-exit
+      (mutable port-reader)
+    )
+)
 
 (define %process-pid-ht (make-eq-hashtable))
 (define %process-fd-ht (make-eq-hashtable))
