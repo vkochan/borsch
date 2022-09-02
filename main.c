@@ -97,7 +97,6 @@ struct Window {
 	Window *next;
 	Window *prev;
 	Window *snext;
-	unsigned int tags;
 	bool highlight_mark;
 	bool pending_draw_evt;
 };
@@ -800,12 +799,12 @@ static void set_current_window(Window *w)
 
 static unsigned int window_tags_get(Window *w)
 {
-	return w->tags;
+	return buffer_tags_get(w->buf);
 }
 
 static void window_tags_set(Window *w, unsigned int tags)
 {
-	w->tags = tags;
+	buffer_tags_set(w->buf, tags);
 }
 
 static bool
@@ -1785,7 +1784,6 @@ int term_create(const char *prog, const char *title, const char *cwd, const char
 	Window *c = calloc(1, sizeof(Window));
 	if (!c)
 		return -1;
-	window_tags_set(c, tagset[seltags]);
 	c->id = ++cmdfifo.id;
 
 	c->buf = __buf_new(title, global_kmap);
@@ -1793,6 +1791,8 @@ int term_create(const char *prog, const char *title, const char *cwd, const char
 		free(c);
 		return -1;
 	}
+
+	window_tags_set(c, tagset[seltags]);
 
 	c->view = view_new(buffer_text_get(c->buf));
 	if (!c->view) {
@@ -2998,7 +2998,6 @@ int win_new(int bid)
 	if (!c)
 		return -1;
 
-	window_tags_set(c, tagset[seltags]);
 	c->id = ++cmdfifo.id;
 
 	if (bid) {
@@ -3008,6 +3007,8 @@ int win_new(int bid)
 	} else {
 		c->buf = __buf_new("", global_kmap);
 	}
+
+	window_tags_set(c, tagset[seltags]);
 
 	if (!c->buf) {
 		free(c);

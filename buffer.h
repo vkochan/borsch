@@ -101,4 +101,7 @@ int buffer_parser_rule_remove(Buffer *buf, syntax_rule_type_t type, const char *
 void buffer_syntax_rules_walk(Buffer *buf, syntax_rule_type_t type, size_t start, size_t end, void *arg,
 			      int (*cb) (SyntaxParser *parser, int type, size_t start, size_t end, void *data, void *arg));
 
+void buffer_tags_set(Buffer *buf, unsigned int tags);
+unsigned int buffer_tags_get(Buffer *buf);
+
 #endif /* BUFFER_H */
