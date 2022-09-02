@@ -798,9 +798,19 @@ static void set_current_window(Window *w)
 	sel = w;
 }
 
+static unsigned int window_tags_get(Window *w)
+{
+	return w->tags;
+}
+
+static void window_tags_set(Window *w, unsigned int tags)
+{
+	w->tags = tags;
+}
+
 static bool
 isvisible(Window *c) {
-	return c->tags & tagset[seltags];
+	return window_tags_get(c) & tagset[seltags];
 }
 
 static bool
@@ -1095,7 +1105,7 @@ lastmaster(unsigned int tag) {
 	Window *c = windows;
 	int n = 1;
 
-	for (; c && !(c->tags & tag); c = c->next);
+	for (; c && !(window_tags_get(c) & tag); c = c->next);
 	for (; c && n < getnmaster(); c = c->next, n++);
 
 	return c;
@@ -1115,7 +1125,7 @@ attachfirst(Window *c) {
 static void
 attach(Window *c) {
 	if (ismastersticky(NULL)) {
-		Window *master = lastmaster(c->tags);
+		Window *master = lastmaster(window_tags_get(c));
 
 		if (master) {
 			attachafter(c, master);
@@ -1343,9 +1353,9 @@ static void
 toggletag(const char *args[]) {
 	if (!current_window())
 		return;
-	unsigned int newtags = current_window()->tags ^ (bitoftag(args[0]) & TAGMASK);
+	unsigned int newtags = window_tags_get(current_window()) ^ (bitoftag(args[0]) & TAGMASK);
 	if (newtags) {
-		current_window()->tags = newtags;
+		window_tags_set(current_window(), newtags);
 		tagschanged();
 	}
 }
@@ -1775,7 +1785,7 @@ int term_create(const char *prog, const char *title, const char *cwd, const char
 	Window *c = calloc(1, sizeof(Window));
 	if (!c)
 		return -1;
-	c->tags = tagset[seltags];
+	window_tags_set(c, tagset[seltags]);
 	c->id = ++cmdfifo.id;
 
 	c->buf = __buf_new(title, global_kmap);
@@ -1850,7 +1860,7 @@ __focusid(int win_id) {
 		if (c->id == win_id) {
 			focus(c);
 			if (!isvisible(c)) {
-				c->tags |= tagset[seltags];
+				window_tags_set(c, window_tags_get(c) | tagset[seltags]);
 				tagschanged();
 			}
 			return;
@@ -2988,7 +2998,7 @@ int win_new(int bid)
 	if (!c)
 		return -1;
 
-	c->tags = tagset[seltags];
+	window_tags_set(c, tagset[seltags]);
 	c->id = ++cmdfifo.id;
 
 	if (bid) {
@@ -3104,7 +3114,7 @@ int win_tag_set(int wid, int tag)
 	if (!c)
 		return -1;
 
-	c->tags = ntags;
+	window_tags_set(c, ntags);
 	tagschanged();
 	return 0;
 }
@@ -3117,7 +3127,7 @@ int win_tag_bits(int wid)
 	if (!c)
 		return 0;
 
-	return c->tags;
+	return window_tags_get(c);
 }
 
 int win_tag_toggle(int wid, int tag)
@@ -3129,9 +3139,9 @@ int win_tag_toggle(int wid, int tag)
 	if (!c)
 		return -1;
 
-	ntags = c->tags ^ tag_to_bit(tag);
+	ntags = window_tags_get(c) ^ tag_to_bit(tag);
 	if (ntags) {
-		c->tags = ntags;
+		window_tags_set(c, ntags);
 		tagschanged();
 	}
 }
@@ -3145,8 +3155,8 @@ int win_tag_add(int wid, int tag)
 	if (!c)
 		return -1;
 
-	ntags = c->tags | tag_to_bit(tag);
-	c->tags = ntags;
+	ntags = window_tags_get(c) | tag_to_bit(tag);
+	window_tags_set(c, ntags);
 	tagschanged();
 	return 0;
 }
@@ -3160,8 +3170,8 @@ int win_tag_del(int wid, int tag)
 	if (!c)
 		return -1;
 
-	ntags = c->tags & ~tag_to_bit(tag);
-	c->tags = ntags;
+	ntags = window_tags_get(c) & ~tag_to_bit(tag);
+	window_tags_set(c, ntags);
 	tagschanged();
 	return 0;
 }
