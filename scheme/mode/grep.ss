@@ -45,11 +45,17 @@
              (define-local major-mode 'grep-mode)
              (define-local grep-search-word s)
              (define-local grep-search-dir d)
-             (buffer-set-name (format "Search: ~a" s))
+             (buffer-set-name (format "Searching ...: ~a" s))
              (buffer-set-mode-name "Grep")
              (erase-buffer)
           )
-          (process-create cmd b)
+          (process-create cmd b
+             (lambda (status buf-out buf-err)
+                (with-current-buffer buf-out
+                   (buffer-set-name (format "Finished: ~a" (get-local grep-search-word)))
+                )
+             )
+          )
           #t
        )
       ]
