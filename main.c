@@ -3094,89 +3094,6 @@ int win_title_set(int wid, char *title)
 	return -1;
 }
 
-static int tag_to_bit(int tag)
-{
-	if (!tag)
-		return ~0;
-
-	tag--;
-	return TAGMASK & ((tag < LENGTH(tags)) ? (1 << tag) : 0);
-}
-
-int win_tag_set(int wid, int tag)
-{
-	unsigned int ntags = tag_to_bit(tag);
-	Window *c;
-
-	if (!ntags)
-		return -1;
-
-	c = window_get_by_id(wid);
-	if (!c)
-		return -1;
-
-	window_tags_set(c, ntags);
-	tagschanged();
-	return 0;
-}
-
-int win_tag_bits(int wid)
-{
-	Window *c;
-
-	c = window_get_by_id(wid);
-	if (!c)
-		return 0;
-
-	return window_tags_get(c);
-}
-
-int win_tag_toggle(int wid, int tag)
-{
-	unsigned int ntags;
-	Window *c;
-
-	c = window_get_by_id(wid);
-	if (!c)
-		return -1;
-
-	ntags = window_tags_get(c) ^ tag_to_bit(tag);
-	if (ntags) {
-		window_tags_set(c, ntags);
-		tagschanged();
-	}
-}
-
-int win_tag_add(int wid, int tag)
-{
-	unsigned int ntags;
-	Window *c;
-
-	c = window_get_by_id(wid);
-	if (!c)
-		return -1;
-
-	ntags = window_tags_get(c) | tag_to_bit(tag);
-	window_tags_set(c, ntags);
-	tagschanged();
-	return 0;
-}
-
-int win_tag_del(int wid, int tag)
-{
-	unsigned int ntags;
-	Window *c;
-
-	c = window_get_by_id(wid);
-	if (!c)
-		return -1;
-
-	ntags = window_tags_get(c) & ~tag_to_bit(tag);
-	window_tags_set(c, ntags);
-	tagschanged();
-	return 0;
-}
-
 win_state_t win_state_get(int wid)
 {
 	Window *c = window_get_by_id(wid);
@@ -4400,6 +4317,81 @@ size_t buf_search_regex(int bid, size_t pos, const char *pattern, int dir)
 	}
 
 	return EPOS;
+}
+
+static int tag_to_bit(int tag)
+{
+	if (!tag)
+		return ~0;
+
+	tag--;
+	return TAGMASK & ((tag < LENGTH(tags)) ? (1 << tag) : 0);
+}
+
+int buf_tag_set(int bid, int tag)
+{
+	unsigned int ntags = tag_to_bit(tag);
+	Buffer *buf = buffer_by_id(bid);
+
+	if (!ntags || !buf)
+		return -1;
+
+	buffer_tags_set(buf, ntags);
+	tagschanged();
+	return 0;
+}
+
+int buf_tag_bits(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (!buf)
+		return 0;
+
+	return buffer_tags_get(buf);
+}
+
+int buf_tag_toggle(int bid, int tag)
+{
+	Buffer *buf = buffer_by_id(bid);
+	unsigned int ntags;
+
+	if (!buf)
+		return -1;
+
+	ntags = buffer_tags_get(buf) ^ tag_to_bit(tag);
+	if (ntags) {
+		buffer_tags_set(buf, ntags);
+		tagschanged();
+	}
+}
+
+int buf_tag_add(int bid, int tag)
+{
+	Buffer *buf = buffer_by_id(bid);
+	unsigned int ntags;
+
+	if (!buf)
+		return -1;
+
+	ntags = buffer_tags_get(buf) | tag_to_bit(tag);
+	buffer_tags_set(buf, ntags);
+	tagschanged();
+	return 0;
+}
+
+int buf_tag_del(int bid, int tag)
+{
+	Buffer *buf = buffer_by_id(bid);
+	unsigned int ntags;
+
+	if (!buf)
+		return -1;
+
+	ntags = buffer_tags_get(buf) & ~tag_to_bit(tag);
+	buffer_tags_set(buf, ntags);
+	tagschanged();
+	return 0;
 }
 
 int buf_parser_set(int bid, const char *lang)

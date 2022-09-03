@@ -14,11 +14,6 @@
 (define __cs_win_close (foreign-procedure __collect_safe "cs_win_close" (int) int))
 (define __cs_win_title_get (foreign-procedure __collect_safe "cs_win_title_get" (int) scheme-object))
 (define __cs_win_title_set (foreign-procedure "cs_win_title_set" (int string) int))
-(define __cs_win_tag_set (foreign-procedure __collect_safe "cs_win_tag_set" (int int) int))
-(define __cs_win_tag_bits (foreign-procedure __collect_safe "cs_win_tag_bits" (int) int))
-(define __cs_win_tag_toggle (foreign-procedure __collect_safe "cs_win_tag_toggle" (int int) int))
-(define __cs_win_tag_add (foreign-procedure __collect_safe "cs_win_tag_add" (int int) int))
-(define __cs_win_tag_del (foreign-procedure __collect_safe "cs_win_tag_del" (int int) int))
 (define __cs_win_state_get(foreign-procedure __collect_safe "cs_win_state_get" (int) int))
 (define __cs_win_state_set(foreign-procedure __collect_safe "cs_win_state_set" (int int) int))
 (define __cs_win_state_toggle(foreign-procedure __collect_safe "cs_win_state_toggle" (int int) int))
@@ -161,7 +156,7 @@
    (lambda (tag)
       (filter
          (lambda (w)
-            (member tag (window-tags (first w)))
+            (member tag (buffer-tags (window-buffer (first w))))
          )
          (window-list)
       )
@@ -316,69 +311,6 @@
 
       [(wid title)
        (call-foreign (__cs_win_title_set wid title))]
-   )
-)
-
-(define window-tags
-   (case-lambda
-      [()
-       (window-tags (current-window))]
-
-      [(wid)
-       (let (
-             [tag-bits (call-foreign (__cs_win_tag_bits wid))]
-             [tag-ls (list)]
-            )
-          (for-each
-             (lambda (bit)
-                (when (fxbit-set? tag-bits bit)
-                   (set! tag-ls (append tag-ls (list (1+ bit))))
-                )
-             ) (list 0 1 2 3 4 5 6 7 8)
-          )
-          tag-ls
-       )
-      ]
-   )
-)
-
-(define window-set-tag
-   (case-lambda
-      [(tag)
-       (call-foreign (__cs_win_tag_set (current-window) tag))]
-
-      [(wid tag)
-       (call-foreign (__cs_win_tag_set wid tag))]
-   )
-)
-
-(define window-toggle-tag
-   (case-lambda
-      [(tag)
-       (call-foreign (__cs_win_tag_toggle (current-window) tag))]
-
-      [(wid tag)
-       (call-foreign (__cs_win_tag_toggle wid tag))]
-   )
-)
-
-(define window-tag+
-   (case-lambda
-      [(tag)
-       (call-foreign (__cs_win_tag_add (current-window) tag))]
-
-      [(wid tag)
-       (call-foreign (__cs_win_tag_add wid tag))]
-   )
-)
-
-(define window-tag-
-   (case-lambda
-      [(tag)
-       (call-foreign (__cs_win_tag_del (current-window) tag))]
-
-      [(wid tag)
-       (call-foreign (__cs_win_tag_del wid tag))]
    )
 )
 

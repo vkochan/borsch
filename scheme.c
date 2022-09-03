@@ -199,31 +199,6 @@ int scheme_win_title_set(int wid, char *title)
 	return win_title_set(wid, title);
 }
 
-int scheme_win_tag_set(int wid, int tag)
-{
-	return win_tag_set(wid, tag);
-}
-
-int scheme_win_tag_bits(int wid)
-{
-	return win_tag_bits(wid);
-}
-
-int scheme_win_tag_toggle(int wid, int tag)
-{
-	return win_tag_toggle(wid, tag);
-}
-
-int scheme_win_tag_add(int wid, int tag)
-{
-	return win_tag_add(wid, tag);
-}
-
-int scheme_win_tag_del(int wid, int tag)
-{
-	return win_tag_del(wid, tag);
-}
-
 int scheme_win_state_get(int wid)
 {
 	return win_state_get(wid);
@@ -917,6 +892,31 @@ ptr scheme_buf_search_regex(int bid, size_t pos, const char *pattern, int dir)
 	return Sfalse;
 }
 
+int scheme_buf_tag_set(int bid, int tag)
+{
+	return buf_tag_set(bid, tag);
+}
+
+int scheme_buf_tag_bits(int bid)
+{
+	return buf_tag_bits(bid);
+}
+
+int scheme_buf_tag_toggle(int bid, int tag)
+{
+	return buf_tag_toggle(bid, tag);
+}
+
+int scheme_buf_tag_add(int bid, int tag)
+{
+	return buf_tag_add(bid, tag);
+}
+
+int scheme_buf_tag_del(int bid, int tag)
+{
+	return buf_tag_del(bid, tag);
+}
+
 ptr scheme_buf_parser_set(int bid, const char *lang)
 {
 	int err = buf_parser_set(bid, lang);
@@ -1350,11 +1350,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_close", scheme_win_close);
 	Sregister_symbol("cs_win_title_get", scheme_win_title_get);
 	Sregister_symbol("cs_win_title_set", scheme_win_title_set);
-	Sregister_symbol("cs_win_tag_set", scheme_win_tag_set);
-	Sregister_symbol("cs_win_tag_bits", scheme_win_tag_bits);
-	Sregister_symbol("cs_win_tag_toggle", scheme_win_tag_toggle);
-	Sregister_symbol("cs_win_tag_add", scheme_win_tag_add);
-	Sregister_symbol("cs_win_tag_del", scheme_win_tag_del);
 	Sregister_symbol("cs_win_state_get", scheme_win_state_get);
 	Sregister_symbol("cs_win_state_set", scheme_win_state_set);
 	Sregister_symbol("cs_win_state_toggle", scheme_win_state_toggle);
@@ -1439,6 +1434,12 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_undo", scheme_buf_undo);
 	Sregister_symbol("cs_buf_redo", scheme_buf_redo);
 	Sregister_symbol("cs_buf_search_regex", scheme_buf_search_regex);
+
+	Sregister_symbol("cs_buf_tag_set", scheme_buf_tag_set);
+	Sregister_symbol("cs_buf_tag_bits", scheme_buf_tag_bits);
+	Sregister_symbol("cs_buf_tag_toggle", scheme_buf_tag_toggle);
+	Sregister_symbol("cs_buf_tag_add", scheme_buf_tag_add);
+	Sregister_symbol("cs_buf_tag_del", scheme_buf_tag_del);
 
 	Sregister_symbol("cs_buf_parser_set", scheme_buf_parser_set);
 	Sregister_symbol("cs_stx_lang_style_add", scheme_stx_lang_style_add);

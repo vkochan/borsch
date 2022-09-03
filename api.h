@@ -67,11 +67,6 @@ void win_del(int wid);
 void win_close(int wid);
 char* win_title_get(int wid);
 int win_title_set(int wid, char *title);
-int win_tag_set(int wid, int tag);
-int win_tag_bits(int wid);
-int win_tag_add(int wid, int tag);
-int win_tag_del(int wid, int tag);
-int win_tag_toggle(int wid, int tag);
 int win_state_set(int wid, win_state_t st);
 int win_state_toggle(int wid, win_state_t st);
 win_state_t win_state_get(int wid);
@@ -166,6 +161,12 @@ void buf_undo(int bid);
 void buf_redo(int bid);
 
 size_t buf_search_regex(int bid, size_t pos, const char *pattern, int dir);
+
+int buf_tag_set(int bid, int tag);
+int buf_tag_bits(int bid);
+int buf_tag_add(int bid, int tag);
+int buf_tag_del(int bid, int tag);
+int buf_tag_toggle(int bid, int tag);
 
 int buf_parser_set(int bid, const char *lang);
 
