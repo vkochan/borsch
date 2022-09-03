@@ -586,6 +586,31 @@
    )
 )
 
+(define buffer-list-by-tag
+   (lambda (tag)
+      (filter
+         (lambda (b)
+            (member tag (buffer-tags (first b)))
+         )
+         (buffer-list)
+      )
+   )
+)
+
+(define buffer-list-hidden-by-tag
+   (lambda (tag)
+      (filter
+         (lambda (b)
+            (and
+               (member tag (buffer-tags (first b)))
+               (not (buffer-is-visible? (first b)))
+            )
+         )
+         (buffer-list)
+      )
+   )
+)
+
 (define enable-insert
    (lambda (e)
       (call-foreign (__cs_buf_text_input_enable (current-buffer) e))
