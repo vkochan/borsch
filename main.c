@@ -949,7 +949,7 @@ static void draw_title(Window *c) {
 	strncpy(name, buffer_name_get(c->buf), sizeof(name));
 
 	line = view_cursors_line(view_cursor);
-	col = view_cursors_col(view_cursor);
+	col = view_cursors_cell_get(view_cursor);
 
 	status_len = snprintf(status, sizeof(status), "[%d:%d] %s%s %s  [%d|%s]%s",
 			line,
