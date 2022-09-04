@@ -227,35 +227,6 @@ static KeyMap *curr_kmap;
 static Window *minibuf;
 static Window *topbar;
 
-/* valid curses attributes are listed below they can be ORed
- *
- * A_NORMAL        Normal display (no highlight)
- * A_STANDOUT      Best highlighting mode of the terminal.
- * A_UNDERLINE     Underlining
- * A_REVERSE       Reverse video
- * A_BLINK         Blinking
- * A_DIM           Half bright
- * A_BOLD          Extra bright or bold
- * A_PROTECT       Protected mode
- * A_INVIS         Invisible or blank mode
- */
-
-enum {
-	DEFAULT,
-	BLUE,
-	RED,
-	MAGENTA,
-	BLUE_BG,
-};
-
-static Color colors[] = {
-	[DEFAULT] = { .fg = -1,         .bg = -1, .fg256 = -1, .bg256 = -1, },
-	[BLUE]    = { .fg = COLOR_BLUE, .bg = -1, .fg256 = 68, .bg256 = -1, },
-	[RED]   = { .fg = COLOR_RED, .bg = -1, .fg256 = 0, .bg256 = -1, },
-	[MAGENTA]   = { .fg = COLOR_MAGENTA, .bg = -1, .fg256 = 0, .bg256 = -1, },
-	[BLUE_BG]   = { .fg = -1, .bg = COLOR_BLUE, .fg256 = -1, .bg256 = 0, },
-};
-
 /* status bar (command line option -s) position */
 #define BAR_POS         BAR_TOP /* BAR_BOTTOM, BAR_OFF */
 /* master width factor [0.1 .. 0.9] */
@@ -1541,15 +1512,6 @@ setup(void) {
 	style_init();
 	vt_init();
 
-	for (unsigned int i = 0; i < LENGTH(colors); i++) {
-		if (COLORS == 256) {
-			if (colors[i].fg256)
-				colors[i].fg = colors[i].fg256;
-			if (colors[i].bg256)
-				colors[i].bg = colors[i].bg256;
-		}
-		colors[i].pair = ui_color_make(ui, colors[i].fg, colors[i].bg);
-	}
 	initpertag();
 	update_screen_size();
 	arrange();
