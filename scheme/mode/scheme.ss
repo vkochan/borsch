@@ -46,6 +46,7 @@
 (add-to-list 'file-match-mode '(".*\\.scm$" . scheme-mode))
 (add-to-list 'file-match-mode '(".*\\.sls$" . scheme-mode))
 (add-to-list 'file-match-mode '(".*\\.ss$" . scheme-mode))
+(add-to-list 'file-match-mode '(".*\\.el$" . scheme-mode))
 
 (define scheme-syntax-function-match "(list . (symbol) @function)")
 (define scheme-syntax-number-match "(number) @number")
