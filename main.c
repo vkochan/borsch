@@ -2590,6 +2590,7 @@ static void window_switch_buf(Window *w, Buffer *b)
 		view_reload(w->view, buffer_text_get(b));
 		buffer_dirty_set(b, true);
 		w->prev_buf = w->buf;
+		buffer_tags_set(b, buffer_tags_get(w->buf));
 		w->buf = b;
 		buffer_ref_get(w->buf);
 	}
