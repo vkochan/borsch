@@ -323,6 +323,24 @@
    )
 )
 
+(define string-pad-right
+   (lambda (s k)
+      (let ([slen (string-length s)])
+         (if (= slen k)
+            s
+            ;; else
+            (if (> slen k)
+               (substring s 0 k)
+               ;; else
+               (let ([pad (make-string (- k slen) #\space)])
+                  (string-append s pad)
+               )
+            )
+         )
+      )
+   )
+)
+
 (define string-join
    (lambda (s j)
       (if (list? s)
