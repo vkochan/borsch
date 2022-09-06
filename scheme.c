@@ -704,6 +704,22 @@ ptr scheme_buf_prop_symbol_add(int bid, const char *symbol, int start, int end, 
 	return Sfalse;
 }
 
+static void scheme_buf_prop_data_free(void *data)
+{
+	Sunlock_object((ptr)data);
+}
+
+ptr scheme_buf_prop_data_add(int bid, ptr data, int start, int end, const char *regex)
+{
+	int ret = buf_prop_data_add(bid, data, start, end, regex, scheme_buf_prop_data_free);
+
+	if (ret == 0) {
+		Slock_object(data);
+		Sinteger(ret);
+	}
+	return Sfalse;
+}
+
 void scheme_buf_prop_del(int bid, int type, int start, int end, const char *regex)
 {
 	buf_prop_del(bid, type, start, end, regex);
@@ -843,6 +859,23 @@ static void scheme_buf_prop_walk(Buffer *buf, int id, size_t start, size_t end, 
 						       Sinteger(end)));
 		scheme_list_insert(&symbol_plist, Scons(Sstring_to_symbol(":name"),
 						       Sstring_to_symbol(symbol)));
+		scheme_list_insert(plist, symbol_plist.head);
+		break;
+	}
+
+	case PROPERTY_TYPE_TEXT_DATA:
+	{
+		struct scheme_list symbol_plist = {0};
+		ptr pdata = data;
+
+		scheme_list_insert(&symbol_plist, Scons(Sstring_to_symbol(":type"),
+						       Sstring_to_symbol("data")));
+		scheme_list_insert(&symbol_plist, Scons(Sstring_to_symbol(":start"),
+						       Sinteger(start)));
+		scheme_list_insert(&symbol_plist, Scons(Sstring_to_symbol(":end"),
+						       Sinteger(end)));
+		scheme_list_insert(&symbol_plist, Scons(Sstring_to_symbol(":data"),
+						       pdata));
 		scheme_list_insert(plist, symbol_plist.head);
 		break;
 	}
@@ -1425,6 +1458,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_prop_style_add", scheme_buf_prop_style_add);
 	Sregister_symbol("cs_buf_prop_kmap_add", scheme_buf_prop_kmap_add);
 	Sregister_symbol("cs_buf_prop_symbol_add", scheme_buf_prop_symbol_add);
+	Sregister_symbol("cs_buf_prop_data_add", scheme_buf_prop_data_add);
 	Sregister_symbol("cs_buf_prop_del", scheme_buf_prop_del);
 	Sregister_symbol("cs_buf_prop_get", scheme_buf_prop_get);
 

@@ -25,6 +25,7 @@ typedef struct TextProperty {
 	int prio;
 	int type;
 	void (*action)(Buffer *buf, struct TextProperty *prop, size_t start, size_t end, void *arg, buffer_property_cb_t cb);
+	void (*free)(void *data);
 	char *regex_pattern;
 	Regex *regex;
 } TextProperty;
@@ -662,7 +663,7 @@ static void buffer_property_regex_action(Buffer *buf, TextProperty *prop, size_t
 	} while (found);
 }
 
-int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *data, const char *pattern)
+int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *data, const char *pattern, void (*free_fn)(void *))
 {
 	Regex *regex = NULL;
 	TextProperty *p;
@@ -689,6 +690,7 @@ int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *d
 		p->regex = regex;
 	}
 
+	p->free = free_fn;
 	p->start = start;
 	p->data = data;
 	p->end = end;
@@ -757,6 +759,8 @@ bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t en
 		if (match >= exp) {
 			if (cb)
 				cb(buf, it->type, it->start, it->end, it->data, arg);
+			else if (it->free)
+				it->free(it->data);
 			else
 				free(it->data);
 

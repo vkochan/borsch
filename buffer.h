@@ -16,6 +16,7 @@ typedef enum {
 	PROPERTY_TYPE_TEXT_HIGHLIGHT	= 2,
 	PROPERTY_TYPE_TEXT_KEYMAP	= 3,
 	PROPERTY_TYPE_TEXT_SYMBOL	= 4,
+	PROPERTY_TYPE_TEXT_DATA		= 5,
 
 	PROPERTY_TYPE_ALL		= 10000,
 } buffer_property_t;
@@ -76,7 +77,7 @@ void buffer_mark_clear(Buffer *buf);
 size_t buffer_mark_get(Buffer *buf);
 void buffer_proc_set(Buffer *buf, Process *proc);
 Process *buffer_proc_get(Buffer *buf);
-int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *data, const char *pattern);
+int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *data, const char *pattern, void (*free_fn)(void *));
 void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, void *arg,	buffer_property_cb_t cb);
 bool buffer_property_remove(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern);
 bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern, void *arg,
