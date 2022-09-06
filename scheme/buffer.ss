@@ -2074,3 +2074,13 @@
        (call-foreign (__cs_buf_tag_del bid tag))]
    )
 )
+
+(define buffer-eval
+   (lambda ()
+      (with-input-from-string (string-append "\'" (buffer-string))
+         (lambda ()
+            (eval (read))
+         )
+      )
+   )
+)
