@@ -198,6 +198,14 @@
    )
 )
 
+(define plist-get
+   (lambda (plist name)
+      (let ([m (member name plist)])
+         (if m (cadr m) #f)
+      )
+   )
+)
+
 (define empty?
    (lambda (ls)
       (> (length ls) 0)
