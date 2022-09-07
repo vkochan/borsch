@@ -200,11 +200,19 @@
    (set-local! linenum-enable #f)
 )
 
+(define mail-reload-thread-list
+   (lambda ()
+      (mail (get-local mail-query))
+   )
+)
+
 (define mail-render-thread-list
-   (lambda (buf-ret)
+   (lambda (qry buf-draw buf-ret)
       (with-current-buffer buf-ret
          (let ([l (buffer-eval)])
-            (with-current-buffer (buffer-get-or-create "Mail")
+            (with-current-buffer buf-draw
+               (define-local buffer-reload-func mail-reload-thread-list)
+               (define-local mail-query qry)
                (mail-mode)
                (erase-buffer)
                (for-each
@@ -240,12 +248,13 @@
 
       [(qry)
        (let (
+             [buf-draw (buffer-get-or-create "Mail")]
              [cmd (format "notmuch search --format=sexp --limit=500 \"(~a)\"" qry)]
              [buf-ret (buffer-new)]
             )
          (process-create cmd buf-ret
             (lambda (status buf-out buf-err)
-               (mail-render-thread-list buf-out)
+               (mail-render-thread-list qry buf-draw buf-out)
                (buffer-delete buf-out)
             )
          )
