@@ -27,6 +27,7 @@
 (load "mode/diff.ss")
 (load "mode/gnumake.ss")
 (load "mode/org.ss")
+(load "mode/mail.ss")
 
 (define message-recent "")
 
