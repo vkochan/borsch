@@ -106,7 +106,7 @@
       (with-current-buffer buf-out
          (let ([l (buffer-eval)])
             (with-current-buffer (buffer-create)
-               (buffer-set-name (format "Thread:~a:" tid))
+               (buffer-set-name (format "Thread:~a" tid))
                (mail-thread-mode)
                (erase-buffer)
                (for-each
