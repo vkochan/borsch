@@ -178,9 +178,20 @@
    )
 )
 
+(define mail-prompt-filter
+   (lambda ()
+      (minibuf-read "Filter:"
+         (lambda (qry)
+            (mail qry)
+         )
+      )
+   )
+)
+
 (define mail-mode-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" (lambda () (mail-open-thread)))
+      (bind-key map ":" (lambda () (mail-prompt-filter)))
       map
    )
 )
@@ -219,17 +230,26 @@
    )
 )
 
-(define mail-default-query "notmuch search --format=sexp --limit=500 \"(to:~a or cc:~a)\"") 
+(define mail-default-query "to:~a or cc:~a") 
 
 (define mail
-   (lambda ()
-      (let ([buf-ret (buffer-new)])
-         (process-create (format mail-default-query mail-user mail-user) buf-ret
+   (case-lambda
+      [()
+       (mail (format mail-default-query mail-user mail-user))
+      ]
+
+      [(qry)
+       (let (
+             [cmd (format "notmuch search --format=sexp --limit=500 \"(~a)\"" qry)]
+             [buf-ret (buffer-new)]
+            )
+         (process-create cmd buf-ret
             (lambda (status buf-out buf-err)
                (mail-render-thread-list buf-out)
                (buffer-delete buf-out)
             )
          )
-      )
+       )
+      ]
    )
 )
