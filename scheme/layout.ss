@@ -69,7 +69,7 @@
 
         [(tag l)
          (call-foreign (__cs_layout_current_set tag  l))
-         (run-hook 'layout-switch-hook)
+         (run-hooks 'layout-switch-hook)
         ]
    )
 )
