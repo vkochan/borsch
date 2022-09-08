@@ -645,6 +645,7 @@
          ['highlight 2]
          ['keymap    3]
          ['symbol    4]
+         ['data      5]
          ['all       10000]
          [else         0]
       )
