@@ -56,6 +56,24 @@
    )
 )
 
+(define mail-set-tag
+   (lambda (id tag)
+      (process-create (format "notmuch tag ~a id:~a" tag id))
+   )
+)
+
+(define mail-add-tag
+   (lambda (id tag)
+      (mail-set-tag id (format "+~a" tag))
+   )
+)
+
+(define mail-del-tag
+   (lambda (id tag)
+      (mail-set-tag id (format "-~a" tag))
+   )
+)
+
 (define mail-open-entry
    (lambda ()
       (let ([plist (get-property 'data (1+ (cursor)) (+ 2 (cursor)))])
@@ -79,6 +97,7 @@
                               ) 
                            )
                         )
+                        (mail-del-tag (mail-entry-id entry) "unread")
                         (move-buffer-begin)
                         (message "Done")
                      )
@@ -127,6 +146,7 @@
                                        [date_rel (plist-get m ':date_relative)]
                                        [id   (plist-get m ':id)]
                                        [curs (cursor)]
+                                       [tags (plist-get m ':tags)]
                                       )
                                     (insert (format "[~a] [~a] " (string-pad-right date_rel 10) (string-pad-right from 15)))
                                     (let ([n 0])
@@ -135,7 +155,13 @@
                                           (set! n (1+ n))
                                        )
                                     )
-                                    (insert (format "~a\n" (string-pad-right subj (- 100 depth))))
+                                    (insert (format "~a\n" (string-pad-right subj (- 100 depth)))
+                                       (if (member "unread" tags)
+                                          '(style (:attr "bold"))
+                                          ;; else
+                                          '(style (:attr "normal"))
+                                       )
+                                    )
                                     (let ([entry (make-mail-entry id date from to cc subj)])
                                        (add-data-property entry curs (cursor))
                                     )
@@ -222,10 +248,17 @@
                            [from (plist-get th ':authors)]
                            [date (plist-get th ':date_relative)]
                            [id   (plist-get th ':thread)]
+                           [tags (plist-get th ':tags)]
                            [curs (cursor)]
                           )
                         (insert (format "[~a] [~a] " (string-pad-right date 10) (string-pad-right from 15)))
-                        (insert (format "~a\n" (string-pad-right subj 100)))
+                        (insert (format "~a\n" (string-pad-right subj 100))
+                           (if (member "unread" tags)
+                              '(style (:attr "bold"))
+                              ;; else
+                              '(style (:attr "normal"))
+                           )
+                        )
                         (add-data-property id curs (cursor))
                      )
                   )
