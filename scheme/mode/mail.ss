@@ -148,7 +148,7 @@
                                        [curs (cursor)]
                                        [tags (plist-get m ':tags)]
                                       )
-                                    (insert (format "[~a] [~a] " (string-pad-right date_rel 10) (string-pad-right from 15)))
+                                    (insert (format "[~a] [~a] " (string-pad-right date_rel 15) (string-pad-right from 15)))
                                     (let ([n 0])
                                        (while (< n depth)
                                           (insert "-")
@@ -251,7 +251,7 @@
                            [tags (plist-get th ':tags)]
                            [curs (cursor)]
                           )
-                        (insert (format "[~a] [~a] " (string-pad-right date 10) (string-pad-right from 15)))
+                        (insert (format "[~a] [~a] " (string-pad-right date 15) (string-pad-right from 15)))
                         (insert (format "~a\n" (string-pad-right subj 100))
                            (if (member "unread" tags)
                               '(style (:attr "bold"))
