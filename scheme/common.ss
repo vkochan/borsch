@@ -212,6 +212,12 @@
    )
 )
 
+(define string-empty?
+   (lambda (s)
+      (= (string-length s) 0)
+   )
+)
+
 (define (string-split str ch)
    (let ([len (string-length str)])
       (letrec

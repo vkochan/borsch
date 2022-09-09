@@ -270,9 +270,15 @@
 
 (define mail-prompt-filter
    (lambda ()
-      (minibuf-read "Filter:"
+      (minibuf-read "Filter: " (get-local mail-query)
          (lambda (qry)
-            (mail qry)
+            (mail
+	       (if (string-empty? qry)
+                  (mail-default-query)
+		  ;; else
+		  qry
+               )
+            )
          )
       )
    )
@@ -349,12 +355,16 @@
    )
 )
 
-(define mail-default-query "to:~a or cc:~a") 
+(define mail-default-query
+   (lambda ()
+      (format "to:~a or cc:~a" mail-username mail-username)
+   )
+) 
 
 (define mail
    (case-lambda
       [()
-       (mail (format mail-default-query mail-username mail-username))
+       (mail (mail-default-query))
       ]
 
       [(qry)
