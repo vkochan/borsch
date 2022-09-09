@@ -11,7 +11,8 @@
 
 (define mail-is-syncing? #f)
 
-(define mail-user "")
+(define mail-fullname "")
+(define mail-username "")
 
 (define mail-timer #f)
 
@@ -277,9 +278,23 @@
    )
 )
 
+(define mail-new-message
+   (lambda ()
+      (let ([buf (buffer-create "*New Message*")])
+         (insert "Subject:\n")
+	 (insert (format "From: ~a <~a>\n" mail-fullname mail-username))
+	 (insert "To: \n")
+	 (insert "\n")
+         (text-mode)
+         (bind-key-local "C-c C-c" mail-send-buffer)
+      )
+   )
+)
+
 (define mail-mode-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" (lambda () (mail-open-thread)))
+      (bind-key map "m" (lambda () (mail-new-message)))
       (bind-key map ":" (lambda () (mail-prompt-filter)))
       map
    )
@@ -339,7 +354,7 @@
 (define mail
    (case-lambda
       [()
-       (mail (format mail-default-query mail-user mail-user))
+       (mail (format mail-default-query mail-username mail-username))
       ]
 
       [(qry)
