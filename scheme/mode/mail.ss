@@ -74,11 +74,63 @@
    )
 )
 
+(define mail-send-message
+   (lambda (msg)
+      (let (
+            [proc (process-create "msmtp -t --read-envelope-from" #f
+                     (lambda (status buf-out buf-err)
+                        (if (eq? 0 status)
+                           (message "Mail sent successfully")
+                           ;; else
+                           (message "Mail sending failed")
+                        )
+                     )
+                  )
+            ]
+           )
+         (let (
+               [proc-out (process-port-out proc)]
+               [proc-in (process-port-in proc)]
+              )
+            (put-string proc-in msg)
+            (close-port proc-out)
+            (close-port proc-in)
+         )
+      )
+   )
+)
+
+(define mail-send-buffer
+   (lambda ()
+      (mail-send-message (buffer-string))
+   )
+)
+
+(define mail-reply-message
+   (case-lambda
+     [()
+      (mail-reply-message (get-local mail-message-id))
+     ]
+
+     [(id)
+      (let ([buf (buffer-create (format "Reply:~a" id))])
+         (with-current-buffer buf
+            (text-mode)
+            (bind-key-local "C-c C-c" mail-send-buffer)
+         )
+         (process-create (format "notmuch reply id:~a" id) buf)
+      )
+     ]
+   )
+)
+
 (define mail-open-entry
    (lambda ()
       (let ([plist (get-property 'data (1+ (cursor)) (+ 2 (cursor)))])
          (let ([entry (cdr (assoc ':data (first plist)))])
             (let ([b (buffer-create (format "Message:~a" (mail-entry-id entry)))])
+               (define-local mail-message-id (mail-entry-id entry))
+               (bind-key-local "r" mail-reply-message)
                (text-mode)
                (message "Loading mail ...")
                (process-create (format "notmuch show --format=mbox id:~a" (mail-entry-id entry)) b
@@ -109,9 +161,20 @@
    )
 )
 
+(define mail-reply-entry
+   (lambda ()
+      (let ([plist (get-property 'data (1+ (cursor)) (+ 2 (cursor)))])
+         (let ([entry (cdr (assoc ':data (first plist)))])
+            (mail-reply-message (mail-entry-id entry))
+         )
+      )
+   )
+)
+
 (define mail-thread-mode-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" (lambda () (mail-open-entry)))
+      (bind-key map "r" (lambda () (mail-reply-entry)))
       map
    )
 )
