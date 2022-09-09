@@ -181,15 +181,6 @@
    )
 )
 
-(define swap
-   (lambda (x y)
-      (let ([t x])
-	 (set! x y)
-	 (set! y t)
-      )
-   )
-)
-
 (define first car)
 
 (define second
