@@ -1,6 +1,7 @@
 include config.mk
 
-SRCS = main.c \
+SRCS = xstr.c \
+      main.c \
       vt.c \
       array.c \
       view.c \

@@ -12,6 +12,7 @@
 #include "buffer.h"
 #include "keymap.h"
 #include "timer.h"
+#include "xstr.h"
 #include "api.h"
 
 #define CALL0(who) Scall0(Stop_level_value(Sstring_to_symbol(who)))
@@ -53,19 +54,18 @@ static int scheme_run_default_init(void)
 	char *home = getenv("HOME");
 	size_t home_len;
 	struct stat st;
-	char path[128];
+	xstr_t path;
 	char *p;
+	int ret;
 
 	if (!home)
 		home = "/root";
 
-	home_len = strlen(home);
-	path[0] = '\0';
+	path = xstr_cat(xstr(home), xstr(SCHEME_INIT_SCRIPT));
 
-        strncat(path, home, sizeof(path));
-	strncat(path+home_len, SCHEME_INIT_SCRIPT, sizeof(path) - home_len);
-
-	return scheme_run_user_init(path);
+	ret = scheme_run_user_init(xstr_cptr(path));
+	xstr_del(path);
+	return ret;
 }
 
 /* Scheme foreign interface */
