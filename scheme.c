@@ -27,7 +27,9 @@
  * only once. */
 static int scheme_initialized = 0;
 
-#define SCHEME_INIT_SCRIPT "/."PROGNAME"/init.ss"
+#define SCHEME_CONFIG_DIR "/."PROGNAME
+
+#define SCHEME_INIT_SCRIPT SCHEME_CONFIG_DIR"/init.ss"
 
 static int scheme_run_script(const char *path)
 {
@@ -69,6 +71,21 @@ static int scheme_run_default_init(void)
 }
 
 /* Scheme foreign interface */
+ptr scheme_config_dir_get(void)
+{
+	char *home = getenv("HOME");
+	xstr_t path;
+	ptr sptr;
+
+	if (!home)
+		home = "/root";
+
+	path = xstr_cat(xstr(home), xstr(SCHEME_CONFIG_DIR));
+	sptr = Sstring(xstr_cptr(path));
+	xstr_del(path);
+	return sptr;
+}
+
 ptr scheme_win_get_by_coord(int x, int y)
 {
 	int ret = win_get_by_coord(x, y);
@@ -1367,6 +1384,7 @@ void scheme_do_quit(void)
 
 static void scheme_export_symbols(void)
 {
+	Sregister_symbol("cs_config_dir_get", scheme_config_dir_get);
 	Sregister_symbol("cs_win_get_by_coord", scheme_win_get_by_coord);
 	Sregister_symbol("cs_win_is_visible", scheme_win_is_visible);
 	Sregister_symbol("cs_win_first_get", scheme_win_first_get);
