@@ -1,6 +1,10 @@
 (define __cs_config_dir_get (foreign-procedure "cs_config_dir_get" () scheme-object))
 
-(define config-dir (__cs_config_dir_get))
+(define config-dir
+   (lambda ()
+      ((delay (__cs_config_dir_get)))
+   )
+)
 
 (load "pregexp.scm")
 (load "common.ss")
