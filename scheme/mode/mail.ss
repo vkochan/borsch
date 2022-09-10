@@ -151,6 +151,7 @@
                            )
                         )
                         (mail-del-tag (mail-entry-id entry) "unread")
+                        (buffer-set-readonly #t)
                         (move-buffer-begin)
                         (message "Done")
                      )
@@ -243,6 +244,7 @@
                   )
                   (first l)
                )
+               (buffer-set-readonly #t)
                (move-buffer-begin)
             )
          )
@@ -348,6 +350,7 @@
                   )
                   l
                )
+               (buffer-set-readonly #t)
                (move-buffer-begin)
             )
          )
