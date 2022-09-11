@@ -11,8 +11,31 @@
 
 (define mail-is-syncing? #f)
 
-(define mail-fullname "")
-(define mail-username "")
+(define mail-fullname-var "")
+(define mail-fullname
+   (case-lambda
+      [()
+       mail-fullname-var
+      ]
+
+      [(fullname)
+       (set! mail-fullname-var fullname)
+      ]
+   )
+)
+
+(define mail-username-var "")
+(define mail-username
+   (case-lambda
+      [()
+       mail-username-var
+      ]
+
+      [(username)
+       (set! mail-username-var username)
+      ]
+   )
+)
 
 (define mail-timer #f)
 
@@ -290,7 +313,7 @@
    (lambda ()
       (let ([buf (buffer-create "*New Message*")])
          (insert "Subject:\n")
-	 (insert (format "From: ~a <~a>\n" mail-fullname mail-username))
+	 (insert (format "From: ~a <~a>\n" (mail-fullname) (mail-username)))
 	 (insert "To: \n")
 	 (insert "\n")
          (text-mode)
@@ -360,7 +383,7 @@
 
 (define mail-default-query
    (lambda ()
-      (format "to:~a or cc:~a" mail-username mail-username)
+      (format "to:~a or cc:~a" (mail-username) (mail-username))
    )
 ) 
 
