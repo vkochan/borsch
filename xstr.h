@@ -1,3 +1,6 @@
+#ifndef XSTR_H
+#define XSTR_H
+
 typedef struct xstr {
 	unsigned char flags;
 	char   *str;
@@ -25,3 +28,5 @@ bool xstr_eq(xstr_t s1, xstr_t s2);
 xstr_t xstr_tok(xstr_t *s, char delim);
 
 void xstr_del(xstr_t s);
+
+#endif /* XSTR_H */
