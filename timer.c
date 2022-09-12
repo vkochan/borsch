@@ -106,16 +106,12 @@ void timer_interval_set(int fd, unsigned long ms)
 	sec = (time_t) ((ms)/1000);
 	nsec = 1000000*ms-sec*1000000000;
 
-	spec.it_value.tv_nsec = nsec;
-	spec.it_value.tv_sec = sec;
+	spec.it_value.tv_nsec = 0;
+	spec.it_value.tv_sec = 1;
 	spec.it_interval.tv_nsec = nsec;
 	spec.it_interval.tv_sec = sec;
 
-	err = clock_gettime(CLOCK_REALTIME, &now);
-	if (!err) {
-		spec.it_value.tv_sec += now.tv_sec;
-		timerfd_settime(fd, TFD_TIMER_ABSTIME, &spec, NULL);
-	}
+	timerfd_settime(fd, 0, &spec, NULL);
 }
 
 void timer_time_set(int fd, unsigned long sec, unsigned long nsec)
