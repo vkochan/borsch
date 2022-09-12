@@ -232,6 +232,7 @@
             (with-current-buffer (buffer-create)
                (buffer-set-name (format "Thread:~a" tid))
                (mail-thread-mode)
+               (buffer-set-readonly #f)
                (erase-buffer)
                (for-each
                   (lambda (th)
@@ -366,6 +367,7 @@
                (define-local buffer-reload-func mail-reload-thread-list)
                (define-local mail-query qry)
                (mail-mode)
+               (buffer-set-readonly #f)
                (erase-buffer)
                (for-each
                   (lambda (th)
