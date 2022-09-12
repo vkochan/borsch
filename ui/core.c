@@ -160,9 +160,6 @@ void __ui_window_draw(UiWin *win, bool force)
 	if (view_update(win->view)) {
 		view_draw(win->view);
 
-		if (win->on_view_update)
-			win->on_view_update(win);
-
 		if (win->draw)
 			win->draw(win);
 		else if (win->ui->window_draw)

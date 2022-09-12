@@ -429,6 +429,9 @@ void view_draw(View *view) {
 	}
 
 	view->need_update = true;
+
+	if (view->ui && view->ui->on_view_update)
+		view->ui->on_view_update(view->ui);
 }
 
 void view_invalidate(View *view) {

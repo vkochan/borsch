@@ -4448,8 +4448,8 @@ static Window *widget_create(const char *name, int x, int y, int width, int heig
 	}
 
 	ui_window_on_view_update_set(w->win, on_view_update_cb);
-	ui_window_resize(w->win, width, height);
 	ui_window_priv_set(w->win, w);
+	ui_window_resize(w->win, width, height);
 	ui_window_move(w->win, x, y);
 	ui_window_draw(w->win);
 
