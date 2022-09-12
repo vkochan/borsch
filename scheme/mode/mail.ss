@@ -174,7 +174,7 @@
                (bind-key-local "r" mail-reply-message)
                (text-mode)
                (message "Loading mail ...")
-               (process-create (format "notmuch show --format=mbox id:~a" (mail-entry-id entry)) b
+               (process-create (format "notmuch show --format=text id:~a" (mail-entry-id entry)) b
                   (lambda (status buf-out buf-err)
                      (with-current-buffer buf-out
                         (move-buffer-begin)
