@@ -415,7 +415,7 @@
       [(qry)
        (let (
              [buf-draw (buffer-get-or-create "Mail")]
-             [cmd (format "notmuch search --format=sexp --limit=500 \"(~a)\"" qry)]
+             [cmd (format "notmuch search --format=sexp --limit=500 '~a'" qry)]
              [buf-ret (buffer-new)]
             )
          (mail-sync)
