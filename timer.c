@@ -101,8 +101,6 @@ void timer_interval_set(int fd, unsigned long ms)
 	struct timespec now;
         long nsec;
         time_t sec;
-	int err;
-
 	sec = (time_t) ((ms)/1000);
 	nsec = 1000000*ms-sec*1000000000;
 
