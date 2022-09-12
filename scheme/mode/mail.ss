@@ -180,7 +180,7 @@
                         (move-buffer-begin)
                         (let loop ()
                            (let ([l (extract-line)])
-                              (when (not (pregexp-match "^\n|^\r\n" l))
+                              (when (and (not (string-empty? l)) (not (pregexp-match "^\n|^\r\n" l)))
                                  (if (not (pregexp-match "^From:|^FROM:|^To:|^TO:|^Cc:|^CC:|^Date:|^DATE:|^Subject:|^SUBJECT:" l))
                                     (delete-line)
                                     ;; else
