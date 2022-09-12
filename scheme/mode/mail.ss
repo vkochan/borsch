@@ -37,26 +37,43 @@
    )
 )
 
+(define mail-sync-cmd-var "mbsync -a")
+(define mail-sync-cmd
+   (case-lambda
+      [()
+       mail-sync-cmd-var
+      ]
+
+      [(cmd)
+       (set! mail-sync-cmd-var cmd)
+      ]
+   )
+)
+
 (define mail-timer #f)
+
+(define mail-sync
+   (lambda ()
+      (when (not mail-is-syncing?)
+         (set! mail-is-syncing? #t)
+         (message "Syncing mail ...")
+         (process-create
+            (format "~a && notmuch new" (mail-sync-cmd)) #f #f
+            (lambda (status buf-out buf-err)
+               (set! mail-is-syncing? #f)
+               (message "Mail synced")
+            )
+         )
+      )
+   )
+)
 
 (define mail-start-sync
    (lambda ()
       (when (not mail-timer)
          (set! mail-timer
             (make-timer (* 10 60 1000)
-               (lambda ()
-                  (when (not mail-is-syncing?)
-                     (set! mail-is-syncing? #t)
-                     (message "Syncing mail ...")
-                     (process-create
-                        "mbsync -a && notmuch new" #f #f
-                        (lambda (status buf-out buf-err)
-                           (set! mail-is-syncing? #f)
-                           (message "Mail synced")
-                        )
-                     )
-                  )
-               )
+               (lambda () (mail-sync))
             )
          )
       )
