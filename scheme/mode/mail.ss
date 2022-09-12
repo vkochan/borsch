@@ -418,6 +418,7 @@
              [cmd (format "notmuch search --format=sexp --limit=500 \"(~a)\"" qry)]
              [buf-ret (buffer-new)]
             )
+         (mail-sync)
          (process-create cmd buf-ret
             (lambda (status buf-out buf-err)
                (mail-render-thread-list qry buf-draw buf-out)
