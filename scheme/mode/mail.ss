@@ -313,7 +313,7 @@
 
 (define mail-prompt-filter
    (lambda ()
-      (minibuf-read "Filter: " (get-local mail-query)
+      (minibuf-read "Search: " (get-local mail-query)
          (lambda (qry)
             (mail
 	       (if (string-empty? qry)
