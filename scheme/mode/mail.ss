@@ -344,7 +344,7 @@
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" (lambda () (mail-open-thread)))
       (bind-key map "m" (lambda () (mail-new-message)))
-      (bind-key map ":" (lambda () (mail-prompt-filter)))
+      (bind-key map "s" (lambda () (mail-prompt-filter)))
       map
    )
 )
