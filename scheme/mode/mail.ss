@@ -255,7 +255,7 @@
 (define mail-render-thread
    (lambda (tid buf-out)
       (with-current-buffer buf-out
-         (let ([l (buffer-eval)])
+         (let ([sexp (buffer-eval)])
             (with-current-buffer (buffer-create)
                (buffer-set-name (format "Thread:~a" tid))
                (mail-thread-mode)
@@ -298,7 +298,7 @@
                         )
                      )
                   )
-                  l
+                  sexp
                )
 
                (buffer-set-readonly #t)
