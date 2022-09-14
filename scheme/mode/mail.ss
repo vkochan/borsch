@@ -225,6 +225,30 @@
    (set-local! linenum-enable #f)
 )
 
+(define mail-for-each-message
+   (lambda (fn sexp)
+      (for-each
+         (lambda (th)
+            (let loop ([th th] [depth 0])
+               (let (
+                     [m (first th)]
+                     [tl (second th)]
+                    )
+                  (fn m depth)
+                  (for-each
+                     (lambda (th)
+                        (loop th (1+ depth))
+                     )
+                     tl
+                  )
+               )
+            )
+         )
+         (first sexp)
+      )
+   )
+)
+
 (define mail-render-thread
    (lambda (tid buf-out)
       (with-current-buffer buf-out
@@ -234,57 +258,46 @@
                (mail-thread-mode)
                (buffer-set-readonly #f)
                (erase-buffer)
-               (for-each
-                  (lambda (th)
-                     (let loop ([th th] [depth 0])
-                        (let (
-                              [m (first th)]
-                              [tl (second th)]
-                             )
-                           (let ([hl (plist-get m ':headers)])
-                              (when hl
-                                 (let (
-                                       [subj (plist-get hl ':Subject)]
-                                       [from (plist-get hl ':From)]
-                                       [to (plist-get hl ':To)]
-                                       [cc (plist-get hl ':Cc)]
-                                       [date (plist-get hl ':Date)]
-                                       [date_rel (plist-get m ':date_relative)]
-                                       [id   (plist-get m ':id)]
-                                       [curs (cursor)]
-                                       [tags (plist-get m ':tags)]
-                                      )
-                                    (insert (format "[~a] [~a] " (string-pad-right date_rel 15) (string-pad-right from 15)))
-                                    (let ([n 0])
-                                       (while (< n depth)
-                                          (insert "-")
-                                          (set! n (1+ n))
-                                       )
-                                    )
-                                    (insert (format "~a\n" (string-pad-right subj (- 100 depth)))
-                                       (if (member "unread" tags)
-                                          '(style (:attr "bold"))
-                                          ;; else
-                                          '(style (:attr "normal"))
-                                       )
-                                    )
-                                    (let ([entry (make-mail-entry id date from to cc subj)])
-                                       (add-data-property entry curs (cursor))
-                                    )
+
+               (mail-for-each-message
+                  (lambda (m depth)
+                     (let ([hl (plist-get m ':headers)])
+                        (when hl
+                           (let (
+                                 [subj (plist-get hl ':Subject)]
+                                 [from (plist-get hl ':From)]
+                                 [to (plist-get hl ':To)]
+                                 [cc (plist-get hl ':Cc)]
+                                 [date (plist-get hl ':Date)]
+                                 [date_rel (plist-get m ':date_relative)]
+                                 [id   (plist-get m ':id)]
+                                 [curs (cursor)]
+                                 [tags (plist-get m ':tags)]
+                                )
+                              (insert (format "[~a] [~a] " (string-pad-right date_rel 15) (string-pad-right from 15)))
+                              (let ([n 0])
+                                 (while (< n depth)
+                                    (insert "-")
+                                    (set! n (1+ n))
                                  )
                               )
-                           )
-                           (for-each
-                              (lambda (th)
-                                 (loop th (1+ depth))
+                              (insert (format "~a\n" (string-pad-right subj (- 100 depth)))
+                                 (if (member "unread" tags)
+                                    '(style (:attr "bold"))
+                                    ;; else
+                                    '(style (:attr "normal"))
+                                 )
                               )
-                              tl
+                              (let ([entry (make-mail-entry id date from to cc subj)])
+                                 (add-data-property entry curs (cursor))
+                              )
                            )
                         )
                      )
                   )
-                  (first l)
+                  l
                )
+
                (buffer-set-readonly #t)
                (move-buffer-begin)
             )
