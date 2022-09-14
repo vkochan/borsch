@@ -2090,11 +2090,19 @@
 )
 
 (define buffer-eval
-   (lambda ()
-      (with-input-from-string (string-append "\'" (buffer-string))
-         (lambda ()
-            (eval (read))
-         )
-      )
+   (case-lambda
+      [()
+       (buffer-eval (current-buffer))
+      ]
+
+      [(buf)
+       (with-current-buffer buf
+          (with-input-from-string (string-append "\'" (buffer-string))
+             (lambda ()
+                (eval (read))
+             )
+          )
+       )
+      ]
    )
 )
