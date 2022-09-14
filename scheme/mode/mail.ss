@@ -168,6 +168,45 @@
    )
 )
 
+(define mail-render-message
+   (lambda (sexp)
+      (let ([headers (plist-get sexp ':headers)])
+         (let (
+               [subj (plist-get headers ':Subject)]
+               [from (plist-get headers ':From)]
+               [to (plist-get headers ':To)]
+               [cc (plist-get headers ':Cc)]
+               [date (plist-get headers ':Date)]
+              )
+            (when subj (insert (format "Subject: ~a\n" subj)))
+            (when from (insert (format "From: ~a\n" from)))
+            (when to (insert (format "To: ~a\n" to)))
+            (when cc (insert (format "Cc: ~a\n" cc)))
+            (when date (insert (format "Date: ~a\n" date)))
+         )
+      )
+      (let loop ([content-list (plist-get sexp ':body)])
+         (for-each
+            (lambda (content)
+               (let (
+                     [type (plist-get content ':content-type)]
+                     [body (plist-get content ':content)]
+                    )
+                  (if (list? body)
+                     (loop body)
+                     (when (and (string? body) (equal? type "text/plain"))
+                        (insert "\n")
+                        (insert body)
+                     )
+                  )
+               )
+            )
+            content-list
+         )
+      )
+   )
+)
+
 (define mail-open-entry
    (lambda ()
       (let ([plist (get-property 'data (1+ (cursor)) (+ 2 (cursor)))])
@@ -177,26 +216,23 @@
                (bind-key-local "r" mail-reply-message)
                (text-mode)
                (message "Loading mail ...")
-               (process-create (format "notmuch show --format=text id:~a" (mail-entry-id entry)) b
+
+               (process-create (format "notmuch show --format=sexp --entire-thread=false id:~a" (mail-entry-id entry)) b
                   (lambda (status buf-out buf-err)
-                     (with-current-buffer buf-out
-                        (move-buffer-begin)
-                        (let loop ()
-                           (let ([l (extract-line)])
-                              (when (and (not (string-empty? l)) (not (pregexp-match "^\n|^\r\n" l)))
-                                 (if (not (pregexp-match "^From:|^FROM:|^To:|^TO:|^Cc:|^CC:|^Date:|^DATE:|^Subject:|^SUBJECT:" l))
-                                    (delete-line)
-                                    ;; else
-                                    (move-next-line)
-                                 )
-                                 (loop)
-                              ) 
+                     (let ([sexp (buffer-eval buf-out)])
+                        (with-current-buffer b
+                           (erase-buffer)
+                           (mail-for-each-message
+                              (lambda (m depth)
+                                 (mail-render-message m)
+                                 (mail-del-tag (mail-entry-id entry) "unread")
+                                 (buffer-set-readonly #t)
+                                 (move-buffer-begin)
+                                 (message "Done")
+                              )
+                              sexp
                            )
                         )
-                        (mail-del-tag (mail-entry-id entry) "unread")
-                        (buffer-set-readonly #t)
-                        (move-buffer-begin)
-                        (message "Done")
                      )
                   )
                )
@@ -237,7 +273,9 @@
                      [m (first th)]
                      [tl (second th)]
                     )
-                  (fn m depth)
+                  (when (not (equal? m 'nil))
+                     (fn m depth)
+                  )
                   (for-each
                      (lambda (th)
                         (loop th (1+ depth))
