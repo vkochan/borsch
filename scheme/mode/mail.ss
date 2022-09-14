@@ -165,6 +165,22 @@
    )
 )
 
+(define mail-dump-entry
+   (lambda ()
+      (let ([plist (get-property 'data (1+ (cursor)) (+ 2 (cursor)))])
+         (let ([entry (cdr (assoc ':data (first plist)))])
+            (let ([b (buffer-create (format "Message-dump:~a" (mail-entry-id entry)))])
+               (text-mode)
+               (process-create
+                  (format "notmuch show --format=sexp --entire-thread=false id:~a" (mail-entry-id entry))
+                  b
+               )
+            )
+         )
+      )
+   )
+)
+
 (define mail-open-entry
    (lambda ()
       (let ([plist (get-property 'data (1+ (cursor)) (+ 2 (cursor)))])
