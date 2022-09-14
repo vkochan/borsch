@@ -86,17 +86,6 @@
    )
 )
  
-(define-record-type mail-entry
-   (fields
-      id
-      date
-      from
-      to
-      cc
-      subject
-   )
-)
-
 (define mail-set-tag
    (lambda (id tag)
       (process-create (format "notmuch tag ~a id:~a" tag id))
