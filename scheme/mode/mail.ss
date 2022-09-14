@@ -169,10 +169,14 @@
    (lambda ()
       (let ([plist (get-property 'data (1+ (cursor)) (+ 2 (cursor)))])
          (let ([entry (cdr (assoc ':data (first plist)))])
-            (let ([b (buffer-create (format "Message-dump:~a" (mail-entry-id entry)))])
+            (let ([b (buffer-create (format "Message-dump:~a" (if (mail-entry? entry) (mail-entry-id entry) entry)))])
                (text-mode)
                (process-create
-                  (format "notmuch show --format=sexp --entire-thread=false id:~a" (mail-entry-id entry))
+                  (if (mail-entry? entry)
+                     (format "notmuch show --format=sexp --entire-thread=false id:~a" (mail-entry-id entry))
+                     ;;
+                     (format "notmuch show --format=sexp --entire-thread=true --body=false thread:~a" entry)
+                  )
                   b
                )
             )
