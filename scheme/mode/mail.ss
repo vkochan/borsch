@@ -367,6 +367,22 @@
 
 (define mail-prompt-filter
    (lambda ()
+      (minibuf-read "Search: "
+         (lambda (qry)
+            (mail
+	       (if (string-empty? qry)
+                  (mail-default-query)
+		  ;; else
+		  qry
+               )
+            )
+         )
+      )
+   )
+)
+
+(define mail-prompt-edit-filter
+   (lambda ()
       (minibuf-read "Search: " (get-local mail-query)
          (lambda (qry)
             (mail
@@ -399,6 +415,7 @@
       (bind-key map "<Enter>" (lambda () (mail-open-thread)))
       (bind-key map "m" (lambda () (mail-new-message)))
       (bind-key map "s" (lambda () (mail-prompt-filter)))
+      (bind-key map "S" (lambda () (mail-prompt-edit-filter)))
       map
    )
 )
