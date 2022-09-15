@@ -41,33 +41,9 @@ static int scheme_run_script(const char *path)
 	return 0;
 }
 
-static int scheme_run_user_init(const char *path)
+static int scheme_run_init(const char *path)
 {
-	struct stat st;
-
-	if (stat(path, &st) == 0)
-		CALL1("__load_script", Sstring(path));
-
-	return 0;
-}
-
-static int scheme_run_default_init(void)
-{
-	char *home = getenv("HOME");
-	size_t home_len;
-	struct stat st;
-	xstr_t path;
-	char *p;
-	int ret;
-
-	if (!home)
-		home = "/root";
-
-	path = xstr_cat(xstr(home), xstr(SCHEME_INIT_SCRIPT));
-
-	ret = scheme_run_user_init(xstr_cptr(path));
-	xstr_del(path);
-	return ret;
+	CALL1("main-init", Sstring(path));
 }
 
 /* Scheme foreign interface */
@@ -1578,15 +1554,8 @@ int scheme_init(const char *init_script)
 	if (err)
 		return err;
 
-	if (init_script) {
-		if (strlen(init_script))
-			err = scheme_run_user_init(init_script);
-		else
-			err = scheme_run_default_init();
-
-		if (err)
-			return err;
-	}
+	if (init_script)
+		scheme_run_init(init_script);
 
 	err = fifo_create();
 	if (err) {

@@ -45,9 +45,11 @@
    )
 )
 
-(define __load_script
+(define main-init
    (lambda (path)
-      (try load path)
+      (when path
+         (try load (string-append (config-dir) (if (equal? path "") "/init.ss" path)))
+      )
    )
 )
 
