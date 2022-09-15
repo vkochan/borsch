@@ -9,6 +9,24 @@
    )
 )
 
+(define mail-config-dir
+   (lambda ()
+      (string-append (config-dir) "/mail")
+   )
+)
+
+(define mail-notmuch-config
+   (lambda ()
+      (string-append (mail-config-dir) "/notmuch-config")
+   )
+)
+
+(define mail-notmuch-cmd
+   (lambda (cmd)
+      (format "notmuch --config=~a ~a" (mail-notmuch-config) cmd)
+   )
+)
+
 (define mail-is-syncing? #f)
 
 (define mail-fullname-var "")
@@ -37,6 +55,19 @@
    )
 )
 
+(define mail-dir-var "")
+(define mail-dir
+   (case-lambda
+      [()
+       mail-dir-var
+      ]
+
+      [(dir)
+       (set! mail-dir-var dir)
+      ]
+   )
+)
+
 (define mail-sync-cmd-var "mbsync -a")
 (define mail-sync-cmd
    (case-lambda
@@ -58,7 +89,7 @@
          (set! mail-is-syncing? #t)
          (message "Syncing mail ...")
          (process-create
-            (format "~a && notmuch new" (mail-sync-cmd)) #f #f
+            (format "~a && ~a" (mail-sync-cmd) (mail-notmuch-cmd "notmuch new")) #f #f
             (lambda (status buf-out buf-err)
                (set! mail-is-syncing? #f)
                (message "Mail synced")
@@ -82,7 +113,7 @@
 
 (define mail-set-tag
    (lambda (id tag)
-      (process-create (format "notmuch tag ~a id:~a" tag id))
+      (process-create (mail-notmuch-cmd (format "tag ~a id:~a" tag id)))
    )
 )
 
@@ -142,7 +173,7 @@
             (text-mode)
             (bind-key-local "C-c C-c" mail-send-buffer)
          )
-         (process-create (format "notmuch reply id:~a" id) buf)
+         (process-create (mail-notmuch-cmd (format "reply id:~a" id)) buf)
       )
      ]
    )
@@ -156,9 +187,9 @@
                (text-mode)
                (process-create
                   (if (mail-entry? entry)
-                     (format "notmuch show --format=sexp --entire-thread=false id:~a" (mail-entry-id entry))
+                     (mail-notmuch-cmd (format "show --format=sexp --entire-thread=false id:~a" (mail-entry-id entry)))
                      ;;
-                     (format "notmuch show --format=sexp --entire-thread=true --body=false thread:~a" entry)
+                     (mail-notmuch-cmd (format "show --format=sexp --entire-thread=true --body=false thread:~a" entry))
                   )
                   b
                )
@@ -217,7 +248,7 @@
                (text-mode)
                (message "Loading mail ...")
 
-               (process-create (format "notmuch show --format=sexp --entire-thread=false id:~a" (mail-entry-id entry)) b
+               (process-create (mail-notmuch-cmd (format "show --format=sexp --entire-thread=false id:~a" (mail-entry-id entry))) b
                   (lambda (status buf-out buf-err)
                      (let ([sexp (buffer-eval buf-out)])
                         (with-current-buffer b
@@ -354,7 +385,7 @@
                [tid (cdr (assoc ':data (first plist)))]
                [buf-ret (buffer-new)]
               )
-            (process-create (format "notmuch show --entire-thread=true --format=sexp --body=false thread:~a" tid) buf-ret
+            (process-create (mail-notmuch-cmd (format "show --entire-thread=true --format=sexp --body=false thread:~a" tid)) buf-ret
                (lambda (status buf-out buf-err)
                   (mail-render-thread tid buf-out)
                   (buffer-delete buf-out)
@@ -477,6 +508,33 @@
    )
 ) 
 
+(define mail-init
+   (lambda ()
+      (let ()
+         (mkdir-p (mail-config-dir))
+         (file> (mail-notmuch-config)
+            (with-output-to-string
+               (lambda ()
+                  (printf "[database]\n")
+                  (printf "path=~a\n" (mail-dir))
+                  (printf "\n")
+                  (printf "[user]\n")
+                  (printf "name=~a\n" (mail-fullname))
+                  (printf "primary_email=~a\n" (mail-username))
+                  (printf "\n")
+                  (printf "[search]\n")
+                  (printf "exclude_tags=deleted spam\n")
+                  (printf "\n")
+                  (printf "[maildir]\n")
+                  (printf "\n")
+               )
+            )
+         )
+      )
+   )
+)
+(add-hook 'init-hook mail-init)
+
 (define mail
    (case-lambda
       [()
@@ -486,7 +544,7 @@
       [(qry)
        (let (
              [buf-draw (buffer-get-or-create "Mail")]
-             [cmd (format "notmuch search --format=sexp --limit=500 '~a'" qry)]
+             [cmd (mail-notmuch-cmd (format "search --format=sexp --limit=500 '~a'" qry))]
              [buf-ret (buffer-new)]
             )
          (mail-sync)

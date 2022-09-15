@@ -49,6 +49,7 @@
    (lambda (path)
       (when path
          (try load (string-append (config-dir) (if (equal? path "") "/init.ss" path)))
+         (run-hooks 'init-hook)
       )
    )
 )

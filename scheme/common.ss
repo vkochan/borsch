@@ -51,6 +51,12 @@
 (define is-link? file-symbolic-link?)
 (define (is-file-or-link? p) (or (is-link? p) (is-file? p))) 
 
+(define mkdir-p
+   (lambda (path)
+      (system (format "mkdir -p ~a" path))
+   )
+)
+
 (define suffix+
    (lambda (str sfx)
       (cond
