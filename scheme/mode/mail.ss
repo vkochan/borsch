@@ -413,7 +413,7 @@
 (define mail-mode-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" (lambda () (mail-open-thread)))
-      (bind-key map "m" (lambda () (mail-new-message)))
+      (bind-key map "c" (lambda () (mail-new-message)))
       (bind-key map "s" (lambda () (mail-prompt-filter)))
       (bind-key map "S" (lambda () (mail-prompt-edit-filter)))
       map
