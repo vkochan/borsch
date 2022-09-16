@@ -527,6 +527,8 @@
                   (printf "\n")
                   (printf "[maildir]\n")
                   (printf "\n")
+                  (printf "[index]\n")
+                  (printf "header.List=List-Id\n")
                )
             )
          )
