@@ -460,6 +460,8 @@ size_t buffer_text_insert_nl(Buffer *buf, size_t pos)
 {
 	Text *txt = buf->text;
 	size_t pos_orig = pos;
+	size_t indent_len = 0;
+	char *indent = NULL;
 	size_t len = 1;
 	char byte;
 
@@ -469,6 +471,23 @@ size_t buffer_text_insert_nl(Buffer *buf, size_t pos)
 	/* insert second newline at end of file, except if there is already one */
 	bool eof = pos == text_size(txt);
 	bool nl2 = eof && !(pos > 0 && text_byte_get(txt, pos-1, &byte) && byte == '\n');
+
+	if (true) {
+		/* copy leading white space of current line */
+		size_t begin = text_line_begin(txt, pos);
+		size_t start = text_line_start(txt, begin);
+		size_t end = text_line_end(txt, start);
+		if (start > pos)
+			start = pos;
+		indent_len = start >= begin ? start-begin : 0;
+		if (start == end) {
+			pos = begin;
+		} else {
+			indent = malloc(indent_len+1);
+			if (indent)
+				indent_len = text_bytes_get(txt, begin, indent_len, indent);
+		}
+	}
 
 	text_insert(txt, pos, "\n", 1);
 	if (eof) {
@@ -480,6 +499,13 @@ size_t buffer_text_insert_nl(Buffer *buf, size_t pos)
 		}
 	}
 	pos++;
+
+	if (indent)
+		text_insert(txt, pos, indent, indent_len);
+	free(indent);
+
+	pos += indent_len;
+	len += indent_len;
 
 	buffer_text_changed(buf, pos_orig, len);
 	buffer_cursor_set(buf, pos);
