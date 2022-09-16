@@ -526,6 +526,7 @@
                   (printf "exclude_tags=deleted;spam;\n")
                   (printf "\n")
                   (printf "[maildir]\n")
+                  (printf "synchronize_flags=true\n")
                   (printf "\n")
                   (printf "[index]\n")
                   (printf "header.List=List-Id\n")
