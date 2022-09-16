@@ -523,7 +523,7 @@
                   (printf "primary_email=~a\n" (mail-username))
                   (printf "\n")
                   (printf "[search]\n")
-                  (printf "exclude_tags=deleted spam\n")
+                  (printf "exclude_tags=deleted;spam;\n")
                   (printf "\n")
                   (printf "[maildir]\n")
                   (printf "\n")
