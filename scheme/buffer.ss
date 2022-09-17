@@ -506,6 +506,14 @@
    )
 )
 
+(define buffer-reload
+   (lambda ()
+      (when (local-bound? buffer-reload-func)
+         ((get-local buffer-reload-func))
+      )
+   )
+)
+
 (define buffer-reload-file
    (lambda ()
       (save-cursor
