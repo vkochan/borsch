@@ -111,21 +111,39 @@
    )
 )
 
-(define mail-set-tag
+(define mail-message-set-tag
    (lambda (id tag)
-      (process-create (mail-notmuch-cmd (format "tag ~a id:~a" tag id)))
+      (system (mail-notmuch-cmd (format "tag ~a id:~a" tag id)))
    )
 )
 
-(define mail-add-tag
+(define mail-message-add-tag
    (lambda (id tag)
-      (mail-set-tag id (format "+~a" tag))
+      (mail-message-set-tag id (format "+~a" tag))
    )
 )
 
-(define mail-del-tag
+(define mail-message-del-tag
    (lambda (id tag)
-      (mail-set-tag id (format "-~a" tag))
+      (mail-message-set-tag id (format "-~a" tag))
+   )
+)
+
+(define mail-thread-set-tag
+   (lambda (id tag)
+      (system (mail-notmuch-cmd (format "tag ~a thread:~a" tag id)))
+   )
+)
+
+(define mail-thread-add-tag
+   (lambda (id tag)
+      (mail-thread-set-tag id (format "+~a" tag))
+   )
+)
+
+(define mail-thread-del-tag
+   (lambda (id tag)
+      (mail-thread-set-tag id (format "-~a" tag))
    )
 )
 
@@ -256,7 +274,7 @@
                            (mail-for-each-message
                               (lambda (m depth)
                                  (mail-render-message m)
-                                 (mail-del-tag (mail-entry-id entry) "unread")
+                                 (mail-message-del-tag (mail-entry-id entry) "unread")
                                  (buffer-set-readonly #t)
                                  (move-buffer-begin)
                                  (message "Done")
@@ -441,9 +459,37 @@
    )
 )
 
+(define mail-delete-thread
+   (lambda ()
+      (let ([plist (get-property 'data (1+ (cursor)) (+ 2 (cursor)))])
+         (let ([entry (cdr (assoc ':data (first plist)))])
+            (mail-thread-add-tag entry "deleted")
+            (buffer-set-readonly #f)
+            (delete-line)
+            (buffer-set-readonly #t)
+         )
+      )
+   )
+)
+
+(define mail-undelete-thread
+   (lambda ()
+      (let ([plist (get-property 'data (1+ (cursor)) (+ 2 (cursor)))])
+         (let ([entry (cdr (assoc ':data (first plist)))])
+            (mail-thread-del-tag entry "deleted")
+            (buffer-set-readonly #f)
+            (delete-line)
+            (buffer-set-readonly #t)
+         )
+      )
+   )
+)
+
 (define mail-mode-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" (lambda () (mail-open-thread)))
+      (bind-key map "d" (lambda () (mail-delete-thread)))
+      (bind-key map "!" (lambda () (mail-undelete-thread)))
       (bind-key map "c" (lambda () (mail-new-message)))
       (bind-key map "s" (lambda () (mail-prompt-filter)))
       (bind-key map "S" (lambda () (mail-prompt-edit-filter)))
