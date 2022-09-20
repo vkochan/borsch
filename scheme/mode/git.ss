@@ -812,6 +812,7 @@
    )
 )
 
+(bind-key dirb-mode-map "g l" (lambda () (git-show-log (dirb-entry-path))))
 (bind-key text-mode-normal-map "g l" (lambda () (git-show-log (buffer-filename))))
 (bind-key text-mode-normal-map "g D" (lambda () (git-status-diff-file 'unstaged (buffer-filename))))
 (bind-key text-mode-normal-map "g c" (lambda () (git-show-commit)))
