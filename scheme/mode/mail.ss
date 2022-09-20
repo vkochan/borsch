@@ -544,9 +544,21 @@
    )
 )
 
+(define mail-default-query-var #f)
+
 (define mail-default-query
-   (lambda ()
-      (format "to:~a or cc:~a" (mail-username) (mail-username))
+   (case-lambda
+      [()
+       (if (not mail-default-query-var)
+          (format "to:~a or cc:~a" (mail-username) (mail-username))
+          ;; else
+          mail-default-query-var
+       )
+      ]
+
+      [(qry)
+       (set! mail-default-query-var qry)
+      ]
    )
 ) 
 
