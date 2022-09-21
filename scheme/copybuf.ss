@@ -54,7 +54,7 @@
           ;; else
           (begin
              (move-line-end)
-             (insert-nl)
+             (insert "\n")
              (save-cursor
                 (copybuf-paste-inplace)
                 (delete-char)

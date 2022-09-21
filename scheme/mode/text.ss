@@ -26,7 +26,7 @@
           ;; else
           (let ([has-newline (equal? (string-ref delbuf-reg 0) #\newline)])
              (move-line-end)
-             (when (not has-newline) (insert-nl))
+             (when (not has-newline) (insert "\n"))
              (save-cursor
                 (delbuf-paste-inplace)
                 (when (not has-newline) (delete-char))
