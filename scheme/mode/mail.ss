@@ -84,18 +84,23 @@
 (define mail-timer #f)
 
 (define mail-sync
-   (lambda ()
-      (when (not mail-is-syncing?)
-         (set! mail-is-syncing? #t)
-         (message "Syncing mail ...")
-         (process-create
-            (format "~a && ~a" (mail-sync-cmd) (mail-notmuch-cmd "new")) #f #f
-            (lambda (status buf-out buf-err)
-               (set! mail-is-syncing? #f)
-               (message "Mail synced")
-            )
-         )
-      )
+   (case-lambda
+      [(func)
+       (let ([func func])
+          (when (not mail-is-syncing?)
+             (set! mail-is-syncing? #t)
+             (message "Syncing mail ...")
+             (process-create
+                (format "~a && ~a" (mail-sync-cmd) (mail-notmuch-cmd "new")) #f #f
+                (lambda (status buf-out buf-err)
+                   (set! mail-is-syncing? #f)
+                   (message "Mail synced")
+                   (when func (func))
+                )
+             )
+          )
+       )
+      ]
    )
 )
 
@@ -499,7 +504,11 @@
 
 (define mail-reload-thread-list
    (lambda ()
-      (mail (get-local mail-query))
+      (mail-sync
+         (lambda ()
+            (mail (get-local mail-query))
+         )
+      )
    )
 )
 
@@ -604,7 +613,6 @@
              [cmd (mail-notmuch-cmd (format "search --format=sexp --limit=500 '~a'" qry))]
              [buf-ret (buffer-new)]
             )
-         (mail-sync)
          (process-create cmd buf-ret
             (lambda (status buf-out buf-err)
                (save-cursor
