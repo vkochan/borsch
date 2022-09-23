@@ -559,7 +559,7 @@
    (case-lambda
       [()
        (if (not mail-default-query-var)
-          (format "to:~a or cc:~a or from:~a" (mail-username) (mail-username) (user-name))
+          (format "to:~a or cc:~a or from:~a" (mail-username) (mail-username) (mail-username))
           ;; else
           mail-default-query-var
        )
