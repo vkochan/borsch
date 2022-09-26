@@ -2377,7 +2377,7 @@ reenter:
 			flags |= KEY_MOD_F_ALT;
 			code = alt_code;
 		}
-	} else if (code < 0x1f && code != 0xd) {
+	} else if (code < 0x1f && code != 0xd && code != 0x9) {
 		flags |= KEY_MOD_F_CTL;
 		code = code + 0x60;
 	}
