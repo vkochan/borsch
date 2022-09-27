@@ -46,6 +46,40 @@
 )
 
 ;; Misc helpers
+(define list-dir
+   (case-lambda
+      [(dir)
+       (list-dir dir "")
+      ]
+      
+      [(dir opts)
+       (let (
+             [dl '()]
+             [fl '()]
+            )
+         (for-each
+            (lambda (e)
+               (when (not (and (equal? (string-ref e 0) #\.)
+                               (not (get-local show-hidden))))
+                  (if (file-directory? (fmt "~a/~a" dir e))
+                     (set! dl (append dl (list (string-append e "/"))))
+                  )
+                  (if (file-regular? (fmt "~a/~a" dir e))
+                     (set! fl (append fl (list e)))
+                  )
+              )
+            )
+            (string-split
+               (list-ref (process-get-output (format "ls -1 ~a ~a" opts dir)) 1)
+               #\newline
+            )
+         )
+         (append dl fl)
+       )
+      ]
+   )
+)
+
 (define is-dir? file-directory?)
 (define is-file? file-regular?)
 (define is-link? file-symbolic-link?)

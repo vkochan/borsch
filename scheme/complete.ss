@@ -18,10 +18,24 @@
    )
 )
 
+(define complete-search-word
+   (lambda ()
+      (let (
+            [search-fn (get-local complete-search-word-func)]
+           )
+         (if search-fn
+            (search-fn)
+            ;; else
+            (get-local complete-text)
+         )
+      )
+   )
+)
+
 (define complete-match
    (lambda ()
       (let (
-            [text-lst (string-split (get-local complete-text) #\space)]
+            [text-lst (string-split (complete-search-word) #\space)]
             [lst (get-local complete-list)]
            )
          (set-local! complete-index 0)
@@ -38,7 +52,7 @@
                               )
                               (eq? nmatch (length text-lst))
                            )
-                        ) lst
+                        ) (if (procedure? lst) (lst) lst)
                      )
          )
       )
@@ -52,6 +66,7 @@
       (set-local! complete-prompt-pos (cursor))
       (insert (get-local complete-text))
 
+      (save-cursor
       (let* (
              [lst-idx (get-local complete-index)]
              [lst (get-local complete-result)]
@@ -82,31 +97,38 @@
             )
          )
       )
-
-      (cursor-set (get-local complete-prompt-cursor))
+      )
    )
 )
 
-(define complete-insert-char
-   (lambda (char)
-      (insert (string char))
-      (set-local! complete-prompt-cursor (cursor))
-      (set-local! complete-text (buffer-string (get-local complete-prompt-pos) (line-end-pos)))
-      (complete-match)
-      (complete-draw)
-   )
-)
-
-(define complete-prompt-delete-prev-char
+(define complete-update-text
    (lambda ()
-      (let ([p (get-local complete-prompt-pos)])
+      (let ()
+         (set-local! complete-prompt-cursor (cursor))
+         (set-local! complete-text (buffer-string (get-local complete-prompt-pos) (line-end-pos)))
+         (complete-match)
+         (complete-draw)
+      )
+   )
+)
+
+(define complete-insert-text
+   (lambda (char-or-string)
+      (if (string? char-or-string) (insert char-or-string) (insert-char char-or-string))
+      (complete-update-text)
+   )
+)
+
+(define complete-delete-prev-char
+   (lambda ()
+      (let (
+            [p (get-local complete-prompt-pos)]
+           )
          (when (> (cursor) p)
-            (delete-prev-char)
-            (set-local! complete-text (extract-line-inner (get-local complete-prompt-pos)))
-            (set-local! complete-prompt-cursor (cursor))
-            (set-local! complete-text (buffer-string (get-local complete-prompt-pos) (line-end-pos)))
-            (complete-match)
-            (complete-draw)
+            (let ()
+               (delete-prev-char)
+               (complete-update-text)
+            )
          )
       )
    )
@@ -132,9 +154,31 @@
 
 (define complete-select-value
    (lambda ()
-      (let ()
-         (set-local! text-insert-hook #f)
-         ((get-local complete-fn) (complete-selected-value))
+      (let (
+            [select-fn (get-local complete-select-func)]
+           )
+         (if select-fn
+            (select-fn)
+            ;; else
+            (begin
+               (set-local! text-insert-hook #f)
+               ((get-local complete-fn) (complete-selected-value))
+            )
+         )
+      )
+   )
+)
+
+(define complete-choose
+   (lambda ()
+      (let (
+            [choose-fn (get-local complete-choose-func)]
+           )
+         (if choose-fn
+            (choose-fn)
+            ;; else
+            (complete-insert-text (complete-selected-value))
+         )
       )
    )
 )
@@ -203,13 +247,14 @@
 
 (define complete-map
    (let ([map (make-empty-keymap)])
-      (bind-key map "<Backspace>" complete-prompt-delete-prev-char)
+      (bind-key map "<Backspace>" complete-delete-prev-char)
       (bind-key map "<Enter>" complete-select-value)
       (bind-key map "<Esc>" complete-cancel)
+      (bind-key map "<Tab>" complete-choose)
       (bind-key map "C-y" complete-copy-value)
       (bind-key map "C-a" complete-append-value)
-      (bind-key map "C-h" complete-prompt-move-prev-char)
-      (bind-key map "C-l" complete-prompt-move-next-char)
+      ;;(bind-key map "C-h" complete-prompt-move-prev-char)
+      ;;(bind-key map "C-l" complete-prompt-move-next-char)
       (bind-key map "C-j" complete-list-move-down)
       (bind-key map "C-k" complete-list-move-up)
       (bind-key map "C-g q q" do-quit)
@@ -224,8 +269,12 @@
       ]
 
       [(ls fn prompt)
+       (complete ls fn prompt "")
+      ]
+
+      [(ls fn prompt init)
        (let ()
-         (define-local text-insert-hook complete-insert-char)
+         (define-local text-insert-hook complete-insert-text)
          (define-local complete-prompt-cursor 0)
          (define-local complete-prompt-pos 0)
          (define-local complete-prompt (format "~a:" prompt))
@@ -235,8 +284,12 @@
          (define-local complete-result '())
          (define-local complete-list ls)
          (define-local complete-fn fn)
+         (define-local complete-search-word-func #f)
+         (define-local complete-choose-func #f)
+         (define-local complete-select-func #f)
          (buffer-set-keymap complete-map)
          (enable-insert #t)
+         (when init (init))
          (complete-match)
          (complete-draw)
          (cursor-set (get-local complete-prompt-pos))

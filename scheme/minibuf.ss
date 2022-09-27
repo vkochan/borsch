@@ -248,10 +248,9 @@
    )
 )
 
-(define minibuf-complete-handle
-   (lambda (o)
+(define minibuf-clear
+   (lambda ()
       (let (
-            [fn (get-local func-value)]
             [b (get-local orig-buf)]
             [w (get-local orig-win)]
            )
@@ -260,6 +259,14 @@
          (set-local! input-mode #f)
          (window-set-height minibuf-window 1)
          (window-select w)
+      )
+   )
+)
+
+(define minibuf-complete-handle
+   (lambda (o)
+      (let ([fn (get-local func-value)])
+         (minibuf-clear)
          (when o
             (fn o)
          )
@@ -274,6 +281,10 @@
      ]
 
      [(lst fn prompt)
+      (minibuf-complete lst fn prompt #f)
+     ]
+     
+     [(lst fn prompt init)
       (let (
             [b (current-buffer)]
            )
@@ -284,9 +295,60 @@
             (set-local! orig-win (current-window))
             (window-set-height minibuf-window 11)
             (window-select minibuf-window)
-            (complete lst minibuf-complete-handle prompt)
+            (complete lst minibuf-complete-handle prompt init)
          )
       )
      ]
+   )
+)
+
+(define minibuf-complete-path
+   (case-lambda
+      [(fn)
+       (minibuf-complete-path fn "")
+      ]
+      
+      [(fn prompt)
+       (let ()
+          (minibuf-complete
+             (lambda ()
+                (list-dir (string-append (current-cwd) "/" (path-parent (get-local complete-text))))
+             )
+             #f
+             prompt
+             (lambda ()
+                (define-local minibuf-complete-path-func fn)
+                (define-local complete-search-word-func
+                   (lambda ()
+                      (path-last (get-local complete-text))
+                   )
+                )
+                (define-local complete-choose-func
+                   (lambda ()
+                      (let (
+                            [dir (path-parent (get-local complete-text))]
+                           )
+                         (set-local! complete-text (string-append dir (if (string-empty? dir) "" "/") (complete-selected-value)))
+                         (complete-match)
+                         (complete-draw)
+                      )
+                   )
+                )
+                (define-local complete-select-func
+                   (lambda ()
+                      (let (
+                            [fn (get-local minibuf-complete-path-func)]
+                            [dir (path-root (get-local complete-text))]
+                            [val (complete-selected-value)]
+                           )
+                         (minibuf-clear)
+                         (fn (string-append (current-cwd) "/" dir val))
+                      )
+                   )
+                )
+             )
+          )
+       )
+      ]
    )
 )
