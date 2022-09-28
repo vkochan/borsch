@@ -737,6 +737,12 @@ static void scheme_list_insert(struct scheme_list *slist, ptr data)
 	slist->tail = snew;
 }
 
+static void scheme_plist_insert(struct scheme_list *slist, const char *name, ptr data)
+{
+	scheme_list_insert(slist, Sstring_to_symbol(name));
+	scheme_list_insert(slist, data);
+}
+
 static ptr scheme_color_to_name(short color)
 {
 	const char *color_name = "default";
@@ -794,6 +800,7 @@ static void scheme_buf_prop_walk(Buffer *buf, int id, size_t start, size_t end, 
 	case PROPERTY_TYPE_TEXT_STYLE:
 	{
 		struct scheme_list style_plist = {0};
+		struct scheme_list attr_plist = {0};
 		char attr_name[128];
 		Style *style = data;
 
@@ -823,18 +830,15 @@ static void scheme_buf_prop_walk(Buffer *buf, int id, size_t start, size_t end, 
 			}
 		}
 
-		scheme_list_insert(&style_plist, Scons(Sstring_to_symbol(":type"),
-						       Sstring_to_symbol("style")));
-		scheme_list_insert(&style_plist, Scons(Sstring_to_symbol(":start"),
-						       Sinteger(start)));
-		scheme_list_insert(&style_plist, Scons(Sstring_to_symbol(":end"),
-						       Sinteger(end)));
-		scheme_list_insert(&style_plist, Scons(Sstring_to_symbol(":fg"),
-						       scheme_color_to_name(style->fg)));
-		scheme_list_insert(&style_plist, Scons(Sstring_to_symbol(":bg"),
-						       scheme_color_to_name(style->bg)));
-		scheme_list_insert(&style_plist, Scons(Sstring_to_symbol(":attr"),
-						       Sstring(attr_name)));
+		scheme_plist_insert(&attr_plist, ":fg", scheme_color_to_name(style->fg));
+		scheme_plist_insert(&attr_plist, ":bg", scheme_color_to_name(style->bg));
+		scheme_plist_insert(&attr_plist, ":attr", Sstring(attr_name));
+						       
+		scheme_plist_insert(&style_plist, ":type", Sstring_to_symbol("style"));
+		scheme_plist_insert(&style_plist, ":start", Sinteger(start));
+		scheme_plist_insert(&style_plist, ":end", Sinteger(end));
+		scheme_plist_insert(&style_plist, "style", attr_plist.head);
+		
 		scheme_list_insert(plist, style_plist.head);
 		break;
 	}
@@ -844,32 +848,26 @@ static void scheme_buf_prop_walk(Buffer *buf, int id, size_t start, size_t end, 
 		struct scheme_list symbol_plist = {0};
 		char *symbol = data;
 
-		scheme_list_insert(&symbol_plist, Scons(Sstring_to_symbol(":type"),
-						       Sstring_to_symbol("symbol")));
-		scheme_list_insert(&symbol_plist, Scons(Sstring_to_symbol(":start"),
-						       Sinteger(start)));
-		scheme_list_insert(&symbol_plist, Scons(Sstring_to_symbol(":end"),
-						       Sinteger(end)));
-		scheme_list_insert(&symbol_plist, Scons(Sstring_to_symbol(":name"),
-						       Sstring_to_symbol(symbol)));
+		scheme_plist_insert(&symbol_plist, ":type", Sstring_to_symbol("symbol"));
+		scheme_plist_insert(&symbol_plist, ":start", Sinteger(start));
+		scheme_plist_insert(&symbol_plist, ":end", Sinteger(end));
+		scheme_plist_insert(&symbol_plist, "symbol", Sstring_to_symbol(symbol));
+						       
 		scheme_list_insert(plist, symbol_plist.head);
 		break;
 	}
 
 	case PROPERTY_TYPE_TEXT_DATA:
 	{
-		struct scheme_list symbol_plist = {0};
+		struct scheme_list data_plist = {0};
 		ptr pdata = data;
 
-		scheme_list_insert(&symbol_plist, Scons(Sstring_to_symbol(":type"),
-						       Sstring_to_symbol("data")));
-		scheme_list_insert(&symbol_plist, Scons(Sstring_to_symbol(":start"),
-						       Sinteger(start)));
-		scheme_list_insert(&symbol_plist, Scons(Sstring_to_symbol(":end"),
-						       Sinteger(end)));
-		scheme_list_insert(&symbol_plist, Scons(Sstring_to_symbol(":data"),
-						       pdata));
-		scheme_list_insert(plist, symbol_plist.head);
+		scheme_plist_insert(&data_plist, ":type", Sstring_to_symbol("data"));
+		scheme_plist_insert(&data_plist, ":start", Sinteger(start));
+		scheme_plist_insert(&data_plist, ":end", Sinteger(end));
+		scheme_plist_insert(&data_plist, "data", pdata);
+		
+		scheme_list_insert(plist, data_plist.head);
 		break;
 	}
 
