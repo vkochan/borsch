@@ -247,6 +247,19 @@
    )
 )
 
+(define plist-for-each
+   (lambda (plist fn)
+      (let loop ([plist plist])
+         (when (>= (length plist) 2)
+            (let ([name (first plist)] [val (second plist)])
+               (fn name val)
+            )
+            (loop (cdr (cdr plist)))
+         )
+      )
+   )
+)
+
 (define empty?
    (lambda (ls)
       (> (length ls) 0)
