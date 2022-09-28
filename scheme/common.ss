@@ -230,9 +230,19 @@
 )
 
 (define plist-get
-   (lambda (plist name)
-      (let ([m (member name plist)])
-         (if m (cadr m) #f)
+   (lambda (plist prop)
+      (let loop ([plist plist])
+         (if (< (length plist) 2)
+            #f
+            ;; else
+            (let ([name (first plist)] [val (second plist)])
+               (if (equal? name prop)
+                  val
+                  ;; else
+                  (loop (cdr (cdr plist)))
+               )
+            )
+         )
       )
    )
 )
