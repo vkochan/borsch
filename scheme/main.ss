@@ -138,10 +138,11 @@
 
 (define open-file-prompt
    (lambda ()
-      (minibuf-read "open file:"
+      (minibuf-complete-path
          (lambda (f)
             (file-open f)
          )
+         "open file"
       )
    )
 )
