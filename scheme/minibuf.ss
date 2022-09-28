@@ -338,11 +338,11 @@
                    (lambda ()
                       (let (
                             [fn (get-local minibuf-complete-path-func)]
-                            [dir (path-root (get-local complete-text))]
+                            [dir (path-parent (get-local complete-text))]
                             [val (complete-selected-value)]
                            )
                          (minibuf-clear)
-                         (fn (string-append (current-cwd) "/" dir val))
+                         (fn (string-append (current-cwd) "/" dir "/" val))
                       )
                    )
                 )
