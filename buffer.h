@@ -19,7 +19,7 @@ typedef enum {
 	PROPERTY_TYPE_TEXT_DATA		= 5,
 
 	PROPERTY_TYPE_ALL		= 10000,
-} buffer_property_t;
+} buffer_property_type_t;
 
 typedef enum {
 	SYNTAX_RULE_TYPE_STYLE = 1,
