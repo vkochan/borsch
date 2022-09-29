@@ -204,7 +204,7 @@
 
 (define mail-dump-entry
    (lambda ()
-      (let ([plist (get-property 'data (1+ (cursor)) (+ 2 (cursor)))])
+      (let ([plist (get-property 'data (cursor) (+ 1 (cursor)))])
          (let ([entry (plist-get (first plist) 'data)])
             (let ([b (buffer-create (format "Message-dump:~a" (if (mail-entry? entry) (mail-entry-id entry) entry)))])
                (text-mode)
@@ -263,7 +263,7 @@
 
 (define mail-open-entry
    (lambda ()
-      (let ([plist (get-property 'data (1+ (cursor)) (+ 2 (cursor)))])
+      (let ([plist (get-property 'data (cursor) (+ 1 (cursor)))])
          (let ([entry (plist-get (first plist) 'data)])
             (let ([b (buffer-create (format "Message:~a" (mail-entry-id entry)))])
                (define-local mail-message-id (mail-entry-id entry))
@@ -298,7 +298,7 @@
 
 (define mail-reply-entry
    (lambda ()
-      (let ([plist (get-property 'data (1+ (cursor)) (+ 2 (cursor)))])
+      (let ([plist (get-property 'data (cursor) (+ 1 (cursor)))])
          (let ([entry (plist-get (first plist) 'data)])
             (mail-reply-message (mail-entry-id entry))
          )
@@ -384,7 +384,7 @@
                                  )
                               )
                               (let ([entry (make-mail-entry id date from to cc subj)])
-                                 (add-property curs (cursor) `(data ,entry))
+                                 (add-property curs (1- (cursor)) `(data ,entry))
                               )
                            )
                         )
@@ -403,7 +403,7 @@
 
 (define mail-open-thread
    (lambda ()
-      (let ([plist (get-property 'data (1+ (cursor)) (+ 2 (cursor)))])
+      (let ([plist (get-property 'data (cursor) (+ 1 (cursor)))])
          (letrec (
                [tid (plist-get (first plist) 'data)]
                [buf-ret (buffer-new)]
@@ -466,7 +466,7 @@
 
 (define mail-delete-thread
    (lambda ()
-      (let ([plist (get-property 'data (1+ (cursor)) (+ 2 (cursor)))])
+      (let ([plist (get-property 'data (cursor) (+ 1 (cursor)))])
          (let ([entry (plist-get (first plist) 'data)])
             (mail-thread-add-tag entry "deleted")
             (buffer-reload)
@@ -477,7 +477,7 @@
 
 (define mail-undelete-thread
    (lambda ()
-      (let ([plist (get-property 'data (1+ (cursor)) (+ 2 (cursor)))])
+      (let ([plist (get-property 'data (cursor) (+ 1 (cursor)))])
          (let ([entry (plist-get (first plist) 'data)])
             (mail-thread-del-tag entry "deleted")
             (buffer-reload)
@@ -540,7 +540,7 @@
                               '(style (:attr "normal"))
                            )
                         )
-                        (add-property curs (cursor) `(data ,id))
+                        (add-property curs (1- (cursor)) `(data ,id))
                      )
                   )
                   l
