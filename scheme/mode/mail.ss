@@ -384,7 +384,7 @@
                                  )
                               )
                               (let ([entry (make-mail-entry id date from to cc subj)])
-                                 (add-data-property entry curs (cursor))
+                                 (add-property curs (cursor) `(data ,entry))
                               )
                            )
                         )
@@ -540,7 +540,7 @@
                               '(style (:attr "normal"))
                            )
                         )
-                        (add-data-property id curs (cursor))
+                        (add-property curs (cursor) `(data ,id))
                      )
                   )
                   l

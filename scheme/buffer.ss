@@ -660,14 +660,14 @@
    )
 )
 
-(define add-style-property
+(define __add-style-property
    (case-lambda
       [(style regex)
-       (add-style-property style -1 -1 regex)
+       (__add-style-property style -1 -1 regex)
       ]
 
       [(style start end)
-       (add-style-property style start end #f)
+       (__add-style-property style start end #f)
       ]
 
       [(style start end regex)
@@ -698,14 +698,14 @@
    )
 )
 
-(define add-keymap-property
+(define __add-keymap-property
    (case-lambda
       [(kmap regex)
-       (add-keymap-property kmap -1 -1 regex)
+       (__add-keymap-property kmap -1 -1 regex)
       ]
 
       [(kmap start end)
-       (add-keymap-property kmap start end #f)
+       (__add-keymap-property kmap start end #f)
       ]
 
       [(kmap start end regex)
@@ -714,10 +714,10 @@
    )
 )
 
-(define add-symbol-property
+(define __add-symbol-property
    (case-lambda
       [(symbol start end)
-       (add-symbol-property symbol start end #f)
+       (__add-symbol-property symbol start end #f)
       ]
 
       [(symbol start end regex)
@@ -726,10 +726,10 @@
    )
 )
 
-(define add-data-property
+(define __add-data-property
    (case-lambda
       [(data start end)
-       (add-data-property data start end #f)
+       (__add-data-property data start end #f)
       ]
 
       [(data start end regex)
@@ -752,9 +752,10 @@
        (plist-for-each plist
           (lambda (prop val)
              (case prop
-                ['style (add-style-property val start end regex)]
-                ['keymap (add-keymap-property val start end regex)]
-                ['symbol (add-symbol-property val start end regex)]
+                ['style (__add-style-property val start end regex)]
+                ['keymap (__add-keymap-property val start end regex)]
+                ['symbol (__add-symbol-property val start end regex)]
+                ['data (__add-data-property val start end regex)]
              )
           )
        )
