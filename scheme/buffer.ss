@@ -740,23 +740,27 @@
 
 (define add-property
    (case-lambda
-      [(regex prop)
-       (add-property -1 -1 regex prop)
+      [(regex plist)
+       (add-property -1 -1 regex plist)
       ]
 
-      [(start end prop)
-       (add-property start end #f prop)
+      [(start end plist)
+       (add-property start end #f plist)
       ]
 
-      [(start end regex prop)
-       (when (equal? 'style (car prop))
-         (add-style-property (cadr prop) start end regex)
-       )
-       (when (equal? 'keymap (car prop))
-         (add-keymap-property (cadr prop) start end regex)
-       )
-       (when (equal? 'symbol (car prop))
-         (add-symbol-property (cadr prop) start end regex)
+      [(start end regex plist)
+       (plist-for-each plist
+          (lambda (prop val)
+             (when (equal? 'style prop)
+                (add-style-property val start end regex)
+             )
+             (when (equal? 'keymap prop)
+                (add-keymap-property val start end regex)
+             )
+             (when (equal? 'symbol prop)
+                (add-symbol-property val start end regex)
+             )
+          )
        )
       ]
    )
