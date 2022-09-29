@@ -751,14 +751,10 @@
       [(start end regex plist)
        (plist-for-each plist
           (lambda (prop val)
-             (when (equal? 'style prop)
-                (add-style-property val start end regex)
-             )
-             (when (equal? 'keymap prop)
-                (add-keymap-property val start end regex)
-             )
-             (when (equal? 'symbol prop)
-                (add-symbol-property val start end regex)
+             (case prop
+                ['style (add-style-property val start end regex)]
+                ['keymap (add-keymap-property val start end regex)]
+                ['symbol (add-symbol-property val start end regex)]
              )
           )
        )
