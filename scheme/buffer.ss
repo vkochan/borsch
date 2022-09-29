@@ -750,13 +750,13 @@
 
       [(start end regex prop)
        (when (equal? 'style (car prop))
-         (add-style-property (cadr prop) start end )
+         (add-style-property (cadr prop) start end regex)
        )
        (when (equal? 'keymap (car prop))
-         (add-keymap-property (cadr prop) start end )
+         (add-keymap-property (cadr prop) start end regex)
        )
        (when (equal? 'symbol (car prop))
-         (add-symbol-property (cadr prop) start end )
+         (add-symbol-property (cadr prop) start end regex)
        )
       ]
    )
