@@ -670,27 +670,27 @@ ptr scheme_buf_is_visible(int bid)
 	return Sfalse;
 }
 
-ptr scheme_buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end, const char *regex)
+ptr scheme_buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end, const char *regex, char *name)
 {
-	int ret = buf_prop_style_add(bid, type, fg, bg, attr, style_name, start, end, regex);
+	int ret = buf_prop_style_add(bid, type, fg, bg, attr, style_name, start, end, regex, name);
 
 	if (ret == 0)
 		Sinteger(ret);
 	return Sfalse;
 }
 
-ptr scheme_buf_prop_kmap_add(int bid, int kid, int start, int end, const char *regex)
+ptr scheme_buf_prop_kmap_add(int bid, int kid, int start, int end, const char *regex, char *name)
 {
-	int ret = buf_prop_kmap_add(bid, kid, start, end, regex);
+	int ret = buf_prop_kmap_add(bid, kid, start, end, regex, name);
 
 	if (ret == 0)
 		Sinteger(ret);
 	return Sfalse;
 }
 
-ptr scheme_buf_prop_symbol_add(int bid, const char *symbol, int start, int end, const char *regex)
+ptr scheme_buf_prop_symbol_add(int bid, const char *symbol, int start, int end, const char *regex, char *name)
 {
-	int ret = buf_prop_symbol_add(bid, symbol, start, end, regex);
+	int ret = buf_prop_symbol_add(bid, symbol, start, end, regex, name);
 
 	if (ret == 0)
 		Sinteger(ret);
@@ -702,9 +702,9 @@ static void scheme_buf_prop_data_free(void *data)
 	Sunlock_object((ptr)data);
 }
 
-ptr scheme_buf_prop_data_add(int bid, ptr data, int start, int end, const char *regex)
+ptr scheme_buf_prop_data_add(int bid, ptr data, int start, int end, const char *regex, char *name)
 {
-	int ret = buf_prop_data_add(bid, data, start, end, regex, scheme_buf_prop_data_free);
+	int ret = buf_prop_data_add(bid, data, start, end, regex, name, scheme_buf_prop_data_free);
 
 	if (ret == 0) {
 		Slock_object(data);
@@ -713,9 +713,9 @@ ptr scheme_buf_prop_data_add(int bid, ptr data, int start, int end, const char *
 	return Sfalse;
 }
 
-void scheme_buf_prop_del(int bid, int type, int start, int end, const char *regex)
+void scheme_buf_prop_del(int bid, int type, int start, int end, const char *regex, char *name)
 {
-	buf_prop_del(bid, type, start, end, regex);
+	buf_prop_del(bid, type, start, end, regex, name);
 }
 
 struct scheme_list
@@ -874,11 +874,11 @@ static void scheme_buf_prop_walk(Buffer *buf, int id, size_t start, size_t end, 
 	}
 }
 
-ptr scheme_buf_prop_get(int bid, int type, int start, int end)
+ptr scheme_buf_prop_get(int bid, int type, int start, int end, char *name)
 {
 	struct scheme_list plist = {0};
 
-	buf_prop_walk(bid, type, start, end, &plist, scheme_buf_prop_walk);
+	buf_prop_walk(bid, type, start, end, name, &plist, scheme_buf_prop_walk);
 
 	return plist.head ? plist.head : Sfalse;
 }

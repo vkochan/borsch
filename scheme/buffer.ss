@@ -28,12 +28,12 @@
 (define __cs_buf_text_bg_get (foreign-procedure "cs_buf_text_bg_get" (int) scheme-object))
 (define __cs_buf_text_style_get (foreign-procedure "cs_buf_text_style_get" (int) scheme-object))
 
-(define __cs_buf_prop_style_add (foreign-procedure "cs_buf_prop_style_add" (int int int int int string int int string) scheme-object))
-(define __cs_buf_prop_kmap_add (foreign-procedure "cs_buf_prop_kmap_add" (int int int int string) scheme-object))
-(define __cs_buf_prop_symbol_add (foreign-procedure "cs_buf_prop_symbol_add" (int string int int string) scheme-object))
-(define __cs_buf_prop_data_add (foreign-procedure "cs_buf_prop_data_add" (int scheme-object int int string) scheme-object))
-(define __cs_buf_prop_del (foreign-procedure "cs_buf_prop_del" (int int int int string) void))
-(define __cs_buf_prop_get (foreign-procedure "cs_buf_prop_get" (int int int int) scheme-object))
+(define __cs_buf_prop_style_add (foreign-procedure "cs_buf_prop_style_add" (int int int int int string int int string string) scheme-object))
+(define __cs_buf_prop_kmap_add (foreign-procedure "cs_buf_prop_kmap_add" (int int int int string string) scheme-object))
+(define __cs_buf_prop_symbol_add (foreign-procedure "cs_buf_prop_symbol_add" (int string int int string string) scheme-object))
+(define __cs_buf_prop_data_add (foreign-procedure "cs_buf_prop_data_add" (int scheme-object int int string string) scheme-object))
+(define __cs_buf_prop_del (foreign-procedure "cs_buf_prop_del" (int int int int string string) void))
+(define __cs_buf_prop_get (foreign-procedure "cs_buf_prop_get" (int int int int string) scheme-object))
 
 (define __cs_buf_cursor_get (foreign-procedure __collect_safe "cs_buf_cursor_get" (int) scheme-object))
 (define __cs_buf_cursor_set (foreign-procedure __collect_safe "cs_buf_cursor_set" (int int) void))
@@ -671,6 +671,10 @@
       ]
 
       [(style start end regex)
+       (__add-style-property style start end #f #f)
+      ]
+      
+      [(style start end regex name)
        (let ([l (if (symbol? style)
                     (list -1 -1 -1)
                     (style->list style)
@@ -691,6 +695,7 @@
                start
                end
                regex
+               name
             )
          )
        )
@@ -709,7 +714,11 @@
       ]
 
       [(kmap start end regex)
-       (call-foreign (__cs_buf_prop_kmap_add (current-buffer) kmap start end regex))
+       (__add-keymap-property kmap start end #f #f)
+      ]
+      
+      [(kmap start end regex name)
+       (call-foreign (__cs_buf_prop_kmap_add (current-buffer) kmap start end regex name))
       ]
    )
 )
@@ -721,7 +730,11 @@
       ]
 
       [(symbol start end regex)
-       (call-foreign (__cs_buf_prop_symbol_add (current-buffer) (symbol->string symbol) start end regex))
+       (__add-symbol-property symbol start end #f #f)
+      ]
+      
+      [(symbol start end regex name)
+       (call-foreign (__cs_buf_prop_symbol_add (current-buffer) (symbol->string symbol) start end regex name))
       ]
    )
 )
@@ -733,7 +746,11 @@
       ]
 
       [(data start end regex)
-       (call-foreign (__cs_buf_prop_data_add (current-buffer) data start end regex))
+       (__add-data-property data start end #f #f)
+      ]
+      
+      [(data start end regex name)
+       (call-foreign (__cs_buf_prop_data_add (current-buffer) data start end regex name))
       ]
    )
 )
@@ -749,13 +766,15 @@
       ]
 
       [(start end regex plist)
-       (plist-for-each plist
-          (lambda (prop val)
-             (case prop
-                ['style (__add-style-property val start end regex)]
-                ['keymap (__add-keymap-property val start end regex)]
-                ['symbol (__add-symbol-property val start end regex)]
-                ['data (__add-data-property val start end regex)]
+       (let ([name (plist-get plist 'name)])
+          (plist-for-each plist
+             (lambda (prop val)
+                (case prop
+                   ['style (__add-style-property val start end regex name)]
+                   ['keymap (__add-keymap-property val start end regex name)]
+                   ['symbol (__add-symbol-property val start end regex name)]
+                   ['data (__add-data-property val start end regex name)]
+                )
              )
           )
        )
@@ -766,16 +785,26 @@
 (define remove-property
    (case-lambda
       [(start end type)
-       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type type) start end #f))]
+       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type type) start end #f #f))]
 
       [(start end)
-       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type 'all) start end #f))]
+       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type 'all) start end #f #f))]
 
-      [(type)
-       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type type) -1 -1 #f))]
+      [(type-or-name)
+       (call-foreign
+          (__cs_buf_prop_del
+             (current-buffer)
+             (symbol->text-property-type (if (symbol? type-or-name) type-or-name 'all))
+             -1
+             -1
+             #f
+             (if (symbol? type-or-name) #f type-or-name)
+          )
+       )
+      ]
 
       [()
-       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type 'all) -1 -1 #f))]
+       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type 'all) -1 -1 #f #f))]
    )
 )
 
@@ -793,6 +822,10 @@
 
 (define get-property
    (case-lambda
+    [(name)
+     (get-property (current-buffer) 'all -1 -1 name)
+    ]
+    
     [(start end)
      (get-property (current-buffer) 'all start end)
     ]
@@ -802,20 +835,24 @@
     ]
 
     [(buf type start end)
-     (call-foreign (__cs_buf_prop_get buf (symbol->text-property-type type) start end))
+     (get-property (current-buffer) type start end #f)
+    ]
+    
+    [(buf type start end name)
+     (call-foreign (__cs_buf_prop_get buf (symbol->text-property-type type) start end name))
     ]
    )
 )
 
 (define highlight-range
    (lambda (s e)
-      (call-foreign (__cs_buf_prop_style_add (current-buffer) 2 -1 -1 -1 "highlight" s e #f))
+      (call-foreign (__cs_buf_prop_style_add (current-buffer) 2 -1 -1 -1 "highlight" s e #f #f))
    )
 )
 
 (define highlight-clear
    (lambda ()
-      (call-foreign (__cs_buf_prop_del (current-buffer) 2 -1 -1 #f))
+      (call-foreign (__cs_buf_prop_del (current-buffer) 2 -1 -1 #f #f))
    )
 )
 

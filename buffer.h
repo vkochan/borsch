@@ -77,10 +77,11 @@ void buffer_mark_clear(Buffer *buf);
 size_t buffer_mark_get(Buffer *buf);
 void buffer_proc_set(Buffer *buf, Process *proc);
 Process *buffer_proc_get(Buffer *buf);
-int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *data, const char *pattern, void (*free_fn)(void *));
-void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, void *arg,	buffer_property_cb_t cb);
-bool buffer_property_remove(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern);
-bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern, void *arg,
+int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *data, const char *pattern,
+			char *name, void (*free_fn)(void *));
+void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, char *name, void *arg, buffer_property_cb_t cb);
+bool buffer_property_remove(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern, char *name);
+bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern, char *name, void *arg,
 		void (*cb)(Buffer *buf, size_t type, size_t start, size_t end,
 			void *data, void *arg));
 void buffer_env_set(Buffer *buf, void *env);

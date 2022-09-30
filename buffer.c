@@ -28,6 +28,7 @@ typedef struct TextProperty {
 	void (*free)(void *data);
 	char *regex_pattern;
 	Regex *regex;
+	char *name;
 } TextProperty;
 
 typedef struct {
@@ -689,7 +690,8 @@ static void buffer_property_regex_action(Buffer *buf, TextProperty *prop, size_t
 	} while (found);
 }
 
-int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *data, const char *pattern, void (*free_fn)(void *))
+int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *data, const char *pattern,
+			char *name, void (*free_fn)(void *))
 {
 	Regex *regex = NULL;
 	TextProperty *p;
@@ -722,6 +724,9 @@ int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *d
 	p->end = end;
 	p->type = type;
 
+	if (name)
+		p->name = strdup(name);
+
 	if (buf->max_prop && start > buf->max_prop->start) {
 		text_property_insert_after(buf->max_prop, p);
 		buf->max_prop = p;
@@ -751,7 +756,7 @@ int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *d
 	return 0;
 }
 
-bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern, void *arg,
+bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern, char *name, void *arg,
 		void (*cb)(Buffer *buf, size_t type, size_t start, size_t end,
 			void *data, void *arg))
 {
@@ -764,6 +769,8 @@ bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t en
 	if (type)
 		exp++;
 	if (pattern)
+		exp++;
+	if (name)
 		exp++;
 
 	if (!exp)
@@ -781,6 +788,8 @@ bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t en
 			match++;
 		if (pattern && strcmp(pattern, it->regex_pattern) == 0)
 			match++;
+		if (name && it->name && strcmp(name, it->name) == 0)
+			match++;
 
 		if (match >= exp) {
 			if (cb)
@@ -797,6 +806,7 @@ bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t en
 
 			text_regex_free(it->regex);
 			free(it->regex_pattern);
+			free(it->name);
 			text_property_remove(it);
 			rem_count++;
 			free(it);
@@ -807,9 +817,9 @@ bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t en
 	return rem_count > 0;
 }
 
-bool buffer_property_remove(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern)
+bool buffer_property_remove(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern, char *name)
 {
-	if (buffer_property_remove_cb(buf, type, start, end, pattern, NULL, NULL)) {
+	if (buffer_property_remove_cb(buf, type, start, end, pattern, name, NULL, NULL)) {
 		buf->is_dirty = true;
 		return true;
 	}
@@ -817,7 +827,7 @@ bool buffer_property_remove(Buffer *buf, size_t type, size_t start, size_t end, 
 	return false;
 }
 
-void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, void *arg,	buffer_property_cb_t cb)
+void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, char *name, void *arg, buffer_property_cb_t cb)
 {
 	TextProperty *it = buf->props.next;
 	int exp = 0;
@@ -831,6 +841,8 @@ void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, voi
 		exp++;
 	}
 	if (type)
+		exp++;
+	if (name)
 		exp++;
 
 	for (; it; it = it->next) {
@@ -847,6 +859,8 @@ void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, voi
 		if (it->type == type)
 			match++;
 		if (type == PROPERTY_TYPE_ALL)
+			match++;
+		if (name && it->name && strcmp(name, it->name) == 0)
 			match++;
 
 		if (match >= exp)

@@ -1578,7 +1578,7 @@ static void __buf_del(Buffer *buf)
 
 	env = buffer_env_get(buf);
 
-	buffer_property_remove(buf, PROPERTY_TYPE_ALL, EPOS, EPOS, NULL);
+	buffer_property_remove(buf, PROPERTY_TYPE_ALL, EPOS, EPOS, NULL, NULL);
 	buffer_ref_put(buf);
 	if (buffer_del(buf)) {
 		if (buffer_proc_get(buf))
@@ -2299,7 +2299,7 @@ static KeyMap *buf_keymap_get(Buffer *buf)
 	KeyMap *tmap = NULL;
 
 	buffer_properties_walk(buf, PROPERTY_TYPE_TEXT_KEYMAP,
-			       cursor, cursor+1, &tmap, buf_keymap_prop_match);
+			       cursor, cursor+1, NULL, &tmap, buf_keymap_prop_match);
 
 	if (tmap)
 		return tmap;
@@ -2916,9 +2916,9 @@ static void on_view_update_cb(UiWin *win)
 	buffer_syntax_rules_walk(w->buf, SYNTAX_RULE_TYPE_STYLE,
 			v.start, v.end, w->view, style_syntax_draw);
 	buffer_properties_walk(w->buf, PROPERTY_TYPE_TEXT_STYLE,
-			v.start, v.end, w->view, style_prop_draw);
+			v.start, v.end, NULL, w->view, style_prop_draw);
 	buffer_properties_walk(w->buf, PROPERTY_TYPE_TEXT_HIGHLIGHT,
-			v.start, v.end, w->view, style_prop_draw);
+			v.start, v.end, NULL, w->view, style_prop_draw);
 
 	if (w->highlight_mark) {
 		size_t start = buffer_mark_get(w->buf);
@@ -4125,7 +4125,7 @@ bool buf_is_visible(int bid)
 	return false;
 }
 
-int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end, const char *regex)
+int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end, const char *regex, char *name)
 {
 	Buffer *buf = buffer_by_id(bid);
 	Style *style, *style_bind;
@@ -4147,7 +4147,7 @@ int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *
 		style->bg = bg;
 	}
 
-	err = buffer_property_add(buf, type, start, end, style, regex, NULL);
+	err = buffer_property_add(buf, type, start, end, style, regex, name, NULL);
 	if (err) {
 		free(style);
 		return err;
@@ -4166,7 +4166,7 @@ static void buf_prop_kmap_free(void *data)
 	keymap_ref_put(map);
 }
 
-int buf_prop_kmap_add(int bid, int kid, int start, int end, const char *regex)
+int buf_prop_kmap_add(int bid, int kid, int start, int end, const char *regex, char *name)
 {
 	Buffer *buf = buffer_by_id(bid);
 	KeyMap *map = keymap_by_id(kid);
@@ -4175,7 +4175,7 @@ int buf_prop_kmap_add(int bid, int kid, int start, int end, const char *regex)
 	if (!map || !buf)
 		return -1;
 
-	err = buffer_property_add(buf, PROPERTY_TYPE_TEXT_KEYMAP, start, end, map, regex, buf_prop_kmap_free);
+	err = buffer_property_add(buf, PROPERTY_TYPE_TEXT_KEYMAP, start, end, map, regex, name, buf_prop_kmap_free);
 	if (err)
 		return err;
 
@@ -4184,7 +4184,7 @@ int buf_prop_kmap_add(int bid, int kid, int start, int end, const char *regex)
 	return 0;
 }
 
-int buf_prop_symbol_add(int bid, const char *symbol, int start, int end, const char *regex)
+int buf_prop_symbol_add(int bid, const char *symbol, int start, int end, const char *regex, char *name)
 {
 	Buffer *buf = buffer_by_id(bid);
 	int err;
@@ -4193,7 +4193,7 @@ int buf_prop_symbol_add(int bid, const char *symbol, int start, int end, const c
 		return -1;
 	}
 
-	err = buffer_property_add(buf, PROPERTY_TYPE_TEXT_SYMBOL, start, end, strdup(symbol), regex, NULL);
+	err = buffer_property_add(buf, PROPERTY_TYPE_TEXT_SYMBOL, start, end, strdup(symbol), regex, name, NULL);
 	if (err) {
 		return err;
 	}
@@ -4201,7 +4201,7 @@ int buf_prop_symbol_add(int bid, const char *symbol, int start, int end, const c
 	return 0;
 }
 
-int buf_prop_data_add(int bid, void *data, int start, int end, const char *regex, void (*free_fn)(void *data))
+int buf_prop_data_add(int bid, void *data, int start, int end, const char *regex, char *name, void (*free_fn)(void *data))
 {
 	Buffer *buf = buffer_by_id(bid);
 	int err;
@@ -4210,7 +4210,7 @@ int buf_prop_data_add(int bid, void *data, int start, int end, const char *regex
 		return -1;
 	}
 
-	err = buffer_property_add(buf, PROPERTY_TYPE_TEXT_DATA, start, end, data, regex, free_fn);
+	err = buffer_property_add(buf, PROPERTY_TYPE_TEXT_DATA, start, end, data, regex, name, free_fn);
 	if (err) {
 		return err;
 	}
@@ -4218,22 +4218,22 @@ int buf_prop_data_add(int bid, void *data, int start, int end, const char *regex
 	return 0;
 }
 
-void buf_prop_del(int bid, int type, int start, int end, const char *regex)
+void buf_prop_del(int bid, int type, int start, int end, const char *regex, char *name)
 {
 	Buffer *buf = buffer_by_id(bid);
 
 	buffer_property_remove(buf, type, start == -1 ? EPOS : start,
-			       end == -1 ? EPOS : end, regex);
+			       end == -1 ? EPOS : end, regex, name);
 	buffer_dirty_set(buf, true);
 }
 
-void buf_prop_walk(int bid, int type, int start, int end, void *arg,
+void buf_prop_walk(int bid, int type, int start, int end, char *name, void *arg,
 		void (*cb)(Buffer *buf, int id, size_t start, size_t end, void *data,
 				 void *arg))
 {
 	Buffer *buf = buffer_by_id(bid);
 
-	buffer_properties_walk(buf, type, start, end, arg, cb);
+	buffer_properties_walk(buf, type, start, end, name, arg, cb);
 }
 
 void *buf_env_get(int bid)
