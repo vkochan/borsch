@@ -864,7 +864,7 @@ void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, cha
 			match++;
 
 		if (match >= exp)
-			cb(buf, it->type, it->start, MIN(it->end, end), it->data, arg);
+			cb(buf, it->type, it->start, it->end, it->data, arg);
 	}
 }
 
