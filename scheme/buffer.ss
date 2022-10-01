@@ -649,12 +649,12 @@
 (define symbol->text-property-type
    (lambda (s)
       (case s
-         ['style     1]
-         ['highlight 2]
-         ['keymap    3]
-         ['symbol    4]
-         ['data      5]
-         ['all       10000]
+         [':style     1]
+         [':highlight 2]
+         [':keymap    3]
+         [':symbol    4]
+         [':data      5]
+         [':all       10000]
          [else         0]
       )
    )
@@ -770,10 +770,10 @@
           (plist-for-each plist
              (lambda (prop val)
                 (case prop
-                   ['style (__add-style-property val start end regex name)]
-                   ['keymap (__add-keymap-property val start end regex name)]
-                   ['symbol (__add-symbol-property val start end regex name)]
-                   ['data (__add-data-property val start end regex name)]
+                   [':style (__add-style-property val start end regex name)]
+                   [':keymap (__add-keymap-property val start end regex name)]
+                   [':symbol (__add-symbol-property val start end regex name)]
+                   [':data (__add-data-property val start end regex name)]
                 )
              )
           )
@@ -788,13 +788,13 @@
        (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type type) start end #f #f))]
 
       [(start end)
-       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type 'all) start end #f #f))]
+       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type ':all) start end #f #f))]
 
       [(type-or-name)
        (call-foreign
           (__cs_buf_prop_del
              (current-buffer)
-             (symbol->text-property-type (if (symbol? type-or-name) type-or-name 'all))
+             (symbol->text-property-type (if (symbol? type-or-name) type-or-name ':all))
              -1
              -1
              #f
@@ -804,14 +804,14 @@
       ]
 
       [()
-       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type 'all) -1 -1 #f #f))]
+       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type ':all) -1 -1 #f #f))]
    )
 )
 
 (define remove-regex-property
    (case-lambda
     [(regex)
-     (remove-regex-property regex 'all)
+     (remove-regex-property regex ':all)
     ]
 
     [(regex type)
@@ -823,11 +823,11 @@
 (define get-property
    (case-lambda
     [(name)
-     (get-property (current-buffer) 'all -1 -1 name)
+     (get-property (current-buffer) ':all -1 -1 name)
     ]
     
     [(start end)
-     (get-property (current-buffer) 'all start end)
+     (get-property (current-buffer) ':all start end)
     ]
 
     [(type start end)
@@ -1706,7 +1706,7 @@
             [s (buffer-begin-pos)]
             [e (buffer-end-pos)]
            )
-         (remove-property 'all)
+         (remove-property ':all)
          (delete-range s e)
       )
    )
@@ -1928,7 +1928,7 @@
             (buffer-set-keymap 'buffer-switch-or-open-map)
             (for-each
                (lambda (x)
-                  (insert (format "~a\n" (cadr x)) '(style (:attr "bold")))
+                  (insert (format "~a\n" (cadr x)) '(:style (:attr "bold")))
                ) l
             )
          )

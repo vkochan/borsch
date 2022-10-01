@@ -164,7 +164,7 @@
             (text-mode)
             (for-each
                (lambda (c)
-                  (insert (format "~a\n" c) `(style (:fg ,c)))
+                  (insert (format "~a\n" c) `(:style (:fg ,c)))
                )
                cls
             )

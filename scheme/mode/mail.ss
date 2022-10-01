@@ -204,8 +204,8 @@
 
 (define mail-dump-entry
    (lambda ()
-      (let ([plist (get-property 'data (cursor) (+ 1 (cursor)))])
-         (let ([entry (plist-get (first plist) 'data)])
+      (let ([plist (get-property ':data (cursor) (+ 1 (cursor)))])
+         (let ([entry (plist-get (first plist) ':data)])
             (let ([b (buffer-create (format "Message-dump:~a" (if (mail-entry? entry) (mail-entry-id entry) entry)))])
                (text-mode)
                (process-create
@@ -263,8 +263,8 @@
 
 (define mail-open-entry
    (lambda ()
-      (let ([plist (get-property 'data (cursor) (+ 1 (cursor)))])
-         (let ([entry (plist-get (first plist) 'data)])
+      (let ([plist (get-property ':data (cursor) (+ 1 (cursor)))])
+         (let ([entry (plist-get (first plist) ':data)])
             (let ([b (buffer-create (format "Message:~a" (mail-entry-id entry)))])
                (define-local mail-message-id (mail-entry-id entry))
                (bind-key-local "r" mail-reply-message)
@@ -298,8 +298,8 @@
 
 (define mail-reply-entry
    (lambda ()
-      (let ([plist (get-property 'data (cursor) (+ 1 (cursor)))])
-         (let ([entry (plist-get (first plist) 'data)])
+      (let ([plist (get-property ':data (cursor) (+ 1 (cursor)))])
+         (let ([entry (plist-get (first plist) ':data)])
             (mail-reply-message (mail-entry-id entry))
          )
       )
@@ -378,13 +378,13 @@
                               )
                               (insert (format "~a\n" (string-pad-right subj (- 100 depth)))
                                  (if (member "unread" tags)
-                                    '(style (:attr "bold"))
+                                    '(:style (:attr "bold"))
                                     ;; else
-                                    '(style (:attr "normal"))
+                                    '(:style (:attr "normal"))
                                  )
                               )
                               (let ([entry (make-mail-entry id date from to cc subj)])
-                                 (add-property curs (1- (cursor)) `(data ,entry))
+                                 (add-property curs (1- (cursor)) `(:data ,entry))
                               )
                            )
                         )
@@ -403,9 +403,9 @@
 
 (define mail-open-thread
    (lambda ()
-      (let ([plist (get-property 'data (cursor) (+ 1 (cursor)))])
+      (let ([plist (get-property ':data (cursor) (+ 1 (cursor)))])
          (letrec (
-               [tid (plist-get (first plist) 'data)]
+               [tid (plist-get (first plist) ':data)]
                [buf-ret (buffer-new)]
               )
             (process-create (mail-notmuch-cmd (format "show --entire-thread=true --format=sexp --body=false thread:~a" tid)) buf-ret
@@ -466,8 +466,8 @@
 
 (define mail-delete-thread
    (lambda ()
-      (let ([plist (get-property 'data (cursor) (+ 1 (cursor)))])
-         (let ([entry (plist-get (first plist) 'data)])
+      (let ([plist (get-property ':data (cursor) (+ 1 (cursor)))])
+         (let ([entry (plist-get (first plist) ':data)])
             (mail-thread-add-tag entry "deleted")
             (buffer-reload)
          )
@@ -477,8 +477,8 @@
 
 (define mail-undelete-thread
    (lambda ()
-      (let ([plist (get-property 'data (cursor) (+ 1 (cursor)))])
-         (let ([entry (plist-get (first plist) 'data)])
+      (let ([plist (get-property ':data (cursor) (+ 1 (cursor)))])
+         (let ([entry (plist-get (first plist) ':data)])
             (mail-thread-del-tag entry "deleted")
             (buffer-reload)
          )
@@ -535,12 +535,12 @@
                         (insert (format "[~a] [~a] " (string-pad-right date 15) (string-pad-right from 15)))
                         (insert (format "~a\n" (string-pad-right subj 100))
                            (if (member "unread" tags)
-                              '(style (:attr "bold"))
+                              '(:style (:attr "bold"))
                               ;; else
-                              '(style (:attr "normal"))
+                              '(:style (:attr "normal"))
                            )
                         )
-                        (add-property curs (1- (cursor)) `(data ,id))
+                        (add-property curs (1- (cursor)) `(:data ,id))
                      )
                   )
                   l

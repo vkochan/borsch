@@ -67,15 +67,15 @@
          )
          (for-each
             (lambda (d)
-               (insert (fmt "~a/\n" d) `(style ,dirb-dir-style))
+               (insert (fmt "~a/\n" d) `(:style ,dirb-dir-style))
             ) dl
          )
          (for-each
             (lambda (f)
                (if (= 0 (bitwise-and #o100 (get-mode (fmt "~a/~a" dir f))))
-                  (insert (fmt "~a\n" f) `(style ,dirb-file-regular-style))
+                  (insert (fmt "~a\n" f) `(:style ,dirb-file-regular-style))
                   ;; else
-                  (insert (fmt "~a\n" f) `(style ,dirb-file-executable-style))
+                  (insert (fmt "~a\n" f) `(:style ,dirb-file-executable-style))
                )
             ) fl
          )

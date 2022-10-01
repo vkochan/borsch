@@ -445,10 +445,10 @@
    (lambda ()
       (let ([ls (get-local staged-list)])
          (when (not (equal? (length ls) 0))
-            (insert (format "Staged (~a):\n" (length ls)) '(style (:attr "bold")) `(keymap ,git-staged-all-map))
+            (insert (format "Staged (~a):\n" (length ls)) '(:style (:attr "bold")) `(:keymap ,git-staged-all-map))
 	    (for-each
                (lambda (f)
-                  (insert (format "~a ~a\n" (git-staged-file-status f) f) `(keymap ,git-staged-file-map))
+                  (insert (format "~a ~a\n" (git-staged-file-status f) f) `(:keymap ,git-staged-file-map))
                ) ls
             )
             (insert "\n")
@@ -461,10 +461,10 @@
    (lambda ()
       (let ([ls (get-local unstaged-list)])
          (when (not (equal? (length ls) 0))
-            (insert (format "Not staged (~a):\n" (length ls)) '(style (:attr "bold")) `(keymap ,git-unstaged-all-map))
+            (insert (format "Not staged (~a):\n" (length ls)) '(:style (:attr "bold")) `(:keymap ,git-unstaged-all-map))
 	    (for-each
                (lambda (f)
-                  (insert (format "~a ~a\n" (git-unstaged-file-status f) f) `(keymap ,git-unstaged-file-map))
+                  (insert (format "~a ~a\n" (git-unstaged-file-status f) f) `(:keymap ,git-unstaged-file-map))
                ) ls
             )
             (insert "\n")
@@ -477,7 +477,7 @@
    (lambda ()
       (let ([ls (get-local unmerged-list)])
          (when (not (equal? (length ls) 0))
-            (insert (format "Not merged (~a):\n" (length ls)) '(style (:attr "bold")))
+            (insert (format "Not merged (~a):\n" (length ls)) '(:style (:attr "bold")))
 	    (for-each
                (lambda (f)
                   (insert (format "~a\n" f))
@@ -493,10 +493,10 @@
    (lambda ()
       (let ([ls (get-local untracked-list)])
          (when (not (equal? (length ls) 0))
-            (insert (format "Untracked (~a):\n" (length ls)) '(style (:attr "bold")))
+            (insert (format "Untracked (~a):\n" (length ls)) '(:style (:attr "bold")))
 	    (for-each
                (lambda (f)
-                  (insert (format "~a\n" f) `(keymap ,git-untracked-file-map))
+                  (insert (format "~a\n" f) `(:keymap ,git-untracked-file-map))
                ) ls
             )
             (insert "\n")
@@ -666,7 +666,7 @@
             (buffer-set-keymap 'git-switch-branch-map)
             (for-each
                (lambda (x)
-                  (insert (format "~a\n" x) '(style (:attr "bold")))
+                  (insert (format "~a\n" x) '(:style (:attr "bold")))
                ) l
             )
          )
@@ -751,7 +751,7 @@
             (move-buffer-begin)
             (move-each-line
                (lambda ()
-                  (add-property (cursor) (word-end-pos) '(style (:fg "green")))
+                  (add-property (cursor) (word-end-pos) '(:style (:fg "green")))
                )
             )
             (move-buffer-begin)
@@ -787,7 +787,7 @@
    (move-buffer-begin)
    (move-each-line
       (lambda ()
-         (add-property (cursor) (word-end-pos) '(style (:fg "green")))
+         (add-property (cursor) (word-end-pos) '(:style (:fg "green")))
       )
    )
    (move-buffer-begin)

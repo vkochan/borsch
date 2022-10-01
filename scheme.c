@@ -834,10 +834,10 @@ static void scheme_buf_prop_walk(Buffer *buf, int id, size_t start, size_t end, 
 		scheme_plist_insert(&attr_plist, ":bg", scheme_color_to_name(style->bg));
 		scheme_plist_insert(&attr_plist, ":attr", Sstring(attr_name));
 						       
-		scheme_plist_insert(&style_plist, ":type", Sstring_to_symbol("style"));
+		//scheme_plist_insert(&style_plist, ":type", Sstring_to_symbol(":style"));
 		scheme_plist_insert(&style_plist, ":start", Sinteger(start));
 		scheme_plist_insert(&style_plist, ":end", Sinteger(end));
-		scheme_plist_insert(&style_plist, "style", attr_plist.head);
+		scheme_plist_insert(&style_plist, ":style", attr_plist.head);
 		
 		scheme_list_insert(plist, style_plist.head);
 		break;
@@ -848,10 +848,10 @@ static void scheme_buf_prop_walk(Buffer *buf, int id, size_t start, size_t end, 
 		struct scheme_list symbol_plist = {0};
 		char *symbol = data;
 
-		scheme_plist_insert(&symbol_plist, ":type", Sstring_to_symbol("symbol"));
+		//scheme_plist_insert(&symbol_plist, ":type", Sstring_to_symbol(":symbol"));
 		scheme_plist_insert(&symbol_plist, ":start", Sinteger(start));
 		scheme_plist_insert(&symbol_plist, ":end", Sinteger(end));
-		scheme_plist_insert(&symbol_plist, "symbol", Sstring_to_symbol(symbol));
+		scheme_plist_insert(&symbol_plist, ":symbol", Sstring_to_symbol(symbol));
 						       
 		scheme_list_insert(plist, symbol_plist.head);
 		break;
@@ -862,10 +862,10 @@ static void scheme_buf_prop_walk(Buffer *buf, int id, size_t start, size_t end, 
 		struct scheme_list data_plist = {0};
 		ptr pdata = data;
 
-		scheme_plist_insert(&data_plist, ":type", Sstring_to_symbol("data"));
+		//scheme_plist_insert(&data_plist, ":type", Sstring_to_symbol(":data"));
 		scheme_plist_insert(&data_plist, ":start", Sinteger(start));
 		scheme_plist_insert(&data_plist, ":end", Sinteger(end));
-		scheme_plist_insert(&data_plist, "data", pdata);
+		scheme_plist_insert(&data_plist, ":data", pdata);
 		
 		scheme_list_insert(plist, data_plist.head);
 		break;
