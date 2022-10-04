@@ -880,7 +880,7 @@ ptr scheme_buf_prop_get(int bid, int type, int start, int end, char *name)
 
 	buf_prop_walk(bid, type, start, end, name, &plist, scheme_buf_prop_walk);
 
-	return plist.head ? plist.head : Sfalse;
+	return plist.head ? plist.head : Scons(Snil, Snil);
 }
 
 ptr scheme_buf_env_get(int bid)
