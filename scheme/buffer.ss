@@ -762,11 +762,10 @@
       ]
 
       [(start end plist)
-       (add-property start end #f plist)
-      ]
-
-      [(start end regex plist)
-       (let ([name (plist-get plist 'name)])
+       (let (
+             [name (plist-get plist ':name)]
+             [regex (plist-get plist ':regex)]
+            )
           (plist-for-each plist
              (lambda (prop val)
                 (case prop
@@ -784,63 +783,66 @@
 
 (define remove-property
    (case-lambda
-      [(start end type)
-       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type type) start end #f #f))]
-
+      [()
+       (remove-property ':all -1 -1 #f)
+      ]
+    
+      [(name)
+       (remove-property ':all -1 -1 name)
+      ]
+    
       [(start end)
-       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type ':all) start end #f #f))]
-
-      [(type-or-name)
-       (call-foreign
-          (__cs_buf_prop_del
-             (current-buffer)
-             (symbol->text-property-type (if (symbol? type-or-name) type-or-name ':all))
-             -1
-             -1
-             #f
-             (if (symbol? type-or-name) #f type-or-name)
-          )
-       )
+       (remove-property ':all start end #f)
       ]
 
-      [()
-       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type ':all) -1 -1 #f #f))]
-   )
-)
+      [(type start end)
+       (remove-property type start end #f)
+      ]
 
-(define remove-regex-property
-   (case-lambda
-    [(regex)
-     (remove-regex-property regex ':all)
-    ]
-
-    [(regex type)
-     (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type type) -1 -1 regex))
-    ]
+      [(type start end name)
+       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type type) start end #f name))
+      ]
    )
 )
 
 (define get-property
    (case-lambda
-    [(name)
-     (get-property (current-buffer) ':all -1 -1 name)
-    ]
+      [(name)
+       (get-property ':all -1 -1 name)
+      ]
     
-    [(start end)
-     (get-property (current-buffer) ':all start end)
-    ]
+      [(start end)
+       (get-property ':all start end #f)
+      ]
 
-    [(type start end)
-     (get-property (current-buffer) type start end)
-    ]
+      [(type start end)
+       (get-property type start end #f)
+      ]
 
-    [(buf type start end)
-     (get-property (current-buffer) type start end #f)
-    ]
+      [(type start end name)
+       (call-foreign (__cs_buf_prop_get (current-buffer) (symbol->text-property-type type) start end name))
+      ]
+   )
+)
+
+(define set-property
+   (case-lambda
+      [(name plist)
+       (set-property ':all -1 -1 name plist)
+      ]
     
-    [(buf type start end name)
-     (call-foreign (__cs_buf_prop_get buf (symbol->text-property-type type) start end name))
-    ]
+      [(start end plist)
+       (set-property ':all start end #f plist)
+      ]
+
+      [(type start end plist)
+       (set-property type start end #f plist)
+      ]
+
+      [(type start end name plist)
+       (remove-property type start end name)
+       (add-property type start end name plist)
+      ]
    )
 )
 
@@ -1706,7 +1708,7 @@
             [s (buffer-begin-pos)]
             [e (buffer-end-pos)]
            )
-         (remove-property ':all)
+         (remove-property)
          (delete-range s e)
       )
    )
