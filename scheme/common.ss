@@ -247,6 +247,28 @@
    )
 )
 
+(define plist-put
+   (lambda (plist prop value)
+      (let loop ([plist plist])
+         (if (< (length plist) 2)
+            (list)
+            ;; else
+            (let (
+                  [rest (cdr (cdr plist))]
+                  [name (first plist)]
+                  [val (second plist)]
+                 )
+               (if (equal? name prop)
+                  (append (list prop value) (loop rest))
+                  ;; else
+                  (append (list name val) (loop rest))
+               )
+            )
+         )
+      )
+   )
+)
+
 (define plist-for-each
    (lambda (plist fn)
       (let loop ([plist plist])
