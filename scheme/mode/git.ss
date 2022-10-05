@@ -751,7 +751,7 @@
             (move-buffer-begin)
             (move-each-line
                (lambda ()
-                  (add-property (cursor) (word-end-pos) '(:style (:fg "green")))
+                  (add-text-property (cursor) (word-end-pos) '(:style (:fg "green")))
                )
             )
             (move-buffer-begin)
@@ -787,7 +787,7 @@
    (move-buffer-begin)
    (move-each-line
       (lambda ()
-         (add-property (cursor) (word-end-pos) '(:style (:fg "green")))
+         (add-text-property (cursor) (word-end-pos) '(:style (:fg "green")))
       )
    )
    (move-buffer-begin)

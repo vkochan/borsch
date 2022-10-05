@@ -755,10 +755,10 @@
    )
 )
 
-(define add-property
+(define add-text-property
    (case-lambda
       [(regex plist)
-       (add-property -1 -1 regex plist)
+       (add-text-property -1 -1 regex plist)
       ]
 
       [(start end plist)
@@ -781,22 +781,22 @@
    )
 )
 
-(define remove-property
+(define remove-text-property
    (case-lambda
       [()
-       (remove-property ':all -1 -1 #f)
+       (remove-text-property ':all -1 -1 #f)
       ]
     
       [(name)
-       (remove-property ':all -1 -1 name)
+       (remove-text-property ':all -1 -1 name)
       ]
     
       [(start end)
-       (remove-property ':all start end #f)
+       (remove-text-property ':all start end #f)
       ]
 
       [(type start end)
-       (remove-property type start end #f)
+       (remove-text-property type start end #f)
       ]
 
       [(type start end name)
@@ -805,18 +805,18 @@
    )
 )
 
-(define get-property
+(define get-text-property
    (case-lambda
       [(name)
-       (get-property ':all -1 -1 name)
+       (get-text-property ':all -1 -1 name)
       ]
     
       [(start end)
-       (get-property ':all start end #f)
+       (get-text-property ':all start end #f)
       ]
 
       [(type start end)
-       (get-property type start end #f)
+       (get-text-property type start end #f)
       ]
 
       [(type start end name)
@@ -825,10 +825,10 @@
    )
 )
 
-(define set-property
+(define set-text-property
    (case-lambda
       [(start end plist)
-       (set-property start end #f plist)
+       (set-text-property start end #f plist)
       ]
       
       [(start end name plist)
@@ -841,8 +841,8 @@
              )
           )
           (when type
-             (remove-property type start end name)
-             (add-property start end plist)
+             (remove-text-property type start end name)
+             (add-text-property start end plist)
           )
        )
       ]
@@ -871,7 +871,7 @@
                (let ([p (- (call-foreign (__cs_buf_text_insert (current-buffer) t)) 1)])
                   (for-each
                      (lambda (a)
-                        (add-property c p a)
+                        (add-text-property c p a)
                      ) s
                   )
                   p
@@ -1711,7 +1711,7 @@
             [s (buffer-begin-pos)]
             [e (buffer-end-pos)]
            )
-         (remove-property)
+         (remove-text-property)
          (delete-range s e)
       )
    )
