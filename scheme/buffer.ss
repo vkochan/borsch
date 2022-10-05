@@ -827,21 +827,24 @@
 
 (define set-property
    (case-lambda
-      [(name plist)
-       (set-property ':all -1 -1 name plist)
-      ]
-    
       [(start end plist)
-       (set-property ':all start end #f plist)
+       (set-property start end #f plist)
       ]
-
-      [(type start end plist)
-       (set-property type start end #f plist)
-      ]
-
-      [(type start end name plist)
-       (remove-property type start end name)
-       (add-property start end (append (list ':name name) plist))
+      
+      [(start end name plist)
+       (let ([type #f])
+          (plist-for-each plist
+             (lambda (prop val)
+                (when (member prop '(:style :data :symbol :keymap))
+                   (set! type prop)
+                )
+             )
+          )
+          (when type
+             (remove-property type start end name)
+             (add-property start end plist)
+          )
+       )
       ]
    )
 )

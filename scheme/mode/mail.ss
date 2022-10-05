@@ -529,7 +529,7 @@
                (set! th-list (append th-list (list th)))
             )
          )
-         (set-property 'style (plist-get th-prop ':start) (plist-get th-prop ':end)
+         (set-property (plist-get th-prop ':start) (plist-get th-prop ':end)
             `(:style ,th-style)
          )
          (set-local! mail-selected-threads th-list)
