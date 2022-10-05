@@ -811,7 +811,7 @@ static void scheme_buf_prop_walk(Buffer *buf, int id, size_t start, size_t end, 
 			int bit = (1 << i);
 
 			if (bit & style->attr) {
-				switch (i) {
+				switch (bit) {
 				case UI_TEXT_STYLE_NORMAL: a = "normal"; break;
 				case UI_TEXT_STYLE_BOLD: a = "bold"; break;
 				case UI_TEXT_STYLE_DIM: a = "dim"; break;
