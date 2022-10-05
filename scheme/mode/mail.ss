@@ -202,6 +202,12 @@
    )
 )
 
+(define mail-current-thread-entry
+   (lambda ()
+      (plist-get (first (get-property ':data (cursor) (+ 1 (cursor)))) ':data)
+   )
+)
+
 (define mail-dump-entry
    (lambda ()
       (let ([plist (get-property ':data (cursor) (+ 1 (cursor)))])
@@ -466,10 +472,19 @@
 
 (define mail-delete-thread
    (lambda ()
-      (let ([plist (get-property ':data (cursor) (+ 1 (cursor)))])
-         (let ([entry (plist-get (first plist) ':data)])
-            (mail-thread-add-tag entry "deleted")
-            (buffer-reload)
+      (let ([th-list (get-local mail-selected-threads)])
+         (minibuf-ask "Mark selected threads as deleted ?"
+            (lambda (v)
+               (when (eq? v 'yes)
+                  (for-each
+                     (lambda (th)
+                        (mail-thread-add-tag th "deleted")
+                     )
+                     th-list
+                  )
+                  (buffer-reload)
+               )
+            )
          )
       )
    )
@@ -477,11 +492,47 @@
 
 (define mail-undelete-thread
    (lambda ()
-      (let ([plist (get-property ':data (cursor) (+ 1 (cursor)))])
-         (let ([entry (plist-get (first plist) ':data)])
-            (mail-thread-del-tag entry "deleted")
-            (buffer-reload)
+      (let ([th-list (get-local mail-selected-threads)])
+         (minibuf-ask "Un-mark selected threads as deleted ?"
+            (lambda (v)
+               (when (eq? v 'yes)
+                  (for-each
+                     (lambda (th)
+                        (mail-thread-del-tag th "deleted")
+                     )
+                     th-list
+                  )
+                  (buffer-reload)
+               )
+            )
          )
+      )
+   )
+)
+
+(define mail-select-thread
+   (lambda ()
+      (let (
+            [th-prop (first (get-property ':style (line-begin-pos) (line-end-pos)))]
+            [th-list (get-local mail-selected-threads)]
+            [th-style '()]
+            [th (mail-current-thread-entry)]
+           )
+         (if (member th th-list)
+            (let ()
+               (set! th-style (plist-put (plist-get th-prop ':style) ':fg "default"))
+               (set! th-list (remove th th-list))
+            )
+            ;; else
+            (let ()
+               (set! th-style (plist-put (plist-get th-prop ':style) ':fg "blue"))
+               (set! th-list (append th-list (list th)))
+            )
+         )
+         (set-property 'style (plist-get th-prop ':start) (plist-get th-prop ':end)
+            `(:style ,th-style)
+         )
+         (set-local! mail-selected-threads th-list)
       )
    )
 )
@@ -489,6 +540,7 @@
 (define mail-mode-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" (lambda () (mail-open-thread)))
+      (bind-key map "<Space>" (lambda () (mail-select-thread)))
       (bind-key map "d" (lambda () (mail-delete-thread)))
       (bind-key map "!" (lambda () (mail-undelete-thread)))
       (bind-key map "c" (lambda () (mail-new-message)))
@@ -500,6 +552,7 @@
 
 (define-mode mail-mode "Mail" text-mode
    (set-local! linenum-enable #f)
+   (define-local mail-selected-threads '())
 )
 
 (define mail-reload-thread-list
