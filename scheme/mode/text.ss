@@ -209,6 +209,19 @@
    )
 )
 
+(define text-mode-join-lines
+   (lambda ()
+      (move-line-end)
+      (delete-next-char)
+      (insert " ")
+      (move-prev-char)
+      (delete-word)
+      (when (not (eq? (cursor) (buffer-end-pos)))
+         (insert " ")
+      )
+   )
+)
+
 (define text-mode-normal-map
    (let ([map (make-keymap)])
       (bind-key map "h" (lambda () (move-prev-char)))
@@ -235,6 +248,7 @@
       (bind-key map "d B" (lambda () (text-mode-delete delete-prev-longword)))
       (bind-key map "d 0" (lambda () (text-mode-delete delete-line-begin)))
       (bind-key map "d $" (lambda () (text-mode-delete delete-line-end)))
+      (bind-key map "J" (lambda () (text-mode-join-lines)))
       (bind-key map "g g" (lambda () (move-buffer-begin)))
       (bind-key map "G" (lambda () (cursor-set (- (buffer-end-pos) 1)) (move-line-start)))
       (bind-key map "H" (lambda () (cursor-set (window-begin-pos))))
