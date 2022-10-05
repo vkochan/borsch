@@ -841,7 +841,7 @@
 
       [(type start end name plist)
        (remove-property type start end name)
-       (add-property type start end name plist)
+       (add-property start end (append (list ':name name) plist))
       ]
    )
 )
