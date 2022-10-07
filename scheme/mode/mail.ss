@@ -91,7 +91,7 @@
              (set! mail-is-syncing? #t)
              (message "Syncing mail ...")
              (process-create
-                (format "~a && ~a" (mail-sync-cmd) (mail-notmuch-cmd "new")) #f #f
+                (format "~a ; ~a" (mail-sync-cmd) (mail-notmuch-cmd "new")) #f #f
                 (lambda (status buf-out buf-err)
                    (set! mail-is-syncing? #f)
                    (message "Mail synced")
