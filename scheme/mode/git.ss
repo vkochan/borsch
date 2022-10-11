@@ -619,59 +619,17 @@
    )
 )
 
-(define git-select-branch
+(define git-switch-branch
    (lambda ()
-      (let (
-            [b (extract-longword)]
-           )
-         (when b
+      (minibuf-complete
+         (git-branch-list)
+         (lambda (b)
             (git-cmd-read (format "checkout ~a" b))
             (if (not (equal? b (git-branch-name)))
                (message (format "could not switch to ~a" b))
             )
-            (window-delete)
          )
-      )
-   )
-)
-
-(define git-switch-branch-map
-   (let ([map (make-keymap)])
-      (bind-key map "<Enter>" git-select-branch)
-      (bind-key map "<Esc>" window-delete)
-      (bind-key map "q" window-delete)
-      (bind-key map "j" (lambda ()
-                                   (highlight-clear)
-                                   (move-line-down)
-                                   (highlight-range
-                                      (line-begin-pos) (line-end-pos))))
-      (bind-key map "k" (lambda ()
-                                   (highlight-clear)
-                                   (move-line-up)
-                                   (highlight-range
-                                      (line-begin-pos) (line-end-pos))))
-      map
-   )
-)
-
-(define git-switch-branch
-   (lambda ()
-      (let (
-            [l (git-branch-list)]
-            [b (buffer-create)]
-           )
-         (window-popup #t)
-         (with-current-buffer b
-            (buffer-set-name "Switch branch")
-            (buffer-set-keymap 'git-switch-branch-map)
-            (for-each
-               (lambda (x)
-                  (insert (format "~a\n" x) '(:style (:attr "bold")))
-               ) l
-            )
-         )
-         (move-buffer-begin)
-         (highlight-range (line-begin-pos) (line-end-pos))
+         "switch to branch"
       )
    )
 )
