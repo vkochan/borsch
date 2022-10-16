@@ -312,17 +312,22 @@
        (let ()
           (minibuf-complete
              (lambda ()
-                (list-dir
-                   (string-append
-                      (get-local minibuf-complete-path-root) "/"
-                      (path-parent (get-local complete-text))
+                (let (
+                      [root (get-local minibuf-complete-path-root)]
+                      [text (get-local complete-text)]
+                     )
+                   (list-dir
+                      (string-append
+                         (if (path-absolute? text) "" root)
+                         (path-parent text)
+                      )
                    )
                 )
              )
              #f
              prompt
              (lambda ()
-                (define-local minibuf-complete-path-root (current-cwd))
+                (define-local minibuf-complete-path-root (string-append (current-cwd) "/"))
                 (define-local minibuf-complete-path-func fn)
                 (define-local complete-search-word-func
                    (lambda ()
@@ -332,9 +337,18 @@
                 (define-local complete-choose-func
                    (lambda ()
                       (let (
-                            [dir (path-parent (get-local complete-text))]
+                            [text (path-parent (get-local complete-text))]
                            )
-                         (set-local! complete-text (string-append dir (if (string-empty? dir) "" "/") (complete-selected-value)))
+                         (set-local! complete-text
+                            (string-append
+                               text
+                               (if (or (path-absolute? text) (string-empty? text))
+                                  ""
+                                  "/"
+                               )
+                               (complete-selected-value)
+                            )
+                         )
                          (complete-match)
                          (complete-draw)
                       )
@@ -345,11 +359,16 @@
                       (let (
                             [fn (get-local minibuf-complete-path-func)]
                             [root (get-local minibuf-complete-path-root)]
-                            [dir (path-parent (get-local complete-text))]
+                            [text (path-parent (get-local complete-text))]
                             [val (complete-selected-value)]
                            )
                          (minibuf-clear)
-                         (fn (string-append root "/" dir "/" val))
+                         (fn
+                            (string-append
+                               (if (path-absolute? text) "" root)
+                               text "/" val
+                            )
+                         )
                       )
                    )
                 )
