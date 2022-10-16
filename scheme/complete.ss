@@ -189,6 +189,13 @@
    )
 )
 
+(define complete-paste-value
+   (lambda ()
+      (copybuf-paste)
+      (complete-update-text)
+   )
+)
+
 (define complete-append-value
    (lambda ()
       (copybuf-append (format "\n~a" (complete-selected-value)))
@@ -252,6 +259,7 @@
       (bind-key map "<Esc>" complete-cancel)
       (bind-key map "<Tab>" complete-choose)
       (bind-key map "C-y" complete-copy-value)
+      (bind-key map "C-p" complete-paste-value)
       (bind-key map "C-a" complete-append-value)
       ;;(bind-key map "C-h" complete-prompt-move-prev-char)
       ;;(bind-key map "C-l" complete-prompt-move-next-char)
