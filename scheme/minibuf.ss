@@ -312,11 +312,17 @@
        (let ()
           (minibuf-complete
              (lambda ()
-                (list-dir (string-append (current-cwd) "/" (path-parent (get-local complete-text))))
+                (list-dir
+                   (string-append
+                      (get-local minibuf-complete-path-root) "/"
+                      (path-parent (get-local complete-text))
+                   )
+                )
              )
              #f
              prompt
              (lambda ()
+                (define-local minibuf-complete-path-root (current-cwd))
                 (define-local minibuf-complete-path-func fn)
                 (define-local complete-search-word-func
                    (lambda ()
@@ -338,11 +344,12 @@
                    (lambda ()
                       (let (
                             [fn (get-local minibuf-complete-path-func)]
+                            [root (get-local minibuf-complete-path-root)]
                             [dir (path-parent (get-local complete-text))]
                             [val (complete-selected-value)]
                            )
                          (minibuf-clear)
-                         (fn (string-append (current-cwd) "/" dir "/" val))
+                         (fn (string-append root "/" dir "/" val))
                       )
                    )
                 )
