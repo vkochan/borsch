@@ -98,6 +98,7 @@
          )
       )
       )
+      (cursor-set (get-local complete-prompt-cursor))
    )
 )
 
@@ -215,8 +216,10 @@
 
 (define complete-prompt-move-next-char
    (lambda ()
-      (move-next-char)
-      (set-local! complete-prompt-cursor (cursor))
+      (when (< (cursor) (line-end-pos))
+         (move-next-char)
+         (set-local! complete-prompt-cursor (cursor))
+      )
    )
 )
 
@@ -261,8 +264,8 @@
       (bind-key map "C-y" complete-copy-value)
       (bind-key map "C-p" complete-paste-value)
       (bind-key map "C-a" complete-append-value)
-      ;;(bind-key map "C-h" complete-prompt-move-prev-char)
-      ;;(bind-key map "C-l" complete-prompt-move-next-char)
+      (bind-key map "C-h" complete-prompt-move-prev-char)
+      (bind-key map "C-l" complete-prompt-move-next-char)
       (bind-key map "C-j" complete-list-move-down)
       (bind-key map "C-k" complete-list-move-up)
       (bind-key map "C-g q q" do-quit)
