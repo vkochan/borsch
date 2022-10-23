@@ -11,7 +11,7 @@
 (load "style.ss")
 (load "keymap.ss")
 (load "layout.ss")
-(load "view.ss")
+(load "frame.ss")
 (load "window.ss")
 (load "buffer.ss")
 (load "command.ss")
