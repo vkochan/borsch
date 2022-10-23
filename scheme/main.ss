@@ -166,7 +166,7 @@
 (add-hook 'change-cwd-hook
    (lambda ()
       (let (
-            [local-script (string-append (frame-cwd) "/" ".borsch.ss")]
+            [local-script (string-append (current-cwd) "/" ".borsch.ss")]
            )
          (when (file-exists? local-script)
             (load local-script)

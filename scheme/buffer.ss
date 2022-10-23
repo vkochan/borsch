@@ -2003,7 +2003,7 @@
       (if (and (local-bound? current-cwd) (get-local current-cwd))
          (get-local current-cwd)
          ;; else
-         (frame-cwd)
+         (current-cwd)
       )
    )
 )
