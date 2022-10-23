@@ -1,141 +1,141 @@
-(define __cs_view_current_get (foreign-procedure __collect_safe "cs_view_current_get" () int))
-(define __cs_view_current_set (foreign-procedure __collect_safe "cs_view_current_set" (int) int))
-(define __cs_view_name_get (foreign-procedure __collect_safe "cs_view_name_get" (int) scheme-object))
-(define __cs_view_name_set (foreign-procedure "cs_view_name_set" (int string) int))
-(define __cs_view_cwd_get (foreign-procedure __collect_safe "cs_view_cwd_get" (int) scheme-object))
-(define __cs_view_cwd_set (foreign-procedure "cs_view_cwd_set" (int string) int))
+(define __cs_frame_current_get (foreign-procedure __collect_safe "cs_frame_current_get" () int))
+(define __cs_frame_current_set (foreign-procedure __collect_safe "cs_frame_current_set" (int) int))
+(define __cs_frame_name_get (foreign-procedure __collect_safe "cs_frame_name_get" (int) scheme-object))
+(define __cs_frame_name_set (foreign-procedure "cs_frame_name_set" (int string) int))
+(define __cs_frame_cwd_get (foreign-procedure __collect_safe "cs_frame_cwd_get" (int) scheme-object))
+(define __cs_frame_cwd_set (foreign-procedure "cs_frame_cwd_set" (int string) int))
 
-(define current-view
+(define current-frame
    (lambda ()
-      (call-foreign (__cs_view_current_get))
+      (call-foreign (__cs_frame_current_get))
    )
 )
 
-(define-syntax (with-current-view stx)
+(define-syntax (with-current-frame stx)
    (syntax-case stx ()
-      ((_ view exp ...)
+      ((_ frame exp ...)
        #`(let (
-               [from (current-view)]
-               [to view]
+               [from (current-frame)]
+               [to frame]
               )
-            (view-switch to)
+            (frame-switch to)
             (begin
                exp
                ...
             )
-            (view-switch from)
+            (frame-switch from)
          )
       )
    )
 )
 
-(define view-switch
+(define frame-switch
    (lambda (tag)
-      (call-foreign (__cs_view_current_set tag))
-      (run-hooks 'view-switch-hook tag)
+      (call-foreign (__cs_frame_current_set tag))
+      (run-hooks 'frame-switch-hook tag)
    )
 )
 
-(define view-switch-1
+(define frame-switch-1
    (lambda ()
-      (view-switch 1)
+      (frame-switch 1)
    )
 )
 
-(define view-switch-2
+(define frame-switch-2
    (lambda ()
-      (view-switch 2)
+      (frame-switch 2)
    )
 )
 
-(define view-switch-3
+(define frame-switch-3
    (lambda ()
-      (view-switch 3)
+      (frame-switch 3)
    )
 )
 
-(define view-switch-4
+(define frame-switch-4
    (lambda ()
-      (view-switch 4)
+      (frame-switch 4)
    )
 )
 
-(define view-switch-5
+(define frame-switch-5
    (lambda ()
-      (view-switch 5)
+      (frame-switch 5)
    )
 )
 
-(define view-switch-6
+(define frame-switch-6
    (lambda ()
-      (view-switch 6)
+      (frame-switch 6)
    )
 )
 
-(define view-switch-7
+(define frame-switch-7
    (lambda ()
-      (view-switch 7)
+      (frame-switch 7)
    )
 )
 
-(define view-switch-8
+(define frame-switch-8
    (lambda ()
-      (view-switch 8)
+      (frame-switch 8)
    )
 )
 
-(define view-switch-9
+(define frame-switch-9
    (lambda ()
-      (view-switch 9)
+      (frame-switch 9)
    )
 )
 
-(define view-switch-all
+(define frame-switch-all
    (lambda ()
-      (view-switch 0)
+      (frame-switch 0)
    )
 )
 
-(define view-name
+(define frame-name
    (case-lambda
       [()
-       (call-foreign (__cs_view_name_get (current-view)))]
+       (call-foreign (__cs_frame_name_get (current-frame)))]
 
       [(tag)
-       (call-foreign (__cs_view_name_get tag))]
+       (call-foreign (__cs_frame_name_get tag))]
    )
 )
 
-(define view-set-name
+(define frame-set-name
    (case-lambda
       [(name)
-       (view-set-name (current-view) name)
+       (frame-set-name (current-frame) name)
       ]
 
       [(tag name)
-       (call-foreign (__cs_view_name_set tag name))
-       (run-hooks 'change-view-name-hook)
+       (call-foreign (__cs_frame_name_set tag name))
+       (run-hooks 'change-frame-name-hook)
       ]
    )
 )
 
-(define view-cwd
+(define frame-cwd
    (case-lambda
       [()
-       (call-foreign (__cs_view_cwd_get (current-view)))]
+       (call-foreign (__cs_frame_cwd_get (current-frame)))]
 
       [(tag)
-       (call-foreign (__cs_view_cwd_get tag))]
+       (call-foreign (__cs_frame_cwd_get tag))]
    )
 )
 
-(define view-set-cwd
+(define frame-set-cwd
    (case-lambda
       [(cwd)
-       (view-set-cwd (current-view) cwd)]
+       (frame-set-cwd (current-frame) cwd)]
 
       [(tag cwd)
-       (call-foreign (__cs_view_cwd_set tag cwd))
+       (call-foreign (__cs_frame_cwd_set tag cwd))
        (run-hooks 'change-cwd-hook)
       ]
    )

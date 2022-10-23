@@ -7,7 +7,7 @@
 (define git-branch-name
    (lambda ()
       (let (
-            [out (process-get-output (format "git -C ~a rev-parse --abbrev-ref HEAD 2> /dev/null" (view-cwd)))]
+            [out (process-get-output (format "git -C ~a rev-parse --abbrev-ref HEAD 2> /dev/null" (current-cwd)))]
            )
          (string-remove-nl (list-ref out 1))
       )
@@ -17,7 +17,7 @@
 (define git-short-status
    (lambda ()
       (let (
-            [out (process-get-output (format "git -C ~a status 2> /dev/null" (view-cwd)))]
+            [out (process-get-output (format "git -C ~a status 2> /dev/null" (current-cwd)))]
             [branch (git-branch-name)]
             [status ""]
            )
@@ -44,7 +44,7 @@
 
 (define git-cmd-format
    (lambda (cmd)
-      (format "git -C ~a ~a" (view-cwd) cmd)
+      (format "git -C ~a ~a" (current-cwd) cmd)
    )
 )
 
@@ -552,7 +552,7 @@
                 (buffer-set-mode-name "Git Commit")
                 (bind-key-local "C-c C-c"
                    (lambda ()
-                      (process-with-input (format "git -C ~a commit ~a -F -" (view-cwd) opt)
+                      (process-with-input (format "git -C ~a commit ~a -F -" (current-cwd) opt)
                                           (buffer-string))
                       (with-current-buffer (get-local status-buffer)
                          (git-show-status)

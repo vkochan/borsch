@@ -4546,12 +4546,12 @@ int term_filter_enable(int bid, bool enable)
 	return -1;
 }
 
-int view_current_get(void)
+int frame_current_get(void)
 {
 	return pertag.curtag;
 }
 
-int view_current_set(int tag)
+int frame_current_set(int tag)
 {
 	int i;
 
@@ -4566,7 +4566,7 @@ int view_current_set(int tag)
 	}
 }
 
-const char *view_name_get(int tag)
+const char *frame_name_get(int tag)
 {
 	if (pertag.name[tag] && strlen(pertag.name[tag])) {
 		return pertag.name[tag];
@@ -4575,7 +4575,7 @@ const char *view_name_get(int tag)
 	}
 }
 
-int view_name_set(int tag, char *name)
+int frame_name_set(int tag, char *name)
 {
 	free(pertag.name[tag]);
 	pertag.name[tag] = NULL;
@@ -4585,12 +4585,12 @@ int view_name_set(int tag, char *name)
 	drawbar();
 }
 
-char *view_cwd_get(int tag)
+char *frame_cwd_get(int tag)
 {
 	return pertag.cwd[tag];
 }
 
-int view_cwd_set(int tag, char *cwd)
+int frame_cwd_set(int tag, char *cwd)
 {
 	strncpy(pertag.cwd[tag], cwd, CWD_MAX - 1);
 	drawbar();

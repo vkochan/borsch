@@ -175,14 +175,14 @@
 
 (define dirb-goto-cwd
    (lambda ()
-      (dirb-open-dir (view-cwd))
+      (dirb-open-dir (current-cwd))
    )
 )
 
 (define dirb-set-cwd
    (lambda ()
-      (view-set-cwd (dirb-current-dir))
-      (dirb-open-dir (view-cwd))
+      (frame-set-cwd (dirb-current-dir))
+      (dirb-open-dir (current-cwd))
    )
 )
 
@@ -539,7 +539,7 @@
 )
 
 (define-mode dirb-mode "Dirb" text-mode
-   (define-local current-dir (view-cwd))
+   (define-local current-dir (current-cwd))
    (define-local show-hidden #f)
    (define-local prev-cursor (make-stack))
    (define-local window-draw-hook dirb-draw-selection)
@@ -551,7 +551,7 @@
 (define dirb
    (case-lambda
       [()
-       (dirb (view-cwd))
+       (dirb (current-cwd))
       ]
 
       [(dir)

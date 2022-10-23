@@ -10,7 +10,7 @@
          (for-each
             (lambda (tag)
                (let (
-                     [tag-color (if (equal? tag (current-view))
+                     [tag-color (if (equal? tag (current-frame))
                                     "blue"
                                     ;; else
                                     (if (> (length (window-list-by-tag tag)) 0)
@@ -22,7 +22,7 @@
                                     )
                                 )
                      ]
-                     [vname (view-name tag)]
+                     [vname (frame-name tag)]
                     )
                   (let ([name (or vname "")])
                      (insert
@@ -46,12 +46,12 @@
          (set! topbar-buffer (window-buffer w))
          (set! topbar-window w)
       )
-      (add-hook 'view-switch-hook
+      (add-hook 'frame-switch-hook
          (lambda (tag)
             (topbar-draw)
          )
       )
-      (add-hook 'change-view-name-hook
+      (add-hook 'change-frame-name-hook
          (lambda ()
             (topbar-draw)
          )

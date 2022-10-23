@@ -1139,38 +1139,38 @@ void scheme_term_filter_enable(int bid, bool enable)
 	term_filter_enable(bid, enable);
 }
 
-int scheme_view_current_get(void)
+int scheme_frame_current_get(void)
 {
-	return view_current_get();
+	return frame_current_get();
 }
 
-int scheme_view_current_set(int tag)
+int scheme_frame_current_set(int tag)
 {
-	return view_current_set(tag);
+	return frame_current_set(tag);
 }
 
-ptr scheme_view_name_get(int tag)
+ptr scheme_frame_name_get(int tag)
 {
-	const char *name = view_name_get(tag);
+	const char *name = frame_name_get(tag);
 
 	if (!name)
 		return Sfalse;
 	return Sstring(name);
 }
 
-int scheme_view_name_set(int tag, char *name)
+int scheme_frame_name_set(int tag, char *name)
 {
-	return view_name_set(tag, name);
+	return frame_name_set(tag, name);
 }
 
-ptr scheme_view_cwd_get(int tag)
+ptr scheme_frame_cwd_get(int tag)
 {
-	return Sstring(view_cwd_get(tag));
+	return Sstring(frame_cwd_get(tag));
 }
 
-int scheme_view_cwd_set(int tag, char *cwd)
+int scheme_frame_cwd_set(int tag, char *cwd)
 {
-	return view_cwd_set(tag, cwd);
+	return frame_cwd_set(tag, cwd);
 }
 
 int scheme_layout_current_get(int tag)
@@ -1490,12 +1490,12 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_term_current_line_get", scheme_term_current_line_get);
 	Sregister_symbol("cs_term_filter_enable", scheme_term_filter_enable);
 
-	Sregister_symbol("cs_view_current_get", scheme_view_current_get);
-	Sregister_symbol("cs_view_current_set", scheme_view_current_set);
-	Sregister_symbol("cs_view_name_get", scheme_view_name_get);
-	Sregister_symbol("cs_view_name_set", scheme_view_name_set);
-	Sregister_symbol("cs_view_cwd_get", scheme_view_cwd_get);
-	Sregister_symbol("cs_view_cwd_set", scheme_view_cwd_set);
+	Sregister_symbol("cs_frame_current_get", scheme_frame_current_get);
+	Sregister_symbol("cs_frame_current_set", scheme_frame_current_set);
+	Sregister_symbol("cs_frame_name_get", scheme_frame_name_get);
+	Sregister_symbol("cs_frame_name_set", scheme_frame_name_set);
+	Sregister_symbol("cs_frame_cwd_get", scheme_frame_cwd_get);
+	Sregister_symbol("cs_frame_cwd_set", scheme_frame_cwd_set);
 
 	Sregister_symbol("cs_layout_current_get", scheme_layout_current_get);
 	Sregister_symbol("cs_layout_current_set", scheme_layout_current_set);

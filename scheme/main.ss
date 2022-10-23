@@ -166,7 +166,7 @@
 (add-hook 'change-cwd-hook
    (lambda ()
       (let (
-            [local-script (string-append (view-cwd) "/" ".borsch.ss")]
+            [local-script (string-append (frame-cwd) "/" ".borsch.ss")]
            )
          (when (file-exists? local-script)
             (load local-script)
@@ -201,7 +201,7 @@
 (minibuf-create)
 (topbar-create)
 
-(view-set-cwd (current-directory))
+(frame-set-cwd (current-directory))
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Default key bindings
@@ -232,16 +232,16 @@
 (bind-key "M-b s"       buffer-switch)
 (bind-key "M-b c"       window-close)
 (bind-key "M-b o"       buffer-open)
-(bind-key "M-1"         view-switch-1)
-(bind-key "M-2"         view-switch-2)
-(bind-key "M-3"         view-switch-3)
-(bind-key "M-4"         view-switch-4)
-(bind-key "M-5"         view-switch-5)
-(bind-key "M-6"         view-switch-6)
-(bind-key "M-7"         view-switch-7)
-(bind-key "M-8"         view-switch-8)
-(bind-key "M-9"         view-switch-9)
-(bind-key "M-0"         view-switch-all)
+(bind-key "M-1"         frame-switch-1)
+(bind-key "M-2"         frame-switch-2)
+(bind-key "M-3"         frame-switch-3)
+(bind-key "M-4"         frame-switch-4)
+(bind-key "M-5"         frame-switch-5)
+(bind-key "M-6"         frame-switch-6)
+(bind-key "M-7"         frame-switch-7)
+(bind-key "M-8"         frame-switch-8)
+(bind-key "M-9"         frame-switch-9)
+(bind-key "M-0"         frame-switch-all)
 
 (bind-key "C-g c"       vterm)
 (bind-key "C-g C-x"     open-repl)
@@ -253,16 +253,16 @@
 (bind-key "C-g <Enter>" window-set-master)
 (bind-key "C-g ."       window-set-minimized)
 
-(bind-key "C-g v 1" view-switch-1)
-(bind-key "C-g v 2" view-switch-2)
-(bind-key "C-g v 3" view-switch-3)
-(bind-key "C-g v 4" view-switch-4)
-(bind-key "C-g v 5" view-switch-5)
-(bind-key "C-g v 6" view-switch-6)
-(bind-key "C-g v 7" view-switch-7)
-(bind-key "C-g v 8" view-switch-8)
-(bind-key "C-g v 9" view-switch-9)
-(bind-key "C-g v 0" view-switch-all)
+(bind-key "C-g v 1" frame-switch-1)
+(bind-key "C-g v 2" frame-switch-2)
+(bind-key "C-g v 3" frame-switch-3)
+(bind-key "C-g v 4" frame-switch-4)
+(bind-key "C-g v 5" frame-switch-5)
+(bind-key "C-g v 6" frame-switch-6)
+(bind-key "C-g v 7" frame-switch-7)
+(bind-key "C-g v 8" frame-switch-8)
+(bind-key "C-g v 9" frame-switch-9)
+(bind-key "C-g v 0" frame-switch-all)
 
 (bind-key "C-g w i"   layout-n-master+)
 (bind-key "C-g w d"   layout-n-master-)

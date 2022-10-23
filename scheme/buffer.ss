@@ -1988,7 +1988,7 @@
 
 (define current-cwd
    (lambda ()
-      (view-cwd)
+      (frame-cwd)
    )
 )
 
@@ -2003,7 +2003,7 @@
       (if (and (local-bound? current-cwd) (get-local current-cwd))
          (get-local current-cwd)
          ;; else
-         (view-cwd)
+         (frame-cwd)
       )
    )
 )
