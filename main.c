@@ -4571,7 +4571,7 @@ const char *view_name_get(int tag)
 	if (pertag.name[tag] && strlen(pertag.name[tag])) {
 		return pertag.name[tag];
 	} else {
-		return tags[tag-1];
+		return NULL;
 	}
 }
 

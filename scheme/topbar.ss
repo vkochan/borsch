@@ -22,8 +22,14 @@
                                     )
                                 )
                      ]
+                     [vname (view-name tag)]
                     )
-                  (insert (format "[~a]" (view-name tag)) `(:style (:fg ,tag-color)))
+                  (let ([name (or vname "")])
+                     (insert
+                        (format "[~a~a]" tag (if (equal? "" name) "" (string-append ":" name)))
+                       `(:style (:fg ,tag-color))
+                     )
+                  )
                )
             )
             '(1 2 3 4 5 6 7 8 9)

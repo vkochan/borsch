@@ -1151,7 +1151,11 @@ int scheme_view_current_set(int tag)
 
 ptr scheme_view_name_get(int tag)
 {
-	return Sstring(view_name_get(tag));
+	const char *name = view_name_get(tag);
+
+	if (!name)
+		return Sfalse;
+	return Sstring(name);
 }
 
 int scheme_view_name_set(int tag, char *name)
