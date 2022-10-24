@@ -957,7 +957,6 @@ static void draw_title(Window *c) {
 
 	if (name_len < xstr_len(bname_str)) {
 		name_ptr += xstr_len(bname_str) - name_len;
-		name_len = xstr_len(bname_str) - name_len;
 	}
 
 	strncpy(name, name_ptr, MIN(sizeof(name)-1, name_len));
