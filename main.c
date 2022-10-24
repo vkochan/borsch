@@ -56,6 +56,7 @@
 #if defined __CYGWIN__ || defined __sun
 # include <termios.h>
 #endif
+#include "xstr.h"
 #include "api.h"
 #include "vt.h"
 
@@ -912,8 +913,9 @@ static void draw_title(Window *c) {
 	size_t line, col;
 	char status[100];
 	char title[256];
-	char name[100];
+	char name[200];
 	char *name_ptr;
+	xstr_t bname_str;
 
 	if (!ui_window_has_title(c->win))
 		return;
@@ -935,9 +937,8 @@ static void draw_title(Window *c) {
 				 UI_TEXT_STYLE_NORMAL);
 
 	maxlen = ui_window_width_get(c->win) - 3;
-	if (maxlen < 0)
-		maxlen = 0;
-	strncpy(name, buffer_name_get(c->buf), sizeof(name));
+	bname_str = xstr(buffer_name_get(c->buf));
+	name_ptr = xstr_cptr(bname_str);
 
 	line = view_cursors_line(view_cursor);
 	col = view_cursors_cell_get(view_cursor);
@@ -952,29 +953,31 @@ static void draw_title(Window *c) {
 			ismastersticky(c) ? "*" : "",
 			buffer_is_readonly(c->buf) ? "[RO]" : "");
 
-	if (maxlen)
-		name_len = maxlen - status_len - 1;
-	else
-		name_len = strlen(name);
+	name_len = MIN(xstr_len(bname_str), maxlen - status_len);
 
-	name_ptr = name;
-
-	if (name_len < strlen(name))
-		name_ptr += strlen(name) - name_len;
-
-	if (name_len >= 3 && name_len < strlen(buffer_name_get(c->buf))) {
-		name_ptr[0] = '.';
-		name_ptr[1] = '.';
-		name_ptr[2] = '.';
+	if (name_len < xstr_len(bname_str)) {
+		name_ptr += xstr_len(bname_str) - name_len;
+		name_len = xstr_len(bname_str) - name_len;
 	}
 
-	snprintf(title, sizeof(title), "%s %s", status, name_ptr);
+	strncpy(name, name_ptr, MIN(sizeof(name)-1, name_len));
+	name[MIN(sizeof(name)-1, name_len)] = '\0';
+
+	if (name_len >= 3 && name_len < xstr_len(bname_str)) {
+		name[0] = '.';
+		name[1] = '.';
+		name[2] = '.';
+	}
+
+	snprintf(title, sizeof(title), "%s %s", status, name);
 
 	ui_window_draw_text_attr(c->win, 0, title_y, title, w_w,
 			title_fg, title_bg,
 			UI_TEXT_STYLE_NORMAL);
 
 	ui_window_cursor_set(c->win, x, y);
+
+	xstr_del(bname_str);
 }
 
 static void buf_update(Window *w);
