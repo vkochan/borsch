@@ -297,15 +297,15 @@ static Button buttons[] = {
 #define CWD_MAX		256
 
 typedef struct {
-	int nmaster[LENGTH(tags) + 1];
-	float mfact[LENGTH(tags) + 1];
-	Layout *layout[LENGTH(tags) + 1];
-	Layout *layout_prev[LENGTH(tags) + 1];
-	bool runinall[LENGTH(tags) + 1];
-	char *cwd[LENGTH(tags) + 1];
-	char *name[LENGTH(tags) + 1];
-	bool msticky[LENGTH(tags) + 1];
-	Window *popup[LENGTH(tags) + 1];
+	int nmaster;
+	float mfact;
+	Layout *layout;
+	Layout *layout_prev;
+	bool runinall;
+	char *cwd;
+	char *name;
+	bool msticky;
+	Window *popup;
 } Pertag;
 
 typedef struct
@@ -338,7 +338,7 @@ static int proc_fd[2];
 /* global variables */
 static const char *prog_name = PROGNAME;
 static unsigned int curtag, prevtag;
-static Pertag pertag;
+static Pertag pertag[LENGTH(tags) + 1];
 static Window *stack = NULL;
 static Window *sel = NULL;
 static Window *lastsel = NULL;
@@ -839,7 +839,7 @@ static bool ismastersticky(Window *c) {
 	int n = 0;
 	Window *m;
 
-	if (!pertag.msticky[curr_tag_get()])
+	if (!pertag[curr_tag_get()].msticky)
 		return false;
 	if (!c)
 		return true;
@@ -862,12 +862,12 @@ char *window_get_title(Window *c)
 
 Window *get_popup(void)
 {
-	return pertag.popup[curr_tag_get()];
+	return pertag[curr_tag_get()].popup;
 }
 
 void *set_popup(Window *p)
 {
-	pertag.popup[curr_tag_get()] = p;
+	pertag[curr_tag_get()].popup = p;
 }
 
 static void
@@ -920,7 +920,7 @@ static void draw_title(Window *c) {
 	if (!ui_window_has_title(c->win))
 		return;
 
-	if (current_window() == c || (pertag.runinall[curr_tag_get()] && !c->minimized)) {
+	if (current_window() == c || (pertag[curr_tag_get()].runinall && !c->minimized)) {
 		title_fg = UI_TEXT_COLOR_BLACK;
 		title_bg = UI_TEXT_COLOR_WHITE;
 	}
@@ -1354,8 +1354,8 @@ toggletag(const char *args[]) {
 
 static void
 setpertag(void) {
-	layout = pertag.layout[curr_tag_get()];
-	runinall = pertag.runinall[curr_tag_get()];
+	layout = pertag[curr_tag_get()].layout;
+	runinall = pertag[curr_tag_get()].runinall;
 }
 
 static void
@@ -1409,7 +1409,7 @@ keypress(int code) {
 		nodelay(stdscr, FALSE);
 	}
 
-	for (Window *c = pertag.runinall[curr_tag_get()] ? nextvisible(windows) : current_window(); c; c = nextvisible(c->next)) {
+	for (Window *c = pertag[curr_tag_get()].runinall ? nextvisible(windows) : current_window(); c; c = nextvisible(c->next)) {
 		if (is_content_visible(c)) {
 			c->urgent = false;
 
@@ -1430,7 +1430,7 @@ keypress(int code) {
 				scheme_event_handle(evt);
 			}
 		}
-		if (!pertag.runinall[curr_tag_get()])
+		if (!pertag[curr_tag_get()].runinall)
 			break;
 	}
 }
@@ -1456,15 +1456,15 @@ initpertag(void) {
 	curr_tag_set(1);
 	prev_tag_set(1);
 	for(i=0; i <= LENGTH(tags); i++) {
-		pertag.nmaster[i] = NMASTER;
-		pertag.mfact[i] = MFACT;
-		pertag.layout[i] = layout;
-		pertag.layout_prev[i] = layout;
-		pertag.runinall[i] = runinall;
-		pertag.msticky[i] = false;
-		pertag.name[i] = NULL;
-		pertag.cwd[i] = calloc(CWD_MAX, 1);
-		getcwd(pertag.cwd[i], CWD_MAX);
+		pertag[i].nmaster = NMASTER;
+		pertag[i].mfact = MFACT;
+		pertag[i].layout = layout;
+		pertag[i].layout_prev = layout;
+		pertag[i].runinall = runinall;
+		pertag[i].msticky = false;
+		pertag[i].name = NULL;
+		pertag[i].cwd = calloc(CWD_MAX, 1);
+		getcwd(pertag[i].cwd, CWD_MAX);
 	}
 }
 
@@ -1633,8 +1633,8 @@ cleanup(void) {
 	while (windows)
 		destroy(windows);
 	for(i=0; i <= LENGTH(tags); i++) {
-		if (pertag.popup[i])
-			destroy(pertag.popup[i]);
+		if (pertag[i].popup)
+			destroy(pertag[i].popup);
 	}
 
 	b = buffer_first_get();
@@ -1668,8 +1668,8 @@ cleanup(void) {
 	if (retfifo.file)
 		unlink(retfifo.file);
 	for(i=0; i <= LENGTH(tags); i++) {
-		free(pertag.name[i]);
-		free(pertag.cwd[i]);
+		free(pertag[i].name);
+		free(pertag[i].cwd);
 	}
 }
 
@@ -1962,19 +1962,19 @@ setlayout(const char *args[]) {
 			return;
 		layout = &layouts[i];
 	}
-	pertag.layout_prev[curr_tag_get()] = pertag.layout[curr_tag_get()];
-	pertag.layout[curr_tag_get()] = layout;
+	pertag[curr_tag_get()].layout_prev = pertag[curr_tag_get()].layout;
+	pertag[curr_tag_get()].layout = layout;
 	arrange();
 }
 
 static int
 getnmaster(void) {
-	return pertag.nmaster[curr_tag_get()];
+	return pertag[curr_tag_get()].nmaster;
 }
 
 static float
 getmfact(void) {
-	return pertag.mfact[curr_tag_get()];
+	return pertag[curr_tag_get()].mfact;
 }
 
 static void
@@ -2047,7 +2047,7 @@ togglemouse(const char *args[]) {
 
 static void
 togglerunall(const char *args[]) {
-	pertag.runinall[curr_tag_get()] = !pertag.runinall[curr_tag_get()];
+	pertag[curr_tag_get()].runinall = !pertag[curr_tag_get()].runinall;
 	drawbar();
 	draw_all();
 }
@@ -3156,8 +3156,8 @@ int win_state_toggle(int wid, win_state_t st)
 
 	case WIN_STATE_MAXIMIZED:
 		if (isarrange(fullscreen)) {
-			layout = pertag.layout_prev[curr_tag_get()];
-			pertag.layout[curr_tag_get()] = layout;
+			layout = pertag[curr_tag_get()].layout_prev;
+			pertag[curr_tag_get()].layout = layout;
 			arrange();
 		} else {
 			setlayout(maxi);
@@ -4591,8 +4591,8 @@ int frame_current_set(int tag)
 
 const char *frame_name_get(int tag)
 {
-	if (pertag.name[tag] && strlen(pertag.name[tag])) {
-		return pertag.name[tag];
+	if (pertag[tag].name && strlen(pertag[tag].name)) {
+		return pertag[tag].name;
 	} else {
 		return NULL;
 	}
@@ -4600,35 +4600,35 @@ const char *frame_name_get(int tag)
 
 int frame_name_set(int tag, char *name)
 {
-	free(pertag.name[tag]);
-	pertag.name[tag] = NULL;
+	free(pertag[tag].name);
+	pertag[tag].name = NULL;
 
 	if (name && strlen(name))
-		pertag.name[tag] = strdup(name);
+		pertag[tag].name = strdup(name);
 	drawbar();
 }
 
 char *frame_cwd_get(int tag)
 {
-	return pertag.cwd[tag];
+	return pertag[tag].cwd;
 }
 
 int frame_cwd_set(int tag, char *cwd)
 {
-	strncpy(pertag.cwd[tag], cwd, CWD_MAX - 1);
+	strncpy(pertag[tag].cwd, cwd, CWD_MAX - 1);
 	drawbar();
 	return 0;
 }
 
 layout_t layout_current_get(int tag)
 {
-	if (pertag.layout[tag]->arrange == fullscreen) {
+	if (pertag[tag].layout->arrange == fullscreen) {
 		return LAYOUT_MAXIMIZED;
-	} else if (pertag.layout[tag]->arrange == tile) {
+	} else if (pertag[tag].layout->arrange == tile) {
 		return LAYOUT_TILED;
-	} else if (pertag.layout[tag]->arrange == bstack) {
+	} else if (pertag[tag].layout->arrange == bstack) {
 		return LAYOUT_BSTACK;
-	} else if (pertag.layout[tag]->arrange == grid) {
+	} else if (pertag[tag].layout->arrange == grid) {
 		return LAYOUT_GRID;
 	} else {
 		return -1;
@@ -4641,14 +4641,14 @@ int layout_current_set(int tag, layout_t lay)
 		return -1;
 
 	layout = &layouts[lay];
-	pertag.layout_prev[curr_tag_get()] = pertag.layout[curr_tag_get()];
-	pertag.layout[curr_tag_get()] = layout;
+	pertag[curr_tag_get()].layout_prev = pertag[curr_tag_get()].layout;
+	pertag[curr_tag_get()].layout = layout;
 	arrange();
 }
 
 int layout_nmaster_get(int tag)
 {
-	return pertag.nmaster[tag];
+	return pertag[tag].nmaster;
 }
 
 int layout_nmaster_set(int tag, int n)
@@ -4656,7 +4656,7 @@ int layout_nmaster_set(int tag, int n)
 	if (get_popup() || isarrange(fullscreen) || isarrange(grid))
 		return -1;
 
-	pertag.nmaster[tag] = n;
+	pertag[tag].nmaster = n;
 	arrange();
 
 	return 0;
@@ -4664,7 +4664,7 @@ int layout_nmaster_set(int tag, int n)
 
 float layout_fmaster_get(int tag)
 {
-	return pertag.mfact[tag];
+	return pertag[tag].mfact;
 }
 
 int layout_fmaster_set(int tag, float f)
@@ -4672,7 +4672,7 @@ int layout_fmaster_set(int tag, float f)
 	if (get_popup() || isarrange(fullscreen) || isarrange(grid))
 		return -1;
 
-	pertag.mfact[tag] = f;
+	pertag[tag].mfact = f;
 	arrange();
 
 	return 0;
@@ -4680,7 +4680,7 @@ int layout_fmaster_set(int tag, float f)
 
 bool layout_sticky_get(int tag)
 {
-	return pertag.msticky[tag];
+	return pertag[tag].msticky;
 }
 
 int layout_sticky_set(int tag, bool is_sticky)
@@ -4688,7 +4688,7 @@ int layout_sticky_set(int tag, bool is_sticky)
 	if (get_popup())
 		return -1;
 
-	pertag.msticky[tag] = is_sticky;
+	pertag[tag].msticky = is_sticky;
 	draw_all();
 	return 0;
 }
