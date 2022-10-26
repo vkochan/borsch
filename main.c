@@ -396,6 +396,11 @@ static void prev_tag_set(int tag)
 	prevtag = tag;
 }
 
+static Frame *current_frame(void)
+{
+	return pertag[curr_tag_get()].f;
+}
+
 static void
 term_title_handler(Vt *term, const char *title) {
 	/* Window *c = (Window *)vt_data_get(term); */
@@ -843,7 +848,7 @@ static bool ismastersticky(Window *c) {
 	int n = 0;
 	Window *m;
 
-	if (!pertag[curr_tag_get()].f->msticky)
+	if (!current_frame()->msticky)
 		return false;
 	if (!c)
 		return true;
@@ -866,12 +871,12 @@ char *window_get_title(Window *c)
 
 Window *get_popup(void)
 {
-	return pertag[curr_tag_get()].f->popup;
+	return current_frame()->popup;
 }
 
 void *set_popup(Window *p)
 {
-	pertag[curr_tag_get()].f->popup = p;
+	current_frame()->popup = p;
 }
 
 static void
@@ -924,7 +929,7 @@ static void draw_title(Window *c) {
 	if (!ui_window_has_title(c->win))
 		return;
 
-	if (current_window() == c || (pertag[curr_tag_get()].f->runinall && !c->minimized)) {
+	if (current_window() == c || (current_frame()->runinall && !c->minimized)) {
 		title_fg = UI_TEXT_COLOR_BLACK;
 		title_bg = UI_TEXT_COLOR_WHITE;
 	}
@@ -1358,8 +1363,8 @@ toggletag(const char *args[]) {
 
 static void
 setpertag(void) {
-	layout = pertag[curr_tag_get()].f->layout;
-	runinall = pertag[curr_tag_get()].f->runinall;
+	layout = current_frame()->layout;
+	runinall = current_frame()->runinall;
 }
 
 static void
@@ -1413,7 +1418,7 @@ keypress(int code) {
 		nodelay(stdscr, FALSE);
 	}
 
-	for (Window *c = pertag[curr_tag_get()].f->runinall ? nextvisible(windows) : current_window(); c; c = nextvisible(c->next)) {
+	for (Window *c = current_frame()->runinall ? nextvisible(windows) : current_window(); c; c = nextvisible(c->next)) {
 		if (is_content_visible(c)) {
 			c->urgent = false;
 
@@ -1434,7 +1439,7 @@ keypress(int code) {
 				scheme_event_handle(evt);
 			}
 		}
-		if (!pertag[curr_tag_get()].f->runinall)
+		if (!current_frame()->runinall)
 			break;
 	}
 }
@@ -1968,19 +1973,19 @@ setlayout(const char *args[]) {
 			return;
 		layout = &layouts[i];
 	}
-	pertag[curr_tag_get()].f->layout_prev = pertag[curr_tag_get()].f->layout;
-	pertag[curr_tag_get()].f->layout = layout;
+	current_frame()->layout_prev = current_frame()->layout;
+	current_frame()->layout = layout;
 	arrange();
 }
 
 static int
 getnmaster(void) {
-	return pertag[curr_tag_get()].f->nmaster;
+	return current_frame()->nmaster;
 }
 
 static float
 getmfact(void) {
-	return pertag[curr_tag_get()].f->mfact;
+	return current_frame()->mfact;
 }
 
 static void
@@ -2053,7 +2058,7 @@ togglemouse(const char *args[]) {
 
 static void
 togglerunall(const char *args[]) {
-	pertag[curr_tag_get()].f->runinall = !pertag[curr_tag_get()].f->runinall;
+	current_frame()->runinall = !current_frame()->runinall;
 	drawbar();
 	draw_all();
 }
@@ -3162,8 +3167,8 @@ int win_state_toggle(int wid, win_state_t st)
 
 	case WIN_STATE_MAXIMIZED:
 		if (isarrange(fullscreen)) {
-			layout = pertag[curr_tag_get()].f->layout_prev;
-			pertag[curr_tag_get()].f->layout = layout;
+			layout = current_frame()->layout_prev;
+			current_frame()->layout = layout;
 			arrange();
 		} else {
 			setlayout(maxi);
@@ -4647,8 +4652,8 @@ int layout_current_set(int tag, layout_t lay)
 		return -1;
 
 	layout = &layouts[lay];
-	pertag[curr_tag_get()].f->layout_prev = pertag[curr_tag_get()].f->layout;
-	pertag[curr_tag_get()].f->layout = layout;
+	current_frame()->layout_prev = current_frame()->layout;
+	current_frame()->layout = layout;
 	arrange();
 }
 
