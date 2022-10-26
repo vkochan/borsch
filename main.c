@@ -216,7 +216,6 @@ static void resize(Window *c, int x, int y, int w, int h);
 static unsigned int waw, wah, wax, way;
 static Window *windows = NULL;
 static char *title;
-static bool show_tagnamebycwd = false;
 
 static void buf_list_update(void);
 
