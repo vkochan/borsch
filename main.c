@@ -314,7 +314,6 @@ typedef struct {
 typedef struct
 {
 	pid_t 			pid;
-	int			status;
 } ProcessInfo;
 
 typedef struct Process
@@ -325,6 +324,7 @@ typedef struct Process
 	const char		**env;
 	char			*cwd;
 	Vt 			*term;
+	bool			is_status_set;
 	int			status;
 	int 			in;
 	int 			out;
@@ -333,6 +333,7 @@ typedef struct Process
 	Window 			*win;
 	Buffer 			*buf;
 	volatile sig_atomic_t 	is_died;
+	bool			async;
 } Process;
 
 static Process proc_list;
@@ -453,6 +454,7 @@ static Process *process_alloc(void)
 	if (!proc)
 		return NULL;
 
+	proc->is_status_set = false;
 	proc->status = -1;
 	proc->pid = -1;
 	proc->in = -1;
@@ -492,6 +494,11 @@ static void process_remove(Process *proc)
 		proc->next->prev = proc->prev;
 }
 
+static bool process_is_async(Process *proc)
+{
+	return proc->async;
+}
+
 static void process_died_set(Process *proc, bool is_died)
 {
 	proc->is_died = is_died;
@@ -509,6 +516,7 @@ static int process_status_get(Process *proc)
 
 static void process_status_set(Process *proc, int status)
 {
+	proc->is_status_set = true;
 	proc->status = status;
 }
 
@@ -660,7 +668,7 @@ static pid_t __process_fork(const char *p, const char *argv[], const char *cwd, 
 	return pid;
 }
 
-static Process *process_create(const char *prog, const char *cwd, int *in, int *out, int *err, const char **env, bool pty)
+static Process *process_create(const char *prog, const char *cwd, int *in, int *out, int *err, const char **env, bool pty, bool async)
 {
 	const char *pargs[4] = { shell, NULL };
 	Vt *term = NULL;
@@ -690,6 +698,7 @@ static Process *process_create(const char *prog, const char *cwd, int *in, int *
 		proc->prog = strdup(prog);
 	if (cwd)
 		proc->cwd = strdup(cwd);
+	proc->async = async;
 	proc->term = term;
 	proc->env = env;
 
@@ -1298,6 +1307,7 @@ get_window_by_coord(unsigned int x, unsigned int y) {
 static void
 sigchld_handler(int sig) {
 	ProcessInfo pinfo;
+	Process *proc;
 	int errsv = errno;
 	int status;
 	pid_t pid;
@@ -1311,9 +1321,15 @@ sigchld_handler(int sig) {
 			eprint("waitpid: %s\n", strerror(errno));
 			break;
 		}
-		pinfo.status = status;
-		pinfo.pid = pid;
-		write(proc_fd[1], &pinfo, sizeof(pinfo));
+		proc = process_by_pid(pid);
+		if (proc) {
+			if (WIFEXITED(status)) {
+				process_status_set(proc, WEXITSTATUS(status));
+			}
+
+			pinfo.pid = pid;
+			write(proc_fd[1], &pinfo, sizeof(pinfo));
+		}
 	}
 
 	errno = errsv;
@@ -1792,7 +1808,7 @@ int term_create(const char *prog, const char *title, const char *cwd, const char
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
 
-	proc = process_create(prog, cwd, NULL, NULL, NULL, env, true);
+	proc = process_create(prog, cwd, NULL, NULL, NULL, env, true, true);
 	if (!proc) {
 		view_free(c->view);
 		__buf_del(c->buf);
@@ -2466,9 +2482,6 @@ static void handle_sigchld_io(int fd, void *arg)
 	if (len == sizeof(pinfo)) {
 		Process *proc = process_by_pid(pinfo.pid);
 		if (proc) {
-			if (WIFEXITED(pinfo.status)) {
-				process_status_set(proc, WEXITSTATUS(pinfo.status));
-			}
 			if (!process_buffer_get(proc)) {
 				process_died_set(proc, true);
 				evt.eid = EVT_PROC_EXIT;
@@ -4788,7 +4801,7 @@ pid_t proc_create(const char *prog, const char *cwd, int *in, int *out, int *err
 {
 	Process *proc;
 
-	proc = process_create(prog, cwd, in, out, err, env, false);
+	proc = process_create(prog, cwd, in, out, err, env, false, async);
 	if (!proc)
 		return -1;	
 
@@ -4806,6 +4819,16 @@ bool proc_is_alive(pid_t pid)
 	} else {
 		return true;
 	}
+}
+
+bool proc_is_async(pid_t pid)
+{
+	Process *proc = process_by_pid(pid);
+
+	if (proc) {
+		return process_is_async(proc);
+	}
+	return false;
 }
 
 int proc_status_get(pid_t pid)
@@ -4840,10 +4863,11 @@ int proc_wait(pid_t pid, int *status)
 {
 	Process *proc = process_by_pid(pid);
 
-	if (!proc)
+	if (!proc) {
 		return -1;
+	}
 
-	if (proc->is_died) {
+	if (proc->is_died || proc->is_status_set) {
 		*status = proc->status;
 		return 0;
 	}
@@ -4854,6 +4878,11 @@ int proc_wait(pid_t pid, int *status)
 		return 0;
 	}
 
+	if (proc->is_status_set) {
+		*status = proc->status;
+		return 0;
+	}
+	
 	return -1;
 }
 

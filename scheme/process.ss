@@ -5,6 +5,8 @@
 
 (define __cs_process_is_alive (foreign-procedure __collect_safe "cs_process_is_alive" (int) scheme-object))
 
+(define __cs_process_is_async (foreign-procedure __collect_safe "cs_process_is_async" (int) scheme-object))
+
 (define __cs_process_status_get (foreign-procedure __collect_safe "cs_process_status_get" (int) scheme-object))
 
 (define __cs_process_del (foreign-procedure "cs_process_del" (int) void))
@@ -83,6 +85,12 @@
 (define process-is-alive?
    (lambda (pid)
       (call-foreign (__cs_process_is_alive pid))
+   )
+)
+
+(define process-is-async?
+   (lambda (proc)
+      (call-foreign (__cs_process_is_async (process-pid proc)))
    )
 )
 
@@ -190,9 +198,13 @@
       ]
 
       [(cmd buf-out buf-err on-exit)
+       (process-create cmd buf-out #f on-exit #t)
+      ]
+
+      [(cmd buf-out buf-err on-exit async?)
        (let*(
              [env (process-environment)]
-             [p (call-foreign (__cs_process_create cmd (current-cwd) #t #t (not (equal? buf-err #f)) env #t))]
+             [p (call-foreign (__cs_process_create cmd (current-cwd) #t #t (not (equal? buf-err #f)) env async?))]
             )
           (let (
                 [reader (if (or buf-out buf-err) (__make-process-reader) #f)]
@@ -263,7 +275,7 @@
 (define process-get-output
    (lambda (cmd)
       (let (
-            [proc (process-create cmd)]
+            [proc (process-create cmd #f #f #f #f)]
            )
          (let (
                [proc-out (process-port-out proc)]
@@ -287,7 +299,7 @@
 (define process-with-input
    (lambda (cmd str)
       (let (
-            [proc (process-create cmd)]
+            [proc (process-create cmd #f #f #f #f)]
            )
          (let (
                [proc-out (process-port-out proc)]
@@ -308,7 +320,7 @@
 (define process-with-input/output
    (lambda (cmd str)
       (let (
-            [proc (process-create cmd)]
+            [proc (process-create cmd #f #f #f #f)]
            )
          (let (
                [proc-out (process-port-out proc)]
@@ -370,8 +382,10 @@
             (when (process-port-reader proc)
                (unlock-object (process-port-reader proc))
             )
-            (hashtable-delete! %process-pid-ht pid)
-            (call-foreign (__cs_process_del pid))
+            (when (process-is-async? proc)
+               (hashtable-delete! %process-pid-ht pid)
+               (call-foreign (__cs_process_del pid))
+            )
          )
       )
    )
