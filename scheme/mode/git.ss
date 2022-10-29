@@ -127,12 +127,33 @@
    )
 )
 
+(define git-delete-branch
+   (lambda (b)
+      (git-cmd-read (format "branch -D ~a" b))
+   )
+)
+
 (define git-branch-list-mode-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" (lambda () (move-line-begin) (git-show-commit)))
       (bind-key map "g r" (lambda () (git-insert-branch-list)))
       (bind-key map "l" (lambda () (move-line-begin) (git-show-log (extract-object))))
       (bind-key map "c" (lambda () (move-line-begin) (git-checkout-branch (extract-object)) (git-insert-branch-list)))
+      (bind-key map "d"
+         (lambda ()
+            (let ([b (extract-object)])
+               (minibuf-ask
+                  (format "Delete ~a branch ?" b) 
+                  (lambda (yes-or-no)
+                     (when (eq? yes-or-no 'yes)
+                        (git-delete-branch b)
+                        (git-insert-branch-list)
+                     )
+                  )
+               )
+            )
+         )
+      )
       map
    )
 )
