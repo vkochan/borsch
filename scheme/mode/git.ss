@@ -50,13 +50,29 @@
 
 (define git-cmd-read
    (lambda (cmd)
-      (list-ref (process-get-output (git-cmd-format cmd)) 1)
+      (let ([ret (process-get-output (git-cmd-format cmd))])
+         (let ([status (list-ref ret 0)] [output (list-ref ret 1)])
+            (when (not (eq? 0 status))
+               (message output)
+            )
+            output
+         )
+      )
    )
 )
 
 (define git-cmd-list
    (lambda (cmd)
       (string-split (git-cmd-read cmd) #\nul)
+   )
+)
+
+(define git-checkout-branch
+   (lambda (b)
+      (git-cmd-read (format "checkout ~a" b))
+      (if (not (equal? b (git-branch-name)))
+         (message (format "could not switch to ~a" b))
+      )
    )
 )
 
@@ -90,6 +106,47 @@
           )
        )
       ]
+   )
+)
+
+(define git-insert-branch-list
+   (lambda ()
+      (let ()
+         (buffer-set-readonly #f)
+         (erase-buffer)
+         (insert (format "~a\n" (git-branch-name)) '(:style (:attr "bold")))
+         (for-each
+            (lambda (b)
+               (insert (format "~a\n" b))
+            )
+            (git-branch-list "-a")
+         )
+         (move-buffer-begin)
+         (buffer-set-readonly #t)
+      )
+   )
+)
+
+(define git-branch-list-mode-map
+   (let ([map (make-keymap)])
+      (bind-key map "<Enter>" (lambda () (move-line-begin) (git-show-commit)))
+      (bind-key map "g r" (lambda () (git-insert-branch-list)))
+      (bind-key map "l" (lambda () (move-line-begin) (git-show-log (extract-object))))
+      (bind-key map "c" (lambda () (move-line-begin) (git-checkout-branch (extract-object)) (git-insert-branch-list)))
+      map
+   )
+)
+
+(define-mode git-branch-list-mode "Git Branch List" text-mode
+   (set-local! linenum-enable #f)
+   (git-insert-branch-list)
+)
+
+(define git-show-branch-list
+   (lambda ()
+      (let ([b (buffer-create)])
+         (git-branch-list-mode)
+      )
    )
 )
 
@@ -624,10 +681,7 @@
       (minibuf-complete
          (git-branch-list)
          (lambda (b)
-            (git-cmd-read (format "checkout ~a" b))
-            (if (not (equal? b (git-branch-name)))
-               (message (format "could not switch to ~a" b))
-            )
+            (git-checkout-branch b)
          )
          "switch to branch"
       )
