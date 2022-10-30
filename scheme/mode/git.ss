@@ -133,7 +133,7 @@
    )
 )
 
-(define git-branch-list-mode-map
+(define git-branch-mode-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" (lambda () (move-line-begin) (git-show-commit)))
       (bind-key map "g r" (lambda () (git-insert-branch-list)))
@@ -158,7 +158,7 @@
    )
 )
 
-(define-mode git-branch-list-mode "Git Branch List" text-mode
+(define-mode git-branch-mode "Git Branch" text-mode
    (set-local! linenum-enable #f)
    (git-insert-branch-list)
 )
@@ -166,7 +166,7 @@
 (define git-show-branch-list
    (lambda ()
       (let ([b (buffer-create)])
-         (git-branch-list-mode)
+         (git-branch-mode)
       )
    )
 )
