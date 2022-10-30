@@ -163,7 +163,7 @@
    (git-insert-branch-list)
 )
 
-(define git-show-branch-list
+(define git-show-branch
    (lambda ()
       (let ([b (buffer-create)])
          (git-branch-mode)
