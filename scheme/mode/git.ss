@@ -813,7 +813,7 @@
 
 (define git-status-draw-branch-status
    (lambda ()
-      #f
+      (insert-empty-line)
    )
 )
 
