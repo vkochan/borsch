@@ -370,242 +370,6 @@
    )
 )
 
-(define git-staged-diff-all
-   (lambda ()
-      (git-status-diff 'staged)
-   )
-)
-
-(define git-staged-all-update
-   (lambda ()
-      (let ([ls (get-local staged-list)])
-         (when (not (equal? (length ls) 0))
-            (git-unstage-file-cmd ls)
-            (git-show-status)
-         )
-      )
-   )
-)
-
-(define git-staged-all-map
-   (let ([map (make-keymap)])
-      (bind-key map "u" git-staged-all-update)
-      (bind-key map "<Enter>" git-staged-diff-all)
-      map
-   )
-)
-
-(define git-staged-file-update
-   (lambda ()
-      (move-line-begin)
-      (move-next-longword)
-      (git-unstage-file-cmd (extract-longword))
-      (git-show-status)
-   )
-)
-
-(define git-staged-diff-file
-   (lambda ()
-      (move-line-begin)
-      (move-next-longword)
-      (git-status-diff-file 'staged (extract-longword))
-   )
-)
-
-(define git-staged-file-map
-   (let ([map (make-keymap)])
-      (bind-key map "u" git-staged-file-update)
-      (bind-key map "<Enter>" git-staged-diff-file)
-      map
-   )
-)
-
-(define git-unstaged-all-update
-   (lambda ()
-      (let ([ls (get-local unstaged-list)])
-         (when (not (equal? (length ls) 0))
-            (git-stage-file-cmd ls)
-            (git-show-status)
-         )
-      )
-   )
-)
-
-(define git-unstaged-all-revert
-   (lambda ()
-      (let ([ls (get-local unstaged-list)])
-         (when (not (equal? (length ls) 0))
-            (minibuf-ask "Revert all unstaged files ?"
-               (lambda (v)
-                  (when (eq? v 'yes)
-                     (git-revert-file-cmd ls)
-                     (git-show-status)
-                  )
-               )
-            )
-         )
-      )
-   )
-)
-
-(define git-unstaged-diff-all
-   (lambda ()
-      (git-status-diff 'unstaged)
-   )
-)
-
-(define git-unstaged-all-map
-   (let ([map (make-keymap)])
-      (bind-key map "u" git-unstaged-all-update)
-      (bind-key map "!" git-unstaged-all-revert)
-      (bind-key map "<Enter>" git-unstaged-diff-all)
-      map
-   )
-)
-
-(define git-unstaged-file-update
-   (lambda ()
-      (move-line-begin)
-      (move-next-longword)
-      (git-stage-file-cmd (extract-longword))
-      (git-show-status)
-   )
-)
-
-(define git-unstaged-diff-file
-   (lambda ()
-      (move-line-begin)
-      (move-next-longword)
-      (git-status-diff-file 'unstaged (extract-longword))
-   )
-)
-
-(define git-unstaged-file-revert
-   (lambda ()
-      (minibuf-ask "Revert selected file ?"
-         (lambda (v)
-            (when (eq? v 'yes)
-               (move-line-begin)
-               (move-next-longword)
-               (git-revert-file-cmd (extract-longword))
-               (git-show-status)
-            )
-         )
-      )
-   )
-)
-
-(define git-unstaged-file-map
-   (let ([map (make-keymap)])
-      (bind-key map "u" git-unstaged-file-update)
-      (bind-key map "!" git-unstaged-file-revert)
-      (bind-key map "<Enter>" git-unstaged-diff-file)
-      map
-   )
-)
-
-(define git-untracked-file-update
-   (lambda ()
-      (move-line-begin)
-      (git-add-file-cmd (extract-longword))
-      (git-show-status)
-   )
-)
-
-(define git-untracked-file-map
-   (let ([map (make-keymap)])
-      (bind-key map "u" git-untracked-file-update)
-      map
-   )
-)
-
-(define git-show-staged-status
-   (lambda ()
-      (let ([ls (get-local staged-list)])
-         (when (not (equal? (length ls) 0))
-            (insert (format "Staged (~a):\n" (length ls)) '(:style (:attr "bold")) `(:keymap ,git-staged-all-map))
-	    (for-each
-               (lambda (f)
-                  (insert (format "~a ~a\n" (git-staged-file-status f) f) `(:keymap ,git-staged-file-map))
-               ) ls
-            )
-            (insert "\n")
-         )
-      )
-   )
-)
-
-(define git-show-unstaged-status
-   (lambda ()
-      (let ([ls (get-local unstaged-list)])
-         (when (not (equal? (length ls) 0))
-            (insert (format "Not staged (~a):\n" (length ls)) '(:style (:attr "bold")) `(:keymap ,git-unstaged-all-map))
-	    (for-each
-               (lambda (f)
-                  (insert (format "~a ~a\n" (git-unstaged-file-status f) f) `(:keymap ,git-unstaged-file-map))
-               ) ls
-            )
-            (insert "\n")
-         )
-      )
-   )
-)
-
-(define git-show-unmerged-status
-   (lambda ()
-      (let ([ls (get-local unmerged-list)])
-         (when (not (equal? (length ls) 0))
-            (insert (format "Not merged (~a):\n" (length ls)) '(:style (:attr "bold")))
-	    (for-each
-               (lambda (f)
-                  (insert (format "~a\n" f))
-               ) ls
-            )
-            (insert "\n")
-         )
-      )
-   )
-)
-
-(define git-show-untracked-status
-   (lambda ()
-      (let ([ls (get-local untracked-list)])
-         (when (not (equal? (length ls) 0))
-            (insert (format "Untracked (~a):\n" (length ls)) '(:style (:attr "bold")))
-	    (for-each
-               (lambda (f)
-                  (insert (format "~a\n" f) `(:keymap ,git-untracked-file-map))
-               ) ls
-            )
-            (insert "\n")
-         )
-      )
-   )
-)
-
-(define git-show-status
-   (lambda ()
-      (save-cursor
-         (buffer-set-readonly #f)
-         (erase-buffer)
-         (set-local! all-list (git-list-all))
-         (set-local! staged-list (git-list-staged))
-         (set-local! unstaged-list (git-list-unstaged))
-         (set-local! unmerged-list (git-list-unmerged))
-         (set-local! untracked-list (git-list-untracked))
-         (insert (format "On branch ~a\n" (git-branch-name)))
-         (insert (git-cmd-read "log -1 --oneline"))
-         (insert "\n")
-         (git-show-staged-status)
-         (git-show-unstaged-status)
-         ; (git-show-unmerged-status)
-         (git-show-untracked-status)
-         (move-buffer-begin)
-         (buffer-set-readonly #t)
-      )
-   )
-)
-
 (define git-create-commit
    (case-lambda
       [()
@@ -633,7 +397,7 @@
                       (process-with-input (format "git -C ~a commit ~a -F -" (current-cwd) opt)
                                           (buffer-string))
                       (with-current-buffer (get-local status-buffer)
-                         (git-show-status)
+                         (git-status-draw)
                       )
                       (window-delete)
                    )
@@ -654,7 +418,7 @@
 (define git-pull-changes
    (lambda ()
       (with-process-temp-buffer (git-cmd-format "pull")
-         (git-show-status)
+         (git-status-draw)
       )
    )
 )
@@ -664,35 +428,6 @@
       (let ([b (buffer-create)])
          (text-mode)
          (process-create (git-cmd-format "pull") b)
-      )
-   )
-)
-
-(define git-status-mode-map
-   (let ([map (make-keymap)])
-      (bind-key map "g r" (lambda () (git-show-status)))
-      (bind-key map "c" (lambda () (git-create-commit)))
-      (bind-key map "a" (lambda () (git-amend-commit)))
-      (bind-key map "u" (lambda () (git-pull-changes)))
-      map
-   )
-)
-
-(define-mode git-status-mode "Git" text-mode
-   (define-local all-list '())
-   (define-local staged-list '())
-   (define-local unstaged-list '())
-   (define-local unmerged-list '())
-   (define-local untracked-list '())
-   (git-show-status)
-   (set-local! linenum-enable #f)
-   (buffer-set-name "git-status")
-)
-
-(define git-status
-   (lambda ()
-      (let ([b (buffer-create)])
-         (git-status-mode)
       )
    )
 )
@@ -842,6 +577,307 @@
             )
          )
       )
+   )
+)
+
+(define git-status-get-path
+   (lambda ()
+      (let ([plist (get-text-property ':data (line-begin-pos) (line-end-pos))])
+         (plist-get (first plist) ':data)
+      )
+   )
+)
+
+(define git-status-staged-open-file-diff
+   (lambda ()
+      (git-status-diff-file 'staged (git-status-get-path))
+   )
+)
+
+(define git-status-staged-update-file
+   (lambda ()
+      (git-unstage-file-cmd (git-status-get-path))
+      (buffer-reload)
+   )
+)
+
+(define git-status-staged-open-all-diff
+   (lambda ()
+      (git-status-diff 'staged)
+   )
+)
+
+(define git-status-staged-all-map
+   (let ([map (make-keymap)])
+      (bind-key map "<Enter>" git-status-staged-open-all-diff)
+      map
+   )
+)
+
+(define git-status-staged-file-map
+   (let ([map (make-keymap)])
+      (bind-key map "<Enter>" git-status-staged-open-file-diff)
+      (bind-key map "u" git-status-staged-update-file)
+      map
+   )
+)
+
+(define git-status-draw-staged
+   (lambda ()
+      (add-text-property
+         (line-begin-pos) (line-end-pos)
+        `(
+          :keymap ,git-status-staged-all-map
+          :style (:attr "bold")
+         )
+      )
+      (move-next-line)
+      (when (string-contains? (extract-line) "(use")
+         (move-next-line)
+      )
+      (while (string-contains? (extract-line) "modified")
+         (move-next-longword)
+         (add-text-property (cursor) (longword-end-pos) '(:style (:fg "green")))
+         (move-next-longword)
+         ;; we stay at the file path word
+         (add-text-property (cursor) (longword-end-pos) '(:style (:fg "green")))
+         (add-text-property
+            (line-begin-pos) (line-end-pos)
+           `(
+             :keymap ,git-status-staged-file-map
+             :data ,(extract-longword)
+            )
+         )
+         (move-next-line)
+      )
+   )
+)
+
+(define git-status-unstaged-open-file-diff
+   (lambda ()
+      (git-status-diff-file 'unstaged (git-status-get-path))
+   )
+)
+
+(define git-status-unstaged-update-file
+   (lambda ()
+      (git-stage-file-cmd (git-status-get-path))
+      (buffer-reload)
+   )
+)
+
+(define git-status-unstaged-revert-file
+   (lambda ()
+      (minibuf-ask "Revert selected file ?"
+         (lambda (v)
+            (when (eq? v 'yes)
+               (git-revert-file-cmd (git-status-get-path))
+               (buffer-reload)
+            )
+         )
+      )
+   )
+)
+
+(define git-status-unstaged-file-map
+   (let ([map (make-keymap)])
+      (bind-key map "<Enter>" git-status-unstaged-open-file-diff)
+      (bind-key map "u" git-status-unstaged-update-file)
+      (bind-key map "!" git-status-unstaged-revert-file)
+      map
+   )
+)
+
+(define git-status-unstaged-open-all-diff
+   (lambda ()
+      (git-status-diff 'unstaged)
+   )
+)
+
+(define git-status-unstaged-all-map
+   (let ([map (make-keymap)])
+      (bind-key map "<Enter>" git-status-unstaged-open-all-diff)
+      map
+   )
+)
+
+(define git-status-draw-unstaged
+   (lambda ()
+      (add-text-property
+         (line-begin-pos) (line-end-pos)
+        `(
+          :keymap ,git-status-unstaged-all-map
+          :style (:attr "bold")
+         )
+      )
+      (move-next-line)
+      (move-next-line)
+      (move-next-line)
+      (while (string-contains? (extract-line) "modified")
+         (move-next-longword)
+         (add-text-property (cursor) (longword-end-pos) '(:style (:fg "red")))
+         (move-next-longword)
+         ;; we stay at the file path word
+         (add-text-property (cursor) (longword-end-pos) '(:style (:fg "red")))
+         (add-text-property
+            (line-begin-pos) (line-end-pos)
+           `(
+             :keymap ,git-status-unstaged-file-map
+             :data ,(extract-longword)
+            )
+         )
+         (move-next-line)
+      )
+   )
+)
+
+(define git-status-unmerged-file-map
+   (let ([map (make-keymap)])
+      (bind-key map "<Enter>" git-status-unstaged-open-file-diff)
+      (bind-key map "u" git-status-unstaged-update-file)
+      map
+   )
+)
+
+(define git-status-unmerged-all-map
+   (let ([map (make-keymap)])
+      (bind-key map "<Enter>" git-status-unstaged-open-all-diff)
+      map
+   )
+)
+
+(define git-status-draw-unmerged
+   (lambda ()
+      (add-text-property
+         (line-begin-pos) (line-end-pos)
+        `(
+          :keymap ,git-status-unmerged-all-map
+          :style (:attr "bold")
+         )
+      )
+      (move-next-line)
+      (move-next-line)
+      (while (string-contains? (extract-line) "modified")
+         (move-next-longword)
+         (add-text-property (cursor) (longword-end-pos) '(:style (:fg "red")))
+         (move-next-longword)
+         (add-text-property (cursor) (longword-end-pos) '(:style (:fg "red")))
+         (move-next-longword)
+         ;; we stay at the file path word
+         (add-text-property (cursor) (longword-end-pos) '(:style (:fg "red")))
+         (add-text-property
+            (line-begin-pos) (line-end-pos)
+           `(
+             :keymap ,git-status-unmerged-file-map
+             :data ,(extract-longword)
+            )
+         )
+         (move-next-line)
+      )
+   )
+)
+
+(define git-status-untracked-file-update
+   (lambda ()
+      (git-add-file-cmd (git-status-get-path))
+      (buffer-reload)
+   )
+)
+
+(define git-status-untracked-file-map
+   (let ([map (make-keymap)])
+      (bind-key map "u" git-status-untracked-file-update)
+      map
+   )
+)
+
+(define git-status-draw-untracked
+   (lambda ()
+      (move-next-line)
+      (move-next-line)
+      (while (not (equal? "" (string-remove-nl (extract-line))))
+         (move-next-longword)
+         ;; we stay at the file path word
+         (add-text-property (cursor) (longword-end-pos) '(:style (:fg "bright-black")))
+         (add-text-property
+            (line-begin-pos) (line-end-pos)
+           `(
+             :keymap ,git-status-untracked-file-map
+             :data ,(extract-longword)
+            )
+         )
+         (move-next-line)
+      )
+   )
+)
+
+(define git-status-draw-branch-status
+   (lambda ()
+      #f
+   )
+)
+
+(define git-status-draw
+   (lambda ()
+      (buffer-set-readonly #f)
+      (set-local! git-status-cursor (cursor))
+      (erase-buffer)
+      (process-create "git status" (current-buffer)
+         (lambda (status buf-out buf-err)
+            (with-current-buffer buf-out
+               (if (not (eq? 0 status))
+                  #f
+                  ;; else
+                  (let ()
+                     (move-buffer-begin)
+                     (insert (git-cmd-read "log -1 --oneline"))
+                     (insert "\n")
+                     (move-each-line
+                        (lambda ()
+                           (let ([line (extract-line)])
+                              (cond
+                                 [(pregexp-match "^On branch" line) (git-status-draw-branch-status)]
+                                 [(pregexp-match "detached at" line) (git-status-draw-branch-status)]
+                                 [(pregexp-match "^Changes to be committed" line) (git-status-draw-staged)]
+                                 [(pregexp-match "^Changes not staged" line) (git-status-draw-unstaged)]
+                                 [(pregexp-match "^Unmerged paths" line) (git-status-draw-unmerged)]
+                                 [(pregexp-match "^Untracked files" line) (git-status-draw-untracked)]
+                              )
+                           )
+                        )
+                     )
+                     (cursor-set (get-local git-status-cursor))
+                  )
+               )
+               (buffer-set-readonly #t)
+            )
+         )
+      )
+   )
+)
+
+(define git-status-mode-map
+   (let ([map (make-keymap)])
+      (bind-key map "c" (lambda () (git-create-commit)))
+      (bind-key map "a" (lambda () (git-amend-commit)))
+      (bind-key map "u" (lambda () (git-pull-changes)))
+      map
+   )
+)
+
+(define-mode git-status-mode "Git" text-mode
+   (define-local buffer-reload-func git-status-draw)
+   (define-local git-status-cursor (cursor))
+   (set-local! linenum-enable #f)
+   (buffer-set-name "git-status")
+   (git-status-draw)
+   (move-buffer-begin)
+)
+
+(define git-status
+   (lambda ()
+      (buffer-create)
+      (git-status-mode)
    )
 )
 
