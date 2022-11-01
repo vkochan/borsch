@@ -588,20 +588,20 @@
    )
 )
 
-(define git-status-staged-open-file-diff
+(define git-status-open-staged-file-diff
    (lambda ()
       (git-status-diff-file 'staged (git-status-get-path))
    )
 )
 
-(define git-status-staged-update-file
+(define git-status-update-staged-file
    (lambda ()
       (git-unstage-file-cmd (git-status-get-path))
       (buffer-reload)
    )
 )
 
-(define git-status-staged-open-all-diff
+(define git-status-open-staged-all-diff
    (lambda ()
       (git-status-diff 'staged)
    )
@@ -609,15 +609,15 @@
 
 (define git-status-staged-all-map
    (let ([map (make-keymap)])
-      (bind-key map "<Enter>" git-status-staged-open-all-diff)
+      (bind-key map "<Enter>" git-status-open-staged-all-diff)
       map
    )
 )
 
 (define git-status-staged-file-map
    (let ([map (make-keymap)])
-      (bind-key map "<Enter>" git-status-staged-open-file-diff)
-      (bind-key map "u" git-status-staged-update-file)
+      (bind-key map "<Enter>" git-status-open-staged-file-diff)
+      (bind-key map "u" git-status-update-staged-file)
       map
    )
 )
@@ -653,20 +653,20 @@
    )
 )
 
-(define git-status-unstaged-open-file-diff
+(define git-status-open-unstaged-file-diff
    (lambda ()
       (git-status-diff-file 'unstaged (git-status-get-path))
    )
 )
 
-(define git-status-unstaged-update-file
+(define git-status-update-unstaged-file
    (lambda ()
       (git-stage-file-cmd (git-status-get-path))
       (buffer-reload)
    )
 )
 
-(define git-status-unstaged-revert-file
+(define git-status-revert-unstaged-file
    (lambda ()
       (minibuf-ask "Revert selected file ?"
          (lambda (v)
@@ -681,14 +681,14 @@
 
 (define git-status-unstaged-file-map
    (let ([map (make-keymap)])
-      (bind-key map "<Enter>" git-status-unstaged-open-file-diff)
-      (bind-key map "u" git-status-unstaged-update-file)
-      (bind-key map "!" git-status-unstaged-revert-file)
+      (bind-key map "<Enter>" git-status-open-unstaged-file-diff)
+      (bind-key map "u" git-status-update-unstaged-file)
+      (bind-key map "!" git-status-revert-unstaged-file)
       map
    )
 )
 
-(define git-status-unstaged-open-all-diff
+(define git-status-open-unstaged-all-diff
    (lambda ()
       (git-status-diff 'unstaged)
    )
@@ -696,7 +696,7 @@
 
 (define git-status-unstaged-all-map
    (let ([map (make-keymap)])
-      (bind-key map "<Enter>" git-status-unstaged-open-all-diff)
+      (bind-key map "<Enter>" git-status-open-unstaged-all-diff)
       map
    )
 )
@@ -733,15 +733,15 @@
 
 (define git-status-unmerged-file-map
    (let ([map (make-keymap)])
-      (bind-key map "<Enter>" git-status-unstaged-open-file-diff)
-      (bind-key map "u" git-status-unstaged-update-file)
+      (bind-key map "<Enter>" git-status-open-unstaged-file-diff)
+      (bind-key map "u" git-status-update-unstaged-file)
       map
    )
 )
 
 (define git-status-unmerged-all-map
    (let ([map (make-keymap)])
-      (bind-key map "<Enter>" git-status-unstaged-open-all-diff)
+      (bind-key map "<Enter>" git-status-open-unstaged-all-diff)
       map
    )
 )
@@ -777,7 +777,7 @@
    )
 )
 
-(define git-status-untracked-file-update
+(define git-status-update-untracked-file
    (lambda ()
       (git-add-file-cmd (git-status-get-path))
       (buffer-reload)
@@ -786,7 +786,7 @@
 
 (define git-status-untracked-file-map
    (let ([map (make-keymap)])
-      (bind-key map "u" git-status-untracked-file-update)
+      (bind-key map "u" git-status-update-untracked-file)
       map
    )
 )
