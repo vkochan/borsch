@@ -311,15 +311,33 @@
    )
 )
 
-(define git-revert-file-cmd
+(define git-stage-all-cmd
+   (lambda ()
+      (git-cmd-read "add -u")
+   )
+)
+
+(define git-restore-file-cmd
    (lambda (f)
       (git-cmd-read (format "checkout -- ~a" (string-join f " ")))
+   )
+)
+
+(define git-restore-all-cmd
+   (lambda ()
+      (git-cmd-read "checkout -- .")
    )
 )
 
 (define git-unstage-file-cmd
    (lambda (f)
       (git-cmd-read (format "reset -- ~a" (string-join f " ")))
+   )
+)
+
+(define git-unstage-all-cmd
+   (lambda ()
+      (git-cmd-read "reset")
    )
 )
 
@@ -607,9 +625,17 @@
    )
 )
 
+(define git-status-update-staged-all
+   (lambda ()
+      (git-unstage-all-cmd)
+      (buffer-reload)
+   )
+)
+
 (define git-status-staged-all-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" git-status-open-staged-all-diff)
+      (bind-key map "u" git-status-update-staged-all)
       map
    )
 )
@@ -666,12 +692,12 @@
    )
 )
 
-(define git-status-revert-unstaged-file
+(define git-status-restore-unstaged-file
    (lambda ()
-      (minibuf-ask "Revert selected file ?"
+      (minibuf-ask "Restore selected file ?"
          (lambda (v)
             (when (eq? v 'yes)
-               (git-revert-file-cmd (git-status-get-path))
+               (git-restore-file-cmd (git-status-get-path))
                (buffer-reload)
             )
          )
@@ -683,7 +709,7 @@
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" git-status-open-unstaged-file-diff)
       (bind-key map "u" git-status-update-unstaged-file)
-      (bind-key map "!" git-status-revert-unstaged-file)
+      (bind-key map "!" git-status-restore-unstaged-file)
       map
    )
 )
@@ -694,9 +720,31 @@
    )
 )
 
+(define git-status-update-unstaged-all
+   (lambda ()
+      (git-stage-all-cmd)
+      (buffer-reload)
+   )
+)
+
+(define git-status-restore-unstaged-all
+   (lambda ()
+      (minibuf-ask "Restore all unstaged file(s) ?"
+         (lambda (v)
+            (when (eq? v 'yes)
+               (git-restore-all-cmd)
+               (buffer-reload)
+            )
+         )
+      )
+   )
+)
+
 (define git-status-unstaged-all-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" git-status-open-unstaged-all-diff)
+      (bind-key map "u" git-status-update-unstaged-all)
+      (bind-key map "!" git-status-restore-unstaged-all)
       map
    )
 )
