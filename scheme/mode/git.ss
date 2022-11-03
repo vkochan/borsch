@@ -662,9 +662,8 @@
          (delete-line)
       )
       (while (string-contains? (extract-line) "modified")
-         (move-next-longword)
-         (add-text-property (cursor) (longword-end-pos) '(:style (:fg "green")))
-         (move-next-longword)
+         (delete-longword)
+         (delete-longword)
          ;; we stay at the file path word
          (add-text-property (cursor) (longword-end-pos) '(:style (:fg "green")))
          (add-text-property
@@ -762,9 +761,8 @@
       (delete-line)
       (delete-line)
       (while (string-contains? (extract-line) "modified")
-         (move-next-longword)
-         (add-text-property (cursor) (longword-end-pos) '(:style (:fg "red")))
-         (move-next-longword)
+         (delete-longword)
+         (delete-longword)
          ;; we stay at the file path word
          (add-text-property (cursor) (longword-end-pos) '(:style (:fg "red")))
          (add-text-property
@@ -809,11 +807,9 @@
       )
       (delete-line)
       (while (string-contains? (extract-line) "modified")
-         (move-next-longword)
-         (add-text-property (cursor) (longword-end-pos) '(:style (:fg "red")))
-         (move-next-longword)
-         (add-text-property (cursor) (longword-end-pos) '(:style (:fg "red")))
-         (move-next-longword)
+         (delete-longword)
+         (delete-longword)
+         (delete-longword)
          ;; we stay at the file path word
          (add-text-property (cursor) (longword-end-pos) '(:style (:fg "red")))
          (add-text-property
@@ -847,7 +843,7 @@
       (move-next-line)
       (delete-line)
       (while (not (equal? "" (string-remove-nl (extract-line))))
-         (move-next-longword)
+         (delete-word)
          ;; we stay at the file path word
          (add-text-property (cursor) (longword-end-pos) '(:style (:fg "bright-black")))
          (add-text-property
