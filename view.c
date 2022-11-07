@@ -1340,7 +1340,7 @@ bool view_style_define(View *view, enum UiStyle id, const char *style) {
 	return view->ui->style_define(view->ui, id, style);
 }
 
-void view_style(View *view, CellStyle style, size_t start, size_t end) {
+void view_style(View *view, CellStyle style, size_t start, size_t end, bool expand) {
 	if (end < view->start || start > view->end)
 		return;
 
@@ -1356,17 +1356,18 @@ void view_style(View *view, CellStyle style, size_t start, size_t end) {
 	if (!line)
 		return;
 
-	int col = 0, width = view->width;
+	int col = 0, save_col, width = view->width;
 
 	/* skip columns before range to be styled */
-	while (pos < start && col < width)
+	while (pos < start && !expand && col < width)
 		pos += line->cells[col++].len;
 
 	do {
-		while (pos <= end && col < width) {
+		while ((pos <= end || expand) && col < width) {
 			pos += line->cells[col].len;
 			line->cells[col++].style = style;
 		}
+		save_col = col;
 		col = 0;
 	} while (pos <= end && (line = line->next));
 }

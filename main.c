@@ -2926,7 +2926,7 @@ static void __style_draw(View *view, size_t start, size_t end, Style *style)
 	if (cell_style.bg == -1)
 		cell_style.bg = default_style->bg;
 
-	view_style(view, cell_style, start, end);
+	view_style(view, cell_style, start, end, style->expand);
 }
 
 static int style_prop_draw(Buffer *buf, int id, size_t start, size_t end, void *data,
@@ -2976,7 +2976,7 @@ static void on_view_update_cb(UiWin *win)
 			.bg = highlight_style->bg,
 		};
 
-		view_style(w->view, cell_style, MIN(start, end), MAX(start, end));
+		view_style(w->view, cell_style, MIN(start, end), MAX(start, end), false);
 	}
 
 	for (Line *l = view_lines_last(w->view)->next; l; l = l->next) {
@@ -4171,7 +4171,8 @@ bool buf_is_visible(int bid)
 	return false;
 }
 
-int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end, const char *regex, char *name)
+int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end,
+		       const char *regex, char *name, bool expand)
 {
 	Buffer *buf = buffer_by_id(bid);
 	Style *style, *style_bind;
@@ -4191,6 +4192,7 @@ int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *
 		style->attr = attr;
 		style->fg = fg;
 		style->bg = bg;
+		style->expand = expand;
 	}
 
 	err = buffer_property_add(buf, type, start, end, style, regex, name, NULL);

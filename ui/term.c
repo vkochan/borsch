@@ -430,8 +430,6 @@ static void term_window_draw(UiWin *win)
 			Cell *c = &l->cells[cx];
 
 			if (!c->len) {
-				c->style.fg = ui_window_text_fg_get(win);
-				c->style.bg = ui_window_text_bg_get(win);
 				c->data[0] = ' ';
 				c->len = 1;
 			}

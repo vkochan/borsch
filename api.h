@@ -34,6 +34,7 @@ typedef struct {
 } event_t;
 
 typedef struct {
+	bool expand;
 	const char *name;
 	short fg;
 	short bg;
@@ -145,7 +146,8 @@ void buf_mark_clear(int bid);
 bool buf_is_term(int bid);
 bool buf_is_visible(int bid);
 
-int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end, const char *regex, char *name);
+int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end,
+		       const char *regex, char *name, bool expand);
 int buf_prop_kmap_add(int bid, int kid, int start, int end, const char *regex, char *name);
 int buf_prop_symbol_add(int bid, const char *symbol, int start, int end, const char *regex, char *name);
 int buf_prop_data_add(int bid, void *data, int start, int end, const char *regex, char *name, void (*free_fn)(void *data));

@@ -670,9 +670,10 @@ ptr scheme_buf_is_visible(int bid)
 	return Sfalse;
 }
 
-ptr scheme_buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end, const char *regex, char *name)
+ptr scheme_buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end,
+			      const char *regex, char *name, bool expand)
 {
-	int ret = buf_prop_style_add(bid, type, fg, bg, attr, style_name, start, end, regex, name);
+	int ret = buf_prop_style_add(bid, type, fg, bg, attr, style_name, start, end, regex, name, expand);
 
 	if (ret == 0)
 		Sinteger(ret);
