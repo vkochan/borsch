@@ -538,8 +538,17 @@
    )
 )
 
+(define mail-unselect-all-thread
+   (lambda ()
+      (set-local! mail-selected-threads '())
+      ;; TODO: just modify the styling !!!
+      (mail (get-local mail-query))
+   )
+)
+
 (define mail-mode-map
    (let ([map (make-keymap)])
+      (bind-key map "<Esc>" (lambda () (mail-unselect-all-thread)))
       (bind-key map "<Enter>" (lambda () (mail-open-thread)))
       (bind-key map "<Space>" (lambda () (mail-select-thread)))
       (bind-key map "d" (lambda () (mail-delete-thread)))
