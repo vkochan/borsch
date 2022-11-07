@@ -526,6 +526,7 @@
             ;; else
             (let ()
                (set! th-style (plist-put (plist-get th-prop ':style) ':bg "blue"))
+               (set! th-style (append th-style '(:expand #t)))
                (set! th-list (append th-list (list th)))
             )
          )
