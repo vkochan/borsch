@@ -1356,7 +1356,7 @@ void view_style(View *view, CellStyle style, size_t start, size_t end, bool expa
 	if (!line)
 		return;
 
-	int col = 0, save_col, width = view->width;
+	int col = 0, width = view->width;
 
 	/* skip columns before range to be styled */
 	while (pos < start && !expand && col < width)
@@ -1367,7 +1367,6 @@ void view_style(View *view, CellStyle style, size_t start, size_t end, bool expa
 			pos += line->cells[col].len;
 			line->cells[col++].style = style;
 		}
-		save_col = col;
 		col = 0;
 	} while (pos <= end && (line = line->next));
 }
