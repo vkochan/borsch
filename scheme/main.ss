@@ -181,6 +181,41 @@
    )
 )
 
+(define minibuf-buffer-list->complete
+   (lambda ()
+      (map
+         (lambda (b)
+            (cons (buffer-name (first b)) (first b))
+         )
+         (buffer-list)
+      )
+   )
+)
+
+(define minibuf-switch-buffer
+   (lambda ()
+      (minibuf-complete
+         (minibuf-buffer-list->complete)
+         (lambda (b)
+            (window-switch-buffer b)
+         )
+         "Switch to buffer"
+      )
+   )
+)
+
+(define minibuf-open-buffer
+   (lambda ()
+      (minibuf-complete
+         (minibuf-buffer-list->complete)
+         (lambda (b)
+            (window-create b)
+         )
+         "Open buffer"
+      )
+   )
+)
+
 (define minibuf-cmd
    (lambda ()
       (minibuf-complete
@@ -229,9 +264,9 @@
 (bind-key "M-w ."       window-set-minimized)
 (bind-key "M-w <Enter>" window-set-master)
 (bind-key "M-b n"       new-text-buffer)
-(bind-key "M-b s"       buffer-switch)
+(bind-key "M-b s"       minibuf-switch-buffer)
 (bind-key "M-b c"       window-close)
-(bind-key "M-b o"       buffer-open)
+(bind-key "M-b o"       minibuf-open-buffer)
 (bind-key "M-1"         frame-switch-1)
 (bind-key "M-2"         frame-switch-2)
 (bind-key "M-3"         frame-switch-3)
@@ -276,9 +311,9 @@
 (bind-key "C-g n"   new-text-buffer)
 (bind-key "C-g o"   open-file-prompt)
 
-(bind-key "C-x b s" buffer-switch)
+(bind-key "C-x b s" minibuf-switch-buffer)
 (bind-key "C-x b c" window-close)
-(bind-key "C-x b o" buffer-open)
+(bind-key "C-x b o" minibuf-open-buffer)
 
 (bind-key "C-g y m" (lambda () (copybuf-put (pregexp-replace "\n$" message-recent ""))))
 (bind-key "C-g y w" (lambda () (copybuf-put (current-cwd))))
