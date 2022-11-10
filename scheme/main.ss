@@ -14,6 +14,7 @@
 (load "frame.ss")
 (load "window.ss")
 (load "buffer.ss")
+(load "text.ss")
 (load "command.ss")
 (load "complete.ss")
 (load "prompt.ss")
