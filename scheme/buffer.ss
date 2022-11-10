@@ -133,7 +133,7 @@
 
 (define buffer-set-mode-name
    (lambda (n)
-      (call-foreign (__cs_buf_mode_name_set (current-buffer) (format "(~a)" n)))
+      (call-foreign (__cs_buf_mode_name_set (current-buffer) (format "~a" n)))
    )
 )
 

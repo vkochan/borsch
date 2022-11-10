@@ -960,7 +960,7 @@ static void draw_title(Window *c) {
 	line = view_cursors_line(view_cursor);
 	col = view_cursors_cell_get(view_cursor);
 
-	status_len = snprintf(status, sizeof(status), "[%d:%d] %s%s %s  [%d|%s]%s",
+	status_len = snprintf(status, sizeof(status), "[%d:%d] %s(%s) %s  [%d|%s]%s",
 			line,
 			col,
 			buffer_is_modified(c->buf) ? "[+] " : "",
