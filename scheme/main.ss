@@ -186,7 +186,12 @@
    (lambda ()
       (map
          (lambda (b)
-            (cons (buffer-name (first b)) (first b))
+            (let (
+                  [mode (buffer-mode-name (first b))]
+                  [name (buffer-name (first b))]
+                 )
+               (cons (format "(~a) ~a" mode name) (first b))
+            )
          )
          (buffer-list)
       )

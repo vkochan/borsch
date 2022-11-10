@@ -139,8 +139,14 @@
 )
 
 (define buffer-mode-name
-   (lambda ()
-      (call-foreign (__cs_buf_mode_name_get (current-buffer)))
+   (case-lambda
+      [()
+       (buffer-mode-name (current-buffer))
+      ]
+
+      [(b)
+       (call-foreign (__cs_buf_mode_name_get b))
+      ]
    )
 )
 
