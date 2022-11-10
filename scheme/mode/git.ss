@@ -661,8 +661,11 @@
       (when (string-contains? (extract-line) "(use")
          (delete-line)
       )
-      (while (string-contains? (extract-line) "modified")
+      (while (pregexp-match "(modified:)|(new file:)" (extract-line))
          (delete-longword)
+         (when (pregexp-match "new file:" (extract-line))
+            (delete-longword)
+         )
          (delete-longword)
          ;; we stay at the file path word
          (add-text-property (cursor) (longword-end-pos) '(:style (:fg "green")))
