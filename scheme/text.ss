@@ -478,9 +478,7 @@
        (extract-line (cursor))]
 
       [(s)
-       (let ([r (text-obj-range (current-buffer) s #\l #f)])
-          (buffer-string (car r) (cdr r))
-       )
+       (buffer-string (line-begin-pos) (line-end-pos))
       ]
    )
 )
@@ -491,9 +489,7 @@
        (extract-line-inner (cursor))]
 
       [(s)
-       (let ([r (text-obj-range (current-buffer) s #\l #t)])
-          (buffer-string (car r) (cdr r))
-       )
+       (buffer-string (line-start-pos) (line-end-pos))
       ]
    )
 )
