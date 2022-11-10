@@ -607,6 +607,11 @@ void scheme_buf_mode_name_set(int bid, char *mode)
 	buf_mode_name_set(bid, mode);
 }
 
+ptr scheme_buf_mode_name_get(int bid)
+{
+	return Sstring(buf_mode_name_get(bid));
+}
+
 void scheme_buf_state_name_set(int bid, char *mode)
 {
 	buf_state_name_set(bid, mode);
@@ -1442,6 +1447,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_text_style_get", scheme_buf_text_style_get);
 
 	Sregister_symbol("cs_buf_mode_name_set", scheme_buf_mode_name_set);
+	Sregister_symbol("cs_buf_mode_name_get", scheme_buf_mode_name_get);
 	Sregister_symbol("cs_buf_state_name_set", scheme_buf_state_name_set);
 	Sregister_symbol("cs_buf_cursor_get", scheme_buf_cursor_get);
 	Sregister_symbol("cs_buf_cursor_set", scheme_buf_cursor_set);

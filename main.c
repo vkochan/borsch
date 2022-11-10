@@ -4051,6 +4051,17 @@ void buf_mode_name_set(int bid, char *name)
 	}
 }
 
+char *buf_mode_name_get(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		return buffer_mode_name_get(buf);
+	}
+
+	return "";
+}
+
 void buf_state_name_set(int bid, char *name)
 {
 	Buffer *buf = buffer_by_id(bid);

@@ -31,6 +31,7 @@
 (define __cs_buf_cursor_set (foreign-procedure __collect_safe "cs_buf_cursor_set" (int int) void))
 (define __cs_buf_line_num (foreign-procedure __collect_safe "cs_buf_line_num" (int int) scheme-object))
 (define __cs_buf_mode_name_set (foreign-procedure "cs_buf_mode_name_set" (int string) void))
+(define __cs_buf_mode_name_get (foreign-procedure "cs_buf_mode_name_get" (int) scheme-object))
 (define __cs_buf_state_name_set (foreign-procedure "cs_buf_state_name_set" (int string) void))
 
 (define __cs_buf_file_open (foreign-procedure "cs_buf_file_open" (int string) scheme-object))
@@ -134,6 +135,12 @@
 (define buffer-set-mode-name
    (lambda (n)
       (call-foreign (__cs_buf_mode_name_set (current-buffer) (format "~a" n)))
+   )
+)
+
+(define buffer-mode-name
+   (lambda ()
+      (call-foreign (__cs_buf_mode_name_get (current-buffer)))
    )
 )
 
