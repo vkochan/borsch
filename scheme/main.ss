@@ -239,6 +239,25 @@
    )
 )
 
+(define minibuf-find-file
+   (lambda ()
+      (let (
+            [find-cmd "find * -not -path '*/\\.*';"]
+            [flist '()]
+           )
+         (with-process-temp-buffer find-cmd
+            (minibuf-complete
+               (string-split (buffer-string) #\newline)
+               (lambda (f)
+                  (file-open f)
+               )
+               "Find file"
+            )
+         )
+      )
+   )
+)
+
 (minibuf-create)
 (topbar-create)
 
@@ -334,6 +353,7 @@
 (bind-key "M-x" minibuf-cmd)
 
 (bind-key "C-x f d" dirb)
+(bind-key "C-x f f" minibuf-find-file)
 
 (bind-key "C-x s g" grep)
 
