@@ -922,7 +922,7 @@
    (let ([map (make-keymap)])
       (bind-key map "c" (lambda () (git-create-commit)))
       (bind-key map "a" (lambda () (git-amend-commit)))
-      (bind-key map "u" (lambda () (git-pull-changes)))
+      (bind-key map "U" (lambda () (git-pull-changes)))
       map
    )
 )
