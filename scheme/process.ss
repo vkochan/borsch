@@ -243,11 +243,13 @@
        #`(let ([b (buffer-new)])
             (process-create cmd b
                (lambda (proc-status buf-out buf-err)
-                  (begin
-                     exp
-		     ...
+                  (with-current-buffer buf-out
+                     (begin
+                        exp
+		        ...
+                     )
                   )
-                  (buffer-delete b)
+                  (buffer-delete buf-out)
                )
             )
          )
