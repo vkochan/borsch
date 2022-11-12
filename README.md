@@ -1,7 +1,7 @@
 # borsch - Build your environment with Scheme
 
-It is based on DVTM implementation with ability to customize
-with ChezScheme.
+It is a messy draft project with merging of code from dvtm, vis (text core),
+and adding a Chez Scheme for customization.
 
 ## Purpose
 
