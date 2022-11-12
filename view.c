@@ -1365,7 +1365,9 @@ void view_style(View *view, CellStyle style, size_t start, size_t end, bool expa
 	do {
 		while ((pos <= end || expand) && col < width) {
 			pos += line->cells[col].len;
-			line->cells[col++].style = style;
+			if (line->cells[col].len || expand)
+				line->cells[col].style = style;
+			col++;
 		}
 		col = 0;
 	} while (pos <= end && (line = line->next));
