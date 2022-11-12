@@ -249,9 +249,13 @@
 
 (define plist-put
    (lambda (plist prop value)
-      (let loop ([plist plist])
+      (let loop ([plist plist] [set? #f])
          (if (< (length plist) 2)
-            (list)
+            (if (not set?)
+               (list prop value)
+               ;; else
+               (list)
+            )
             ;; else
             (let (
                   [rest (cdr (cdr plist))]
@@ -259,9 +263,9 @@
                   [val (second plist)]
                  )
                (if (equal? name prop)
-                  (append (list prop value) (loop rest))
+                  (append (list prop value) (loop rest #t))
                   ;; else
-                  (append (list name val) (loop rest))
+                  (append (list name val) (loop rest set?))
                )
             )
          )
