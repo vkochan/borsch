@@ -41,6 +41,26 @@
    )
 )
 
+(define dirb-insert-entry
+   (lambda (dir path style)
+      (let (
+            [slist (dirb-get-selection)]
+            [entry path]
+           )
+         (if (file-directory? (fmt "~a/~a" dir path))
+            (set! entry (fmt "~a/\n" path))
+         )
+         (if (file-regular? (fmt "~a/~a" dir path))
+            (set! entry (fmt "~a\n" path))
+         )
+         (when (member (fmt "~a/~a" dir path) slist)
+            (set! style (plist-put style ':bg "blue"))
+         )
+         (insert entry `(:style ,style))
+      )
+   )
+)
+
 (define dirb-open-dir
    (lambda (cwd)
       (let (
@@ -67,15 +87,15 @@
          )
          (for-each
             (lambda (d)
-               (insert (fmt "~a/\n" d) `(:style ,dirb-dir-style))
+               (dirb-insert-entry dir d dirb-dir-style)
             ) dl
          )
          (for-each
             (lambda (f)
                (if (= 0 (bitwise-and #o100 (get-mode (fmt "~a/~a" dir f))))
-                  (insert (fmt "~a\n" f) `(:style ,dirb-file-regular-style))
+                  (dirb-insert-entry dir f dirb-file-regular-style)
                   ;; else
-                  (insert (fmt "~a\n" f) `(:style ,dirb-file-executable-style))
+                  (dirb-insert-entry dir f dirb-file-executable-style)
                )
             ) fl
          )
@@ -225,7 +245,7 @@
 (define dirb-clear-selection
    (lambda ()
       (dirb-set-selection (list))
-      (dirb-draw-selection (current-window))
+      (dirb-reload)
    )
 )
 
@@ -425,51 +445,29 @@
    )
 )
 
-(define dirb-draw-selection
-   (lambda (w)
-      (let ([slist (dirb-get-selection)])
-         (if (> (length slist) 0)
-            (window-set-sidebar-width w 2)
-            ;; else
-            (window-set-sidebar-width w 0)
-         )
-         (when (> (length slist) 0)
-            (let ([lines (window-lines-coord w)])
-               (for-each
-                  (lambda (c)
-                     (let (
-                           [line-pos (list-ref c 3)]
-                           [line-y (list-ref c 1)]
-                          )
-                        (let ([path (dirb-entry-path line-pos)])
-                           (if (member path slist)
-                              (window-draw-sidebar w 0 line-y "*")
-                              ;; else
-                              (window-draw-sidebar w 0 line-y " ")
-                           )
-                        )
-                     )
-                  ) lines
-               )
-            )
-         )
-      )
-   )
-)
-
 (define dirb-select-entry
    (lambda ()
       (let (
+            [prop (first (get-text-property ':style (line-begin-pos) (line-end-pos)))]
+            [style '()]
             [slist (dirb-get-selection)]
             [path (dirb-entry-path)]
            )
          (if (member path slist)
-            (set! slist (remove path slist))
+            (let ()
+               (set! style (plist-put (plist-get prop ':style) ':bg "default"))
+               (set! slist (remove path slist))
+            )
             ;; else
-            (set! slist (append slist (list path)))
+            (let ()
+               (set! style (plist-put (plist-get prop ':style) ':bg "blue"))
+               (set! slist (append slist (list path)))
+            )
+         )
+         (set-text-property (plist-get prop ':start) (plist-get prop ':end)
+            `(:style ,style)
          )
          (dirb-set-selection slist)
-         (dirb-draw-selection (current-window))
       )
    )
 )
@@ -542,7 +540,6 @@
    (define-local current-dir (current-cwd))
    (define-local show-hidden #f)
    (define-local prev-cursor (make-stack))
-   (define-local window-draw-hook dirb-draw-selection)
    (define-local defval #f)
    (define-local buffer-reload-func dirb-reload)
    (set-local! linenum-enable #f)
