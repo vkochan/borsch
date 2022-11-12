@@ -64,6 +64,7 @@
 (define dirb-open-dir
    (lambda (cwd)
       (let (
+            [slist (dirb-get-selection)]
             [dir (dirb-get-entry cwd)]
             [dl '()]
             [fl '()]
@@ -101,6 +102,11 @@
          )
          (move-buffer-begin)
          (buffer-set-readonly #t)
+         (if (> (length slist) 0)
+            (buffer-set-state-name (format "[sel:~a]" (length slist)))
+            ;; else
+            (buffer-set-state-name "")
+         )
       )
    )
 )
@@ -468,6 +474,11 @@
             `(:style ,style)
          )
          (dirb-set-selection slist)
+         (if (> (length slist) 0)
+            (buffer-set-state-name (format "[sel:~a]" (length slist)))
+            ;; else
+            (buffer-set-state-name "")
+         )
       )
    )
 )
