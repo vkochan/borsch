@@ -18,6 +18,7 @@
             [fn (get-local func-value)]
             [b  (get-local orig-buf)]
            )
+         (buffer-set-keymap 1)
          (set-local! input-mode #f)
          (enable-insert #f)
          (erase-buffer)
