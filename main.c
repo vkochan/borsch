@@ -1416,22 +1416,7 @@ viewprevtag(const char *args[]) {
 
 static void
 keypress(int code) {
-	int key = -1;
-	unsigned int len = 1;
 	char buf[8] = { '\e' };
-
-	if (code == '\e') {
-		/* pass characters following escape to the underlying app */
-		nodelay(stdscr, TRUE);
-		for (int t; len < sizeof(buf) && (t = getch()) != ERR; len++) {
-			if (t > 255) {
-				key = t;
-				break;
-			}
-			buf[len] = t;
-		}
-		nodelay(stdscr, FALSE);
-	}
 
 	for (Window *c = current_frame()->runinall ? nextvisible(windows) : current_window(); c; c = nextvisible(c->next)) {
 		if (is_content_visible(c)) {
@@ -1441,11 +1426,9 @@ keypress(int code) {
 				Vt *term = process_term_get(buffer_proc_get(c->buf));
 
 				if (code == '\e')
-					vt_write(term, buf, len);
+					vt_write(term, buf, 1);
 				else
 					vt_keypress(term, code);
-				if (key != -1)
-					vt_keypress(term, key);
 			} else if (buffer_text_input_is_enabled(c->buf)) {
 				event_t evt = {};
 
