@@ -2417,12 +2417,6 @@ reenter:
 	if (code < 0)
 		return;
 
-	if (code == KEY_MOUSE) {
-		handle_mouse();
-		return;
-	}
-
-
 	if (!keybuf_enqueue(kbuf, code, flags)) {
 		keybuf_flush(kbuf);
 		return;	
