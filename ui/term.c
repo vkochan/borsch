@@ -576,7 +576,6 @@ Ui *ui_term_new(void)
 	tui->ui.window_clear = term_window_clear;
 	tui->ui.window_resize = term_window_resize;
 	tui->ui.window_move = term_window_move;
-	tui->ui.window_draw_char = term_window_draw_char;
 	tui->ui.window_draw_text = term_window_draw_text;
 	tui->ui.window_draw_char_attr = term_window_draw_char_attr;
 	tui->ui.window_draw_text_attr = term_window_draw_text_attr;
