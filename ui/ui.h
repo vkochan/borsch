@@ -103,7 +103,6 @@ struct Ui {
 	void (*window_clear)(UiWin*);
 	void (*window_resize)(UiWin*, int width, int height);
 	void (*window_move)(UiWin*, int x, int y);
-	void (*window_draw_char)(UiWin*, int x, int y, unsigned int ch, int n);
 	void (*window_draw_text)(UiWin *win, int x, int y, const char *text, int n);
 	void (*window_draw_char_attr)(UiWin *win, int x, int y, unsigned ch, int n,
 				      short fg, short bg, ui_text_style_t style);
@@ -143,12 +142,9 @@ struct UiWin {
 	void (*options_set)(UiWin*, enum UiOption);
 	enum UiOption (*options_get)(UiWin*);
 	bool (*style_define)(UiWin*, int id, const char *style);
-	void (*resize)(UiWin *, int, int);
 	void (*draw)(UiWin *);
 	void (*on_view_update)(UiWin *win);
 };
-
-bool is_default_color(CellColor c);
 
 Ui *ui_term_new(void);
 int ui_init(Ui *ui);
@@ -162,7 +158,6 @@ void ui_event_process(Ui *ui);
 void ui_refresh(Ui *ui);
 int ui_height_get(Ui *ui);
 int ui_width_get(Ui *ui);
-short ui_color_make(Ui *ui, short fg, short bg);
 void ui_draw_char(Ui *ui, int x, int y, unsigned int ch, int n);
 void ui_draw_char_vert(Ui *ui, int x, int y, unsigned int ch, int n);
 short ui_colors_max_get(Ui *ui);
@@ -173,7 +168,6 @@ void ui_window_free(UiWin *win);
 void ui_window_cursor_set(UiWin *win, int x, int y);
 void ui_window_cursor_get(UiWin *win, int *x, int *y);
 void ui_window_draw(UiWin *win);
-void ui_window_draw_char(UiWin *win, int x, int y, unsigned int ch, int n);
 void ui_window_draw_text(UiWin *win, int x, int y, const char *text, int n);
 void ui_window_draw_char_attr(UiWin *win, int x, int y, unsigned ch, int n,
 			      short fg, short bg, ui_text_style_t style);
@@ -196,8 +190,6 @@ void ui_window_priv_set(UiWin *win, void *priv);
 void *ui_window_priv_get(UiWin *win);
 void ui_window_ops_draw_set(UiWin *win, void (*fn)(UiWin *));
 void *ui_window_ops_draw_get(UiWin *win);
-void ui_window_ops_resize_set(UiWin *win, void (*fn)(UiWin *, int, int));
-void *ui_window_ops_resize_get(UiWin *win);
 void ui_window_text_fg_set(UiWin *win, short fg);
 void ui_window_text_bg_set(UiWin *win, short bg);
 void ui_window_text_style_set(UiWin *win, ui_text_style_t style);

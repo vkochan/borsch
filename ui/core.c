@@ -76,14 +76,6 @@ int ui_width_get(Ui *ui)
 	return 0;
 }
 
-short ui_color_make(Ui *ui, short fg, short bg)
-{
-	if (ui->color_make)
-		return ui->color_make(ui, fg, bg);
-	else
-		return -1;
-}
-
 void ui_draw_char(Ui *ui, int x, int y, unsigned int ch, int n)
 {
 	if (ui->draw_char)
@@ -214,9 +206,7 @@ void ui_window_resize(UiWin *win, int width, int height)
 		view_resize(win->view, win->width - win->sidebar_width - (border*2),
 				       win->height - (border + win->has_title));
 
-		if (win->resize)
-			win->resize(win, win->width, win->height);
-		else if (win->ui->window_resize)
+		if (win->ui->window_resize)
 			win->ui->window_resize(win, win->width, win->height);
 
 		ui_window_clear(win);
@@ -232,15 +222,6 @@ void ui_window_move(UiWin *win, int x, int y)
 		if (win->ui->window_move)
 			win->ui->window_move(win, x, y);
 	}
-}
-
-void ui_window_draw_char(UiWin *win, int x, int y, unsigned int ch, int n)
-{
-	int skip_x = win->has_border;
-	int skip_y = win->has_border;
-
-	if (win->ui->window_draw_char)
-		win->ui->window_draw_char(win, x+skip_x, y+skip_y, ch, n);
 }
 
 void ui_window_draw_text(UiWin *win, int x, int y, const char *text, int n)
@@ -330,16 +311,6 @@ void ui_window_ops_draw_set(UiWin *win, void (*fn)(UiWin *))
 void *ui_window_ops_draw_get(UiWin *win)
 {
 	return win->draw;
-}
-
-void ui_window_ops_resize_set(UiWin *win, void (*fn)(UiWin *, int, int))
-{
-	win->resize = fn;
-}
-
-void *ui_window_ops_resize_get(UiWin *win)
-{
-	return win->resize;
 }
 
 void ui_window_text_fg_set(UiWin *win, short fg)
