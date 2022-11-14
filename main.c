@@ -178,6 +178,7 @@ extern void *scheme_env_alloc(void);
 extern void scheme_env_free(void *env);
 
 static char *scheme_init_script = "";
+static bool start_in_graphic = false;
 
 /* commands for use by keybindings */
 static void focusn(const char *args[]);
@@ -1544,7 +1545,10 @@ setup(void) {
 
 	style_init();
 
-	ui = ui_term_new();
+	if (start_in_graphic)
+		ui = ui_x_new();
+	else
+		ui = ui_term_new();
 	ui->get_default_cell_style = get_default_cell_style;
 	ui_event_handler_set(ui, handle_ui_event);
 	ui_init(ui);
@@ -2321,6 +2325,8 @@ parse_args(int argc, char *argv[]) {
 			arg++;
 		} else if (strcmp(argv[arg], "-n") == 0) {
 			scheme_init_script = NULL;
+		} else if (strcmp(argv[arg], "-g") == 0) {
+			start_in_graphic = true;
 		}
 	}
 

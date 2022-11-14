@@ -1,5 +1,12 @@
 include config.mk
 
+PKG_CONFIG = pkg-config
+
+X11_LIB = /usr/X11R6/lib
+X11_LIBS = -L$(X11_LIB) -lrt -lX11 -lutil -lXft \
+       `$(PKG_CONFIG) --libs fontconfig` \
+       `$(PKG_CONFIG) --libs freetype2`
+
 SRCS = xstr.c \
       main.c \
       vt.c \
@@ -22,7 +29,7 @@ SRCS += scheme.c
 SCH_SCRIPTS = main.ss
 
 LDFLAGS += -L ./text -L ./ui
-LIBS += -ltext -lui -ltree-sitter
+LIBS += -ltext -lui -ltree-sitter $(X11_LIBS)
 
 SRCS += syntax/c/parser.c \
        syntax/devicetree/parser.c \

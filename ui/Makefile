@@ -1,10 +1,17 @@
 TARGET = libui.a
 
-SRC = core.c term.c
+PKG_CONFIG = pkg-config
+
+SRC = core.c term.c x.c
 
 OBJ = $(SRC:.c=.o)
 
-CFLAGS = -I.. -DCONFIG_MOUSE
+X11_INC = /usr/X11R6/include
+X11_INCS = -I$(X11_INC) \
+       `$(PKG_CONFIG) --cflags fontconfig` \
+       `$(PKG_CONFIG) --cflags freetype2`
+
+CFLAGS = -I.. -DCONFIG_MOUSE $(X11_INCS)
 CFLAGS_STD ?= -std=c99 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DNDEBUG
 CFLAGS_LIBC = -DHAVE_MEMRCHR=1
 LDFLAGS_STD ?= -lc

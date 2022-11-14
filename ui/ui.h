@@ -147,6 +147,8 @@ struct UiWin {
 };
 
 Ui *ui_term_new(void);
+Ui *ui_x_new(void);
+
 int ui_init(Ui *ui);
 void ui_free(Ui *ui);
 void ui_redraw(Ui *ui);
