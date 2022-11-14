@@ -15,6 +15,10 @@
 typedef struct Ui Ui;
 typedef struct UiWin UiWin;
 
+enum UiEventType {
+   UiEventType_KeyPress = 1,
+};
+
 enum UiLayout {
 	UI_LAYOUT_HORIZONTAL,
 	UI_LAYOUT_VERTICAL,
@@ -117,6 +121,9 @@ struct Ui {
 	short (*color_make)(Ui *ui, short fg, short bg);
 	short (*colors_max_get)(Ui *ui);
 	CellStyle (*get_default_cell_style)(Ui *ui);
+
+	int (*event_handler_cb)(Ui *ui, enum UiEventType type, void *evt);
+	void (*event_process)(Ui *ui);
 };
 
 struct UiWin {
@@ -150,6 +157,8 @@ void ui_redraw(Ui *ui);
 bool ui_resize(Ui *ui);
 void ui_clear(Ui *ui);
 void ui_update(Ui *ui);
+void ui_event_handler_set(Ui *ui, int (*cb)(Ui *ui, enum UiEventType type, void *evt));
+void ui_event_process(Ui *ui);
 void ui_refresh(Ui *ui);
 int ui_height_get(Ui *ui);
 int ui_width_get(Ui *ui);
@@ -206,5 +215,4 @@ void ui_window_has_title_set(UiWin *win, bool has_title);
 bool ui_window_has_title(UiWin *win);
 
 void ui_window_update(UiWin *win);
-
 #endif

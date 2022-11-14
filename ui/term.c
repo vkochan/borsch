@@ -5,7 +5,11 @@
 #include <string.h>
 #include <sys/ioctl.h>
 
+#include "keymap.h"
+#include "event.h"
 #include "ui/ui.h"
+
+#define ALT	27
 
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 
@@ -221,6 +225,34 @@ static void term_init_colors(Ui *ui)
 	term_color_make(ui, COLOR_WHITE, COLOR_BLACK);
 }
 
+void term_handle_keypress(int fd, void *arg)
+{
+	Ui *ui = arg;
+	int code = getch();
+	int alt_code;
+	int flags = 0;
+	KeyCode key = {};
+
+	if (code == ALT) {
+		nodelay(stdscr, TRUE);
+		alt_code = getch();
+		nodelay(stdscr, FALSE);
+		if (alt_code > 0) {
+			flags |= KEY_MOD_F_ALT;
+			code = alt_code;
+		}
+	} else if (code < 0x1f && code != 0xd && code != 0x9) {
+		flags |= KEY_MOD_F_CTL;
+		code = code + 0x60;
+	}
+
+	key.flags = flags;
+	key.code = code;
+
+	if (ui->event_handler_cb)
+		ui->event_handler_cb(ui, UiEventType_KeyPress, &key);
+}
+
 static int term_init(Ui *ui)
 {
 	UiTerm *tui = (UiTerm*)ui;
@@ -243,11 +275,13 @@ static int term_init(Ui *ui)
 
 	term_redraw(ui);
 
+	event_fd_handler_register(STDIN_FILENO, term_handle_keypress, ui);
 	return 0;
 }
 
 static void term_free(Ui *ui)
 {
+	event_fd_handler_unregister(STDIN_FILENO);
 	endwin();
 	free(ui);
 }
@@ -271,6 +305,12 @@ static void term_clear(Ui *ui)
 static void term_update(Ui *ui)
 {
 	doupdate();
+}
+
+static void term_event_process(Ui *ui)
+{
+	doupdate();
+	event_process();
 }
 
 static void term_refresh(Ui *ui)
@@ -519,6 +559,7 @@ Ui *ui_term_new(void)
 	tui->ui.resize = term_resize;
 	tui->ui.clear = term_clear;
 	tui->ui.update = term_update;
+	tui->ui.event_process = term_event_process;
 	tui->ui.refresh = term_refresh;
 	tui->ui.color_make = term_color_make;
 	tui->ui.colors_max_get = term_colors_max_get;

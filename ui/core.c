@@ -45,6 +45,17 @@ void ui_update(Ui *ui)
 		ui->update(ui);
 }
 
+void ui_event_handler_set(Ui *ui, int (*cb)(Ui *ui, enum UiEventType type, void *evt))
+{
+	ui->event_handler_cb = cb;
+}
+
+void ui_event_process(Ui *ui)
+{
+	if (ui->event_process)
+		ui->event_process(ui);
+}
+
 void ui_refresh(Ui *ui)
 {
 	if (ui->refresh)

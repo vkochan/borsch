@@ -1203,6 +1203,8 @@ detachstack(Window *c) {
 	*tc = c->snext;
 }
 
+static KeyMap *buf_keymap_get(Buffer *buf);
+
 static void
 focus(Window *c) {
 	if (!c)
@@ -1214,8 +1216,6 @@ focus(Window *c) {
 	if (c) {
 		if (c->minimized)
 			curr_kmap = win_min_kmap;
-		else
-			curr_kmap = global_kmap;
 	}
 
 	lastsel = current_window();
@@ -1521,6 +1521,20 @@ static CellStyle get_default_cell_style(Ui *ui)
 	return cell_style;
 }
 
+static void handle_keypress(KeyCode *key);
+
+static int handle_ui_event(Ui *ui, enum UiEventType type, void *evt, void *arg)
+{
+	switch (type)
+	{
+	case UiEventType_KeyPress:
+		handle_keypress(evt);
+		break;
+	}
+
+	return 0;
+}
+
 static void
 setup(void) {
 	shell = getshell();
@@ -1535,6 +1549,7 @@ setup(void) {
 
 	ui = ui_term_new();
 	ui->get_default_cell_style = get_default_cell_style;
+	ui_event_handler_set(ui, handle_ui_event);
 	ui_init(ui);
 
 	init_default_keymap();
@@ -1632,8 +1647,6 @@ cleanup(void) {
 	Buffer *b;
 	int i;
 
-	/* issue when deleting fd handlers during execution the fd handler ? */
-	event_fd_handler_unregister(STDIN_FILENO);
 	if (cmdfifo.fd != -1)
 		event_fd_handler_unregister(cmdfifo.fd);
 
@@ -2376,69 +2389,58 @@ static void keybuf_flush(KeyBuf *kbuf)
 	keybuf_clear(kbuf);
 }
 
-static void handle_keypress(int fd, void *arg)
+static void handle_keypress(KeyCode *key)
 {
 	KeyBinding *kbd = NULL;
-	KeyBuf *kbuf = arg;
-	int alt_code;
 	event_t evt = {};
-	int flags;
-	int code;
+	int flags = key->flags;
+	int code = key->code;
 
 	if (!current_window()) {
 		curr_kmap = global_kmap;
-	} else if (current_window() && !current_window()->minimized) {
+	} else if (!curr_kmap && current_window() && !current_window()->minimized) {
 		KeyMap *map = buf_keymap_get(current_window()->buf);
 		if (map)
 			curr_kmap = map;
+	} else if (!curr_kmap) {
+		curr_kmap = global_kmap;
 	};
 
-reenter:
-	code = getch();
-	flags = 0;
+	if (code < 0) {
+		curr_kmap = NULL;
+		return;
+	}
 
 	evt.eid = EVT_KEY_PRESS;
 	evt.oid = code;
 	scheme_event_handle(evt);
 
-	if (code == ALT) {
-		nodelay(stdscr, TRUE);
-		alt_code = getch();
-		nodelay(stdscr, FALSE);
-		if (alt_code > 0) {
-			flags |= KEY_MOD_F_ALT;
-			code = alt_code;
-		}
-	} else if (code < 0x1f && code != 0xd && code != 0x9) {
-		flags |= KEY_MOD_F_CTL;
-		code = code + 0x60;
-	}
-
-	if (code < 0)
-		return;
-
-	if (!keybuf_enqueue(kbuf, code, flags)) {
-		keybuf_flush(kbuf);
+	if (!keybuf_enqueue(&kbuf, code, flags)) {
+		keybuf_flush(&kbuf);
+		curr_kmap = NULL;
 		return;	
 	}
 
-	if ((kbd = keymap_match(curr_kmap, kbuf->keys, kbuf->key_index))) {
+	if ((kbd = keymap_match(curr_kmap, kbuf.keys, kbuf.key_index))) {
 		if (keymap_kbd_is_map(kbd)) {
 			curr_kmap = keymap_kbd_map_get(kbd);
-			keybuf_clear(kbuf);
-			goto reenter;
+			keybuf_clear(&kbuf);
+			curr_kmap = NULL;
+			return;
 		}
 
-		if (keymap_kbd_len(kbd) == kbuf->key_index) {
+		if (keymap_kbd_len(kbd) == kbuf.key_index) {
 			debug("kbd action: enter\n");
 			is_in_kbd_action = true;
 			keymap_kbd_action(kbd);
 			debug("kbd action: exit\n");
 			is_in_kbd_action = false;
-			keybuf_clear(kbuf);
+			keybuf_clear(&kbuf);
+			curr_kmap = NULL;
 		}
 	} else {
-		keybuf_flush(kbuf);
+		keybuf_flush(&kbuf);
+		curr_kmap = NULL;
 	}
 
 	for (Window *c = nextvisible(windows); c; c = nextvisible(c->next)) {
@@ -2488,8 +2490,6 @@ int main(int argc, char *argv[]) {
 	pipe2(proc_fd, O_NONBLOCK);
 	event_fd_handler_register(proc_fd[0], handle_sigchld_io, NULL);
 
-	event_fd_handler_register(STDIN_FILENO, handle_keypress, &kbuf);
-
 	update_screen_size();
 
 	while (running) {
@@ -2519,9 +2519,7 @@ int main(int argc, char *argv[]) {
 		}
 		/* TODO: what to do with a died buffers ? */
 
-		ui_update(ui);
-
-		event_process();
+		ui_event_process(ui);
 
 	        if (topbar) {
 		   draw(topbar, true);
