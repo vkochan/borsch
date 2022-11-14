@@ -1,7 +1,5 @@
 TARGET = libui.a
 
-REGEX_SRC ?= text-regex.c
-
 SRC = core.c term.c
 
 OBJ = $(SRC:.c=.o)
