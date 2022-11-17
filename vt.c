@@ -1462,6 +1462,7 @@ int vt_process(Vt *t)
 	if (t->vt_filter) {
 		t->vt_filter(t, t->filter_buf, t->filter_buf_len, t->vt_filter_arg);
 	}
+
 	return 0;
 }
 
@@ -1542,6 +1543,8 @@ void vt_dirty(Vt *t)
 
 void vt_draw(UiWin *win)
 {
+	View *view = win->view;
+	const Line *line = view_lines_first(view);
 	Vt *t = ui_window_priv_get(win);
 	VtBuffer *b = t->buffer;
 	int srow = 0, scol = 0;
@@ -1552,48 +1555,60 @@ void vt_draw(UiWin *win)
 		t->srow = srow;
 		t->scol = scol;
 	}
+	view_resize(view, b->cols, b->rows);
+	view_clear(view);
 
 	for (i = 0; i < b->rows; i++) {
 		short curattrs = UI_TEXT_STYLE_NORMAL;
 		short curfg = UI_TEXT_COLOR_DEFAULT;
 		short curbg = UI_TEXT_COLOR_DEFAULT;
 		VtRow *row = b->lines + i;
+		VtCell *vt_cell = NULL;
 
-		ui_window_cursor_set(win, scol, srow + i);
-		VtCell *cell = NULL;
 		for (j = 0; j < b->cols; j++) {
-			VtCell *prev_cell = cell;
-			cell = row->cells + j;
-			if (!prev_cell || cell->attr != prev_cell->attr
-			    || cell->fg != prev_cell->fg
-			    || cell->bg != prev_cell->bg) {
-				curattrs = cell->attr;
-				curfg = cell->fg;
-				curbg = cell->bg;
+			Cell cell = { .data = "", .len = 0, .width = 0, };
+			VtCell *prev_cell = vt_cell;
+
+			vt_cell = row->cells + j;
+			if (!prev_cell || vt_cell->attr != prev_cell->attr
+			    || vt_cell->fg != prev_cell->fg
+			    || vt_cell->bg != prev_cell->bg) {
+				curattrs = vt_cell->attr;
+				curfg = vt_cell->fg;
+				curbg = vt_cell->bg;
 			}
 
-			if (is_utf8 && cell->text >= 128) {
-				char buf[MB_CUR_MAX + 1];
-				size_t len = wcrtomb(buf, cell->text, NULL);
-				if (len > 0) {
-					ui_window_draw_text_attr(win, j, srow + i, buf, len,
-								 curfg, curbg, curattrs);
-					if (wcwidth(cell->text) > 1)
-						j++;
-				}
+			if (is_utf8 && vt_cell->text >= 128) {
+				cell.len = wcrtomb(cell.data, vt_cell->text, NULL);
+				cell.width = wcwidth(vt_cell->text);
 			} else {
-				ui_window_draw_char_attr(win, j, srow + i, cell->text > ' ' ? cell->text : ' ', 1,
-							 curfg, curbg, curattrs);
+				cell.data[0] = vt_cell->text > ' ' ? vt_cell->text : ' ';
+				cell.len = 1;
+				cell.width = 1;
 			}
+
+			cell.style.attr = curattrs;
+			cell.style.fg = curfg;
+			cell.style.bg = curbg;
+
+			view_addch(view, &cell);
 		}
 
-		if (j && j < b->cols - 1)
-			ui_window_draw_char_attr(win, j, srow + i, ' ', b->cols - j,
-						 curfg, curbg, curattrs);
+		if (j && j < b->cols - 1) {
+			Cell cell;
+
+			cell.len = 1;
+			cell.width = 1;
+			cell.data[0] = ' ';
+			cell.style.attr = curattrs;
+			cell.style.fg = curfg;
+			cell.style.bg = curbg;
+
+			view_addch(view, &cell);
+		}
 
 		row->dirty = false;
 	}
-
 	ui_window_cursor_set(win, scol + b->curs_col, srow + b->curs_row - b->lines);
 }
 

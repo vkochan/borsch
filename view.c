@@ -108,8 +108,6 @@ static Cell cell_unused;
 static bool view_viewport_up(View *view, int n);
 static bool view_viewport_down(View *view, int n);
 
-static void view_clear(View *view);
-static bool view_addch(View *view, Cell *cell);
 static void selection_free(Selection*);
 /* set/move current cursor position to a given (line, column) pair */
 static size_t cursor_set(Selection*, Line *line, int col);
@@ -120,7 +118,7 @@ void view_tabwidth_set(View *view, int tabwidth) {
 }
 
 /* reset internal view data structures (cell matrix, line offsets etc.) */
-static void view_clear(View *view) {
+void view_clear(View *view) {
 	memset(view->lines, 0, view->lines_size);
 	if (view->start != view->start_last) {
 		if (view->start == 0)
@@ -165,14 +163,13 @@ Filerange view_viewport_get(View *view) {
 }
 
 /* try to add another character to the view, return whether there was space left */
-static bool view_addch(View *view, Cell *cell) {
+bool view_addch(View *view, Cell *cell) {
 	if (!view->line)
 		return false;
 
 	int width;
 	size_t lineno = view->line->lineno;
 	unsigned char ch = (unsigned char)cell->data[0];
-	cell->style = view->cell_blank.style;
 
 	switch (ch) {
 	case '\t':
@@ -344,6 +341,7 @@ void view_draw(View *view) {
 	Cell cell = { .data = "", .len = 0, .width = 0, }, prev_cell = cell;
 
 	while (rem > 0) {
+		cell.style = view->cell_blank.style;
 
 		/* current 'parsed' character' */
 		wchar_t wchar;
@@ -395,6 +393,7 @@ void view_draw(View *view) {
 
 		memset(&cell, 0, sizeof cell);
 	}
+	cell.style = view->cell_blank.style;
 
 	if (prev_cell.len && view_addch(view, &prev_cell))
 		pos += prev_cell.len;

@@ -365,6 +365,10 @@ void view_tabwidth_set(View*, int tabwidth);
 bool view_style_define(View*, enum UiStyle, const char *style);
 /** Apply a style to a text range. */
 void view_style(View*, CellStyle style, size_t start, size_t end, bool expand);
+/** Append cell to the view */
+bool view_addch(View *view, Cell *cell);
+
+void view_clear(View *view);
 
 char *view_symbol_eof_get(View*);
 

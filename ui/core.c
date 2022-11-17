@@ -160,13 +160,13 @@ void __ui_window_draw(UiWin *win, bool force)
 	if (force)
 		view_invalidate(win->view);
 
-	if (view_update(win->view)) {
-		view_draw(win->view);
-
+	if (view_update(win->view) || win->draw) {
 		if (win->draw)
 			win->draw(win);
 		else if (win->ui->window_draw)
-			win->ui->window_draw(win);
+			view_draw(win->view);
+
+		win->ui->window_draw(win);
 	}
 }
 
