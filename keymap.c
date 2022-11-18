@@ -3,8 +3,6 @@
 #include <stdbool.h>
 #include <sys/param.h>
 
-#include <curses.h>
-
 #include "keymap.h"
 
 #define MAX_KEYS 3
@@ -68,8 +66,7 @@ static int __keymap_code(char *key)
 	} else if (strcmp(key, "<Tab>") == 0) {
 		return '\t';
 	} else if (strcmp(key, "<Backspace>") == 0) {
-		/* TODO: make it term specific and remove curses.h inclusion */
-		return KEY_BACKSPACE;
+		return 0x107;
 	} else if (strcmp(key, "<Esc>") == 0) {
 		return 27;
 	} else {
