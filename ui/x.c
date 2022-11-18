@@ -179,11 +179,11 @@ typedef struct {
 	int w, h; /* window width and height */
 	int mode; /* window state/mode flags */
 	int cursor; /* cursor style */
+	bool need_resize;
 } XUi;
 
 typedef struct {
 	UiWin win;
-	int cur_x, cur_y;
 } XWin;
 
 /*
@@ -464,7 +464,7 @@ int x_loadfonts(XUi *xui, const char *fontstr, double fontsize)
 }
 
 void __x_clear(XUi *xui, int x1, int y1, int x2, int y2);
-void x_resize(XUi *xui, int col, int row)
+void __x_resize(XUi *xui, int col, int row)
 {
 	XFreePixmap(xui->dpy, xui->buf);
 	xui->buf = XCreatePixmap(xui->dpy, xui->win, xui->w, xui->h,
@@ -487,10 +487,10 @@ void x_cresize(XUi *xui, int width, int height)
 
 	col = (xui->w - 2 * borderpx) / xui->cw;
 	row = (xui->h - 2 * borderpx) / xui->ch;
-	col = MAX(1, col);
-	row = MAX(1, row);
+	cols = MAX(1, col);
+	rows = MAX(1, row);
 
-	x_resize(xui, col, row);
+	__x_resize(xui, col, row);
 }
 
 ushort sixd_to_16bit(int x)
@@ -626,22 +626,6 @@ static void x_window_free(UiWin *win)
 	free(xwin);
 }
 
-static void x_window_cursor_set(UiWin *win, int x, int y)
-{
-	XWin *xwin = (XWin*)win;
-
-	xwin->cur_x = x;
-	xwin->cur_y = y;
-}
-
-static void x_window_cursor_get(UiWin *win, int *x, int *y)
-{
-	XWin *xwin = (XWin*)win;
-
-	*x = xwin->cur_x;
-	*y = xwin->cur_y;
-}
-
 void x_handle_events(int fd, void *arg)
 {
 	XUi *xui = arg;
@@ -654,7 +638,12 @@ void x_handle_events(int fd, void *arg)
 		if (XFilterEvent(&ev, None))
 			continue;
 
-		if ((/*ev.type == KeyRelease || */ev.type == KeyPress)) {
+		if (ev.type == ConfigureNotify) {
+			if (ev.xconfigure.width != xui->w || ev.xconfigure.height == xui->h) {
+				x_cresize(xui, ev.xconfigure.width, ev.xconfigure.height);
+				xui->need_resize = true;
+			}
+		} else if (ev.type == KeyPress) {
 			int len = XLookupString(&ev.xkey, text, sizeof(text), &key_sym, 0);
 			if (len) {
 				KeyCode key_code = {};
@@ -669,6 +658,11 @@ void x_handle_events(int fd, void *arg)
 					code = code + 0x60;
 				}
 
+				switch (key_sym) {
+				case XK_BackSpace: flags = 0; code = 0x107; break;
+				case XK_Escape: flags = 0; code = 27; break;
+				}
+
 				if (code > 0) {
 					key_code.flags = flags;
 					key_code.code = code;
@@ -679,6 +673,7 @@ void x_handle_events(int fd, void *arg)
 			}
 		}
 	}
+	XFlush(xui->dpy);
 
 }
 
@@ -1173,6 +1168,15 @@ static int x_width_get(Ui *ui)
 	return cols;
 }
 
+static bool x_check_resize(Ui *ui)
+{
+	XUi *xui = (XUi *)ui;
+	bool need_resize = xui->need_resize;
+
+	xui->need_resize = false;
+	return need_resize;
+}
+
 static void x_draw_char(Ui *ui, int x, int y, unsigned int ch, int n)
 {
 	XUi *xui = (XUi *)ui;
@@ -1205,6 +1209,7 @@ static void x_draw_char_vert(Ui *ui, int x, int y, unsigned int ch, int n)
 	}
 }
 
+#if 0
 void x_drawcursor(XWin *xwin)
 {
 	int x0 = ui_window_x_get(&xwin->win);
@@ -1295,6 +1300,7 @@ void x_drawcursor(XWin *xwin)
 				xui->cw, 1);
 	}
 }
+#endif
 
 static void x_clear(Ui *ui)
 {
@@ -1318,51 +1324,28 @@ static void x_redraw(Ui *ui)
 static void x_event_process(Ui *ui)
 {
 	XUi *xui = (XUi *)ui;
-	XEvent ev;
-	KeySym key;		/* a dealie-bob to handle KeyPress Events */	
-	char text[255];	
 	
 	x_update(ui);
-
-	#if 0
-	/* look for events forever... */
-	while(1) {	
-		XNextEvent(xui->dpy, &ev);
-//XKeysymToString(XKeycodeToKeysym(display, event.xkey.keycode, 0)
-		if ((ev.type==KeyPress/* || ev.type == KeyRelease*/)) {
-			if (XLookupString(&ev.xkey,text,255,&key,0)) {
-			fprintf(stderr, "XXX [%s]\n", text);
-			//fprintf(stderr, "XXX sym [%s]\n", XKeysymToString(XKeycodeToKeysym(xui->dpy, ev.xkey.keycode, 0)));
-#define ISCONTROLC0(c)		(BETWEEN(c, 0, 0x1f) || (c) == 0x7f)
-#define ISCONTROLC1(c)		(BETWEEN(c, 0x80, 0x9f))
-#define ISCONTROL(c)		(ISCONTROLC0(c) || ISCONTROLC1(c))
-			//if ((text[0] == 0x1f | 'g'))
-			fprintf(stderr, "[%x:%x]\n", text[0], text[1]);
-			if (text[0] < 0x1f && text[0] != 0xd && text[0] != 0x9) {
-			    int code = text[0] + 0x60;
-			    if (code == 'g')
-			    fprintf(stderr, "XXX here is control-g\n");
-			}
-			if (text[0]=='q')
-				break;
-			}
-		}
-	}
-	#endif
 
 	event_process();
 }
 
 void x_window_clear(UiWin *win)
 {
+	int sidebar = ui_window_sidebar_width_get(win);
 	int h = ui_window_height_get(win);
-	int w = ui_window_width_get(win);
-	int x0 = ui_window_x_get(win);
-	int y0 = ui_window_y_get(win);
+	int y = win->has_border;
 	XUi *xui = (XUi*)win->ui;
 	XWin *xwin = (XWin*)win;
 
-	__x_clear(xui, x0, y0, x0+w, y0+h);
+	if (sidebar) {
+		char ch = ' ';
+
+		for (; y < h - 1; y++) {
+			ui_window_draw_char_attr(win, 0, y, ch, sidebar,
+				defaultfg, defaultbg, UI_TEXT_STYLE_NORMAL);
+		}
+	}
 }
 
 static void x_window_draw(UiWin *win)
@@ -1373,34 +1356,37 @@ static void x_window_draw(UiWin *win)
 	XWin *xwin = (XWin*)win;
 	int sidebar = ui_window_sidebar_width_get(win);
 	int x0 = win->has_border + sidebar;
-	int y = win->has_border;
+	int curs_x, curs_y;
+	int y = 0;
 	int sx, sy;
-
-	//x_window_clear(win);
 
 	sx = ui_window_x_get(win);
 	sy = ui_window_y_get(win);
 
+	ui_window_cursor_get(win, &curs_x, &curs_y);
+
 	for (const Line *l = line; l; l = l->next, y++) {
 		for (int cx = 0, x = x0; cx < view_width; cx++,x++) {
-			Cell *c = &l->cells[cx];
+			Cell c = l->cells[cx];
 
 			/* TODO: fix it in generic place, attr is checked against 0 in
 			 * glyph rendering.
 			 */
-			if (!c->style.attr)
-				c->style.attr = 1;
-			if (!c->len) {
-				c->data[0] = ' ';
-				c->len = 1;
+			if (!c.style.attr)
+				c.style.attr = 1;
+			if (!c.len) {
+				c.data[0] = ' ';
+				c.len = 1;
+			}
+			if (cx == curs_x && y == curs_y &&
+				ui_window_is_focused(win) && !ui_window_is_cursor_disabled(win)) {
+				c.style.fg = defaultbg;
+				c.style.bg = defaultfg;
 			}
 
-			x_drawglyph(xui, *c, sx+x, sy+y);
+			x_drawglyph(xui, c, sx+x, sy+y);
 		}
 	}
-
-	//if (ui_window_is_focused(win))
-	//	x_drawcursor(xwin);
 }
 
 static void x_window_refresh(UiWin *win)
@@ -1408,8 +1394,7 @@ static void x_window_refresh(UiWin *win)
 	XUi *xui = (XUi *)win->ui;
 	XWin *xwin = (XWin*)win;
 
-	if (ui_window_is_focused(win))
-		x_drawcursor(xwin);
+	x_window_draw(win);
 }
 
 void x_window_draw_text(UiWin *win, int x, int y, const char *text, int n)
@@ -1491,6 +1476,7 @@ Ui *ui_x_new(void)
 	xui->ui.free = x_free;
 	xui->ui.height_get = x_height_get;
 	xui->ui.width_get = x_width_get;
+	xui->ui.resize = x_check_resize;
 	xui->ui.clear = x_clear;
 	xui->ui.redraw = x_redraw;
 	xui->ui.update = x_update;
@@ -1499,11 +1485,8 @@ Ui *ui_x_new(void)
 	xui->ui.draw_char_vert = x_draw_char_vert;
 	xui->ui.window_new = x_window_new;
 	xui->ui.window_free = x_window_free;
-	xui->ui.window_cursor_set = x_window_cursor_set;
-	xui->ui.window_cursor_get = x_window_cursor_get;
-	//xui->ui.window_clear = x_window_clear;
-	//xui->ui.window_redraw = x_window_draw;
-	xui->ui.window_refresh = x_window_refresh;
+	xui->ui.window_clear = x_window_clear;
+	xui->ui.window_focus = x_window_draw;
 	xui->ui.window_draw = x_window_draw;
 	xui->ui.window_draw_text = x_window_draw_text;
 	xui->ui.window_draw_char_attr = x_window_draw_char_attr;

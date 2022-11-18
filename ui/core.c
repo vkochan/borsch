@@ -407,6 +407,9 @@ void ui_window_update(UiWin *win)
 void ui_window_focus(UiWin *win, bool focus)
 {
 	win->is_focused = focus;
+
+	if (win->ui->window_focus)
+		win->ui->window_focus(win, focus);
 }
 
 bool ui_window_is_focused(UiWin *win)

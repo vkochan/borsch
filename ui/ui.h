@@ -94,6 +94,7 @@ struct Ui {
 	int (*height_get)(Ui*);
 	int (*width_get)(Ui*);
 	UiWin* (*window_new)(Ui*, View *view);
+	void (*window_focus)(UiWin*, bool);
 	void (*window_free)(UiWin*);
 	void (*window_draw)(UiWin *);
 	void (*window_redraw)(UiWin*);
