@@ -95,8 +95,6 @@ struct Ui {
 	int (*width_get)(Ui*);
 	UiWin* (*window_new)(Ui*, View *view);
 	void (*window_free)(UiWin*);
-	void (*window_cursor_set)(UiWin*, int x, int y);
-	void (*window_cursor_get)(UiWin*, int *x, int *y);
 	void (*window_draw)(UiWin *);
 	void (*window_redraw)(UiWin*);
 	void (*window_refresh)(UiWin*);
@@ -116,7 +114,6 @@ struct Ui {
 	void (*clear)(Ui*);
 	void (*update)(Ui*);
 	void (*refresh)(Ui*);
-	void (*cursor_enable)(Ui*, bool enable);
 	short (*color_make)(Ui *ui, short fg, short bg);
 	short (*colors_max_get)(Ui *ui);
 	CellStyle (*get_default_cell_style)(Ui *ui);
@@ -130,6 +127,8 @@ struct UiWin {
 	View *view;
 	void *priv;
 	int x, y;
+	int curs_x, curs_y;
+	bool curs_disable;
 	int width, height;
 	bool has_title;
 	unsigned curr_style;
@@ -137,6 +136,7 @@ struct UiWin {
 	char title[256];
 	bool has_border;
 	int sidebar_width;
+	bool is_focused;
 	CellStyle (*style_get)(UiWin*, enum UiStyle);
 	void (*status)(UiWin*, const char *txt);
 	void (*options_set)(UiWin*, enum UiOption);
@@ -161,12 +161,13 @@ int ui_width_get(Ui *ui);
 void ui_draw_char(Ui *ui, int x, int y, unsigned int ch, int n);
 void ui_draw_char_vert(Ui *ui, int x, int y, unsigned int ch, int n);
 short ui_colors_max_get(Ui *ui);
-void ui_cursor_enable(Ui*, bool enable);
 
 UiWin *ui_window_new(Ui *ui, View *view);
 void ui_window_free(UiWin *win);
 void ui_window_cursor_set(UiWin *win, int x, int y);
 void ui_window_cursor_get(UiWin *win, int *x, int *y);
+void ui_window_cursor_disable(UiWin *win, bool disable);
+bool ui_window_is_cursor_disabled(UiWin *win);
 void ui_window_draw(UiWin *win);
 void ui_window_draw_text(UiWin *win, int x, int y, const char *text, int n);
 void ui_window_draw_char_attr(UiWin *win, int x, int y, unsigned ch, int n,
@@ -207,4 +208,8 @@ void ui_window_has_title_set(UiWin *win, bool has_title);
 bool ui_window_has_title(UiWin *win);
 
 void ui_window_update(UiWin *win);
+
+void ui_window_focus(UiWin *win, bool focus);
+bool ui_window_is_focused(UiWin *win);
+
 #endif

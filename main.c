@@ -922,7 +922,7 @@ static void draw_title(Window *c) {
 	ui_text_style_t title_style = UI_TEXT_STYLE_NORMAL;
 	int title_fg = UI_TEXT_COLOR_WHITE;
 	int title_bg = UI_TEXT_COLOR_BRIGHT_BLACK;
-	int x, y, maxlen, title_y, title_x;
+	int maxlen, title_y, title_x;
 	int w_w = ui_window_width_get(c->win);
 	int has_border = ui_window_border_is_enabled(c->win);
 	size_t status_len, name_len;
@@ -946,8 +946,6 @@ static void draw_title(Window *c) {
 	title_y -= has_border;
 	title_x = has_border;
 	w_w -= has_border;
-
-	ui_window_cursor_get(c->win, &x, &y);
 
 	ui_window_draw_char_attr(c->win, title_x, title_y, ACS_HLINE, w_w-(has_border*2),
 				 title_bg, title_bg,
@@ -990,8 +988,6 @@ static void draw_title(Window *c) {
 	ui_window_draw_text_attr(c->win, 0, title_y, title, w_w,
 			title_fg, title_bg,
 			UI_TEXT_STYLE_NORMAL);
-
-	ui_window_cursor_set(c->win, x, y);
 
 	xstr_del(bname_str);
 }
@@ -1045,7 +1041,6 @@ draw_all(void) {
 
 	if (!nextvisible(windows)) {
 		set_current_window(NULL);
-		ui_cursor_enable(ui, false);
 		ui_clear(ui);
 		drawbar();
 		ui_update(ui);
@@ -1221,6 +1216,7 @@ focus(Window *c) {
 	lastsel = current_window();
 	set_current_window(c);
 	if (lastsel) {
+		ui_window_focus(lastsel->win, false);
 		lastsel->urgent = false;
 		if (!isarrange(fullscreen)) {
 			draw_title(lastsel);
@@ -1243,6 +1239,8 @@ focus(Window *c) {
 					ui_window_width_get(c->win));
 		}
 
+		ui_window_focus(c->win, true);
+
 		if (isarrange(fullscreen)) {
 			draw(c, true);
 		} else {
@@ -1251,14 +1249,13 @@ focus(Window *c) {
 		}
 
 		if (proc) {
-			ui_cursor_enable(ui, c && !c->minimized &&
-					vt_cursor_visible(process_term_get(proc)));
+			ui_window_cursor_disable(c->win, c && !c->minimized &&
+					!vt_cursor_visible(process_term_get(proc)));
 		} else {
 			size_t curs_view = view_cursor_get(c->view);
 
 			buffer_cursor_set(c->buf, curs_view);
 			buffer_dirty_set(c->buf, true);
-			ui_cursor_enable(ui, true);
 		}
 	}
 }
@@ -1963,9 +1960,8 @@ scrollback(const char *args[]) {
 			vt_scroll(term,  w_h/2);
 
 	if (term)
-		ui_cursor_enable(ui, vt_cursor_visible(term));
-	else
-		ui_cursor_enable(ui, true);
+		ui_window_cursor_disable(current_window()->win,
+			!vt_cursor_visible(term));
 	draw(current_window(), true);
 }
 
@@ -2543,17 +2539,12 @@ int main(int argc, char *argv[]) {
 		}
 
 		if (is_content_visible(current_window())) {
-			int x, y;
-
 			if (buffer_proc_get(current_window()->buf)) {
 				Process *proc = buffer_proc_get(current_window()->buf);
-				ui_cursor_enable(ui, vt_cursor_visible(process_term_get(proc)));
-			} else {
-				ui_cursor_enable(ui, true);
+				ui_window_cursor_disable(current_window()->win,
+					!vt_cursor_visible(process_term_get(proc)));
 			}
 			draw(current_window(), false);
-		        ui_window_cursor_get(current_window()->win, &x, &y);
-		        ui_window_cursor_set(current_window()->win, x, y);
 		}
 	}
 
@@ -3192,7 +3183,6 @@ void win_mark_highlight(int wid, bool enable)
 void win_popup(int wid, bool enable)
 {
 	Window *w = window_get_by_id(wid);
-	int x, y;
 
 	if (w) {
 		/* TODO: add support for term window */
@@ -3220,8 +3210,6 @@ void win_popup(int wid, bool enable)
 			arrange();
 		}
 
-		ui_window_cursor_get(w->win, &x, &y);
-		ui_window_cursor_set(w->win, x+1, y+1);
 		ui_window_refresh(w->win);
 	}
 }

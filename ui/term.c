@@ -264,6 +264,7 @@ static int term_init(Ui *ui)
 	nonl();
 	keypad(stdscr, TRUE);
 	raw();
+	curs_set(false);
 
 	term_init_colors(ui);
 
@@ -326,11 +327,6 @@ static void term_draw_char(Ui *ui, int x, int y, unsigned int ch, int n)
 static void term_draw_char_vert(Ui *ui, int x, int y, unsigned int ch, int n)
 {
 	mvvline(y, x, ch, n);
-}
-
-static void term_cursor_enable(Ui *ui, bool enable)
-{
-	curs_set(enable);
 }
 
 static UiWin *term_window_new(Ui *ui, View *view)
@@ -434,24 +430,6 @@ void term_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int 
 		   NULL);
 }
 
-static void term_window_cursor_set(UiWin *win, int x, int y)
-{
-	WinTerm *twin = (WinTerm*)win;
-
-	wmove(twin->cwin, y, x);
-	twin->cur_x = x;
-	twin->cur_y = y;
-	wnoutrefresh(twin->cwin);
-}
-
-static void term_window_cursor_get(UiWin *win, int *x, int *y)
-{
-	WinTerm *twin = (WinTerm*)win;
-
-	*x = twin->cur_x;
-	*y = twin->cur_y;
-}
-
 static void term_window_draw(UiWin *win)
 {
 	const Line *line = view_lines_first(win->view);
@@ -459,35 +437,43 @@ static void term_window_draw(UiWin *win)
 	WinTerm *twin = (WinTerm*)win;
 	int sidebar = ui_window_sidebar_width_get(win);
 	int x0 = win->has_border + sidebar;
-	int y = win->has_border;
+	int y = 0;
+	int curs_x, curs_y;
 	int sx, sy;
 
 	getyx(twin->cwin, sy, sx);
 	wmove(twin->cwin, y, x0);
 
+	ui_window_cursor_get(win, &curs_x, &curs_y);
+
 	for (const Line *l = line; l; l = l->next, y++) {
 		for (int cx = 0, x = x0; cx < view_width; cx++,x++) {
-			Cell *c = &l->cells[cx];
+			Cell c = l->cells[cx];
 
-			if (!c->len) {
-				c->data[0] = ' ';
-				c->len = 1;
+			if (!c.len) {
+				c.data[0] = ' ';
+				c.len = 1;
 			}
 
+			if (cx == curs_x && y == curs_y &&
+				ui_window_is_focused(win) && !ui_window_is_cursor_disabled(win)) {
+				c.style.fg = default_bg;
+				c.style.bg = default_fg;
+			}
 			/* wattrset(twin->cwin, term_style2attr(c->style.attr)); */
 
 			/* wcolor_set(twin->cwin, term_window_color_get(win, */
 			/* 			term_color2curses(c->style.fg), */
 			/* 			term_color2curses(c->style.bg)), */
 			/* 		NULL); */
-			wattrset(twin->cwin, term_style2attr(c->style.attr));
+			wattrset(twin->cwin, term_style2attr(c.style.attr));
 			wcolor_set(twin->cwin,
-					term_color_make(win->ui, term_color2curses(c->style.fg),
-						term_color2curses(c->style.bg)),
+					term_color_make(win->ui, term_color2curses(c.style.fg),
+						term_color2curses(c.style.bg)),
 					NULL);
 
 			wmove(twin->cwin, y, x);
-			waddnstr(twin->cwin, c->data, c->len);
+			waddnstr(twin->cwin, c.data, c.len);
 		}
 	}
 
@@ -565,14 +551,12 @@ Ui *ui_term_new(void)
 	tui->ui.colors_max_get = term_colors_max_get;
 	tui->ui.draw_char = term_draw_char;
 	tui->ui.draw_char_vert = term_draw_char_vert;
-	tui->ui.cursor_enable = term_cursor_enable;
 	tui->ui.window_new = term_window_new;
 	tui->ui.window_free = term_window_free;
-	tui->ui.window_cursor_set = term_window_cursor_set;
-	tui->ui.window_cursor_get = term_window_cursor_get;
 	tui->ui.window_draw = term_window_draw;
 	tui->ui.window_redraw = term_window_redraw;
 	tui->ui.window_refresh = term_window_refresh;
+	tui->ui.window_refresh = term_window_draw;
 	tui->ui.window_clear = term_window_clear;
 	tui->ui.window_resize = term_window_resize;
 	tui->ui.window_move = term_window_move;

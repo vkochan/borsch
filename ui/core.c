@@ -88,12 +88,6 @@ void ui_draw_char_vert(Ui *ui, int x, int y, unsigned int ch, int n)
 		ui->draw_char_vert(ui, x, y, ch, n);
 }
 
-void ui_cursor_enable(Ui *ui, bool enable)
-{
-	if (ui->cursor_enable)
-		ui->cursor_enable(ui, enable);
-}
-
 short ui_colors_max_get(Ui *ui)
 {
 	if (ui->colors_max_get)
@@ -140,19 +134,24 @@ void ui_window_free(UiWin *win)
 
 void ui_window_cursor_set(UiWin *win, int x, int y)
 {
-	int skip_x = win->has_border + win->sidebar_width;
-	int skip_y = win->has_border;
-
-	if (win->ui->window_cursor_set)
-		win->ui->window_cursor_set(win, x+skip_x, y+skip_y);
+	win->curs_x = x;
+	win->curs_y = y;
 }
 
 void ui_window_cursor_get(UiWin *win, int *x, int *y)
 {
-	if (win->ui->window_cursor_get)
-		win->ui->window_cursor_get(win, x, y);
-	*x -= win->has_border + win->sidebar_width;
-	*y -= win->has_border;
+	*x = win->curs_x;
+	*y = win->curs_y;
+}
+
+void ui_window_cursor_disable(UiWin *win, bool disable)
+{
+	win->curs_disable = disable;
+}
+
+bool ui_window_is_cursor_disabled(UiWin *win)
+{
+	return win->curs_disable;
 }
 
 void __ui_window_draw(UiWin *win, bool force)
@@ -403,4 +402,14 @@ bool ui_window_has_title(UiWin *win)
 void ui_window_update(UiWin *win)
 {
 	__ui_window_draw(win, true);
+}
+
+void ui_window_focus(UiWin *win, bool focus)
+{
+	win->is_focused = focus;
+}
+
+bool ui_window_is_focused(UiWin *win)
+{
+	return win->is_focused;
 }
