@@ -1390,6 +1390,7 @@ static void x_event_process(Ui *ui)
 		/* idle detected or maxlatency exhausted -> draw */
 		break;
 	}
+	XFlush(xui->dpy);
 }
 
 void x_window_clear(UiWin *win)
