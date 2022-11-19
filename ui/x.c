@@ -84,6 +84,21 @@ static const Rune utfmin[UTF_SIZ + 1] = {       0,    0,  0x80,  0x800,  0x10000
 static const Rune utfmax[UTF_SIZ + 1] = {0x10FFFF, 0x7F, 0x7FF, 0xFFFF, 0x10FFFF};
 
 /*
+ * draw latency range in ms - from new content/keypress/etc until drawing.
+ * within this range, st draws when content stops arriving (idle). mostly it's
+ * near minlatency, but it waits longer for slow updates to avoid partial draw.
+ * low minlatency will tear/flicker more, as it can "detect" idle too early.
+ */
+static double minlatency = 8;
+static double maxlatency = 33;
+
+/*
+ * blinking timeout (set to 0 to disable blinking) for the terminal blinking
+ * attribute.
+ */
+static unsigned int blinktimeout = 800;
+
+/*
  * Default columns and rows numbers
  */
 static unsigned int cols = 120;
@@ -626,14 +641,16 @@ static void x_window_free(UiWin *win)
 	free(xwin);
 }
 
-void x_handle_events(int fd, void *arg)
+bool x_handle_events(int fd, void *arg)
 {
 	XUi *xui = arg;
 	KeySym key_sym;
 	XEvent ev;
 	char text[16];
+	bool xev = false;
 	
 	while (XPending(xui->dpy)) {
+		xev = true;
 		XNextEvent(xui->dpy, &ev);
 		if (XFilterEvent(&ev, None))
 			continue;
@@ -673,8 +690,7 @@ void x_handle_events(int fd, void *arg)
 			}
 		}
 	}
-	XFlush(xui->dpy);
-
+	return xev;
 }
 
 static int x_init(Ui *ui)
@@ -817,7 +833,7 @@ static int x_init(Ui *ui)
 
 	x_cresize(xui, w, h);
 
-	event_fd_handler_register(XConnectionNumber(xui->dpy), x_handle_events, ui);
+	event_fd_handler_register(XConnectionNumber(xui->dpy), NULL, NULL);
 
 	return 0;
 }
@@ -1321,13 +1337,59 @@ static void x_redraw(Ui *ui)
 	x_finishdraw(xui);
 }
 
+static struct timespec lastblink, trigger;
+
 static void x_event_process(Ui *ui)
 {
+	struct timespec seltv, *tv, now;
+	double timeout = -1;
+	int drawing = 0;
 	XUi *xui = (XUi *)ui;
-	
-	x_update(ui);
 
-	event_process();
+	ui_update(ui);
+
+	while (true) {
+		int xev = 0;
+		int nfd;
+
+		if (XPending(xui->dpy))
+			timeout = 0;  /* existing events might not set xfd */
+
+		seltv.tv_sec = timeout / 1E3;
+		seltv.tv_nsec = 1E6 * (timeout - 1E3 * seltv.tv_sec);
+		tv = timeout >= 0 ? &seltv : NULL;
+
+		nfd = event_process(tv);
+
+		clock_gettime(CLOCK_MONOTONIC, &now);
+
+		xev = x_handle_events(0, xui);
+
+		/*
+		 * To reduce flicker and tearing, when new content or event
+		 * triggers drawing, we first wait a bit to ensure we got
+		 * everything, and if nothing new arrives - we draw.
+		 * We start with trying to wait minlatency ms. If more content
+		 * arrives sooner, we retry with shorter and shorter periods,
+		 * and eventually draw even without idle after maxlatency ms.
+		 * Typically this results in low latency while interacting,
+		 * maximum latency intervals during `cat huge.txt`, and perfect
+		 * sync with periodic updates from animations/key-repeats/etc.
+		 */
+		if (nfd > 0 || xev) {
+			if (!drawing) {
+				trigger = now;
+				drawing = 1;
+			}
+			timeout = (maxlatency - TIMEDIFF(now, trigger)) \
+			          / maxlatency * minlatency;
+			if (timeout > 0)
+				continue;  /* we have time, try to find idle */
+		}
+
+		/* idle detected or maxlatency exhausted -> draw */
+		break;
+	}
 }
 
 void x_window_clear(UiWin *win)

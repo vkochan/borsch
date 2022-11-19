@@ -66,7 +66,7 @@ void event_fd_handler_unregister(int fd)
 	}
 }
 
-int event_process(void)
+int event_process(struct timespec *tv)
 {
 	sigset_t emptyset;
 	event_fd_t *evt;
@@ -82,7 +82,7 @@ int event_process(void)
 		nfds = MAX(nfds, evt->fd);
 	}
 
-	r = pselect(nfds + 1, &rd, NULL, NULL, NULL, &emptyset);
+	r = pselect(nfds + 1, &rd, NULL, NULL, tv, &emptyset);
 	if (r < 0) {
 		if (errno == EINTR)
 			return 0;
@@ -92,7 +92,7 @@ int event_process(void)
 	while (evt) {
 		event_fd_t *next = evt->next;
 
-		if (FD_ISSET(evt->fd, &rd)) {
+		if (FD_ISSET(evt->fd, &rd) && evt->fn) {
 			evt->fn(evt->fd, evt->arg);
 		}
 		evt = next;
