@@ -1,10 +1,11 @@
 #!/bin/sh
 
-SCHEME_PROG="scheme"
+SCHEME_PROG="chez scheme chez-scheme"
 
-if ! command -v scheme &> /dev/null
-then
-    SCHEME_PROG="chez"	
-fi
-
-echo "(scheme-version)" | ${SCHEME_PROG} -q | sed -e 's|"||g' | cut -d ' ' -f4
+for scm in $SCHEME_PROG; do
+    if command -v $scm &> /dev/null
+    then
+        echo "(scheme-version)" | ${scm} -q | sed -e 's|"||g' | cut -d ' ' -f4
+        exit 0
+    fi
+done
