@@ -855,7 +855,7 @@ static int x_makeglyphfontspecs(XUi *xui, XftGlyphFontSpec *specs, const Cell *c
 
 	for (i = 0, xp = winx, yp = winy + font->ascent; i < len; ++i) {
 		/* Fetch rune and mode for current glyph. */
-		utf8decode(cells[i].data, &rune, 1);
+		utf8decode(cells[i].data, &rune, cells[i].len);
 		
 		attr = (ulong)cells[i].style.attr;
 
@@ -1201,7 +1201,7 @@ static void x_draw_char(Ui *ui, int x, int y, unsigned int ch, int n)
 	c.style.attr = UI_TEXT_STYLE_NORMAL;
 	c.style.fg = defaultfg;
 	c.style.bg = defaultbg;
-	utf8encode(ch, c.data);
+	c.len = utf8encode(ch, c.data);
 
 	n = MIN(cols - x, n);
 	for (; n--; x++) {
@@ -1217,7 +1217,7 @@ static void x_draw_char_vert(Ui *ui, int x, int y, unsigned int ch, int n)
 	c.style.attr = UI_TEXT_STYLE_NORMAL;
 	c.style.fg = defaultfg;
 	c.style.bg = defaultbg;
-	utf8encode(ch, c.data);
+	c.len = utf8encode(ch, c.data);
 
 	n = MIN(rows - y, n);
 	for (; n--; y++) {
@@ -1474,9 +1474,10 @@ void x_window_draw_text(UiWin *win, int x, int y, const char *text, int n)
 		c.style.attr = UI_TEXT_STYLE_NORMAL;
 		c.style.fg = defaultfg;
 		c.style.bg = defaultbg;
+		c.len = 1;
 
 		if (*text) {
-			utf8encode(*text, c.data);
+			c.len = utf8encode(*text, c.data);
 			text++;
 		}
 		x_drawglyph(xui, c, x0+x+i, y0+y);
@@ -1496,7 +1497,7 @@ void x_window_draw_char_attr(UiWin *win, int x, int y, unsigned ch, int n,
 	c.style.attr = style;
 	c.style.fg = fg;
 	c.style.bg = bg;
-	utf8encode(ch, c.data);
+	c.len = utf8encode(ch, c.data);
 
 	n = MIN(w - x, n);
 	for (; n--; x++) {
@@ -1520,9 +1521,10 @@ void x_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int n,
 		c.style.attr = style;
 		c.style.fg = fg;
 		c.style.bg = bg;
+		c.len = 1;
 
 		if (*text) {
-			utf8encode(*text, c.data);
+			c.len = utf8encode(*text, c.data);
 			text++;
 		}
 		x_drawglyph(xui, c, x0+x+i, y0+y);
