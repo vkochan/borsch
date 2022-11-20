@@ -2,9 +2,10 @@
 #define XSTR_H
 
 typedef struct xstr {
-	unsigned char flags;
 	char   *str;
-	size_t	len;
+	unsigned short len;
+	unsigned short cap;
+	unsigned char flags;
 } xstr_t;
 
 xstr_t xstr(char *s);

@@ -28,6 +28,7 @@ xstr_t xstr(char *s)
 
 	if (s) {
 		ret.len = strlen(s);
+		ret.cap = ret.len;
 		ret.str = s;
 	}
 
@@ -46,6 +47,7 @@ xstr_t xstr_dup(xstr_t s)
 	ret.str = strndup(s.str, s.len);
 	ret.flags = XMEM_BIT_ALLOC;
 	ret.len = s.len;
+	ret.cap = s.len;
 
 	return ret;
 }
@@ -62,6 +64,7 @@ xstr_t xstr_cat(xstr_t s1, xstr_t s2)
 	ret.len = s1.len + s2.len;
 	ret.str = calloc(ret.len + 1, sizeof(*ret.str));
 	ret.flags = XMEM_BIT_ALLOC;
+	ret.cap = ret.len;
 
 	strncpy(ret.str, s1.str, s1.len);
 	strncpy(ret.str + s1.len, s2.str, s2.len);
@@ -76,6 +79,7 @@ xstr_t xstr_join(xstr_t s1, xstr_t js, xstr_t s2)
 	ret.len = s1.len + js.len + s2.len;
 	ret.str = calloc(ret.len + 1, sizeof(*ret.str));
 	ret.flags = XMEM_BIT_ALLOC;
+	ret.cap = ret.len;
 
 	strncpy(ret.str, s1.str, s1.len);
 	strncpy(ret.str + s1.len, js.str, js.len);
@@ -134,11 +138,31 @@ xstr_t xstr_tok(xstr_t *s, char delim)
 
 	ret.len = end - start;
 	ret.str = start;
+	ret.cap = ret.len;
 
 	s->len -= end - s->str;
 	s->str = end;
 
 	return ret;
+}
+
+void xstr_clear(xstr_t *s)
+{
+	s->str[0] = '\0';
+	s->len = 0;
+}
+
+void xstr_copy(xstr_t *s, xstr_t from)
+{
+	if ((s->flags & XMEM_BIT_ALLOC) && s->cap >= from.len) {
+		memcpy(s->str, from.str, from.len);
+		s->str[from.len] = '\0';
+	} else {
+		xstr_t dup = xstr_dup(from);
+
+		xstr_del(*s);
+		*s = dup;
+	}
 }
 
 void xstr_del(xstr_t s)
