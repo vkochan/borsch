@@ -49,8 +49,12 @@
 (define main-init
    (lambda (path)
       (when path
-         (try load (string-append (config-dir) (if (equal? path "") "/init.ss" path)))
-         (run-hooks 'init-hook)
+         (let ([init-script (string-append (config-dir) (if (equal? path "") "/init.ss" path))])
+            (when (file-exists? init-script)
+               (try load init-script)
+               (run-hooks 'init-hook)
+            )
+         )
       )
    )
 )
