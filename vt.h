@@ -52,8 +52,6 @@ void vt_pty_set(Vt*, int);
 bool vt_cursor_visible(Vt*);
 
 int vt_process(Vt *);
-void vt_processed_set(Vt *, bool processed);
-bool vt_is_processed(Vt *);
 void vt_keypress(Vt *, int keycode);
 ssize_t vt_write(Vt*, const char *buf, size_t len);
 void vt_mouse(Vt*, int x, int y, mmask_t mask);

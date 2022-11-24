@@ -182,7 +182,6 @@ struct Vt {
 	vt_title_handler_t title_handler; /* hook which is called when title changes */
 	vt_urgent_handler_t urgent_handler; /* hook which is called upon bell */
 	void *data;              /* user supplied data */
-	bool processed;
 	void (*vt_filter)(Vt *vt, char *ch, size_t len, void *arg);
 	void *vt_filter_arg;
 	char *filter_buf;
@@ -1432,8 +1431,9 @@ int vt_process(Vt *t)
 	}
 
 	res = read(t->pty, t->rbuf + t->rlen, sizeof(t->rbuf) - t->rlen);
-	if (res < 0)
+	if (res < 0) {
 		return -1;
+	}
 
 	t->rlen += res;
 	while (pos < t->rlen) {
@@ -1464,16 +1464,6 @@ int vt_process(Vt *t)
 	}
 
 	return 0;
-}
-
-void vt_processed_set(Vt *vt, bool processed)
-{
-	vt->processed = processed;
-}
-
-bool vt_is_processed(Vt *vt)
-{
-	return vt->processed;
 }
 
 Vt *vt_create(int rows, int cols, int scroll_size)

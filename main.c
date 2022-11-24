@@ -434,16 +434,13 @@ static void process_handle_vt(int fd, void *arg) {
 	Process *proc = arg;
 	Buffer *buf = process_buffer_get(proc);
 
-	if (!vt_is_processed(proc->term)) {
-		if (vt_process(proc->term) < 0 && errno == EIO) {
-			Window *win = proc->win;
-			process_destroy(proc);
-			destroy(win);
-		} else {
-			if (buf) {
-				vt_processed_set(proc->term, true);
-				buffer_dirty_set(buf, true);
-			}
+	if (vt_process(proc->term) < 0 && errno == EIO) {
+		Window *win = proc->win;
+		process_destroy(proc);
+		destroy(win);
+	} else {
+		if (buf) {
+			buffer_dirty_set(buf, true);
 		}
 	}
 }
@@ -2512,13 +2509,6 @@ int main(int argc, char *argv[]) {
 			proc = next;
 		}
 
-		for (Window *c = windows; c; ) {
-			if (buffer_proc_get(c->buf)) {
-				Process *proc = buffer_proc_get(c->buf);
-				vt_processed_set(process_term_get(proc), false);
-			}
-			c = c->next;
-		}
 		/* TODO: what to do with a died buffers ? */
 
 		ui_event_process(ui);
