@@ -238,11 +238,11 @@
                [cc (plist-get headers ':Cc)]
                [date (plist-get headers ':Date)]
               )
-            (when subj (insert (format "Subject: ~a\n" subj)))
-            (when from (insert (format "From: ~a\n" from)))
-            (when to (insert (format "To: ~a\n" to)))
-            (when cc (insert (format "Cc: ~a\n" cc)))
-            (when date (insert (format "Date: ~a\n" date)))
+            (when subj (text-insert (format "Subject: ~a\n" subj)))
+            (when from (text-insert (format "From: ~a\n" from)))
+            (when to (text-insert (format "To: ~a\n" to)))
+            (when cc (text-insert (format "Cc: ~a\n" cc)))
+            (when date (text-insert (format "Date: ~a\n" date)))
          )
       )
       (let loop ([content-list (plist-get sexp ':body)])
@@ -255,8 +255,8 @@
                   (if (list? body)
                      (loop body)
                      (when (and (string? body) (equal? type "text/plain"))
-                        (insert "\n")
-                        (insert body)
+                        (text-insert "\n")
+                        (text-insert body)
                      )
                   )
                )
@@ -375,14 +375,14 @@
                                  [curs (cursor)]
                                  [tags (plist-get m ':tags)]
                                 )
-                              (insert (format "[~a] [~a] " (string-pad-right date_rel 15) (string-pad-right from 15)))
+                              (text-insert (format "[~a] [~a] " (string-pad-right date_rel 15) (string-pad-right from 15)))
                               (let ([n 0])
                                  (while (< n depth)
-                                    (insert "-")
+                                    (text-insert "-")
                                     (set! n (1+ n))
                                  )
                               )
-                              (insert (format "~a\n" (string-pad-right subj (- 100 depth)))
+                              (text-insert (format "~a\n" (string-pad-right subj (- 100 depth)))
                                  (if (member "unread" tags)
                                     '(:style (:attr "bold"))
                                     ;; else
@@ -460,10 +460,10 @@
 (define mail-new-message
    (lambda ()
       (let ([buf (buffer-create "*New Message*")])
-         (insert "Subject:\n")
-	 (insert (format "From: ~a <~a>\n" (mail-fullname) (mail-username)))
-	 (insert "To: \n")
-	 (insert "\n")
+         (text-insert "Subject:\n")
+	 (text-insert (format "From: ~a <~a>\n" (mail-fullname) (mail-username)))
+	 (text-insert "To: \n")
+	 (text-insert "\n")
          (text-mode)
          (bind-key-local "C-c C-c" mail-send-buffer)
       )
@@ -595,8 +595,8 @@
                            [tags (plist-get th ':tags)]
                            [curs (cursor)]
                           )
-                        (insert (format "[~a] [~a] " (string-pad-right date 15) (string-pad-right from 15)))
-                        (insert (format "~a\n" (string-pad-right subj 100))
+                        (text-insert (format "[~a] [~a] " (string-pad-right date 15) (string-pad-right from 15)))
+                        (text-insert (format "~a\n" (string-pad-right subj 100))
                            (if (member "unread" tags)
                               '(:style (:attr "bold"))
                               ;; else

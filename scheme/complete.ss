@@ -62,9 +62,9 @@
 (define complete-draw
    (lambda ()
       (erase-buffer)
-      (insert (get-local complete-prompt))
+      (text-insert (get-local complete-prompt))
       (set-local! complete-prompt-pos (cursor))
-      (insert (get-local complete-text))
+      (text-insert (get-local complete-text))
 
       (save-cursor
       (let* (
@@ -87,9 +87,9 @@
                (lambda (x)
                   (let ([name (complete-item-name x)])
                      (if (= line-idx sel)
-                        (insert (format "\n> ~a" name) '(:style (:attr "bold" :fg "blue")))
+                        (text-insert (format "\n> ~a" name) '(:style (:attr "bold" :fg "blue")))
                         ;; else
-                        (insert (format "\n  ~a" name))
+                        (text-insert (format "\n  ~a" name))
                      )
                   )
                   (set! line-idx (1+ line-idx))
@@ -115,7 +115,7 @@
 
 (define complete-insert-text
    (lambda (char-or-string)
-      (if (string? char-or-string) (insert char-or-string) (insert-char char-or-string))
+      (if (string? char-or-string) (text-insert char-or-string) (text-insert-char char-or-string))
       (complete-update-text)
    )
 )

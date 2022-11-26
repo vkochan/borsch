@@ -17,7 +17,7 @@
       (let ([b (buffer-get "*Messages*")])
          (when b
             (with-current-buffer b
-               (insert (format "~a\n" s))
+               (text-insert (format "~a\n" s))
             )
          )
          (run-hooks 'message-hook s)
@@ -43,7 +43,7 @@
    )
 )
 
-(define insert
+(define text-insert
    (lambda (t . s)
       (if (equal? (length s) 0)
          (call-foreign (__cs_buf_text_insert (current-buffer) t))
@@ -64,41 +64,41 @@
    )
 )
 
-(define insert-char
+(define text-insert-char
    (lambda (char)
       (call-foreign (__cs_buf_text_insert_char (current-buffer) char))
    )
 )
 
-(define insert-nl
+(define text-insert-nl
    (lambda ()
       (buffer-modify (call-foreign (__cs_buf_text_insert_nl (current-buffer) (cursor))))
    )
 )
 
-(define insert-empty-line-up
+(define text-insert-empty-line-up
    (lambda ()
       (buffer-modify
          (move-prev-line-end)
          (if (equal? (cursor) 0)
-            (save-cursor (insert-nl))
+            (save-cursor (text-insert-nl))
             ;; else
-            (insert-nl)
+            (text-insert-nl)
          )
       )
    )
 )
 
-(define insert-empty-line
+(define text-insert-empty-line
    (lambda ()
       (buffer-modify
          (move-line-end)
-         (insert-nl)
+         (text-insert-nl)
       )
    )
 )
 
-(define insert-file
+(define text-insert-file
    (lambda (t)
       (buffer-modify (call-foreign (__cs_buf_text_insert_file (current-buffer) t)))
    )
@@ -718,7 +718,7 @@
    (lambda (s e t)
       (delete-range s e)
       (cursor-set s)
-      (insert t)
+      (text-insert t)
    )
 )
 
@@ -1008,7 +1008,7 @@
    (lambda ()
       (save-cursor
          (erase-buffer)
-         (insert-file (buffer-filename))
+         (text-insert-file (buffer-filename))
          (buffer-save)
       )
    )

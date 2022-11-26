@@ -56,7 +56,7 @@
          (when (member (fmt "~a/~a" dir path) slist)
             (set! style (plist-put style ':bg "blue"))
          )
-         (insert entry `(:style ,style))
+         (text-insert entry `(:style ,style))
       )
    )
 )

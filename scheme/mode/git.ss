@@ -114,10 +114,10 @@
       (let ()
          (buffer-set-readonly #f)
          (erase-buffer)
-         (insert (format "~a\n" (git-branch-name)) '(:style (:attr "bold")))
+         (text-insert (format "~a\n" (git-branch-name)) '(:style (:attr "bold")))
          (for-each
             (lambda (b)
-               (insert (format "~a\n" b))
+               (text-insert (format "~a\n" b))
             )
             (git-branch-list "-a")
          )
@@ -353,7 +353,7 @@
          (with-current-buffer b
             (diff-mode)
             (buffer-set-mode-name (if (eq? status 'staged) "Diff Staged" "Diff Unstaged"))
-            (insert
+            (text-insert
                (git-cmd-read
                   (format "diff ~a"
                      (if (eq? status 'staged) "--cached" "")
@@ -373,7 +373,7 @@
          (with-current-buffer b
             (diff-mode)
             (buffer-set-mode-name "Diff")
-            (insert
+            (text-insert
                (git-cmd-read
                   (format "diff ~a -- ~a"
                      (if (eq? status 'staged) "--cached" "")
@@ -404,7 +404,7 @@
                 (define-local status-buffer c)
                 (text-mode)
                 (if (eq? mode 'amend)
-                   (insert (git-cmd-read "log --format=%B -n 1 HEAD"))
+                   (text-insert (git-cmd-read "log --format=%B -n 1 HEAD"))
                 )
                 (save-cursor
                    (run-hooks 'git-commit-edit-hook)
@@ -490,7 +490,7 @@
       [(obj num)
        (let ([ls (git-cmd-read (format "log --no-merges -n ~a --pretty=format:\"%h  %d (%an <%ae>) %s\" ~a" num obj))])
           (buffer-set-readonly #f)
-          (insert ls)
+          (text-insert ls)
           (buffer-set-readonly #t)
        )
       ]
@@ -503,7 +503,7 @@
          (let ([b (buffer-create)])
             (diff-mode)
             (buffer-set-name (format "commit: ~a" id))
-            (insert (git-cmd-read (format "show ~a" id)))
+            (text-insert (git-cmd-read (format "show ~a" id)))
             (buffer-set-readonly #t)
             (move-buffer-begin)
          )
@@ -552,7 +552,7 @@
       [(file start end)
        (let ([ls (git-cmd-read (format "blame --root ~a -L~a,~a" file start end))])
           (buffer-set-readonly #f)
-          (insert ls)
+          (text-insert ls)
           (buffer-set-readonly #t)
        )
       ]
@@ -879,7 +879,7 @@
 
 (define git-status-draw-branch-status
    (lambda ()
-      (insert-empty-line)
+      (text-insert-empty-line)
    )
 )
 
@@ -896,8 +896,8 @@
                   ;; else
                   (let ()
                      (move-buffer-begin)
-                     (insert (git-cmd-read "log -1 --oneline"))
-                     (insert "\n")
+                     (text-insert (git-cmd-read "log -1 --oneline"))
+                     (text-insert "\n")
                      (move-each-line
                         (lambda ()
                            (let ([line (extract-line)])

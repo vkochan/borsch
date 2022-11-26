@@ -37,7 +37,7 @@
 
 (define copybuf-paste-inplace
    (lambda ()
-      (insert copybuf-reg)
+      (text-insert copybuf-reg)
    )
 )
 
@@ -54,7 +54,7 @@
           ;; else
           (begin
              (move-line-end)
-             (insert "\n")
+             (text-insert "\n")
              (save-cursor
                 (copybuf-paste-inplace)
                 (delete-char)

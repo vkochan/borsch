@@ -25,7 +25,7 @@
                      [vname (frame-name tag)]
                     )
                   (let ([name (or vname "")])
-                     (insert
+                     (text-insert
                         (format "[~a~a]" tag (if (equal? "" name) "" (string-append ":" name)))
                        `(:style (:fg ,tag-color))
                      )
@@ -34,8 +34,8 @@
             )
             '(1 2 3 4 5 6 7 8 9)
          )
-         (insert (layout-name))
-         (insert (format "[~a]" (current-cwd)) '(:style (:fg "bright-yellow")))
+         (text-insert (layout-name))
+         (text-insert (format "[~a]" (current-cwd)) '(:style (:fg "bright-yellow")))
       )
    )
 )

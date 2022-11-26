@@ -9,7 +9,7 @@
 
 (define delbuf-paste-inplace
    (lambda ()
-      (insert delbuf-reg)
+      (text-insert delbuf-reg)
    )
 )
 
@@ -26,7 +26,7 @@
           ;; else
           (let ([has-newline (equal? (string-ref delbuf-reg 0) #\newline)])
              (move-line-end)
-             (when (not has-newline) (insert "\n"))
+             (when (not has-newline) (text-insert "\n"))
              (save-cursor
                 (delbuf-paste-inplace)
                 (when (not has-newline) (delete-char))
@@ -213,11 +213,11 @@
    (lambda ()
       (move-line-end)
       (delete-next-char)
-      (insert " ")
+      (text-insert " ")
       (move-prev-char)
       (delete-word)
       (when (not (eq? (cursor) (buffer-end-pos)))
-         (insert " ")
+         (text-insert " ")
       )
    )
 )
@@ -260,8 +260,8 @@
       (bind-key map "i" (lambda () (text-mode-insert)))
       (bind-key map "a" (lambda () (move-next-char) (text-mode-insert)))
       (bind-key map "A" (lambda () (move-line-end) (text-mode-insert)))
-      (bind-key map "o" (lambda () (insert-empty-line) (text-mode-insert)))
-      (bind-key map "O" (lambda () (insert-empty-line-up) (text-mode-insert)))
+      (bind-key map "o" (lambda () (text-insert-empty-line) (text-mode-insert)))
+      (bind-key map "O" (lambda () (text-insert-empty-line-up) (text-mode-insert)))
       (bind-key map "C" (lambda () (delete-line-end) (text-mode-insert)))
       (bind-key map "c w" (lambda () (delete-word) (text-mode-insert)))
       (bind-key map "c W" (lambda () (delete-longword) (text-mode-insert)))
@@ -297,7 +297,7 @@
 
 (define text-mode-insert-map
    (let ([map (make-keymap)])
-      (bind-key map "<Enter>" (lambda () (insert-nl)))
+      (bind-key map "<Enter>" (lambda () (text-insert-nl)))
       (bind-key map "<Backspace>" (lambda () (delete-prev-char)))
       (bind-key map "<Esc>" text-mode-normal)
       (bind-key map "M-<Space>" text-mode-normal)
@@ -418,7 +418,7 @@
 
 (define text-mode-insert-char
    (lambda (char)
-      (insert-char char)
+      (text-insert-char char)
    )
 )
 

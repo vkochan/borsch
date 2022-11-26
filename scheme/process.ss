@@ -112,7 +112,7 @@
                   (with-current-buffer buf
                      (save-cursor
                         (move-buffer-end)
-                        (insert s)
+                        (text-insert s)
                      )
                   )
                   ;; else
@@ -138,7 +138,7 @@
                   (with-current-buffer buf
                      (save-cursor
                         (move-buffer-end)
-                        (insert s)
+                        (text-insert s)
                      )
                   )
                   (set! s (get-string-some proc-out))

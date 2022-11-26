@@ -59,7 +59,7 @@
             (buffer-set-name "Term Copy")
             (define-local orig-buf c)
             (window-switch-buffer b)
-            (insert s)
+            (text-insert s)
          )
       )
    )

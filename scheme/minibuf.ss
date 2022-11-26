@@ -108,7 +108,7 @@
 
 (define minibuf-insert-char
    (lambda (char)
-      (insert (string char))
+      (text-insert (string char))
    )
 )
 
@@ -136,7 +136,7 @@
       (when minibuf-buffer
          (window-set-height minibuf-window (1+ (lines-count m)))
          (with-current-buffer minibuf-buffer
-            (insert (format "~a\n" m))
+            (text-insert (format "~a\n" m))
             (cursor-set 0)
          )
       )
@@ -149,7 +149,7 @@
          (window-set-height minibuf-window (1+ (lines-count e)))
          (with-current-buffer minibuf-buffer
             (when (not (get-local input-mode))
-               (insert (format "~a\n" e) '(:style (:fg "red")))
+               (text-insert (format "~a\n" e) '(:style (:fg "red")))
                (cursor-set 0)
             )
          )
@@ -177,7 +177,7 @@
            )
          (with-current-buffer minibuf-buffer
             (erase-buffer)
-            (insert str)
+            (text-insert str)
             (set-local! text-insert-hook minibuf-insert-char)
             (set-local! prompt-pos (cursor))
             (set-local! input-mode #t)
@@ -185,7 +185,7 @@
             (set-local! orig-buf b)
             (buffer-set-keymap map)
             (when def
-               (insert def)
+               (text-insert def)
             )
          )
          (window-select minibuf-window)
