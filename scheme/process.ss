@@ -198,7 +198,7 @@
       ]
 
       [(cmd buf-out buf-err on-exit)
-       (process-create cmd buf-out #f on-exit #t)
+       (process-create cmd buf-out buf-err on-exit #t)
       ]
 
       [(cmd buf-out buf-err on-exit async?)
