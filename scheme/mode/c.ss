@@ -7,13 +7,13 @@
 (define c-compile-buffer
    (case-lambda
       [()
-       (c-compile-buffer #f)
+       (c-compile-buffer "-c" #f)
       ]
 
-      [(fn)
+      [(ext-opts fn)
        (let ([buf-out (buffer-new)] [buf-err (buffer-new)] [fn fn])
           (process-create
-             (format "gcc ~a -c ~a" (c-compile-options) (buffer-filename))
+             (format "gcc ~a ~a ~a" (c-compile-options) (buffer-filename) ext-opts)
              buf-out
              buf-err
              (lambda (status out err)
@@ -48,6 +48,7 @@
             [file (buffer-filename)]
            )
          (c-compile-buffer
+            (format "-o ~a" prog)
             (lambda (status out err)
                (when (eq? status 0)
                   (vterm (format "~a ; read" prog))
