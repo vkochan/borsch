@@ -986,24 +986,6 @@
    )
 )
 
-(define-syntax (text-modify stx)
-   (syntax-case stx ()
-      ((_ exp ...)
-       #`(if (buffer-is-readonly?)
-            (begin
-               (message "buffer is readonly")
-               (cursor)
-            )
-            ;; else
-            (begin
-               exp
-               ...
-            )
-         )
-      )
-   )
-)
-
 (define buffer-reload-file
    (lambda ()
       (save-cursor
