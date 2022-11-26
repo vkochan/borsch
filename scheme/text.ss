@@ -25,7 +25,7 @@
    )
 )
 
-(define-syntax (buffer-modify stx)
+(define-syntax (text-modify stx)
    (syntax-case stx ()
       ((_ exp ...)
        #`(if (buffer-is-readonly?)
@@ -72,13 +72,13 @@
 
 (define text-insert-nl
    (lambda ()
-      (buffer-modify (call-foreign (__cs_buf_text_insert_nl (current-buffer) (cursor))))
+      (text-modify (call-foreign (__cs_buf_text_insert_nl (current-buffer) (cursor))))
    )
 )
 
 (define text-insert-empty-line-up
    (lambda ()
-      (buffer-modify
+      (text-modify
          (move-prev-line-end)
          (if (equal? (cursor) 0)
             (save-cursor (text-insert-nl))
@@ -91,7 +91,7 @@
 
 (define text-insert-empty-line
    (lambda ()
-      (buffer-modify
+      (text-modify
          (move-line-end)
          (text-insert-nl)
       )
@@ -100,7 +100,7 @@
 
 (define text-insert-file
    (lambda (t)
-      (buffer-modify (call-foreign (__cs_buf_text_insert_file (current-buffer) t)))
+      (text-modify (call-foreign (__cs_buf_text_insert_file (current-buffer) t)))
    )
 )
 
@@ -703,7 +703,7 @@
 
 (define delete-range
    (lambda (s e)
-      (buffer-modify
+      (text-modify
          (let ([del-hook (get-local text-delete-hook #f)])
             (when del-hook 
                (del-hook s e)
@@ -724,7 +724,7 @@
 
 (define cursor-obj-delete
    (lambda (fn)
-      (buffer-modify
+      (text-modify
          (let (
                [end (fn)]
                [start (cursor)]
@@ -737,7 +737,7 @@
 
 (define cursor-obj-delete-inclusive
    (lambda (fn)
-      (buffer-modify
+      (text-modify
          (let (
                [end (next-char-pos (fn))]
                [start (cursor)]
@@ -986,7 +986,7 @@
    )
 )
 
-(define-syntax (buffer-modify stx)
+(define-syntax (text-modify stx)
    (syntax-case stx ()
       ((_ exp ...)
        #`(if (buffer-is-readonly?)

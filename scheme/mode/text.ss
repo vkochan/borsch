@@ -54,7 +54,7 @@
 
 (define text-mode-insert
    (lambda ()
-      (buffer-modify
+      (text-modify
          (text-mode-set-keymap 'text-mode-insert-local-map)
          (buffer-set-state-name "<I>")
          (enable-insert #t)
