@@ -207,7 +207,7 @@
    (lambda ()
       (let ([p (get-local complete-prompt-pos)])
          (when (> (cursor) p)
-            (move-prev-char)
+            (cursor-goto-prev-char)
          )
          (set-local! complete-prompt-cursor (cursor))
       )
@@ -217,7 +217,7 @@
 (define complete-prompt-move-next-char
    (lambda ()
       (when (< (cursor) (line-end-pos))
-         (move-next-char)
+         (cursor-goto-next-char)
          (set-local! complete-prompt-cursor (cursor))
       )
    )

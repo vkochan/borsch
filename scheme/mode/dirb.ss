@@ -100,7 +100,7 @@
                )
             ) fl
          )
-         (move-buffer-begin)
+         (cursor-goto-begin)
          (buffer-set-readonly #t)
          (if (> (length slist) 0)
             (buffer-set-state-name (format "[sel:~a]" (length slist)))
@@ -135,15 +135,15 @@
 
 (define dirb-next-entry
     (lambda ()
-       (move-line-down)
-       (move-line-begin)
+       (cursor-goto-line-down)
+       (cursor-goto-line-begin)
     )
 )
 
 (define dirb-prev-entry
     (lambda ()
-       (move-line-up)
-       (move-line-begin)
+       (cursor-goto-line-up)
+       (cursor-goto-line-begin)
     )
 )
 

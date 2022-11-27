@@ -287,7 +287,7 @@
                                  (mail-render-message m)
                                  (mail-message-del-tag (mail-entry-id entry) "unread")
                                  (buffer-set-readonly #t)
-                                 (move-buffer-begin)
+                                 (cursor-goto-begin)
                                  (message "Done")
                               )
                               sexp
@@ -400,7 +400,7 @@
                )
 
                (buffer-set-readonly #t)
-               (move-buffer-begin)
+               (cursor-goto-begin)
             )
          )
       )
@@ -609,7 +609,7 @@
                   l
                )
                (buffer-set-readonly #t)
-               (move-buffer-begin)
+               (cursor-goto-begin)
             )
          )
       )
@@ -680,7 +680,7 @@
             (lambda (status buf-out buf-err)
                (save-cursor
                   (mail-render-thread-list qry buf-draw buf-out)
-                  (move-line-begin)
+                  (cursor-goto-line-begin)
                )
                (buffer-delete buf-out)
             )

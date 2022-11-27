@@ -79,7 +79,7 @@
 (define text-insert-empty-line-up
    (lambda ()
       (text-modify
-         (move-prev-line-end)
+         (cursor-goto-prev-line-end)
          (if (equal? (cursor) 0)
             (save-cursor (text-insert-nl))
             ;; else
@@ -92,7 +92,7 @@
 (define text-insert-empty-line
    (lambda ()
       (text-modify
-         (move-line-end)
+         (cursor-goto-line-end)
          (text-insert-nl)
       )
    )
@@ -104,67 +104,67 @@
    )
 )
 
-(define move-next-char
+(define cursor-goto-next-char
    (lambda ()
       (cursor-set (next-char-pos))
    )
 )
 
-(define move-prev-char
+(define cursor-goto-prev-char
    (lambda ()
       (cursor-set (prev-char-pos))
    )
 )
 
-(define move-next-word
+(define cursor-goto-next-word
    (lambda ()
       (cursor-set (next-word-pos))
    )
 )
 
-(define move-prev-word
+(define cursor-goto-prev-word
    (lambda ()
       (cursor-set (prev-word-pos))
    )
 )
 
-(define move-word-end
+(define cursor-goto-word-end
    (lambda ()
       (cursor-set (word-end-pos))
    )
 )
 
-(define move-next-longword
+(define cursor-goto-next-longword
    (lambda ()
       (cursor-set (next-longword-pos))
    )
 )
 
-(define move-prev-longword
+(define cursor-goto-prev-longword
    (lambda ()
       (cursor-set (prev-longword-pos))
    )
 )
 
-(define move-longword-end
+(define cursor-goto-longword-end
    (lambda ()
       (cursor-set (longword-end-pos))
    )
 )
 
-(define move-line-num
+(define cursor-goto-line
    (lambda (n)
       (cursor-set (next-line-pos (current-buffer) 0 (- n 1)))
    )
 )
 
-(define move-line-up
+(define cursor-goto-line-up
    (lambda ()
       (cursor-set (prev-line-pos))
    )
 )
 
-(define move-line-down
+(define cursor-goto-line-down
    (lambda ()
       (when (not (is-last-line?))
          (cursor-set (next-line-pos))
@@ -172,49 +172,49 @@
    )
 )
 
-(define move-next-line
+(define cursor-goto-next-line
    (lambda ()
       (cursor-set (next-line-begin-pos))
    )
 )
 
-(define move-prev-line-end
+(define cursor-goto-prev-line-end
    (lambda ()
       (cursor-set (prev-line-end-pos))
    )
 )
 
-(define move-line-start
+(define cursor-goto-line-start
    (lambda ()
       (cursor-set (line-start-pos))
    )
 )
 
-(define move-line-finish
+(define cursor-goto-line-finish
    (lambda ()
       (cursor-set (line-finish-pos))
    )
 )
 
-(define move-line-begin
+(define cursor-goto-line-begin
    (lambda ()
       (cursor-set (line-begin-pos))
    )
 )
 
-(define move-line-end
+(define cursor-goto-line-end
    (lambda ()
       (cursor-set (line-end-pos))
    )
 )
 
-(define move-buffer-begin
+(define cursor-goto-begin
    (lambda ()
       (cursor-set (buffer-begin-pos))
    )
 )
 
-(define move-buffer-end
+(define cursor-goto-end
    (lambda ()
       (cursor-set (buffer-end-pos))
    )
@@ -226,13 +226,13 @@
    )
 )
 
-(define move-each-line
+(define cursor-goto-each-line
    (lambda (fn)
       (let loop ()
-         (move-line-begin)
+         (cursor-goto-line-begin)
          (fn)
          (when (not (is-last-line?))
-            (move-next-line)
+            (cursor-goto-next-line)
             (loop)
          )
       )
@@ -750,102 +750,102 @@
 
 (define delete-next-char
    (lambda ()
-      (cursor-obj-delete move-next-char)
+      (cursor-obj-delete cursor-goto-next-char)
    )
 )
 (define delete-char delete-next-char)
 
 (define delete-prev-char
    (lambda ()
-      (cursor-obj-delete move-prev-char)
+      (cursor-obj-delete cursor-goto-prev-char)
    )
 )
 
 (define delete-next-word
    (lambda ()
-      (cursor-obj-delete move-next-word)
+      (cursor-obj-delete cursor-goto-next-word)
    )
 )
 (define delete-word delete-next-word)
 
 (define delete-prev-word
    (lambda ()
-      (cursor-obj-delete move-prev-word)
+      (cursor-obj-delete cursor-goto-prev-word)
    )
 )
 
 (define delete-word-end
    (lambda ()
-      (cursor-obj-delete-inclusive move-word-end)
+      (cursor-obj-delete-inclusive cursor-goto-word-end)
    )
 )
 
 (define delete-next-longword
    (lambda ()
-      (cursor-obj-delete move-next-longword)
+      (cursor-obj-delete cursor-goto-next-longword)
    )
 )
 (define delete-longword delete-next-longword)
 
 (define delete-prev-longword
    (lambda ()
-      (cursor-obj-delete move-prev-longword)
+      (cursor-obj-delete cursor-goto-prev-longword)
    )
 )
 
 (define delete-longword-end
    (lambda ()
-      (cursor-obj-delete-inclusive move-longword-end)
+      (cursor-obj-delete-inclusive cursor-goto-longword-end)
    )
 )
 
 (define delete-next-line-begin
    (lambda ()
-      (cursor-obj-delete move-next-line)
+      (cursor-obj-delete cursor-goto-next-line)
    )
 )
 
 (define delete-prev-line-end
    (lambda ()
-      (cursor-obj-delete move-prev-line-end)
+      (cursor-obj-delete cursor-goto-prev-line-end)
    )
 )
 
 (define delete-line-start
    (lambda ()
-      (cursor-obj-delete move-line-start)
+      (cursor-obj-delete cursor-goto-line-start)
    )
 )
 
 (define delete-line-finish
    (lambda ()
-      (cursor-obj-delete move-line-finish)
+      (cursor-obj-delete cursor-goto-line-finish)
    )
 )
 
 (define delete-line-begin
    (lambda ()
-      (cursor-obj-delete move-line-begin)
+      (cursor-obj-delete cursor-goto-line-begin)
    )
 )
 
 (define delete-line-end
    (lambda ()
-      (cursor-obj-delete move-line-end)
+      (cursor-obj-delete cursor-goto-line-end)
    )
 )
 
 (define delete-line
    (lambda ()
-      (move-line-end)
+      (cursor-goto-line-end)
       (delete-prev-line-end)
       (if (equal? (cursor) 0)
          (delete-char)
          ;; else
          (if (equal? (buffer-end-pos) (1+ (line-end-pos)))
-            (move-line-begin)
+            (cursor-goto-line-begin)
             ;; else
-            (move-next-line)
+            (cursor-goto-next-line)
          )
       )
    )
@@ -853,13 +853,13 @@
 
 (define delete-buffer-begin
    (lambda ()
-      (cursor-obj-delete move-buffer-begin)
+      (cursor-obj-delete cursor-goto-begin)
    )
 )
 
 (define delete-buffer-end
    (lambda ()
-      (cursor-obj-delete move-buffer-end)
+      (cursor-obj-delete cursor-goto-end)
    )
 )
 

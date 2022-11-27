@@ -168,7 +168,7 @@
                )
                cls
             )
-            (move-buffer-begin)
+            (cursor-goto-begin)
          )
       )
    )
