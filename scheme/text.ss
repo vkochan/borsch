@@ -986,7 +986,7 @@
    )
 )
 
-(define buffer-reload-file
+(define text-reload-file
    (lambda ()
       (save-cursor
          (text-delete)
