@@ -7,7 +7,7 @@
    (lambda ()
       (enable-insert #f)
       (set-local! input-mode #f)
-      (erase-buffer)
+      (text-delete)
       (window-select (window-prev-selected))
    )
 )
@@ -21,7 +21,7 @@
          (buffer-set-keymap 1)
          (set-local! input-mode #f)
          (enable-insert #f)
-         (erase-buffer)
+         (text-delete)
          (window-select (window-prev-selected))
          (fn v)
       )
@@ -42,7 +42,7 @@
    (lambda ()
       (let ([p (get-local prompt-pos)])
          (when (> (cursor) p)
-            (delete-prev-char)
+            (text-delete-prev-char)
          )
       )
    )
@@ -163,7 +163,7 @@
          (with-current-buffer minibuf-buffer
             (when (not (get-local input-mode))
                (window-set-height minibuf-window 1)
-               (erase-buffer)
+               (text-delete)
             )
          )
       )
@@ -176,7 +176,7 @@
             [b (current-buffer)]
            )
          (with-current-buffer minibuf-buffer
-            (erase-buffer)
+            (text-delete)
             (text-insert str)
             (set-local! text-insert-hook minibuf-insert-char)
             (set-local! prompt-pos (cursor))
@@ -256,7 +256,7 @@
             [w (get-local orig-win)]
            )
          (enable-insert #f)
-         (erase-buffer)
+         (text-delete)
          (set-local! input-mode #f)
          (window-set-height minibuf-window 1)
          (window-select w)

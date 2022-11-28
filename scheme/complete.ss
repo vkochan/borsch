@@ -61,7 +61,7 @@
 
 (define complete-draw
    (lambda ()
-      (erase-buffer)
+      (text-delete)
       (text-insert (get-local complete-prompt))
       (set-local! complete-prompt-pos (cursor))
       (text-insert (get-local complete-text))
@@ -127,7 +127,7 @@
            )
          (when (> (cursor) p)
             (let ()
-               (delete-prev-char)
+               (text-delete-prev-char)
                (complete-update-text)
             )
          )

@@ -15,7 +15,7 @@
    (let ([map (make-keymap)])
       (bind-key map "<Esc>" window-delete)
       (bind-key map "<Enter>" prompt-pass-value-cmd)
-      (bind-key map "<Backspace>" delete-prev-char)
+      (bind-key map "<Backspace>" text-delete-prev-char)
       map
    )
 )

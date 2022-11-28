@@ -6,7 +6,7 @@
 (define topbar-draw
    (lambda ()
       (with-current-buffer topbar-buffer
-         (erase-buffer)
+         (text-delete)
          (for-each
             (lambda (tag)
                (let (

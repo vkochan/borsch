@@ -281,7 +281,7 @@
                   (lambda (status buf-out buf-err)
                      (let ([sexp (buffer-eval buf-out)])
                         (with-current-buffer b
-                           (erase-buffer)
+                           (text-delete)
                            (mail-for-each-message
                               (lambda (m depth)
                                  (mail-render-message m)
@@ -358,7 +358,7 @@
                (buffer-set-name (format "Thread:~a" tid))
                (mail-thread-mode)
                (buffer-set-readonly #f)
-               (erase-buffer)
+               (text-delete)
 
                (mail-for-each-message
                   (lambda (m depth)
@@ -584,7 +584,7 @@
                (define-local mail-query qry)
                (mail-mode)
                (buffer-set-readonly #f)
-               (erase-buffer)
+               (text-delete)
                (for-each
                   (lambda (th)
                      (let (

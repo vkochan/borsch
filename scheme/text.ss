@@ -701,7 +701,7 @@
    )
 )
 
-(define delete-range
+(define text-delete-range
    (lambda (s e)
       (text-modify
          (let ([del-hook (get-local text-delete-hook #f)])
@@ -714,9 +714,9 @@
    )
 )
 
-(define replace-range
+(define text-replace-range
    (lambda (s e t)
-      (delete-range s e)
+      (text-delete-range s e)
       (cursor-set s)
       (text-insert t)
    )
@@ -729,7 +729,7 @@
                [end (fn)]
                [start (cursor)]
               )
-            (delete-range start end)
+            (text-delete-range start end)
          )
       )
    )
@@ -742,50 +742,50 @@
                [end (text-next-char-pos (fn))]
                [start (cursor)]
               )
-            (delete-range start end)
+            (text-delete-range start end)
          )
       )
    )
 )
 
-(define delete-next-char
+(define text-delete-next-char
    (lambda ()
       (cursor-obj-delete cursor-goto-next-char)
    )
 )
-(define delete-char delete-next-char)
+(define text-delete-char text-delete-next-char)
 
-(define delete-prev-char
+(define text-delete-prev-char
    (lambda ()
       (cursor-obj-delete cursor-goto-prev-char)
    )
 )
 
-(define delete-next-word
+(define text-delete-next-word
    (lambda ()
       (cursor-obj-delete cursor-goto-next-word)
    )
 )
-(define delete-word delete-next-word)
+(define text-delete-word text-delete-next-word)
 
-(define delete-prev-word
+(define text-delete-prev-word
    (lambda ()
       (cursor-obj-delete cursor-goto-prev-word)
    )
 )
 
-(define delete-word-end
+(define text-delete-word-end
    (lambda ()
       (cursor-obj-delete-inclusive cursor-goto-word-end)
    )
 )
 
-(define delete-next-longword
+(define text-delete-next-longword
    (lambda ()
       (cursor-obj-delete cursor-goto-next-longword)
    )
 )
-(define delete-longword delete-next-longword)
+(define text-delete-longword text-delete-next-longword)
 
 (define delete-prev-longword
    (lambda ()
@@ -793,54 +793,54 @@
    )
 )
 
-(define delete-longword-end
+(define text-delete-longword-end
    (lambda ()
       (cursor-obj-delete-inclusive cursor-goto-longword-end)
    )
 )
 
-(define delete-next-line-begin
+(define text-delete-next-line-begin
    (lambda ()
       (cursor-obj-delete cursor-goto-next-line)
    )
 )
 
-(define delete-prev-line-end
+(define text-delete-prev-line-end
    (lambda ()
       (cursor-obj-delete cursor-goto-prev-line-end)
    )
 )
 
-(define delete-line-start
+(define text-delete-line-start
    (lambda ()
       (cursor-obj-delete cursor-goto-line-start)
    )
 )
 
-(define delete-line-finish
+(define text-delete-line-finish
    (lambda ()
       (cursor-obj-delete cursor-goto-line-finish)
    )
 )
 
-(define delete-line-begin
+(define text-delete-line-begin
    (lambda ()
       (cursor-obj-delete cursor-goto-line-begin)
    )
 )
 
-(define delete-line-end
+(define text-delete-line-end
    (lambda ()
       (cursor-obj-delete cursor-goto-line-end)
    )
 )
 
-(define delete-line
+(define text-delete-line
    (lambda ()
       (cursor-goto-line-end)
-      (delete-prev-line-end)
+      (text-delete-prev-line-end)
       (if (equal? (cursor) 0)
-         (delete-char)
+         (text-delete-char)
          ;; else
          (if (equal? (text-end-pos) (1+ (text-line-end-pos)))
             (cursor-goto-line-begin)
@@ -851,26 +851,26 @@
    )
 )
 
-(define delete-buffer-begin
+(define text-delete-begin
    (lambda ()
       (cursor-obj-delete cursor-goto-begin)
    )
 )
 
-(define delete-buffer-end
+(define text-delete-end
    (lambda ()
       (cursor-obj-delete cursor-goto-end)
    )
 )
 
-(define erase-buffer
+(define text-delete
    (lambda ()
       (let (
             [s (text-begin-pos)]
             [e (text-end-pos)]
            )
          (remove-text-property)
-         (delete-range s e)
+         (text-delete-range s e)
       )
    )
 )
@@ -930,7 +930,7 @@
 (define selection-delete
    (lambda ()
       (let ([r (selection-get-range)])
-         (delete-range (car r) (cadr r))
+         (text-delete-range (car r) (cadr r))
       )
    )
 )
@@ -989,7 +989,7 @@
 (define buffer-reload-file
    (lambda ()
       (save-cursor
-         (erase-buffer)
+         (text-delete)
          (text-insert-file (buffer-filename))
          (buffer-save)
       )

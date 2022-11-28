@@ -47,7 +47,7 @@
              (define-local grep-search-dir d)
              (buffer-set-name (format "Searching ...: ~a" s))
              (buffer-set-mode-name "Grep")
-             (erase-buffer)
+             (text-delete)
           )
           (process-create cmd b
              (lambda (status buf-out buf-err)

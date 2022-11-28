@@ -72,7 +72,7 @@
          (buffer-set-readonly #f)
          (dirb-set-current-dir dir)
          (buffer-set-name dir)
-	 (erase-buffer)
+	 (text-delete)
          (for-each
             (lambda (e)
                (when (not (and (equal? (string-ref e 0) #\.)
