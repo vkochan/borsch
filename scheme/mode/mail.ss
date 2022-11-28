@@ -279,7 +279,7 @@
 
                (process-create (mail-notmuch-cmd (format "show --format=sexp --entire-thread=false id:~a" (mail-entry-id entry))) b
                   (lambda (status buf-out buf-err)
-                     (let ([sexp (buffer-eval buf-out)])
+                     (let ([sexp (text-eval buf-out)])
                         (with-current-buffer b
                            (text-delete)
                            (mail-for-each-message
@@ -353,7 +353,7 @@
 (define mail-render-thread
    (lambda (tid buf-out)
       (with-current-buffer buf-out
-         (let ([sexp (buffer-eval)])
+         (let ([sexp (text-eval)])
             (with-current-buffer (buffer-create)
                (buffer-set-name (format "Thread:~a" tid))
                (mail-thread-mode)
@@ -578,7 +578,7 @@
 (define mail-render-thread-list
    (lambda (qry buf-draw buf-ret)
       (with-current-buffer buf-ret
-         (let ([l (buffer-eval)])
+         (let ([l (text-eval)])
             (with-current-buffer buf-draw
                (define-local buffer-reload-func mail-reload-thread-list)
                (define-local mail-query qry)

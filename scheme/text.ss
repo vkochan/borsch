@@ -996,7 +996,7 @@
    )
 )
 
-(define buffer-eval
+(define text-eval
    (case-lambda
       [()
        (buffer-eval (current-buffer))
