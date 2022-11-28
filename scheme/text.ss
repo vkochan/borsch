@@ -875,7 +875,7 @@
    )
 )
 
-(define copy-line
+(define text-copy-line
    (lambda ()
       (copybuf-copy (text-string (text-line-begin-pos) (1+ (text-line-end-pos))) #t)
    )
