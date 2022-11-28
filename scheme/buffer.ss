@@ -962,7 +962,7 @@
 (define search-word-forward
    (case-lambda
       [()
-       (search-word-forward (extract-word))]
+       (search-word-forward (text-word))]
 
       [(w)
        (search-word-direction w +1)]
@@ -972,7 +972,7 @@
 (define search-word-backward
    (case-lambda
       [()
-       (search-word-backward (extract-word))]
+       (search-word-backward (text-word))]
 
       [(w)
        (search-word-direction w -1)]

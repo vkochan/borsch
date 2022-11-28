@@ -397,10 +397,10 @@
    )
 )
 
-(define extract-char
+(define text-char
    (case-lambda
       [()
-         (extract-char (cursor))]
+         (text-char (cursor))]
 
       [(s)
          (let ([str (text-string s (text-next-char-pos s))])
@@ -420,14 +420,14 @@
    )
 )
 
-(define extract-word
+(define text-word
    (case-lambda
       [()
-       (extract-word (cursor))]
+       (text-word (cursor))]
 
       [(s)
-       (if (local-bound? extract-word)
-          ((get-local extract-word))
+       (if (local-bound? text-word-func)
+          ((get-local text-word-func))
           ;; else
           (let ([r (text-obj-range (current-buffer) s #\w #t)])
              (text-string (car r) (cdr r))
@@ -437,10 +437,10 @@
    )
 )
 
-(define extract-longword
+(define text-longword
    (case-lambda
       [()
-       (extract-longword (cursor))]
+       (text-longword (cursor))]
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\W #t)])
@@ -450,10 +450,10 @@
    )
 )
 
-(define extract-object
+(define text-object
    (case-lambda
       [()
-       (extract-object (cursor))]
+       (text-object (cursor))]
 
       [(s)
        (let ([obj (if (selection-is-set?)
@@ -462,20 +462,20 @@
                          sel
                       )
                       ;else
-                      (extract-longword s)
+                      (text-longword s)
                   )
              ])
-          (string-trim (extract-longword s)
+          (string-trim (text-longword s)
                        '(#\space #\< #\> #\( #\) #\[ #\] #\" #\'))
        )
       ]
    )
 )
 
-(define extract-line
+(define text-line
    (case-lambda
       [()
-       (extract-line (cursor))]
+       (text-line (cursor))]
 
       [(s)
        (text-string (text-line-begin-pos) (text-line-end-pos))
@@ -483,10 +483,10 @@
    )
 )
 
-(define extract-line-inner
+(define text-line-inner
    (case-lambda
       [()
-       (extract-line-inner (cursor))]
+       (text-line-inner (cursor))]
 
       [(s)
        (text-string (text-line-start-pos) (text-line-end-pos))
@@ -494,10 +494,10 @@
    )
 )
 
-(define extract-square-brackets
+(define text-square-brackets
    (case-lambda
       [()
-       (extract-square-brackets (cursor))]
+       (text-square-brackets (cursor))]
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\[ #f)])
@@ -507,10 +507,10 @@
    )
 )
 
-(define extract-square-brackets-inner
+(define text-square-brackets-inner
    (case-lambda
       [()
-       (extract-square-brackets-inner (cursor))]
+       (text-square-brackets-inner (cursor))]
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\[ #t)])
@@ -520,10 +520,10 @@
    )
 )
 
-(define extract-curly-brackets
+(define text-curly-brackets
    (case-lambda
       [()
-       (extract-curly-brackets (cursor))]
+       (text-curly-brackets (cursor))]
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\{ #f)])
@@ -533,10 +533,10 @@
    )
 )
 
-(define extract-curly-brackets-inner
+(define text-curly-brackets-inner
    (case-lambda
       [()
-       (extract-curly-brackets-inner (cursor))]
+       (text-curly-brackets-inner (cursor))]
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\{ #t)])
@@ -546,10 +546,10 @@
    )
 )
 
-(define extract-angle-brackets
+(define text-angle-brackets
    (case-lambda
       [()
-       (extract-angle-brackets (cursor))]
+       (text-angle-brackets (cursor))]
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\< #f)])
@@ -559,10 +559,10 @@
    )
 )
 
-(define extract-angle-brackets-inner
+(define text-angle-brackets-inner
    (case-lambda
       [()
-       (extract-angle-brackets-inner (cursor))]
+       (text-angle-brackets-inner (cursor))]
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\< #t)])
@@ -572,10 +572,10 @@
    )
 )
 
-(define extract-parens
+(define text-parens
    (case-lambda
       [()
-       (extract-parens (cursor))]
+       (text-parens (cursor))]
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\( #f)])
@@ -585,10 +585,10 @@
    )
 )
 
-(define extract-parens-inner
+(define text-parens-inner
    (case-lambda
       [()
-       (extract-parens-inner (cursor))]
+       (text-parens-inner (cursor))]
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\( #t)])
@@ -598,10 +598,10 @@
    )
 )
 
-(define extract-quote
+(define text-quote
    (case-lambda
       [()
-       (extract-quote (cursor))]
+       (text-quote (cursor))]
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\" #f)])
@@ -611,10 +611,10 @@
    )
 )
 
-(define extract-quote-inner
+(define text-quote-inner
    (case-lambda
       [()
-       (extract-quote-inner (cursor))]
+       (text-quote-inner (cursor))]
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\" #t)])
@@ -624,10 +624,10 @@
    )
 )
 
-(define extract-single-quote
+(define text-single-quote
    (case-lambda
       [()
-       (extract-single-quote (cursor))]
+       (text-single-quote (cursor))]
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\' #f)])
@@ -637,10 +637,10 @@
    )
 )
 
-(define extract-single-quote-inner
+(define text-single-quote-inner
    (case-lambda
       [()
-       (extract-single-quote-inner (cursor))]
+       (text-single-quote-inner (cursor))]
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\' #t)])
@@ -650,10 +650,10 @@
    )
 )
 
-(define extract-back-quote
+(define text-back-quote
    (case-lambda
       [()
-       (extract-back-quote (cursor))]
+       (text-back-quote (cursor))]
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\` #f)])
@@ -663,10 +663,10 @@
    )
 )
 
-(define extract-back-quote-inner
+(define text-back-quote-inner
    (case-lambda
       [()
-       (extract-back-quote-inner (cursor))]
+       (text-back-quote-inner (cursor))]
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\` #t)])

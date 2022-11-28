@@ -33,14 +33,14 @@
 
 (define scheme-extract-word
    (lambda ()
-      (pregexp-replace* "\\[|\\]|\\'|\\(|\\)" (extract-longword) "")
+      (pregexp-replace* "\\[|\\]|\\'|\\(|\\)" (text-longword) "")
    )
 )
 
 (define-mode scheme-mode "Scheme" text-mode
    (bind-key-local "C-c C-c" scheme-eval-buffer)
    (syntax-set-lang 'scheme)
-   (define-local extract-word scheme-extract-word)
+   (define-local text-word-func scheme-extract-word)
 )
 
 (add-to-list 'file-match-mode '(".*\\.scm$" . scheme-mode))

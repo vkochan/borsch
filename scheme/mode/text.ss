@@ -17,7 +17,7 @@
    (lambda ()
       (if (not delbuf-is-linewise)
          (begin
-            (when (not (equal? #\newline (extract-char)))
+            (when (not (equal? #\newline (text-char)))
                (cursor-goto-next-char)
             )
             (delbuf-paste-inplace)
@@ -124,7 +124,7 @@
 
 (define file-open-at-cursor
    (lambda ()
-      (let-values ([(f l) (get-file-location (extract-object))])
+      (let-values ([(f l) (get-file-location (text-object))])
          (let ([p (if (equal? #\/ (string-ref f 0)) f (string-append (buffer-cwd) "/" f))])
             (file-open p)
             (cursor-goto-line l)

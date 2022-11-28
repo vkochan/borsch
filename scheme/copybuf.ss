@@ -45,7 +45,7 @@
    (lambda ()
       (if (not copybuf-is-linewise)
          (begin
-            (when (not (equal? #\newline (extract-char)))
+            (when (not (equal? #\newline (text-char)))
                (cursor-goto-next-char)
             )
             (copybuf-paste-inplace)

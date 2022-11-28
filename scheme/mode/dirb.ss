@@ -154,7 +154,7 @@
        ]
 
        [(pos)
-        (let ([e (extract-line-inner pos)])
+        (let ([e (text-line-inner pos)])
            (dirb-get-entry (fmt "~a/~a" (dirb-current-dir) e))
         )
        ]
@@ -164,7 +164,7 @@
 (define dirb-open-entry
     (lambda ()
        (let* (
-               [e (extract-line-inner)]
+               [e (text-line-inner)]
                [p (fmt "~a/~a" (dirb-current-dir) e)] 
              )
           (if (file-directory? p)
@@ -260,7 +260,7 @@
       (minibuf-ask "Delete entry(s) ?"
          (lambda (v)
             (let*(
-                  [e (extract-line-inner)]
+                  [e (text-line-inner)]
                   [p (string-append (dirb-current-dir) "/" e)]
                  )
                (when (eq? v 'yes)
@@ -428,7 +428,7 @@
 
 (define dirb-rename-entry
    (lambda ()
-      (let ([entry (dirb-get-entry (extract-line-inner))])
+      (let ([entry (dirb-get-entry (text-line-inner))])
          (set-local! defval entry)
          (minibuf-read "rename:" entry
             (lambda (v)

@@ -137,11 +137,11 @@
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" (lambda () (cursor-goto-line-begin) (git-show-commit)))
       (bind-key map "g r" (lambda () (git-insert-branch-list)))
-      (bind-key map "l" (lambda () (cursor-goto-line-begin) (git-show-log (extract-object))))
-      (bind-key map "c" (lambda () (cursor-gogo-line-begin) (git-checkout-branch (extract-object)) (git-insert-branch-list)))
+      (bind-key map "l" (lambda () (cursor-goto-line-begin) (git-show-log (text-object))))
+      (bind-key map "c" (lambda () (cursor-gogo-line-begin) (git-checkout-branch (text-object)) (git-insert-branch-list)))
       (bind-key map "d"
          (lambda ()
-            (let ([b (extract-object)])
+            (let ([b (text-object)])
                (minibuf-ask
                   (format "Delete ~a branch ?" b) 
                   (lambda (yes-or-no)
@@ -499,7 +499,7 @@
 
 (define git-show-commit
    (lambda ()
-      (let ([id (extract-object)])
+      (let ([id (text-object)])
          (let ([b (buffer-create)])
             (diff-mode)
             (buffer-set-name (format "commit: ~a" id))
@@ -658,18 +658,18 @@
          )
       )
       (cursor-goto-next-line)
-      (when (string-contains? (extract-line) "(use")
+      (when (string-contains? (text-line) "(use")
          (delete-line)
       )
-      (when (string-empty? (extract-line))
+      (when (string-empty? (text-line))
          (delete-line)
       )
-      (while (pregexp-match "(modified:)|(new file:)|(deleted:)|(renamed:)" (extract-line))
+      (while (pregexp-match "(modified:)|(new file:)|(deleted:)|(renamed:)" (text-line))
          (delete-longword)
-         (when (pregexp-match "new file:" (extract-line))
+         (when (pregexp-match "new file:" (text-line))
             (delete-longword)
          )
-         (when (pregexp-match "renamed:" (extract-line))
+         (when (pregexp-match "renamed:" (text-line))
             (delete-longword)
             (delete-longword)
          )
@@ -680,7 +680,7 @@
             (text-line-begin-pos) (text-line-end-pos)
            `(
              :keymap ,git-status-staged-file-map
-             :data ,(extract-longword)
+             :data ,(text-longword)
             )
          )
          (cursor-goto-next-line)
@@ -770,10 +770,10 @@
       (cursor-goto-next-line)
       (delete-line)
       (delete-line)
-      (when (string-empty? (extract-line))
+      (when (string-empty? (text-line))
          (delete-line)
       )
-      (while (pregexp-match "(modified:)|(deleted:)" (extract-line))
+      (while (pregexp-match "(modified:)|(deleted:)" (text-line))
          (delete-longword)
          (delete-longword)
          ;; we stay at the file path word
@@ -782,7 +782,7 @@
             (text-line-begin-pos) (text-line-end-pos)
            `(
              :keymap ,git-status-unstaged-file-map
-             :data ,(extract-longword)
+             :data ,(text-longword)
             )
          )
          (cursor-goto-next-line)
@@ -815,14 +815,14 @@
          )
       )
       (cursor-goto-next-line)
-      (when (string-contains? (extract-line) "(use")
+      (when (string-contains? (text-line) "(use")
          (delete-line)
       )
       (delete-line)
-      (when (string-empty? (extract-line))
+      (when (string-empty? (text-line))
          (delete-line)
       )
-      (while (string-contains? (extract-line) "modified")
+      (while (string-contains? (text-line) "modified")
          (delete-longword)
          (delete-longword)
          (delete-longword)
@@ -832,7 +832,7 @@
             (text-line-begin-pos) (text-line-end-pos)
            `(
              :keymap ,git-status-unmerged-file-map
-             :data ,(extract-longword)
+             :data ,(text-longword)
             )
          )
          (cursor-goto-next-line)
@@ -858,10 +858,10 @@
    (lambda ()
       (cursor-goto-next-line)
       (delete-line)
-      (when (string-empty? (extract-line))
+      (when (string-empty? (text-line))
          (delete-line)
       )
-      (while (not (equal? "" (extract-line)))
+      (while (not (equal? "" (text-line)))
          (delete-word)
          ;; we stay at the file path word
          (add-text-property (cursor) (text-longword-end-pos) '(:style (:fg "bright-black")))
@@ -869,7 +869,7 @@
             (text-line-begin-pos) (text-line-end-pos)
            `(
              :keymap ,git-status-untracked-file-map
-             :data ,(extract-longword)
+             :data ,(text-longword)
             )
          )
          (cursor-goto-next-line)
@@ -900,7 +900,7 @@
                      (text-insert "\n")
                      (cursor-goto-each-line
                         (lambda ()
-                           (let ([line (extract-line)])
+                           (let ([line (text-line)])
                               (cond
                                  [(pregexp-match "^On branch" line) (git-status-draw-branch-status)]
                                  [(pregexp-match "detached at" line) (git-status-draw-branch-status)]
