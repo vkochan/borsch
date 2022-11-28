@@ -234,7 +234,7 @@
       (bind-key map "B" (lambda () (cursor-goto-prev-longword)))
       (bind-key map "e" (lambda () (cursor-goto-word-end)))
       (bind-key map "E" (lambda () (cursor-goto-longword-end)))
-      (bind-key map "0" (lambda () (move-line-begin)))
+      (bind-key map "0" (lambda () (cursor-goto-line-begin)))
       (bind-key map "$" (lambda () (cursor-goto-line-end)))
       (bind-key map "x" (lambda () (text-mode-delete delete-next-char)))
       (bind-key map "X" (lambda () (text-mode-delete delete-prev-char)))
@@ -271,7 +271,7 @@
       (bind-key map "c B" (lambda () (delete-prev-longword) (text-mode-insert)))
       (bind-key map "c 0" (lambda () (delete-line-begin) (text-mode-insert)))
       (bind-key map "c $" (lambda () (delete-line-end) (text-mode-insert)))
-      (bind-key map "S" (lambda () (move-line-begin) (delete-line-end) (text-mode-insert)))
+      (bind-key map "S" (lambda () (cursor-goto-line-begin) (delete-line-end) (text-mode-insert)))
       (bind-key map "v" (lambda () (text-mode-visual)))
       (bind-key map "V" (lambda () (text-mode-visual-linewise)))
       (bind-key map "^ d" (lambda () (delbuf-paste) (buffer-snapshot)))
@@ -343,7 +343,7 @@
          ;; else
          (begin
             (selection-set (line-end-pos (selection-get)))
-            (move-line-begin)
+            (cursor-goto-line-begin)
          )
       )
    )
