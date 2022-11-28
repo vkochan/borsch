@@ -582,10 +582,10 @@
 (define git-blame
    (lambda ()
       (let (
-            [start (buffer-line-num (selection-get))]
+            [start (buffer-line-num (text-get-selection))]
             [end   (buffer-line-num (cursor))]
            )
-         (selection-clear)
+         (text-clear-selection)
 
          (let ([b (buffer-create (buffer-filename))])
             (with-current-buffer b

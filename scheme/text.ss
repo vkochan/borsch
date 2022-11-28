@@ -456,9 +456,9 @@
        (text-object (cursor))]
 
       [(s)
-       (let ([obj (if (selection-is-set?)
-                      (let ([sel (selection-extract)])
-                         (selection-clear)
+       (let ([obj (if (text-is-selection-set?)
+                      (let ([sel (text-selection)])
+                         (text-clear-selection)
                          sel
                       )
                       ;else
@@ -881,7 +881,7 @@
    )
 )
 
-(define selection-set
+(define text-set-selection
    (case-lambda
       [()
        (call-foreign (__cs_buf_mark_set (current-buffer) (cursor)))]
@@ -891,22 +891,22 @@
    )
 )
 
-(define selection-get
+(define text-get-selection
    (lambda ()
       (call-foreign (__cs_buf_mark_get (current-buffer)))
    )
 )
 
-(define selection-is-set?
+(define text-is-selection-set?
    (lambda ()
       (call-foreign (__cs_buf_mark_is_set (current-buffer)))
    )
 )
 
-(define selection-get-range
+(define text-selection-range
    (lambda ()
       (let (
-            [m (selection-get)]
+            [m (text-get-selection)]
             [c (cursor)]
            )
            (let (
@@ -919,68 +919,68 @@
    )
 )
 
-(define selection-extract
+(define text-selection
    (lambda ()
-      (let ([r (selection-get-range)])
+      (let ([r (text-selection-range)])
          (text-string (car r) (cadr r))
       )
    )
 )
 
-(define selection-delete
+(define text-delete-selection
    (lambda ()
-      (let ([r (selection-get-range)])
+      (let ([r (text-selection-range)])
          (text-delete-range (car r) (cadr r))
       )
    )
 )
 
-(define selection-copy
+(define text-copy-selection
    (lambda ()
-      (let ([r (selection-get-range)])
+      (let ([r (text-selection-range)])
            (copybuf-copy (text-string (car r) (cadr r)))
       )
    )
 )
 
-(define selection-copy-append
+(define text-append-selection
    (lambda ()
-      (let ([r (selection-get-range)])
+      (let ([r (text-selection-range)])
            (copybuf-append (text-string (car r) (cadr r)))
       )
    )
 )
 
-(define selection-copy-linewise
+(define text-copy-selection-linewise
    (lambda ()
-      (let ([r (selection-get-range)])
+      (let ([r (text-selection-range)])
            (copybuf-copy (text-string (car r) (cadr r)) #t)
       )
    )
 )
 
-(define selection-copy-append-linewise
+(define text-append-selection-linewise
    (lambda ()
-      (let ([r (selection-get-range)])
+      (let ([r (text-selection-range)])
            (copybuf-append (text-string (car r) (cadr r)) #t)
       )
    )
 )
 
-(define selection-highlight
+(define text-highlight-selection
    (case-lambda
       [(e)
-       (selection-highlight (__cs_win_current_get) e)]
+       (text-highlight-selection (__cs_win_current_get) e)]
 
       [(wid e)
        (when wid (call-foreign (__cs_win_mark_highlight wid e)))]
    )
 )
 
-(define selection-clear
+(define text-clear-selection
    (lambda ()
-      (when (local-bound? selection-clear-hook)
-         ((get-local selection-clear-hook))
+      (when (local-bound? text-clear-selection-hook)
+         ((get-local text-clear-selection-hook))
       )
       (call-foreign (__cs_buf_mark_clear (current-buffer)))
    )

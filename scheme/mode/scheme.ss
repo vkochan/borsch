@@ -20,9 +20,9 @@
 
 (define scheme-eval-buffer
    (lambda ()
-      (if (selection-is-set?)
-         (let ([sel (selection-extract)])
-            (selection-clear)
+      (if (text-is-selection-set?)
+         (let ([sel (text-selection)])
+            (text-clear-selection)
             (scheme-eval sel)
          )
          ;; else
