@@ -197,14 +197,14 @@
 (define text-mode-delete
    (lambda (fn)
       (set! delbuf-is-linewise #f)
-      (delbuf-put (extract-deletion (fn)))
+      (delbuf-put (text-track-deletion (fn)))
       (buffer-snapshot)
    )
 )
 (define text-mode-delete-linewise
    (lambda (fn)
       (set! delbuf-is-linewise #t)
-      (delbuf-put (extract-deletion (fn)))
+      (delbuf-put (text-track-deletion (fn)))
       (buffer-snapshot)
    )
 )

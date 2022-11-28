@@ -676,7 +676,7 @@
    )
 )
 
-(define-syntax (extract-deletion stx)
+(define-syntax (text-track-deletion stx)
    (syntax-case stx ()
       ((_ exp ...)
        #`(let ([del-text ""])
