@@ -26,7 +26,7 @@
             (scheme-eval sel)
          )
          ;; else
-         (scheme-eval (buffer-string))
+         (scheme-eval (text-string))
       )
    )
 )

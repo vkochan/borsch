@@ -106,123 +106,123 @@
 
 (define cursor-goto-next-char
    (lambda ()
-      (cursor-set (next-char-pos))
+      (cursor-set (text-next-char-pos))
    )
 )
 
 (define cursor-goto-prev-char
    (lambda ()
-      (cursor-set (prev-char-pos))
+      (cursor-set (text-prev-char-pos))
    )
 )
 
 (define cursor-goto-next-word
    (lambda ()
-      (cursor-set (next-word-pos))
+      (cursor-set (text-next-word-pos))
    )
 )
 
 (define cursor-goto-prev-word
    (lambda ()
-      (cursor-set (prev-word-pos))
+      (cursor-set (text-prev-word-pos))
    )
 )
 
 (define cursor-goto-word-end
    (lambda ()
-      (cursor-set (word-end-pos))
+      (cursor-set (text-word-end-pos))
    )
 )
 
 (define cursor-goto-next-longword
    (lambda ()
-      (cursor-set (next-longword-pos))
+      (cursor-set (text-next-longword-pos))
    )
 )
 
 (define cursor-goto-prev-longword
    (lambda ()
-      (cursor-set (prev-longword-pos))
+      (cursor-set (text-prev-longword-pos))
    )
 )
 
 (define cursor-goto-longword-end
    (lambda ()
-      (cursor-set (longword-end-pos))
+      (cursor-set (text-longword-end-pos))
    )
 )
 
 (define cursor-goto-line
    (lambda (n)
-      (cursor-set (next-line-pos (current-buffer) 0 (- n 1)))
+      (cursor-set (text-next-line-pos (current-buffer) 0 (- n 1)))
    )
 )
 
 (define cursor-goto-line-up
    (lambda ()
-      (cursor-set (prev-line-pos))
+      (cursor-set (text-prev-line-pos))
    )
 )
 
 (define cursor-goto-line-down
    (lambda ()
       (when (not (is-last-line?))
-         (cursor-set (next-line-pos))
+         (cursor-set (text-next-line-pos))
       )
    )
 )
 
 (define cursor-goto-next-line
    (lambda ()
-      (cursor-set (next-line-begin-pos))
+      (cursor-set (text-next-line-begin-pos))
    )
 )
 
 (define cursor-goto-prev-line-end
    (lambda ()
-      (cursor-set (prev-line-end-pos))
+      (cursor-set (text-prev-line-end-pos))
    )
 )
 
 (define cursor-goto-line-start
    (lambda ()
-      (cursor-set (line-start-pos))
+      (cursor-set (text-line-start-pos))
    )
 )
 
 (define cursor-goto-line-finish
    (lambda ()
-      (cursor-set (line-finish-pos))
+      (cursor-set (text-line-finish-pos))
    )
 )
 
 (define cursor-goto-line-begin
    (lambda ()
-      (cursor-set (line-begin-pos))
+      (cursor-set (text-line-begin-pos))
    )
 )
 
 (define cursor-goto-line-end
    (lambda ()
-      (cursor-set (line-end-pos))
+      (cursor-set (text-line-end-pos))
    )
 )
 
 (define cursor-goto-begin
    (lambda ()
-      (cursor-set (buffer-begin-pos))
+      (cursor-set (text-begin-pos))
    )
 )
 
 (define cursor-goto-end
    (lambda ()
-      (cursor-set (buffer-end-pos))
+      (cursor-set (text-end-pos))
    )
 )
 
 (define is-last-line?
    (lambda ()
-      (<= (- (buffer-end-pos) (line-end-pos)) 1)
+      (<= (- (text-end-pos) (text-line-end-pos)) 1)
    )
 )
 
@@ -245,7 +245,7 @@
    )
 )
 
-(define next-char-pos
+(define text-next-char-pos
    (case-lambda
       [()
        (text-obj-pos (current-buffer) (cursor) #\c 1)]
@@ -255,7 +255,7 @@
    )
 )
 
-(define prev-char-pos
+(define text-prev-char-pos
    (case-lambda
       [()
        (text-obj-pos (current-buffer) (cursor) #\c -1)]
@@ -265,55 +265,55 @@
    )
 )
 
-(define next-word-pos
+(define text-next-word-pos
    (lambda ()
       (text-obj-pos (current-buffer) (cursor) #\w 1)
    )
 )
 
-(define prev-word-pos
+(define text-prev-word-pos
    (lambda ()
       (text-obj-pos (current-buffer) (cursor) #\w -1)
    )
 )
 
-(define word-end-pos
+(define text-word-end-pos
    (lambda ()
       (text-obj-pos (current-buffer) (cursor) #\e 1)
    )
 )
 
-(define next-longword-pos
+(define text-next-longword-pos
    (lambda ()
       (text-obj-pos (current-buffer) (cursor) #\W 1)
    )
 )
 
-(define prev-longword-pos
+(define text-prev-longword-pos
    (lambda ()
       (text-obj-pos (current-buffer) (cursor) #\W -1)
    )
 )
 
-(define longword-end-pos
+(define text-longword-end-pos
    (lambda ()
       (text-obj-pos (current-buffer) (cursor) #\E 1)
    )
 )
 
-(define prev-line-pos
+(define text-prev-line-pos
    (lambda ()
       (text-obj-pos (current-buffer) (cursor) #\l -1)
    )
 )
 
-(define next-line-pos
+(define text-next-line-pos
    (case-lambda
       [()
-       (next-line-pos (current-buffer) (cursor))]
+       (text-next-line-pos (current-buffer) (cursor))]
 
       [(s)
-       (next-line-pos (current-buffer) s)]
+       (text-next-line-pos (current-buffer) s)]
 
       [(b s)
        (text-obj-pos b s #\l 1)]
@@ -323,44 +323,44 @@
    )
 )
 
-(define next-line-begin-pos
+(define text-next-line-begin-pos
    (lambda ()
       (text-obj-pos (current-buffer) (cursor) #\L 1)
    )
 )
 
-(define prev-line-end-pos
+(define text-prev-line-end-pos
    (lambda ()
       (text-obj-pos (current-buffer) (cursor) #\L -1)
    )
 )
 
-(define line-start-pos
+(define text-line-start-pos
    (lambda ()
       (text-obj-pos (current-buffer) (cursor) #\0 -1)
    )
 )
 
-(define line-finish-pos
+(define text-line-finish-pos
    (lambda ()
       (text-obj-pos (current-buffer) (cursor) #\0 1)
    )
 )
 
-(define line-begin-pos
+(define text-line-begin-pos
    (case-lambda
       [()
-       (line-begin-pos (current-buffer) (cursor))]
+       (text-line-begin-pos (current-buffer) (cursor))]
 
       [(s)
-       (line-begin-pos (current-buffer) s)]
+       (text-line-begin-pos (current-buffer) s)]
 
       [(b s)
        (text-obj-pos b s #\1 -1)]
    )
 )
 
-(define line-end-pos
+(define text-line-end-pos
    (case-lambda
       [()
       (text-obj-pos (current-buffer) (cursor) #\1 1)]
@@ -370,24 +370,24 @@
    )
 )
 
-(define buffer-begin-pos
+(define text-begin-pos
    (lambda ()
       (text-obj-pos (current-buffer) (cursor) #\g 1)
    )
 )
 
-(define buffer-end-pos
+(define text-end-pos
    (lambda ()
       (text-obj-pos (current-buffer) (cursor) #\g -1)
    )
 )
 
-(define buffer-string
+(define text-string
    (case-lambda
       [()
        (call-foreign (__cs_buf_text_get (current-buffer)
-                          (buffer-begin-pos)
-                          (- (buffer-end-pos) (buffer-begin-pos))))]
+                          (text-begin-pos)
+                          (- (text-end-pos) (text-begin-pos))))]
 
       [(start end)
        (let ([start (min start end)] [end (max start end)])
@@ -403,7 +403,7 @@
          (extract-char (cursor))]
 
       [(s)
-         (let ([str (buffer-string s (next-char-pos s))])
+         (let ([str (text-string s (text-next-char-pos s))])
             (if (> (string-length str) 0)
                (string-ref str 0)
                ;; else
@@ -430,7 +430,7 @@
           ((get-local extract-word))
           ;; else
           (let ([r (text-obj-range (current-buffer) s #\w #t)])
-             (buffer-string (car r) (cdr r))
+             (text-string (car r) (cdr r))
           )
        )
       ]
@@ -444,7 +444,7 @@
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\W #t)])
-          (buffer-string (car r) (cdr r))
+          (text-string (car r) (cdr r))
        )
       ]
    )
@@ -478,7 +478,7 @@
        (extract-line (cursor))]
 
       [(s)
-       (buffer-string (line-begin-pos) (line-end-pos))
+       (text-string (text-line-begin-pos) (text-line-end-pos))
       ]
    )
 )
@@ -489,7 +489,7 @@
        (extract-line-inner (cursor))]
 
       [(s)
-       (buffer-string (line-start-pos) (line-end-pos))
+       (text-string (text-line-start-pos) (text-line-end-pos))
       ]
    )
 )
@@ -501,7 +501,7 @@
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\[ #f)])
-          (buffer-string (car r) (cdr r))
+          (text-string (car r) (cdr r))
        )
       ]
    )
@@ -514,7 +514,7 @@
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\[ #t)])
-          (buffer-string (car r) (cdr r))
+          (text-string (car r) (cdr r))
        )
       ]
    )
@@ -527,7 +527,7 @@
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\{ #f)])
-          (buffer-string (car r) (cdr r))
+          (text-string (car r) (cdr r))
        )
       ]
    )
@@ -540,7 +540,7 @@
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\{ #t)])
-          (buffer-string (car r) (cdr r))
+          (text-string (car r) (cdr r))
        )
       ]
    )
@@ -553,7 +553,7 @@
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\< #f)])
-          (buffer-string (car r) (cdr r))
+          (text-string (car r) (cdr r))
        )
       ]
    )
@@ -566,7 +566,7 @@
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\< #t)])
-          (buffer-string (car r) (cdr r))
+          (text-string (car r) (cdr r))
        )
       ]
    )
@@ -579,7 +579,7 @@
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\( #f)])
-          (buffer-string (car r) (cdr r))
+          (text-string (car r) (cdr r))
        )
       ]
    )
@@ -592,7 +592,7 @@
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\( #t)])
-          (buffer-string (car r) (cdr r))
+          (text-string (car r) (cdr r))
        )
       ]
    )
@@ -605,7 +605,7 @@
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\" #f)])
-          (buffer-string (car r) (cdr r))
+          (text-string (car r) (cdr r))
        )
       ]
    )
@@ -618,7 +618,7 @@
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\" #t)])
-          (buffer-string (car r) (cdr r))
+          (text-string (car r) (cdr r))
        )
       ]
    )
@@ -631,7 +631,7 @@
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\' #f)])
-          (buffer-string (car r) (cdr r))
+          (text-string (car r) (cdr r))
        )
       ]
    )
@@ -644,7 +644,7 @@
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\' #t)])
-          (buffer-string (car r) (cdr r))
+          (text-string (car r) (cdr r))
        )
       ]
    )
@@ -657,7 +657,7 @@
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\` #f)])
-          (buffer-string (car r) (cdr r))
+          (text-string (car r) (cdr r))
        )
       ]
    )
@@ -670,7 +670,7 @@
 
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\` #t)])
-          (buffer-string (car r) (cdr r))
+          (text-string (car r) (cdr r))
        )
       ]
    )
@@ -682,7 +682,7 @@
        #`(let ([del-text ""])
             (let (
                   [del-hook (lambda (start end)
-                               (let ([text (buffer-string start end)])
+                               (let ([text (text-string start end)])
                                   (set! del-text (string-append del-text text))
                                )
                             )
@@ -739,7 +739,7 @@
    (lambda (fn)
       (text-modify
          (let (
-               [end (next-char-pos (fn))]
+               [end (text-next-char-pos (fn))]
                [start (cursor)]
               )
             (delete-range start end)
@@ -842,7 +842,7 @@
       (if (equal? (cursor) 0)
          (delete-char)
          ;; else
-         (if (equal? (buffer-end-pos) (1+ (line-end-pos)))
+         (if (equal? (text-end-pos) (1+ (text-line-end-pos)))
             (cursor-goto-line-begin)
             ;; else
             (cursor-goto-next-line)
@@ -866,8 +866,8 @@
 (define erase-buffer
    (lambda ()
       (let (
-            [s (buffer-begin-pos)]
-            [e (buffer-end-pos)]
+            [s (text-begin-pos)]
+            [e (text-end-pos)]
            )
          (remove-text-property)
          (delete-range s e)
@@ -877,7 +877,7 @@
 
 (define copy-line
    (lambda ()
-      (copybuf-copy (buffer-string (line-begin-pos) (1+ (line-end-pos))) #t)
+      (copybuf-copy (text-string (text-line-begin-pos) (1+ (text-line-end-pos))) #t)
    )
 )
 
@@ -913,7 +913,7 @@
                  [s (min m c)]
                  [e (max m c)]
                 )
-	      (list s (next-char-pos e))
+	      (list s (text-next-char-pos e))
            )
       )
    )
@@ -922,7 +922,7 @@
 (define selection-extract
    (lambda ()
       (let ([r (selection-get-range)])
-         (buffer-string (car r) (cadr r))
+         (text-string (car r) (cadr r))
       )
    )
 )
@@ -938,7 +938,7 @@
 (define selection-copy
    (lambda ()
       (let ([r (selection-get-range)])
-           (copybuf-copy (buffer-string (car r) (cadr r)))
+           (copybuf-copy (text-string (car r) (cadr r)))
       )
    )
 )
@@ -946,7 +946,7 @@
 (define selection-copy-append
    (lambda ()
       (let ([r (selection-get-range)])
-           (copybuf-append (buffer-string (car r) (cadr r)))
+           (copybuf-append (text-string (car r) (cadr r)))
       )
    )
 )
@@ -954,7 +954,7 @@
 (define selection-copy-linewise
    (lambda ()
       (let ([r (selection-get-range)])
-           (copybuf-copy (buffer-string (car r) (cadr r)) #t)
+           (copybuf-copy (text-string (car r) (cadr r)) #t)
       )
    )
 )
@@ -962,7 +962,7 @@
 (define selection-copy-append-linewise
    (lambda ()
       (let ([r (selection-get-range)])
-           (copybuf-append (buffer-string (car r) (cadr r)) #t)
+           (copybuf-append (text-string (car r) (cadr r)) #t)
       )
    )
 )
@@ -1004,7 +1004,7 @@
 
       [(buf)
        (with-current-buffer buf
-          (with-input-from-string (string-append "\'" (buffer-string))
+          (with-input-from-string (string-append "\'" (text-string))
              (lambda ()
                 (eval (read))
              )

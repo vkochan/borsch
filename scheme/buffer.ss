@@ -313,9 +313,9 @@
       (when p
          (let ([c p])
             (when (and (not *buffer-enable-eof*)
-                       (and (> c 0) (>= c (buffer-end-pos)))
+                       (and (> c 0) (>= c (text-end-pos)))
                   )
-               (set! c (- (buffer-end-pos) 1))
+               (set! c (- (text-end-pos) 1))
             )
 	    (call-foreign (__cs_buf_cursor_set (current-buffer) c))
             c

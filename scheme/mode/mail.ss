@@ -180,7 +180,7 @@
 
 (define mail-send-buffer
    (lambda ()
-      (mail-send-message (buffer-string))
+      (mail-send-message (text-string))
    )
 )
 
@@ -513,7 +513,7 @@
 (define mail-select-thread
    (lambda ()
       (let (
-            [th-prop (first (get-text-property ':style (line-begin-pos) (line-end-pos)))]
+            [th-prop (first (get-text-property ':style (text-line-begin-pos) (text-line-end-pos)))]
             [th-list (get-local mail-selected-threads)]
             [th-style '()]
             [th (mail-current-thread-entry)]

@@ -413,7 +413,7 @@
                 (bind-key-local "C-c C-c"
                    (lambda ()
                       (process-with-input (format "git -C ~a commit ~a -F -" (current-cwd) opt)
-                                          (buffer-string))
+                                          (text-string))
                       (with-current-buffer (get-local status-buffer)
                          (git-status-draw)
                       )
@@ -537,7 +537,7 @@
             (cursor-goto-begin)
             (cursor-goto-each-line
                (lambda ()
-                  (add-text-property (cursor) (word-end-pos) '(:style (:fg "green")))
+                  (add-text-property (cursor) (text-word-end-pos) '(:style (:fg "green")))
                )
             )
             (cursor-goto-begin)
@@ -573,7 +573,7 @@
    (cursor-goto-begin)
    (cursor-goto-each-line
       (lambda ()
-         (add-text-property (cursor) (word-end-pos) '(:style (:fg "green")))
+         (add-text-property (cursor) (text-word-end-pos) '(:style (:fg "green")))
       )
    )
    (cursor-goto-begin)
@@ -600,7 +600,7 @@
 
 (define git-status-get-path
    (lambda ()
-      (let ([plist (get-text-property ':data (line-begin-pos) (line-end-pos))])
+      (let ([plist (get-text-property ':data (text-line-begin-pos) (text-line-end-pos))])
          (plist-get (first plist) ':data)
       )
    )
@@ -651,7 +651,7 @@
 (define git-status-draw-staged
    (lambda ()
       (add-text-property
-         (line-begin-pos) (line-end-pos)
+         (text-line-begin-pos) (text-line-end-pos)
         `(
           :keymap ,git-status-staged-all-map
           :style (:attr "bold")
@@ -675,9 +675,9 @@
          )
          (delete-longword)
          ;; we stay at the file path word
-         (add-text-property (cursor) (longword-end-pos) '(:style (:fg "green")))
+         (add-text-property (cursor) (text-longword-end-pos) '(:style (:fg "green")))
          (add-text-property
-            (line-begin-pos) (line-end-pos)
+            (text-line-begin-pos) (text-line-end-pos)
            `(
              :keymap ,git-status-staged-file-map
              :data ,(extract-longword)
@@ -761,7 +761,7 @@
 (define git-status-draw-unstaged
    (lambda ()
       (add-text-property
-         (line-begin-pos) (line-end-pos)
+         (text-line-begin-pos) (text-line-end-pos)
         `(
           :keymap ,git-status-unstaged-all-map
           :style (:attr "bold")
@@ -777,9 +777,9 @@
          (delete-longword)
          (delete-longword)
          ;; we stay at the file path word
-         (add-text-property (cursor) (longword-end-pos) '(:style (:fg "red")))
+         (add-text-property (cursor) (text-longword-end-pos) '(:style (:fg "red")))
          (add-text-property
-            (line-begin-pos) (line-end-pos)
+            (text-line-begin-pos) (text-line-end-pos)
            `(
              :keymap ,git-status-unstaged-file-map
              :data ,(extract-longword)
@@ -808,7 +808,7 @@
 (define git-status-draw-unmerged
    (lambda ()
       (add-text-property
-         (line-begin-pos) (line-end-pos)
+         (text-line-begin-pos) (text-line-end-pos)
         `(
           :keymap ,git-status-unmerged-all-map
           :style (:attr "bold")
@@ -827,9 +827,9 @@
          (delete-longword)
          (delete-longword)
          ;; we stay at the file path word
-         (add-text-property (cursor) (longword-end-pos) '(:style (:fg "red")))
+         (add-text-property (cursor) (text-longword-end-pos) '(:style (:fg "red")))
          (add-text-property
-            (line-begin-pos) (line-end-pos)
+            (text-line-begin-pos) (text-line-end-pos)
            `(
              :keymap ,git-status-unmerged-file-map
              :data ,(extract-longword)
@@ -864,9 +864,9 @@
       (while (not (equal? "" (extract-line)))
          (delete-word)
          ;; we stay at the file path word
-         (add-text-property (cursor) (longword-end-pos) '(:style (:fg "bright-black")))
+         (add-text-property (cursor) (text-longword-end-pos) '(:style (:fg "bright-black")))
          (add-text-property
-            (line-begin-pos) (line-end-pos)
+            (text-line-begin-pos) (text-line-end-pos)
            `(
              :keymap ,git-status-untracked-file-map
              :data ,(extract-longword)

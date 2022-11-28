@@ -572,11 +572,11 @@
               )
                (let* (
                       [start (window-begin-pos w)]
-                      [end (line-begin-pos b (window-end-pos w))]
+                      [end (text-line-begin-pos b (window-end-pos w))]
                       [coord (window-pos->coord w start)]
                       [lst '()]
                      )
-                  (while (and (<= start end) (not (= start (buffer-end-pos))))
+                  (while (and (<= start end) (not (= start (text-end-pos))))
                      (when coord
                         (let (
                               [line-x (list-ref coord 0)]
@@ -586,7 +586,7 @@
                            (set! lst (append lst (list (list line-x line-y line-n start))))
                         )
                      )
-                     (set! start (next-line-pos b start))
+                     (set! start (text-next-line-pos b start))
                      (set! coord (window-pos->coord w start))
                   )
 		  lst

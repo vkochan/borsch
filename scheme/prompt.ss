@@ -3,7 +3,7 @@
       (let (
             [b (get-local prompt-orig-buf)]
             [f (get-local prompt-cb)]
-            [s (buffer-string)]
+            [s (text-string)]
            )
          (window-delete)
          (f b s)

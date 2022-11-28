@@ -106,7 +106,7 @@
    (lambda ()
       (let ()
          (set-local! complete-prompt-cursor (cursor))
-         (set-local! complete-text (buffer-string (get-local complete-prompt-pos) (line-end-pos)))
+         (set-local! complete-text (text-string (get-local complete-prompt-pos) (text-line-end-pos)))
          (complete-match)
          (complete-draw)
       )
@@ -216,7 +216,7 @@
 
 (define complete-prompt-move-next-char
    (lambda ()
-      (when (< (cursor) (line-end-pos))
+      (when (< (cursor) (text-line-end-pos))
          (cursor-goto-next-char)
          (set-local! complete-prompt-cursor (cursor))
       )

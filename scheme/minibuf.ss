@@ -31,7 +31,7 @@
 (define minibuf-prompt-send-value
    (lambda ()
       (let (
-            [s  (buffer-string (get-local prompt-pos) (buffer-end-pos))]
+            [s  (text-string (get-local prompt-pos) (text-end-pos))]
            )
          (minibuf-send-value s)
       )

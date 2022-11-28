@@ -251,7 +251,7 @@
            )
          (with-process-temp-buffer find-cmd
             (minibuf-complete
-               (string-split (buffer-string) #\newline)
+               (string-split (text-string) #\newline)
                (lambda (f)
                   (file-open f)
                )

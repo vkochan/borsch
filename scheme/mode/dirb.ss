@@ -454,7 +454,7 @@
 (define dirb-select-entry
    (lambda ()
       (let (
-            [prop (first (get-text-property ':style (line-begin-pos) (line-end-pos)))]
+            [prop (first (get-text-property ':style (text-line-begin-pos) (text-line-end-pos)))]
             [style '()]
             [slist (dirb-get-selection)]
             [path (dirb-entry-path)]

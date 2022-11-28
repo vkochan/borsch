@@ -77,7 +77,7 @@
       (text-mode-set-keymap 'text-mode-visual-linewise-local-map)
       (buffer-set-state-name "<V *L*>")
       (enable-insert #f)
-      (selection-set (line-begin-pos))
+      (selection-set (text-line-begin-pos))
       (cursor-goto-line-end)
       (selection-highlight #t)
    )
@@ -216,7 +216,7 @@
       (text-insert " ")
       (cursor-goto-prev-char)
       (delete-word)
-      (when (not (eq? (cursor) (buffer-end-pos)))
+      (when (not (eq? (cursor) (text-end-pos)))
          (text-insert " ")
       )
    )
@@ -250,7 +250,7 @@
       (bind-key map "d $" (lambda () (text-mode-delete delete-line-end)))
       (bind-key map "J" (lambda () (text-mode-join-lines)))
       (bind-key map "g g" (lambda () (cursor-goto-begin)))
-      (bind-key map "G" (lambda () (cursor-set (- (buffer-end-pos) 1)) (cursor-goto-line-start)))
+      (bind-key map "G" (lambda () (cursor-set (- (text-end-pos) 1)) (cursor-goto-line-start)))
       (bind-key map "H" (lambda () (cursor-set (window-begin-pos))))
       (bind-key map "L" (lambda () (cursor-set (window-end-pos))))
       (bind-key map "C-u" (lambda () (cursor-set (window-scroll-halfpage-up))))
@@ -337,12 +337,12 @@
    (lambda ()
       (if (>= (cursor) (selection-get))
          (begin
-            (selection-set (line-begin-pos (selection-get)))
+            (selection-set (text-line-begin-pos (selection-get)))
             (cursor-goto-line-end)
          )
          ;; else
          (begin
-            (selection-set (line-end-pos (selection-get)))
+            (selection-set (text-line-end-pos (selection-get)))
             (cursor-goto-line-begin)
          )
       )
@@ -386,7 +386,7 @@
          (begin
             (let ([b (window-buffer w)])
                (with-current-buffer b
-                  (count-digits-num (buffer-line-num (buffer-end-pos)))
+                  (count-digits-num (buffer-line-num (text-end-pos)))
                )
             )
          )
