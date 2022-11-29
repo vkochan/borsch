@@ -999,7 +999,7 @@
 (define text-eval
    (case-lambda
       [()
-       (buffer-eval (current-buffer))
+       (text-eval (current-buffer))
       ]
 
       [(buf)
