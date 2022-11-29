@@ -48,8 +48,6 @@
 (define __cs_buf_undo (foreign-procedure __collect_safe "cs_buf_undo" (int) void))
 (define __cs_buf_redo (foreign-procedure __collect_safe "cs_buf_redo" (int) void))
 
-(define __cs_buf_search_regex (foreign-procedure "cs_buf_search_regex" (int int string int) scheme-object))
-
 (define __cs_buf_tag_set (foreign-procedure __collect_safe "cs_buf_tag_set" (int int) int))
 (define __cs_buf_tag_bits (foreign-procedure __collect_safe "cs_buf_tag_bits" (int) int))
 (define __cs_buf_tag_toggle (foreign-procedure __collect_safe "cs_buf_tag_toggle" (int int) int))
@@ -919,75 +917,6 @@
          (get-local current-cwd)
          ;; else
          (current-cwd)
-      )
-   )
-)
-
-(define search-reg "")
-
-(define search-regex
-   (case-lambda
-      [(rx)
-       (search-regex rx (cursor))]
-
-      [(rx pos)
-       (search-regex rx (cursor) +1)]
-
-      [(rx pos dir)
-       (call-foreign (__cs_buf_search_regex (current-buffer) pos rx dir))]
-   )
-)
-
-(define search-next
-   (lambda ()
-      (cursor-set (search-regex search-reg (cursor) +1))
-   )
-)
-
-(define search-prev
-   (lambda ()
-      (cursor-set (search-regex search-reg (cursor) -1))
-   )
-)
-
-(define search-word-direction
-   (lambda (word dir)
-      (let ([pattern (format "\\<~a\\>" word)])
-         (set! search-reg pattern)
-         (cursor-set (search-regex pattern (cursor) dir))
-      )
-   )
-)
-
-(define search-word-forward
-   (case-lambda
-      [()
-       (search-word-forward (text-word))]
-
-      [(w)
-       (search-word-direction w +1)]
-   )
-)
-
-(define search-word-backward
-   (case-lambda
-      [()
-       (search-word-backward (text-word))]
-
-      [(w)
-       (search-word-direction w -1)]
-   )
-)
-
-(define search-regex-read
-   (lambda ()
-      (when (not (buffer-is-vterm?))
-         (minibuf-read "/"
-            (lambda (r)
-               (set! search-reg r)
-               (cursor-set (search-regex r))
-            )
-         )
       )
    )
 )

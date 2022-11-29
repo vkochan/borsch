@@ -11,6 +11,7 @@
 (define __cs_buf_mark_is_set (foreign-procedure "cs_buf_mark_is_set" (int) scheme-object))
 (define __cs_win_mark_highlight (foreign-procedure __collect_safe "cs_win_mark_highlight" (int boolean) void))
 (define __cs_buf_text_get (foreign-procedure "cs_buf_text_get" (int int int) scheme-object))
+(define __cs_buf_search_regex (foreign-procedure "cs_buf_search_regex" (int int string int) scheme-object))
 
 (define message
    (lambda (s)
@@ -1011,6 +1012,75 @@
           )
        )
       ]
+   )
+)
+
+(define text-search-reg "")
+
+(define text-search-regex
+   (case-lambda
+      [(rx)
+       (text-search-regex rx (cursor))]
+
+      [(rx pos)
+       (text-search-regex rx (cursor) +1)]
+
+      [(rx pos dir)
+       (call-foreign (__cs_buf_search_regex (current-buffer) pos rx dir))]
+   )
+)
+
+(define text-search-next
+   (lambda ()
+      (cursor-set (text-search-regex text-search-reg (cursor) +1))
+   )
+)
+
+(define text-search-prev
+   (lambda ()
+      (cursor-set (text-search-regex text-search-reg (cursor) -1))
+   )
+)
+
+(define text-search-word-direction
+   (lambda (word dir)
+      (let ([pattern (format "\\<~a\\>" word)])
+         (set! text-search-reg pattern)
+         (cursor-set (text-search-regex pattern (cursor) dir))
+      )
+   )
+)
+
+(define text-search-word-forward
+   (case-lambda
+      [()
+       (text-search-word-forward (text-word))]
+
+      [(w)
+       (search-word-direction w +1)]
+   )
+)
+
+(define text-search-word-backward
+   (case-lambda
+      [()
+       (text-search-word-backward (text-word))]
+
+      [(w)
+       (search-word-direction w -1)]
+   )
+)
+
+(define text-search-regex-read
+   (lambda ()
+      (when (not (buffer-is-vterm?))
+         (minibuf-read "/"
+            (lambda (r)
+               (set! text-search-reg r)
+               (cursor-set (text-search-regex r))
+            )
+         )
+      )
    )
 )
 
