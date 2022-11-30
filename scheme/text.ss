@@ -1057,7 +1057,7 @@
        (text-search-word-forward (text-word))]
 
       [(w)
-       (search-word-direction w +1)]
+       (text-search-word-direction w +1)]
    )
 )
 
