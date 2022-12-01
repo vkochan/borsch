@@ -428,6 +428,8 @@ void term_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int 
 	wcolor_set(twin->cwin,
 		   term_color_make(win->ui, tmp_fg, tmp_bg),
 		   NULL);
+	/* TODO: better to call it via separate ui_ api call */
+	wnoutrefresh(twin->cwin);
 }
 
 static void term_window_draw(UiWin *win)
