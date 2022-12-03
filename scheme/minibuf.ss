@@ -379,3 +379,28 @@
       ]
    )
 )
+
+(define minibuf-find-file
+   (case-lambda
+      [()
+       (minibuf-find-file (current-cwd))
+      ]
+
+      [(cwd)
+       (let (
+             [find-cmd (format "cd ~a; find * -not -path '*/\\.*';" cwd)]
+             [flist '()]
+            )
+          (with-process-temp-buffer find-cmd
+             (minibuf-complete
+                (string-split (text-string) #\newline)
+                (lambda (f)
+                   (file-open f)
+                )
+                "Find file"
+             )
+          )
+       )
+      ]
+   )
+)

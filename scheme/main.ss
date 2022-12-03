@@ -20,9 +20,9 @@
 (load "prompt.ss")
 (load "copybuf.ss")
 (load "topbar.ss")
+(load "process.ss")
 (load "minibuf.ss")
 (load "os.ss")
-(load "process.ss")
 (load "timer.ss")
 (load "syntax.ss")
 (load "mode/text.ss")
@@ -239,25 +239,6 @@
             ((command-func c))
          )
          "Cmd"
-      )
-   )
-)
-
-(define minibuf-find-file
-   (lambda ()
-      (let (
-            [find-cmd "find * -not -path '*/\\.*';"]
-            [flist '()]
-           )
-         (with-process-temp-buffer find-cmd
-            (minibuf-complete
-               (string-split (text-string) #\newline)
-               (lambda (f)
-                  (file-open f)
-               )
-               "Find file"
-            )
-         )
       )
    )
 )
