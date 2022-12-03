@@ -518,6 +518,18 @@
    )
 )
 
+(define dirb-find-file
+   (lambda ()
+      (minibuf-find-file (dirb-current-dir) "-type f")
+   )
+)
+
+(define dirb-find-dir
+   (lambda ()
+      (minibuf-find-file (dirb-current-dir) "-type d")
+   )
+)
+
 (define dirb-mode-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" dirb-open-entry)
@@ -543,6 +555,8 @@
       (bind-key map "c" dirb-create-tar-archive)
       (bind-key map "x" dirb-extract-tar-archive)
       (bind-key map "o" dirb-open-entry-externally)
+      (bind-key map "f f" dirb-find-file)
+      (bind-key map "f d" dirb-find-dir)
       map
    )
 )

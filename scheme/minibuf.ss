@@ -385,17 +385,21 @@
       [()
        (minibuf-find-file (current-cwd))
       ]
-
+      
       [(cwd)
+       (minibuf-find-file (current-cwd) "")
+      ]
+
+      [(cwd opts)
        (let (
-             [find-cmd (format "cd ~a; find * -not -path '*/\\.*';" cwd)]
+             [find-cmd (format "cd ~a; find * ~a -not -path '*/\\.*';" cwd opts)]
              [flist '()]
             )
           (with-process-temp-buffer find-cmd
              (minibuf-complete
                 (string-split (text-string) #\newline)
                 (lambda (f)
-                   (file-open f)
+                   (file-open (string-append cwd "/" f))
                 )
                 "Find file"
              )
