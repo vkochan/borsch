@@ -38,6 +38,19 @@
    )
 )
 
+(define message
+   (lambda (s)
+      (let ([b (buffer-get "*Messages*")])
+         (when b
+            (with-current-buffer b
+               (text-insert (format "~a\n" s))
+            )
+         )
+         (run-hooks 'message-hook s)
+      )
+   )
+)
+
 (define do-quit
    (lambda ()
       (run-hooks 'exit-hook)

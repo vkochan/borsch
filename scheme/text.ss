@@ -15,19 +15,6 @@
 (define __cs_buf_cursor_get (foreign-procedure __collect_safe "cs_buf_cursor_get" (int) scheme-object))
 (define __cs_buf_cursor_set (foreign-procedure __collect_safe "cs_buf_cursor_set" (int int) void))
 
-(define message
-   (lambda (s)
-      (let ([b (buffer-get "*Messages*")])
-         (when b
-            (with-current-buffer b
-               (text-insert (format "~a\n" s))
-            )
-         )
-         (run-hooks 'message-hook s)
-      )
-   )
-)
-
 (define cursor
    (lambda ()
       (call-foreign (__cs_buf_cursor_get (current-buffer)))
