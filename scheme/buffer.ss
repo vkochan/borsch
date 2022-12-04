@@ -27,8 +27,6 @@
 (define __cs_buf_prop_del (foreign-procedure "cs_buf_prop_del" (int int int int string string) void))
 (define __cs_buf_prop_get (foreign-procedure "cs_buf_prop_get" (int int int int string) scheme-object))
 
-(define __cs_buf_cursor_get (foreign-procedure __collect_safe "cs_buf_cursor_get" (int) scheme-object))
-(define __cs_buf_cursor_set (foreign-procedure __collect_safe "cs_buf_cursor_set" (int int) void))
 (define __cs_buf_line_num (foreign-procedure __collect_safe "cs_buf_line_num" (int int) scheme-object))
 (define __cs_buf_mode_name_set (foreign-procedure "cs_buf_mode_name_set" (int string) void))
 (define __cs_buf_mode_name_get (foreign-procedure "cs_buf_mode_name_get" (int) scheme-object))
@@ -297,42 +295,6 @@
 	       ((_ s)
 		#`(local-symbol-bound? 's)
                )
-   )
-)
-
-(define cursor
-   (lambda ()
-      (call-foreign (__cs_buf_cursor_get (current-buffer)))
-   )
-)
-
-(define cursor-set
-   (lambda (p)
-      (when p
-         (let ([c p])
-            (when (and (not *buffer-enable-eof*)
-                       (and (> c 0) (>= c (text-end-pos)))
-                  )
-               (set! c (- (text-end-pos) 1))
-            )
-	    (call-foreign (__cs_buf_cursor_set (current-buffer) c))
-            c
-         )
-      )
-   )
-)
-
-(define-syntax (save-cursor stx)
-   (syntax-case stx ()
-      ((_ exp ...)
-       #`(let ([curs (cursor)])
-            (begin
-               exp
-               ...
-            )
-            (cursor-set curs)
-         )
-      )
    )
 )
 

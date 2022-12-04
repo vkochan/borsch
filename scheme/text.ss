@@ -12,6 +12,8 @@
 (define __cs_win_mark_highlight (foreign-procedure __collect_safe "cs_win_mark_highlight" (int boolean) void))
 (define __cs_buf_text_get (foreign-procedure "cs_buf_text_get" (int int int) scheme-object))
 (define __cs_buf_search_regex (foreign-procedure "cs_buf_search_regex" (int int string int) scheme-object))
+(define __cs_buf_cursor_get (foreign-procedure __collect_safe "cs_buf_cursor_get" (int) scheme-object))
+(define __cs_buf_cursor_set (foreign-procedure __collect_safe "cs_buf_cursor_set" (int int) void))
 
 (define message
    (lambda (s)
@@ -25,6 +27,43 @@
       )
    )
 )
+
+(define cursor
+   (lambda ()
+      (call-foreign (__cs_buf_cursor_get (current-buffer)))
+   )
+)
+
+(define cursor-set
+   (lambda (p)
+      (when p
+         (let ([c p])
+            (when (and (not *buffer-enable-eof*)
+                       (and (> c 0) (>= c (text-end-pos)))
+                  )
+               (set! c (- (text-end-pos) 1))
+            )
+	    (call-foreign (__cs_buf_cursor_set (current-buffer) c))
+            c
+         )
+      )
+   )
+)
+
+(define-syntax (save-cursor stx)
+   (syntax-case stx ()
+      ((_ exp ...)
+       #`(let ([curs (cursor)])
+            (begin
+               exp
+               ...
+            )
+            (cursor-set curs)
+         )
+      )
+   )
+)
+
 
 (define-syntax (text-modify stx)
    (syntax-case stx ()
