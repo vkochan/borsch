@@ -134,15 +134,15 @@
            (let loop ([l s])
               (let ([t (car l)])
                  (cond
-                    [(equal? t ':fg)
+                    [(equal? t 'fg:)
 		     (set! f (color-name->number (cadr l)))
                      (when (> (length l) 2) (loop (cdr (cdr l))))
 	            ]
-                    [(equal? t ':bg)
+                    [(equal? t 'bg:)
 		     (set! b (color-name->number (cadr l)))
                      (when (> (length l) 2) (loop (cdr (cdr l))))
                     ]
-                    [(equal? t ':attr)
+                    [(equal? t 'attr:)
 		     (set! a (style-name->number (cadr l)))
                      (when (> (length l) 2) (loop (cdr (cdr l))))
                     ]
@@ -164,7 +164,7 @@
             (text-mode)
             (for-each
                (lambda (c)
-                  (text-insert (format "~a\n" c) `(:style (:fg ,c)))
+                  (text-insert (format "~a\n" c) `(style: (fg: ,c)))
                )
                cls
             )

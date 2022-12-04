@@ -149,7 +149,7 @@
          (window-set-height minibuf-window (1+ (lines-count e)))
          (with-current-buffer minibuf-buffer
             (when (not (get-local input-mode))
-               (text-insert (format "~a\n" e) '(:style (:fg "red")))
+               (text-insert (format "~a\n" e) '(style: (fg: "red")))
                (cursor-set 0)
             )
          )

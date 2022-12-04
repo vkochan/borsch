@@ -699,7 +699,7 @@
 (define window-draw-sidebar
    (case-lambda
       [(w x y t)
-       (window-draw-sidebar w x y t '(:fg "default" :bg "default" :attr "normal"))
+       (window-draw-sidebar w x y t '(fg: "default" bg: "default" attr: "normal"))
       ]
 
       [(w x y t s)

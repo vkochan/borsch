@@ -27,7 +27,7 @@
                   (let ([name (or vname "")])
                      (text-insert
                         (format "[~a~a]" tag (if (equal? "" name) "" (string-append ":" name)))
-                       `(:style (:fg ,tag-color))
+                       `(style: (fg: ,tag-color))
                      )
                   )
                )
@@ -35,7 +35,7 @@
             '(1 2 3 4 5 6 7 8 9)
          )
          (text-insert (layout-name))
-         (text-insert (format "[~a]" (current-cwd)) '(:style (:fg "bright-yellow")))
+         (text-insert (format "[~a]" (current-cwd)) '(style: (fg: "bright-yellow")))
       )
    )
 )

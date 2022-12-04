@@ -1,6 +1,6 @@
-(define dirb-dir-style '(:fg "blue" :attr "bold"))
-(define dirb-file-executable-style '(:fg "yellow" :attr "bold"))
-(define dirb-file-regular-style '(:fg "white"))
+(define dirb-dir-style '(fg: "blue" attr: "bold"))
+(define dirb-file-executable-style '(fg: "yellow" attr: "bold"))
+(define dirb-file-regular-style '(fg: "white"))
 (define dirb-external-opener "xdg-open")
 
 (define dirb-selection-list (list))
@@ -54,9 +54,9 @@
             (set! entry (fmt "~a\n" path))
          )
          (when (member (fmt "~a/~a" dir path) slist)
-            (set! style (plist-put style ':bg "blue"))
+            (set! style (plist-put style 'bg: "blue"))
          )
-         (text-insert entry `(:style ,style))
+         (text-insert entry `(style: ,style))
       )
    )
 )
@@ -454,24 +454,24 @@
 (define dirb-select-entry
    (lambda ()
       (let (
-            [prop (first (get-text-property ':style (text-line-begin-pos) (text-line-end-pos)))]
+            [prop (first (get-text-property 'style: (text-line-begin-pos) (text-line-end-pos)))]
             [style '()]
             [slist (dirb-get-selection)]
             [path (dirb-entry-path)]
            )
          (if (member path slist)
             (let ()
-               (set! style (plist-put (plist-get prop ':style) ':bg "default"))
+               (set! style (plist-put (plist-get prop 'style:) 'bg: "default"))
                (set! slist (remove path slist))
             )
             ;; else
             (let ()
-               (set! style (plist-put (plist-get prop ':style) ':bg "blue"))
+               (set! style (plist-put (plist-get prop 'style:) 'bg: "blue"))
                (set! slist (append slist (list path)))
             )
          )
-         (set-text-property (plist-get prop ':start) (plist-get prop ':end)
-            `(:style ,style)
+         (set-text-property (plist-get prop 'start:) (plist-get prop 'end:)
+            `(style: ,style)
          )
          (dirb-set-selection slist)
          (if (> (length slist) 0)

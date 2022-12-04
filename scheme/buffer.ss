@@ -382,7 +382,7 @@
    (case-lambda
       [() 
        (let ([b (window-buffer (window-create))])
-          (set-text-style '(:fg "white"))
+          (set-text-style '(fg: "white"))
           b
        )
       ]
@@ -423,7 +423,7 @@
       [(n) 
        (let ([b (call-foreign (__cs_buf_new n))])
           (with-current-buffer b
-             (set-text-style '(:fg "white"))
+             (set-text-style '(fg: "white"))
           )
           b
        )
@@ -600,11 +600,11 @@
          (for-each
             (lambda (o)
                (cond
-                  [(equal? (car o) ':fg)
+                  [(equal? (car o) 'fg:)
 		     (call-foreign (__cs_buf_text_fg_set (current-buffer) (color-name->number (cadr o))))]
-                  [(equal? (car o) ':bg)
+                  [(equal? (car o) 'bg:)
 		     (call-foreign (__cs_buf_text_bg_set (current-buffer) (color-name->number (cadr o))))]
-                  [(equal? (car o) ':attr)
+                  [(equal? (car o) 'attr:)
 		     (call-foreign (__cs_buf_text_style_set (current-buffer) (style-name->number (cadr o))))]
                )
             )
@@ -617,12 +617,12 @@
 (define symbol->text-property-type
    (lambda (s)
       (case s
-         [':style     1]
-         [':highlight 2]
-         [':keymap    3]
-         [':symbol    4]
-         [':data      5]
-         [':all       10000]
+         ['style:     1]
+         ['highlight: 2]
+         ['keymap:    3]
+         ['symbol:    4]
+         ['data:      5]
+         ['all:       10000]
          [else         0]
       )
    )
@@ -664,7 +664,7 @@
                end
                regex
                name
-               (plist-get style ':expand)
+               (plist-get style 'expand:)
             )
          )
        )
@@ -738,10 +738,10 @@
           (plist-for-each plist
              (lambda (prop val)
                 (case prop
-                   [':style (__add-style-property val start end regex name)]
-                   [':keymap (__add-keymap-property val start end regex name)]
-                   [':symbol (__add-symbol-property val start end regex name)]
-                   [':data (__add-data-property val start end regex name)]
+                   ['style: (__add-style-property val start end regex name)]
+                   ['keymap: (__add-keymap-property val start end regex name)]
+                   ['symbol: (__add-symbol-property val start end regex name)]
+                   ['data: (__add-data-property val start end regex name)]
                 )
              )
           )
@@ -753,15 +753,15 @@
 (define remove-text-property
    (case-lambda
       [()
-       (remove-text-property ':all -1 -1 #f)
+       (remove-text-property 'all: -1 -1 #f)
       ]
     
       [(name)
-       (remove-text-property ':all -1 -1 name)
+       (remove-text-property 'all: -1 -1 name)
       ]
     
       [(start end)
-       (remove-text-property ':all start end #f)
+       (remove-text-property 'all: start end #f)
       ]
 
       [(type start end)
@@ -777,11 +777,11 @@
 (define get-text-property
    (case-lambda
       [(name)
-       (get-text-property ':all -1 -1 name)
+       (get-text-property 'all: -1 -1 name)
       ]
     
       [(start end)
-       (get-text-property ':all start end #f)
+       (get-text-property 'all: start end #f)
       ]
 
       [(type start end)
@@ -804,7 +804,7 @@
        (let ([type #f])
           (plist-for-each plist
              (lambda (prop val)
-                (when (member prop '(:style :data :symbol :keymap))
+                (when (member prop '(style: data: symbol: keymap:))
                    (set! type prop)
                 )
              )

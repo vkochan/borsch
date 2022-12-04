@@ -87,7 +87,7 @@
                (lambda (x)
                   (let ([name (complete-item-name x)])
                      (if (= line-idx sel)
-                        (text-insert (format "\n> ~a" name) '(:style (:attr "bold" :fg "blue")))
+                        (text-insert (format "\n> ~a" name) '(style: (attr: "bold" fg: "blue")))
                         ;; else
                         (text-insert (format "\n  ~a" name))
                      )

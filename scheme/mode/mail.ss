@@ -204,14 +204,14 @@
 
 (define mail-current-thread-entry
    (lambda ()
-      (plist-get (first (get-text-property ':data (cursor) (+ 1 (cursor)))) ':data)
+      (plist-get (first (get-text-property 'data: (cursor) (+ 1 (cursor)))) 'data:)
    )
 )
 
 (define mail-dump-entry
    (lambda ()
-      (let ([plist (get-text-property ':data (cursor) (+ 1 (cursor)))])
-         (let ([entry (plist-get (first plist) ':data)])
+      (let ([plist (get-text-property 'data: (cursor) (+ 1 (cursor)))])
+         (let ([entry (plist-get (first plist) 'data:)])
             (let ([b (buffer-create (format "Message-dump:~a" (if (mail-entry? entry) (mail-entry-id entry) entry)))])
                (text-mode)
                (process-create
@@ -269,8 +269,8 @@
 
 (define mail-open-entry
    (lambda ()
-      (let ([plist (get-text-property ':data (cursor) (+ 1 (cursor)))])
-         (let ([entry (plist-get (first plist) ':data)])
+      (let ([plist (get-text-property 'data: (cursor) (+ 1 (cursor)))])
+         (let ([entry (plist-get (first plist) 'data:)])
             (let ([b (buffer-create (format "Message:~a" (mail-entry-id entry)))])
                (define-local mail-message-id (mail-entry-id entry))
                (bind-key-local "r" mail-reply-message)
@@ -304,8 +304,8 @@
 
 (define mail-reply-entry
    (lambda ()
-      (let ([plist (get-text-property ':data (cursor) (+ 1 (cursor)))])
-         (let ([entry (plist-get (first plist) ':data)])
+      (let ([plist (get-text-property 'data: (cursor) (+ 1 (cursor)))])
+         (let ([entry (plist-get (first plist) 'data:)])
             (mail-reply-message (mail-entry-id entry))
          )
       )
@@ -384,13 +384,13 @@
                               )
                               (text-insert (format "~a\n" (string-pad-right subj (- 100 depth)))
                                  (if (member "unread" tags)
-                                    '(:style (:attr "bold"))
+                                    '(style: (attr: "bold"))
                                     ;; else
-                                    '(:style (:attr "normal"))
+                                    '(style: (attr: "normal"))
                                  )
                               )
                               (let ([entry (make-mail-entry id date from to cc subj)])
-                                 (add-text-property curs (1- (cursor)) `(:data ,entry))
+                                 (add-text-property curs (1- (cursor)) `(data: ,entry))
                               )
                            )
                         )
@@ -409,9 +409,9 @@
 
 (define mail-open-thread
    (lambda ()
-      (let ([plist (get-text-property ':data (cursor) (+ 1 (cursor)))])
+      (let ([plist (get-text-property 'data: (cursor) (+ 1 (cursor)))])
          (letrec (
-               [tid (plist-get (first plist) ':data)]
+               [tid (plist-get (first plist) 'data:)]
                [buf-ret (buffer-new)]
               )
             (process-create (mail-notmuch-cmd (format "show --entire-thread=true --format=sexp --body=false thread:~a" tid)) buf-ret
@@ -513,25 +513,25 @@
 (define mail-select-thread
    (lambda ()
       (let (
-            [th-prop (first (get-text-property ':style (text-line-begin-pos) (text-line-end-pos)))]
+            [th-prop (first (get-text-property 'style: (text-line-begin-pos) (text-line-end-pos)))]
             [th-list (get-local mail-selected-threads)]
             [th-style '()]
             [th (mail-current-thread-entry)]
            )
          (if (member th th-list)
             (let ()
-               (set! th-style (plist-put (plist-get th-prop ':style) ':bg "default"))
+               (set! th-style (plist-put (plist-get th-prop 'style:) 'bg: "default"))
                (set! th-list (remove th th-list))
             )
             ;; else
             (let ()
-               (set! th-style (plist-put (plist-get th-prop ':style) ':bg "blue"))
-               (set! th-style (append th-style '(:expand #t)))
+               (set! th-style (plist-put (plist-get th-prop 'style:) 'bg: "blue"))
+               (set! th-style (append th-style '(expand: #t)))
                (set! th-list (append th-list (list th)))
             )
          )
-         (set-text-property (plist-get th-prop ':start) (plist-get th-prop ':end)
-            `(:style ,th-style)
+         (set-text-property (plist-get th-prop 'start:) (plist-get th-prop 'end:)
+            `(style: ,th-style)
          )
          (set-local! mail-selected-threads th-list)
       )
@@ -598,12 +598,12 @@
                         (text-insert (format "[~a] [~a] " (string-pad-right date 15) (string-pad-right from 15)))
                         (text-insert (format "~a\n" (string-pad-right subj 100))
                            (if (member "unread" tags)
-                              '(:style (:attr "bold"))
+                              '(style: (attr: "bold"))
                               ;; else
-                              '(:style (:attr "normal"))
+                              '(style: (attr: "normal"))
                            )
                         )
-                        (add-text-property curs (1- (cursor)) `(:data ,id))
+                        (add-text-property curs (1- (cursor)) `(data: ,id))
                      )
                   )
                   l

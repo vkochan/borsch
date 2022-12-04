@@ -114,7 +114,7 @@
       (let ()
          (buffer-set-readonly #f)
          (text-delete)
-         (text-insert (format "~a\n" (git-branch-name)) '(:style (:attr "bold")))
+         (text-insert (format "~a\n" (git-branch-name)) '(style: (attr: "bold")))
          (for-each
             (lambda (b)
                (text-insert (format "~a\n" b))
@@ -537,7 +537,7 @@
             (cursor-goto-begin)
             (cursor-goto-each-line
                (lambda ()
-                  (add-text-property (cursor) (text-word-end-pos) '(:style (:fg "green")))
+                  (add-text-property (cursor) (text-word-end-pos) '(style: (fg: "green")))
                )
             )
             (cursor-goto-begin)
@@ -573,7 +573,7 @@
    (cursor-goto-begin)
    (cursor-goto-each-line
       (lambda ()
-         (add-text-property (cursor) (text-word-end-pos) '(:style (:fg "green")))
+         (add-text-property (cursor) (text-word-end-pos) '(style: (fg: "green")))
       )
    )
    (cursor-goto-begin)
@@ -600,8 +600,8 @@
 
 (define git-status-get-path
    (lambda ()
-      (let ([plist (get-text-property ':data (text-line-begin-pos) (text-line-end-pos))])
-         (plist-get (first plist) ':data)
+      (let ([plist (get-text-property 'data: (text-line-begin-pos) (text-line-end-pos))])
+         (plist-get (first plist) 'data:)
       )
    )
 )
@@ -653,8 +653,8 @@
       (add-text-property
          (text-line-begin-pos) (text-line-end-pos)
         `(
-          :keymap ,git-status-staged-all-map
-          :style (:attr "bold")
+          keymap: ,git-status-staged-all-map
+          style: (attr: "bold")
          )
       )
       (cursor-goto-next-line)
@@ -675,12 +675,12 @@
          )
          (text-delete-longword)
          ;; we stay at the file path word
-         (add-text-property (cursor) (text-longword-end-pos) '(:style (:fg "green")))
+         (add-text-property (cursor) (text-longword-end-pos) '(style: (fg: "green")))
          (add-text-property
             (text-line-begin-pos) (text-line-end-pos)
            `(
-             :keymap ,git-status-staged-file-map
-             :data ,(text-longword)
+             keymap: ,git-status-staged-file-map
+             data: ,(text-longword)
             )
          )
          (cursor-goto-next-line)
@@ -763,8 +763,8 @@
       (add-text-property
          (text-line-begin-pos) (text-line-end-pos)
         `(
-          :keymap ,git-status-unstaged-all-map
-          :style (:attr "bold")
+          keymap: ,git-status-unstaged-all-map
+          style: (attr: "bold")
          )
       )
       (cursor-goto-next-line)
@@ -777,12 +777,12 @@
          (text-delete-longword)
          (text-delete-longword)
          ;; we stay at the file path word
-         (add-text-property (cursor) (text-longword-end-pos) '(:style (:fg "red")))
+         (add-text-property (cursor) (text-longword-end-pos) '(style: (fg: "red")))
          (add-text-property
             (text-line-begin-pos) (text-line-end-pos)
            `(
-             :keymap ,git-status-unstaged-file-map
-             :data ,(text-longword)
+             keymap: ,git-status-unstaged-file-map
+             data: ,(text-longword)
             )
          )
          (cursor-goto-next-line)
@@ -810,8 +810,8 @@
       (add-text-property
          (text-line-begin-pos) (text-line-end-pos)
         `(
-          :keymap ,git-status-unmerged-all-map
-          :style (:attr "bold")
+          keymap: ,git-status-unmerged-all-map
+          style: (attr: "bold")
          )
       )
       (cursor-goto-next-line)
@@ -827,12 +827,12 @@
          (text-delete-longword)
          (text-delete-longword)
          ;; we stay at the file path word
-         (add-text-property (cursor) (text-longword-end-pos) '(:style (:fg "red")))
+         (add-text-property (cursor) (text-longword-end-pos) '(style: (fg: "red")))
          (add-text-property
             (text-line-begin-pos) (text-line-end-pos)
            `(
-             :keymap ,git-status-unmerged-file-map
-             :data ,(text-longword)
+             keymap: ,git-status-unmerged-file-map
+             data: ,(text-longword)
             )
          )
          (cursor-goto-next-line)
@@ -864,12 +864,12 @@
       (while (not (equal? "" (text-line)))
          (text-delete-word)
          ;; we stay at the file path word
-         (add-text-property (cursor) (text-longword-end-pos) '(:style (:fg "bright-black")))
+         (add-text-property (cursor) (text-longword-end-pos) '(style: (fg: "bright-black")))
          (add-text-property
             (text-line-begin-pos) (text-line-end-pos)
            `(
-             :keymap ,git-status-untracked-file-map
-             :data ,(text-longword)
+             keymap: ,git-status-untracked-file-map
+             data: ,(text-longword)
             )
          )
          (cursor-goto-next-line)

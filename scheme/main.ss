@@ -124,7 +124,7 @@
       (let ([m (buffer-get "*Messages*")])
          (when m
             (with-current-buffer m
-               (text-insert (format "~a\n" e) '(:style (:fg "red")))
+               (text-insert (format "~a\n" e) '(style: (fg: "red")))
             )
          )
       )
