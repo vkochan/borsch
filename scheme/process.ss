@@ -110,7 +110,7 @@
             (when (not (eof-object? s))
                (if (buffer-is-valid? buf)
                   (with-current-buffer buf
-                     (save-cursor
+                     (with-saved-cursor
                         (cursor-to-end)
                         (text-insert s)
                      )
@@ -136,7 +136,7 @@
             (let ([s (get-string-some proc-out)])
                (while (not (eof-object? s))
                   (with-current-buffer buf
-                     (save-cursor
+                     (with-saved-cursor
                         (cursor-to-end)
                         (text-insert s)
                      )

@@ -50,7 +50,7 @@
    )
 )
 
-(define-syntax (save-cursor stx)
+(define-syntax (with-saved-cursor stx)
    (syntax-case stx ()
       ((_ exp ...)
        #`(let ([curs (cursor)])
@@ -121,7 +121,7 @@
       (text-modify
          (cursor-to-prev-line-end)
          (if (equal? (cursor) 0)
-            (save-cursor (text-insert-nl))
+            (with-saved-cursor (text-insert-nl))
             ;; else
             (text-insert-nl)
          )
@@ -1028,7 +1028,7 @@
 
 (define text-reload-file
    (lambda ()
-      (save-cursor
+      (with-saved-cursor
          (text-delete)
          (text-insert-file (buffer-filename))
          (buffer-save)

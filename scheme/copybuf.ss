@@ -55,7 +55,7 @@
           (begin
              (cursor-to-line-end)
              (text-insert "\n")
-             (save-cursor
+             (with-saved-cursor
                 (copybuf-paste-inplace)
                 (text-delete-char)
              )

@@ -113,7 +113,7 @@
 
 (define dirb-reload
    (lambda ()
-      (save-cursor (dirb-open-dir (dirb-current-dir)))
+      (with-saved-cursor (dirb-open-dir (dirb-current-dir)))
    )
 )
 

@@ -678,7 +678,7 @@
             )
          (process-create cmd buf-ret
             (lambda (status buf-out buf-err)
-               (save-cursor
+               (with-saved-cursor
                   (mail-render-thread-list qry buf-draw buf-out)
                   (cursor-to-line-begin)
                )

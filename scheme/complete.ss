@@ -66,7 +66,7 @@
       (set-local! complete-prompt-pos (cursor))
       (text-insert (get-local complete-text))
 
-      (save-cursor
+      (with-saved-cursor
       (let* (
              [lst-idx (get-local complete-index)]
              [lst (get-local complete-result)]

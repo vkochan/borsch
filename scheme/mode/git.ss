@@ -406,7 +406,7 @@
                 (if (eq? mode 'amend)
                    (text-insert (git-cmd-read "log --format=%B -n 1 HEAD"))
                 )
-                (save-cursor
+                (with-saved-cursor
                    (run-hooks 'git-commit-edit-hook)
                 )
                 (buffer-set-mode-name "Git Commit")

@@ -27,7 +27,7 @@
           (let ([has-newline (equal? (string-ref delbuf-reg 0) #\newline)])
              (cursor-to-line-end)
              (when (not has-newline) (text-insert "\n"))
-             (save-cursor
+             (with-saved-cursor
                 (delbuf-paste-inplace)
                 (when (not has-newline) (text-delete-char))
              )
