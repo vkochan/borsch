@@ -52,7 +52,7 @@
    (lambda ()
       (let ([p (get-local prompt-pos)])
          (when (> (cursor) p)
-            (cursor-goto-prev-char)
+            (cursor-to-prev-char)
          )
       )
    )
@@ -60,14 +60,14 @@
 
 (define minibuf-prompt-move-next-char
    (lambda ()
-      (cursor-goto-next-char)
+      (cursor-to-next-char)
    )
 )
 
 (define minibuf-prompt-copybuf-paste
    (lambda ()
       (copybuf-paste)
-      (cursor-goto-next-char)
+      (cursor-to-next-char)
    )
 )
 

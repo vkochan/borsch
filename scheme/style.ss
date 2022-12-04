@@ -168,7 +168,7 @@
                )
                cls
             )
-            (cursor-goto-begin)
+            (cursor-to-begin)
          )
       )
    )

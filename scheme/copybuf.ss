@@ -46,14 +46,14 @@
       (if (not copybuf-is-linewise)
          (begin
             (when (not (equal? #\newline (text-char)))
-               (cursor-goto-next-char)
+               (cursor-to-next-char)
             )
             (copybuf-paste-inplace)
-            (cursor-goto-prev-char)
+            (cursor-to-prev-char)
           )
           ;; else
           (begin
-             (cursor-goto-line-end)
+             (cursor-to-line-end)
              (text-insert "\n")
              (save-cursor
                 (copybuf-paste-inplace)
@@ -67,7 +67,7 @@
 (define copybuf-paste-before
    (lambda ()
       (copybuf-paste-inplace)
-      (cursor-goto-prev-char)
+      (cursor-to-prev-char)
    )
 )
 

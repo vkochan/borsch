@@ -80,7 +80,7 @@
 (define text-insert-empty-line-up
    (lambda ()
       (text-modify
-         (cursor-goto-prev-line-end)
+         (cursor-to-prev-line-end)
          (if (equal? (cursor) 0)
             (save-cursor (text-insert-nl))
             ;; else
@@ -93,7 +93,7 @@
 (define text-insert-empty-line
    (lambda ()
       (text-modify
-         (cursor-goto-line-end)
+         (cursor-to-line-end)
          (text-insert-nl)
       )
    )
@@ -105,67 +105,67 @@
    )
 )
 
-(define cursor-goto-next-char
+(define cursor-to-next-char
    (lambda ()
       (cursor-set (text-next-char-pos))
    )
 )
 
-(define cursor-goto-prev-char
+(define cursor-to-prev-char
    (lambda ()
       (cursor-set (text-prev-char-pos))
    )
 )
 
-(define cursor-goto-next-word
+(define cursor-to-next-word
    (lambda ()
       (cursor-set (text-next-word-pos))
    )
 )
 
-(define cursor-goto-prev-word
+(define cursor-to-prev-word
    (lambda ()
       (cursor-set (text-prev-word-pos))
    )
 )
 
-(define cursor-goto-word-end
+(define cursor-to-word-end
    (lambda ()
       (cursor-set (text-word-end-pos))
    )
 )
 
-(define cursor-goto-next-longword
+(define cursor-to-next-longword
    (lambda ()
       (cursor-set (text-next-longword-pos))
    )
 )
 
-(define cursor-goto-prev-longword
+(define cursor-to-prev-longword
    (lambda ()
       (cursor-set (text-prev-longword-pos))
    )
 )
 
-(define cursor-goto-longword-end
+(define cursor-to-longword-end
    (lambda ()
       (cursor-set (text-longword-end-pos))
    )
 )
 
-(define cursor-goto-line
+(define cursor-to-line
    (lambda (n)
       (cursor-set (text-next-line-pos (current-buffer) 0 (- n 1)))
    )
 )
 
-(define cursor-goto-line-up
+(define cursor-to-line-up
    (lambda ()
       (cursor-set (text-prev-line-pos))
    )
 )
 
-(define cursor-goto-line-down
+(define cursor-to-line-down
    (lambda ()
       (when (not (is-last-line?))
          (cursor-set (text-next-line-pos))
@@ -173,49 +173,49 @@
    )
 )
 
-(define cursor-goto-next-line
+(define cursor-to-next-line
    (lambda ()
       (cursor-set (text-next-line-begin-pos))
    )
 )
 
-(define cursor-goto-prev-line-end
+(define cursor-to-prev-line-end
    (lambda ()
       (cursor-set (text-prev-line-end-pos))
    )
 )
 
-(define cursor-goto-line-start
+(define cursor-to-line-start
    (lambda ()
       (cursor-set (text-line-start-pos))
    )
 )
 
-(define cursor-goto-line-finish
+(define cursor-to-line-finish
    (lambda ()
       (cursor-set (text-line-finish-pos))
    )
 )
 
-(define cursor-goto-line-begin
+(define cursor-to-line-begin
    (lambda ()
       (cursor-set (text-line-begin-pos))
    )
 )
 
-(define cursor-goto-line-end
+(define cursor-to-line-end
    (lambda ()
       (cursor-set (text-line-end-pos))
    )
 )
 
-(define cursor-goto-begin
+(define cursor-to-begin
    (lambda ()
       (cursor-set (text-begin-pos))
    )
 )
 
-(define cursor-goto-end
+(define cursor-to-end
    (lambda ()
       (cursor-set (text-end-pos))
    )
@@ -227,13 +227,13 @@
    )
 )
 
-(define cursor-goto-each-line
+(define cursor-to-each-line
    (lambda (fn)
       (let loop ()
-         (cursor-goto-line-begin)
+         (cursor-to-line-begin)
          (fn)
          (when (not (is-last-line?))
-            (cursor-goto-next-line)
+            (cursor-to-next-line)
             (loop)
          )
       )
@@ -751,102 +751,102 @@
 
 (define text-delete-next-char
    (lambda ()
-      (cursor-obj-delete cursor-goto-next-char)
+      (cursor-obj-delete cursor-to-next-char)
    )
 )
 (define text-delete-char text-delete-next-char)
 
 (define text-delete-prev-char
    (lambda ()
-      (cursor-obj-delete cursor-goto-prev-char)
+      (cursor-obj-delete cursor-to-prev-char)
    )
 )
 
 (define text-delete-next-word
    (lambda ()
-      (cursor-obj-delete cursor-goto-next-word)
+      (cursor-obj-delete cursor-to-next-word)
    )
 )
 (define text-delete-word text-delete-next-word)
 
 (define text-delete-prev-word
    (lambda ()
-      (cursor-obj-delete cursor-goto-prev-word)
+      (cursor-obj-delete cursor-to-prev-word)
    )
 )
 
 (define text-delete-word-end
    (lambda ()
-      (cursor-obj-delete-inclusive cursor-goto-word-end)
+      (cursor-obj-delete-inclusive cursor-to-word-end)
    )
 )
 
 (define text-delete-next-longword
    (lambda ()
-      (cursor-obj-delete cursor-goto-next-longword)
+      (cursor-obj-delete cursor-to-next-longword)
    )
 )
 (define text-delete-longword text-delete-next-longword)
 
 (define delete-prev-longword
    (lambda ()
-      (cursor-obj-delete cursor-goto-prev-longword)
+      (cursor-obj-delete cursor-to-prev-longword)
    )
 )
 
 (define text-delete-longword-end
    (lambda ()
-      (cursor-obj-delete-inclusive cursor-goto-longword-end)
+      (cursor-obj-delete-inclusive cursor-to-longword-end)
    )
 )
 
 (define text-delete-next-line-begin
    (lambda ()
-      (cursor-obj-delete cursor-goto-next-line)
+      (cursor-obj-delete cursor-to-next-line)
    )
 )
 
 (define text-delete-prev-line-end
    (lambda ()
-      (cursor-obj-delete cursor-goto-prev-line-end)
+      (cursor-obj-delete cursor-to-prev-line-end)
    )
 )
 
 (define text-delete-line-start
    (lambda ()
-      (cursor-obj-delete cursor-goto-line-start)
+      (cursor-obj-delete cursor-to-line-start)
    )
 )
 
 (define text-delete-line-finish
    (lambda ()
-      (cursor-obj-delete cursor-goto-line-finish)
+      (cursor-obj-delete cursor-to-line-finish)
    )
 )
 
 (define text-delete-line-begin
    (lambda ()
-      (cursor-obj-delete cursor-goto-line-begin)
+      (cursor-obj-delete cursor-to-line-begin)
    )
 )
 
 (define text-delete-line-end
    (lambda ()
-      (cursor-obj-delete cursor-goto-line-end)
+      (cursor-obj-delete cursor-to-line-end)
    )
 )
 
 (define text-delete-line
    (lambda ()
-      (cursor-goto-line-end)
+      (cursor-to-line-end)
       (text-delete-prev-line-end)
       (if (equal? (cursor) 0)
          (text-delete-char)
          ;; else
          (if (equal? (text-end-pos) (1+ (text-line-end-pos)))
-            (cursor-goto-line-begin)
+            (cursor-to-line-begin)
             ;; else
-            (cursor-goto-next-line)
+            (cursor-to-next-line)
          )
       )
    )
@@ -854,13 +854,13 @@
 
 (define text-delete-begin
    (lambda ()
-      (cursor-obj-delete cursor-goto-begin)
+      (cursor-obj-delete cursor-to-begin)
    )
 )
 
 (define text-delete-end
    (lambda ()
-      (cursor-obj-delete cursor-goto-end)
+      (cursor-obj-delete cursor-to-end)
    )
 )
 

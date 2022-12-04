@@ -111,7 +111,7 @@
                (if (buffer-is-valid? buf)
                   (with-current-buffer buf
                      (save-cursor
-                        (cursor-goto-end)
+                        (cursor-to-end)
                         (text-insert s)
                      )
                   )
@@ -137,7 +137,7 @@
                (while (not (eof-object? s))
                   (with-current-buffer buf
                      (save-cursor
-                        (cursor-goto-end)
+                        (cursor-to-end)
                         (text-insert s)
                      )
                   )

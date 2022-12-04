@@ -121,7 +121,7 @@
             )
             (git-branch-list "-a")
          )
-         (cursor-goto-begin)
+         (cursor-to-begin)
          (buffer-set-readonly #t)
       )
    )
@@ -135,9 +135,9 @@
 
 (define git-branch-mode-map
    (let ([map (make-keymap)])
-      (bind-key map "<Enter>" (lambda () (cursor-goto-line-begin) (git-show-commit)))
+      (bind-key map "<Enter>" (lambda () (cursor-to-line-begin) (git-show-commit)))
       (bind-key map "g r" (lambda () (git-insert-branch-list)))
-      (bind-key map "l" (lambda () (cursor-goto-line-begin) (git-show-log (text-object))))
+      (bind-key map "l" (lambda () (cursor-to-line-begin) (git-show-log (text-object))))
       (bind-key map "c" (lambda () (cursor-gogo-line-begin) (git-checkout-branch (text-object)) (git-insert-branch-list)))
       (bind-key map "d"
          (lambda ()
@@ -361,7 +361,7 @@
                )
             )
             (buffer-set-readonly #t)
-            (cursor-goto-begin)
+            (cursor-to-begin)
          )
       )
    )
@@ -382,7 +382,7 @@
                )
             )
             (buffer-set-readonly #t)
-            (cursor-goto-begin)
+            (cursor-to-begin)
          )
       )
    )
@@ -505,7 +505,7 @@
             (buffer-set-name (format "commit: ~a" id))
             (text-insert (git-cmd-read (format "show ~a" id)))
             (buffer-set-readonly #t)
-            (cursor-goto-begin)
+            (cursor-to-begin)
          )
       )
    )
@@ -513,7 +513,7 @@
 
 (define git-log-mode-map
    (let ([map (make-keymap)])
-      (bind-key map "<Enter>" (lambda () (cursor-goto-line-begin) (git-show-commit)))
+      (bind-key map "<Enter>" (lambda () (cursor-to-line-begin) (git-show-commit)))
       map
    )
 )
@@ -534,13 +534,13 @@
        (let ([b (buffer-create obj)])
           (with-current-buffer b
             (git-log-mode)
-            (cursor-goto-begin)
-            (cursor-goto-each-line
+            (cursor-to-begin)
+            (cursor-to-each-line
                (lambda ()
                   (add-text-property (cursor) (text-word-end-pos) '(style: (fg: "green")))
                )
             )
-            (cursor-goto-begin)
+            (cursor-to-begin)
           )
         )
       ]
@@ -561,7 +561,7 @@
 
 (define git-blame-mode-map
    (let ([map (make-keymap)])
-      (bind-key map "<Enter>" (lambda () (cursor-goto-line-begin) (git-show-commit)))
+      (bind-key map "<Enter>" (lambda () (cursor-to-line-begin) (git-show-commit)))
       map
    )
 )
@@ -570,13 +570,13 @@
    (buffer-set-readonly #t)
    (set-local! linenum-enable #f)
    (git-insert-blame (buffer-name) (get-local git-blame-start) (get-local git-blame-end))
-   (cursor-goto-begin)
-   (cursor-goto-each-line
+   (cursor-to-begin)
+   (cursor-to-each-line
       (lambda ()
          (add-text-property (cursor) (text-word-end-pos) '(style: (fg: "green")))
       )
    )
-   (cursor-goto-begin)
+   (cursor-to-begin)
 )
 
 (define git-blame
@@ -657,7 +657,7 @@
           style: (attr: "bold")
          )
       )
-      (cursor-goto-next-line)
+      (cursor-to-next-line)
       (when (string-contains? (text-line) "(use")
          (text-delete-line)
       )
@@ -683,7 +683,7 @@
              data: ,(text-longword)
             )
          )
-         (cursor-goto-next-line)
+         (cursor-to-next-line)
       )
    )
 )
@@ -767,7 +767,7 @@
           style: (attr: "bold")
          )
       )
-      (cursor-goto-next-line)
+      (cursor-to-next-line)
       (text-delete-line)
       (text-delete-line)
       (when (string-empty? (text-line))
@@ -785,7 +785,7 @@
              data: ,(text-longword)
             )
          )
-         (cursor-goto-next-line)
+         (cursor-to-next-line)
       )
    )
 )
@@ -814,7 +814,7 @@
           style: (attr: "bold")
          )
       )
-      (cursor-goto-next-line)
+      (cursor-to-next-line)
       (when (string-contains? (text-line) "(use")
          (text-delete-line)
       )
@@ -835,7 +835,7 @@
              data: ,(text-longword)
             )
          )
-         (cursor-goto-next-line)
+         (cursor-to-next-line)
       )
    )
 )
@@ -856,7 +856,7 @@
 
 (define git-status-draw-untracked
    (lambda ()
-      (cursor-goto-next-line)
+      (cursor-to-next-line)
       (text-delete-line)
       (when (string-empty? (text-line))
          (text-delete-line)
@@ -872,7 +872,7 @@
              data: ,(text-longword)
             )
          )
-         (cursor-goto-next-line)
+         (cursor-to-next-line)
       )
    )
 )
@@ -895,10 +895,10 @@
                   #f
                   ;; else
                   (let ()
-                     (cursor-goto-begin)
+                     (cursor-to-begin)
                      (text-insert (git-cmd-read "log -1 --oneline"))
                      (text-insert "\n")
-                     (cursor-goto-each-line
+                     (cursor-to-each-line
                         (lambda ()
                            (let ([line (text-line)])
                               (cond
@@ -937,7 +937,7 @@
    (set-local! linenum-enable #f)
    (buffer-set-name "git-status")
    (git-status-draw)
-   (cursor-goto-begin)
+   (cursor-to-begin)
 )
 
 (define git-status
