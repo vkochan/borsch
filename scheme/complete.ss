@@ -127,7 +127,7 @@
            )
          (when (> (cursor) p)
             (let ()
-               (text-delete-prev-char)
+               (text-delete-to-prev-char)
                (complete-update-text)
             )
          )

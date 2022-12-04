@@ -42,7 +42,7 @@
    (lambda ()
       (let ([p (get-local prompt-pos)])
          (when (> (cursor) p)
-            (text-delete-prev-char)
+            (text-delete-to-prev-char)
          )
       )
    )

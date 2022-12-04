@@ -788,88 +788,88 @@
    )
 )
 
-(define text-delete-next-char
+(define text-delete-to-next-char
    (lambda ()
       (cursor-obj-delete cursor-to-next-char)
    )
 )
-(define text-delete-char text-delete-next-char)
+(define text-delete-char text-delete-to-next-char)
 
-(define text-delete-prev-char
+(define text-delete-to-prev-char
    (lambda ()
       (cursor-obj-delete cursor-to-prev-char)
    )
 )
 
-(define text-delete-next-word
+(define text-delete-to-next-word
    (lambda ()
       (cursor-obj-delete cursor-to-next-word)
    )
 )
-(define text-delete-word text-delete-next-word)
+(define text-delete-word text-delete-to-next-word)
 
-(define text-delete-prev-word
+(define text-delete-to-prev-word
    (lambda ()
       (cursor-obj-delete cursor-to-prev-word)
    )
 )
 
-(define text-delete-word-end
+(define text-delete-to-word-end
    (lambda ()
       (cursor-obj-delete-inclusive cursor-to-word-end)
    )
 )
 
-(define text-delete-next-longword
+(define text-delete-to-next-longword
    (lambda ()
       (cursor-obj-delete cursor-to-next-longword)
    )
 )
-(define text-delete-longword text-delete-next-longword)
+(define text-delete-longword text-delete-to-next-longword)
 
-(define delete-prev-longword
+(define text-delete-to-prev-longword
    (lambda ()
       (cursor-obj-delete cursor-to-prev-longword)
    )
 )
 
-(define text-delete-longword-end
+(define text-delete-to-longword-end
    (lambda ()
       (cursor-obj-delete-inclusive cursor-to-longword-end)
    )
 )
 
-(define text-delete-next-line-begin
+(define text-delete-to-next-line-begin
    (lambda ()
       (cursor-obj-delete cursor-to-next-line)
    )
 )
 
-(define text-delete-prev-line-end
+(define text-delete-to-prev-line-end
    (lambda ()
       (cursor-obj-delete cursor-to-prev-line-end)
    )
 )
 
-(define text-delete-line-start
+(define text-delete-to-line-start
    (lambda ()
       (cursor-obj-delete cursor-to-line-start)
    )
 )
 
-(define text-delete-line-finish
+(define text-delete-to-line-finish
    (lambda ()
       (cursor-obj-delete cursor-to-line-finish)
    )
 )
 
-(define text-delete-line-begin
+(define text-delete-to-line-begin
    (lambda ()
       (cursor-obj-delete cursor-to-line-begin)
    )
 )
 
-(define text-delete-line-end
+(define text-delete-to-line-end
    (lambda ()
       (cursor-obj-delete cursor-to-line-end)
    )
@@ -878,7 +878,7 @@
 (define text-delete-line
    (lambda ()
       (cursor-to-line-end)
-      (text-delete-prev-line-end)
+      (text-delete-to-prev-line-end)
       (if (equal? (cursor) 0)
          (text-delete-char)
          ;; else
@@ -891,13 +891,13 @@
    )
 )
 
-(define text-delete-begin
+(define text-delete-to-begin
    (lambda ()
       (cursor-obj-delete cursor-to-begin)
    )
 )
 
-(define text-delete-end
+(define text-delete-to-end
    (lambda ()
       (cursor-obj-delete cursor-to-end)
    )
