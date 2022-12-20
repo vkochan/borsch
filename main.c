@@ -214,7 +214,6 @@ static Window* nextvisible(Window *c);
 static void focus(Window *c);
 static void resize(Window *c, int x, int y, int w, int h);
 static unsigned int waw, wah, wax, way;
-static Window *windows = NULL;
 static char *title;
 
 static void buf_list_update(void);
@@ -235,6 +234,8 @@ static Window *topbar;
 #define NMASTER 1
 
 const char tags[][8] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+
+static Window *windows_list(void);
 
 #include "tile.c"
 #include "grid.c"
@@ -307,6 +308,7 @@ typedef struct {
 	Window *popup;
 	Window *sel;
 	Window *lastsel;
+	Window *windows;
 } Frame;
 
 typedef struct {
@@ -814,12 +816,12 @@ static void set_last_selected_window(Window *w)
 
 static Window *windows_list(void)
 {
-	return windows;
+	return current_frame()->windows;
 }
 
 static void set_windows_list(Window *w)
 {
-	windows = w;
+	current_frame()->windows = w;
 }
 
 static unsigned int window_tags_get(Window *w)
