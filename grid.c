@@ -5,7 +5,7 @@ static void grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned 
 
 	Window *c;
 
-	for (n = 0, c = nextvisible(windows); c; c = nextvisible(c->next))
+	for (n = 0, c = nextvisible(windows_list()); c; c = nextvisible(c->next))
 		if (!c->minimized)
 			n++;
 	/* grid dimensions */
@@ -16,7 +16,7 @@ static void grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned 
 	/* window geoms (cell height/width) */
 	nh = lah / (rows ? rows : 1);
 	nw = law / (cols ? cols : 1);
-	for (i = 0, c = nextvisible(windows); c; c = nextvisible(c->next)) {
+	for (i = 0, c = nextvisible(windows_list()); c; c = nextvisible(c->next)) {
 		if (c->minimized)
 			continue;
 		/* if there are less windows in the last row than normal adjust the
