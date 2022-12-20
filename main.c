@@ -350,7 +350,6 @@ static Window *msel = NULL;
 static unsigned int seltags;
 static unsigned int tagset[2] = { 1, 1 };
 static bool mouse_events_enabled = ENABLE_MOUSE;
-static Layout *layout = layouts;
 
 static Fifo cmdfifo = { .fd = -1 };
 static Fifo retfifo = { .fd = -1 };
@@ -790,7 +789,7 @@ error(const char *errstr, ...) {
 
 static bool
 isarrange(void (*func)()) {
-	return func == layout->arrange;
+	return func == current_frame()->layout->arrange;
 }
 
 static Window *current_window(void)
@@ -1089,7 +1088,7 @@ arrange(void) {
 			dh = 1;
 	}
 	wah -= dh;
-	layout->arrange(wax, way, waw, wah);
+	current_frame()->layout->arrange(wax, way, waw, wah);
 	if (m && !isarrange(fullscreen)) {
 		unsigned int i = 0, nw = waw / m, nx = wax;
 		for (Window *c = nextvisible(windows); c; c = nextvisible(c->next)) {
@@ -1385,7 +1384,6 @@ toggletag(const char *args[]) {
 
 static void
 setpertag(void) {
-	layout = current_frame()->layout;
 	runinall = current_frame()->runinall;
 }
 
@@ -1473,8 +1471,8 @@ initpertag(void) {
 		pertag[i].f = calloc(1, sizeof(Frame));
 		pertag[i].f->nmaster = NMASTER;
 		pertag[i].f->mfact = MFACT;
-		pertag[i].f->layout = layout;
-		pertag[i].f->layout_prev = layout;
+		pertag[i].f->layout = layouts;
+		pertag[i].f->layout_prev = layouts;
 		pertag[i].f->runinall = runinall;
 		pertag[i].f->msticky = false;
 		pertag[i].f->name = NULL;
@@ -1974,6 +1972,7 @@ scrollback(const char *args[]) {
 
 static void
 setlayout(const char *args[]) {
+	Layout *layout = current_frame()->layout;
 	unsigned int i;
 
 	if (!args || !args[0]) {
@@ -3147,8 +3146,7 @@ int win_state_toggle(int wid, win_state_t st)
 
 	case WIN_STATE_MAXIMIZED:
 		if (isarrange(fullscreen)) {
-			layout = current_frame()->layout_prev;
-			current_frame()->layout = layout;
+			current_frame()->layout = current_frame()->layout_prev;
 			arrange();
 		} else {
 			setlayout(maxi);
@@ -4641,9 +4639,8 @@ int layout_current_set(int tag, layout_t lay)
 	if (get_popup())
 		return -1;
 
-	layout = &layouts[lay];
 	current_frame()->layout_prev = current_frame()->layout;
-	current_frame()->layout = layout;
+	current_frame()->layout = &layouts[lay];
 	arrange();
 }
 
