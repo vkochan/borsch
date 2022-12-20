@@ -195,9 +195,6 @@ static float getmfact(void);
 static void toggleminimize(void);
 static void minimizeother(const char *args[]);
 static void togglemouse(const char *args[]);
-static void toggletag(const char *args[]);
-static void toggleview(const char *args[]);
-static void viewprevtag(const char *args[]);
 static void zoom(const char *args[]);
 static void doeval(const char *args[]);
 
@@ -1378,47 +1375,6 @@ tagschanged() {
 		toggleminimize();
 	}
 	arrange();
-}
-
-static void
-toggletag(const char *args[]) {
-	if (!current_window())
-		return;
-	unsigned int newtags = window_tags_get(current_window()) ^ (bitoftag(args[0]) & TAGMASK);
-	if (newtags) {
-		window_tags_set(current_window(), newtags);
-		tagschanged();
-	}
-}
-
-static void
-toggleview(const char *args[]) {
-	int i;
-
-	unsigned int newtagset = tagset[seltags] ^ (bitoftag(args[0]) & TAGMASK);
-	if (newtagset) {
-		if(newtagset == TAGMASK) {
-			prev_tag_set(curr_tag_get());
-			curr_tag_set(0);
-		} else if(!(newtagset & 1 << (curr_tag_get() - 1))) {
-			prev_tag_set(curr_tag_get());
-			for (i=0; !(newtagset &1 << i); i++) ;
-			curr_tag_set(i + 1);
-		}
-		tagset[seltags] = newtagset;
-		tagschanged();
-	}
-}
-
-static void
-viewprevtag(const char *args[]) {
-	unsigned int tmptag;
-
-	seltags ^= 1;
-	tmptag = prev_tag_get();
-	prev_tag_set(curr_tag_get());
-	curr_tag_set(tmptag);
-	tagschanged();
 }
 
 static void
