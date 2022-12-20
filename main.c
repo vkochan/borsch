@@ -304,6 +304,7 @@ typedef struct {
 	Window *sel;
 	Window *lastsel;
 	Window *windows;
+	Window *stack;
 } Frame;
 
 typedef struct {
@@ -342,7 +343,6 @@ static int proc_fd[2];
 static const char *prog_name = PROGNAME;
 static unsigned int curtag, prevtag;
 static Pertag pertag[LENGTH(tags) + 1];
-static Window *stack = NULL;
 static Window *msel = NULL;
 static unsigned int seltags;
 static unsigned int tagset[2] = { 1, 1 };
@@ -394,6 +394,16 @@ static void prev_tag_set(int tag)
 static Frame *current_frame(void)
 {
 	return pertag[curr_tag_get()].f;
+}
+
+static Window *window_stack(void)
+{
+	return current_frame()->stack;
+}
+
+static void set_window_stack(Window *stack)
+{
+	current_frame()->stack = stack;
 }
 
 static void
@@ -1172,8 +1182,8 @@ attachafter(Window *c, Window *a) { /* attach c after a */
 
 static void
 attachstack(Window *c) {
-	c->snext = stack;
-	stack = c;
+	c->snext = window_stack();
+	set_window_stack(c);
 }
 
 static void
@@ -1206,7 +1216,7 @@ settitle(Window *c) {
 static void
 detachstack(Window *c) {
 	Window **tc;
-	for (tc = &stack; *tc && *tc != c; tc = &(*tc)->snext);
+	for (tc = &current_frame()->stack; *tc && *tc != c; tc = &(*tc)->snext);
 	*tc = c->snext;
 }
 
@@ -1217,7 +1227,7 @@ focus(Window *c) {
 	Window *lastsel;
 
 	if (!c)
-		for (c = stack; c && !isvisible(c); c = c->snext);
+		for (c = window_stack(); c && !isvisible(c); c = c->snext);
 
 	if (current_window() == c)
 		return;
