@@ -184,7 +184,6 @@ static bool start_in_graphic = false;
 static void focusn(const char *args[]);
 static void focusnextnm(const char *args[]);
 static void focusprevnm(const char *args[]);
-static void focuslast(const char *args[]);
 static void killwindow(void);
 static void killother(const char *args[]);
 static void quit(const char *args[]);
@@ -804,6 +803,16 @@ static void set_current_window(Window *w)
 	current_frame()->sel = w;
 }
 
+static Window *last_selected_window(void)
+{
+	return lastsel;
+}
+
+static void set_last_selected_window(Window *w)
+{
+	lastsel = w;
+}
+
 static unsigned int window_tags_get(Window *w)
 {
 	return buffer_tags_get(w->buf);
@@ -1200,6 +1209,8 @@ static KeyMap *buf_keymap_get(Buffer *buf);
 
 static void
 focus(Window *c) {
+	Window *lastsel;
+
 	if (!c)
 		for (c = stack; c && !isvisible(c); c = c->snext);
 
@@ -1211,7 +1222,8 @@ focus(Window *c) {
 			curr_kmap = win_min_kmap;
 	}
 
-	lastsel = current_window();
+	set_last_selected_window(current_window());
+	lastsel = last_selected_window();
 	set_current_window(c);
 	if (lastsel) {
 		ui_window_focus(lastsel->win, false);
@@ -1594,8 +1606,8 @@ static void __win_del(Window *w)
 			set_current_window(NULL);
 		}
 	}
-	if (lastsel == w)
-		lastsel = NULL;
+	if (last_selected_window() == w)
+		set_last_selected_window(NULL);
 	ui_window_free(w->win);
 	view_free(w->view);
 	free(w);
@@ -1889,12 +1901,6 @@ focusprevnm(const char *args[]) {
 		}
 	} while (c && c != current_window() && c->minimized);
 	focus(c);
-}
-
-static void
-focuslast(const char *args[]) {
-	if (lastsel)
-		focus(lastsel);
 }
 
 static void
@@ -2740,8 +2746,8 @@ int win_current_set(int wid)
 
 int win_prev_selected(void)
 {
-	if (lastsel)
-		return lastsel->id;
+	if (last_selected_window())
+		return last_selected_window()->id;
 	if (current_window())
 		return current_window()->id;
 	return 0;
