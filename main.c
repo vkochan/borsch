@@ -306,6 +306,7 @@ typedef struct {
 	char *name;
 	bool msticky;
 	Window *popup;
+	Window *sel;
 } Frame;
 
 typedef struct {
@@ -345,7 +346,6 @@ static const char *prog_name = PROGNAME;
 static unsigned int curtag, prevtag;
 static Pertag pertag[LENGTH(tags) + 1];
 static Window *stack = NULL;
-static Window *sel = NULL;
 static Window *lastsel = NULL;
 static Window *msel = NULL;
 static unsigned int seltags;
@@ -796,12 +796,12 @@ isarrange(void (*func)()) {
 
 static Window *current_window(void)
 {
-	return sel;
+	return current_frame()->sel;
 }
 
 static void set_current_window(Window *w)
 {
-	sel = w;
+	current_frame()->sel = w;
 }
 
 static unsigned int window_tags_get(Window *w)
