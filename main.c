@@ -195,7 +195,6 @@ static float getmfact(void);
 static void toggleminimize(void);
 static void minimizeother(const char *args[]);
 static void togglemouse(const char *args[]);
-static void togglerunall(const char *args[]);
 static void toggletag(const char *args[]);
 static void toggleview(const char *args[]);
 static void viewprevtag(const char *args[]);
@@ -301,7 +300,6 @@ typedef struct {
 	float mfact;
 	Layout *layout;
 	Layout *layout_prev;
-	bool runinall;
 	char *cwd;
 	char *name;
 	bool msticky;
@@ -358,7 +356,6 @@ static Fifo retfifo = { .fd = -1 };
 
 static const char *shell;
 static volatile sig_atomic_t running = true;
-static bool runinall = false;
 /* make sense only in layouts which has master window (tile, bstack) */
 static int min_align = MIN_ALIGN_HORIZ;
 
@@ -955,7 +952,7 @@ static void draw_title(Window *c) {
 	if (!ui_window_has_title(c->win))
 		return;
 
-	if (current_window() == c || (current_frame()->runinall && !c->minimized)) {
+	if (current_window() == c || (c->minimized)) {
 		title_fg = UI_TEXT_COLOR_BLACK;
 		title_bg = UI_TEXT_COLOR_WHITE;
 	}
@@ -1395,11 +1392,6 @@ toggletag(const char *args[]) {
 }
 
 static void
-setpertag(void) {
-	runinall = current_frame()->runinall;
-}
-
-static void
 toggleview(const char *args[]) {
 	int i;
 
@@ -1413,7 +1405,6 @@ toggleview(const char *args[]) {
 			for (i=0; !(newtagset &1 << i); i++) ;
 			curr_tag_set(i + 1);
 		}
-		setpertag();
 		tagset[seltags] = newtagset;
 		tagschanged();
 	}
@@ -1427,7 +1418,6 @@ viewprevtag(const char *args[]) {
 	tmptag = prev_tag_get();
 	prev_tag_set(curr_tag_get());
 	curr_tag_set(tmptag);
-	setpertag();
 	tagschanged();
 }
 
@@ -1435,7 +1425,7 @@ static void
 keypress(int code) {
 	char buf[8] = { '\e' };
 
-	for (Window *c = current_frame()->runinall ? nextvisible(windows_list()) : current_window(); c; c = nextvisible(c->next)) {
+	for (Window *c = current_window(); c; c = nextvisible(c->next)) {
 		if (is_content_visible(c)) {
 			c->urgent = false;
 
@@ -1454,8 +1444,7 @@ keypress(int code) {
 				scheme_event_handle(evt);
 			}
 		}
-		if (!current_frame()->runinall)
-			break;
+		break;
 	}
 }
 
@@ -1485,7 +1474,6 @@ initpertag(void) {
 		pertag[i].f->mfact = MFACT;
 		pertag[i].f->layout = layouts;
 		pertag[i].f->layout_prev = layouts;
-		pertag[i].f->runinall = runinall;
 		pertag[i].f->msticky = false;
 		pertag[i].f->name = NULL;
 		pertag[i].f->cwd = calloc(CWD_MAX, 1);
@@ -2079,13 +2067,6 @@ static void
 togglemouse(const char *args[]) {
 	mouse_events_enabled = !mouse_events_enabled;
 	mouse_setup();
-}
-
-static void
-togglerunall(const char *args[]) {
-	current_frame()->runinall = !current_frame()->runinall;
-	drawbar();
-	draw_all();
 }
 
 static void
@@ -4594,7 +4575,6 @@ int frame_current_set(int tag)
 		seltags ^= 1; /* toggle current_window() tagset */
 		prev_tag_set(curr_tag_get());
 		curr_tag_set(tag);
-		setpertag();
 		tagset[seltags] = newtagset;
 		tagschanged();
 	}
