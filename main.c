@@ -306,6 +306,7 @@ typedef struct {
 	bool msticky;
 	Window *popup;
 	Window *sel;
+	Window *lastsel;
 } Frame;
 
 typedef struct {
@@ -345,7 +346,6 @@ static const char *prog_name = PROGNAME;
 static unsigned int curtag, prevtag;
 static Pertag pertag[LENGTH(tags) + 1];
 static Window *stack = NULL;
-static Window *lastsel = NULL;
 static Window *msel = NULL;
 static unsigned int seltags;
 static unsigned int tagset[2] = { 1, 1 };
@@ -805,12 +805,12 @@ static void set_current_window(Window *w)
 
 static Window *last_selected_window(void)
 {
-	return lastsel;
+	return current_frame()->lastsel;
 }
 
 static void set_last_selected_window(Window *w)
 {
-	lastsel = w;
+	current_frame()->lastsel = w;
 }
 
 static unsigned int window_tags_get(Window *w)
