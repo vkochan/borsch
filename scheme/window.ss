@@ -1,6 +1,6 @@
 (define __cs_win_get_by_coord (foreign-procedure __collect_safe "cs_win_get_by_coord" (int int) scheme-object))
 (define __cs_win_is_visible (foreign-procedure __collect_safe "cs_win_is_visible" (int) boolean))
-(define __cs_win_first_get (foreign-procedure __collect_safe "cs_win_first_get" () scheme-object))
+(define __cs_win_first_get (foreign-procedure __collect_safe "cs_win_first_get" (int) scheme-object))
 (define __cs_win_prev_get (foreign-procedure __collect_safe "cs_win_prev_get" (int) scheme-object))
 (define __cs_win_next_get (foreign-procedure __collect_safe "cs_win_next_get" (int) scheme-object))
 (define __cs_win_upper_get (foreign-procedure __collect_safe "cs_win_upper_get" (int) scheme-object))
@@ -48,8 +48,14 @@
 )
 
 (define window-first
-   (lambda ()
-       (call-foreign (__cs_win_first_get))
+   (case-lambda
+     [()
+      (window-first -1)
+     ]
+
+     [(fid)
+      (call-foreign (__cs_win_first_get fid))
+     ]
    )
 )
 
@@ -60,66 +66,6 @@
 
       [(wid)
        (call-foreign (__cs_win_next_get wid))]
-   )
-)
-
-(define window-first-visible
-   (lambda ()
-      (let ([win (window-first)]
-	   )
-         (while (and win (not (window-is-visible? win)))
-            (set! win (window-next win))
-         )
-	 win
-      )
-   )
-)
-
-(define window-next-visible
-   (case-lambda
-      [()
-       (window-next-visible (current-window))
-      ]
-
-      [(wid)
-       (let ([win (window-next wid)]
-	    )
-          (while (and win (not (window-is-visible? win)))
-             (set! win (window-next win))
-          )
-	  win
-       )
-      ]
-   )
-)
-
-(define window-prev-visible
-   (case-lambda
-      [()
-       (window-prev-visible (current-window))
-      ]
-
-      [(wid)
-       (let ([win (window-prev wid)]
-	    )
-          (while (and win (not (window-is-visible? win)))
-             (set! win (window-prev win))
-          )
-	  win
-       )
-      ]
-   )
-)
-
-(define window-last-visible
-   (lambda ()
-      (let ([win (window-first-visible)]
-	   )
-         (while (window-next-visible win)
-            (set! win (window-next-visible win))
-         )
-	 win
-      )
    )
 )
 
@@ -134,8 +80,13 @@
 )
 
 (define window-list
-   (lambda ()
-      (let ([win (window-first)]
+   (case-lambda
+     [()
+      (window-list -1)
+     ]
+
+     [(fid)
+      (let ([win (window-first fid)]
             [lst   '()]
 	   )
 
@@ -149,17 +100,7 @@
 
 	 lst
       )
-   )
-)
-
-(define window-list-by-tag
-   (lambda (tag)
-      (filter
-         (lambda (w)
-            (member tag (buffer-tags (window-buffer (first w))))
-         )
-         (window-list)
-      )
+     ]
    )
 )
 
@@ -238,13 +179,13 @@
 
 (define window-select-upper
    (lambda ()
-      (window-select (or (window-upper) (window-prev-visible) (window-last-visible)))
+      (window-select (or (window-upper) (window-prev) (window-last)))
    )
 )
 
 (define window-select-lower
    (lambda ()
-      (window-select (or (window-lower) (window-next-visible) (window-first-visible)))
+      (window-select (or (window-lower) (window-next) (window-first)))
    )
 )
 

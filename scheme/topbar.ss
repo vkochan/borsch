@@ -13,13 +13,13 @@
                      [tag-color (if (equal? tag (current-frame))
                                     "blue"
                                     ;; else
-                                    (if (> (length (window-list-by-tag tag)) 0)
-                                       "green"
-                                       ;;"bright-black"
-                                       ;; else
-                                       ;;"green"
-                                       "bright-black"
-                                    )
+                                    ;;(if (> (length (window-list tag)) 0)
+                                    ;;   "green"
+                                    ;;   ;;"bright-black"
+                                    ;;   ;; else
+                                    ;;   ;;"green"
+                                    ;;   "bright-black"
+                                    ;;)
                                 )
                      ]
                      [vname (frame-name tag)]

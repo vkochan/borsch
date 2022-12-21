@@ -46,12 +46,6 @@
 (define __cs_buf_undo (foreign-procedure __collect_safe "cs_buf_undo" (int) void))
 (define __cs_buf_redo (foreign-procedure __collect_safe "cs_buf_redo" (int) void))
 
-(define __cs_buf_tag_set (foreign-procedure __collect_safe "cs_buf_tag_set" (int int) int))
-(define __cs_buf_tag_bits (foreign-procedure __collect_safe "cs_buf_tag_bits" (int) int))
-(define __cs_buf_tag_toggle (foreign-procedure __collect_safe "cs_buf_tag_toggle" (int int) int))
-(define __cs_buf_tag_add (foreign-procedure __collect_safe "cs_buf_tag_add" (int int) int))
-(define __cs_buf_tag_del (foreign-procedure __collect_safe "cs_buf_tag_del" (int int) int))
-
 (define %dir-locals-ht (make-hashtable string-hash string=?))
 
 (define file-match-mode (list))
@@ -525,31 +519,6 @@
    )
 )
 
-(define buffer-list-by-tag
-   (lambda (tag)
-      (filter
-         (lambda (b)
-            (member tag (buffer-tags (first b)))
-         )
-         (buffer-list)
-      )
-   )
-)
-
-(define buffer-list-hidden-by-tag
-   (lambda (tag)
-      (filter
-         (lambda (b)
-            (and
-               (member tag (buffer-tags (first b)))
-               (not (buffer-is-visible? (first b)))
-            )
-         )
-         (buffer-list)
-      )
-   )
-)
-
 (define enable-insert
    (lambda (e)
       (call-foreign (__cs_buf_text_input_enable (current-buffer) e))
@@ -880,69 +849,6 @@
          ;; else
          (current-cwd)
       )
-   )
-)
-
-(define buffer-tags
-   (case-lambda
-      [()
-       (buffer-tags (current-buffer))]
-
-      [(bid)
-       (let (
-             [tag-bits (call-foreign (__cs_buf_tag_bits bid))]
-             [tag-ls (list)]
-            )
-          (for-each
-             (lambda (bit)
-                (when (fxbit-set? tag-bits bit)
-                   (set! tag-ls (append tag-ls (list (1+ bit))))
-                )
-             ) (list 0 1 2 3 4 5 6 7 8)
-          )
-          tag-ls
-       )
-      ]
-   )
-)
-
-(define buffer-set-tag
-   (case-lambda
-      [(tag)
-       (call-foreign (__cs_buf_tag_set (current-buffer) tag))]
-
-      [(bid tag)
-       (call-foreign (__cs_buf_tag_set bid tag))]
-   )
-)
-
-(define buffer-toggle-tag
-   (case-lambda
-      [(tag)
-       (call-foreign (__cs_buf_tag_toggle (current-buffer) tag))]
-
-      [(bid tag)
-       (call-foreign (__cs_buf_tag_toggle bid tag))]
-   )
-)
-
-(define buffer-tag+
-   (case-lambda
-      [(tag)
-       (call-foreign (__cs_buf_tag_add (current-buffer) tag))]
-
-      [(bid tag)
-       (call-foreign (__cs_buf_tag_add bid tag))]
-   )
-)
-
-(define buffer-tag-
-   (case-lambda
-      [(tag)
-       (call-foreign (__cs_buf_tag_del (current-buffer) tag))]
-
-      [(bid tag)
-       (call-foreign (__cs_buf_tag_del bid tag))]
    )
 )
 

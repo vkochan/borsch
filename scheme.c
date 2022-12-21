@@ -77,9 +77,9 @@ bool scheme_win_is_visible(int wid)
 	return win_is_visible(wid);
 }
 
-ptr scheme_win_first_get(void)
+ptr scheme_win_first_get(int fid)
 {
-	int ret = win_first_get();
+	int ret = win_first_get(fid);
 
 	if (ret)
 		return Sinteger(ret);
@@ -924,27 +924,27 @@ ptr scheme_buf_search_regex(int bid, size_t pos, const char *pattern, int dir)
 
 int scheme_buf_tag_set(int bid, int tag)
 {
-	return buf_tag_set(bid, tag);
+	return 0;
 }
 
 int scheme_buf_tag_bits(int bid)
 {
-	return buf_tag_bits(bid);
+	return 0;
 }
 
 int scheme_buf_tag_toggle(int bid, int tag)
 {
-	return buf_tag_toggle(bid, tag);
+	return 0;
 }
 
 int scheme_buf_tag_add(int bid, int tag)
 {
-	return buf_tag_add(bid, tag);
+	return 0;
 }
 
 int scheme_buf_tag_del(int bid, int tag)
 {
-	return buf_tag_del(bid, tag);
+	return 0;
 }
 
 ptr scheme_buf_parser_set(int bid, const char *lang)

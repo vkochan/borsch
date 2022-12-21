@@ -168,7 +168,6 @@ static Ui *ui;
 #define LENGTH(arr) (sizeof(arr) / sizeof((arr)[0]))
 #define MAX(x, y)   ((x) > (y) ? (x) : (y))
 #define MIN(x, y)   ((x) < (y) ? (x) : (y))
-#define TAGMASK     ((1 << LENGTH(tags)) - 1)
 
 extern int scheme_init(const char *);
 extern void scheme_uninit(void);
@@ -229,7 +228,7 @@ static Window *topbar;
 /* number of windows in master area */
 #define NMASTER 1
 
-const char tags[][8] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+#define MAXTAGS	9
 
 static Window *windows_list(void);
 
@@ -341,11 +340,9 @@ static int proc_fd[2];
 
 /* global variables */
 static const char *prog_name = PROGNAME;
-static unsigned int curtag, prevtag;
-static Pertag pertag[LENGTH(tags) + 1];
+static unsigned int curtag;
+static Pertag pertag[MAXTAGS + 1];
 static Window *msel = NULL;
-static unsigned int seltags;
-static unsigned int tagset[2] = { 1, 1 };
 static bool mouse_events_enabled = ENABLE_MOUSE;
 
 static Fifo cmdfifo = { .fd = -1 };
@@ -381,19 +378,14 @@ static void curr_tag_set(int tag)
 	curtag = tag;
 }
 
-static int prev_tag_get(void)
+static Frame *get_frame(int fid)
 {
-	return prevtag;
-}
-
-static void prev_tag_set(int tag)
-{
-	prevtag = tag;
+	return pertag[fid].f;
 }
 
 static Frame *current_frame(void)
 {
-	return pertag[curr_tag_get()].f;
+	return get_frame(curr_tag_get());
 }
 
 static Window *window_stack(void)
@@ -823,24 +815,19 @@ static Window *windows_list(void)
 	return current_frame()->windows;
 }
 
+static Window *windows_list_by_fid(int fid)
+{
+	return get_frame(fid)->windows;
+}
+
 static void set_windows_list(Window *w)
 {
 	current_frame()->windows = w;
 }
 
-static unsigned int window_tags_get(Window *w)
-{
-	return buffer_tags_get(w->buf);
-}
-
-static void window_tags_set(Window *w, unsigned int tags)
-{
-	buffer_tags_set(w->buf, tags);
-}
-
 static bool
 isvisible(Window *c) {
-	return window_tags_get(c) & tagset[seltags];
+	return true;
 }
 
 static bool
@@ -1126,12 +1113,10 @@ arrange(void) {
 	draw_all();
 }
 
-static Window *
-lastmaster(unsigned int tag) {
+static Window *lastmaster(void) {
 	Window *c = windows_list();
 	int n = 1;
 
-	for (; c && !(window_tags_get(c) & tag); c = c->next);
 	for (; c && n < getnmaster(); c = c->next, n++);
 
 	return c;
@@ -1151,7 +1136,7 @@ attachfirst(Window *c) {
 static void
 attach(Window *c) {
 	if (ismastersticky(NULL)) {
-		Window *master = lastmaster(window_tags_get(c));
+		Window *master = lastmaster();
 
 		if (master) {
 			attachafter(c, master);
@@ -1362,31 +1347,6 @@ sigterm_handler(int sig) {
 	running = false;
 }
 
-static unsigned int
-bitoftag(const char *tag) {
-	unsigned int i;
-	if (!tag)
-		return ~0;
-	for (i = 0; (i < LENGTH(tags)) && strcmp(tags[i], tag); i++);
-	return (i < LENGTH(tags)) ? (1 << i) : 0;
-}
-
-static void
-tagschanged() {
-	bool allminimized = true;
-	for (Window *c = nextvisible(windows_list()); c; c = nextvisible(c->next)) {
-		if (!c->minimized) {
-			allminimized = false;
-			break;
-		}
-	}
-	if (allminimized && nextvisible(windows_list())) {
-		focus(NULL);
-		toggleminimize();
-	}
-	arrange();
-}
-
 static void
 keypress(int code) {
 	char buf[8] = { '\e' };
@@ -1433,8 +1393,7 @@ initpertag(void) {
 	int i;
 
 	curr_tag_set(1);
-	prev_tag_set(1);
-	for(i=0; i <= LENGTH(tags); i++) {
+	for(i=0; i <= MAXTAGS; i++) {
 		pertag[i].f = calloc(1, sizeof(Frame));
 		pertag[i].f->nmaster = NMASTER;
 		pertag[i].f->mfact = MFACT;
@@ -1627,7 +1586,7 @@ cleanup(void) {
 	scheme_uninit();
 	while (windows_list())
 		destroy(windows_list());
-	for(i=0; i <= LENGTH(tags); i++) {
+	for(i=0; i <= MAXTAGS; i++) {
 		if (pertag[i].f->popup)
 			destroy(pertag[i].f->popup);
 	}
@@ -1662,7 +1621,7 @@ cleanup(void) {
 		close(retfifo.fd);
 	if (retfifo.file)
 		unlink(retfifo.file);
-	for(i=0; i <= LENGTH(tags); i++) {
+	for(i=0; i <= MAXTAGS; i++) {
 		free(pertag[i].f->name);
 		free(pertag[i].f->cwd);
 		free(pertag[i].f);
@@ -1760,8 +1719,6 @@ int term_create(const char *prog, const char *title, const char *cwd, const char
 		return -1;
 	}
 
-	window_tags_set(c, tagset[seltags]);
-
 	c->view = view_new(buffer_text_get(c->buf));
 	if (!c->view) {
 		__buf_del(c->buf);
@@ -1827,10 +1784,6 @@ __focusid(int win_id) {
 	for (Window *c = windows_list(); c; c = c->next) {
 		if (c->id == win_id) {
 			focus(c);
-			if (!isvisible(c)) {
-				window_tags_set(c, window_tags_get(c) | tagset[seltags]);
-				tagschanged();
-			}
 			return;
 		}
 	}
@@ -2549,7 +2502,6 @@ static void window_switch_buf(Window *w, Buffer *b)
 		view_reload(w->view, buffer_text_get(b));
 		buffer_dirty_set(b, true);
 		w->prev_buf = w->buf;
-		buffer_tags_set(b, buffer_tags_get(w->buf));
 		w->buf = b;
 		buffer_ref_get(w->buf);
 	}
@@ -2576,12 +2528,16 @@ bool win_is_visible(int wid)
 	return false;
 }
 
-int win_first_get(void)
+int win_first_get(int fid)
 {
-	if (windows_list())
-		return windows_list()->id;
+	int wid = 0;
 
-	return 0;
+	fid = fid < 0 ? curr_tag_get() : fid;
+
+	if (windows_list_by_fid(fid))
+		wid = windows_list_by_fid(fid)->id;
+
+	return wid;
 }
 
 int win_prev_get(int wid)
@@ -2929,8 +2885,6 @@ int win_new(int bid)
 	} else {
 		c->buf = __buf_new("", global_kmap);
 	}
-
-	window_tags_set(c, tagset[seltags]);
 
 	if (!c->buf) {
 		free(c);
@@ -4275,81 +4229,6 @@ size_t buf_search_regex(int bid, size_t pos, const char *pattern, int dir)
 	return EPOS;
 }
 
-static int tag_to_bit(int tag)
-{
-	if (!tag)
-		return ~0;
-
-	tag--;
-	return TAGMASK & ((tag < LENGTH(tags)) ? (1 << tag) : 0);
-}
-
-int buf_tag_set(int bid, int tag)
-{
-	unsigned int ntags = tag_to_bit(tag);
-	Buffer *buf = buffer_by_id(bid);
-
-	if (!ntags || !buf)
-		return -1;
-
-	buffer_tags_set(buf, ntags);
-	tagschanged();
-	return 0;
-}
-
-int buf_tag_bits(int bid)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (!buf)
-		return 0;
-
-	return buffer_tags_get(buf);
-}
-
-int buf_tag_toggle(int bid, int tag)
-{
-	Buffer *buf = buffer_by_id(bid);
-	unsigned int ntags;
-
-	if (!buf)
-		return -1;
-
-	ntags = buffer_tags_get(buf) ^ tag_to_bit(tag);
-	if (ntags) {
-		buffer_tags_set(buf, ntags);
-		tagschanged();
-	}
-}
-
-int buf_tag_add(int bid, int tag)
-{
-	Buffer *buf = buffer_by_id(bid);
-	unsigned int ntags;
-
-	if (!buf)
-		return -1;
-
-	ntags = buffer_tags_get(buf) | tag_to_bit(tag);
-	buffer_tags_set(buf, ntags);
-	tagschanged();
-	return 0;
-}
-
-int buf_tag_del(int bid, int tag)
-{
-	Buffer *buf = buffer_by_id(bid);
-	unsigned int ntags;
-
-	if (!buf)
-		return -1;
-
-	ntags = buffer_tags_get(buf) & ~tag_to_bit(tag);
-	buffer_tags_set(buf, ntags);
-	tagschanged();
-	return 0;
-}
-
 int buf_parser_set(int bid, const char *lang)
 {
 	Buffer *buf = buffer_by_id(bid);
@@ -4404,7 +4283,6 @@ static Window *widget_create(const char *name, int x, int y, int width, int heig
 	if (!w)
 		return NULL;
 
-	/* c->tags = tagset[seltags]; */
 	w->id = ++cmdfifo.id;
 
 	w->buf = __buf_new(name, NULL);
@@ -4534,16 +4412,8 @@ int frame_current_get(void)
 
 int frame_current_set(int tag)
 {
-	int i;
-
-	unsigned int newtagset = tag_to_bit(tag);
-	if (tagset[seltags] != newtagset && newtagset) {
-		seltags ^= 1; /* toggle current_window() tagset */
-		prev_tag_set(curr_tag_get());
-		curr_tag_set(tag);
-		tagset[seltags] = newtagset;
-		tagschanged();
-	}
+	curr_tag_set(tag);
+	arrange();
 }
 
 const char *frame_name_get(int tag)

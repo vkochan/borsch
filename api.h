@@ -54,7 +54,7 @@ void eprint(const char *errstr, ...);
 
 int win_get_by_coord(int x, int y);
 bool win_is_visible(int wid);
-int win_first_get(void);
+int win_first_get(int fid);
 int win_prev_get(int wid);
 int win_next_get(int wid);
 int win_upper_get(int wid);
@@ -165,12 +165,6 @@ void buf_undo(int bid);
 void buf_redo(int bid);
 
 size_t buf_search_regex(int bid, size_t pos, const char *pattern, int dir);
-
-int buf_tag_set(int bid, int tag);
-int buf_tag_bits(int bid);
-int buf_tag_add(int bid, int tag);
-int buf_tag_del(int bid, int tag);
-int buf_tag_toggle(int bid, int tag);
 
 int buf_parser_set(int bid, const char *lang);
 

@@ -62,7 +62,6 @@ typedef struct Buffer {
 	TextProperty *max_prop;
 	TextProperty props;
 	SyntaxParser *parser;
-	unsigned int tags;
 	void *env;
 } Buffer;
 
@@ -962,14 +961,4 @@ void buffer_syntax_rules_walk(Buffer *buf, syntax_rule_type_t type, size_t start
 	if (buf->parser) {
 		syntax_parser_rules_walk(buf->parser, type, start, end, arg, cb);
 	}
-}
-
-void buffer_tags_set(Buffer *buf, unsigned int tags)
-{
-	buf->tags = tags;
-}
-
-unsigned int buffer_tags_get(Buffer *buf)
-{
-	return buf->tags;
 }
