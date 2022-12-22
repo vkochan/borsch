@@ -184,7 +184,11 @@ void scheme_win_close(int wid)
 
 ptr scheme_win_title_get(int wid)
 {
-	return Sstring(win_title_get(wid));
+	char *title = win_title_get(wid);
+
+	if (title)
+		return Sstring(title);
+	return Sfalse;
 }
 
 int scheme_win_title_set(int wid, char *title)
