@@ -102,14 +102,6 @@ struct Window {
 	bool pending_draw_evt;
 };
 
-typedef struct {
-	short fg;
-	short bg;
-	short fg256;
-	short bg256;
-	short pair;
-} Color;
-
 /* #define ALT(k)      ((k) + (161 - 'a')) */
 #define ALT	27
 #if defined CTRL && defined _AIX
