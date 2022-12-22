@@ -138,9 +138,6 @@ typedef struct {
 
 static KeyBuf kbuf;
 
-enum { BAR_TOP, BAR_BOTTOM, BAR_OFF };
-enum { BAR_LEFT, BAR_RIGHT };
-
 enum { MIN_ALIGN_HORIZ, MIN_ALIGN_VERT };
 
 typedef struct {
@@ -213,8 +210,6 @@ static KeyMap *curr_kmap;
 static Window *minibuf;
 static Window *topbar;
 
-/* status bar (command line option -s) position */
-#define BAR_POS         BAR_TOP /* BAR_BOTTOM, BAR_OFF */
 /* master width factor [0.1 .. 0.9] */
 #define MFACT 0.5
 /* number of windows in master area */
@@ -902,12 +897,8 @@ update_screen_size(void) {
 
 	wah = ui_height_get(ui)-dec_h;
 	waw = ui_width_get(ui);
-	if (BAR_POS == BAR_TOP) {
-		wah -= top_h;
-		way += top_h;
-	} else if (BAR_POS == BAR_BOTTOM) {
-		wah -= top_h;
-	}
+	wah -= top_h;
+	way += top_h;
 
 	if (minibuf)
 		ui_window_move(minibuf->win, 0, ui_height_get(ui)-dec_h);
