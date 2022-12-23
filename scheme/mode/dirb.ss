@@ -174,12 +174,7 @@
              )
           )
           (if (file-regular? p)
-             (let ([b (buffer-create)])
-                (with-current-buffer b
-                   (text-mode)
-                   (buffer-open-file p)
-                )
-             )
+             (buffer-open-file p)
           )
        )
     )

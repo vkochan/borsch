@@ -423,17 +423,53 @@
 
 (define buffer-open-file
    (lambda (f)
-      (let ([ok (call-foreign (__cs_buf_file_open (current-buffer) f)) ])
-         (when ok
-            (for-each
-               (lambda (match)
-                  (let ([fname (buffer-filename)])
-                     (when (pregexp-match (car match) fname)
-                        ((top-level-value (cdr match)))
+      (let (
+            [bid (buffer-get f)]
+            [in-frame? #f]
+            [wid 0]
+           )
+         (if bid
+            (let ()
+               (set! wid (buffer-window bid))
+               (for-all
+                  (lambda (w)
+                     (when (equal? (first w) wid)
+                        (set! in-frame? #t)
+                        #f
                      ) 
                   )
+                  (window-list)
                )
-               file-match-mode
+               (if in-frame?
+                  (begin
+                     (window-select wid)
+                  )
+                  ;; else
+                  (window-create bid)
+               )
+               bid
+            )
+            ;; else
+            (let* (
+                   [b (buffer-create)]
+                   [ok (call-foreign (__cs_buf_file_open b f))]
+                  )
+               (with-current-buffer b
+                  (text-mode)
+                  (when ok
+                     (for-each
+                        (lambda (match)
+                           (let ([fname (buffer-filename)])
+                              (when (pregexp-match (car match) fname)
+                                 ((top-level-value (cdr match)))
+                              ) 
+                           )
+                        )
+                        file-match-mode
+                     )
+                  )
+               )
+               b
             )
          )
       )

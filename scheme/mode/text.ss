@@ -105,12 +105,7 @@
    (lambda (p)
       (let ([p (path-expand p)])
          (if (file-regular? p)
-            (let ([b (buffer-create)])
-               (with-current-buffer b
-                  (text-mode)
-                  (buffer-open-file p)
-               )
-            )
+            (buffer-open-file p)
             ;; else
             (if (file-directory? p)
                (dirb p)
