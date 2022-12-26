@@ -193,7 +193,6 @@ static void mouse_minimize(const char *args[]);
 static void mouse_zoom(const char *args[]);
 
 static void attachafter(Window *c, Window *a);
-static Window* nextvisible(Window *c);
 
 static void focus(Window *c);
 static void resize(Window *c, int x, int y, int w, int h);
@@ -351,7 +350,6 @@ static void draw_title(Window *c);
 static void drawbar(void);
 static bool isarrange(void (*func)());
 static Window *current_window(void);
-static bool isvisible(Window *c);
 
 static char term_name[32];
 
@@ -403,7 +401,7 @@ term_urgent_handler(Vt *term) {
 	printf("\a");
 	fflush(stdout);
 	drawbar();
-	if (!isarrange(fullscreen) && current_window() != c && isvisible(c))
+	if (!isarrange(fullscreen) && current_window() != c)
 		draw_title(c);
 }
 
@@ -813,11 +811,6 @@ static void set_windows_list(Window *w)
 }
 
 static bool
-isvisible(Window *c) {
-	return true;
-}
-
-static bool
 is_content_visible(Window *c) {
 	if (!c)
 		return false;
@@ -827,20 +820,14 @@ is_content_visible(Window *c) {
 		return true;
 	else if (c == topbar)
 		return true;
-	return isvisible(c) && !c->minimized;
-}
-
-static Window*
-nextvisible(Window *c) {
-	for (; c && !isvisible(c); c = c->next);
-	return c;
+	return !c->minimized;
 }
 
 static bool ismaster(Window *c) {
 	int n = 0;
 	Window *m;
 
-	for (m = nextvisible(windows_list()); m && n < getnmaster(); m = nextvisible(m->next), n++) {
+	for (m = windows_list(); m && n < getnmaster(); m = m->next, n++) {
 		if (c == m)
 			return true;
 	}
@@ -857,7 +844,7 @@ static bool ismastersticky(Window *c) {
 	if (!c)
 		return true;
 
-	for (m = nextvisible(windows_list()); m && n < getnmaster(); m = nextvisible(m->next), n++) {
+	for (m = windows_list(); m && n < getnmaster(); m = m->next, n++) {
 		if (c == m)
 			return true;
 	}
@@ -1031,7 +1018,7 @@ draw_all(void) {
 		draw(minibuf, true);
 	}
 
-	if (!nextvisible(windows_list())) {
+	if (!windows_list()) {
 		set_current_window(NULL);
 		ui_clear(ui);
 		drawbar();
@@ -1040,7 +1027,7 @@ draw_all(void) {
 	}
 
 	if (!isarrange(fullscreen)) {
-		for (Window *c = nextvisible(windows_list()); c; c = nextvisible(c->next)) {
+		for (Window *c = windows_list(); c; c = c->next) {
 			if (c != current_window()) {
 				draw(c, true);
 			}
@@ -1059,7 +1046,7 @@ draw_all(void) {
 static void
 arrange(void) {
 	unsigned int m = 0, n = 0, dh = 0;
-	for (Window *c = nextvisible(windows_list()); c; c = nextvisible(c->next)) {
+	for (Window *c = windows_list(); c; c = c->next) {
 		c->order = ++n;
 		if (c->minimized)
 			m++;
@@ -1077,7 +1064,7 @@ arrange(void) {
 	current_frame()->layout->arrange(wax, way, waw, wah);
 	if (m && !isarrange(fullscreen)) {
 		unsigned int i = 0, nw = waw / m, nx = wax;
-		for (Window *c = nextvisible(windows_list()); c; c = nextvisible(c->next)) {
+		for (Window *c = windows_list(); c; c = c->next) {
 			if (c->minimized) {
 				if (min_align == MIN_ALIGN_VERT) {
 					resize(c, nx, way+wah+i, waw, 1);
@@ -1112,7 +1099,7 @@ attachfirst(Window *c) {
 	c->next = windows_list();
 	c->prev = NULL;
 	set_windows_list(c);
-	for (int o = 1; c; c = nextvisible(c->next), o++)
+	for (int o = 1; c; c = c->next, o++)
 		c->order = o;
 }
 
@@ -1143,7 +1130,7 @@ attachafter(Window *c, Window *a) { /* attach c after a */
 		c->next = a->next;
 		c->prev = a;
 		a->next = c;
-		for (int o = a->order; c; c = nextvisible(c->next))
+		for (int o = a->order; c; c = c->next)
 			c->order = ++o;
 	}
 }
@@ -1161,7 +1148,7 @@ detach(Window *c) {
 		c->prev->next = c->next;
 	if (c->next) {
 		c->next->prev = c->prev;
-		for (d = nextvisible(c->next); d; d = nextvisible(d->next))
+		for (d = c->next; d; d = d->next)
 			--d->order;
 	}
 	if (c == windows_list())
@@ -1195,7 +1182,7 @@ focus(Window *c) {
 	Window *lastsel;
 
 	if (!c)
-		for (c = window_stack(); c && !isvisible(c); c = c->snext);
+		c = window_stack();
 
 	if (current_window() == c)
 		return;
@@ -1280,7 +1267,7 @@ get_window_by_coord(unsigned int x, unsigned int y) {
 		return NULL;
 	if (isarrange(fullscreen))
 		return current_window();
-	for (Window *c = nextvisible(windows_list()); c; c = nextvisible(c->next)) {
+	for (Window *c = windows_list(); c; c = c->next) {
 		int w_h = ui_window_height_get(c->win);
 		int w_w = ui_window_width_get(c->win);
 		int w_y = ui_window_y_get(c->win);
@@ -1334,7 +1321,7 @@ static void
 keypress(int code) {
 	char buf[8] = { '\e' };
 
-	for (Window *c = current_window(); c; c = nextvisible(c->next)) {
+	for (Window *c = current_window(); c; c = c->next) {
 		if (is_content_visible(c)) {
 			c->urgent = false;
 
@@ -1503,7 +1490,7 @@ static void __win_del(Window *w)
 	detachstack(w);
 
 	if (current_window() == w) {
-		Window *next = nextvisible(windows_list());
+		Window *next = windows_list();
 		if (next) {
 			focus(next);
 			toggleminimize();
@@ -1751,7 +1738,7 @@ int term_create(const char *prog, const char *title, const char *cwd, const char
 
 static void
 focusn(const char *args[]) {
-	for (Window *c = nextvisible(windows_list()); c; c = nextvisible(c->next)) {
+	for (Window *c = windows_list(); c; c = c->next) {
 		if (c->order == atoi(args[0])) {
 			focus(c);
 			if (c->minimized)
@@ -1780,9 +1767,9 @@ focusnextnm(const char *args[]) {
 		return;
 	Window *c = current_window();
 	do {
-		c = nextvisible(c->next);
+		c = c->next;
 		if (!c)
-			c = nextvisible(windows_list());
+			c = windows_list();
 	} while (c && c->minimized && c != current_window());
 	focus(c);
 }
@@ -1793,10 +1780,10 @@ focusprevnm(const char *args[]) {
 		return;
 	Window *c = current_window();
 	do {
-		for (c = c->prev; c && !isvisible(c); c = c->prev);
+		for (c = c->prev; c; c = c->prev);
 		if (!c) {
 			for (c = windows_list(); c && c->next; c = c->next);
-			for (; c && !isvisible(c); c = c->prev);
+			for (; c; c = c->prev);
 		}
 	} while (c && c != current_window() && c->minimized);
 	focus(c);
@@ -1816,7 +1803,7 @@ static void killother(const char *args[]) {
 	unsigned int n;
 	Window *c;
 
-	for (n = 0, c = nextvisible(windows_list()); c; c = nextvisible(c->next)) {
+	for (n = 0, c = windows_list(); c; c = c->next) {
 		if (ismastersticky(c) || current_window() == c)
 			continue;
 		destroy(c);
@@ -1915,7 +1902,7 @@ toggleminimize(void)
 		return;
 	/* the last window can't be minimized */
 	if (!current_window()->minimized) {
-		for (n = 0, c = nextvisible(windows_list()); c; c = nextvisible(c->next))
+		for (n = 0, c = windows_list(); c; c = c->next)
 			if (!c->minimized)
 				n++;
 		if (n == 1)
@@ -1924,20 +1911,20 @@ toggleminimize(void)
 	current_window()->minimized = !current_window()->minimized;
 	m = current_window();
 	/* check whether the master window was minimized */
-	if (current_window() == nextvisible(windows_list()) && current_window()->minimized) {
-		c = nextvisible(current_window()->next);
+	if (current_window() == windows_list() && current_window()->minimized) {
+		c = current_window()->next;
 		detach(c);
 		attach(c);
 		focus(c);
 		detach(m);
-		for (; c && (t = nextvisible(c->next)) && !t->minimized; c = t);
+		for (; c && (t = c->next) && !t->minimized; c = t);
 		attachafter(m, c);
 	} else if (m->minimized) {
 		/* non master window got minimized move it above all other
 		 * minimized ones */
 		focusnextnm(NULL);
 		detach(m);
-		for (c = nextvisible(windows_list()); c && (t = nextvisible(c->next)) && !t->minimized; c = t);
+		for (c = windows_list(); c && (t = c->next) && !t->minimized; c = t);
 		attachafter(m, c);
 	} else { /* window is no longer minimized, move it to the master area */
 		Process *proc = buffer_proc_get(m->buf);
@@ -1954,7 +1941,7 @@ static void minimizeother(const char *args[])
 	unsigned int n;
 	Window *c;
 
-	for (n = 0, c = nextvisible(windows_list()); c; c = nextvisible(c->next)) {
+	for (n = 0, c = windows_list(); c; c = c->next) {
 		if (ismastersticky(c) || current_window() == c)
 			continue;
 
@@ -1978,8 +1965,8 @@ zoom(const char *args[]) {
 		return;
 	if (args && args[0])
 		focusn(args);
-	if ((c = current_window()) == nextvisible(windows_list()))
-		if (!(c = nextvisible(c->next)))
+	if ((c = current_window()) == windows_list())
+		if (!(c = c->next))
 			return;
 	detach(c);
 	attachfirst(c);
@@ -2341,7 +2328,7 @@ static void handle_keypress(KeyCode *key)
 		curr_kmap = NULL;
 	}
 
-	for (Window *c = nextvisible(windows_list()); c; c = nextvisible(c->next)) {
+	for (Window *c = windows_list(); c; c = c->next) {
 		if (c->pending_draw_evt) {
 			c->pending_draw_evt = false;
 			draw(c, true);
@@ -2426,8 +2413,7 @@ int main(int argc, char *argv[]) {
 				if (c != current_window()) {
 					draw(c, false);
 				}
-			} else if (!isarrange(fullscreen) && isvisible(c)
-					&& c->minimized) {
+			} else if (!isarrange(fullscreen) && c->minimized) {
 				draw_title(c);
 				ui_window_refresh(c->win);
 			}
@@ -2504,8 +2490,15 @@ bool win_is_visible(int wid)
 {
 	Window *c = window_get_by_id(wid);
 
-	if (c)
-		return isvisible(c) || c == minibuf || c == topbar;
+	if (c) {
+		if (c == minibuf || c == topbar)
+			return true;
+
+		for (Window *m = windows_list(); m; m = m->next) {
+			if (m->id == c->id)
+				return true;
+		}
+	}
 
 	return false;
 }
@@ -3384,7 +3377,7 @@ void buf_name_set(int bid, const char *name)
 		buffer_name_set(buf, name);
 
 		for (Window *c = windows_list(); c; c = c->next) {
-			if (isvisible(c) && c->buf == buf)
+			if (c->buf == buf)
 				draw_title(c);
 		}
 	}
@@ -3408,7 +3401,7 @@ void buf_readonly_set(int bid, bool is_readonly)
 		buffer_readonly_set(buf, is_readonly);
 
 		for (Window *w = windows_list(); w; w = w->next) {
-			if (isvisible(w) && w->buf == buf)
+			if (w->buf == buf)
 				draw_title(w);
 		}
 	}
@@ -4031,7 +4024,7 @@ bool buf_is_visible(int bid)
 	Buffer *buf = buffer_by_id(bid);
 
 	if (buf) {
-		for (Window *c = nextvisible(windows_list()); c; c = nextvisible(c->next)) {
+		for (Window *c = windows_list(); c; c = c->next) {
 			if (c->buf == buf)
 				return true;
 		}

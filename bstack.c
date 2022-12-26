@@ -5,7 +5,7 @@ static void bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigne
 
 	Window *c;
 
-	for (n = 0, c = nextvisible(windows_list()); c; c = nextvisible(c->next))
+	for (n = 0, c = windows_list(); c; c = c->next)
 		if (!c->minimized)
 			n++;
 
@@ -16,7 +16,7 @@ static void bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigne
 	nx = lax;
 	ny = lay;
 
-	for (i = 0, c = nextvisible(windows_list()); c; c = nextvisible(c->next)) {
+	for (i = 0, c = windows_list(); c; c = c->next) {
 		if (c->minimized)
 			continue;
 		if (i < m) {	/* master */
