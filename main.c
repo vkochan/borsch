@@ -171,7 +171,6 @@ static bool start_in_graphic = false;
 /* commands for use by keybindings */
 static void focusn(const char *args[]);
 static void focusnextnm(const char *args[]);
-static void focusprevnm(const char *args[]);
 static void killwindow(void);
 static void killother(const char *args[]);
 static void quit(const char *args[]);
@@ -1771,21 +1770,6 @@ focusnextnm(const char *args[]) {
 		if (!c)
 			c = windows_list();
 	} while (c && c->minimized && c != current_window());
-	focus(c);
-}
-
-static void
-focusprevnm(const char *args[]) {
-	if (!current_window())
-		return;
-	Window *c = current_window();
-	do {
-		for (c = c->prev; c; c = c->prev);
-		if (!c) {
-			for (c = windows_list(); c && c->next; c = c->next);
-			for (; c; c = c->prev);
-		}
-	} while (c && c != current_window() && c->minimized);
 	focus(c);
 }
 
