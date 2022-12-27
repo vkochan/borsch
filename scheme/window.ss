@@ -258,7 +258,6 @@
 (define win-state->symb
    (lambda (st)
       (case st
-         [0 'minimized]
 	 [1 'maximized]
          [2 'master   ]
       )
@@ -272,16 +271,6 @@
 
       [(wid st)
        (win-state->symb (call-foreign (__cs_win_state_get (wid))))]
-   )
-)
-
-(define window-is-minimized?
-   (case-lambda
-      [()
-       (equal? (__window-get) 'minimized)]
-
-      [(wid)
-       (equal? (__window-get wid) 'minimized)]
    )
 )
 
@@ -308,7 +297,6 @@
 (define symb->win-state
    (lambda (sym)
       (case sym
-         ['minimized 0]
          ['maximized 1]
          ['master    2]
       )
@@ -322,18 +310,6 @@
 
       [(wid st)
        (call-foreign (__cs_win_state_set wid (symb->win-state st)))]
-   )
-)
-
-(define window-set-minimized
-   (case-lambda
-      [()
-       (window-set-minimized (current-window))]
-
-      [(wid)
-       (__window-set wid 'minimized)
-       (run-hooks 'window-minimize-hook wid)
-      ]
    )
 )
 
@@ -366,20 +342,6 @@
 
       [(wid st)
        (call-foreign (__cs_win_state_toggle wid (symb->win-state st)))]
-   )
-)
-
-(define window-toggle-minimized
-   (case-lambda
-      [()
-       (window-toggle-minimized (current-window))]
-
-      [(wid)
-       (__window-toggle wid 'minimized)
-       (when (window-is-minimized? wid)
-          (run-hooks 'window-minimize-hook wid)
-       )
-      ]
    )
 )
 

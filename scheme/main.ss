@@ -271,7 +271,6 @@
 (bind-key "M-w g"       layout-switch-grid)
 (bind-key "M-w b"       layout-switch-bstack)
 (bind-key "M-w m"       window-toggle-maximized)
-(bind-key "M-w ."       window-set-minimized)
 (bind-key "M-w <Enter>" window-set-master)
 (bind-key "M-b n"       new-text-buffer)
 (bind-key "M-b s"       minibuf-switch-buffer)
@@ -296,7 +295,6 @@
 (bind-key "C-g j"       window-select-lower)
 (bind-key "C-g k"       window-select-upper)
 (bind-key "C-g <Enter>" window-set-master)
-(bind-key "C-g ."       window-set-minimized)
 
 (bind-key "C-g f 1" frame-switch-1)
 (bind-key "C-g f 2" frame-switch-2)
