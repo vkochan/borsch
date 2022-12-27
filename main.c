@@ -143,12 +143,6 @@ typedef struct {
 	unsigned short int id;
 } Fifo;
 
-typedef struct {
-	char *data;
-	size_t len;
-	size_t size;
-} Register;
-
 static Ui *ui;
 
 #define LENGTH(arr) (sizeof(arr) / sizeof((arr)[0]))
