@@ -202,6 +202,112 @@ static Window *topbar;
 
 static Window *windows_list(void);
 
+static void tile(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
+static void grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
+static void bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
+static void fullscreen(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
+
+/* by default the first layout entry is used */
+static Layout layouts[] = {
+	{ "[]=", tile },
+	{ "+++", grid },
+	{ "TTT", bstack },
+	{ "[ ]", fullscreen },
+};
+
+#ifdef NCURSES_MOUSE_VERSION
+# define CONFIG_MOUSE /* compile in mouse support if we build against ncurses */
+#endif
+
+#define ENABLE_MOUSE true /* whether to enable mouse events by default */
+
+#ifdef CONFIG_MOUSE
+static Button buttons[] = {
+	{ BUTTON1_CLICKED,        { mouse_focus,      { NULL  } } },
+	{ BUTTON1_DOUBLE_CLICKED, { mouse_fullscreen, { "[ ]" } } },
+	{ BUTTON2_CLICKED,        { mouse_zoom,       { NULL  } } },
+};
+#endif /* CONFIG_MOUSE */
+
+#define CWD_MAX		256
+
+typedef struct {
+	int nmaster;
+	float mfact;
+	Layout *layout;
+	Layout *layout_prev;
+	char *cwd;
+	char *name;
+	bool msticky;
+	Window *popup;
+	Window *sel;
+	Window *lastsel;
+	Window *windows;
+	Window *stack;
+} Frame;
+
+typedef struct {
+	Frame *f;
+} Tab;
+
+typedef struct
+{
+	pid_t 			pid;
+} ProcessInfo;
+
+typedef struct Process
+{
+	struct Process 		*next;
+	struct Process 		*prev;
+	char			*prog;
+	const char		**env;
+	char			*cwd;
+	Vt 			*term;
+	bool			is_status_set;
+	int			status;
+	int 			in;
+	int 			out;
+	int 			err;
+	pid_t 			pid;
+	Window 			*win;
+	Buffer 			*buf;
+	volatile sig_atomic_t 	is_died;
+	bool			async;
+} Process;
+
+static Process proc_list;
+static int proc_fd[2];
+
+/* global variables */
+static const char *prog_name = PROGNAME;
+static unsigned int curtag;
+static Tab tabs[MAXTAGS + 1];
+static Window *msel = NULL;
+static bool mouse_events_enabled = ENABLE_MOUSE;
+
+static Fifo cmdfifo = { .fd = -1 };
+static Fifo retfifo = { .fd = -1 };
+
+static const char *shell;
+static volatile sig_atomic_t running = true;
+
+static Cmd commands[] = {
+	{ "eval", { doeval, { NULL } } },
+};
+
+static Array style_array;
+
+static void draw(Window *c, bool force);
+static void draw_title(Window *c);
+static void drawbar(void);
+static bool isarrange(void (*func)());
+static Window *current_window(void);
+
+static char term_name[32];
+
+#define for_each_window_master(__m) \
+	for (int __n = ({__m = windows_list();0;}); __m && __n < getnmaster(); __m = __m->next, __n++)
+
 static void tile(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
 {
 	unsigned int lax = wax, lay = way-1, law = waw, lah = wah;
@@ -364,106 +470,6 @@ static void fullscreen(unsigned int wax, unsigned int way, unsigned int waw, uns
 		resize(c, wax, way, waw, wah);
 }
 
-/* by default the first layout entry is used */
-static Layout layouts[] = {
-	{ "[]=", tile },
-	{ "+++", grid },
-	{ "TTT", bstack },
-	{ "[ ]", fullscreen },
-};
-
-#ifdef NCURSES_MOUSE_VERSION
-# define CONFIG_MOUSE /* compile in mouse support if we build against ncurses */
-#endif
-
-#define ENABLE_MOUSE true /* whether to enable mouse events by default */
-
-#ifdef CONFIG_MOUSE
-static Button buttons[] = {
-	{ BUTTON1_CLICKED,        { mouse_focus,      { NULL  } } },
-	{ BUTTON1_DOUBLE_CLICKED, { mouse_fullscreen, { "[ ]" } } },
-	{ BUTTON2_CLICKED,        { mouse_zoom,       { NULL  } } },
-};
-#endif /* CONFIG_MOUSE */
-
-#define CWD_MAX		256
-
-typedef struct {
-	int nmaster;
-	float mfact;
-	Layout *layout;
-	Layout *layout_prev;
-	char *cwd;
-	char *name;
-	bool msticky;
-	Window *popup;
-	Window *sel;
-	Window *lastsel;
-	Window *windows;
-	Window *stack;
-} Frame;
-
-typedef struct {
-	Frame *f;
-} Tab;
-
-typedef struct
-{
-	pid_t 			pid;
-} ProcessInfo;
-
-typedef struct Process
-{
-	struct Process 		*next;
-	struct Process 		*prev;
-	char			*prog;
-	const char		**env;
-	char			*cwd;
-	Vt 			*term;
-	bool			is_status_set;
-	int			status;
-	int 			in;
-	int 			out;
-	int 			err;
-	pid_t 			pid;
-	Window 			*win;
-	Buffer 			*buf;
-	volatile sig_atomic_t 	is_died;
-	bool			async;
-} Process;
-
-static Process proc_list;
-static int proc_fd[2];
-
-/* global variables */
-static const char *prog_name = PROGNAME;
-static unsigned int curtag;
-static Tab tabs[MAXTAGS + 1];
-static Window *msel = NULL;
-static bool mouse_events_enabled = ENABLE_MOUSE;
-
-static Fifo cmdfifo = { .fd = -1 };
-static Fifo retfifo = { .fd = -1 };
-
-static const char *shell;
-static volatile sig_atomic_t running = true;
-
-static Cmd commands[] = {
-	{ "eval", { doeval, { NULL } } },
-};
-
-static Array style_array;
-
-static void draw(Window *c, bool force);
-static void draw_title(Window *c);
-static void drawbar(void);
-static bool isarrange(void (*func)());
-static Window *current_window(void);
-
-static char term_name[32];
-
-#define for_each_window_master(__m) \
-	for (int __n = ({__m = windows_list();0;}); __m && __n < getnmaster(); __m = __m->next, __n++)
 
 static int curr_tag_get(void)
 {
