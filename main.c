@@ -179,8 +179,6 @@ static void scrollback(const char *args[]);
 static void setlayout(const char *args[]);
 static int getnmaster(void);
 static float getmfact(void);
-static void toggleminimize(void);
-static void minimizeother(const char *args[]);
 static void togglemouse(const char *args[]);
 static void zoom(const char *args[]);
 static void doeval(const char *args[]);
@@ -201,7 +199,6 @@ static char *title;
 static void buf_list_update(void);
 
 static bool is_in_kbd_action;
-static KeyMap *win_min_kmap;
 static KeyMap *global_kmap;
 static KeyMap *curr_kmap;
 
@@ -1186,11 +1183,6 @@ focus(Window *c) {
 	if (current_window() == c)
 		return;
 
-	if (c) {
-		if (c->minimized)
-			curr_kmap = win_min_kmap;
-	}
-
 	set_last_selected_window(current_window());
 	lastsel = last_selected_window();
 	set_current_window(c);
@@ -1401,10 +1393,6 @@ static void init_default_keymap(void)
 {
 	global_kmap = keymap_new(NULL);
 	curr_kmap = global_kmap;
-
-	win_min_kmap = keymap_new(global_kmap);
-	keymap_bind(win_min_kmap, "<Enter>", toggleminimize, NULL);
-	keymap_bind(win_min_kmap, "x", killwindow, NULL);
 }
 
 static CellStyle get_default_cell_style(Ui *ui)
@@ -1492,7 +1480,6 @@ static void __win_del(Window *w)
 		Window *next = windows_list();
 		if (next) {
 			focus(next);
-			toggleminimize();
 		} else {
 			set_current_window(NULL);
 		}
@@ -1575,7 +1562,6 @@ cleanup(void) {
 		proc = next;
 	}
 
-	keymap_free(win_min_kmap);
 	keymap_free(global_kmap);
 	vt_shutdown();
 	syntax_cleanup();
@@ -1740,8 +1726,6 @@ focusn(const char *args[]) {
 	for (Window *c = windows_list(); c; c = c->next) {
 		if (c->order == atoi(args[0])) {
 			focus(c);
-			if (c->minimized)
-				toggleminimize();
 			return;
 		}
 	}
@@ -1874,68 +1858,6 @@ getmfact(void) {
 }
 
 static void
-toggleminimize(void)
-{
-	Window *c, *m, *t;
-	unsigned int n;
-
-	if (!current_window())
-		return;
-	/* do not minimize sticked master */
-	if (ismastersticky(current_window()))
-		return;
-	/* the last window can't be minimized */
-	if (!current_window()->minimized) {
-		for (n = 0, c = windows_list(); c; c = c->next)
-			if (!c->minimized)
-				n++;
-		if (n == 1)
-			return;
-	}
-	current_window()->minimized = !current_window()->minimized;
-	m = current_window();
-	/* check whether the master window was minimized */
-	if (current_window() == windows_list() && current_window()->minimized) {
-		c = current_window()->next;
-		detach(c);
-		attach(c);
-		focus(c);
-		detach(m);
-		for (; c && (t = c->next) && !t->minimized; c = t);
-		attachafter(m, c);
-	} else if (m->minimized) {
-		/* non master window got minimized move it above all other
-		 * minimized ones */
-		focusnextnm(NULL);
-		detach(m);
-		for (c = windows_list(); c && (t = c->next) && !t->minimized; c = t);
-		attachafter(m, c);
-	} else { /* window is no longer minimized, move it to the master area */
-		Process *proc = buffer_proc_get(m->buf);
-		if (proc)
-			vt_dirty(process_term_get(proc));
-		detach(m);
-		attach(m);
-	}
-	arrange();
-}
-
-static void minimizeother(const char *args[])
-{
-	unsigned int n;
-	Window *c;
-
-	for (n = 0, c = windows_list(); c; c = c->next) {
-		if (ismastersticky(c) || current_window() == c)
-			continue;
-
-		c->minimized = true;
-	}
-
-	arrange();
-}
-
-static void
 togglemouse(const char *args[]) {
 	mouse_events_enabled = !mouse_events_enabled;
 	mouse_setup();
@@ -1955,8 +1877,6 @@ zoom(const char *args[]) {
 	detach(c);
 	attachfirst(c);
 	focus(c);
-	if (c->minimized)
-		toggleminimize();
 	arrange();
 }
 
@@ -1964,8 +1884,6 @@ zoom(const char *args[]) {
 static void
 mouse_focus(const char *args[]) {
 	focus(msel);
-	if (msel->minimized)
-		toggleminimize();
 }
 
 static void
@@ -1977,7 +1895,6 @@ mouse_fullscreen(const char *args[]) {
 static void
 mouse_minimize(const char *args[]) {
 	focus(msel);
-	toggleminimize();
 }
 
 static void
@@ -2936,9 +2853,7 @@ win_state_t win_state_get(int wid)
 	if (!c)
 		return -1;
 
-	if (c->minimized) {
-		return WIN_STATE_MINIMIZED;
-	} else if (isarrange(fullscreen)) {
+	if (isarrange(fullscreen)) {
 		return WIN_STATE_MAXIMIZED;
 	} else if (ismaster(c)) {
 		return WIN_STATE_MASTER;
@@ -2962,16 +2877,6 @@ int win_state_set(int wid, win_state_t st)
 	orig = current_window();
 
 	switch (st) {
-	case WIN_STATE_MINIMIZED:
-		if (!c->minimized) {
-			win_current_set(wid);
-			toggleminimize();
-			/* switch to the original window */
-			if (orig != c)
-				win_current_set(orig->id);
-		}
-		break;
-
 	case WIN_STATE_MAXIMIZED:
 		win_current_set(wid);
 		setlayout(maxi);
@@ -2982,8 +2887,6 @@ int win_state_set(int wid, win_state_t st)
 		detach(c);
 		attachfirst(c);
 		focus(c);
-		if (c->minimized)
-			toggleminimize();
 		arrange();
 		/* switch to the original window */
 		if (orig)
@@ -3008,14 +2911,6 @@ int win_state_toggle(int wid, win_state_t st)
 	orig = current_window();
 
 	switch (st) {
-	case WIN_STATE_MINIMIZED:
-		win_current_set(wid);
-		toggleminimize();
-		/* switch to the original window */
-		if (orig)
-			win_current_set(orig->id);
-		break;
-
 	case WIN_STATE_MAXIMIZED:
 		if (isarrange(fullscreen)) {
 			current_frame()->layout = current_frame()->layout_prev;
