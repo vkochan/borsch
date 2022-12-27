@@ -160,7 +160,6 @@ static char *scheme_init_script = "";
 static bool start_in_graphic = false;
 
 /* commands for use by keybindings */
-static void focusn(const char *args[]);
 static void killother(const char *args[]);
 static void quit(const char *args[]);
 static void redraw(const char *args[]);
@@ -169,7 +168,6 @@ static void setlayout(const char *args[]);
 static int getnmaster(void);
 static float getmfact(void);
 static void togglemouse(const char *args[]);
-static void zoom(const char *args[]);
 static void doeval(const char *args[]);
 
 /* commands for use by mouse bindings */
@@ -1823,18 +1821,6 @@ int term_create(const char *prog, const char *title, const char *cwd, const char
 }
 
 static void
-focusn(const char *args[]) {
-	Window *c;
-
-	for_each_window(c) {
-		if (c->order == atoi(args[0])) {
-			focus(c);
-			return;
-		}
-	}
-}
-
-static void
 __focusid(int win_id) {
 	Window *c;
 
@@ -1944,23 +1930,6 @@ togglemouse(const char *args[]) {
 	mouse_setup();
 }
 
-static void
-zoom(const char *args[]) {
-	Window *c;
-
-	if (!current_window())
-		return;
-	if (args && args[0])
-		focusn(args);
-	if ((c = current_window()) == windows_list())
-		if (!(c = c->next))
-			return;
-	detach(c);
-	attachfirst(c);
-	focus(c);
-	arrange();
-}
-
 /* commands for use by mouse bindings */
 static void
 mouse_focus(const char *args[]) {
@@ -1976,7 +1945,6 @@ mouse_fullscreen(const char *args[]) {
 static void
 mouse_zoom(const char *args[]) {
 	focus(msel);
-	zoom(NULL);
 }
 
 static Cmd *
