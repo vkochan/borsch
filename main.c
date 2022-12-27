@@ -161,7 +161,6 @@ static bool start_in_graphic = false;
 
 /* commands for use by keybindings */
 static void focusn(const char *args[]);
-static void killwindow(void);
 static void killother(const char *args[]);
 static void quit(const char *args[]);
 static void redraw(const char *args[]);
@@ -1703,16 +1702,6 @@ __focusid(int win_id) {
 
 	if (minibuf && minibuf->id == win_id)
 		focus(minibuf);
-}
-
-static void
-killwindow(void) {
-	Window *target = current_window();
-
-	if (!target)
-		return;
-
-	destroy(target);
 }
 
 static void killother(const char *args[]) {
