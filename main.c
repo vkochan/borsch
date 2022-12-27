@@ -202,10 +202,167 @@ static Window *topbar;
 
 static Window *windows_list(void);
 
-#include "tile.c"
-#include "grid.c"
-#include "bstack.c"
-#include "fullscreen.c"
+static void tile(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
+{
+	unsigned int lax = wax, lay = way-1, law = waw, lah = wah;
+	unsigned int i, n, nx, ny, nw, nh, m, mw, mh, th;
+	Window *c;
+
+	for (n = 0, c = windows_list(); c; c = c->next)
+		n++;
+
+	m  = MAX(1, MIN(n, getnmaster()));
+	mw = n == m ? waw : getmfact() * waw;
+	mh = wah / m;
+	th = n == m ? 0 : wah / (n - m);
+	nx = lax;
+	ny = lay;
+
+	for (i = 0, c = windows_list(); c; c = c->next) {
+		if (i < m) {	/* master */
+			nw = mw;
+			nh = (i < m - 1) ? mh : (lay + wah) - ny;
+		} else {	/* tile window */
+			if (i == m) {
+				ny = lay;
+				nx += mw;
+				ui_draw_char_vert(ui, nx, ny, ACS_VLINE, wah);
+				ui_draw_char(ui, nx, ny, ACS_TTEE, 1);
+				nx++;
+				nw = waw - mw -1;
+			}
+			nh = (i < n - 1) ? th : (lay + wah) - ny;
+			if (i > m)
+				ui_draw_char(ui, nx - 1, ny, ACS_LTEE, 1);
+		}
+		resize(c, nx, ny+(way-lay), nw, nh);
+		ny += nh;
+		i++;
+	}
+
+	/* Fill in nmaster intersections */
+	if (n > m) {
+		ny = lay + mh;
+		for (i = 1; i < m; i++) {
+			ui_draw_char(ui, nx - 1, ny, ((ny - 1) % th ? ACS_RTEE : ACS_PLUS), 1);
+			ny += mh;
+		}
+	}
+}
+
+static void grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
+{
+	unsigned int lax = wax, lay = way-1, law = waw, lah = wah;
+	unsigned int i, n, nx, ny, nw, nh, aw, ah, cols, rows;
+
+	Window *c;
+
+	for (n = 0, c = windows_list(); c; c = c->next)
+		n++;
+	/* grid dimensions */
+	for (cols = 0; cols <= n / 2; cols++)
+		if (cols * cols >= n)
+			break;
+	rows = (cols && (cols - 1) * cols >= n) ? cols - 1 : cols;
+	/* window geoms (cell height/width) */
+	nh = lah / (rows ? rows : 1);
+	nw = law / (cols ? cols : 1);
+	for (i = 0, c = windows_list(); c; c = c->next) {
+		/* if there are less windows in the last row than normal adjust the
+		 * split rate to fill the empty space */
+		if (rows > 1 && i == (rows * cols) - cols && (n - i) <= (n % cols))
+			nw = law / (n - i);
+		nx = (i % cols) * nw + lax;
+		ny = (i / cols) * nh + lay;
+		/* adjust height/width of last row/column's windows */
+		ah = (i >= cols * (rows - 1)) ? lah - nh * rows : 0;
+		/* special case if there are less windows in the last row */
+		if (rows > 1 && i == n - 1 && (n - i) < (n % cols))
+			/* (n % cols) == number of windows in the last row */
+			aw = law - nw * (n % cols);
+		else
+			aw = ((i + 1) % cols == 0) ? law - nw * cols : 0;
+		if (i % cols) {
+			ui_draw_char_vert(ui, nx, ny, ACS_VLINE, nh + ah);
+			/* if we are on the first row, or on the last one and there are fewer windows
+			 * than normal whose border does not match the line above, print a top tree char
+			 * otherwise a plus sign. */
+			if (i <= cols
+			    || (i >= rows * cols - cols && n % cols
+				&& (cols - (n % cols)) % 2))
+				ui_draw_char(ui, nx, ny, ACS_TTEE, 1);
+			else
+				ui_draw_char(ui, nx, ny, ACS_PLUS, 1);
+			nx++, aw--;
+		}
+		resize(c, nx, ny+(way-lay), nw + aw, nh + ah);
+		i++;
+	}
+}
+
+static void bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
+{
+	unsigned int lax = wax, lay = way-1, law = waw, lah = wah;
+	unsigned int i, n, nx, ny, nw, nh, m, mw, mh, tw;
+
+	Window *c;
+
+	for (n = 0, c = windows_list(); c; c = c->next)
+		n++;
+
+	m  = MAX(1, MIN(n, getnmaster()));
+	mh = n == m ? lah : getmfact() * lah;
+	mw = law / m;
+	tw = n == m ? 0 : law / (n - m);
+	nx = lax;
+	ny = lay;
+
+	for (i = 0, c = windows_list(); c; c = c->next) {
+		if (i < m) {	/* master */
+			if (i > 0) {
+				ui_draw_char_vert(ui, nx, ny, ACS_VLINE, nh);
+				ui_draw_char(ui, nx, ny, ACS_TTEE, 1);
+				nx++;
+			}
+			nh = mh;
+			nw = (i < m - 1) ? mw : (lax + law) - nx;
+		} else {	/* tile window */
+			if (i == m) {
+				nx = lax;
+				ny += mh;
+				nh = (lay + lah) - ny;
+			}
+			if (i > m) {
+				ui_draw_char_vert(ui, nx, ny, ACS_VLINE, nh);
+				ui_draw_char(ui, nx, ny, ACS_TTEE, 1);
+				nx++;
+			}
+			nw = (i < n - 1) ? tw : (lax + law) - nx;
+		}
+		resize(c, nx, ny+(way-lay), nw, nh);
+		nx += nw;
+		i++;
+	}
+
+	/* Fill in nmaster intersections */
+	if (n > m) {
+		nx = lax;
+		for (i = 0; i < m; i++) {
+			if (i > 0) {
+				ui_draw_char(ui, nx, ny, ACS_PLUS, 1);
+				nx++;
+			}
+			nw = (i < m - 1) ? mw : (lax + law) - nx;
+			nx += nw;
+		}
+	}
+}
+
+static void fullscreen(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
+{
+	for (Window *c = windows_list(); c; c = c->next)
+		resize(c, wax, way, waw, wah);
+}
 
 /* by default the first layout entry is used */
 static Layout layouts[] = {
