@@ -308,6 +308,9 @@ static char term_name[32];
 #define for_each_window(__w) \
 	for (__w = windows_list(); __w; __w = __w->next)
 
+#define for_each_window_except_last(__w) \
+	for (__w = windows_list(); __w && __w->next; __w = __w->next)
+
 #define for_each_window_master(__m) \
 	for (int __n = ({__m = windows_list();0;}); __m && __n < getnmaster(); __m = __m->next, __n++)
 
@@ -1142,7 +1145,8 @@ draw_all(void) {
 	}
 
 	if (!isarrange(fullscreen)) {
-		for (Window *c = windows_list(); c; c = c->next) {
+		Window *c;
+		for_each_window(c) {
 			if (c != current_window()) {
 				draw(c, true);
 			}
@@ -1161,9 +1165,10 @@ draw_all(void) {
 static void
 arrange(void) {
 	unsigned int n = 0;
-	for (Window *c = windows_list(); c; c = c->next) {
+	Window *c;
+
+	for_each_window(c)
 		c->order = ++n;
-	}
 
 	ui_clear(ui);
 	current_frame()->layout->arrange(wax, way, waw, wah);
@@ -1212,7 +1217,7 @@ attachafter(Window *c, Window *a) { /* attach c after a */
 	if (c == a)
 		return;
 	if (!a)
-		for (a = windows_list(); a && a->next; a = a->next);
+		for_each_window_except_last(a);
 
 	if (a) {
 		if (a->next)
@@ -1348,11 +1353,13 @@ resize(Window *c, int x, int y, int w, int h) {
 
 static Window*
 get_window_by_coord(unsigned int x, unsigned int y) {
+	Window *c;
+
 	if (y < way || y >= way+wah)
 		return NULL;
 	if (isarrange(fullscreen))
 		return current_window();
-	for (Window *c = windows_list(); c; c = c->next) {
+	for_each_window(c) {
 		int w_h = ui_window_height_get(c->win);
 		int w_w = ui_window_width_get(c->win);
 		int w_y = ui_window_y_get(c->win);
@@ -1817,7 +1824,9 @@ int term_create(const char *prog, const char *title, const char *cwd, const char
 
 static void
 focusn(const char *args[]) {
-	for (Window *c = windows_list(); c; c = c->next) {
+	Window *c;
+
+	for_each_window(c) {
 		if (c->order == atoi(args[0])) {
 			focus(c);
 			return;
@@ -1827,7 +1836,9 @@ focusn(const char *args[]) {
 
 static void
 __focusid(int win_id) {
-	for (Window *c = windows_list(); c; c = c->next) {
+	Window *c;
+
+	for_each_window(c) {
 		if (c->id == win_id) {
 			focus(c);
 			return;
@@ -1839,10 +1850,9 @@ __focusid(int win_id) {
 }
 
 static void killother(const char *args[]) {
-	unsigned int n;
 	Window *c;
 
-	for (n = 0, c = windows_list(); c; c = c->next) {
+	for_each_window(c) {
 		if (ismastersticky(c) || current_window() == c)
 			continue;
 		destroy(c);
@@ -1857,7 +1867,9 @@ quit(const char *args[]) {
 
 static void
 redraw(const char *args[]) {
-	for (Window *c = windows_list(); c; c = c->next) {
+	Window *c;
+
+	for_each_window(c) {
 		Process *proc = buffer_proc_get(c->buf);
 
 		if (proc)
@@ -2293,7 +2305,8 @@ static void handle_keypress(KeyCode *key)
 		curr_kmap = NULL;
 	}
 
-	for (Window *c = windows_list(); c; c = c->next) {
+	Window *c;
+	for_each_window(c) {
 		if (c->pending_draw_evt) {
 			c->pending_draw_evt = false;
 			draw(c, true);
@@ -2371,7 +2384,8 @@ int main(int argc, char *argv[]) {
 			draw(minibuf, true);
 		}
 
-		for (Window *c = windows_list(); c; c = c->next) {
+		Window *c;
+		for_each_window(c) {
 			if (is_content_visible(c)) {
 				if (buffer_proc_get(c->buf) && !buffer_name_is_locked(c->buf))
 					synctitle(c);
@@ -2400,7 +2414,8 @@ int main(int argc, char *argv[]) {
 
 static Window *window_get_by_id(int id)
 {
-	for (Window *c = windows_list(); c; c = c->next) {
+	Window *c;
+	for_each_window(c) {
 		if (c->id == id)
 			return c;
 	}
@@ -2459,7 +2474,8 @@ bool win_is_visible(int wid)
 		if (c == minibuf || c == topbar)
 			return true;
 
-		for (Window *m = windows_list(); m; m = m->next) {
+		Window *m;
+		for_each_window(m) {
 			if (m->id == c->id)
 				return true;
 		}
@@ -3319,7 +3335,8 @@ void buf_name_set(int bid, const char *name)
 		buffer_name_lock(buf, true);
 		buffer_name_set(buf, name);
 
-		for (Window *c = windows_list(); c; c = c->next) {
+		Window *c;
+		for_each_window(c) {
 			if (c->buf == buf)
 				draw_title(c);
 		}
@@ -3343,7 +3360,8 @@ void buf_readonly_set(int bid, bool is_readonly)
 	if (buf) {
 		buffer_readonly_set(buf, is_readonly);
 
-		for (Window *w = windows_list(); w; w = w->next) {
+		Window *w;
+		for_each_window(w) {
 			if (w->buf == buf)
 				draw_title(w);
 		}
@@ -3424,7 +3442,8 @@ static void buf_list_update(void)
 	if (topbar)
 		buf_update(topbar);
 
-	for (Window *w = windows_list(); w; w = w->next) {
+	Window *w;
+	for_each_window(w) {
 		if (is_content_visible(w)) {
 			buf_update(w);
 		}
@@ -3714,7 +3733,8 @@ char *buf_text_get(int bid, int start, int len)
 
 static void buf_text_style_update(Buffer *buf, char what)
 {
-	for (Window *c = windows_list(); c; c = c->next) {
+	Window *c;
+	for_each_window(c) {
 		if (c->buf == buf) {
 			switch (what) {
 			case 'f':
@@ -3878,7 +3898,8 @@ int buf_file_open(int bid, const char *file)
 			return -1;
 
 		/* update view with new text */
-		for (Window *c = windows_list(); c; c = c->next) {
+		Window *c;
+		for_each_window(c) {
 			if (buf == c->buf) {
 				Text *txt = buffer_text_get(buf);
 
@@ -3967,7 +3988,8 @@ bool buf_is_visible(int bid)
 	Buffer *buf = buffer_by_id(bid);
 
 	if (buf) {
-		for (Window *c = windows_list(); c; c = c->next) {
+		Window *c;
+		for_each_window(c) {
 			if (c->buf == buf)
 				return true;
 		}
