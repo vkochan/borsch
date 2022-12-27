@@ -305,16 +305,19 @@ static Window *current_window(void);
 
 static char term_name[32];
 
+#define for_each_window(__w) \
+	for (__w = windows_list(); __w; __w = __w->next)
+
 #define for_each_window_master(__m) \
 	for (int __n = ({__m = windows_list();0;}); __m && __n < getnmaster(); __m = __m->next, __n++)
 
 static void tile(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
 {
 	unsigned int lax = wax, lay = way-1, law = waw, lah = wah;
-	unsigned int i, n, nx, ny, nw, nh, m, mw, mh, th;
+	unsigned int i = 0, n = 0, nx, ny, nw, nh, m, mw, mh, th;
 	Window *c;
 
-	for (n = 0, c = windows_list(); c; c = c->next)
+	for_each_window(c)
 		n++;
 
 	m  = MAX(1, MIN(n, getnmaster()));
@@ -324,7 +327,7 @@ static void tile(unsigned int wax, unsigned int way, unsigned int waw, unsigned 
 	nx = lax;
 	ny = lay;
 
-	for (i = 0, c = windows_list(); c; c = c->next) {
+	for_each_window(c) {
 		if (i < m) {	/* master */
 			nw = mw;
 			nh = (i < m - 1) ? mh : (lay + wah) - ny;
@@ -359,12 +362,12 @@ static void tile(unsigned int wax, unsigned int way, unsigned int waw, unsigned 
 static void grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
 {
 	unsigned int lax = wax, lay = way-1, law = waw, lah = wah;
-	unsigned int i, n, nx, ny, nw, nh, aw, ah, cols, rows;
-
+	unsigned int i = 0, n = 0, nx, ny, nw, nh, aw, ah, cols, rows;
 	Window *c;
 
-	for (n = 0, c = windows_list(); c; c = c->next)
+	for_each_window(c)
 		n++;
+	
 	/* grid dimensions */
 	for (cols = 0; cols <= n / 2; cols++)
 		if (cols * cols >= n)
@@ -373,7 +376,7 @@ static void grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned 
 	/* window geoms (cell height/width) */
 	nh = lah / (rows ? rows : 1);
 	nw = law / (cols ? cols : 1);
-	for (i = 0, c = windows_list(); c; c = c->next) {
+	for_each_window(c) {
 		/* if there are less windows in the last row than normal adjust the
 		 * split rate to fill the empty space */
 		if (rows > 1 && i == (rows * cols) - cols && (n - i) <= (n % cols))
@@ -409,11 +412,10 @@ static void grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned 
 static void bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
 {
 	unsigned int lax = wax, lay = way-1, law = waw, lah = wah;
-	unsigned int i, n, nx, ny, nw, nh, m, mw, mh, tw;
-
+	unsigned int i = 0, n = 0, nx, ny, nw, nh, m, mw, mh, tw;
 	Window *c;
 
-	for (n = 0, c = windows_list(); c; c = c->next)
+	for_each_window(c)
 		n++;
 
 	m  = MAX(1, MIN(n, getnmaster()));
@@ -423,7 +425,7 @@ static void bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigne
 	nx = lax;
 	ny = lay;
 
-	for (i = 0, c = windows_list(); c; c = c->next) {
+	for_each_window(c) {
 		if (i < m) {	/* master */
 			if (i > 0) {
 				ui_draw_char_vert(ui, nx, ny, ACS_VLINE, nh);
@@ -466,7 +468,8 @@ static void bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigne
 
 static void fullscreen(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
 {
-	for (Window *c = windows_list(); c; c = c->next)
+	Window *c;
+	for_each_window(c)
 		resize(c, wax, way, waw, wah);
 }
 
