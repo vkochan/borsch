@@ -305,6 +305,9 @@ static Window *current_window(void);
 
 static char term_name[32];
 
+#define for_each_window_master(__m) \
+	for (int __n = ({__m = windows_list();0;}); __m && __n < getnmaster(); __m = __m->next, __n++)
+
 static int curr_tag_get(void)
 {
 	return curtag;
@@ -775,12 +778,11 @@ is_content_visible(Window *c) {
 	return true;
 }
 
-static bool ismaster(Window *c) {
-	int n = 0;
+static bool ismaster(Window *w) {
 	Window *m;
 
-	for (m = windows_list(); m && n < getnmaster(); m = m->next, n++) {
-		if (c == m)
+	for_each_window_master(m) {
+		if (w == m)
 			return true;
 	}
 
@@ -796,12 +798,7 @@ static bool ismastersticky(Window *c) {
 	if (!c)
 		return true;
 
-	for (m = windows_list(); m && n < getnmaster(); m = m->next, n++) {
-		if (c == m)
-			return true;
-	}
-
-	return false;
+	return ismaster(c);
 }
 
 char *window_get_title(Window *c)
@@ -1011,12 +1008,12 @@ arrange(void) {
 }
 
 static Window *lastmaster(void) {
-	Window *c = windows_list();
-	int n = 1;
+	Window *m, *last = NULL;
 
-	for (; c && n < getnmaster(); c = c->next, n++);
+	for_each_window_master(m)
+		last = m;
 
-	return c;
+	return last;
 }
 
 static void
