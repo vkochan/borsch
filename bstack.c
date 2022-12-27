@@ -6,8 +6,7 @@ static void bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigne
 	Window *c;
 
 	for (n = 0, c = windows_list(); c; c = c->next)
-		if (!c->minimized)
-			n++;
+		n++;
 
 	m  = MAX(1, MIN(n, getnmaster()));
 	mh = n == m ? lah : getmfact() * lah;
@@ -17,8 +16,6 @@ static void bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigne
 	ny = lay;
 
 	for (i = 0, c = windows_list(); c; c = c->next) {
-		if (c->minimized)
-			continue;
 		if (i < m) {	/* master */
 			if (i > 0) {
 				ui_draw_char_vert(ui, nx, ny, ACS_VLINE, nh);

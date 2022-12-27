@@ -5,8 +5,7 @@ static void tile(unsigned int wax, unsigned int way, unsigned int waw, unsigned 
 	Window *c;
 
 	for (n = 0, c = windows_list(); c; c = c->next)
-		if (!c->minimized)
-			n++;
+		n++;
 
 	m  = MAX(1, MIN(n, getnmaster()));
 	mw = n == m ? waw : getmfact() * waw;
@@ -16,8 +15,6 @@ static void tile(unsigned int wax, unsigned int way, unsigned int waw, unsigned 
 	ny = lay;
 
 	for (i = 0, c = windows_list(); c; c = c->next) {
-		if (c->minimized)
-			continue;
 		if (i < m) {	/* master */
 			nw = mw;
 			nh = (i < m - 1) ? mh : (lay + wah) - ny;

@@ -6,8 +6,7 @@ static void grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned 
 	Window *c;
 
 	for (n = 0, c = windows_list(); c; c = c->next)
-		if (!c->minimized)
-			n++;
+		n++;
 	/* grid dimensions */
 	for (cols = 0; cols <= n / 2; cols++)
 		if (cols * cols >= n)
@@ -17,8 +16,6 @@ static void grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned 
 	nh = lah / (rows ? rows : 1);
 	nw = law / (cols ? cols : 1);
 	for (i = 0, c = windows_list(); c; c = c->next) {
-		if (c->minimized)
-			continue;
 		/* if there are less windows in the last row than normal adjust the
 		 * split rate to fill the empty space */
 		if (rows > 1 && i == (rows * cols) - cols && (n - i) <= (n % cols))

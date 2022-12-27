@@ -93,7 +93,6 @@ struct Window {
 	const char *cmd;
 	int order;
 	unsigned short int id;
-	bool minimized;
 	bool urgent;
 	Window *next;
 	Window *prev;
@@ -138,8 +137,6 @@ typedef struct {
 
 static KeyBuf kbuf;
 
-enum { MIN_ALIGN_HORIZ, MIN_ALIGN_VERT };
-
 typedef struct {
 	int fd;
 	const char *file;
@@ -170,7 +167,6 @@ static bool start_in_graphic = false;
 
 /* commands for use by keybindings */
 static void focusn(const char *args[]);
-static void focusnextnm(const char *args[]);
 static void killwindow(void);
 static void killother(const char *args[]);
 static void quit(const char *args[]);
@@ -186,7 +182,6 @@ static void doeval(const char *args[]);
 /* commands for use by mouse bindings */
 static void mouse_focus(const char *args[]);
 static void mouse_fullscreen(const char *args[]);
-static void mouse_minimize(const char *args[]);
 static void mouse_zoom(const char *args[]);
 
 static void attachafter(Window *c, Window *a);
@@ -267,7 +262,6 @@ static Button buttons[] = {
 	{ BUTTON1_CLICKED,        { mouse_focus,      { NULL  } } },
 	{ BUTTON1_DOUBLE_CLICKED, { mouse_fullscreen, { "[ ]" } } },
 	{ BUTTON2_CLICKED,        { mouse_zoom,       { NULL  } } },
-	{ BUTTON3_CLICKED,        { mouse_minimize,   { NULL  } } },
 };
 #endif /* CONFIG_MOUSE */
 
@@ -332,8 +326,6 @@ static Fifo retfifo = { .fd = -1 };
 
 static const char *shell;
 static volatile sig_atomic_t running = true;
-/* make sense only in layouts which has master window (tile, bstack) */
-static int min_align = MIN_ALIGN_HORIZ;
 
 static Cmd commands[] = {
 	{ "eval", { doeval, { NULL } } },
@@ -816,7 +808,7 @@ is_content_visible(Window *c) {
 		return true;
 	else if (c == topbar)
 		return true;
-	return !c->minimized;
+	return true;
 }
 
 static bool ismaster(Window *c) {
@@ -912,7 +904,7 @@ static void draw_title(Window *c) {
 	if (!ui_window_has_title(c->win))
 		return;
 
-	if (current_window() == c || (c->minimized)) {
+	if (current_window() == c) {
 		title_fg = UI_TEXT_COLOR_BLACK;
 		title_bg = UI_TEXT_COLOR_WHITE;
 	}
@@ -1041,38 +1033,13 @@ draw_all(void) {
 
 static void
 arrange(void) {
-	unsigned int m = 0, n = 0, dh = 0;
+	unsigned int n = 0;
 	for (Window *c = windows_list(); c; c = c->next) {
 		c->order = ++n;
-		if (c->minimized)
-			m++;
 	}
 
 	ui_clear(ui);
-
-	if (m && !isarrange(fullscreen)) {
-		if (min_align == MIN_ALIGN_VERT)
-			dh = m;
-		else
-			dh = 1;
-	}
-	wah -= dh;
 	current_frame()->layout->arrange(wax, way, waw, wah);
-	if (m && !isarrange(fullscreen)) {
-		unsigned int i = 0, nw = waw / m, nx = wax;
-		for (Window *c = windows_list(); c; c = c->next) {
-			if (c->minimized) {
-				if (min_align == MIN_ALIGN_VERT) {
-					resize(c, nx, way+wah+i, waw, 1);
-					i++;
-				} else {
-					resize(c, nx, way+wah, ++i == m ? waw - nx : nw, 1);
-					nx += nw;
-				}
-			}
-		}
-		wah += dh;
-	}
 	focus(NULL);
 	ui_refresh(ui);
 	drawbar();
@@ -1220,7 +1187,7 @@ focus(Window *c) {
 		}
 
 		if (proc) {
-			ui_window_cursor_disable(c->win, c && !c->minimized &&
+			ui_window_cursor_disable(c->win, c &&
 					!vt_cursor_visible(process_term_get(proc)));
 		} else {
 			size_t curs_view = view_cursor_get(c->view);
@@ -1467,7 +1434,7 @@ setup(void) {
 static void __win_del(Window *w)
 {
 	if (current_window() == w)
-		focusnextnm(NULL);
+		focus(w->next);
 
 	if (w != get_popup()) {
 		detach(w);
@@ -1745,19 +1712,6 @@ __focusid(int win_id) {
 }
 
 static void
-focusnextnm(const char *args[]) {
-	if (!current_window())
-		return;
-	Window *c = current_window();
-	do {
-		c = c->next;
-		if (!c)
-			c = windows_list();
-	} while (c && c->minimized && c != current_window());
-	focus(c);
-}
-
-static void
 killwindow(void) {
 	Window *target = current_window();
 
@@ -1787,13 +1741,11 @@ quit(const char *args[]) {
 static void
 redraw(const char *args[]) {
 	for (Window *c = windows_list(); c; c = c->next) {
-		if (!c->minimized) {
-			Process *proc = buffer_proc_get(c->buf);
+		Process *proc = buffer_proc_get(c->buf);
 
-			if (proc)
-				vt_dirty(process_term_get(proc));
-			ui_window_redraw(c->win);
-		}
+		if (proc)
+			vt_dirty(process_term_get(proc));
+		ui_window_redraw(c->win);
 	}
 	ui_redraw(ui);
 	update_screen_size();
@@ -1890,11 +1842,6 @@ static void
 mouse_fullscreen(const char *args[]) {
 	mouse_focus(NULL);
 	setlayout(isarrange(fullscreen) ? NULL : args);
-}
-
-static void
-mouse_minimize(const char *args[]) {
-	focus(msel);
 }
 
 static void
@@ -2184,7 +2131,7 @@ static void handle_keypress(KeyCode *key)
 
 	if (!current_window()) {
 		curr_kmap = global_kmap;
-	} else if (!curr_kmap && current_window() && !current_window()->minimized) {
+	} else if (!curr_kmap && current_window()) {
 		KeyMap *map = buf_keymap_get(current_window()->buf);
 		if (map)
 			curr_kmap = map;
@@ -2314,7 +2261,7 @@ int main(int argc, char *argv[]) {
 				if (c != current_window()) {
 					draw(c, false);
 				}
-			} else if (!isarrange(fullscreen) && c->minimized) {
+			} else if (!isarrange(fullscreen)) {
 				draw_title(c);
 				ui_window_refresh(c->win);
 			}
