@@ -432,6 +432,7 @@
                      [new (string-append (dirb-current-dir) "/" v)]
                     )
                   (rename-file old new)
+                  (run-hooks 'dirb-rename-entry-hook old new)
                   (dirb-reload)
                )
             )

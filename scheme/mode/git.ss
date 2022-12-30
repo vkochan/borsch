@@ -48,6 +48,16 @@
    )
 )
 
+(define git-in-repo?
+   (lambda (path)
+      (let ([ret (process-get-output (git-cmd-format (format "ls-files --error-unmatch ~a" path)))])
+         (let ([status (list-ref ret 0)] [output (list-ref ret 1)])
+            (eq? 0 status)
+         )
+      )
+   )
+)
+
 (define git-cmd-read
    (lambda (cmd)
       (let ([ret (process-get-output (git-cmd-format cmd))])
@@ -343,7 +353,7 @@
 
 (define git-untrack-file-cmd
    (lambda (f)
-      (git-cmd (format "rm --cached ~a" (string-join f " ")))
+      (git-cmd-read (format "rm --cached ~a" (string-join f " ")))
    )
 )
 
@@ -947,6 +957,16 @@
    )
 )
 
+(define git-rename-dirb-entry
+   (lambda (old new)
+      (when (git-in-repo? old)
+         (git-untrack-file-cmd old)
+         (git-stage-file-cmd new)
+      )
+   )
+)
+
+(add-hook 'dirb-rename-entry-hook git-rename-dirb-entry)
 (bind-key dirb-mode-map "g l" (lambda () (git-show-log (dirb-entry-path))))
 (bind-key text-mode-normal-map "g l" (lambda () (git-show-log (buffer-filename))))
 (bind-key text-mode-normal-map "g D" (lambda () (git-status-diff-file 'unstaged (buffer-filename))))
