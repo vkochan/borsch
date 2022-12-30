@@ -303,6 +303,8 @@ static Window *current_window(void);
 
 static char term_name[32];
 
+static bool ui_needs_arrange = false;
+
 #define for_each_window(__w) \
 	for (__w = windows_list(); __w; __w = __w->next)
 
@@ -2345,6 +2347,11 @@ int main(int argc, char *argv[]) {
 
 		ui_event_process(ui);
 
+		if (ui_needs_arrange) {
+			ui_needs_arrange = false;
+			arrange();
+		}
+
 	        if (topbar) {
 		   draw(topbar, true);
 	        }
@@ -2487,6 +2494,46 @@ int win_next_get(int wid)
 	if (c->next)
 		return c->next->id;
 
+	return 0;
+}
+
+int win_prev_set(int wid, int prev)
+{
+	Window *w = window_get_by_id(wid);
+	Window *p = window_get_by_id(prev);
+
+	if (!w || !p)
+		return -1;
+
+	detach(w);
+
+	if (p->next)
+		p->next->prev = w;
+	w->next = p->next;
+	w->prev = p;
+	p->next = w;
+
+	ui_needs_arrange = true;
+	return 0;
+}
+
+int win_next_set(int wid, int next)
+{
+	Window *w = window_get_by_id(wid);
+	Window *n = window_get_by_id(next);
+
+	if (!w || !n)
+		return -1;
+
+	detach(w);
+
+	if (n->prev)
+		n->prev->next = w;
+	w->prev = n->prev;
+	w->next = n;
+	n->prev = w;
+
+	ui_needs_arrange = true;
 	return 0;
 }
 

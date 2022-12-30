@@ -107,6 +107,26 @@ ptr scheme_win_next_get(int wid)
 	return Sfalse;
 }
 
+ptr scheme_win_prev_set(int wid, int prev)
+{
+	int err = win_prev_set(wid, prev);
+
+	if (err)
+		return Sfalse;
+
+	return Strue;
+}
+
+ptr scheme_win_next_set(int wid, int next)
+{
+	int err = win_next_set(wid, next);
+
+	if (err)
+		return Sfalse;
+
+	return Strue;
+}
+
 ptr scheme_win_upper_get(int wid)
 {
 	int ret = win_upper_get(wid);
@@ -1383,6 +1403,8 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_first_get", scheme_win_first_get);
 	Sregister_symbol("cs_win_prev_get", scheme_win_prev_get);
 	Sregister_symbol("cs_win_next_get", scheme_win_next_get);
+	Sregister_symbol("cs_win_prev_set", scheme_win_prev_set);
+	Sregister_symbol("cs_win_next_set", scheme_win_next_set);
 	Sregister_symbol("cs_win_upper_get", scheme_win_upper_get);
 	Sregister_symbol("cs_win_lower_get", scheme_win_lower_get);
 	Sregister_symbol("cs_win_right_get", scheme_win_right_get);

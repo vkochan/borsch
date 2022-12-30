@@ -57,6 +57,8 @@ bool win_is_visible(int wid);
 int win_first_get(int fid);
 int win_prev_get(int wid);
 int win_next_get(int wid);
+int win_prev_set(int wid, int prev);
+int win_next_set(int wid, int next);
 int win_upper_get(int wid);
 int win_lower_get(int wid);
 int win_right_get(int wid);
