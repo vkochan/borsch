@@ -492,7 +492,7 @@
    (lambda ()
       (let* (
              [path (dirb-entry-path)]
-             [match (pregexp-match ".*\\.(tar)$|.*\\.(tar\\.gz)$|.*\\.(tar\\.bz2)$" path)]
+             [match (pregexp-match ".*\\.(tar)$|.*\\.(tar\\.gz)$|.*\\.(tar\\.bz2)$|.*\\.(tar\\.xz)$" path)]
             )
          (if match
             (begin
