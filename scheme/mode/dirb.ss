@@ -509,7 +509,7 @@
 (define dirb-open-entry-externally
    (lambda ()
       (let ([path (dirb-entry-path)])
-         (system (format "~a ~s" dirb-external-opener path))
+         (system (format "~a ~s &" dirb-external-opener path))
       )
    )
 )
