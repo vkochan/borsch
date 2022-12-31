@@ -1590,7 +1590,7 @@ static void __win_del(Window *w)
 	ui_window_free(w->win);
 	view_free(w->view);
 	free(w);
-	arrange();
+	ui_needs_arrange = true;
 }
 
 static Buffer *__buf_new(const char *name, KeyMap *kmap)
@@ -1817,7 +1817,7 @@ int term_create(const char *prog, const char *title, const char *cwd, const char
 	ui_window_move(c->win, wax, way);
 	attach(c);
 	focus(c);
-	arrange();
+	ui_needs_arrange = true;
 
 	return c->id;
 }
@@ -1913,7 +1913,7 @@ setlayout(const char *args[]) {
 	}
 	current_frame()->layout_prev = current_frame()->layout;
 	current_frame()->layout = layout;
-	arrange();
+	ui_needs_arrange = true;
 }
 
 static int
@@ -2891,7 +2891,7 @@ int win_new(int bid)
 
 	attach(c);
 	focus(c);
-	arrange();
+	ui_needs_arrange = true;
 
 	return c->id;
 }
@@ -2982,7 +2982,7 @@ int win_state_set(int wid, win_state_t st)
 		detach(c);
 		attachfirst(c);
 		focus(c);
-		arrange();
+		ui_needs_arrange = true;
 		/* switch to the original window */
 		if (orig)
 			win_current_set(orig->id);
@@ -3009,7 +3009,7 @@ int win_state_toggle(int wid, win_state_t st)
 	case WIN_STATE_MAXIMIZED:
 		if (isarrange(fullscreen)) {
 			current_frame()->layout = current_frame()->layout_prev;
-			arrange();
+			ui_needs_arrange = true;
 		} else {
 			setlayout(maxi);
 		}
@@ -3099,7 +3099,7 @@ void win_size_set(int wid, int width, int height)
 			update_screen_size();
 			buffer_dirty_set(w->buf, true);
 			draw(w, true);
-			arrange();
+			ui_needs_arrange = true;
 		} else {
 			redraw(NULL);
 		}
@@ -4368,7 +4368,7 @@ int frame_current_get(void)
 int frame_current_set(int tag)
 {
 	curr_tag_set(tag);
-	arrange();
+	ui_needs_arrange = true;
 }
 
 const char *frame_name_get(int tag)
@@ -4424,7 +4424,7 @@ int layout_current_set(int tag, layout_t lay)
 
 	current_frame()->layout_prev = current_frame()->layout;
 	current_frame()->layout = &layouts[lay];
-	arrange();
+	ui_needs_arrange = true;
 }
 
 int layout_nmaster_get(int tag)
@@ -4438,7 +4438,7 @@ int layout_nmaster_set(int tag, int n)
 		return -1;
 
 	tabs[tag].f->nmaster = n;
-	arrange();
+	ui_needs_arrange = true;
 
 	return 0;
 }
@@ -4454,7 +4454,7 @@ int layout_fmaster_set(int tag, float mfact)
 		return -1;
 
 	tabs[tag].f->mfact = mfact;
-	arrange();
+	ui_needs_arrange = true;
 
 	return 0;
 }
