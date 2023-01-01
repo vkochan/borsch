@@ -855,6 +855,30 @@ Process *process_by_pid(pid_t pid)
 	return NULL;
 }
 
+int process_wait(Process *proc, int *status)
+{
+	pid_t pid;
+
+	if (proc->is_died || proc->is_status_set) {
+		*status = proc->status;
+		return 0;
+	}
+
+	pid = waitpid(proc->pid, status, 0);
+	if (pid == proc->pid && WIFEXITED(*status)) {
+		*status = WEXITSTATUS(*status);
+		return 0;
+	}
+
+	if (proc->is_status_set) {
+		*status = proc->status;
+		return 0;
+	}
+	
+	return -1;
+}
+
+
 static int style_init(void)
 {
 	Style default_style = {
@@ -4625,23 +4649,7 @@ int proc_wait(pid_t pid, int *status)
 		return -1;
 	}
 
-	if (proc->is_died || proc->is_status_set) {
-		*status = proc->status;
-		return 0;
-	}
-
-	pid = waitpid(proc->pid, status, 0);
-	if (pid == proc->pid && WIFEXITED(*status)) {
-		*status = WEXITSTATUS(*status);
-		return 0;
-	}
-
-	if (proc->is_status_set) {
-		*status = proc->status;
-		return 0;
-	}
-	
-	return -1;
+	return process_wait(proc, status);
 }
 
 void do_quit(void)
