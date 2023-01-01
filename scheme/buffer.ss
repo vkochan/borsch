@@ -424,7 +424,7 @@
 (define buffer-open-file
    (lambda (f)
       (let (
-            [bid (buffer-get f)]
+            [bid (buffer-get-by-file f)]
             [in-frame? #f]
             [wid 0]
            )
