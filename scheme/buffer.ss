@@ -485,8 +485,14 @@
 )
 
 (define buffer-filename
-   (lambda ()
-      (call-foreign (__cs_buf_file_get (current-buffer)))
+   (case-lambda
+     [()
+      (buffer-filename (current-buffer))
+     ]
+
+     [(b)
+      (call-foreign (__cs_buf_file_get b))
+     ]
    )
 )
 
@@ -562,6 +568,33 @@
             (fn (first b))
          )
          (buffer-list)
+      )
+   )
+)
+
+(define for-all-buffer
+   (lambda (fn)
+      (for-all
+         (lambda (b)
+            (fn (first b))
+         )
+         (buffer-list)
+      )
+   )
+)
+
+(define buffer-get-by-file
+   (lambda (file)
+      (let ([buf #f])
+         (for-all-buffer
+            (lambda (b)
+               (when (equal? file (buffer-filename b))
+                  (set! buf b)
+                  #f
+               )
+            )
+         )
+         buf
       )
    )
 )
