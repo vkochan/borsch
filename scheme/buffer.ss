@@ -555,6 +555,17 @@
    )
 )
 
+(define for-each-buffer
+   (lambda (fn)
+      (for-each
+         (lambda (b)
+            (fn (first b))
+         )
+         (buffer-list)
+      )
+   )
+)
+
 (define enable-insert
    (lambda (e)
       (call-foreign (__cs_buf_text_input_enable (current-buffer) e))
