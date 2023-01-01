@@ -783,7 +783,7 @@ static Process *process_create(const char *prog, const char *cwd, int *in, int *
 		return NULL;
 
 	if (pty) {
-		term = vt_create(ui_height_get(ui), ui_width_get(ui));
+		term = vt_create();
 		if (!term) {
 			process_free(proc);
 			return NULL;

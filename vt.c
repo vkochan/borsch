@@ -1466,10 +1466,10 @@ int vt_process(Vt *t)
 	return 0;
 }
 
-Vt *vt_create(int rows, int cols)
+Vt *vt_create(void)
 {
-	if (rows <= 0 || cols <= 0)
-		return NULL;
+	int rows = 40;
+	int cols = 80;
 
 	Vt *t = calloc(1, sizeof(Vt));
 	if (!t)
