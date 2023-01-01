@@ -1534,7 +1534,6 @@ void vt_dirty(Vt *t)
 void vt_draw(UiWin *win)
 {
 	View *view = win->view;
-	const Line *line = view_lines_first(view);
 	Vt *t = ui_window_priv_get(win);
 	VtBuffer *b = t->buffer;
 	int srow = 0, scol = 0;
