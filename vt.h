@@ -41,7 +41,7 @@ void vt_urgent_handler_set(Vt*, vt_urgent_handler_t);
 void vt_data_set(Vt*, void *);
 void *vt_data_get(Vt*);
 
-Vt *vt_create(int rows, int cols, int scroll_buf_sz);
+Vt *vt_create(int rows, int cols);
 void vt_size_get(Vt *vt, int *rows, int *cols);
 void vt_attach(Vt *vt, UiWin *uiwin);
 void vt_draw(UiWin *win);

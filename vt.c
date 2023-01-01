@@ -1466,7 +1466,7 @@ int vt_process(Vt *t)
 	return 0;
 }
 
-Vt *vt_create(int rows, int cols, int scroll_size)
+Vt *vt_create(int rows, int cols)
 {
 	if (rows <= 0 || cols <= 0)
 		return NULL;
@@ -1478,7 +1478,7 @@ Vt *vt_create(int rows, int cols, int scroll_size)
 	t->pty = -1;
 	t->buffer = &t->buffer_normal;
 
-	if (!buffer_init(&t->buffer_normal, rows, cols, scroll_size) ||
+	if (!buffer_init(&t->buffer_normal, rows, cols, 4000) ||
 	    !buffer_init(&t->buffer_alternate, rows, cols, 0)) {
 		free(t);
 		return NULL;

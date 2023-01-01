@@ -74,11 +74,6 @@ int ESCDELAY;
 # define set_escdelay(d) (ESCDELAY = (d))
 #endif
 
-/* scroll back buffer size in lines */
-#define SCROLL_HISTORY 4000
-
-static int scr_history = SCROLL_HISTORY;
-
 typedef struct {
 	const char *symbol;
 	void (*arrange)(unsigned int, unsigned int, unsigned int, unsigned int);
@@ -788,7 +783,7 @@ static Process *process_create(const char *prog, const char *cwd, int *in, int *
 		return NULL;
 
 	if (pty) {
-		term = vt_create(ui_height_get(ui), ui_width_get(ui), scr_history);
+		term = vt_create(ui_height_get(ui), ui_width_get(ui));
 		if (!term) {
 			process_free(proc);
 			return NULL;
