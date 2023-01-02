@@ -244,7 +244,7 @@ static void draw(Window *c, bool force);
 static void draw_title(Window *c);
 static void drawbar(void);
 static bool isarrange(void (*func)());
-static Window *current_window(void);
+static Window *window_current(void);
 
 static char term_name[32];
 
@@ -457,7 +457,7 @@ term_urgent_handler(Vt *term) {
 	printf("\a");
 	fflush(stdout);
 	drawbar();
-	if (!isarrange(fullscreen) && current_window() != c)
+	if (!isarrange(fullscreen) && window_current() != c)
 		draw_title(c);
 }
 
@@ -853,7 +853,7 @@ isarrange(void (*func)()) {
 	return func == current_frame()->layout->arrange;
 }
 
-static Window *current_window(void)
+static Window *window_current(void)
 {
 	return current_frame()->sel;
 }
@@ -893,7 +893,7 @@ is_content_visible(Window *c) {
 	if (!c)
 		return false;
 	if (isarrange(fullscreen))
-		return current_window() == c;
+		return window_current() == c;
 	else if (c == minibuf)
 		return true;
 	else if (c == topbar)
@@ -988,7 +988,7 @@ static void draw_title(Window *c) {
 	if (!ui_window_has_title(c->win))
 		return;
 
-	if (current_window() == c) {
+	if (window_current() == c) {
 		title_fg = UI_TEXT_COLOR_BLACK;
 		title_bg = UI_TEXT_COLOR_WHITE;
 	}
@@ -1070,7 +1070,7 @@ __draw(Window *c, bool force, bool fire_event) {
 
 		ui_window_draw(c->win);
 
-		if (!isarrange(fullscreen) || c == current_window())
+		if (!isarrange(fullscreen) || c == window_current())
 			draw_title(c);
 
 		ui_window_refresh(c->win);
@@ -1101,7 +1101,7 @@ draw_all(void) {
 	if (!isarrange(fullscreen)) {
 		Window *c;
 		for_each_window(c) {
-			if (c != current_window()) {
+			if (c != window_current()) {
 				draw(c, true);
 			}
 		}
@@ -1111,8 +1111,8 @@ draw_all(void) {
 	 * this has the effect that the cursor position is
 	 * accurate
 	 */
-	if (current_window()) {
-		draw(current_window(), true);
+	if (window_current()) {
+		draw(window_current(), true);
 	}
 }
 
@@ -1209,7 +1209,7 @@ static void
 settitle(Window *c) {
 	char *term, *t = title;
 	char *ctitle = window_get_title(c);
-	if (!t && current_window() == c && ctitle && strlen(ctitle))
+	if (!t && window_current() == c && ctitle && strlen(ctitle))
 		t = ctitle;
 	if (t && (term = getenv("TERM")) && !strstr(term, "linux")) {
 		printf("\033]0;%s\007", t);
@@ -1233,10 +1233,10 @@ focus(Window *c) {
 	if (!c)
 		c = window_stack();
 
-	if (current_window() == c)
+	if (window_current() == c)
 		return;
 
-	set_last_selected_window(current_window());
+	set_last_selected_window(window_current());
 	lastsel = last_selected_window();
 	set_current_window(c);
 	if (lastsel) {
@@ -1312,7 +1312,7 @@ get_window_by_coord(unsigned int x, unsigned int y) {
 	if (y < way || y >= way+wah)
 		return NULL;
 	if (isarrange(fullscreen))
-		return current_window();
+		return window_current();
 	for_each_window(c) {
 		int w_h = ui_window_height_get(c->win);
 		int w_w = ui_window_width_get(c->win);
@@ -1367,7 +1367,7 @@ static void
 keypress(int code) {
 	char buf[8] = { '\e' };
 
-	for (Window *c = current_window(); c; c = c->next) {
+	for (Window *c = window_current(); c; c = c->next) {
 		if (is_content_visible(c)) {
 			c->urgent = false;
 
@@ -1521,7 +1521,7 @@ setup(void) {
 
 static void __win_del(Window *w)
 {
-	if (current_window() == w)
+	if (window_current() == w)
 		focus(w->next);
 
 	if (w != get_popup()) {
@@ -1531,7 +1531,7 @@ static void __win_del(Window *w)
 	}
 	detachstack(w);
 
-	if (current_window() == w) {
+	if (window_current() == w) {
 		Window *next = windows_list();
 		if (next) {
 			focus(next);
@@ -1691,7 +1691,7 @@ synctitle(Window *c)
 	buffer_name_set(c->buf, basename(buf));
 
 	settitle(c);
-	if (!isarrange(fullscreen) || current_window() == c)
+	if (!isarrange(fullscreen) || window_current() == c)
 		draw_title(c);
 done:
 	close(fd);
@@ -1797,7 +1797,7 @@ static void killother(const char *args[]) {
 	Window *c;
 
 	for_each_window(c) {
-		if (ismastersticky(c) || current_window() == c)
+		if (ismastersticky(c) || window_current() == c)
 			continue;
 		destroy(c);
 	}
@@ -1827,14 +1827,14 @@ redraw(const char *args[]) {
 
 static void
 scrollback(const char *args[]) {
-	int w_h = ui_window_height_get(current_window()->win);
+	int w_h = ui_window_height_get(window_current()->win);
 	Process *proc;
 	Vt *term;
 
-	if (!is_content_visible(current_window()))
+	if (!is_content_visible(window_current()))
 		return;
 
-	proc = buffer_proc_get(current_window()->buf);
+	proc = buffer_proc_get(window_current()->buf);
 	if (!proc)
 		return;
 
@@ -1846,9 +1846,9 @@ scrollback(const char *args[]) {
 			vt_scroll(term,  w_h/2);
 
 	if (term)
-		ui_window_cursor_disable(current_window()->win,
+		ui_window_cursor_disable(window_current()->win,
 			!vt_cursor_visible(term));
-	draw(current_window(), true);
+	draw(window_current(), true);
 }
 
 static void
@@ -2184,10 +2184,10 @@ static void handle_keypress(KeyCode *key)
 	int flags = key->flags;
 	int code = key->code;
 
-	if (!current_window()) {
+	if (!window_current()) {
 		curr_kmap = global_kmap;
-	} else if (!curr_kmap && current_window()) {
-		KeyMap *map = buf_keymap_get(current_window()->buf);
+	} else if (!curr_kmap && window_current()) {
+		KeyMap *map = buf_keymap_get(window_current()->buf);
 		if (map)
 			curr_kmap = map;
 	} else if (!curr_kmap) {
@@ -2320,7 +2320,7 @@ int main(int argc, char *argv[]) {
 			if (is_content_visible(c)) {
 				if (buffer_proc_get(c->buf) && !buffer_name_is_locked(c->buf))
 					synctitle(c);
-				if (c != current_window()) {
+				if (c != window_current()) {
 					draw(c, false);
 				}
 			} else if (!isarrange(fullscreen)) {
@@ -2329,13 +2329,13 @@ int main(int argc, char *argv[]) {
 			}
 		}
 
-		if (is_content_visible(current_window())) {
-			if (buffer_proc_get(current_window()->buf)) {
-				Process *proc = buffer_proc_get(current_window()->buf);
-				ui_window_cursor_disable(current_window()->win,
+		if (is_content_visible(window_current())) {
+			if (buffer_proc_get(window_current()->buf)) {
+				Process *proc = buffer_proc_get(window_current()->buf);
+				ui_window_cursor_disable(window_current()->win,
 					!vt_cursor_visible(process_term_get(proc)));
 			}
-			draw(current_window(), false);
+			draw(window_current(), false);
 		}
 	}
 
@@ -2572,8 +2572,8 @@ int win_right_get(int wid)
 
 int win_current_get(void)
 {
-	if (current_window())
-		return current_window()->id;
+	if (window_current())
+		return window_current()->id;
 
 	return 0;
 }
@@ -2589,8 +2589,8 @@ int win_prev_selected(void)
 {
 	if (last_selected_window())
 		return last_selected_window()->id;
-	if (current_window())
-		return current_window()->id;
+	if (window_current())
+		return window_current()->id;
 	return 0;
 }
 
@@ -2925,7 +2925,7 @@ int win_state_set(int wid, win_state_t st)
 	if (!c)
 		return -1;
 
-	orig = current_window();
+	orig = window_current();
 
 	switch (st) {
 	case WIN_STATE_MAXIMIZED:
@@ -2959,7 +2959,7 @@ int win_state_toggle(int wid, win_state_t st)
 	if (!c)
 		return -1;
 
-	orig = current_window();
+	orig = window_current();
 
 	switch (st) {
 	case WIN_STATE_MAXIMIZED:
@@ -3268,8 +3268,8 @@ int buf_kmap_get(int bid)
 
 int buf_current_get(void)
 {
-	if (current_window())
-		return buffer_id_get(current_window()->buf);
+	if (window_current())
+		return buffer_id_get(window_current()->buf);
 
 	return 0;
 }
@@ -3371,7 +3371,7 @@ static void buf_update(Window *w)
 
 		view_invalidate(view);
 
-		if (w == current_window() || w == minibuf || w == topbar) {
+		if (w == window_current() || w == minibuf || w == topbar) {
 			void (*scroll_fn)(View *, size_t) = view_scroll_to;
 			Filerange r = view_viewport_get(view);
 			Text *text = buffer_text_get(buf);
@@ -3397,7 +3397,7 @@ static void buf_update(Window *w)
 			scroll_fn(view, pos);
 
 			if (view_coord_get(view, pos, NULL, &y, &x)) {
-				if (w == current_window())
+				if (w == window_current())
 					ui_window_cursor_set(win, x, y);
 			}
 
@@ -3831,8 +3831,8 @@ void buf_mode_name_set(int bid, char *name)
 
 	if (buf) {
 		buffer_mode_name_set(buf, name);
-		if (current_window())
-			draw_title(current_window());
+		if (window_current())
+			draw_title(window_current());
 	}
 }
 
@@ -3853,8 +3853,8 @@ void buf_state_name_set(int bid, char *name)
 
 	if (buf) {
 		buffer_state_name_set(buf, name);
-		if (current_window())
-			draw_title(current_window());
+		if (window_current())
+			draw_title(window_current());
 	}
 }
 
