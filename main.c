@@ -227,7 +227,6 @@ static Array style_array;
 static void draw(Window *c, bool force);
 static void draw_title(Window *c);
 static void drawbar(void);
-static bool isarrange(void (*func)());
 static Window *window_current(void);
 
 static char term_name[32];
@@ -420,7 +419,7 @@ term_title_handler(Vt *term, const char *title) {
 	/* 	strncpy(c->title, title, sizeof(c->title) - 1); */
 	/* c->title[title ? sizeof(c->title) - 1 : 0] = '\0'; */
 	/* settitle(c); */
-	/* if (!isarrange(fullscreen)) */
+	/* if (!layout_is_arrange(LAYOUT_MAXIMIZED)) */
 	/* 	draw_title(c); */
 }
 
@@ -431,7 +430,7 @@ term_urgent_handler(Vt *term) {
 	printf("\a");
 	fflush(stdout);
 	drawbar();
-	if (!isarrange(fullscreen) && window_current() != c)
+	if (!layout_is_arrange(LAYOUT_MAXIMIZED) && window_current() != c)
 		draw_title(c);
 }
 
@@ -822,11 +821,6 @@ error(const char *errstr, ...) {
 	exit(EXIT_FAILURE);
 }
 
-static bool
-isarrange(void (*func)()) {
-	return func == frame_current()->layout->arrange;
-}
-
 static Window *window_current(void)
 {
 	return frame_current()->sel;
@@ -866,7 +860,7 @@ static bool
 is_content_visible(Window *c) {
 	if (!c)
 		return false;
-	if (isarrange(fullscreen))
+	if (layout_is_arrange(LAYOUT_MAXIMIZED))
 		return window_current() == c;
 	else if (c == minibuf)
 		return true;
@@ -1034,7 +1028,7 @@ __draw(Window *c, bool force, bool fire_event) {
 
 		ui_window_draw(c->win);
 
-		if (!isarrange(fullscreen) || c == window_current())
+		if (!layout_is_arrange(LAYOUT_MAXIMIZED) || c == window_current())
 			draw_title(c);
 
 		ui_window_refresh(c->win);
@@ -1062,7 +1056,7 @@ draw_all(void) {
 		return;
 	}
 
-	if (!isarrange(fullscreen)) {
+	if (!layout_is_arrange(LAYOUT_MAXIMIZED)) {
 		Window *c;
 		for_each_window(c) {
 			if (c != window_current()) {
@@ -1206,7 +1200,7 @@ focus(Window *c) {
 	if (lastsel) {
 		ui_window_focus(lastsel->win, false);
 		lastsel->urgent = false;
-		if (!isarrange(fullscreen)) {
+		if (!layout_is_arrange(LAYOUT_MAXIMIZED)) {
 			draw_title(lastsel);
 			ui_window_refresh(lastsel->win);
 		}
@@ -1229,7 +1223,7 @@ focus(Window *c) {
 
 		ui_window_focus(c->win, true);
 
-		if (isarrange(fullscreen)) {
+		if (layout_is_arrange(LAYOUT_MAXIMIZED)) {
 			draw(c, true);
 		} else {
 			draw_title(c);
@@ -1275,7 +1269,7 @@ get_window_by_coord(unsigned int x, unsigned int y) {
 
 	if (y < way || y >= way+wah)
 		return NULL;
-	if (isarrange(fullscreen))
+	if (layout_is_arrange(LAYOUT_MAXIMIZED))
 		return window_current();
 	for_each_window(c) {
 		int w_h = ui_window_height_get(c->win);
@@ -1647,7 +1641,7 @@ synctitle(Window *c)
 	buffer_name_set(c->buf, basename(buf));
 
 	settitle(c);
-	if (!isarrange(fullscreen) || window_current() == c)
+	if (!layout_is_arrange(LAYOUT_MAXIMIZED) || window_current() == c)
 		draw_title(c);
 done:
 	close(fd);
@@ -1853,7 +1847,7 @@ mouse_focus(const char *args[]) {
 static void
 mouse_fullscreen(const char *args[]) {
 	mouse_focus(NULL);
-	setlayout(isarrange(fullscreen) ? NULL : args);
+	setlayout(layout_is_arrange(LAYOUT_MAXIMIZED) ? NULL : args);
 }
 
 static void
@@ -2279,7 +2273,7 @@ int main(int argc, char *argv[]) {
 				if (c != window_current()) {
 					draw(c, false);
 				}
-			} else if (!isarrange(fullscreen)) {
+			} else if (!layout_is_arrange(LAYOUT_MAXIMIZED)) {
 				draw_title(c);
 				ui_window_refresh(c->win);
 			}
@@ -2845,7 +2839,7 @@ int win_title_set(int wid, char *title)
 	if (c) {
 		ui_window_title_set(c->win, title);
 		settitle(c);
-		if (!isarrange(fullscreen))
+		if (!layout_is_arrange(LAYOUT_MAXIMIZED))
 			draw_title(c);
 		return 0;
 	}
@@ -2860,7 +2854,7 @@ win_state_t win_state_get(int wid)
 	if (!c)
 		return -1;
 
-	if (isarrange(fullscreen)) {
+	if (layout_is_arrange(LAYOUT_MAXIMIZED)) {
 		return WIN_STATE_MAXIMIZED;
 	} else if (ismaster(c)) {
 		return WIN_STATE_MASTER;
@@ -2919,7 +2913,7 @@ int win_state_toggle(int wid, win_state_t st)
 
 	switch (st) {
 	case WIN_STATE_MAXIMIZED:
-		if (isarrange(fullscreen)) {
+		if (layout_is_arrange(LAYOUT_MAXIMIZED)) {
 			frame_current()->layout = frame_current()->layout_prev;
 			layout_changed(true);
 		} else {
@@ -4304,7 +4298,7 @@ int layout_nmaster_get(int tab)
 
 int layout_nmaster_set(int tab, int n)
 {
-	if (window_popup_get() || isarrange(fullscreen) || isarrange(grid))
+	if (window_popup_get() || layout_is_arrange(LAYOUT_MAXIMIZED) || layout_is_arrange(LAYOUT_GRID))
 		return -1;
 
 	tab_get(tab)->f->nmaster = n;
@@ -4320,7 +4314,7 @@ float layout_fmaster_get(int tab)
 
 int layout_fmaster_set(int tab, float mfact)
 {
-	if (window_popup_get() || isarrange(fullscreen) || isarrange(grid))
+	if (window_popup_get() || layout_is_arrange(LAYOUT_MAXIMIZED) || layout_is_arrange(LAYOUT_GRID))
 		return -1;
 
 	tab_get(tab)->f->mfact = mfact;

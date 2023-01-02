@@ -10,15 +10,20 @@ static Tab tabs[MAXTABS + 1];
 
 /* by default the first layout entry is used */
 static Layout layouts[] = {
-	{ "[]=", NULL },
-	{ "+++", NULL },
-	{ "TTT", NULL },
-	{ "[ ]", NULL },
+	{ LAYOUT_TILED,     "[]=", NULL },
+	{ LAYOUT_GRID,      "+++", NULL },
+	{ LAYOUT_BSTACK,    "TTT", NULL },
+	{ LAYOUT_MAXIMIZED, "[ ]", NULL },
 };
 
 Layout *layout_get(int id)
 {
 	return &layouts[id];
+}
+
+Layout *layout_current(void)
+{
+	return frame_current()->layout;
 }
 
 bool layout_is_changed(void)
@@ -34,6 +39,11 @@ void layout_changed(bool changed)
 void layout_set_func(int id, void (*arrange)(unsigned int, unsigned int, unsigned int, unsigned int))
 {
 	layout_get(id)->arrange = arrange;
+}
+
+bool layout_is_arrange(int id)
+{
+	return layout_current()->id == id;
 }
 
 Tab *tab_get(int tab)
@@ -127,4 +137,3 @@ void *window_popup_set(Window *p)
 {
 	frame_current()->popup = p;
 }
-

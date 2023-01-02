@@ -7,16 +7,17 @@
 #include "view.h"
 
 typedef enum {
-	LAYOUT_FIRST,
+	LAYOUT_FIRST = 0,
 	LAYOUT_TILED = LAYOUT_FIRST,
-	LAYOUT_GRID,
-	LAYOUT_BSTACK,
-	LAYOUT_MAXIMIZED,
+	LAYOUT_GRID = 1,
+	LAYOUT_BSTACK = 2,
+	LAYOUT_MAXIMIZED = 3,
 
 	LAYOUT_MAX
 } layout_t;
 
 typedef struct {
+	int id;
 	const char *symbol;
 	void (*arrange)(unsigned int, unsigned int, unsigned int, unsigned int);
 } Layout;
@@ -67,9 +68,11 @@ typedef struct {
 #define MAXTABS	9
 
 Layout *layout_get(int id);
+Layout *layout_current(void);
 bool layout_is_changed(void);
 void layout_changed(bool changed);
 void layout_set_func(int id, void (*arrange)(unsigned int, unsigned int, unsigned int, unsigned int));
+bool layout_is_arrange(int id);
 
 Tab *tab_get(int tab);
 int tab_current_id_get(void);
