@@ -75,6 +75,8 @@ void layout_set_arrange(int id, void (*arrange)(unsigned int, unsigned int, unsi
 bool layout_is_arrange(int id);
 layout_t layout_current_get(int tab);
 int layout_current_set(int tab, layout_t lay);
+int layout_current_nmaster(void);
+float layout_current_fmaster(void);
 int layout_nmaster_get(int tab);
 int layout_nmaster_set(int tab, int n);
 float layout_fmaster_get(int tab);

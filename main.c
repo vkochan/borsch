@@ -132,8 +132,6 @@ static void quit(const char *args[]);
 static void redraw(const char *args[]);
 static void scrollback(const char *args[]);
 static void setlayout(const char *args[]);
-static int getnmaster(void);
-static float getmfact(void);
 static void togglemouse(const char *args[]);
 static void doeval(const char *args[]);
 
@@ -238,7 +236,7 @@ static char term_name[32];
 	for (__w = windows_list(); __w && __w->next; __w = __w->next)
 
 #define for_each_window_master(__m) \
-	for (int __n = ({__m = windows_list();0;}); __m && __n < getnmaster(); __m = __m->next, __n++)
+	for (int __n = ({__m = windows_list();0;}); __m && __n < layout_current_nmaster(); __m = __m->next, __n++)
 
 static void tile(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
 {
@@ -249,8 +247,8 @@ static void tile(unsigned int wax, unsigned int way, unsigned int waw, unsigned 
 	for_each_window(c)
 		n++;
 
-	m  = MAX(1, MIN(n, getnmaster()));
-	mw = n == m ? waw : getmfact() * waw;
+	m  = MAX(1, MIN(n, layout_current_nmaster()));
+	mw = n == m ? waw : layout_current_fmaster() * waw;
 	mh = wah / m;
 	th = n == m ? 0 : wah / (n - m);
 	nx = lax;
@@ -347,8 +345,8 @@ static void bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigne
 	for_each_window(c)
 		n++;
 
-	m  = MAX(1, MIN(n, getnmaster()));
-	mh = n == m ? lah : getmfact() * lah;
+	m  = MAX(1, MIN(n, layout_current_nmaster()));
+	mh = n == m ? lah : layout_current_fmaster() * lah;
 	mw = law / m;
 	tw = n == m ? 0 : law / (n - m);
 	nx = lax;
@@ -1816,16 +1814,6 @@ setlayout(const char *args[]) {
 	frame_current()->layout_prev = frame_current()->layout;
 	frame_current()->layout = layout;
 	layout_changed(true);
-}
-
-static int
-getnmaster(void) {
-	return frame_current()->nmaster;
-}
-
-static float
-getmfact(void) {
-	return frame_current()->mfact;
 }
 
 static void

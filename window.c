@@ -61,6 +61,16 @@ int layout_current_set(int tab, layout_t lay)
 	layout_changed(true);
 }
 
+int layout_current_nmaster(void)
+{
+	return frame_current()->nmaster;
+}
+
+float layout_current_fmaster(void)
+{
+	return frame_current()->mfact;
+}
+
 int layout_nmaster_get(int tab)
 {
 	return tab_get(tab)->f->nmaster;
