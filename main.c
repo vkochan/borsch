@@ -4337,7 +4337,6 @@ int frame_name_set(int tab, char *name)
 
 	if (name && strlen(name))
 		tabs[tab].f->name = strdup(name);
-	drawbar();
 }
 
 char *frame_cwd_get(int tab)
@@ -4348,7 +4347,6 @@ char *frame_cwd_get(int tab)
 int frame_cwd_set(int tab, char *cwd)
 {
 	strncpy(tabs[tab].f->cwd, cwd, CWD_MAX - 1);
-	drawbar();
 	return 0;
 }
 
