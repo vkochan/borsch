@@ -170,7 +170,7 @@ static Window *topbar;
 /* number of windows in master area */
 #define NMASTER 1
 
-#define MAXTAGS	9
+#define MAXTABS	9
 
 static Window *windows_list(void);
 
@@ -232,7 +232,7 @@ static int proc_fd[2];
 /* global variables */
 static const char *prog_name = PROGNAME;
 static unsigned int curr_tab;
-static Tab tabs[MAXTAGS + 1];
+static Tab tabs[MAXTABS + 1];
 static Window *msel = NULL;
 static bool mouse_events_enabled = ENABLE_MOUSE;
 
@@ -1429,7 +1429,7 @@ static void tabs_init(void) {
 	int i;
 
 	curr_tab_set(1);
-	for(i=0; i <= MAXTAGS; i++) {
+	for(i=0; i <= MAXTABS; i++) {
 		tabs[i].f = calloc(1, sizeof(Frame));
 		tabs[i].f->nmaster = NMASTER;
 		tabs[i].f->mfact = MFACT;
@@ -1617,7 +1617,7 @@ cleanup(void) {
 	scheme_uninit();
 	while (windows_list())
 		destroy(windows_list());
-	for(i=0; i <= MAXTAGS; i++) {
+	for(i=0; i <= MAXTABS; i++) {
 		if (tabs[i].f->popup)
 			destroy(tabs[i].f->popup);
 	}
@@ -1651,7 +1651,7 @@ cleanup(void) {
 		close(retfifo.fd);
 	if (retfifo.file)
 		unlink(retfifo.file);
-	for(i=0; i <= MAXTAGS; i++) {
+	for(i=0; i <= MAXTABS; i++) {
 		free(tabs[i].f->name);
 		free(tabs[i].f->cwd);
 		free(tabs[i].f);
