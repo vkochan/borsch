@@ -231,7 +231,7 @@ static int proc_fd[2];
 
 /* global variables */
 static const char *prog_name = PROGNAME;
-static unsigned int curtag;
+static unsigned int curr_tab;
 static Tab tabs[MAXTAGS + 1];
 static Window *msel = NULL;
 static bool mouse_events_enabled = ENABLE_MOUSE;
@@ -430,14 +430,14 @@ static void fullscreen(unsigned int wax, unsigned int way, unsigned int waw, uns
 }
 
 
-static int curr_tag_get(void)
+static int curr_tab_get(void)
 {
-	return curtag;
+	return curr_tab;
 }
 
-static void curr_tag_set(int tag)
+static void curr_tab_set(int tab)
 {
-	curtag = tag;
+	curr_tab = tab;
 }
 
 static Frame *get_frame(int fid)
@@ -447,7 +447,7 @@ static Frame *get_frame(int fid)
 
 static Frame *current_frame(void)
 {
-	return get_frame(curr_tag_get());
+	return get_frame(curr_tab_get());
 }
 
 static Window *window_stack(void)
@@ -1428,7 +1428,7 @@ mouse_setup(void) {
 static void tabs_init(void) {
 	int i;
 
-	curr_tag_set(1);
+	curr_tab_set(1);
 	for(i=0; i <= MAXTAGS; i++) {
 		tabs[i].f = calloc(1, sizeof(Frame));
 		tabs[i].f->nmaster = NMASTER;
@@ -2440,7 +2440,7 @@ int win_first_get(int fid)
 {
 	int wid = 0;
 
-	fid = fid < 0 ? curr_tag_get() : fid;
+	fid = fid < 0 ? curr_tab_get() : fid;
 
 	if (windows_list_by_fid(fid))
 		wid = windows_list_by_fid(fid)->id;
@@ -4339,62 +4339,62 @@ int term_filter_enable(int bid, bool enable)
 
 int frame_current_get(void)
 {
-	return curr_tag_get();
+	return curr_tab_get();
 }
 
-int frame_current_set(int tag)
+int frame_current_set(int tab)
 {
-	curr_tag_set(tag);
+	curr_tab_set(tab);
 	ui_needs_arrange = true;
 }
 
-const char *frame_name_get(int tag)
+const char *frame_name_get(int tab)
 {
-	if (tabs[tag].f->name && strlen(tabs[tag].f->name)) {
-		return tabs[tag].f->name;
+	if (tabs[tab].f->name && strlen(tabs[tab].f->name)) {
+		return tabs[tab].f->name;
 	} else {
 		return NULL;
 	}
 }
 
-int frame_name_set(int tag, char *name)
+int frame_name_set(int tab, char *name)
 {
-	free(tabs[tag].f->name);
-	tabs[tag].f->name = NULL;
+	free(tabs[tab].f->name);
+	tabs[tab].f->name = NULL;
 
 	if (name && strlen(name))
-		tabs[tag].f->name = strdup(name);
+		tabs[tab].f->name = strdup(name);
 	drawbar();
 }
 
-char *frame_cwd_get(int tag)
+char *frame_cwd_get(int tab)
 {
-	return tabs[tag].f->cwd;
+	return tabs[tab].f->cwd;
 }
 
-int frame_cwd_set(int tag, char *cwd)
+int frame_cwd_set(int tab, char *cwd)
 {
-	strncpy(tabs[tag].f->cwd, cwd, CWD_MAX - 1);
+	strncpy(tabs[tab].f->cwd, cwd, CWD_MAX - 1);
 	drawbar();
 	return 0;
 }
 
-layout_t layout_current_get(int tag)
+layout_t layout_current_get(int tab)
 {
-	if (tabs[tag].f->layout->arrange == fullscreen) {
+	if (tabs[tab].f->layout->arrange == fullscreen) {
 		return LAYOUT_MAXIMIZED;
-	} else if (tabs[tag].f->layout->arrange == tile) {
+	} else if (tabs[tab].f->layout->arrange == tile) {
 		return LAYOUT_TILED;
-	} else if (tabs[tag].f->layout->arrange == bstack) {
+	} else if (tabs[tab].f->layout->arrange == bstack) {
 		return LAYOUT_BSTACK;
-	} else if (tabs[tag].f->layout->arrange == grid) {
+	} else if (tabs[tab].f->layout->arrange == grid) {
 		return LAYOUT_GRID;
 	} else {
 		return -1;
 	}
 }
 
-int layout_current_set(int tag, layout_t lay)
+int layout_current_set(int tab, layout_t lay)
 {
 	if (get_popup())
 		return -1;
@@ -4404,49 +4404,49 @@ int layout_current_set(int tag, layout_t lay)
 	ui_needs_arrange = true;
 }
 
-int layout_nmaster_get(int tag)
+int layout_nmaster_get(int tab)
 {
-	return tabs[tag].f->nmaster;
+	return tabs[tab].f->nmaster;
 }
 
-int layout_nmaster_set(int tag, int n)
+int layout_nmaster_set(int tab, int n)
 {
 	if (get_popup() || isarrange(fullscreen) || isarrange(grid))
 		return -1;
 
-	tabs[tag].f->nmaster = n;
+	tabs[tab].f->nmaster = n;
 	ui_needs_arrange = true;
 
 	return 0;
 }
 
-float layout_fmaster_get(int tag)
+float layout_fmaster_get(int tab)
 {
-	return tabs[tag].f->mfact;
+	return tabs[tab].f->mfact;
 }
 
-int layout_fmaster_set(int tag, float mfact)
+int layout_fmaster_set(int tab, float mfact)
 {
 	if (get_popup() || isarrange(fullscreen) || isarrange(grid))
 		return -1;
 
-	tabs[tag].f->mfact = mfact;
+	tabs[tab].f->mfact = mfact;
 	ui_needs_arrange = true;
 
 	return 0;
 }
 
-bool layout_sticky_get(int tag)
+bool layout_sticky_get(int tab)
 {
-	return tabs[tag].f->msticky;
+	return tabs[tab].f->msticky;
 }
 
-int layout_sticky_set(int tag, bool is_sticky)
+int layout_sticky_set(int tab, bool is_sticky)
 {
 	if (get_popup())
 		return -1;
 
-	tabs[tag].f->msticky = is_sticky;
+	tabs[tab].f->msticky = is_sticky;
 	draw_all();
 	return 0;
 }
