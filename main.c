@@ -52,6 +52,7 @@
 #include "window.h"
 #include "view.h"
 #include "syntax.h"
+#include "scheme.h"
 #include "text/text-motions.h"
 #include "text/text-objects.h"
 #if defined __CYGWIN__ || defined __sun
@@ -122,13 +123,6 @@ static Ui *ui;
 #define LENGTH(arr) (sizeof(arr) / sizeof((arr)[0]))
 #define MAX(x, y)   ((x) > (y) ? (x) : (y))
 #define MIN(x, y)   ((x) < (y) ? (x) : (y))
-
-extern int scheme_init(const char *);
-extern void scheme_uninit(void);
-extern int scheme_event_handle(event_t evt);
-extern int scheme_eval_file(const char *scm_in, const char *out);
-extern void *scheme_env_alloc(void);
-extern void scheme_env_free(void *env);
 
 static char *scheme_init_script = "";
 static bool start_in_graphic = false;
