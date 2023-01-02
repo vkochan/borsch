@@ -19,13 +19,6 @@ typedef enum {
 	WIN_STATE_MASTER    = 2,
 } win_state_t;
 
-typedef enum {
-	LAYOUT_TILED = 0,
-	LAYOUT_GRID = 1,
-	LAYOUT_BSTACK = 2,
-	LAYOUT_MAXIMIZED = 3,
-} layout_t;
-
 typedef struct {
 	event_id_t   eid;
 	int          oid;

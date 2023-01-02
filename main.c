@@ -166,14 +166,6 @@ static void grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned 
 static void bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
 static void fullscreen(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
 
-/* by default the first layout entry is used */
-static Layout layouts[] = {
-	{ "[]=", tile },
-	{ "+++", grid },
-	{ "TTT", bstack },
-	{ "[ ]", fullscreen },
-};
-
 #ifdef NCURSES_MOUSE_VERSION
 # define CONFIG_MOUSE /* compile in mouse support if we build against ncurses */
 #endif
@@ -218,7 +210,6 @@ static int proc_fd[2];
 
 /* global variables */
 static const char *prog_name = PROGNAME;
-static Tab tabs[MAXTABS + 1];
 static Window *msel = NULL;
 static bool mouse_events_enabled = ENABLE_MOUSE;
 
@@ -413,24 +404,14 @@ static void fullscreen(unsigned int wax, unsigned int way, unsigned int waw, uns
 		resize(c, wax, way, waw, wah);
 }
 
-static Frame *get_frame(int fid)
-{
-	return tabs[fid].f;
-}
-
-static Frame *current_frame(void)
-{
-	return get_frame(tab_current_id_get());
-}
-
 static Window *window_stack(void)
 {
-	return current_frame()->stack;
+	return frame_current()->stack;
 }
 
 static void set_window_stack(Window *stack)
 {
-	current_frame()->stack = stack;
+	frame_current()->stack = stack;
 }
 
 static void
@@ -844,42 +825,42 @@ error(const char *errstr, ...) {
 
 static bool
 isarrange(void (*func)()) {
-	return func == current_frame()->layout->arrange;
+	return func == frame_current()->layout->arrange;
 }
 
 static Window *window_current(void)
 {
-	return current_frame()->sel;
+	return frame_current()->sel;
 }
 
 static void set_current_window(Window *w)
 {
-	current_frame()->sel = w;
+	frame_current()->sel = w;
 }
 
 static Window *last_selected_window(void)
 {
-	return current_frame()->lastsel;
+	return frame_current()->lastsel;
 }
 
 static void set_last_selected_window(Window *w)
 {
-	current_frame()->lastsel = w;
+	frame_current()->lastsel = w;
 }
 
 static Window *windows_list(void)
 {
-	return current_frame()->windows;
+	return frame_current()->windows;
 }
 
 static Window *windows_list_by_fid(int fid)
 {
-	return get_frame(fid)->windows;
+	return frame_get(fid)->windows;
 }
 
 static void set_windows_list(Window *w)
 {
-	current_frame()->windows = w;
+	frame_current()->windows = w;
 }
 
 static bool
@@ -910,7 +891,7 @@ static bool ismastersticky(Window *c) {
 	int n = 0;
 	Window *m;
 
-	if (!current_frame()->msticky)
+	if (!frame_current()->msticky)
 		return false;
 	if (!c)
 		return true;
@@ -928,12 +909,12 @@ char *window_get_title(Window *c)
 
 Window *get_popup(void)
 {
-	return current_frame()->popup;
+	return frame_current()->popup;
 }
 
 void *set_popup(Window *p)
 {
-	current_frame()->popup = p;
+	frame_current()->popup = p;
 }
 
 static void
@@ -1119,7 +1100,7 @@ arrange(void) {
 		c->order = ++n;
 
 	ui_clear(ui);
-	current_frame()->layout->arrange(wax, way, waw, wah);
+	frame_current()->layout->arrange(wax, way, waw, wah);
 	focus(NULL);
 	ui_refresh(ui);
 	drawbar();
@@ -1214,7 +1195,7 @@ settitle(Window *c) {
 static void
 detachstack(Window *c) {
 	Window **tc;
-	for (tc = &current_frame()->stack; *tc && *tc != c; tc = &(*tc)->snext);
+	for (tc = &frame_current()->stack; *tc && *tc != c; tc = &(*tc)->snext);
 	*tc = c->snext;
 }
 
@@ -1398,23 +1379,6 @@ mouse_setup(void) {
 #endif /* CONFIG_MOUSE */
 }
 
-static void tabs_init(void) {
-	int i;
-
-	tab_current_id_set(1);
-	for(i=0; i <= MAXTABS; i++) {
-		tabs[i].f = calloc(1, sizeof(Frame));
-		tabs[i].f->nmaster = NMASTER;
-		tabs[i].f->mfact = MFACT;
-		tabs[i].f->layout = layouts;
-		tabs[i].f->layout_prev = layouts;
-		tabs[i].f->msticky = false;
-		tabs[i].f->name = NULL;
-		tabs[i].f->cwd = calloc(CWD_MAX, 1);
-		getcwd(tabs[i].f->cwd, CWD_MAX);
-	}
-}
-
 static bool
 checkshell(const char *shell) {
 	if (shell == NULL || *shell == '\0' || *shell != '/')
@@ -1470,6 +1434,14 @@ static int handle_ui_event(Ui *ui, enum UiEventType type, void *evt, void *arg)
 	return 0;
 }
 
+static void layout_init(void)
+{
+	layout_set_func(LAYOUT_TILED, tile);
+	layout_set_func(LAYOUT_GRID, grid);
+	layout_set_func(LAYOUT_BSTACK, bstack);
+	layout_set_func(LAYOUT_MAXIMIZED, fullscreen);
+}
+
 static void
 setup(void) {
 	shell = getshell();
@@ -1495,6 +1467,7 @@ setup(void) {
 	syntax_init();
 	style_init();
 	vt_init();
+	layout_init();
 	tabs_init();
 	update_screen_size();
 	arrange();
@@ -1591,8 +1564,8 @@ cleanup(void) {
 	while (windows_list())
 		destroy(windows_list());
 	for(i=0; i <= MAXTABS; i++) {
-		if (tabs[i].f->popup)
-			destroy(tabs[i].f->popup);
+		if (tab_get(i)->f->popup)
+			destroy(tab_get(i)->f->popup);
 	}
 
 	b = buffer_first_get();
@@ -1625,9 +1598,9 @@ cleanup(void) {
 	if (retfifo.file)
 		unlink(retfifo.file);
 	for(i=0; i <= MAXTABS; i++) {
-		free(tabs[i].f->name);
-		free(tabs[i].f->cwd);
-		free(tabs[i].f);
+		free(tab_get(i)->f->name);
+		free(tab_get(i)->f->cwd);
+		free(tab_get(i)->f);
 	}
 }
 
@@ -1847,33 +1820,33 @@ scrollback(const char *args[]) {
 
 static void
 setlayout(const char *args[]) {
-	Layout *layout = current_frame()->layout;
+	Layout *layout = frame_current()->layout;
 	unsigned int i;
 
 	if (!args || !args[0]) {
-		if (++layout == &layouts[LENGTH(layouts)])
-			layout = &layouts[0];
+		if (++layout == layout_get(LAYOUT_MAX))
+			layout = layout_get(LAYOUT_FIRST);
 	} else {
-		for (i = 0; i < LENGTH(layouts); i++)
-			if (!strcmp(args[0], layouts[i].symbol))
+		for (i = 0; i < LAYOUT_MAX; i++)
+			if (!strcmp(args[0], layout_get(i)->symbol))
 				break;
-		if (i == LENGTH(layouts))
+		if (i == LAYOUT_MAX)
 			return;
-		layout = &layouts[i];
+		layout = layout_get(i);
 	}
-	current_frame()->layout_prev = current_frame()->layout;
-	current_frame()->layout = layout;
+	frame_current()->layout_prev = frame_current()->layout;
+	frame_current()->layout = layout;
 	layout_changed(true);
 }
 
 static int
 getnmaster(void) {
-	return current_frame()->nmaster;
+	return frame_current()->nmaster;
 }
 
 static float
 getmfact(void) {
-	return current_frame()->mfact;
+	return frame_current()->mfact;
 }
 
 static void
@@ -2958,7 +2931,7 @@ int win_state_toggle(int wid, win_state_t st)
 	switch (st) {
 	case WIN_STATE_MAXIMIZED:
 		if (isarrange(fullscreen)) {
-			current_frame()->layout = current_frame()->layout_prev;
+			frame_current()->layout = frame_current()->layout_prev;
 			layout_changed(true);
 		} else {
 			setlayout(maxi);
@@ -4323,8 +4296,8 @@ int frame_current_set(int tab)
 
 const char *frame_name_get(int tab)
 {
-	if (tabs[tab].f->name && strlen(tabs[tab].f->name)) {
-		return tabs[tab].f->name;
+	if (tab_get(tab)->f->name && strlen(tab_get(tab)->f->name)) {
+		return tab_get(tab)->f->name;
 	} else {
 		return NULL;
 	}
@@ -4332,33 +4305,33 @@ const char *frame_name_get(int tab)
 
 int frame_name_set(int tab, char *name)
 {
-	free(tabs[tab].f->name);
-	tabs[tab].f->name = NULL;
+	free(tab_get(tab)->f->name);
+	tab_get(tab)->f->name = NULL;
 
 	if (name && strlen(name))
-		tabs[tab].f->name = strdup(name);
+		tab_get(tab)->f->name = strdup(name);
 }
 
 char *frame_cwd_get(int tab)
 {
-	return tabs[tab].f->cwd;
+	return tab_get(tab)->f->cwd;
 }
 
 int frame_cwd_set(int tab, char *cwd)
 {
-	strncpy(tabs[tab].f->cwd, cwd, CWD_MAX - 1);
+	strncpy(tab_get(tab)->f->cwd, cwd, CWD_MAX - 1);
 	return 0;
 }
 
 layout_t layout_current_get(int tab)
 {
-	if (tabs[tab].f->layout->arrange == fullscreen) {
+	if (tab_get(tab)->f->layout->arrange == fullscreen) {
 		return LAYOUT_MAXIMIZED;
-	} else if (tabs[tab].f->layout->arrange == tile) {
+	} else if (tab_get(tab)->f->layout->arrange == tile) {
 		return LAYOUT_TILED;
-	} else if (tabs[tab].f->layout->arrange == bstack) {
+	} else if (tab_get(tab)->f->layout->arrange == bstack) {
 		return LAYOUT_BSTACK;
-	} else if (tabs[tab].f->layout->arrange == grid) {
+	} else if (tab_get(tab)->f->layout->arrange == grid) {
 		return LAYOUT_GRID;
 	} else {
 		return -1;
@@ -4370,14 +4343,14 @@ int layout_current_set(int tab, layout_t lay)
 	if (get_popup())
 		return -1;
 
-	current_frame()->layout_prev = current_frame()->layout;
-	current_frame()->layout = &layouts[lay];
+	frame_current()->layout_prev = frame_current()->layout;
+	frame_current()->layout = layout_get(lay);
 	layout_changed(true);
 }
 
 int layout_nmaster_get(int tab)
 {
-	return tabs[tab].f->nmaster;
+	return tab_get(tab)->f->nmaster;
 }
 
 int layout_nmaster_set(int tab, int n)
@@ -4385,7 +4358,7 @@ int layout_nmaster_set(int tab, int n)
 	if (get_popup() || isarrange(fullscreen) || isarrange(grid))
 		return -1;
 
-	tabs[tab].f->nmaster = n;
+	tab_get(tab)->f->nmaster = n;
 	layout_changed(true);
 
 	return 0;
@@ -4393,7 +4366,7 @@ int layout_nmaster_set(int tab, int n)
 
 float layout_fmaster_get(int tab)
 {
-	return tabs[tab].f->mfact;
+	return tab_get(tab)->f->mfact;
 }
 
 int layout_fmaster_set(int tab, float mfact)
@@ -4401,7 +4374,7 @@ int layout_fmaster_set(int tab, float mfact)
 	if (get_popup() || isarrange(fullscreen) || isarrange(grid))
 		return -1;
 
-	tabs[tab].f->mfact = mfact;
+	tab_get(tab)->f->mfact = mfact;
 	layout_changed(true);
 
 	return 0;
@@ -4409,7 +4382,7 @@ int layout_fmaster_set(int tab, float mfact)
 
 bool layout_sticky_get(int tab)
 {
-	return tabs[tab].f->msticky;
+	return tab_get(tab)->f->msticky;
 }
 
 int layout_sticky_set(int tab, bool is_sticky)
@@ -4417,7 +4390,7 @@ int layout_sticky_set(int tab, bool is_sticky)
 	if (get_popup())
 		return -1;
 
-	tabs[tab].f->msticky = is_sticky;
+	tab_get(tab)->f->msticky = is_sticky;
 	draw_all();
 	return 0;
 }

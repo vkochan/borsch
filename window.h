@@ -6,6 +6,16 @@
 #include "buffer.h"
 #include "view.h"
 
+typedef enum {
+	LAYOUT_FIRST,
+	LAYOUT_TILED = LAYOUT_FIRST,
+	LAYOUT_GRID,
+	LAYOUT_BSTACK,
+	LAYOUT_MAXIMIZED,
+
+	LAYOUT_MAX
+} layout_t;
+
 typedef struct {
 	const char *symbol;
 	void (*arrange)(unsigned int, unsigned int, unsigned int, unsigned int);
@@ -56,10 +66,16 @@ typedef struct {
 
 #define MAXTABS	9
 
+Layout *layout_get(int id);
 bool layout_is_changed(void);
 void layout_changed(bool changed);
+void layout_set_func(int id, void (*arrange)(unsigned int, unsigned int, unsigned int, unsigned int));
 
+Tab *tab_get(int tab);
 int tab_current_id_get(void);
 void tab_current_id_set(int tab);
+
+Frame *frame_get(int fid);
+Frame *frame_current(void);
 
 #endif /* WINDOW_H */
