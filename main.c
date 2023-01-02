@@ -165,13 +165,6 @@ static KeyMap *curr_kmap;
 static Window *minibuf;
 static Window *topbar;
 
-/* master width factor [0.1 .. 0.9] */
-#define MFACT 0.5
-/* number of windows in master area */
-#define NMASTER 1
-
-#define MAXTABS	9
-
 static Window *windows_list(void);
 
 static void tile(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);

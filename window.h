@@ -47,4 +47,11 @@ typedef struct {
 	Frame *f;
 } Tab;
 
+/* master width factor [0.1 .. 0.9] */
+#define MFACT 0.5
+/* number of windows in master area */
+#define NMASTER 1
+
+#define MAXTABS	9
+
 #endif /* WINDOW_H */
