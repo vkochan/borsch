@@ -49,6 +49,7 @@
 #include "event.h"
 #include "buffer.h"
 #include "keymap.h"
+#include "window.h"
 #include "view.h"
 #include "syntax.h"
 #include "text/text-motions.h"
@@ -73,28 +74,6 @@ int ESCDELAY;
 #ifndef NCURSES_REENTRANT
 # define set_escdelay(d) (ESCDELAY = (d))
 #endif
-
-typedef struct {
-	const char *symbol;
-	void (*arrange)(unsigned int, unsigned int, unsigned int, unsigned int);
-} Layout;
-
-typedef struct Window Window;
-struct Window {
-	Buffer *prev_buf;
-	Buffer *buf;
-	View *view;
-	UiWin *win;
-	const char *cmd;
-	int order;
-	unsigned short int id;
-	bool urgent;
-	Window *next;
-	Window *prev;
-	Window *snext;
-	bool highlight_mark;
-	bool pending_draw_evt;
-};
 
 /* #define ALT(k)      ((k) + (161 - 'a')) */
 #define ALT	27
@@ -221,27 +200,6 @@ static Button buttons[] = {
 	{ BUTTON2_CLICKED,        { mouse_zoom,       { NULL  } } },
 };
 #endif /* CONFIG_MOUSE */
-
-#define CWD_MAX		256
-
-typedef struct {
-	int nmaster;
-	float mfact;
-	Layout *layout;
-	Layout *layout_prev;
-	char *cwd;
-	char *name;
-	bool msticky;
-	Window *popup;
-	Window *sel;
-	Window *lastsel;
-	Window *windows;
-	Window *stack;
-} Frame;
-
-typedef struct {
-	Frame *f;
-} Tab;
 
 typedef struct
 {
