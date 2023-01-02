@@ -4266,68 +4266,6 @@ int term_filter_enable(int bid, bool enable)
 	return -1;
 }
 
-layout_t layout_current_get(int tab)
-{
-	if (tab_get(tab)->f->layout->arrange == fullscreen) {
-		return LAYOUT_MAXIMIZED;
-	} else if (tab_get(tab)->f->layout->arrange == tile) {
-		return LAYOUT_TILED;
-	} else if (tab_get(tab)->f->layout->arrange == bstack) {
-		return LAYOUT_BSTACK;
-	} else if (tab_get(tab)->f->layout->arrange == grid) {
-		return LAYOUT_GRID;
-	} else {
-		return -1;
-	}
-}
-
-int layout_current_set(int tab, layout_t lay)
-{
-	if (window_popup_get())
-		return -1;
-
-	frame_current()->layout_prev = frame_current()->layout;
-	frame_current()->layout = layout_get(lay);
-	layout_changed(true);
-}
-
-int layout_nmaster_get(int tab)
-{
-	return tab_get(tab)->f->nmaster;
-}
-
-int layout_nmaster_set(int tab, int n)
-{
-	if (window_popup_get() || layout_is_arrange(LAYOUT_MAXIMIZED) || layout_is_arrange(LAYOUT_GRID))
-		return -1;
-
-	tab_get(tab)->f->nmaster = n;
-	layout_changed(true);
-
-	return 0;
-}
-
-float layout_fmaster_get(int tab)
-{
-	return tab_get(tab)->f->mfact;
-}
-
-int layout_fmaster_set(int tab, float mfact)
-{
-	if (window_popup_get() || layout_is_arrange(LAYOUT_MAXIMIZED) || layout_is_arrange(LAYOUT_GRID))
-		return -1;
-
-	tab_get(tab)->f->mfact = mfact;
-	layout_changed(true);
-
-	return 0;
-}
-
-bool layout_sticky_get(int tab)
-{
-	return tab_get(tab)->f->msticky;
-}
-
 int layout_sticky_set(int tab, bool is_sticky)
 {
 	if (window_popup_get())

@@ -73,6 +73,13 @@ bool layout_is_changed(void);
 void layout_changed(bool changed);
 void layout_set_func(int id, void (*arrange)(unsigned int, unsigned int, unsigned int, unsigned int));
 bool layout_is_arrange(int id);
+layout_t layout_current_get(int tab);
+int layout_current_set(int tab, layout_t lay);
+int layout_nmaster_get(int tab);
+int layout_nmaster_set(int tab, int n);
+float layout_fmaster_get(int tab);
+int layout_fmaster_set(int tab, float mfact);
+bool layout_sticky_get(int tab);
 
 Tab *tab_get(int tab);
 int tab_current_id_get(void);
