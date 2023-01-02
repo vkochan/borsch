@@ -36,7 +36,7 @@ void layout_changed(bool changed)
 	layout_needs_arrange = changed;
 }
 
-void layout_set_func(int id, void (*arrange)(unsigned int, unsigned int, unsigned int, unsigned int))
+void layout_set_arrange(int id, void (*arrange)(unsigned int, unsigned int, unsigned int, unsigned int))
 {
 	layout_get(id)->arrange = arrange;
 }

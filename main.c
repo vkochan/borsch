@@ -1419,10 +1419,10 @@ static int handle_ui_event(Ui *ui, enum UiEventType type, void *evt, void *arg)
 
 static void layout_init(void)
 {
-	layout_set_func(LAYOUT_TILED, tile);
-	layout_set_func(LAYOUT_GRID, grid);
-	layout_set_func(LAYOUT_BSTACK, bstack);
-	layout_set_func(LAYOUT_MAXIMIZED, fullscreen);
+	layout_set_arrange(LAYOUT_TILED, tile);
+	layout_set_arrange(LAYOUT_GRID, grid);
+	layout_set_arrange(LAYOUT_BSTACK, bstack);
+	layout_set_arrange(LAYOUT_MAXIMIZED, fullscreen);
 }
 
 static void

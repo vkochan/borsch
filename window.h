@@ -71,7 +71,7 @@ Layout *layout_get(int id);
 Layout *layout_current(void);
 bool layout_is_changed(void);
 void layout_changed(bool changed);
-void layout_set_func(int id, void (*arrange)(unsigned int, unsigned int, unsigned int, unsigned int));
+void layout_set_arrange(int id, void (*arrange)(unsigned int, unsigned int, unsigned int, unsigned int));
 bool layout_is_arrange(int id);
 layout_t layout_current_get(int tab);
 int layout_current_set(int tab, layout_t lay);
