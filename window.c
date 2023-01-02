@@ -117,3 +117,14 @@ void tabs_init(void) {
 		getcwd(tabs[i].f->cwd, CWD_MAX);
 	}
 }
+
+Window *window_popup_get(void)
+{
+	return frame_current()->popup;
+}
+
+void *window_popup_set(Window *p)
+{
+	frame_current()->popup = p;
+}
+

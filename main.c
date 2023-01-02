@@ -906,16 +906,6 @@ char *window_get_title(Window *c)
 	return buffer_name_get(c->buf);
 }
 
-Window *get_popup(void)
-{
-	return frame_current()->popup;
-}
-
-void *set_popup(Window *p)
-{
-	frame_current()->popup = p;
-}
-
 static void
 update_screen_size(void) {
 	int dec_h = 0;
@@ -1026,7 +1016,7 @@ __draw(Window *c, bool force, bool fire_event) {
 		return;
 	}
 
-	if ((force || buffer_is_dirty(c->buf) && is_content_visible(c)) || c == get_popup()) {
+	if ((force || buffer_is_dirty(c->buf) && is_content_visible(c)) || c == window_popup_get()) {
 		debug("%s: buffer name: %s\n", __func__, buffer_name_get(c->buf));
 		/* we assume that it will be set on EVT_WIN_DRAW */
 		/* ui_window_sidebar_width_set(c->win, 0); */
@@ -1265,7 +1255,7 @@ resize_window(Window *c, int w, int h) {
 	if (buffer_proc_get(c->buf)) {
 		Process *proc = buffer_proc_get(c->buf);
 
-		if (c == get_popup()) {
+		if (c == window_popup_get()) {
 			w-=-2;
 			h--;
 		}
@@ -1490,10 +1480,10 @@ static void __win_del(Window *w)
 	if (window_current() == w)
 		focus(w->next);
 
-	if (w != get_popup()) {
+	if (w != window_popup_get()) {
 		detach(w);
 	} else {
-		set_popup(NULL);
+		window_popup_set(NULL);
 	}
 	detachstack(w);
 
@@ -1680,7 +1670,7 @@ int term_create(const char *prog, const char *title, const char *cwd, const char
 	char tmppath[PATH_MAX];
 	char tmp[256];
 
-	if (get_popup())
+	if (window_popup_get())
 		return -1;
 
 	Window *c = calloc(1, sizeof(Window));
@@ -2317,8 +2307,8 @@ static Window *window_get_by_id(int id)
 			return c;
 	}
 
-	if (get_popup() && get_popup()->id == id)
-		return get_popup();
+	if (window_popup_get() && window_popup_get()->id == id)
+		return window_popup_get();
 	else if (minibuf && minibuf->id == id)
 		return minibuf;
 	else if (topbar && topbar->id == id)
@@ -2546,7 +2536,7 @@ int win_current_get(void)
 
 int win_current_set(int wid)
 {
-	if (!get_popup())
+	if (!window_popup_get())
 		__focusid(wid);
 	return 0;
 }
@@ -2884,7 +2874,7 @@ int win_state_set(int wid, win_state_t st)
 	const char *maxi[] = { "[ ]" };
 	Window *c, *orig;
 
-	if (get_popup())
+	if (window_popup_get())
 		return -1;
 
 	c = window_get_by_id(wid);
@@ -2979,16 +2969,16 @@ void win_popup(int wid, bool enable)
 
 			detach(w);
 
-			if (get_popup())
-				attach(get_popup());
+			if (window_popup_get())
+				attach(window_popup_get());
 
 			ui_window_border_enable(w->win, true);
 			resize(w, waw-(waw-pw), wah-(wah-ph), pw, ph);
-			set_popup(w);
+			window_popup_set(w);
 			arrange();
 			focus(w);
 		} else {
-			set_popup(NULL);
+			window_popup_set(NULL);
 			ui_window_border_enable(w->win, false);
 			attach(w);
 			arrange();
@@ -3387,8 +3377,8 @@ static void buf_list_update(void)
 	}
 	if (topbar)
 		buf_update(topbar);
-	if (get_popup())
-		buf_update(get_popup());
+	if (window_popup_get())
+		buf_update(window_popup_get());
 	if (minibuf)
 		buf_update(minibuf);
 }
@@ -4299,7 +4289,7 @@ layout_t layout_current_get(int tab)
 
 int layout_current_set(int tab, layout_t lay)
 {
-	if (get_popup())
+	if (window_popup_get())
 		return -1;
 
 	frame_current()->layout_prev = frame_current()->layout;
@@ -4314,7 +4304,7 @@ int layout_nmaster_get(int tab)
 
 int layout_nmaster_set(int tab, int n)
 {
-	if (get_popup() || isarrange(fullscreen) || isarrange(grid))
+	if (window_popup_get() || isarrange(fullscreen) || isarrange(grid))
 		return -1;
 
 	tab_get(tab)->f->nmaster = n;
@@ -4330,7 +4320,7 @@ float layout_fmaster_get(int tab)
 
 int layout_fmaster_set(int tab, float mfact)
 {
-	if (get_popup() || isarrange(fullscreen) || isarrange(grid))
+	if (window_popup_get() || isarrange(fullscreen) || isarrange(grid))
 		return -1;
 
 	tab_get(tab)->f->mfact = mfact;
@@ -4346,7 +4336,7 @@ bool layout_sticky_get(int tab)
 
 int layout_sticky_set(int tab, bool is_sticky)
 {
-	if (get_popup())
+	if (window_popup_get())
 		return -1;
 
 	tab_get(tab)->f->msticky = is_sticky;
