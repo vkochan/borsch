@@ -52,7 +52,6 @@
 #include "window.h"
 #include "view.h"
 #include "syntax.h"
-#include "scheme.h"
 #include "text/text-motions.h"
 #include "text/text-objects.h"
 #if defined __CYGWIN__ || defined __sun

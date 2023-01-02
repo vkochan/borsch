@@ -10,6 +10,7 @@
 
 #include "text/text.h"
 #include "buffer.h"
+#include "window.h"
 #include "keymap.h"
 #include "timer.h"
 #include "xstr.h"
