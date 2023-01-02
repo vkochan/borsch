@@ -1172,7 +1172,7 @@ void scheme_term_filter_enable(int bid, bool enable)
 
 int scheme_frame_current_get(void)
 {
-	return frame_current_get();
+	return frame_current_id();
 }
 
 int scheme_frame_current_set(int tag)

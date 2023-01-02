@@ -1,7 +1,12 @@
 #ifndef API_H
 #define API_H
 
+#include <stddef.h>
 #include <stdbool.h>
+
+#include "window.h"
+
+typedef struct Buffer Buffer;
 
 typedef enum {
 	EVT_WIN_DRAW     = 1,
@@ -177,12 +182,6 @@ int term_text_get(int bid, char **buf, size_t *len);
 int term_current_line_get(int bid, char **buf, size_t *len);
 int term_filter_enable(int bid, bool enable);
 
-int frame_current_get(void);
-int frame_current_set(int tag);
-const char *frame_name_get(int tag);
-int frame_name_set(int tag, char *name);
-char *frame_cwd_get(int tag);
-int frame_cwd_set(int tag, char *cwd);
 layout_t layout_current_get(int tag);
 int layout_current_set(int tag, layout_t lay);
 int layout_nmaster_get(int tag);

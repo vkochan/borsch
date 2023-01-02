@@ -77,5 +77,10 @@ void tab_current_id_set(int tab);
 
 Frame *frame_get(int fid);
 Frame *frame_current(void);
+int frame_current_set(int tab);
+const char *frame_name_get(int tab);
+int frame_name_set(int tab, char *name);
+char *frame_cwd_get(int tab);
+int frame_cwd_set(int tab, char *cwd);
 
 #endif /* WINDOW_H */
