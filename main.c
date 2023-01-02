@@ -1580,11 +1580,7 @@ cleanup(void) {
 		close(retfifo.fd);
 	if (retfifo.file)
 		unlink(retfifo.file);
-	for(i=0; i <= MAXTABS; i++) {
-		free(tab_get(i)->f->name);
-		free(tab_get(i)->f->cwd);
-		free(tab_get(i)->f);
-	}
+	tabs_cleanup();
 }
 
 static void __win_buf_attach(Window *w, Buffer *buf)

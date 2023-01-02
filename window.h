@@ -81,6 +81,8 @@ float layout_fmaster_get(int tab);
 int layout_fmaster_set(int tab, float mfact);
 bool layout_sticky_get(int tab);
 
+void tabs_init();
+void tabs_cleanup(void);
 Tab *tab_get(int tab);
 int tab_current_id_get(void);
 void tab_current_id_set(int tab);

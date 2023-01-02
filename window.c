@@ -181,6 +181,15 @@ void tabs_init(void) {
 	}
 }
 
+void tabs_cleanup(void)
+{
+	for(int i = 0; i <= MAXTABS; i++) {
+		free(tab_get(i)->f->name);
+		free(tab_get(i)->f->cwd);
+		free(tab_get(i)->f);
+	}
+}
+
 Window *window_popup_get(void)
 {
 	return frame_current()->popup;
