@@ -224,7 +224,6 @@ static int proc_fd[2];
 
 /* global variables */
 static const char *prog_name = PROGNAME;
-static unsigned int curr_tab;
 static Tab tabs[MAXTABS + 1];
 static Window *msel = NULL;
 static bool mouse_events_enabled = ENABLE_MOUSE;
@@ -420,17 +419,6 @@ static void fullscreen(unsigned int wax, unsigned int way, unsigned int waw, uns
 		resize(c, wax, way, waw, wah);
 }
 
-
-static int curr_tab_get(void)
-{
-	return curr_tab;
-}
-
-static void curr_tab_set(int tab)
-{
-	curr_tab = tab;
-}
-
 static Frame *get_frame(int fid)
 {
 	return tabs[fid].f;
@@ -438,7 +426,7 @@ static Frame *get_frame(int fid)
 
 static Frame *current_frame(void)
 {
-	return get_frame(curr_tab_get());
+	return get_frame(tab_current_id_get());
 }
 
 static Window *window_stack(void)
@@ -1419,7 +1407,7 @@ mouse_setup(void) {
 static void tabs_init(void) {
 	int i;
 
-	curr_tab_set(1);
+	tab_current_id_set(1);
 	for(i=0; i <= MAXTABS; i++) {
 		tabs[i].f = calloc(1, sizeof(Frame));
 		tabs[i].f->nmaster = NMASTER;
@@ -2431,7 +2419,7 @@ int win_first_get(int fid)
 {
 	int wid = 0;
 
-	fid = fid < 0 ? curr_tab_get() : fid;
+	fid = fid < 0 ? tab_current_id_get() : fid;
 
 	if (windows_list_by_fid(fid))
 		wid = windows_list_by_fid(fid)->id;
@@ -4330,12 +4318,12 @@ int term_filter_enable(int bid, bool enable)
 
 int frame_current_get(void)
 {
-	return curr_tab_get();
+	return tab_current_id_get();
 }
 
 int frame_current_set(int tab)
 {
-	curr_tab_set(tab);
+	tab_current_id_set(tab);
 	layout_changed(true);
 }
 

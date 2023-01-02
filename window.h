@@ -59,4 +59,7 @@ typedef struct {
 bool layout_is_changed(void);
 void layout_changed(bool changed);
 
+int tab_current_id_get(void);
+void tab_current_id_set(int tab);
+
 #endif /* WINDOW_H */
