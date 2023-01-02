@@ -1,6 +1,8 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+#include <stdbool.h>
+
 #include "buffer.h"
 #include "view.h"
 
@@ -53,5 +55,8 @@ typedef struct {
 #define NMASTER 1
 
 #define MAXTABS	9
+
+bool layout_is_changed(void);
+void layout_changed(bool changed);
 
 #endif /* WINDOW_H */

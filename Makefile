@@ -11,6 +11,7 @@ SRCS = xstr.c \
       main.c \
       vt.c \
       array.c \
+      window.c \
       view.c \
       buffer.c \
       keymap.c \

@@ -249,8 +249,6 @@ static Window *current_window(void);
 
 static char term_name[32];
 
-static bool ui_needs_arrange = false;
-
 #define for_each_window(__w) \
 	for (__w = windows_list(); __w; __w = __w->next)
 
@@ -1558,7 +1556,7 @@ static void __win_del(Window *w)
 	ui_window_free(w->win);
 	view_free(w->view);
 	free(w);
-	ui_needs_arrange = true;
+	layout_changed(true);
 }
 
 static Buffer *__buf_new(const char *name, KeyMap *kmap)
@@ -1787,7 +1785,7 @@ int term_create(const char *prog, const char *title, const char *cwd, const char
 	ui_window_move(c->win, wax, way);
 	attach(c);
 	focus(c);
-	ui_needs_arrange = true;
+	layout_changed(true);
 
 	return c->id;
 }
@@ -1883,7 +1881,7 @@ setlayout(const char *args[]) {
 	}
 	current_frame()->layout_prev = current_frame()->layout;
 	current_frame()->layout = layout;
-	ui_needs_arrange = true;
+	layout_changed(true);
 }
 
 static int
@@ -2317,8 +2315,8 @@ int main(int argc, char *argv[]) {
 
 		ui_event_process(ui);
 
-		if (ui_needs_arrange) {
-			ui_needs_arrange = false;
+		if (layout_is_changed()) {
+			layout_changed(false);
 			arrange();
 		}
 
@@ -2483,7 +2481,7 @@ int win_prev_set(int wid, int prev)
 	w->prev = p;
 	p->next = w;
 
-	ui_needs_arrange = true;
+	layout_changed(true);
 	return 0;
 }
 
@@ -2503,7 +2501,7 @@ int win_next_set(int wid, int next)
 	w->next = n;
 	n->prev = w;
 
-	ui_needs_arrange = true;
+	layout_changed(true);
 	return 0;
 }
 
@@ -2861,7 +2859,7 @@ int win_new(int bid)
 
 	attach(c);
 	focus(c);
-	ui_needs_arrange = true;
+	layout_changed(true);
 
 	return c->id;
 }
@@ -2952,7 +2950,7 @@ int win_state_set(int wid, win_state_t st)
 		detach(c);
 		attachfirst(c);
 		focus(c);
-		ui_needs_arrange = true;
+		layout_changed(true);
 		/* switch to the original window */
 		if (orig)
 			win_current_set(orig->id);
@@ -2979,7 +2977,7 @@ int win_state_toggle(int wid, win_state_t st)
 	case WIN_STATE_MAXIMIZED:
 		if (isarrange(fullscreen)) {
 			current_frame()->layout = current_frame()->layout_prev;
-			ui_needs_arrange = true;
+			layout_changed(true);
 		} else {
 			setlayout(maxi);
 		}
@@ -3069,7 +3067,7 @@ void win_size_set(int wid, int width, int height)
 			update_screen_size();
 			buffer_dirty_set(w->buf, true);
 			draw(w, true);
-			ui_needs_arrange = true;
+			layout_changed(true);
 		} else {
 			redraw(NULL);
 		}
@@ -4338,7 +4336,7 @@ int frame_current_get(void)
 int frame_current_set(int tab)
 {
 	curr_tab_set(tab);
-	ui_needs_arrange = true;
+	layout_changed(true);
 }
 
 const char *frame_name_get(int tab)
@@ -4394,7 +4392,7 @@ int layout_current_set(int tab, layout_t lay)
 
 	current_frame()->layout_prev = current_frame()->layout;
 	current_frame()->layout = &layouts[lay];
-	ui_needs_arrange = true;
+	layout_changed(true);
 }
 
 int layout_nmaster_get(int tab)
@@ -4408,7 +4406,7 @@ int layout_nmaster_set(int tab, int n)
 		return -1;
 
 	tabs[tab].f->nmaster = n;
-	ui_needs_arrange = true;
+	layout_changed(true);
 
 	return 0;
 }
@@ -4424,7 +4422,7 @@ int layout_fmaster_set(int tab, float mfact)
 		return -1;
 
 	tabs[tab].f->mfact = mfact;
-	ui_needs_arrange = true;
+	layout_changed(true);
 
 	return 0;
 }
