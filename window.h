@@ -113,5 +113,8 @@ Window *window_first(void);
 void window_first_set(Window *w);
 void window_insert_first(Window *c);
 void window_insert_after(Window *c, Window *a);
+void window_insert(Window *c);
+bool window_is_master(Window *w);
+bool window_is_master_sticky(Window *c);
 
 #endif /* WINDOW_H */

@@ -838,29 +838,6 @@ is_content_visible(Window *c) {
 	return true;
 }
 
-static bool ismaster(Window *w) {
-	Window *m;
-
-	for_each_window_master(m) {
-		if (w == m)
-			return true;
-	}
-
-	return false;
-}
-
-static bool ismastersticky(Window *c) {
-	int n = 0;
-	Window *m;
-
-	if (!frame_current()->msticky)
-		return false;
-	if (!c)
-		return true;
-
-	return ismaster(c);
-}
-
 char *window_get_title(Window *c)
 {
 	if (strlen(ui_window_title_get(c->win)))
@@ -943,7 +920,7 @@ static void draw_title(Window *c) {
 			buffer_mode_name_get(c->buf),
 			buffer_state_name_get(c->buf),
 			c->order,
-			ismastersticky(c) ? "*" : "",
+			window_is_master_sticky(c) ? "*" : "",
 			buffer_is_readonly(c->buf) ? "[RO]" : "");
 
 	name_len = MIN(xstr_len(bname_str), maxlen - status_len);
@@ -1057,29 +1034,6 @@ arrange(void) {
 	ui_refresh(ui);
 	drawbar();
 	draw_all();
-}
-
-static Window *lastmaster(void) {
-	Window *m, *last = NULL;
-
-	for_each_window_master(m)
-		last = m;
-
-	return last;
-}
-
-static void
-attach(Window *c) {
-	if (ismastersticky(NULL)) {
-		Window *master = lastmaster();
-
-		if (master) {
-			window_insert_after(c, master);
-			return;
-		}
-	}
-
-	window_insert_first(c);
 }
 
 static void
@@ -1657,7 +1611,7 @@ int term_create(const char *prog, const char *title, const char *cwd, const char
 
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
-	attach(c);
+	window_insert(c);
 	focus(c);
 	layout_changed(true);
 
@@ -1683,7 +1637,7 @@ static void killother(const char *args[]) {
 	Window *c;
 
 	for_each_window(c) {
-		if (ismastersticky(c) || window_current() == c)
+		if (window_is_master_sticky(c) || window_current() == c)
 			continue;
 		destroy(c);
 	}
@@ -2721,7 +2675,7 @@ int win_new(int bid)
 	ui_window_resize(c->win, waw, wah);
 	ui_window_move(c->win, wax, way);
 
-	attach(c);
+	window_insert(c);
 	focus(c);
 	layout_changed(true);
 
@@ -2782,7 +2736,7 @@ win_state_t win_state_get(int wid)
 
 	if (layout_is_arrange(LAYOUT_MAXIMIZED)) {
 		return WIN_STATE_MAXIMIZED;
-	} else if (ismaster(c)) {
+	} else if (window_is_master(c)) {
 		return WIN_STATE_MASTER;
 	}
 
@@ -2890,7 +2844,7 @@ void win_popup(int wid, bool enable)
 			detach(w);
 
 			if (window_popup_get())
-				attach(window_popup_get());
+				window_insert(window_popup_get());
 
 			ui_window_border_enable(w->win, true);
 			resize(w, waw-(waw-pw), wah-(wah-ph), pw, ph);
@@ -2900,7 +2854,7 @@ void win_popup(int wid, bool enable)
 		} else {
 			window_popup_set(NULL);
 			ui_window_border_enable(w->win, false);
-			attach(w);
+			window_insert(w);
 			arrange();
 		}
 

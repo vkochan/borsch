@@ -256,3 +256,52 @@ void window_insert_after(Window *c, Window *a)
 			c->order = ++o;
 	}
 }
+
+static Window *window_last_master(void)
+{
+	Window *m, *last = NULL;
+
+	for_each_window_master(m)
+		last = m;
+
+	return last;
+}
+
+void window_insert(Window *c)
+{
+	if (window_is_master_sticky(NULL)) {
+		Window *master = window_last_master();
+
+		if (master) {
+			window_insert_after(c, master);
+			return;
+		}
+	}
+
+	window_insert_first(c);
+}
+
+bool window_is_master(Window *w)
+{
+	Window *m;
+
+	for_each_window_master(m) {
+		if (w == m)
+			return true;
+	}
+
+	return false;
+}
+
+bool window_is_master_sticky(Window *c)
+{
+	int n = 0;
+	Window *m;
+
+	if (!frame_current()->msticky)
+		return false;
+	if (!c)
+		return true;
+
+	return window_is_master(c);
+}
