@@ -381,16 +381,6 @@ static void fullscreen(unsigned int wax, unsigned int way, unsigned int waw, uns
 		resize(c, wax, way, waw, wah);
 }
 
-static Window *window_stack(void)
-{
-	return frame_current()->stack;
-}
-
-static void set_window_stack(Window *stack)
-{
-	frame_current()->stack = stack;
-}
-
 static void
 term_title_handler(Vt *term, const char *title) {
 	/* Window *c = (Window *)vt_data_get(term); */
@@ -1032,12 +1022,6 @@ arrange(void) {
 }
 
 static void
-attachstack(Window *c) {
-	c->snext = window_stack();
-	set_window_stack(c);
-}
-
-static void
 detach(Window *c) {
 	Window *d;
 	if (c->prev)
@@ -1062,13 +1046,6 @@ settitle(Window *c) {
 		printf("\033]0;%s\007", t);
 		fflush(stdout);
 	}
-}
-
-static void
-detachstack(Window *c) {
-	Window **tc;
-	for (tc = &frame_current()->stack; *tc && *tc != c; tc = &(*tc)->snext);
-	*tc = c->snext;
 }
 
 static KeyMap *buf_keymap_get(Buffer *buf);
@@ -1099,8 +1076,8 @@ focus(Window *c) {
 		Process *proc = buffer_proc_get(c->buf);
 		Selection *s;
 
-		detachstack(c);
-		attachstack(c);
+		window_stack_remove(c);
+		window_stack_insert(c);
 		settitle(c);
 		c->urgent = false;
 
@@ -1366,7 +1343,7 @@ static void __win_del(Window *w)
 	} else {
 		window_popup_set(NULL);
 	}
-	detachstack(w);
+	window_stack_remove(w);
 
 	if (window_current() == w) {
 		Window *next = window_first();

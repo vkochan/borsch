@@ -116,5 +116,8 @@ void window_insert_after(Window *c, Window *a);
 void window_insert(Window *c);
 bool window_is_master(Window *w);
 bool window_is_master_sticky(Window *c);
+Window *window_stack(void);
+void window_stack_insert(Window *c);
+void window_stack_remove(Window *c);
 
 #endif /* WINDOW_H */
