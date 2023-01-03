@@ -154,11 +154,6 @@ static KeyMap *curr_kmap;
 static Window *minibuf;
 static Window *topbar;
 
-static void tile(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
-static void grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
-static void bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
-static void fullscreen(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
-
 #ifdef NCURSES_MOUSE_VERSION
 # define CONFIG_MOUSE /* compile in mouse support if we build against ncurses */
 #endif
