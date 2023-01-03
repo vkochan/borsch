@@ -208,11 +208,11 @@ void ui_window_resize(UiWin *win, int width, int height)
 		if (win->ui->window_resize)
 			win->ui->window_resize(win, win->width, win->height);
 
-		if (win->on_resize)
-			win->on_resize(win);
-
 		ui_window_clear(win);
 	}
+
+	if (win->on_resize)
+		win->on_resize(win);
 }
 
 void ui_window_move(UiWin *win, int x, int y)
