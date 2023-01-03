@@ -1324,8 +1324,6 @@ setup(void) {
 		term = "borsch";
 	snprintf(term_name, sizeof term_name, "%s%s", term, COLORS >= 256 ? "-256color" : "");
 
-	style_init();
-
 	if (start_in_graphic)
 		ui = ui_x_new();
 	else
