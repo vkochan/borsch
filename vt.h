@@ -23,6 +23,7 @@
 #include <stdbool.h>
 #include <sys/types.h>
 
+#include "window.h"
 #include "ui/ui.h"
 
 #ifndef NCURSES_MOUSE_VERSION
@@ -43,7 +44,7 @@ void *vt_data_get(Vt*);
 
 Vt *vt_create(void);
 void vt_size_get(Vt *vt, int *rows, int *cols);
-void vt_attach(Vt *vt, UiWin *uiwin);
+void vt_attach(Vt *vt, Window *win);
 void vt_draw(UiWin *win);
 void vt_resize(Vt*, int rows, int cols);
 void vt_destroy(Vt*);

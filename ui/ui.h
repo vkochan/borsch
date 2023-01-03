@@ -145,6 +145,7 @@ struct UiWin {
 	bool (*style_define)(UiWin*, int id, const char *style);
 	void (*draw)(UiWin *);
 	void (*on_view_update)(UiWin *win);
+	void (*on_resize)(UiWin *win);
 };
 
 Ui *ui_term_new(void);
@@ -201,6 +202,7 @@ short ui_window_text_fg_get(UiWin *win);
 short ui_window_text_bg_get(UiWin *win);
 short ui_window_text_style_get(UiWin *win);
 void ui_window_on_view_update_set(UiWin *win, void (*cb)(UiWin *win));
+void ui_window_on_resize_set(UiWin *win, void (*cb)(UiWin *win));
 void ui_window_border_enable(UiWin *win, bool enable);
 bool ui_window_border_is_enabled(UiWin *win);
 void ui_window_sidebar_width_set(UiWin *win, int width);

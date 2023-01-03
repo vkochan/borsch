@@ -208,6 +208,9 @@ void ui_window_resize(UiWin *win, int width, int height)
 		if (win->ui->window_resize)
 			win->ui->window_resize(win, win->width, win->height);
 
+		if (win->on_resize)
+			win->on_resize(win);
+
 		ui_window_clear(win);
 	}
 }
@@ -345,6 +348,11 @@ short ui_window_text_style_get(UiWin *win)
 void ui_window_on_view_update_set(UiWin *win, void (*cb)(UiWin *))
 {
 	win->on_view_update = cb;
+}
+
+void ui_window_on_resize_set(UiWin *win, void (*cb)(UiWin *win))
+{
+	win->on_resize = cb;
 }
 
 void ui_window_border_enable(UiWin *win, bool enable)

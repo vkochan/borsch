@@ -41,6 +41,7 @@
 # include <util.h>
 #endif
 
+#include "window.h"
 #include "vt.h"
 
 #ifndef NCURSES_ACS
@@ -1493,9 +1494,27 @@ void vt_size_get(Vt *vt, int *rows, int *cols)
 	*cols = vt->buffer->cols;
 }
 
-void vt_attach(Vt *vt, UiWin *uiwin)
+static void ui_window_resize_cb(UiWin *win)
 {
-	vt->win = uiwin;
+	Vt *t = ui_window_priv_get(win);
+	int rows = ui_window_height_get(win);
+	int cols = ui_window_width_get(win);
+	Window *w = vt_data_get(t);
+
+	if (w == window_popup_get()) {
+		cols-=-2;
+		rows--;
+	}
+
+	vt_resize(t, rows - ui_window_has_title(win), cols);
+}
+
+void vt_attach(Vt *vt, Window *w)
+{
+	ui_window_on_resize_set(w->win, ui_window_resize_cb);
+	vt_data_set(vt, w);
+	vt_dirty(vt);
+	vt->win = w->win;
 }
 
 void vt_resize(Vt *t, int rows, int cols)

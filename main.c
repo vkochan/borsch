@@ -506,9 +506,7 @@ static void process_attach_win(Process *proc, Window *w)
 	ui_window_ops_draw_set(w->win, vt_draw);
 	ui_window_priv_set(w->win, proc->term);
 
-	vt_attach(proc->term, w->win);
-	vt_data_set(proc->term, w);
-	vt_dirty(proc->term);
+	vt_attach(proc->term, w);
 }
 
 int process_kill(Process *proc)
@@ -1109,23 +1107,8 @@ focus(Window *c) {
 }
 
 static void
-resize_window(Window *c, int w, int h) {
-	ui_window_resize(c->win, w, h);
-
-	if (buffer_proc_get(c->buf)) {
-		Process *proc = buffer_proc_get(c->buf);
-
-		if (c == window_popup_get()) {
-			w-=-2;
-			h--;
-		}
-		vt_resize(process_term_get(proc), h - ui_window_has_title(c->win), w);
-	}
-}
-
-static void
 resize(Window *c, int x, int y, int w, int h) {
-	resize_window(c, w, h);
+	ui_window_resize(c->win, w, h);
 	ui_window_move(c->win, x, y);
 }
 
@@ -2173,6 +2156,7 @@ static void window_switch_buf(Window *w, Buffer *b)
 		} else {
 			ui_window_on_view_update_set(w->win, on_view_update_cb);
 			ui_window_ops_draw_set(w->win, NULL);
+			ui_window_on_resize_set(w->win, NULL);
 			ui_window_priv_set(w->win, w);
 		}
 
