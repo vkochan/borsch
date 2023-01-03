@@ -223,7 +223,6 @@ static Array style_array;
 static void draw(Window *c, bool force);
 static void draw_title(Window *c);
 static void drawbar(void);
-static Window *window_current(void);
 
 static char term_name[32];
 
@@ -815,11 +814,6 @@ error(const char *errstr, ...) {
 	vfprintf(stderr, errstr, ap);
 	va_end(ap);
 	exit(EXIT_FAILURE);
-}
-
-static Window *window_current(void)
-{
-	return frame_current()->sel;
 }
 
 static void set_current_window(Window *w)
