@@ -183,7 +183,6 @@ typedef struct Process
 	int 			out;
 	int 			err;
 	pid_t 			pid;
-	Window 			*win;
 	Buffer 			*buf;
 	volatile sig_atomic_t 	is_died;
 	bool			async;
@@ -243,14 +242,13 @@ Buffer *process_buffer_get(Process *proc);
 void process_destroy(Process *proc);
 int process_kill(Process *proc);
 
-static void process_handle_vt(int fd, void *arg) {
+static void process_handle_vt(int fd, void *arg)
+{
 	Process *proc = arg;
 	Buffer *buf = process_buffer_get(proc);
 
 	if (vt_process(proc->term) < 0 && errno == EIO) {
-		Window *win = proc->win;
 		process_destroy(proc);
-		destroy(win);
 	} else {
 		if (buf) {
 			buffer_dirty_set(buf, true);
@@ -333,8 +331,6 @@ static void process_status_set(Process *proc, int status)
 
 static void process_attach_win(Process *proc, Window *w)
 {
-	proc->win = w;
-
 	ui_window_on_view_update_set(w->win, NULL);
 	ui_window_sidebar_width_set(w->win, 0);
 	ui_window_ops_draw_set(w->win, vt_draw);
