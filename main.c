@@ -45,6 +45,7 @@
 # include <util.h>
 #endif
 
+#include "common.h"
 #include "array.h"
 #include "event.h"
 #include "buffer.h"
@@ -118,10 +119,6 @@ typedef struct {
 } Fifo;
 
 static Ui *ui;
-
-#define LENGTH(arr) (sizeof(arr) / sizeof((arr)[0]))
-#define MAX(x, y)   ((x) > (y) ? (x) : (y))
-#define MIN(x, y)   ((x) < (y) ? (x) : (y))
 
 static char *scheme_init_script = "";
 static bool start_in_graphic = false;
@@ -217,168 +214,6 @@ static void draw_title(Window *c);
 static void drawbar(void);
 
 static char term_name[32];
-
-static void tile(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
-{
-	unsigned int lax = wax, lay = way-1, law = waw, lah = wah;
-	unsigned int i = 0, n = 0, nx, ny, nw, nh, m, mw, mh, th;
-	Window *c;
-
-	for_each_window(c)
-		n++;
-
-	m  = MAX(1, MIN(n, layout_current_nmaster()));
-	mw = n == m ? waw : layout_current_fmaster() * waw;
-	mh = wah / m;
-	th = n == m ? 0 : wah / (n - m);
-	nx = lax;
-	ny = lay;
-
-	for_each_window(c) {
-		if (i < m) {	/* master */
-			nw = mw;
-			nh = (i < m - 1) ? mh : (lay + wah) - ny;
-		} else {	/* tile window */
-			if (i == m) {
-				ny = lay;
-				nx += mw;
-				ui_draw_char_vert(ui, nx, ny, ACS_VLINE, wah);
-				ui_draw_char(ui, nx, ny, ACS_TTEE, 1);
-				nx++;
-				nw = waw - mw -1;
-			}
-			nh = (i < n - 1) ? th : (lay + wah) - ny;
-			if (i > m)
-				ui_draw_char(ui, nx - 1, ny, ACS_LTEE, 1);
-		}
-		window_move_resize(c, nx, ny+(way-lay), nw, nh);
-		ny += nh;
-		i++;
-	}
-
-	/* Fill in nmaster intersections */
-	if (n > m) {
-		ny = lay + mh;
-		for (i = 1; i < m; i++) {
-			ui_draw_char(ui, nx - 1, ny, ((ny - 1) % th ? ACS_RTEE : ACS_PLUS), 1);
-			ny += mh;
-		}
-	}
-}
-
-static void grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
-{
-	unsigned int lax = wax, lay = way-1, law = waw, lah = wah;
-	unsigned int i = 0, n = 0, nx, ny, nw, nh, aw, ah, cols, rows;
-	Window *c;
-
-	for_each_window(c)
-		n++;
-	
-	/* grid dimensions */
-	for (cols = 0; cols <= n / 2; cols++)
-		if (cols * cols >= n)
-			break;
-	rows = (cols && (cols - 1) * cols >= n) ? cols - 1 : cols;
-	/* window geoms (cell height/width) */
-	nh = lah / (rows ? rows : 1);
-	nw = law / (cols ? cols : 1);
-	for_each_window(c) {
-		/* if there are less windows in the last row than normal adjust the
-		 * split rate to fill the empty space */
-		if (rows > 1 && i == (rows * cols) - cols && (n - i) <= (n % cols))
-			nw = law / (n - i);
-		nx = (i % cols) * nw + lax;
-		ny = (i / cols) * nh + lay;
-		/* adjust height/width of last row/column's windows */
-		ah = (i >= cols * (rows - 1)) ? lah - nh * rows : 0;
-		/* special case if there are less windows in the last row */
-		if (rows > 1 && i == n - 1 && (n - i) < (n % cols))
-			/* (n % cols) == number of windows in the last row */
-			aw = law - nw * (n % cols);
-		else
-			aw = ((i + 1) % cols == 0) ? law - nw * cols : 0;
-		if (i % cols) {
-			ui_draw_char_vert(ui, nx, ny, ACS_VLINE, nh + ah);
-			/* if we are on the first row, or on the last one and there are fewer windows
-			 * than normal whose border does not match the line above, print a top tree char
-			 * otherwise a plus sign. */
-			if (i <= cols
-			    || (i >= rows * cols - cols && n % cols
-				&& (cols - (n % cols)) % 2))
-				ui_draw_char(ui, nx, ny, ACS_TTEE, 1);
-			else
-				ui_draw_char(ui, nx, ny, ACS_PLUS, 1);
-			nx++, aw--;
-		}
-		window_move_resize(c, nx, ny+(way-lay), nw + aw, nh + ah);
-		i++;
-	}
-}
-
-static void bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
-{
-	unsigned int lax = wax, lay = way-1, law = waw, lah = wah;
-	unsigned int i = 0, n = 0, nx, ny, nw, nh, m, mw, mh, tw;
-	Window *c;
-
-	for_each_window(c)
-		n++;
-
-	m  = MAX(1, MIN(n, layout_current_nmaster()));
-	mh = n == m ? lah : layout_current_fmaster() * lah;
-	mw = law / m;
-	tw = n == m ? 0 : law / (n - m);
-	nx = lax;
-	ny = lay;
-
-	for_each_window(c) {
-		if (i < m) {	/* master */
-			if (i > 0) {
-				ui_draw_char_vert(ui, nx, ny, ACS_VLINE, nh);
-				ui_draw_char(ui, nx, ny, ACS_TTEE, 1);
-				nx++;
-			}
-			nh = mh;
-			nw = (i < m - 1) ? mw : (lax + law) - nx;
-		} else {	/* tile window */
-			if (i == m) {
-				nx = lax;
-				ny += mh;
-				nh = (lay + lah) - ny;
-			}
-			if (i > m) {
-				ui_draw_char_vert(ui, nx, ny, ACS_VLINE, nh);
-				ui_draw_char(ui, nx, ny, ACS_TTEE, 1);
-				nx++;
-			}
-			nw = (i < n - 1) ? tw : (lax + law) - nx;
-		}
-		window_move_resize(c, nx, ny+(way-lay), nw, nh);
-		nx += nw;
-		i++;
-	}
-
-	/* Fill in nmaster intersections */
-	if (n > m) {
-		nx = lax;
-		for (i = 0; i < m; i++) {
-			if (i > 0) {
-				ui_draw_char(ui, nx, ny, ACS_PLUS, 1);
-				nx++;
-			}
-			nw = (i < m - 1) ? mw : (lax + law) - nx;
-			nx += nw;
-		}
-	}
-}
-
-static void fullscreen(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
-{
-	Window *c;
-	for_each_window(c)
-		window_move_resize(c, wax, way, waw, wah);
-}
 
 static void
 term_title_handler(Vt *term, const char *title) {
@@ -1259,14 +1094,6 @@ static int handle_ui_event(Ui *ui, enum UiEventType type, void *evt, void *arg)
 	return 0;
 }
 
-static void layout_init(void)
-{
-	layout_set_arrange(LAYOUT_TILED, tile);
-	layout_set_arrange(LAYOUT_GRID, grid);
-	layout_set_arrange(LAYOUT_BSTACK, bstack);
-	layout_set_arrange(LAYOUT_MAXIMIZED, fullscreen);
-}
-
 static void
 setup(void) {
 	shell = getshell();
@@ -1290,8 +1117,7 @@ setup(void) {
 	syntax_init();
 	style_init();
 	vt_init();
-	layout_init();
-	tabs_init();
+	windows_init(ui);
 	update_screen_size();
 	arrange();
 
@@ -1420,7 +1246,7 @@ cleanup(void) {
 		close(retfifo.fd);
 	if (retfifo.file)
 		unlink(retfifo.file);
-	tabs_cleanup();
+	windows_cleanup();
 }
 
 static void __win_buf_attach(Window *w, Buffer *buf)

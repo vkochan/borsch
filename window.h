@@ -83,8 +83,6 @@ float layout_fmaster_get(int tab);
 int layout_fmaster_set(int tab, float mfact);
 bool layout_sticky_get(int tab);
 
-void tabs_init();
-void tabs_cleanup(void);
 Tab *tab_get(int tab);
 int tab_current_id_get(void);
 void tab_current_id_set(int tab);
@@ -105,6 +103,9 @@ int frame_cwd_set(int tab, char *cwd);
 
 #define for_each_window_master(__m) \
 	for (int __n = ({__m = window_first();0;}); __m && __n < layout_current_nmaster(); __m = __m->next, __n++)
+
+void windows_init(Ui *ui);
+void windows_cleanup(void);
 
 Window *window_current(void);
 Window *window_popup_get(void);

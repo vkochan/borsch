@@ -1,21 +1,192 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
+#include <curses.h>
 
+#include "common.h"
 #include "window.h"
 #include "ui/ui.h"
 
 static bool layout_needs_arrange = false;
 static unsigned int curr_tab;
 static Tab tabs[MAXTABS + 1];
+static Ui *ui;
+
+static void layout_tiled(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
+static void layout_grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
+static void layout_bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
+static void layout_fullscreen(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
 
 /* by default the first layout entry is used */
 static Layout layouts[] = {
-	{ LAYOUT_TILED,     "[]=", NULL },
-	{ LAYOUT_GRID,      "+++", NULL },
-	{ LAYOUT_BSTACK,    "TTT", NULL },
-	{ LAYOUT_MAXIMIZED, "[ ]", NULL },
+	{ LAYOUT_TILED,     "[]=", layout_tiled },
+	{ LAYOUT_GRID,      "+++", layout_grid },
+	{ LAYOUT_BSTACK,    "TTT", layout_bstack },
+	{ LAYOUT_MAXIMIZED, "[ ]", layout_fullscreen },
 };
+
+static void layout_tiled(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
+{
+	unsigned int lax = wax, lay = way-1, law = waw, lah = wah;
+	unsigned int i = 0, n = 0, nx, ny, nw, nh, m, mw, mh, th;
+	Window *c;
+
+	for_each_window(c)
+		n++;
+
+	m  = MAX(1, MIN(n, layout_current_nmaster()));
+	mw = n == m ? waw : layout_current_fmaster() * waw;
+	mh = wah / m;
+	th = n == m ? 0 : wah / (n - m);
+	nx = lax;
+	ny = lay;
+
+	for_each_window(c) {
+		if (i < m) {	/* master */
+			nw = mw;
+			nh = (i < m - 1) ? mh : (lay + wah) - ny;
+		} else {	/* tile window */
+			if (i == m) {
+				ny = lay;
+				nx += mw;
+				ui_draw_char_vert(ui, nx, ny, ACS_VLINE, wah);
+				ui_draw_char(ui, nx, ny, ACS_TTEE, 1);
+				nx++;
+				nw = waw - mw -1;
+			}
+			nh = (i < n - 1) ? th : (lay + wah) - ny;
+			if (i > m)
+				ui_draw_char(ui, nx - 1, ny, ACS_LTEE, 1);
+		}
+		window_move_resize(c, nx, ny+(way-lay), nw, nh);
+		ny += nh;
+		i++;
+	}
+
+	/* Fill in nmaster intersections */
+	if (n > m) {
+		ny = lay + mh;
+		for (i = 1; i < m; i++) {
+			ui_draw_char(ui, nx - 1, ny, ((ny - 1) % th ? ACS_RTEE : ACS_PLUS), 1);
+			ny += mh;
+		}
+	}
+}
+
+static void layout_grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
+{
+	unsigned int lax = wax, lay = way-1, law = waw, lah = wah;
+	unsigned int i = 0, n = 0, nx, ny, nw, nh, aw, ah, cols, rows;
+	Window *c;
+
+	for_each_window(c)
+		n++;
+	
+	/* grid dimensions */
+	for (cols = 0; cols <= n / 2; cols++)
+		if (cols * cols >= n)
+			break;
+	rows = (cols && (cols - 1) * cols >= n) ? cols - 1 : cols;
+	/* window geoms (cell height/width) */
+	nh = lah / (rows ? rows : 1);
+	nw = law / (cols ? cols : 1);
+	for_each_window(c) {
+		/* if there are less windows in the last row than normal adjust the
+		 * split rate to fill the empty space */
+		if (rows > 1 && i == (rows * cols) - cols && (n - i) <= (n % cols))
+			nw = law / (n - i);
+		nx = (i % cols) * nw + lax;
+		ny = (i / cols) * nh + lay;
+		/* adjust height/width of last row/column's windows */
+		ah = (i >= cols * (rows - 1)) ? lah - nh * rows : 0;
+		/* special case if there are less windows in the last row */
+		if (rows > 1 && i == n - 1 && (n - i) < (n % cols))
+			/* (n % cols) == number of windows in the last row */
+			aw = law - nw * (n % cols);
+		else
+			aw = ((i + 1) % cols == 0) ? law - nw * cols : 0;
+		if (i % cols) {
+			ui_draw_char_vert(ui, nx, ny, ACS_VLINE, nh + ah);
+			/* if we are on the first row, or on the last one and there are fewer windows
+			 * than normal whose border does not match the line above, print a top tree char
+			 * otherwise a plus sign. */
+			if (i <= cols
+			    || (i >= rows * cols - cols && n % cols
+				&& (cols - (n % cols)) % 2))
+				ui_draw_char(ui, nx, ny, ACS_TTEE, 1);
+			else
+				ui_draw_char(ui, nx, ny, ACS_PLUS, 1);
+			nx++, aw--;
+		}
+		window_move_resize(c, nx, ny+(way-lay), nw + aw, nh + ah);
+		i++;
+	}
+}
+
+static void layout_bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
+{
+	unsigned int lax = wax, lay = way-1, law = waw, lah = wah;
+	unsigned int i = 0, n = 0, nx, ny, nw, nh, m, mw, mh, tw;
+	Window *c;
+
+	for_each_window(c)
+		n++;
+
+	m  = MAX(1, MIN(n, layout_current_nmaster()));
+	mh = n == m ? lah : layout_current_fmaster() * lah;
+	mw = law / m;
+	tw = n == m ? 0 : law / (n - m);
+	nx = lax;
+	ny = lay;
+
+	for_each_window(c) {
+		if (i < m) {	/* master */
+			if (i > 0) {
+				ui_draw_char_vert(ui, nx, ny, ACS_VLINE, nh);
+				ui_draw_char(ui, nx, ny, ACS_TTEE, 1);
+				nx++;
+			}
+			nh = mh;
+			nw = (i < m - 1) ? mw : (lax + law) - nx;
+		} else {	/* tile window */
+			if (i == m) {
+				nx = lax;
+				ny += mh;
+				nh = (lay + lah) - ny;
+			}
+			if (i > m) {
+				ui_draw_char_vert(ui, nx, ny, ACS_VLINE, nh);
+				ui_draw_char(ui, nx, ny, ACS_TTEE, 1);
+				nx++;
+			}
+			nw = (i < n - 1) ? tw : (lax + law) - nx;
+		}
+		window_move_resize(c, nx, ny+(way-lay), nw, nh);
+		nx += nw;
+		i++;
+	}
+
+	/* Fill in nmaster intersections */
+	if (n > m) {
+		nx = lax;
+		for (i = 0; i < m; i++) {
+			if (i > 0) {
+				ui_draw_char(ui, nx, ny, ACS_PLUS, 1);
+				nx++;
+			}
+			nw = (i < m - 1) ? mw : (lax + law) - nx;
+			nx += nw;
+		}
+	}
+}
+
+static void layout_fullscreen(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
+{
+	Window *c;
+	for_each_window(c)
+		window_move_resize(c, wax, way, waw, wah);
+}
 
 Layout *layout_get(int id)
 {
@@ -35,11 +206,6 @@ bool layout_is_changed(void)
 void layout_changed(bool changed)
 {
 	layout_needs_arrange = changed;
-}
-
-void layout_set_arrange(int id, void (*arrange)(unsigned int, unsigned int, unsigned int, unsigned int))
-{
-	layout_get(id)->arrange = arrange;
 }
 
 bool layout_is_arrange(int id)
@@ -175,7 +341,7 @@ int frame_cwd_set(int tab, char *cwd)
 	return 0;
 }
 
-void tabs_init(void) {
+static void tabs_init(void) {
 	int i;
 
 	tab_current_id_set(1);
@@ -192,13 +358,24 @@ void tabs_init(void) {
 	}
 }
 
-void tabs_cleanup(void)
+static void tabs_cleanup(void)
 {
 	for(int i = 0; i <= MAXTABS; i++) {
 		free(tab_get(i)->f->name);
 		free(tab_get(i)->f->cwd);
 		free(tab_get(i)->f);
 	}
+}
+
+void windows_init(Ui *_ui)
+{
+	tabs_init();
+	ui = _ui;
+}
+
+void windows_cleanup(void)
+{
+	tabs_cleanup();
 }
 
 Window *window_popup_get(void)
