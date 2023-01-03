@@ -209,3 +209,8 @@ void *window_popup_set(Window *p)
 {
 	frame_current()->popup = p;
 }
+
+Window *window_first(void)
+{
+	return frame_current()->windows;
+}

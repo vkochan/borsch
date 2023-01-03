@@ -156,8 +156,6 @@ static KeyMap *curr_kmap;
 static Window *minibuf;
 static Window *topbar;
 
-static Window *windows_list(void);
-
 static void tile(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
 static void grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
 static void bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
@@ -230,13 +228,13 @@ static Window *window_current(void);
 static char term_name[32];
 
 #define for_each_window(__w) \
-	for (__w = windows_list(); __w; __w = __w->next)
+	for (__w = window_first(); __w; __w = __w->next)
 
 #define for_each_window_except_last(__w) \
-	for (__w = windows_list(); __w && __w->next; __w = __w->next)
+	for (__w = window_first(); __w && __w->next; __w = __w->next)
 
 #define for_each_window_master(__m) \
-	for (int __n = ({__m = windows_list();0;}); __m && __n < layout_current_nmaster(); __m = __m->next, __n++)
+	for (int __n = ({__m = window_first();0;}); __m && __n < layout_current_nmaster(); __m = __m->next, __n++)
 
 static void tile(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
 {
@@ -839,11 +837,6 @@ static void set_last_selected_window(Window *w)
 	frame_current()->lastsel = w;
 }
 
-static Window *windows_list(void)
-{
-	return frame_current()->windows;
-}
-
 static Window *windows_list_by_fid(int fid)
 {
 	return frame_get(fid)->windows;
@@ -1046,7 +1039,7 @@ draw_all(void) {
 		draw(minibuf, true);
 	}
 
-	if (!windows_list()) {
+	if (!window_first()) {
 		set_current_window(NULL);
 		ui_clear(ui);
 		drawbar();
@@ -1099,9 +1092,9 @@ static Window *lastmaster(void) {
 
 static void
 attachfirst(Window *c) {
-	if (windows_list())
-		windows_list()->prev = c;
-	c->next = windows_list();
+	if (window_first())
+		window_first()->prev = c;
+	c->next = window_first();
 	c->prev = NULL;
 	set_windows_list(c);
 	for (int o = 1; c; c = c->next, o++)
@@ -1156,7 +1149,7 @@ detach(Window *c) {
 		for (d = c->next; d; d = d->next)
 			--d->order;
 	}
-	if (c == windows_list())
+	if (c == window_first())
 		set_windows_list(c->next);
 	c->next = c->prev = NULL;
 }
@@ -1480,7 +1473,7 @@ static void __win_del(Window *w)
 	detachstack(w);
 
 	if (window_current() == w) {
-		Window *next = windows_list();
+		Window *next = window_first();
 		if (next) {
 			focus(next);
 		} else {
@@ -1542,8 +1535,8 @@ cleanup(void) {
 		event_fd_handler_unregister(cmdfifo.fd);
 
 	scheme_uninit();
-	while (windows_list())
-		destroy(windows_list());
+	while (window_first())
+		destroy(window_first());
 	for(i=0; i <= MAXTABS; i++) {
 		if (tab_get(i)->f->popup)
 			destroy(tab_get(i)->f->popup);
