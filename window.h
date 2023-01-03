@@ -100,5 +100,6 @@ int frame_cwd_set(int tab, char *cwd);
 Window *window_popup_get(void);
 void *window_popup_set(Window *p);
 Window *window_first(void);
+void window_first_set(Window *w);
 
 #endif /* WINDOW_H */

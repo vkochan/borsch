@@ -842,11 +842,6 @@ static Window *windows_list_by_fid(int fid)
 	return frame_get(fid)->windows;
 }
 
-static void set_windows_list(Window *w)
-{
-	frame_current()->windows = w;
-}
-
 static bool
 is_content_visible(Window *c) {
 	if (!c)
@@ -1096,7 +1091,7 @@ attachfirst(Window *c) {
 		window_first()->prev = c;
 	c->next = window_first();
 	c->prev = NULL;
-	set_windows_list(c);
+	window_first_set(c);
 	for (int o = 1; c; c = c->next, o++)
 		c->order = o;
 }
@@ -1150,7 +1145,7 @@ detach(Window *c) {
 			--d->order;
 	}
 	if (c == window_first())
-		set_windows_list(c->next);
+		window_first_set(c->next);
 	c->next = c->prev = NULL;
 }
 

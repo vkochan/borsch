@@ -214,3 +214,8 @@ Window *window_first(void)
 {
 	return frame_current()->windows;
 }
+
+void window_first_set(Window *w)
+{
+	frame_current()->windows = w;
+}
