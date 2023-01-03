@@ -101,5 +101,6 @@ Window *window_popup_get(void);
 void *window_popup_set(Window *p);
 Window *window_first(void);
 void window_first_set(Window *w);
+void window_insert_first(Window *c);
 
 #endif /* WINDOW_H */

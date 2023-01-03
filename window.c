@@ -219,3 +219,17 @@ void window_first_set(Window *w)
 {
 	frame_current()->windows = w;
 }
+
+void window_insert_first(Window *c)
+{
+	if (window_first())
+		window_first()->prev = c;
+
+	c->next = window_first();
+	c->prev = NULL;
+
+	window_first_set(c);
+
+	for (int o = 1; c; c = c->next, o++)
+		c->order = o;
+}

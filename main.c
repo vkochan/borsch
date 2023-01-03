@@ -1086,17 +1086,6 @@ static Window *lastmaster(void) {
 }
 
 static void
-attachfirst(Window *c) {
-	if (window_first())
-		window_first()->prev = c;
-	c->next = window_first();
-	c->prev = NULL;
-	window_first_set(c);
-	for (int o = 1; c; c = c->next, o++)
-		c->order = o;
-}
-
-static void
 attach(Window *c) {
 	if (ismastersticky(NULL)) {
 		Window *master = lastmaster();
@@ -1107,7 +1096,7 @@ attach(Window *c) {
 		}
 	}
 
-	attachfirst(c);
+	window_insert_first(c);
 }
 
 static void
@@ -2858,7 +2847,7 @@ int win_state_set(int wid, win_state_t st)
 	case WIN_STATE_MASTER:
 		win_current_set(wid);
 		detach(c);
-		attachfirst(c);
+		window_insert_first(c);
 		focus(c);
 		layout_changed(true);
 		/* switch to the original window */
