@@ -3,6 +3,7 @@
 #include <stdbool.h>
 
 #include "window.h"
+#include "ui/ui.h"
 
 static bool layout_needs_arrange = false;
 static unsigned int curr_tab;
@@ -327,4 +328,10 @@ void window_stack_remove(Window *c)
 	Window **tc;
 	for (tc = &frame_current()->stack; *tc && *tc != c; tc = &(*tc)->snext);
 	*tc = c->snext;
+}
+
+void window_move_resize(Window *c, int x, int y, int w, int h)
+{
+	ui_window_resize(c->win, w, h);
+	ui_window_move(c->win, x, y);
 }

@@ -141,7 +141,6 @@ static void mouse_fullscreen(const char *args[]);
 static void mouse_zoom(const char *args[]);
 
 static void focus(Window *c);
-static void resize(Window *c, int x, int y, int w, int h);
 static unsigned int waw, wah, wax, way;
 static char *title;
 
@@ -252,7 +251,7 @@ static void tile(unsigned int wax, unsigned int way, unsigned int waw, unsigned 
 			if (i > m)
 				ui_draw_char(ui, nx - 1, ny, ACS_LTEE, 1);
 		}
-		resize(c, nx, ny+(way-lay), nw, nh);
+		window_move_resize(c, nx, ny+(way-lay), nw, nh);
 		ny += nh;
 		i++;
 	}
@@ -312,7 +311,7 @@ static void grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned 
 				ui_draw_char(ui, nx, ny, ACS_PLUS, 1);
 			nx++, aw--;
 		}
-		resize(c, nx, ny+(way-lay), nw + aw, nh + ah);
+		window_move_resize(c, nx, ny+(way-lay), nw + aw, nh + ah);
 		i++;
 	}
 }
@@ -355,7 +354,7 @@ static void bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigne
 			}
 			nw = (i < n - 1) ? tw : (lax + law) - nx;
 		}
-		resize(c, nx, ny+(way-lay), nw, nh);
+		window_move_resize(c, nx, ny+(way-lay), nw, nh);
 		nx += nw;
 		i++;
 	}
@@ -378,7 +377,7 @@ static void fullscreen(unsigned int wax, unsigned int way, unsigned int waw, uns
 {
 	Window *c;
 	for_each_window(c)
-		resize(c, wax, way, waw, wah);
+		window_move_resize(c, wax, way, waw, wah);
 }
 
 static void
@@ -1104,12 +1103,6 @@ focus(Window *c) {
 			buffer_dirty_set(c->buf, true);
 		}
 	}
-}
-
-static void
-resize(Window *c, int x, int y, int w, int h) {
-	ui_window_resize(c->win, w, h);
-	ui_window_move(c->win, x, y);
 }
 
 static Window*
@@ -2801,7 +2794,7 @@ void win_popup(int wid, bool enable)
 				window_insert(window_popup_get());
 
 			ui_window_border_enable(w->win, true);
-			resize(w, waw-(waw-pw), wah-(wah-ph), pw, ph);
+			window_move_resize(w, waw-(waw-pw), wah-(wah-ph), pw, ph);
 			window_popup_set(w);
 			arrange();
 			focus(w);

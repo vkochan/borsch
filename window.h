@@ -119,5 +119,6 @@ bool window_is_master_sticky(Window *c);
 Window *window_stack(void);
 void window_stack_insert(Window *c);
 void window_stack_remove(Window *c);
+void window_move_resize(Window *c, int x, int y, int w, int h);
 
 #endif /* WINDOW_H */
