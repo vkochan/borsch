@@ -97,11 +97,21 @@ int frame_name_set(int tab, char *name);
 char *frame_cwd_get(int tab);
 int frame_cwd_set(int tab, char *cwd);
 
+#define for_each_window(__w) \
+	for (__w = window_first(); __w; __w = __w->next)
+
+#define for_each_window_except_last(__w) \
+	for (__w = window_first(); __w && __w->next; __w = __w->next)
+
+#define for_each_window_master(__m) \
+	for (int __n = ({__m = window_first();0;}); __m && __n < layout_current_nmaster(); __m = __m->next, __n++)
+
 Window *window_current(void);
 Window *window_popup_get(void);
 void *window_popup_set(Window *p);
 Window *window_first(void);
 void window_first_set(Window *w);
 void window_insert_first(Window *c);
+void window_insert_after(Window *c, Window *a);
 
 #endif /* WINDOW_H */

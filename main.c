@@ -140,8 +140,6 @@ static void mouse_focus(const char *args[]);
 static void mouse_fullscreen(const char *args[]);
 static void mouse_zoom(const char *args[]);
 
-static void attachafter(Window *c, Window *a);
-
 static void focus(Window *c);
 static void resize(Window *c, int x, int y, int w, int h);
 static unsigned int waw, wah, wax, way;
@@ -225,15 +223,6 @@ static void draw_title(Window *c);
 static void drawbar(void);
 
 static char term_name[32];
-
-#define for_each_window(__w) \
-	for (__w = window_first(); __w; __w = __w->next)
-
-#define for_each_window_except_last(__w) \
-	for (__w = window_first(); __w && __w->next; __w = __w->next)
-
-#define for_each_window_master(__m) \
-	for (int __n = ({__m = window_first();0;}); __m && __n < layout_current_nmaster(); __m = __m->next, __n++)
 
 static void tile(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
 {
@@ -1085,30 +1074,12 @@ attach(Window *c) {
 		Window *master = lastmaster();
 
 		if (master) {
-			attachafter(c, master);
+			window_insert_after(c, master);
 			return;
 		}
 	}
 
 	window_insert_first(c);
-}
-
-static void
-attachafter(Window *c, Window *a) { /* attach c after a */
-	if (c == a)
-		return;
-	if (!a)
-		for_each_window_except_last(a);
-
-	if (a) {
-		if (a->next)
-			a->next->prev = c;
-		c->next = a->next;
-		c->prev = a;
-		a->next = c;
-		for (int o = a->order; c; c = c->next)
-			c->order = ++o;
-	}
 }
 
 static void

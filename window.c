@@ -238,3 +238,21 @@ void window_insert_first(Window *c)
 	for (int o = 1; c; c = c->next, o++)
 		c->order = o;
 }
+
+void window_insert_after(Window *c, Window *a)
+{
+	if (c == a)
+		return;
+	if (!a)
+		for_each_window_except_last(a);
+
+	if (a) {
+		if (a->next)
+			a->next->prev = c;
+		c->next = a->next;
+		c->prev = a;
+		a->next = c;
+		for (int o = a->order; c; c = c->next)
+			c->order = ++o;
+	}
+}
