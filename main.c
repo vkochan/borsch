@@ -114,7 +114,6 @@ static bool start_in_graphic = false;
 static void killother(const char *args[]);
 static void quit(const char *args[]);
 static void redraw(const char *args[]);
-static void scrollback(const char *args[]);
 static void setlayout(const char *args[]);
 static void togglemouse(const char *args[]);
 static void doeval(const char *args[]);
@@ -840,32 +839,6 @@ redraw(const char *args[]) {
 	ui_redraw(ui);
 	update_screen_size();
 	arrange();
-}
-
-static void
-scrollback(const char *args[]) {
-	int w_h = ui_window_height_get(window_current()->win);
-	Process *proc;
-	Vt *term;
-
-	if (!is_content_visible(window_current()))
-		return;
-
-	proc = buffer_proc_get(window_current()->buf);
-	if (!proc)
-		return;
-
-	term = process_term_get(proc);
-	if (term)
-		if (!args[0] || atoi(args[0]) < 0)
-			vt_scroll(term, -w_h/2);
-		else
-			vt_scroll(term,  w_h/2);
-
-	if (term)
-		ui_window_cursor_disable(window_current()->win,
-			!vt_cursor_visible(term));
-	draw(window_current(), true);
 }
 
 static void
