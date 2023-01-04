@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include "window.h"
+#include "common.h"
 
 typedef struct Buffer Buffer;
 
