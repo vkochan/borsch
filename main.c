@@ -123,8 +123,6 @@ static void mouse_focus(const char *args[]);
 static void mouse_fullscreen(const char *args[]);
 static void mouse_zoom(const char *args[]);
 
-static void window_focus(Window *c);
-
 static void buf_list_update(void);
 
 static KeyMap *global_kmap;
@@ -312,63 +310,6 @@ arrange(void) {
 }
 
 static KeyMap *buf_keymap_get(Buffer *buf);
-
-static void window_focus(Window *c)
-{
-	Window *lastsel;
-
-	if (!c)
-		c = window_stack();
-
-	if (window_current() == c)
-		return;
-
-	window_last_selected_set(window_current());
-	lastsel = window_last_selected();
-	window_current_set(c);
-	if (lastsel) {
-		ui_window_focus(lastsel->win, false);
-		lastsel->urgent = false;
-		if (!layout_is_arrange(LAYOUT_MAXIMIZED)) {
-			window_draw_title(lastsel);
-			ui_window_refresh(lastsel->win);
-		}
-	}
-
-	if (c) {
-		Process *proc = buffer_proc_get(c->buf);
-		Selection *s;
-
-		window_stack_remove(c);
-		window_stack_insert(c);
-		c->urgent = false;
-
-		if (proc && buffer_ref_count(c->buf) > 2) {
-			vt_resize(process_term_get(proc),
-					ui_window_height_get(c->win) - ui_window_has_title(c->win),
-					ui_window_width_get(c->win));
-		}
-
-		ui_window_focus(c->win, true);
-
-		if (layout_is_arrange(LAYOUT_MAXIMIZED)) {
-			window_draw_flags(c, WIN_DRAW_F_FORCE);
-		} else {
-			window_draw_title(c);
-			ui_window_refresh(c->win);
-		}
-
-		if (proc) {
-			ui_window_cursor_disable(c->win, c &&
-					!vt_cursor_visible(process_term_get(proc)));
-		} else {
-			size_t curs_view = view_cursor_get(c->view);
-
-			buffer_cursor_set(c->buf, curs_view);
-			buffer_dirty_set(c->buf, true);
-		}
-	}
-}
 
 static void
 sigchld_handler(int sig) {
