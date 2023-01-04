@@ -37,6 +37,7 @@ struct Window {
 	Window *snext;
 	bool highlight_mark;
 	bool pending_draw_evt;
+	bool is_widget;
 };
 
 #define CWD_MAX		256
@@ -131,6 +132,7 @@ void window_insert(Window *c);
 void window_remove(Window *c);
 bool window_is_master(Window *w);
 bool window_is_master_sticky(Window *c);
+bool window_is_widget(Window *w);
 Window *window_stack(void);
 void window_stack_insert(Window *c);
 void window_stack_remove(Window *c);

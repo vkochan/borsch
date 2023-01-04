@@ -239,9 +239,7 @@ is_content_visible(Window *c) {
 		return false;
 	if (layout_is_arrange(LAYOUT_MAXIMIZED))
 		return window_current() == c;
-	else if (c == minibuf)
-		return true;
-	else if (c == topbar)
+	else if (window_is_widget(c))
 		return true;
 	return true;
 }
@@ -1390,7 +1388,7 @@ bool win_is_visible(int wid)
 	Window *c = window_get_by_id(wid);
 
 	if (c) {
-		if (c == minibuf || c == topbar)
+		if (window_is_widget(c))
 			return true;
 
 		Window *m;
@@ -2039,7 +2037,7 @@ void win_size_set(int wid, int width, int height)
 		if (!is_changed)
 			return;
 
-		if (w == minibuf || w == topbar) {
+		if (window_is_widget(w)) {
 			update_screen_size();
 			buffer_dirty_set(w->buf, true);
 			draw(w, true);
@@ -2359,7 +2357,7 @@ static void buf_update(Window *w)
 
 		view_invalidate(view);
 
-		if (w == window_current() || w == minibuf || w == topbar) {
+		if (w == window_current() || window_is_widget(w)) {
 			void (*scroll_fn)(View *, size_t) = view_scroll_to;
 			Filerange r = view_viewport_get(view);
 			Text *text = buffer_text_get(buf);
@@ -3183,6 +3181,7 @@ static Window *widget_create(const char *name, int x, int y, int width, int heig
 		return NULL;
 
 	w->id = ++cmdfifo.id;
+	w->is_widget = true;
 
 	w->buf = __buf_new(name, NULL);
 	if (!w->buf) {

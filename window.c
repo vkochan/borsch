@@ -584,6 +584,11 @@ bool window_is_master_sticky(Window *c)
 	return window_is_master(c);
 }
 
+bool window_is_widget(Window *w)
+{
+	return w->is_widget;
+}
+
 Window *window_stack(void)
 {
 	return frame_current()->stack;
