@@ -174,7 +174,6 @@ static Cmd commands[] = {
 static Array style_array;
 
 static void draw(Window *c, bool force);
-static void draw_title(Window *c);
 static void drawbar(void);
 
 static void
@@ -185,7 +184,7 @@ term_title_handler(Vt *term, const char *title) {
 	/* c->title[title ? sizeof(c->title) - 1 : 0] = '\0'; */
 	/* settitle(c); */
 	/* if (!layout_is_arrange(LAYOUT_MAXIMIZED)) */
-	/* 	draw_title(c); */
+	/* 	window_draw_title(c); */
 }
 
 static void
@@ -196,7 +195,7 @@ term_urgent_handler(Vt *term) {
 	fflush(stdout);
 	drawbar();
 	if (!layout_is_arrange(LAYOUT_MAXIMIZED) && window_current() != c)
-		draw_title(c);
+		window_draw_title(c);
 }
 
 static void process_attach_win(Process *proc, Window *w)
@@ -316,80 +315,6 @@ drawbar(void) {
 		draw(topbar, true);
 }
 
-static void draw_title(Window *c) {
-	ui_text_style_t title_style = UI_TEXT_STYLE_NORMAL;
-	int title_fg = UI_TEXT_COLOR_WHITE;
-	int title_bg = UI_TEXT_COLOR_BRIGHT_BLACK;
-	int maxlen, title_y, title_x;
-	int w_w = ui_window_width_get(c->win);
-	int has_border = ui_window_border_is_enabled(c->win);
-	size_t status_len, name_len;
-	Selection *view_cursor = view_selections_primary_get(c->view);
-	size_t line, col;
-	char status[100];
-	char title[256];
-	char name[200];
-	char *name_ptr;
-	xstr_t bname_str;
-
-	if (!ui_window_has_title(c->win))
-		return;
-
-	if (window_current() == c) {
-		title_fg = UI_TEXT_COLOR_BLACK;
-		title_bg = UI_TEXT_COLOR_WHITE;
-	}
-
-	title_y = ui_window_height_get(c->win)-1;
-	title_y -= has_border;
-	title_x = has_border;
-	w_w -= has_border;
-
-	ui_window_draw_char_attr(c->win, title_x, title_y, ACS_HLINE, w_w-(has_border*2),
-				 title_bg, title_bg,
-				 UI_TEXT_STYLE_NORMAL);
-
-	maxlen = ui_window_width_get(c->win) - 3;
-	bname_str = xstr(buffer_name_get(c->buf));
-	name_ptr = xstr_cptr(bname_str);
-
-	line = view_cursors_line(view_cursor);
-	col = view_cursors_cell_get(view_cursor);
-
-	status_len = snprintf(status, sizeof(status), "[%d:%d] %s(%s) %s  [%d|%s]%s",
-			line,
-			col,
-			buffer_is_modified(c->buf) ? "[+] " : "",
-			buffer_mode_name_get(c->buf),
-			buffer_state_name_get(c->buf),
-			c->order,
-			window_is_master_sticky(c) ? "*" : "",
-			buffer_is_readonly(c->buf) ? "[RO]" : "");
-
-	name_len = MIN(xstr_len(bname_str), maxlen - status_len);
-
-	if (name_len < xstr_len(bname_str)) {
-		name_ptr += xstr_len(bname_str) - name_len;
-	}
-
-	strncpy(name, name_ptr, MIN(sizeof(name)-1, name_len));
-	name[MIN(sizeof(name)-1, name_len)] = '\0';
-
-	if (name_len >= 3 && name_len < xstr_len(bname_str)) {
-		name[0] = '.';
-		name[1] = '.';
-		name[2] = '.';
-	}
-
-	snprintf(title, sizeof(title), "%s %s", status, name);
-
-	ui_window_draw_text_attr(c->win, 0, title_y, title, w_w,
-			title_fg, title_bg,
-			UI_TEXT_STYLE_NORMAL);
-
-	xstr_del(bname_str);
-}
-
 static void buf_update(Window *w);
 
 static void
@@ -418,7 +343,7 @@ __draw(Window *c, bool force, bool fire_event) {
 		ui_window_draw(c->win);
 
 		if (!layout_is_arrange(LAYOUT_MAXIMIZED) || c == window_current())
-			draw_title(c);
+			window_draw_title(c);
 
 		ui_window_refresh(c->win);
 	}
@@ -525,7 +450,7 @@ focus(Window *c) {
 		ui_window_focus(lastsel->win, false);
 		lastsel->urgent = false;
 		if (!layout_is_arrange(LAYOUT_MAXIMIZED)) {
-			draw_title(lastsel);
+			window_draw_title(lastsel);
 			ui_window_refresh(lastsel->win);
 		}
 	}
@@ -550,7 +475,7 @@ focus(Window *c) {
 		if (layout_is_arrange(LAYOUT_MAXIMIZED)) {
 			draw(c, true);
 		} else {
-			draw_title(c);
+			window_draw_title(c);
 			ui_window_refresh(c->win);
 		}
 
@@ -893,7 +818,7 @@ synctitle(Window *c)
 
 	settitle(c);
 	if (!layout_is_arrange(LAYOUT_MAXIMIZED) || window_current() == c)
-		draw_title(c);
+		window_draw_title(c);
 done:
 	close(fd);
 }
@@ -1503,7 +1428,7 @@ int main(int argc, char *argv[]) {
 					draw(c, false);
 				}
 			} else if (!layout_is_arrange(LAYOUT_MAXIMIZED)) {
-				draw_title(c);
+				window_draw_title(c);
 				ui_window_refresh(c->win);
 			}
 		}
@@ -2070,7 +1995,7 @@ int win_title_set(int wid, char *title)
 		ui_window_title_set(c->win, title);
 		settitle(c);
 		if (!layout_is_arrange(LAYOUT_MAXIMIZED))
-			draw_title(c);
+			window_draw_title(c);
 		return 0;
 	}
 
@@ -2489,7 +2414,7 @@ void buf_name_set(int bid, const char *name)
 		Window *c;
 		for_each_window(c) {
 			if (c->buf == buf)
-				draw_title(c);
+				window_draw_title(c);
 		}
 	}
 }
@@ -2514,7 +2439,7 @@ void buf_readonly_set(int bid, bool is_readonly)
 		Window *w;
 		for_each_window(w) {
 			if (w->buf == buf)
-				draw_title(w);
+				window_draw_title(w);
 		}
 	}
 }
@@ -3012,7 +2937,7 @@ void buf_mode_name_set(int bid, char *name)
 	if (buf) {
 		buffer_mode_name_set(buf, name);
 		if (window_current())
-			draw_title(window_current());
+			window_draw_title(window_current());
 	}
 }
 
@@ -3034,7 +2959,7 @@ void buf_state_name_set(int bid, char *name)
 	if (buf) {
 		buffer_state_name_set(buf, name);
 		if (window_current())
-			draw_title(window_current());
+			window_draw_title(window_current());
 	}
 }
 
