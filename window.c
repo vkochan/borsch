@@ -638,6 +638,17 @@ static void term_title_set(Window *c)
 	}
 }
 
+bool window_is_visible(Window *c)
+{
+	if (!c)
+		return false;
+	if (layout_is_arrange(LAYOUT_MAXIMIZED))
+		return window_current() == c;
+	else if (window_is_widget(c))
+		return true;
+	return true;
+}
+
 void window_update(Window *w)
 {
 	View *view = w->view;

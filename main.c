@@ -232,17 +232,6 @@ error(const char *errstr, ...) {
 	exit(EXIT_FAILURE);
 }
 
-static bool
-is_content_visible(Window *c) {
-	if (!c)
-		return false;
-	if (layout_is_arrange(LAYOUT_MAXIMIZED))
-		return window_current() == c;
-	else if (window_is_widget(c))
-		return true;
-	return true;
-}
-
 static void
 update_screen_size(void) {
 	int waw, wah, way = 0, wax = 0;
@@ -274,7 +263,7 @@ drawbar(void) {
 
 static void
 __draw(Window *c, bool force, bool fire_event) {
-	if ((force || buffer_is_dirty(c->buf) && is_content_visible(c)) || c == window_popup_get()) {
+	if ((force || buffer_is_dirty(c->buf) && window_is_visible(c)) || c == window_popup_get()) {
 		debug("%s: buffer name: %s\n", __func__, buffer_name_get(c->buf));
 		/* we assume that it will be set on EVT_WIN_DRAW */
 		/* ui_window_sidebar_width_set(c->win, 0); */
@@ -454,7 +443,7 @@ keypress(int code) {
 	char buf[8] = { '\e' };
 
 	for (Window *c = window_current(); c; c = c->next) {
-		if (is_content_visible(c)) {
+		if (window_is_visible(c)) {
 			c->urgent = false;
 
 			if (buffer_proc_get(c->buf)) {
@@ -1275,7 +1264,7 @@ int main(int argc, char *argv[]) {
 
 		Window *c;
 		for_each_window(c) {
-			if (is_content_visible(c)) {
+			if (window_is_visible(c)) {
 				if (buffer_proc_get(c->buf) && !buffer_name_is_locked(c->buf))
 					synctitle(c);
 				if (c != window_current()) {
@@ -1287,7 +1276,7 @@ int main(int argc, char *argv[]) {
 			}
 		}
 
-		if (is_content_visible(window_current())) {
+		if (window_is_visible(window_current())) {
 			if (buffer_proc_get(window_current()->buf)) {
 				Process *proc = buffer_proc_get(window_current()->buf);
 				ui_window_cursor_disable(window_current()->win,
@@ -2323,7 +2312,7 @@ static void buf_list_update(void)
 
 	Window *w;
 	for_each_window(w) {
-		if (is_content_visible(w)) {
+		if (window_is_visible(w)) {
 			window_update(w);
 		}
 	}
