@@ -516,6 +516,14 @@ void window_move_resize(Window *c, int x, int y, int w, int h)
 	ui_window_move(c->win, x, y);
 }
 
+char *window_title_get(Window *c)
+{
+	if (strlen(ui_window_title_get(c->win)))
+		return ui_window_title_get(c->win);
+
+	return buffer_name_get(c->buf);
+}
+
 void window_draw_title(Window *c)
 {
 	ui_text_style_t title_style = UI_TEXT_STYLE_NORMAL;

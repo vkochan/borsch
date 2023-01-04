@@ -280,14 +280,6 @@ is_content_visible(Window *c) {
 	return true;
 }
 
-char *window_get_title(Window *c)
-{
-	if (strlen(ui_window_title_get(c->win)))
-		return ui_window_title_get(c->win);
-
-	return buffer_name_get(c->buf);
-}
-
 static void
 update_screen_size(void) {
 	int dec_h = 0;
@@ -422,7 +414,7 @@ detach(Window *c) {
 static void
 settitle(Window *c) {
 	char *term, *t = title;
-	char *ctitle = window_get_title(c);
+	char *ctitle = window_title_get(c);
 	if (!t && window_current() == c && ctitle && strlen(ctitle))
 		t = ctitle;
 	if (t && (term = getenv("TERM")) && !strstr(term, "linux")) {
@@ -1982,7 +1974,7 @@ char *win_title_get(int wid)
 	Window *c = window_get_by_id(wid);
 
 	if (c)
-		return window_get_title(c);
+		return window_title_get(c);
 
 	return NULL;
 }

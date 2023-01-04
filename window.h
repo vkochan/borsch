@@ -121,6 +121,7 @@ Window *window_stack(void);
 void window_stack_insert(Window *c);
 void window_stack_remove(Window *c);
 void window_move_resize(Window *c, int x, int y, int w, int h);
+char *window_title_get(Window *c);
 void window_draw_title(Window *c);
 
 #endif /* WINDOW_H */
