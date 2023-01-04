@@ -1,4 +1,5 @@
 #ifndef COMMON_H
+#define COMMON_H
 
 typedef enum {
 	EVT_WIN_DRAW     = 1,
