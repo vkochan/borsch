@@ -113,6 +113,9 @@ int frame_cwd_set(int tab, char *cwd);
 #define for_each_window_master(__m) \
 	for (int __n = ({__m = window_first();0;}); __m && __n < layout_current_nmaster(); __m = __m->next, __n++)
 
+#define WIN_DRAW_F_FORCE	(1 << 0)
+#define WIN_DRAW_F_NO_EVENT	(1 << 1)
+
 void windows_init(Ui *ui);
 void windows_cleanup(void);
 
@@ -141,5 +144,6 @@ char *window_title_get(Window *c);
 bool window_is_visible(Window *c);
 void window_update(Window *w);
 void window_draw_title(Window *c);
+void window_draw_flags(Window *c, int flags);
 
 #endif /* WINDOW_H */

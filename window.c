@@ -775,3 +775,32 @@ void window_draw_title(Window *c)
 
 	xstr_del(bname_str);
 }
+
+void window_draw_flags(Window *c, int flags)
+{
+	bool fire_event = !(flags & WIN_DRAW_F_NO_EVENT);
+	bool force = flags & WIN_DRAW_F_FORCE;
+
+	if ((force || buffer_is_dirty(c->buf) && window_is_visible(c)) || c == window_popup_get()) {
+		/* we assume that it will be set on EVT_WIN_DRAW */
+		/* ui_window_sidebar_width_set(c->win, 0); */
+		ui_window_clear(c->win);
+
+		window_update(c);
+
+		if (fire_event) {
+			event_t evt = {};
+
+			evt.eid = EVT_WIN_DRAW;
+			evt.oid = c->id;
+			scheme_event_handle(evt);
+		}
+
+		ui_window_draw(c->win);
+
+		if (!layout_is_arrange(LAYOUT_MAXIMIZED) || c == window_current())
+			window_draw_title(c);
+
+		ui_window_refresh(c->win);
+	}
+}

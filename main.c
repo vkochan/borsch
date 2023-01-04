@@ -261,35 +261,9 @@ drawbar(void) {
 		draw(topbar, true);
 }
 
-static void
-__draw(Window *c, bool force, bool fire_event) {
-	if ((force || buffer_is_dirty(c->buf) && window_is_visible(c)) || c == window_popup_get()) {
-		debug("%s: buffer name: %s\n", __func__, buffer_name_get(c->buf));
-		/* we assume that it will be set on EVT_WIN_DRAW */
-		/* ui_window_sidebar_width_set(c->win, 0); */
-		ui_window_clear(c->win);
-
-		window_update(c);
-
-		if (fire_event) {
-			event_t evt = {};
-
-			evt.eid = EVT_WIN_DRAW;
-			evt.oid = c->id;
-			scheme_event_handle(evt);
-		}
-
-		ui_window_draw(c->win);
-
-		if (!layout_is_arrange(LAYOUT_MAXIMIZED) || c == window_current())
-			window_draw_title(c);
-
-		ui_window_refresh(c->win);
-	}
-}
-
-static void draw(Window *c, bool force) {
-	__draw(c, force, true);
+static void draw(Window *c, bool force)
+{
+	window_draw_flags(c, force ? WIN_DRAW_F_FORCE : 0);
 }
 
 static void
@@ -1625,7 +1599,7 @@ void win_sidebar_set(int wid, int width)
 	if (w && width != ui_window_sidebar_width_get(w->win)) {
 		ui_window_sidebar_width_set(w->win, width);
 		buffer_dirty_set(w->buf, true);
-		__draw(w, true, false);
+		window_draw_flags(w, WIN_DRAW_F_FORCE | WIN_DRAW_F_NO_EVENT);
 	}
 }
 
