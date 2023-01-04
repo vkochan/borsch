@@ -14,6 +14,7 @@
 static bool layout_needs_arrange = false;
 static unsigned int curr_tab;
 static Tab tabs[MAXTABS + 1];
+static char *title;
 static Ui *ui;
 
 static void layout_tiled(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
@@ -545,6 +546,18 @@ char *window_title_get(Window *c)
 	return buffer_name_get(c->buf);
 }
 
+static void term_title_set(Window *c)
+{
+	char *term, *t = title;
+	char *ctitle = window_title_get(c);
+	if (!t && window_current() == c && ctitle && strlen(ctitle))
+		t = ctitle;
+	if (t && (term = getenv("TERM")) && !strstr(term, "linux")) {
+		printf("\033]0;%s\007", t);
+		fflush(stdout);
+	}
+}
+
 void window_draw_title(Window *c)
 {
 	ui_text_style_t title_style = UI_TEXT_STYLE_NORMAL;
@@ -616,6 +629,9 @@ void window_draw_title(Window *c)
 	ui_window_draw_text_attr(c->win, 0, title_y, title, w_w,
 			title_fg, title_bg,
 			UI_TEXT_STYLE_NORMAL);
+
+	if (window_current() == c)
+		term_title_set(c);
 
 	xstr_del(bname_str);
 }

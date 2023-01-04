@@ -126,7 +126,6 @@ static void mouse_zoom(const char *args[]);
 
 static void focus(Window *c);
 static unsigned int waw, wah, wax, way;
-static char *title;
 
 static void buf_list_update(void);
 
@@ -182,7 +181,6 @@ term_title_handler(Vt *term, const char *title) {
 	/* if (title) */
 	/* 	strncpy(c->title, title, sizeof(c->title) - 1); */
 	/* c->title[title ? sizeof(c->title) - 1 : 0] = '\0'; */
-	/* settitle(c); */
 	/* if (!layout_is_arrange(LAYOUT_MAXIMIZED)) */
 	/* 	window_draw_title(c); */
 }
@@ -391,18 +389,6 @@ detach(Window *c) {
 	c->next = c->prev = NULL;
 }
 
-static void
-settitle(Window *c) {
-	char *term, *t = title;
-	char *ctitle = window_title_get(c);
-	if (!t && window_current() == c && ctitle && strlen(ctitle))
-		t = ctitle;
-	if (t && (term = getenv("TERM")) && !strstr(term, "linux")) {
-		printf("\033]0;%s\007", t);
-		fflush(stdout);
-	}
-}
-
 static KeyMap *buf_keymap_get(Buffer *buf);
 
 static void
@@ -433,7 +419,6 @@ focus(Window *c) {
 
 		window_stack_remove(c);
 		window_stack_insert(c);
-		settitle(c);
 		c->urgent = false;
 
 		if (proc && buffer_ref_count(c->buf) > 2) {
@@ -788,7 +773,6 @@ synctitle(Window *c)
 
 	buffer_name_set(c->buf, basename(buf));
 
-	settitle(c);
 	if (!layout_is_arrange(LAYOUT_MAXIMIZED) || window_current() == c)
 		window_draw_title(c);
 done:
@@ -1965,7 +1949,6 @@ int win_title_set(int wid, char *title)
 
 	if (c) {
 		ui_window_title_set(c->win, title);
-		settitle(c);
 		if (!layout_is_arrange(LAYOUT_MAXIMIZED))
 			window_draw_title(c);
 		return 0;
