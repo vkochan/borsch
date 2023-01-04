@@ -273,8 +273,6 @@ drawbar(void) {
 		draw(topbar, true);
 }
 
-static void buf_update(Window *w);
-
 static void
 __draw(Window *c, bool force, bool fire_event) {
 	if ((force || buffer_is_dirty(c->buf) && is_content_visible(c)) || c == window_popup_get()) {
@@ -283,7 +281,7 @@ __draw(Window *c, bool force, bool fire_event) {
 		/* ui_window_sidebar_width_set(c->win, 0); */
 		ui_window_clear(c->win);
 
-		buf_update(c);
+		window_update(c);
 
 		if (fire_event) {
 			event_t evt = {};
@@ -2345,72 +2343,23 @@ int buf_by_name(const char *name)
 	return 0;
 }
 
-static void buf_update(Window *w)
-{
-	View *view = w->view;
-	Buffer *buf = w->buf;
-	UiWin *win = w->win;
-
-	if (buffer_is_dirty(buf)) {
-		size_t pos = buffer_cursor_get(buf);
-		int x, y;
-
-		view_invalidate(view);
-
-		if (w == window_current() || window_is_widget(w)) {
-			void (*scroll_fn)(View *, size_t) = view_scroll_to;
-			Filerange r = view_viewport_get(view);
-			Text *text = buffer_text_get(buf);
-
-			if (pos < r.start || pos > r.end) {
-				size_t lines;
-				size_t start;
-				size_t end;
-
-				if (pos < r.start) {
-					start = pos;
-					end = r.start;
-				} else if (pos > r.end) {
-					start = r.end;
-					end = pos;
-				}
-
-				lines = text_lines_count(text, start, end - start);
-				if (lines > (view_height_get(view) / 2))
-					scroll_fn = view_cursor_to;
-			}
-
-			scroll_fn(view, pos);
-
-			if (view_coord_get(view, pos, NULL, &y, &x)) {
-				if (w == window_current())
-					ui_window_cursor_set(win, x, y);
-			}
-
-			/* TODO: better to make buffer to know about it's
-			 * windows and mark them as dirty on text update */
-			buffer_dirty_set(buf, false);
-		}
-	}
-}
-
 static void buf_list_update(void)
 {
 	if (topbar)
-		buf_update(topbar);
+		window_update(topbar);
 
 	Window *w;
 	for_each_window(w) {
 		if (is_content_visible(w)) {
-			buf_update(w);
+			window_update(w);
 		}
 	}
 	if (topbar)
-		buf_update(topbar);
+		window_update(topbar);
 	if (window_popup_get())
-		buf_update(window_popup_get());
+		window_update(window_popup_get());
 	if (minibuf)
-		buf_update(minibuf);
+		window_update(minibuf);
 }
 
 size_t buf_text_insert(int bid, const char *text)

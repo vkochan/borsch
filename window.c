@@ -638,6 +638,55 @@ static void term_title_set(Window *c)
 	}
 }
 
+void window_update(Window *w)
+{
+	View *view = w->view;
+	Buffer *buf = w->buf;
+	UiWin *win = w->win;
+
+	if (buffer_is_dirty(buf)) {
+		size_t pos = buffer_cursor_get(buf);
+		int x, y;
+
+		view_invalidate(view);
+
+		if (w == window_current() || window_is_widget(w)) {
+			void (*scroll_fn)(View *, size_t) = view_scroll_to;
+			Filerange r = view_viewport_get(view);
+			Text *text = buffer_text_get(buf);
+
+			if (pos < r.start || pos > r.end) {
+				size_t lines;
+				size_t start;
+				size_t end;
+
+				if (pos < r.start) {
+					start = pos;
+					end = r.start;
+				} else if (pos > r.end) {
+					start = r.end;
+					end = pos;
+				}
+
+				lines = text_lines_count(text, start, end - start);
+				if (lines > (view_height_get(view) / 2))
+					scroll_fn = view_cursor_to;
+			}
+
+			scroll_fn(view, pos);
+
+			if (view_coord_get(view, pos, NULL, &y, &x)) {
+				if (w == window_current())
+					ui_window_cursor_set(win, x, y);
+			}
+
+			/* TODO: better to make buffer to know about it's
+			 * windows and mark them as dirty on text update */
+			buffer_dirty_set(buf, false);
+		}
+	}
+}
+
 void window_draw_title(Window *c)
 {
 	ui_text_style_t title_style = UI_TEXT_STYLE_NORMAL;
