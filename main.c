@@ -123,7 +123,7 @@ static void mouse_focus(const char *args[]);
 static void mouse_fullscreen(const char *args[]);
 static void mouse_zoom(const char *args[]);
 
-static void focus(Window *c);
+static void window_focus(Window *c);
 
 static void buf_list_update(void);
 
@@ -305,7 +305,7 @@ arrange(void) {
 
 	ui_clear(ui);
 	layout_current_arrange();
-	focus(NULL);
+	window_focus(NULL);
 	ui_refresh(ui);
 	drawbar();
 	draw_all();
@@ -313,8 +313,8 @@ arrange(void) {
 
 static KeyMap *buf_keymap_get(Buffer *buf);
 
-static void
-focus(Window *c) {
+static void window_focus(Window *c)
+{
 	Window *lastsel;
 
 	if (!c)
@@ -518,7 +518,7 @@ setup(void) {
 static void __win_del(Window *w)
 {
 	if (window_current() == w)
-		focus(w->next);
+		window_focus(w->next);
 
 	if (w != window_popup_get()) {
 		window_remove(w);
@@ -530,7 +530,7 @@ static void __win_del(Window *w)
 	if (window_current() == w) {
 		Window *next = window_first();
 		if (next) {
-			focus(next);
+			window_focus(next);
 		} else {
 			window_current_set(NULL);
 		}
@@ -745,7 +745,7 @@ int term_create(const char *prog, const char *title, const char *cwd, const char
 	ui_window_resize(c->win, layout_current_width(), layout_current_height());
 	ui_window_move(c->win, layout_current_x(), layout_current_y());
 	window_insert(c);
-	focus(c);
+	window_focus(c);
 	layout_changed(true);
 
 	return c->id;
@@ -757,13 +757,13 @@ __focusid(int win_id) {
 
 	for_each_window(c) {
 		if (c->id == win_id) {
-			focus(c);
+			window_focus(c);
 			return;
 		}
 	}
 
 	if (minibuf && minibuf->id == win_id)
-		focus(minibuf);
+		window_focus(minibuf);
 }
 
 static void killother(const char *args[]) {
@@ -828,7 +828,7 @@ togglemouse(const char *args[]) {
 /* commands for use by mouse bindings */
 static void
 mouse_focus(const char *args[]) {
-	focus(msel);
+	window_focus(msel);
 }
 
 static void
@@ -839,7 +839,7 @@ mouse_fullscreen(const char *args[]) {
 
 static void
 mouse_zoom(const char *args[]) {
-	focus(msel);
+	window_focus(msel);
 }
 
 static Cmd *
@@ -1759,7 +1759,7 @@ int win_new(int bid)
 	ui_window_move(c->win, layout_current_x(), layout_current_y());
 
 	window_insert(c);
-	focus(c);
+	window_focus(c);
 	layout_changed(true);
 
 	return c->id;
@@ -1849,7 +1849,7 @@ int win_state_set(int wid, win_state_t st)
 		win_current_set(wid);
 		window_remove(c);
 		window_insert_first(c);
-		focus(c);
+		window_focus(c);
 		layout_changed(true);
 		/* switch to the original window */
 		if (orig)
@@ -1934,7 +1934,7 @@ void win_popup(int wid, bool enable)
 			window_move_resize(w, waw-(waw-pw), wah-(wah-ph), pw, ph);
 			window_popup_set(w);
 			arrange();
-			focus(w);
+			window_focus(w);
 		} else {
 			window_popup_set(NULL);
 			ui_window_border_enable(w->win, false);
