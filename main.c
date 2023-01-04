@@ -195,16 +195,6 @@ term_urgent_handler(Vt *term) {
 		window_draw_title(c);
 }
 
-static void process_attach_win(Process *proc, Window *w)
-{
-	ui_window_on_view_update_set(w->win, NULL);
-	ui_window_sidebar_width_set(w->win, 0);
-	ui_window_ops_draw_set(w->win, vt_draw);
-	ui_window_priv_set(w->win, proc->term);
-
-	vt_attach(proc->term, w);
-}
-
 static int style_init(void)
 {
 	Style default_style = {
@@ -808,7 +798,7 @@ int term_create(const char *prog, const char *title, const char *cwd, const char
 	ui_window_has_title_set(c->win, true);
 	process_buffer_set(proc, c->buf);
 	buffer_proc_set(c->buf, proc);
-	process_attach_win(proc, c);
+	vt_attach(process_term_get(proc), c);
 
 	if (prog) {
 		c->cmd = prog;
@@ -1389,7 +1379,7 @@ static void window_switch_buf(Window *w, Buffer *b)
 		buffer_ref_put(w->buf);
 
 		if (buffer_proc_get(b)) {
-			process_attach_win(buffer_proc_get(b), w);
+			vt_attach(process_term_get(buffer_proc_get(b)), w);
 		} else {
 			ui_window_on_view_update_set(w->win, on_view_update_cb);
 			ui_window_ops_draw_set(w->win, NULL);
@@ -1853,7 +1843,7 @@ int win_new(int bid)
 	}
 
 	if (buffer_proc_get(c->buf)) {
-		process_attach_win(buffer_proc_get(c->buf), c);
+		vt_attach(process_term_get(buffer_proc_get(c->buf)), c);
 	} else {
 		ui_window_priv_set(c->win, c);
 		ui_window_on_view_update_set(c->win, on_view_update_cb);

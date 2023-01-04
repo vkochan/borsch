@@ -1511,6 +1511,10 @@ static void ui_window_resize_cb(UiWin *win)
 
 void vt_attach(Vt *vt, Window *w)
 {
+	ui_window_on_view_update_set(w->win, NULL);
+	ui_window_sidebar_width_set(w->win, 0);
+	ui_window_ops_draw_set(w->win, vt_draw);
+	ui_window_priv_set(w->win, vt);
 	ui_window_on_resize_set(w->win, ui_window_resize_cb);
 	vt_data_set(vt, w);
 	vt_dirty(vt);
