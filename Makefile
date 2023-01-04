@@ -8,6 +8,7 @@ X11_LIBS = -L$(X11_LIB) -lrt -lX11 -lutil -lXft \
        `$(PKG_CONFIG) --libs freetype2`
 
 SRCS = xstr.c \
+      process.c \
       main.c \
       vt.c \
       array.c \
