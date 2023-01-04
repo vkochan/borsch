@@ -125,7 +125,6 @@ static void mouse_fullscreen(const char *args[]);
 static void mouse_zoom(const char *args[]);
 
 static void focus(Window *c);
-static unsigned int waw, wah, wax, way;
 
 static void buf_list_update(void);
 
@@ -249,10 +248,9 @@ is_content_visible(Window *c) {
 
 static void
 update_screen_size(void) {
+	int waw, wah, way = 0, wax = 0;
 	int dec_h = 0;
 	int top_h = 0;
-	wax = 0;
-	way = 0;
 
 	if (topbar)
 		top_h = ui_window_height_get(topbar->win);
@@ -263,6 +261,9 @@ update_screen_size(void) {
 	waw = ui_width_get(ui);
 	wah -= top_h;
 	way += top_h;
+
+	layout_current_resize(waw, wah);
+	layout_current_move(wax, way);
 
 	if (minibuf)
 		ui_window_move(minibuf->win, 0, ui_height_get(ui)-dec_h);
@@ -351,7 +352,7 @@ arrange(void) {
 		c->order = ++n;
 
 	ui_clear(ui);
-	frame_current()->layout->arrange(wax, way, waw, wah);
+	layout_current_arrange();
 	focus(NULL);
 	ui_refresh(ui);
 	drawbar();
@@ -415,28 +416,6 @@ focus(Window *c) {
 			buffer_dirty_set(c->buf, true);
 		}
 	}
-}
-
-static Window*
-get_window_by_coord(unsigned int x, unsigned int y) {
-	Window *c;
-
-	if (y < way || y >= way+wah)
-		return NULL;
-	if (layout_is_arrange(LAYOUT_MAXIMIZED))
-		return window_current();
-	for_each_window(c) {
-		int w_h = ui_window_height_get(c->win);
-		int w_w = ui_window_width_get(c->win);
-		int w_y = ui_window_y_get(c->win);
-		int w_x = ui_window_x_get(c->win);
-
-		if (x >= w_x && x < w_x + w_w && y >= w_y && y < w_y + w_h) {
-			debug("mouse event, x: %d y: %d window: %d\n", x, y, c->order);
-			return c;
-		}
-	}
-	return NULL;
 }
 
 static void
@@ -783,8 +762,8 @@ int term_create(const char *prog, const char *title, const char *cwd, const char
 		free(c);
 		return -1;
 	}
-	ui_window_resize(c->win, waw, wah);
-	ui_window_move(c->win, wax, way);
+	ui_window_resize(c->win, layout_current_width(), layout_current_height());
+	ui_window_move(c->win, layout_current_x(), layout_current_y());
 
 	proc = process_create(prog, cwd, NULL, NULL, NULL, env, true, true);
 	if (!proc) {
@@ -811,8 +790,8 @@ int term_create(const char *prog, const char *title, const char *cwd, const char
 		c->cmd = process_shell();
 	}
 
-	ui_window_resize(c->win, waw, wah);
-	ui_window_move(c->win, wax, way);
+	ui_window_resize(c->win, layout_current_width(), layout_current_height());
+	ui_window_move(c->win, layout_current_x(), layout_current_y());
 	window_insert(c);
 	focus(c);
 	layout_changed(true);
@@ -1069,7 +1048,7 @@ handle_mouse(void) {
 	if (getmouse(&event) != OK)
 		return;
 
-	msel = get_window_by_coord(event.x, event.y);
+	msel = window_get_by_coord(event.x, event.y);
 	if (!msel)
 		return;
 
@@ -1398,7 +1377,7 @@ static void window_switch_buf(Window *w, Buffer *b)
 /* External API */
 int win_get_by_coord(int x, int y)
 {
-	Window *c = get_window_by_coord(x, y);
+	Window *c = window_get_by_coord(x, y);
 
 	if (c)
 		return c->id;
@@ -1515,7 +1494,7 @@ int win_upper_get(int wid)
 	w_y = ui_window_y_get(c->win);
 
 	/* avoid vertical separator, hence +1 in x direction */
-	u = get_window_by_coord(w_x + 1, w_y - 1);
+	u = window_get_by_coord(w_x + 1, w_y - 1);
 	if (u)
 		return u->id;
 
@@ -1534,7 +1513,7 @@ int win_lower_get(int wid)
 	w_x = ui_window_x_get(c->win);
 	w_y = ui_window_y_get(c->win);
 
-	l = get_window_by_coord(w_x, w_y + ui_window_height_get(c->win));
+	l = window_get_by_coord(w_x, w_y + ui_window_height_get(c->win));
 	if (l)
 		return l->id;
 
@@ -1553,7 +1532,7 @@ int win_left_get(int wid)
 	w_x = ui_window_x_get(c->win);
 	w_y = ui_window_y_get(c->win);
 
-	l = get_window_by_coord(w_x - 2, w_y);
+	l = window_get_by_coord(w_x - 2, w_y);
 	if (l)
 		return l->id;
 
@@ -1572,7 +1551,7 @@ int win_right_get(int wid)
 	w_x = ui_window_x_get(c->win);
 	w_y = ui_window_y_get(c->win);
 
-	r = get_window_by_coord(w_x + ui_window_width_get(c->win) + 1, w_y);
+	r = window_get_by_coord(w_x + ui_window_width_get(c->win) + 1, w_y);
 	if (r)
 		return r->id;
 
@@ -1850,8 +1829,8 @@ int win_new(int bid)
 	}
 
 	ui_window_has_title_set(c->win, true);
-	ui_window_resize(c->win, waw, wah);
-	ui_window_move(c->win, wax, way);
+	ui_window_resize(c->win, layout_current_width(), layout_current_height());
+	ui_window_move(c->win, layout_current_x(), layout_current_y());
 
 	window_insert(c);
 	focus(c);
@@ -2015,6 +1994,8 @@ void win_popup(int wid, bool enable)
 			return;
 
 		if (enable) {
+			int waw = layout_current_width();
+			int wah = layout_current_height();
 			int pw = waw/3;
 			int ph = wah/3;
 
@@ -3235,14 +3216,14 @@ static Window *widget_create(const char *name, int x, int y, int width, int heig
 
 int minibuf_create(void)
 {
-	minibuf = widget_create("*minibuf*", 0, ui_height_get(ui)-1, waw, 1);
+	minibuf = widget_create("*minibuf*", 0, ui_height_get(ui)-1, layout_current_width(), 1);
 	update_screen_size();
 	return minibuf->id;
 }
 
 int topbar_create(void)
 {
-	topbar = widget_create("*topbar*", 0, 0, waw, 1);
+	topbar = widget_create("*topbar*", 0, 0, layout_current_width(), 1);
 	update_screen_size();
 	return topbar->id;
 }

@@ -11,6 +11,7 @@
 #include "ui/ui.h"
 #include "xstr.h"
 
+static unsigned int waw, wah, wax, way;
 static bool layout_needs_arrange = false;
 static unsigned int curr_tab;
 static Tab tabs[MAXTABS + 1];
@@ -242,6 +243,43 @@ float layout_current_fmaster(void)
 	return frame_current()->mfact;
 }
 
+unsigned int layout_current_x(void)
+{
+	return wax;
+}
+
+unsigned int layout_current_y(void)
+{
+	return way;
+}
+
+void layout_current_move(unsigned int x, unsigned y)
+{
+	wax = x;
+	way = y;
+}
+
+unsigned int layout_current_width(void)
+{
+	return waw;
+}
+
+unsigned int layout_current_height(void)
+{
+	return wah;
+}
+
+void layout_current_resize(unsigned int width, unsigned height)
+{
+	waw = width;
+	wah = height;
+}
+
+void layout_current_arrange(void)
+{
+	frame_current()->layout->arrange(wax, way, waw, wah);
+}
+
 int layout_nmaster_get(int tab)
 {
 	return tab_get(tab)->f->nmaster;
@@ -395,6 +433,27 @@ void *window_popup_set(Window *p)
 Window *window_current(void)
 {
 	return frame_current()->sel;
+}
+
+Window *window_get_by_coord(unsigned int x, unsigned int y)
+{
+	Window *c;
+
+	if (y < way || y >= way+wah)
+		return NULL;
+	if (layout_is_arrange(LAYOUT_MAXIMIZED))
+		return window_current();
+	for_each_window(c) {
+		int w_h = ui_window_height_get(c->win);
+		int w_w = ui_window_width_get(c->win);
+		int w_y = ui_window_y_get(c->win);
+		int w_x = ui_window_x_get(c->win);
+
+		if (x >= w_x && x < w_x + w_w && y >= w_y && y < w_y + w_h) {
+			return c;
+		}
+	}
+	return NULL;
 }
 
 void window_current_set(Window *w)
