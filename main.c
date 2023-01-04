@@ -129,7 +129,6 @@ static unsigned int waw, wah, wax, way;
 
 static void buf_list_update(void);
 
-static bool is_in_kbd_action;
 static KeyMap *global_kmap;
 static KeyMap *curr_kmap;
 
@@ -289,11 +288,6 @@ static void buf_update(Window *w);
 
 static void
 __draw(Window *c, bool force, bool fire_event) {
-	if (is_in_kbd_action) {
-		c->pending_draw_evt = true;
-		return;
-	}
-
 	if ((force || buffer_is_dirty(c->buf) && is_content_visible(c)) || c == window_popup_get()) {
 		debug("%s: buffer name: %s\n", __func__, buffer_name_get(c->buf));
 		/* we assume that it will be set on EVT_WIN_DRAW */
@@ -1288,24 +1282,14 @@ static void handle_keypress(KeyCode *key)
 
 		if (keymap_kbd_len(kbd) == kbuf.key_index) {
 			debug("kbd action: enter\n");
-			is_in_kbd_action = true;
 			keymap_kbd_action(kbd);
 			debug("kbd action: exit\n");
-			is_in_kbd_action = false;
 			keybuf_clear(&kbuf);
 			curr_kmap = NULL;
 		}
 	} else {
 		keybuf_flush(&kbuf);
 		curr_kmap = NULL;
-	}
-
-	Window *c;
-	for_each_window(c) {
-		if (c->pending_draw_evt) {
-			c->pending_draw_evt = false;
-			draw(c, true);
-		}
 	}
 }
 
