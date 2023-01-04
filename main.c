@@ -368,21 +368,6 @@ arrange(void) {
 	draw_all();
 }
 
-static void
-detach(Window *c) {
-	Window *d;
-	if (c->prev)
-		c->prev->next = c->next;
-	if (c->next) {
-		c->next->prev = c->prev;
-		for (d = c->next; d; d = d->next)
-			--d->order;
-	}
-	if (c == window_first())
-		window_first_set(c->next);
-	c->next = c->prev = NULL;
-}
-
 static KeyMap *buf_keymap_get(Buffer *buf);
 
 static void
@@ -615,7 +600,7 @@ static void __win_del(Window *w)
 		focus(w->next);
 
 	if (w != window_popup_get()) {
-		detach(w);
+		window_remove(w);
 	} else {
 		window_popup_set(NULL);
 	}
@@ -1495,7 +1480,7 @@ int win_prev_set(int wid, int prev)
 	if (!w || !p)
 		return -1;
 
-	detach(w);
+	window_remove(w);
 
 	if (p->next)
 		p->next->prev = w;
@@ -1515,7 +1500,7 @@ int win_next_set(int wid, int next)
 	if (!w || !n)
 		return -1;
 
-	detach(w);
+	window_remove(w);
 
 	if (n->prev)
 		n->prev->next = w;
@@ -1967,7 +1952,7 @@ int win_state_set(int wid, win_state_t st)
 
 	case WIN_STATE_MASTER:
 		win_current_set(wid);
-		detach(c);
+		window_remove(c);
 		window_insert_first(c);
 		focus(c);
 		layout_changed(true);
@@ -2043,7 +2028,7 @@ void win_popup(int wid, bool enable)
 			int pw = waw/3;
 			int ph = wah/3;
 
-			detach(w);
+			window_remove(w);
 
 			if (window_popup_get())
 				window_insert(window_popup_get());

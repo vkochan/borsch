@@ -484,6 +484,22 @@ void window_insert(Window *c)
 	window_insert_first(c);
 }
 
+void window_remove(Window *c)
+{
+	Window *d;
+	if (c->prev)
+		c->prev->next = c->next;
+	if (c->next) {
+		c->next->prev = c->prev;
+		for (d = c->next; d; d = d->next)
+			--d->order;
+	}
+	if (c == window_first())
+		window_first_set(c->next);
+	c->next = c->prev = NULL;
+}
+
+
 bool window_is_master(Window *w)
 {
 	Window *m;
