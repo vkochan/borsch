@@ -247,26 +247,6 @@ error(const char *errstr, ...) {
 	exit(EXIT_FAILURE);
 }
 
-static void set_current_window(Window *w)
-{
-	frame_current()->sel = w;
-}
-
-static Window *last_selected_window(void)
-{
-	return frame_current()->lastsel;
-}
-
-static void set_last_selected_window(Window *w)
-{
-	frame_current()->lastsel = w;
-}
-
-static Window *windows_list_by_fid(int fid)
-{
-	return frame_get(fid)->windows;
-}
-
 static bool
 is_content_visible(Window *c) {
 	if (!c)
@@ -355,7 +335,7 @@ draw_all(void) {
 	}
 
 	if (!window_first()) {
-		set_current_window(NULL);
+		window_current_set(NULL);
 		ui_clear(ui);
 		drawbar();
 		ui_update(ui);
@@ -435,9 +415,9 @@ focus(Window *c) {
 	if (window_current() == c)
 		return;
 
-	set_last_selected_window(window_current());
-	lastsel = last_selected_window();
-	set_current_window(c);
+	window_last_selected_set(window_current());
+	lastsel = window_last_selected();
+	window_current_set(c);
 	if (lastsel) {
 		ui_window_focus(lastsel->win, false);
 		lastsel->urgent = false;
@@ -667,11 +647,11 @@ static void __win_del(Window *w)
 		if (next) {
 			focus(next);
 		} else {
-			set_current_window(NULL);
+			window_current_set(NULL);
 		}
 	}
-	if (last_selected_window() == w)
-		set_last_selected_window(NULL);
+	if (window_last_selected() == w)
+		window_last_selected_set(NULL);
 	ui_window_free(w->win);
 	view_free(w->view);
 	free(w);
@@ -1684,8 +1664,8 @@ int win_current_set(int wid)
 
 int win_prev_selected(void)
 {
-	if (last_selected_window())
-		return last_selected_window()->id;
+	if (window_last_selected())
+		return window_last_selected()->id;
 	if (window_current())
 		return window_current()->id;
 	return 0;

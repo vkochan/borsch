@@ -108,6 +108,10 @@ void windows_init(Ui *ui);
 void windows_cleanup(void);
 
 Window *window_current(void);
+void window_current_set(Window *w);
+Window *window_last_selected(void);
+void window_last_selected_set(Window *w);
+Window *windows_list_by_fid(int fid);
 Window *window_popup_get(void);
 void *window_popup_set(Window *p);
 Window *window_first(void);

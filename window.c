@@ -396,6 +396,27 @@ Window *window_current(void)
 	return frame_current()->sel;
 }
 
+void window_current_set(Window *w)
+{
+	frame_current()->sel = w;
+}
+
+Window *window_last_selected(void)
+{
+	return frame_current()->lastsel;
+}
+
+void window_last_selected_set(Window *w)
+{
+	frame_current()->lastsel = w;
+}
+
+Window *windows_list_by_fid(int fid)
+{
+	return frame_get(fid)->windows;
+}
+
+
 Window *window_first(void)
 {
 	return frame_current()->windows;
