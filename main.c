@@ -169,7 +169,6 @@ static Cmd commands[] = {
 
 static Array style_array;
 
-static void draw(Window *c, bool force);
 static void drawbar(void);
 
 static void
@@ -258,21 +257,16 @@ update_screen_size(void) {
 static void
 drawbar(void) {
 	if (topbar)
-		draw(topbar, true);
-}
-
-static void draw(Window *c, bool force)
-{
-	window_draw_flags(c, force ? WIN_DRAW_F_FORCE : 0);
+		window_draw_flags(topbar, WIN_DRAW_F_FORCE);
 }
 
 static void
 draw_all(void) {
 	if (topbar) {
-		draw(topbar, true);
+		window_draw_flags(topbar, WIN_DRAW_F_FORCE);
 	}
 	if (minibuf) {
-		draw(minibuf, true);
+		window_draw_flags(minibuf, WIN_DRAW_F_FORCE);
 	}
 
 	if (!window_first()) {
@@ -287,7 +281,7 @@ draw_all(void) {
 		Window *c;
 		for_each_window(c) {
 			if (c != window_current()) {
-				draw(c, true);
+				window_draw_flags(c, WIN_DRAW_F_FORCE);
 			}
 		}
 	}
@@ -297,7 +291,7 @@ draw_all(void) {
 	 * accurate
 	 */
 	if (window_current()) {
-		draw(window_current(), true);
+		window_draw_flags(window_current(), WIN_DRAW_F_FORCE);
 	}
 }
 
@@ -358,7 +352,7 @@ focus(Window *c) {
 		ui_window_focus(c->win, true);
 
 		if (layout_is_arrange(LAYOUT_MAXIMIZED)) {
-			draw(c, true);
+			window_draw_flags(c, WIN_DRAW_F_FORCE);
 		} else {
 			window_draw_title(c);
 			ui_window_refresh(c->win);
@@ -1230,10 +1224,10 @@ int main(int argc, char *argv[]) {
 		}
 
 	        if (topbar) {
-		   draw(topbar, true);
+			window_draw_flags(topbar, WIN_DRAW_F_FORCE);
 	        }
 		if (minibuf) {
-			draw(minibuf, true);
+			window_draw_flags(minibuf, WIN_DRAW_F_FORCE);
 		}
 
 		Window *c;
@@ -1242,7 +1236,7 @@ int main(int argc, char *argv[]) {
 				if (buffer_proc_get(c->buf) && !buffer_name_is_locked(c->buf))
 					synctitle(c);
 				if (c != window_current()) {
-					draw(c, false);
+					window_draw(c);
 				}
 			} else if (!layout_is_arrange(LAYOUT_MAXIMIZED)) {
 				window_draw_title(c);
@@ -1256,7 +1250,7 @@ int main(int argc, char *argv[]) {
 				ui_window_cursor_disable(window_current()->win,
 					!vt_cursor_visible(process_term_get(proc)));
 			}
-			draw(window_current(), false);
+			window_draw(window_current());
 		}
 	}
 
@@ -1974,7 +1968,7 @@ void win_size_set(int wid, int width, int height)
 		if (window_is_widget(w)) {
 			update_screen_size();
 			buffer_dirty_set(w->buf, true);
-			draw(w, true);
+			window_draw_flags(w, WIN_DRAW_F_FORCE);
 			layout_changed(true);
 		} else {
 			redraw(NULL);

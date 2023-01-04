@@ -804,3 +804,8 @@ void window_draw_flags(Window *c, int flags)
 		ui_window_refresh(c->win);
 	}
 }
+
+void window_draw(Window *c)
+{
+	window_draw_flags(c, 0);
+}

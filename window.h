@@ -145,5 +145,6 @@ bool window_is_visible(Window *c);
 void window_update(Window *w);
 void window_draw_title(Window *c);
 void window_draw_flags(Window *c, int flags);
+void window_draw(Window *c);
 
 #endif /* WINDOW_H */
