@@ -1255,17 +1255,12 @@ int win_next_set(int wid, int next)
 int win_upper_get(int wid)
 {
 	Window *c = window_get_by_id(wid);
-	int w_x, w_y;
 	Window *u;
 
 	if (!c)
 		return 0;
 
-	w_x = ui_window_x_get(c->win);
-	w_y = ui_window_y_get(c->win);
-
-	/* avoid vertical separator, hence +1 in x direction */
-	u = window_get_by_coord(w_x + 1, w_y - 1);
+	u = window_upper(c);
 	if (u)
 		return u->id;
 
@@ -1275,16 +1270,12 @@ int win_upper_get(int wid)
 int win_lower_get(int wid)
 {
 	Window *c = window_get_by_id(wid);
-	int w_x, w_y;
 	Window *l;
 
 	if (!c)
 		return 0;
 
-	w_x = ui_window_x_get(c->win);
-	w_y = ui_window_y_get(c->win);
-
-	l = window_get_by_coord(w_x, w_y + ui_window_height_get(c->win));
+	l = window_lower(c);
 	if (l)
 		return l->id;
 

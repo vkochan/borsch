@@ -128,6 +128,8 @@ Window *windows_list_by_fid(int fid);
 Window *window_popup_get(void);
 void *window_popup_set(Window *p);
 Window *window_first(void);
+Window *window_upper(Window *w);
+Window *window_lower(Window *w);
 void window_first_set(Window *w);
 void window_next_set(Window *w, Window *n);
 void window_prev_set(Window *w, Window *n);

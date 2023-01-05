@@ -484,6 +484,27 @@ Window *window_first(void)
 	return frame_current()->windows;
 }
 
+Window *window_upper(Window *w)
+{
+	int w_x, w_y;
+
+	w_x = ui_window_x_get(w->win);
+	w_y = ui_window_y_get(w->win);
+
+	/* avoid vertical separator, hence +1 in x direction */
+	return window_get_by_coord(w_x + 1, w_y - 1);
+}
+
+Window *window_lower(Window *w)
+{
+	int w_x, w_y;
+
+	w_x = ui_window_x_get(w->win);
+	w_y = ui_window_y_get(w->win);
+
+	return window_get_by_coord(w_x, w_y + ui_window_height_get(w->win));
+}
+
 void window_first_set(Window *w)
 {
 	frame_current()->windows = w;
