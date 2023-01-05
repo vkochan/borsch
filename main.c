@@ -1254,13 +1254,7 @@ int win_next_set(int wid, int next)
 
 int win_upper_get(int wid)
 {
-	Window *c = window_get_by_id(wid);
-	Window *u;
-
-	if (!c)
-		return 0;
-
-	u = window_upper(c);
+	Window *u = window_upper(window_get_by_id(wid));
 	if (u)
 		return u->id;
 
@@ -1269,13 +1263,7 @@ int win_upper_get(int wid)
 
 int win_lower_get(int wid)
 {
-	Window *c = window_get_by_id(wid);
-	Window *l;
-
-	if (!c)
-		return 0;
-
-	l = window_lower(c);
+	Window *l = window_lower(window_get_by_id(wid));
 	if (l)
 		return l->id;
 
@@ -1284,13 +1272,7 @@ int win_lower_get(int wid)
 
 int win_left_get(int wid)
 {
-	Window *c = window_get_by_id(wid);
-	Window *l;
-
-	if (!c)
-		return 0;
-
-	l = window_left(c);
+	Window *l = window_left(window_get_by_id(wid));
 	if (l)
 		return l->id;
 
@@ -1299,13 +1281,7 @@ int win_left_get(int wid)
 
 int win_right_get(int wid)
 {
-	Window *c = window_get_by_id(wid);
-	Window *r;
-
-	if (!c)
-		return 0;
-
-	r = window_right(c);
+	Window *r = window_right(window_get_by_id(wid));
 	if (r)
 		return r->id;
 

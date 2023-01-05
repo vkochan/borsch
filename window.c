@@ -488,6 +488,9 @@ Window *window_upper(Window *w)
 {
 	int w_x, w_y;
 
+	if (!w)
+		return NULL;
+
 	w_x = ui_window_x_get(w->win);
 	w_y = ui_window_y_get(w->win);
 
@@ -498,6 +501,9 @@ Window *window_upper(Window *w)
 Window *window_lower(Window *w)
 {
 	int w_x, w_y;
+	
+	if (!w)
+		return NULL;
 
 	w_x = ui_window_x_get(w->win);
 	w_y = ui_window_y_get(w->win);
@@ -509,6 +515,9 @@ Window *window_left(Window *w)
 {
 	int w_x, w_y;
 
+	if (!w)
+		return NULL;
+
 	w_x = ui_window_x_get(w->win);
 	w_y = ui_window_y_get(w->win);
 
@@ -518,6 +527,9 @@ Window *window_left(Window *w)
 Window *window_right(Window *w)
 {
 	int w_x, w_y;
+
+	if (!w)
+		return NULL;
 
 	w_x = ui_window_x_get(w->win);
 	w_y = ui_window_y_get(w->win);
