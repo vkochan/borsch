@@ -489,6 +489,32 @@ void window_first_set(Window *w)
 	frame_current()->windows = w;
 }
 
+void window_next_set(Window *w, Window *n)
+{
+	window_remove(w);
+
+	if (n->prev)
+		n->prev->next = w;
+	w->prev = n->prev;
+	w->next = n;
+	n->prev = w;
+
+	layout_changed(true);
+}
+
+void window_prev_set(Window *w, Window *p)
+{
+	window_remove(w);
+
+	if (p->next)
+		p->next->prev = w;
+	w->next = p->next;
+	w->prev = p;
+	p->next = w;
+
+	layout_changed(true);
+}
+
 void window_insert_first(Window *c)
 {
 	if (window_first())

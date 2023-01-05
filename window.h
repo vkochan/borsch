@@ -129,6 +129,8 @@ Window *window_popup_get(void);
 void *window_popup_set(Window *p);
 Window *window_first(void);
 void window_first_set(Window *w);
+void window_next_set(Window *w, Window *n);
+void window_prev_set(Window *w, Window *n);
 void window_insert_first(Window *c);
 void window_insert_after(Window *c, Window *a);
 void window_insert(Window *c);

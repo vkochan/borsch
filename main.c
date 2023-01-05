@@ -1236,15 +1236,7 @@ int win_prev_set(int wid, int prev)
 	if (!w || !p)
 		return -1;
 
-	window_remove(w);
-
-	if (p->next)
-		p->next->prev = w;
-	w->next = p->next;
-	w->prev = p;
-	p->next = w;
-
-	layout_changed(true);
+	window_prev_set(w, p);
 	return 0;
 }
 
@@ -1256,15 +1248,7 @@ int win_next_set(int wid, int next)
 	if (!w || !n)
 		return -1;
 
-	window_remove(w);
-
-	if (n->prev)
-		n->prev->next = w;
-	w->prev = n->prev;
-	w->next = n;
-	n->prev = w;
-
-	layout_changed(true);
+	window_next_set(w, n);
 	return 0;
 }
 
