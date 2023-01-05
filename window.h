@@ -116,8 +116,8 @@ int frame_cwd_set(int tab, char *cwd);
 #define WIN_DRAW_F_FORCE	(1 << 0)
 #define WIN_DRAW_F_NO_EVENT	(1 << 1)
 
-void windows_init(Ui *ui);
-void windows_cleanup(void);
+void window_init(Ui *ui);
+void window_cleanup(void);
 
 Window *window_current(void);
 Window *window_get_by_coord(unsigned int x, unsigned int y);

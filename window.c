@@ -411,13 +411,13 @@ static void tabs_cleanup(void)
 	}
 }
 
-void windows_init(Ui *_ui)
+void window_init(Ui *_ui)
 {
 	tabs_init();
 	ui = _ui;
 }
 
-void windows_cleanup(void)
+void window_cleanup(void)
 {
 	tabs_cleanup();
 }

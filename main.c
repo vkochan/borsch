@@ -436,7 +436,7 @@ setup(void) {
 	syntax_init();
 	style_init();
 	vt_init();
-	windows_init(ui);
+	window_init(ui);
 	update_screen_size();
 	arrange();
 
@@ -556,7 +556,7 @@ cleanup(void) {
 		close(retfifo.fd);
 	if (retfifo.file)
 		unlink(retfifo.file);
-	windows_cleanup();
+	window_cleanup();
 }
 
 static char *getcwd_by_pid(Window *c, char *buf) {
