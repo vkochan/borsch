@@ -690,21 +690,6 @@ int term_create(const char *prog, const char *title, const char *cwd, const char
 	return c->id;
 }
 
-static void
-__focusid(int win_id) {
-	Window *c;
-
-	for_each_window(c) {
-		if (c->id == win_id) {
-			window_focus(c);
-			return;
-		}
-	}
-
-	if (minibuf && minibuf->id == win_id)
-		window_focus(minibuf);
-}
-
 static void killother(const char *args[]) {
 	Window *c;
 
@@ -1433,8 +1418,12 @@ int win_current_get(void)
 
 int win_current_set(int wid)
 {
-	if (!window_popup_get())
-		__focusid(wid);
+	Window *w = window_get_by_id(wid);
+
+	if (window_popup_get())
+		return 0;
+
+	window_focus(w);
 	return 0;
 }
 
