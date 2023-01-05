@@ -505,6 +505,26 @@ Window *window_lower(Window *w)
 	return window_get_by_coord(w_x, w_y + ui_window_height_get(w->win));
 }
 
+Window *window_left(Window *w)
+{
+	int w_x, w_y;
+
+	w_x = ui_window_x_get(w->win);
+	w_y = ui_window_y_get(w->win);
+
+	return window_get_by_coord(w_x - 2, w_y);
+}
+
+Window *window_right(Window *w)
+{
+	int w_x, w_y;
+
+	w_x = ui_window_x_get(w->win);
+	w_y = ui_window_y_get(w->win);
+
+	return window_get_by_coord(w_x + ui_window_width_get(w->win) + 1, w_y);
+}
+
 void window_first_set(Window *w)
 {
 	frame_current()->windows = w;

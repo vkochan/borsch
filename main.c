@@ -1285,16 +1285,12 @@ int win_lower_get(int wid)
 int win_left_get(int wid)
 {
 	Window *c = window_get_by_id(wid);
-	int w_x, w_y;
 	Window *l;
 
 	if (!c)
 		return 0;
 
-	w_x = ui_window_x_get(c->win);
-	w_y = ui_window_y_get(c->win);
-
-	l = window_get_by_coord(w_x - 2, w_y);
+	l = window_left(c);
 	if (l)
 		return l->id;
 
@@ -1304,16 +1300,12 @@ int win_left_get(int wid)
 int win_right_get(int wid)
 {
 	Window *c = window_get_by_id(wid);
-	int w_x, w_y;
 	Window *r;
 
 	if (!c)
 		return 0;
 
-	w_x = ui_window_x_get(c->win);
-	w_y = ui_window_y_get(c->win);
-
-	r = window_get_by_coord(w_x + ui_window_width_get(c->win) + 1, w_y);
+	r = window_right(c);
 	if (r)
 		return r->id;
 
