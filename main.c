@@ -350,8 +350,9 @@ sigterm_handler(int sig) {
 static void
 keypress(int code) {
 	char buf[8] = { '\e' };
+	Window *c;
 
-	for (Window *c = window_current(); c; c = c->next) {
+	for_each_window(c) {
 		if (window_is_visible(c)) {
 			c->urgent = false;
 
