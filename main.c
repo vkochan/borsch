@@ -145,13 +145,6 @@ static Button buttons[] = {
 };
 #endif /* CONFIG_MOUSE */
 
-typedef struct
-{
-	pid_t 			pid;
-} ProcessInfo;
-
-static int proc_fd[2];
-
 /* global variables */
 static Window *msel = NULL;
 static bool mouse_events_enabled = ENABLE_MOUSE;
@@ -312,37 +305,6 @@ arrange(void) {
 static KeyMap *buf_keymap_get(Buffer *buf);
 
 static void
-sigchld_handler(int sig) {
-	ProcessInfo pinfo;
-	Process *proc;
-	int errsv = errno;
-	int status;
-	pid_t pid;
-
-	while ((pid = waitpid(-1, &status, WNOHANG)) != 0) {
-		if (pid == -1) {
-			if (errno == ECHILD) {
-				/* no more child processes */
-				break;
-			}
-			eprint("waitpid: %s\n", strerror(errno));
-			break;
-		}
-		proc = process_by_pid(pid);
-		if (proc) {
-			if (WIFEXITED(status)) {
-				process_status_set(proc, WEXITSTATUS(status));
-			}
-
-			pinfo.pid = pid;
-			write(proc_fd[1], &pinfo, sizeof(pinfo));
-		}
-	}
-
-	errno = errsv;
-}
-
-static void
 sigterm_handler(int sig) {
 	running = false;
 }
@@ -444,8 +406,6 @@ setup(void) {
 	memset(&sa, 0, sizeof sa);
 	sa.sa_flags = 0;
 	sigemptyset(&sa.sa_mask);
-	sa.sa_handler = sigchld_handler;
-	sigaction(SIGCHLD, &sa, NULL);
 	sa.sa_handler = sigterm_handler;
 	sigaction(SIGTERM, &sa, NULL);
 	sa.sa_handler = SIG_IGN;
@@ -1088,26 +1048,6 @@ static void handle_keypress(KeyCode *key)
 	}
 }
 
-static void handle_sigchld_io(int fd, void *arg)
-{
-	ProcessInfo pinfo;
-	event_t evt = {};
-	ssize_t len;
-
-	len = read(fd, &pinfo, sizeof(pinfo));
-	if (len == sizeof(pinfo)) {
-		Process *proc = process_by_pid(pinfo.pid);
-		if (proc) {
-			if (!process_buffer_get(proc)) {
-				process_died_set(proc, true);
-				evt.eid = EVT_PROC_EXIT;
-				evt.oid = pinfo.pid;
-				scheme_event_handle(evt);
-			}
-		}
-	}
-}
-
 int main(int argc, char *argv[]) {
 	sigset_t blockset;
 	event_t evt = {};
@@ -1123,9 +1063,6 @@ int main(int argc, char *argv[]) {
 
 	if (cmdfifo.fd != -1)
 		event_fd_handler_register(cmdfifo.fd, handle_cmdfifo, NULL);
-
-	pipe2(proc_fd, O_NONBLOCK);
-	event_fd_handler_register(proc_fd[0], handle_sigchld_io, NULL);
 
 	update_screen_size();
 
