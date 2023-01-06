@@ -458,17 +458,8 @@ static Buffer *__buf_new(const char *name, KeyMap *kmap)
 
 static void __buf_del(Buffer *buf)
 {
-	void *env;
-
-	env = buffer_env_get(buf);
-
-	buffer_property_remove(buf, PROPERTY_TYPE_ALL, EPOS, EPOS, NULL, NULL);
 	buffer_ref_put(buf);
-	if (buffer_del(buf)) {
-		if (buffer_proc_get(buf))
-			process_destroy(buffer_proc_get(buf));
-		scheme_env_free(env);
-	}
+	buffer_del(buf);
 }
 
 static void

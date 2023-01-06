@@ -7,6 +7,7 @@
 #include <signal.h>
 #include <sys/param.h>
 
+#include "process.h"
 #include "vt.h"
 #include "view.h"
 #include "keymap.h"
@@ -179,6 +180,10 @@ bool buffer_del(Buffer *buf)
 		buf->ref_count--;
 
 	if (!buf->ref_count) {
+		buffer_property_remove(buf, PROPERTY_TYPE_ALL, EPOS, EPOS, NULL, NULL);
+		if (buffer_proc_get(buf))
+			process_destroy(buffer_proc_get(buf));
+		scheme_env_free(buffer_env_get(buf));
 		buffer_list_del(buf);
 		/* TODO: check if buffer is not saved and ask user to save it */
 		syntax_parser_delete(buf->parser);
