@@ -208,8 +208,8 @@ void process_kill_async(Process *proc)
 
 void process_destroy(Process *proc)
 {
-	if (proc->buf)
-		buffer_proc_set(proc->buf, NULL);
+	if (process_buffer_get(proc))
+		buffer_proc_set(process_buffer_get(proc), NULL);
 	process_kill(proc);
 	process_remove(proc);
 	process_free(proc);
