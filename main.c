@@ -614,8 +614,6 @@ int term_create(const char *prog, const char *title, const char *cwd, const char
 		free(c);
 		return -1;
 	}
-	vt_urgent_handler_set(process_term_get(proc), term_urgent_handler);
-	vt_title_handler_set(process_term_get(proc), term_title_handler);
 	ui_window_has_title_set(c->win, true);
 	process_buffer_set(proc, c->buf);
 	buffer_proc_set(c->buf, proc);
