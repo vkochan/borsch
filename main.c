@@ -604,8 +604,6 @@ int term_create(const char *prog, const char *title, const char *cwd, const char
 		free(c);
 		return -1;
 	}
-	ui_window_resize(c->win, layout_current_width(), layout_current_height());
-	ui_window_move(c->win, layout_current_x(), layout_current_y());
 
 	proc = process_create(prog, cwd, NULL, NULL, NULL, env, true, true);
 	if (!proc) {
@@ -614,7 +612,6 @@ int term_create(const char *prog, const char *title, const char *cwd, const char
 		free(c);
 		return -1;
 	}
-	ui_window_has_title_set(c->win, true);
 	process_buffer_set(proc, c->buf);
 	buffer_proc_set(c->buf, proc);
 	vt_attach(process_term_get(proc), c);
@@ -630,6 +627,7 @@ int term_create(const char *prog, const char *title, const char *cwd, const char
 		c->cmd = process_shell();
 	}
 
+	ui_window_has_title_set(c->win, true);
 	ui_window_resize(c->win, layout_current_width(), layout_current_height());
 	ui_window_move(c->win, layout_current_x(), layout_current_y());
 	window_insert(c);
@@ -1554,7 +1552,6 @@ int win_new(int bid)
 	ui_window_has_title_set(c->win, true);
 	ui_window_resize(c->win, layout_current_width(), layout_current_height());
 	ui_window_move(c->win, layout_current_x(), layout_current_y());
-
 	window_insert(c);
 	window_focus(c);
 	layout_changed(true);
