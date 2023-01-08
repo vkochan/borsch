@@ -307,7 +307,7 @@
 
 (define string-empty?
    (lambda (s)
-      (= (string-length s) 0)
+      (and s (= (string-length s) 0))
    )
 )
 

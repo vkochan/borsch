@@ -310,8 +310,14 @@
 )
 
 (define buffer-set-name
-   (lambda (n)
-      (call-foreign (__cs_buf_name_set (current-buffer) n))
+   (case-lambda
+     [(n)
+      (buffer-set-name (current-buffer) n)
+     ]
+
+     [(b n)
+      (call-foreign (__cs_buf_name_set b n))
+     ]
    )
 )
 
@@ -926,6 +932,21 @@
 (define current-cwd
    (lambda ()
       (frame-cwd)
+   )
+)
+
+(define-syntax (with-current-cwd stx)
+   (syntax-case stx ()
+      ((_ cwd exp ...)
+       #`(let ([c cwd])
+            (fluid-let ([current-cwd (lambda () c)])
+               (begin
+                  exp
+                  ...
+               )
+            )
+         )
+      )
    )
 )
 

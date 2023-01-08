@@ -100,17 +100,22 @@
        (vterm prog title (current-cwd))]
 
       [(prog title cwd)
-       (let* (
-              [env (process-environment)]
-              [w (call-foreign (__cs_term_create prog title cwd env))]
-              [b (window-buffer w)]
+       (let (
+             [p (with-current-cwd cwd (process-create prog #f #f #f #t #t))]
+             [b (buffer-new)]
+            )
+          (with-current-buffer b
+             (define-local major-mode 'vterm-mode)
+             (define-local vterm-filter-func #f)
+             (buffer-set-keymap 'vterm-mode-map)
+             (buffer-set-mode-name "VTerm")
+             (buffer-set-vterm (process-pid p))
+             (when (not (string-empty? title))
+                (buffer-set-name title)
              )
-          (define-local major-mode 'vterm-mode)
-          (define-local vterm-filter-func #f)
-          (buffer-set-keymap 'vterm-mode-map)
-          (buffer-set-mode-name "VTerm")
-          (run-hooks 'window-create-hook w)
-          w
+          )
+          (window-create b)
+          b
        )
       ]
    )
