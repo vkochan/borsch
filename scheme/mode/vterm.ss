@@ -1,6 +1,5 @@
 (define __cs_term_keys_send (foreign-procedure "cs_term_keys_send" (int string) int))
 (define __cs_term_text_send (foreign-procedure "cs_term_text_send" (int string) int))
-(define __cs_term_create (foreign-procedure "cs_term_create" (string string string scheme-object) scheme-object))
 (define __cs_term_text_get (foreign-procedure "cs_term_text_get" (int) scheme-object))
 (define __cs_term_current_line_get (foreign-procedure "cs_term_current_line_get" (int) scheme-object))
 (define __cs_term_filter_enable (foreign-procedure "cs_term_filter_enable" (int boolean) scheme-object))

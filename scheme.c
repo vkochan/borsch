@@ -1116,16 +1116,6 @@ static char **scheme_list_to_env(ptr list, char **env, int i)
 	return scheme_list_to_env(Scdr(list), env, i + 2);
 }
 
-ptr scheme_term_create(char *prog, char *title, char *cwd, ptr env)
-{
-	int ret = term_create(prog, title, cwd, scheme_list_to_env(env, NULL, 0));
-
-	if (ret)
-		return Sinteger(ret);
-
-	return Sfalse;
-}
-
 int scheme_term_keys_send(int bid, char *text)
 {
 	return term_keys_send(bid, text);
@@ -1528,7 +1518,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_minibuf_create", scheme_minibuf_create);
 	Sregister_symbol("cs_topbar_create", scheme_topbar_create);
 
-	Sregister_symbol("cs_term_create", scheme_term_create);
 	Sregister_symbol("cs_term_keys_send", scheme_term_keys_send);
 	Sregister_symbol("cs_term_text_send", scheme_term_text_send);
 	Sregister_symbol("cs_term_text_get", scheme_term_text_get);
