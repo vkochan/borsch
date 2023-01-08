@@ -310,12 +310,10 @@ static void handle_sigchld_io(int fd, void *arg)
 	if (len == sizeof(pinfo)) {
 		Process *proc = process_by_pid(pinfo.pid);
 		if (proc) {
-			if (!process_buffer_get(proc)) {
-				process_died_set(proc, true);
-				evt.eid = EVT_PROC_EXIT;
-				evt.oid = pinfo.pid;
-				scheme_event_handle(evt);
-			}
+			process_died_set(proc, true);
+			evt.eid = EVT_PROC_EXIT;
+			evt.oid = pinfo.pid;
+			scheme_event_handle(evt);
 		}
 	}
 }
@@ -348,7 +346,10 @@ static void process_handle_vt(int fd, void *arg)
 	Buffer *buf = process_buffer_get(proc);
 
 	if (vt_process(proc->term) < 0 && errno == EIO) {
-		process_destroy(proc);
+		event_t evt = {};
+		evt.eid = EVT_PROC_EXIT;
+		evt.oid = process_pid_get(proc);
+		scheme_event_handle(evt);
 	} else {
 		if (buf) {
 			buffer_dirty_set(buf, true);
