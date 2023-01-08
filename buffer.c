@@ -176,8 +176,10 @@ Buffer *buffer_new(const char *name)
 
 bool buffer_del(Buffer *buf)
 {
-	if (buf->ref_count)
-		buf->ref_count--;
+	buffer_ref_put(buf);
+
+	if (buffer_proc_get(buf))
+		buffer_ref_put(buf);
 
 	if (!buf->ref_count) {
 		buffer_property_remove(buf, PROPERTY_TYPE_ALL, EPOS, EPOS, NULL, NULL);
