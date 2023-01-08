@@ -2613,6 +2613,18 @@ bool buf_is_term(int bid)
 	return false;
 }
 
+void buf_term_set(int bid, pid_t pid)
+{
+	Process *proc = process_by_pid(pid);
+	Buffer *buf = buffer_by_id(bid);
+
+	if (!proc || !buf)
+		return;
+
+	process_buffer_set(proc, buf);
+	buffer_proc_set(buf, proc);
+}
+
 bool buf_is_visible(int bid)
 {
 	Buffer *buf = buffer_by_id(bid);

@@ -693,6 +693,11 @@ ptr scheme_buf_is_term(int bid)
 	return Sfalse;
 }
 
+void scheme_buf_term_set(int bid, pid_t pid)
+{
+	buf_term_set(bid, pid);
+}
+
 ptr scheme_buf_is_visible(int bid)
 {
 	if (buf_is_visible(bid))
@@ -1488,6 +1493,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_mark_get", scheme_buf_mark_get);
 	Sregister_symbol("cs_buf_mark_clear", scheme_buf_mark_clear);
 	Sregister_symbol("cs_buf_is_term", scheme_buf_is_term);
+	Sregister_symbol("cs_buf_term_set", scheme_buf_term_set);
 	Sregister_symbol("cs_buf_is_visible", scheme_buf_is_visible);
 
 	Sregister_symbol("cs_buf_prop_style_add", scheme_buf_prop_style_add);

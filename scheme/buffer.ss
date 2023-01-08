@@ -39,6 +39,7 @@
 
 (define __cs_buf_is_visible (foreign-procedure __collect_safe "cs_buf_is_visible" (int) scheme-object))
 (define __cs_buf_is_term (foreign-procedure __collect_safe "cs_buf_is_term" (int) scheme-object))
+(define __cs_buf_term_set (foreign-procedure __collect_safe "cs_buf_term_set" (int int) void))
 
 (define __cs_buf_env_get (foreign-procedure __collect_safe "cs_buf_env_get" (int) scheme-object))
 
@@ -848,6 +849,18 @@
 
       [(b)
        (call-foreign (__cs_buf_is_visible b))]
+   )
+)
+
+(define buffer-set-vterm
+   (case-lambda
+      [(pid)
+       (buffer-set-vterm (current-buffer) pid)
+      ]
+
+      [(b pid)
+       (call-foreign (__cs_buf_term_set b pid))
+      ]
    )
 )
 
