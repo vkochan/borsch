@@ -1307,7 +1307,7 @@ void scheme_timer_time_set(int fd, unsigned long sec, unsigned long nsec)
 	timer_time_set(fd, sec, nsec);
 }
 
-ptr scheme_process_create(const char *prog, const char *cwd, bool redir_in, bool redir_out, bool redir_err, ptr env, bool async)
+ptr scheme_process_create(const char *prog, const char *cwd, bool redir_in, bool redir_out, bool redir_err, ptr env, bool pty, bool async)
 {
 	int *in_ptr = NULL, *out_ptr = NULL, *err_ptr = NULL;
 	int in = -1, out = -1, err = -1;
@@ -1321,7 +1321,7 @@ ptr scheme_process_create(const char *prog, const char *cwd, bool redir_in, bool
 	if (redir_err)
 		err_ptr = &err;
 
-	pid = proc_create(prog, cwd, in_ptr, out_ptr, err_ptr, scheme_list_to_env(env, NULL, 0), async);
+	pid = proc_create(prog, cwd, in_ptr, out_ptr, err_ptr, scheme_list_to_env(env, NULL, 0), pty, async);
 	if (pid == -1)
 		return Sfalse;
 

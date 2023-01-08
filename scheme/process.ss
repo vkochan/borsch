@@ -1,5 +1,5 @@
 (define __cs_process_create (foreign-procedure "cs_process_create"
-				(string string boolean boolean boolean scheme-object boolean) scheme-object))
+				(string string boolean boolean boolean scheme-object boolean boolean) scheme-object))
 
 (define __cs_process_wait (foreign-procedure "cs_process_wait" (int) scheme-object))
 
@@ -202,9 +202,13 @@
       ]
 
       [(cmd buf-out buf-err on-exit async?)
+       (process-create cmd buf-out buf-err on-exit #t #f)
+      ]
+
+      [(cmd buf-out buf-err on-exit async? pty?)
        (let*(
              [env (process-environment)]
-             [p (call-foreign (__cs_process_create cmd (current-cwd) #t #t (not (equal? buf-err #f)) env async?))]
+             [p (call-foreign (__cs_process_create cmd (current-cwd) #t #t (not (equal? buf-err #f)) env pty? async?))]
             )
           (let (
                 [reader (if (or buf-out buf-err) (__make-process-reader) #f)]
