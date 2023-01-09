@@ -7,6 +7,7 @@
 #include <signal.h>
 #include <sys/param.h>
 
+#include "api.h"
 #include "process.h"
 #include "vt.h"
 #include "view.h"
@@ -183,8 +184,12 @@ bool buffer_del(Buffer *buf)
 
 	if (!buf->ref_count) {
 		buffer_property_remove(buf, PROPERTY_TYPE_ALL, EPOS, EPOS, NULL, NULL);
-		if (buffer_proc_get(buf))
-			process_destroy(buffer_proc_get(buf));
+		if (buffer_proc_get(buf)) {
+			event_t evt = {};
+			evt.eid = EVT_PROC_EXIT;
+			evt.oid = process_pid_get(buffer_proc_get(buf));
+			scheme_event_handle(evt);
+		}
 		scheme_env_free(buffer_env_get(buf));
 		buffer_list_del(buf);
 		/* TODO: check if buffer is not saved and ask user to save it */

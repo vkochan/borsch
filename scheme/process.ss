@@ -385,7 +385,9 @@
                )
                (close-port (process-port-err proc))
             )
-            (close-port (process-port-in proc))
+            (when (process-port-in proc)
+               (close-port (process-port-in proc))
+            )
             (when (process-on-exit proc)
                (try
                   (process-on-exit proc)
