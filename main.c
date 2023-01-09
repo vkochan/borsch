@@ -414,34 +414,6 @@ setup(void) {
 	buf_list_update();
 }
 
-static void __win_del(Window *w)
-{
-	if (window_current() == w)
-		window_focus(w->next);
-
-	if (w != window_popup_get()) {
-		window_remove(w);
-	} else {
-		window_popup_set(NULL);
-	}
-	window_stack_remove(w);
-
-	if (window_current() == w) {
-		Window *next = window_first();
-		if (next) {
-			window_focus(next);
-		} else {
-			window_current_set(NULL);
-		}
-	}
-	if (window_last_selected() == w)
-		window_last_selected_set(NULL);
-	ui_window_free(w->win);
-	view_free(w->view);
-	free(w);
-	layout_changed(true);
-}
-
 static Buffer *__buf_new(const char *name, KeyMap *kmap)
 {
 	Buffer *buf = buffer_new(name);
@@ -466,7 +438,7 @@ static void
 destroy(Window *w) {
 	Buffer *buf = w->buf;
 
-	__win_del(w);
+	window_delete(w);
 	__buf_del(buf);
 }
 
@@ -1507,11 +1479,8 @@ void win_close(int wid)
 {
 	Window *w = window_get_by_id(wid);
 
-	if (w) {
-		Buffer *buf = w->buf;
-		__win_del(w);
-		buffer_ref_put(buf);
-	}
+	if (w)
+		window_close(w);
 }
 
 char *win_title_get(int wid)

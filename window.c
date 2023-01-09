@@ -947,3 +947,40 @@ void window_focus(Window *c)
 		}
 	}
 }
+
+void window_delete(Window *w)
+{
+	if (window_current() == w)
+		window_focus(w->next);
+
+	if (w != window_popup_get()) {
+		window_remove(w);
+	} else {
+		window_popup_set(NULL);
+	}
+	window_stack_remove(w);
+
+	if (window_current() == w) {
+		Window *next = window_first();
+		if (next) {
+			window_focus(next);
+		} else {
+			window_current_set(NULL);
+		}
+	}
+	if (window_last_selected() == w)
+		window_last_selected_set(NULL);
+	ui_window_free(w->win);
+	view_free(w->view);
+	free(w);
+	layout_changed(true);
+}
+
+void window_close(Window *w)
+{
+	Buffer *buf = w->buf;
+
+	window_delete(w);
+	if (buf)
+		buffer_ref_put(buf);
+}

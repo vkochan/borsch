@@ -153,5 +153,7 @@ void window_draw_title(Window *c);
 void window_draw_flags(Window *c, int flags);
 void window_draw(Window *c);
 void window_focus(Window *c);
+void window_delete(Window *w);
+void window_close(Window *w);
 
 #endif /* WINDOW_H */
