@@ -212,8 +212,8 @@
                                  cmd
                                  (current-cwd)
                                  (not pty?)
-                                 (not pty?)
-                                 (not (equal? buf-err #f))
+                                 (if (or (not pty?) buf-out) #t #f)
+                                 (not (not buf-err))
                                  env
                                  pty?
                                  async?))
