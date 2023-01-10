@@ -481,15 +481,6 @@ cleanup(void) {
 	window_cleanup();
 }
 
-static char *getcwd_by_pid(Window *c, char *buf) {
-	if (!c)
-		return NULL;
-	Process *proc = buffer_proc_get(c->buf);
-	char tmp[32];
-	snprintf(tmp, sizeof(tmp), "/proc/%d/cwd", process_pid_get(proc));
-	return realpath(tmp, buf);
-}
-
 static void
 synctitle(Window *c)
 {
