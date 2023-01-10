@@ -28,8 +28,6 @@ LIBS += -lpthread -luuid -ldl -lm
 BIN += ${PROGNAME}-eval
 SRCS += scheme.c
 
-SCH_SCRIPTS = main.ss
-
 LDFLAGS += -L ./text -L ./ui
 LIBS += -ltext -lui -ltree-sitter $(X11_LIBS)
 
