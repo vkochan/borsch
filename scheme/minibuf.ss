@@ -3,12 +3,23 @@
 (define minibuf-window #f)
 (define minibuf-buffer #f)
 
+(define minibuf-select-previous
+   (lambda ()
+      (let ([prev-sel (window-prev-selected)])
+         (let ([prev (if (equal? prev-sel minibuf-window) 0 prev-sel)])
+            (buffer-set-keymap 1)
+            (window-select prev)
+         )
+      )
+   )
+)
+
 (define minibuf-cancel-read
    (lambda ()
       (enable-insert #f)
       (set-local! input-mode #f)
       (text-delete)
-      (window-select (window-prev-selected))
+      (minibuf-select-previous)
    )
 )
 
@@ -18,11 +29,10 @@
             [fn (get-local func-value)]
             [b  (get-local orig-buf)]
            )
-         (buffer-set-keymap 1)
          (set-local! input-mode #f)
          (enable-insert #f)
          (text-delete)
-         (window-select (window-prev-selected))
+         (minibuf-select-previous)
          (fn v)
       )
    )
@@ -259,7 +269,7 @@
          (text-delete)
          (set-local! input-mode #f)
          (window-set-height minibuf-window 1)
-         (window-select w)
+         (minibuf-select-previous)
       )
    )
 )
@@ -292,8 +302,8 @@
          (with-current-buffer minibuf-buffer
             (set-local! input-mode #t)
             (set-local! func-value fn)
-            (set-local! orig-buf b)
-            (set-local! orig-win (current-window))
+            (set-local! orig-buf (if (equal? minibuf-buffer (current-buffer)) #f (current-buffer)))
+            (set-local! orig-win (if (equal? minibuf-window (current-window)) #f (current-window)))
             (window-set-height minibuf-window 11)
             (window-select minibuf-window)
             (complete lst minibuf-complete-handle prompt init)

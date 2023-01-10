@@ -261,7 +261,6 @@ draw_all(void) {
 	}
 
 	if (!window_first()) {
-		window_current_set(NULL);
 		ui_clear(ui);
 		drawbar();
 		ui_update(ui);
@@ -1192,8 +1191,14 @@ int win_current_get(void)
 
 int win_current_set(int wid)
 {
-	Window *w = window_get_by_id(wid);
+	Window *w;
 
+	if (!wid) {
+		window_current_set(NULL);
+		return 0;
+	}
+	
+	w = window_get_by_id(wid);
 	if (window_popup_get())
 		return 0;
 
