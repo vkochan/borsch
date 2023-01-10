@@ -30,8 +30,6 @@ static int scheme_initialized = 0;
 
 #define SCHEME_CONFIG_DIR "/."PROGNAME
 
-#define SCHEME_INIT_SCRIPT SCHEME_CONFIG_DIR"/init.ss"
-
 static int scheme_run_script(const char *path)
 {
 	struct stat st;
