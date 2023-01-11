@@ -93,6 +93,32 @@
    )
 )
 
+(define directory-list-files*
+   (lambda (path)
+      (let loop ([path path])
+         (let (
+               [ls '()]
+              )
+            (for-each
+               (lambda (p)
+                  (let ([path (string-append path "/" p)])
+                     (if (file-regular? path)
+                        (set! ls (append ls (list path)))
+                        ;; else
+                        (when (file-directory? path)
+                           (set! ls (append ls (loop path)))
+                        )
+                     )
+                  )
+               )
+               (directory-list path)
+            )
+            ls
+         )
+      )
+   )
+)
+
 (define is-dir? file-directory?)
 (define is-file? file-regular?)
 (define is-link? file-symbolic-link?)
