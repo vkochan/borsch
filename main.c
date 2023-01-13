@@ -997,26 +997,15 @@ static Window *window_get_by_id(int id)
 	return NULL;
 }
 
-static void on_view_update_cb(UiWin *win);
-
 static void window_switch_buf(Window *w, Buffer *b)
 {
 	if (w && b && w->buf != b) {
 		buffer_ref_put(w->buf);
 
-		if (buffer_proc_get(b)) {
-			vt_attach(process_term_get(buffer_proc_get(b)), w);
-		} else {
-			ui_window_on_view_update_set(w->win, on_view_update_cb);
-			ui_window_ops_draw_set(w->win, NULL);
-			ui_window_on_resize_set(w->win, NULL);
-			ui_window_priv_set(w->win, w);
-		}
+		window_buffer_switch(w, b);
 
 		view_reload(w->view, buffer_text_get(b));
 		buffer_dirty_set(b, true);
-		w->prev_buf = w->buf;
-		w->buf = b;
 		buffer_ref_get(w->buf);
 	}
 }
@@ -1300,90 +1289,6 @@ void win_update(int wid)
 	}
 }
 
-static void __style_draw(View *view, size_t start, size_t end, Style *style)
-{
-	Style *default_style = style_get_by_id(0);
-	Style *bind_style;
-	CellStyle cell_style;
-
-	if (style->id != -1) {
-		bind_style = style_get_by_id(style->id);
-		if (bind_style)
-			style = bind_style;
-	}
-
-	cell_style.attr = style->attr;
-	cell_style.fg = style->fg;
-	cell_style.bg = style->bg;
-
-	if (cell_style.attr == 0)
-		cell_style.attr = default_style->attr;
-	if (cell_style.fg == -1)
-		cell_style.fg = default_style->fg;
-	if (cell_style.bg == -1)
-		cell_style.bg = default_style->bg;
-
-	view_style(view, cell_style, start, end, style->expand);
-}
-
-static int style_prop_draw(Buffer *buf, int id, size_t start, size_t end, void *data,
-		void *arg)
-{
-	Style *style = data;
-	View *view = arg;
-
-	__style_draw(view, start, end, style);
-
-	return 0;
-}
-
-static int style_syntax_draw(SyntaxParser *parser, int id, size_t start, size_t end, void *data,
-		void *arg)
-{
-	Style *style = data;
-	View *view = arg;
-
-	__style_draw(view, start, end, style);
-
-	return 0;
-}
-
-static void on_view_update_cb(UiWin *win)
-{
-	Window *w = ui_window_priv_get(win);
-	Filerange v = view_viewport_get(w->view);
-	char *eof_sym = "~";
-	size_t eof_len = strlen(eof_sym);
-	Style *default_style = style_get_by_id(0);
-
-	buffer_syntax_rules_walk(w->buf, SYNTAX_RULE_TYPE_STYLE,
-			v.start, v.end, w->view, style_syntax_draw);
-	buffer_properties_walk(w->buf, PROPERTY_TYPE_TEXT_STYLE,
-			v.start, v.end, NULL, w->view, style_prop_draw);
-	buffer_properties_walk(w->buf, PROPERTY_TYPE_TEXT_HIGHLIGHT,
-			v.start, v.end, NULL, w->view, style_prop_draw);
-
-	if (w->highlight_mark) {
-		size_t start = buffer_mark_get(w->buf);
-		size_t end = buffer_cursor_get(w->buf);
-		Style *highlight_style = style_get_by_id(1);
-		CellStyle cell_style = {
-			.attr = highlight_style->attr,
-			.fg = highlight_style->fg,
-			.bg = highlight_style->bg,
-		};
-
-		view_style(w->view, cell_style, MIN(start, end), MAX(start, end), false);
-	}
-
-	for (Line *l = view_lines_last(w->view)->next; l; l = l->next) {
-		l->cells[0].style.fg = default_style->fg;
-		l->cells[0].style.bg = default_style->bg;
-		strncpy(l->cells[0].data, eof_sym, eof_len);
-		l->cells[0].len = eof_len;
-	}
-}
-
 int win_new(int bid)
 {
 	Window *c = calloc(1, sizeof(Window));
@@ -1421,12 +1326,7 @@ int win_new(int bid)
 		return -1;
 	}
 
-	if (buffer_proc_get(c->buf)) {
-		vt_attach(process_term_get(buffer_proc_get(c->buf)), c);
-	} else {
-		ui_window_priv_set(c->win, c);
-		ui_window_on_view_update_set(c->win, on_view_update_cb);
-	}
+	window_buffer_switch(c, c->buf);
 
 	ui_window_has_title_set(c->win, true);
 	ui_window_resize(c->win, layout_current_width(), layout_current_height());
@@ -2698,8 +2598,8 @@ static Window *widget_create(const char *name, int x, int y, int width, int heig
 		return NULL;
 	}
 
-	ui_window_on_view_update_set(w->win, on_view_update_cb);
-	ui_window_priv_set(w->win, w);
+	window_buffer_switch(w, w->buf);
+
 	ui_window_resize(w->win, width, height);
 	ui_window_move(w->win, x, y);
 	ui_window_draw(w->win);

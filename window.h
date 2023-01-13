@@ -155,5 +155,6 @@ void window_draw(Window *c);
 void window_focus(Window *c);
 void window_delete(Window *w);
 void window_close(Window *w);
+void window_buffer_switch(Window *w, Buffer *b);
 
 #endif /* WINDOW_H */
