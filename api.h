@@ -6,6 +6,7 @@
 
 #include "window.h"
 #include "common.h"
+#include "style.h"
 
 typedef struct Buffer Buffer;
 
