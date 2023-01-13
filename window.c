@@ -19,6 +19,7 @@ static bool layout_needs_arrange = false;
 static unsigned int curr_tab;
 static Tab tabs[MAXTABS + 1];
 static char *title;
+static int win_id;
 static Ui *ui;
 
 static void layout_tiled(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
@@ -1083,4 +1084,80 @@ void window_buffer_switch(Window *w, Buffer *b)
 		ui_window_on_resize_set(w->win, NULL);
 		ui_window_priv_set(w->win, w);
 	}
+}
+
+Window *window_create(Buffer *buf)
+{
+	Window *c;
+
+	if (!buf)
+		return NULL;
+
+	c = calloc(1, sizeof(Window));
+	if (!c)
+		return NULL;
+
+	c->id = ++win_id;
+	c->buf = buf;
+
+	c->view = view_new(buffer_text_get(c->buf));
+	if (!c->view) {
+		free(c);
+		return NULL;
+	}
+
+	c->win = ui_window_new(ui, c->view);
+	if (!c->win) {
+		view_free(c->view);
+		free(c);
+		return NULL;
+	}
+
+	window_buffer_switch(c, buf);
+
+	ui_window_has_title_set(c->win, true);
+	ui_window_resize(c->win, layout_current_width(), layout_current_height());
+	ui_window_move(c->win, layout_current_x(), layout_current_y());
+	window_insert(c);
+	window_focus(c);
+	layout_changed(true);
+
+	return c;
+}
+
+Window *widget_create(Buffer *buf, int x, int y, int width, int height)
+{
+	Window *w;
+
+	if (!buf)
+		return NULL;
+
+	w = calloc(1, sizeof(Window));
+	if (!w)
+		return NULL;
+
+	w->id = ++win_id;
+	w->is_widget = true;
+	w->buf = buf;
+
+	w->view = view_new(buffer_text_get(w->buf));
+	if (!w->view) {
+		free(w);
+		return NULL;
+	}
+
+	w->win = ui_window_new(ui, w->view);
+	if (!w->win) {
+		view_free(w->view);
+		free(w);
+		return NULL;
+	}
+
+	window_buffer_switch(w, buf);
+
+	ui_window_resize(w->win, width, height);
+	ui_window_move(w->win, x, y);
+	ui_window_draw(w->win);
+
+	return w;
 }

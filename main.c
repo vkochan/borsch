@@ -1291,51 +1291,24 @@ void win_update(int wid)
 
 int win_new(int bid)
 {
-	Window *c = calloc(1, sizeof(Window));
+	Buffer *buf;
+	Window *c;
 
-	if (!c)
-		return -1;
+ 	if (bid) {
+		buf = buffer_by_id(bid);
+		buffer_dirty_set(buf, true);
+		buffer_ref_get(buf);
+ 	} else {
+		buf = __buf_new("", global_kmap);
+ 	}
 
-	c->id = ++cmdfifo.id;
+	c = window_create(buf);
+	if (!c) {
+		__buf_del(buf);
+ 		return -1;
+ 	}
 
-	if (bid) {
-		c->buf = buffer_by_id(bid);
-		buffer_dirty_set(c->buf, true);
-		buffer_ref_get(c->buf);
-	} else {
-		c->buf = __buf_new("", global_kmap);
-	}
-
-	if (!c->buf) {
-		free(c);
-		return -1;
-	}
-
-	c->view = view_new(buffer_text_get(c->buf));
-	if (!c->view) {
-		__buf_del(c->buf);
-		free(c);
-		return -1;
-	}
-
-	c->win = ui_window_new(ui, c->view);
-	if (!c->win) {
-		view_free(c->view);
-		__buf_del(c->buf);
-		free(c);
-		return -1;
-	}
-
-	window_buffer_switch(c, c->buf);
-
-	ui_window_has_title_set(c->win, true);
-	ui_window_resize(c->win, layout_current_width(), layout_current_height());
-	ui_window_move(c->win, layout_current_x(), layout_current_y());
-	window_insert(c);
-	window_focus(c);
-	layout_changed(true);
-
-	return c->id;
+ 	return c->id;
 }
 
 void win_del(int wid)
@@ -2566,57 +2539,28 @@ void stx_lang_style_clear(const char *lang)
 	syntax_lang_rules_clear(lang, SYNTAX_RULE_TYPE_STYLE);
 }
 
-static Window *widget_create(const char *name, int x, int y, int width, int height)
-{
-	Window *w;
-
-	w = calloc(1, sizeof(Window));
-	if (!w)
-		return NULL;
-
-	w->id = ++cmdfifo.id;
-	w->is_widget = true;
-
-	w->buf = __buf_new(name, NULL);
-	if (!w->buf) {
-		free(w);
-		return NULL;
-	}
-
-	w->view = view_new(buffer_text_get(w->buf));
-	if (!w->view) {
-		__buf_del(w->buf);
-		free(w);
-		return NULL;
-	}
-
-	w->win = ui_window_new(ui, w->view);
-	if (!w->win) {
-		view_free(w->view);
-		__buf_del(w->buf);
-		free(w);
-		return NULL;
-	}
-
-	window_buffer_switch(w, w->buf);
-
-	ui_window_resize(w->win, width, height);
-	ui_window_move(w->win, x, y);
-	ui_window_draw(w->win);
-
-	return w;
-}
-
 int minibuf_create(void)
 {
-	minibuf = widget_create("*minibuf*", 0, ui_height_get(ui)-1, layout_current_width(), 1);
+	Buffer *buf = __buf_new("*minibuf*", NULL);
+
+	minibuf = widget_create(buf, 0, ui_height_get(ui)-1, layout_current_width(), 1);
+	if (!minibuf) {
+		__buf_del(buf);
+		return -1;
+	}
 	update_screen_size();
 	return minibuf->id;
 }
 
 int topbar_create(void)
 {
-	topbar = widget_create("*topbar*", 0, 0, layout_current_width(), 1);
+	Buffer *buf = __buf_new("*topbar*", NULL);
+
+	topbar = widget_create(buf, 0, 0, layout_current_width(), 1);
+	if (!topbar) {
+		__buf_del(buf);
+		return -1;
+	}
 	update_screen_size();
 	return topbar->id;
 }
