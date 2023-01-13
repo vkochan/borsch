@@ -15,15 +15,6 @@ typedef enum {
 	WIN_STATE_MASTER    = 2,
 } win_state_t;
 
-typedef struct {
-	bool expand;
-	const char *name;
-	short fg;
-	short bg;
-	int attr;
-	int id;
-} Style;
-
 typedef void (*bind_key_cb_t)(void);
 
 void eprint(const char *errstr, ...);

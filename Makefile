@@ -18,7 +18,8 @@ SRCS = xstr.c \
       keymap.c \
       event.c \
       timer.c \
-      syntax.c
+      syntax.c \
+      style.c
 
 SCH_VERSION := $(shell ./scripts/get_scheme_version.sh)
 SCH_MACHINE := $(shell ./scripts/get_scheme_machine.sh)
