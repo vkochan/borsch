@@ -7,14 +7,6 @@
    )
 )
 
-(define __cs_kmap_add (foreign-procedure "cs_kmap_add" (string) scheme-object))
-(define __cs_kmap_parent_set (foreign-procedure "cs_kmap_parent_set" (int string int) void))
-(define __cs_kmap_parent_get (foreign-procedure __collect_safe "cs_kmap_parent_get" (int) scheme-object))
-(define __cs_kmap_del (foreign-procedure __collect_safe "cs_kmap_del" (int) void))
-
-(define __cs_bind_key (foreign-procedure "cs_bind_key" (string void* int string) int))
-(define __cs_unbind_key (foreign-procedure "cs_unbind_key" (string int) int))
-
 (define global-keymap 1)
 
 (define %keymap-get

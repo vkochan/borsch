@@ -1,12 +1,3 @@
-(define __cs_layout_current_get (foreign-procedure __collect_safe "cs_layout_current_get" (int) int))
-(define __cs_layout_current_set (foreign-procedure __collect_safe "cs_layout_current_set" (int int) int))
-(define __cs_layout_nmaster_get (foreign-procedure __collect_safe "cs_layout_nmaster_get" (int) int))
-(define __cs_layout_nmaster_set (foreign-procedure __collect_safe "cs_layout_nmaster_set" (int int) int))
-(define __cs_layout_fmaster_get (foreign-procedure __collect_safe "cs_layout_fmaster_get" (int) float))
-(define __cs_layout_fmaster_set (foreign-procedure __collect_safe "cs_layout_fmaster_set" (int float) int))
-(define __cs_layout_sticky_get (foreign-procedure __collect_safe "cs_layout_sticky_get" (int) boolean))
-(define __cs_layout_sticky_set (foreign-procedure __collect_safe "cs_layout_sticky_set" (int boolean) int))
-
 (define layout->symb
    (lambda (l)
       (case l 

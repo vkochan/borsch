@@ -1,5 +1,3 @@
-(define __cs_topbar_create (foreign-procedure "cs_topbar_create" () scheme-object))
-
 (define topbar-window #f)
 (define topbar-buffer #f)
 

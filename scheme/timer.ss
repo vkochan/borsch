@@ -1,8 +1,3 @@
-(define __cs_timer_add (foreign-procedure __collect_safe "cs_timer_add" (void*) scheme-object))
-(define __cs_timer_del (foreign-procedure __collect_safe "cs_timer_del" (int) void))
-(define __cs_timer_interval_set (foreign-procedure __collect_safe "cs_timer_interval_set" (int long) void))
-(define __cs_timer_time_set (foreign-procedure __collect_safe "cs_timer_interval_set" (int long long) void))
-
 (define %timer-fd-ht (make-eq-hashtable))
 
 (define timer-cb
