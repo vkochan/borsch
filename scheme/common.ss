@@ -308,9 +308,9 @@
    )
 )
 
-(define empty?
+(define list-empty?
    (lambda (ls)
-      (> (length ls) 0)
+      (= (length ls) 0)
    )
 )
 
