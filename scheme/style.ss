@@ -1,3 +1,7 @@
+(define __cs_style_add (foreign-procedure "cs_style_add" (string int int int) scheme-object))
+(define __cs_style_set (foreign-procedure "cs_style_set" (string int int int) scheme-object))
+(define __cs_style_get (foreign-procedure "cs_style_get" (string) scheme-object))
+
 (define style-add
    (lambda (symb prop)
       (let ([lst (style->list prop)])

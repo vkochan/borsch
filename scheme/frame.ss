@@ -1,3 +1,10 @@
+(define __cs_frame_current_get (foreign-procedure __collect_safe "cs_frame_current_get" () int))
+(define __cs_frame_current_set (foreign-procedure __collect_safe "cs_frame_current_set" (int) int))
+(define __cs_frame_name_get (foreign-procedure __collect_safe "cs_frame_name_get" (int) scheme-object))
+(define __cs_frame_name_set (foreign-procedure "cs_frame_name_set" (int string) int))
+(define __cs_frame_cwd_get (foreign-procedure __collect_safe "cs_frame_cwd_get" (int) scheme-object))
+(define __cs_frame_cwd_set (foreign-procedure "cs_frame_cwd_set" (int string) int))
+
 (define current-frame
    (lambda ()
       (call-foreign (__cs_frame_current_get))

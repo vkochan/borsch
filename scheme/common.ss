@@ -1,3 +1,20 @@
+;; FFI
+(define __cs_do_quit (foreign-procedure "cs_do_quit" () void))
+
+(define foreign-mutex (make-mutex))
+
+(define-syntax (call-foreign stx)
+   (syntax-case stx ()
+      ((_ exp ...)
+       ;;#`(with-mutex foreign-mutex
+       #`(begin
+            exp
+	    ...
+         )
+      )
+   )
+)
+
 (define-syntax (while stx)
   (syntax-case stx ()
 	       ((_ condition expression ...)

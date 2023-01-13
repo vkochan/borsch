@@ -1,3 +1,5 @@
+(define __cs_minibuf_create (foreign-procedure "cs_minibuf_create" () scheme-object))
+
 (define minibuf-window #f)
 (define minibuf-buffer #f)
 

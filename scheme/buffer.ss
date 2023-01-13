@@ -1,3 +1,52 @@
+(define __cs_buf_new (foreign-procedure "cs_buf_new" (string) scheme-object))
+(define __cs_buf_is_valid (foreign-procedure "cs_buf_is_valid" (int) scheme-object))
+(define __cs_buf_del (foreign-procedure __collect_safe "cs_buf_del" (int) void))
+(define __cs_buf_kmap_get (foreign-procedure __collect_safe "cs_buf_kmap_get" (int) scheme-object))
+(define __cs_buf_kmap_set (foreign-procedure "cs_buf_kmap_set" (int string) scheme-object))
+(define __cs_buf_current_get (foreign-procedure __collect_safe "cs_buf_current_get" () scheme-object))
+(define __cs_buf_first_get (foreign-procedure __collect_safe "cs_buf_first_get" () scheme-object))
+(define __cs_buf_next_get (foreign-procedure __collect_safe "cs_buf_next_get" (int) scheme-object))
+(define __cs_buf_name_get (foreign-procedure __collect_safe "cs_buf_name_get" (int) scheme-object))
+(define __cs_buf_name_set (foreign-procedure "cs_buf_name_set" (int string) void))
+(define __cs_buf_readonly_set (foreign-procedure __collect_safe "cs_buf_readonly_set" (int boolean) void))
+(define __cs_buf_readonly_get (foreign-procedure __collect_safe "cs_buf_readonly_get" (int) scheme-object))
+(define __cs_buf_by_name (foreign-procedure "cs_buf_by_name" (string) scheme-object))
+(define __cs_buf_text_input_enable (foreign-procedure __collect_safe "cs_buf_text_input_enable" (int boolean) void))
+
+(define __cs_buf_text_fg_set (foreign-procedure "cs_buf_text_fg_set" (int int) void))
+(define __cs_buf_text_bg_set (foreign-procedure "cs_buf_text_bg_set" (int int) void))
+(define __cs_buf_text_style_set (foreign-procedure "cs_buf_text_style_set" (int int) void))
+(define __cs_buf_text_fg_get (foreign-procedure "cs_buf_text_fg_get" (int) scheme-object))
+(define __cs_buf_text_bg_get (foreign-procedure "cs_buf_text_bg_get" (int) scheme-object))
+(define __cs_buf_text_style_get (foreign-procedure "cs_buf_text_style_get" (int) scheme-object))
+
+(define __cs_buf_prop_style_add (foreign-procedure "cs_buf_prop_style_add" (int int int int int string int int string string boolean) scheme-object))
+(define __cs_buf_prop_kmap_add (foreign-procedure "cs_buf_prop_kmap_add" (int int int int string string) scheme-object))
+(define __cs_buf_prop_symbol_add (foreign-procedure "cs_buf_prop_symbol_add" (int string int int string string) scheme-object))
+(define __cs_buf_prop_data_add (foreign-procedure "cs_buf_prop_data_add" (int scheme-object int int string string) scheme-object))
+(define __cs_buf_prop_del (foreign-procedure "cs_buf_prop_del" (int int int int string string) void))
+(define __cs_buf_prop_get (foreign-procedure "cs_buf_prop_get" (int int int int string) scheme-object))
+
+(define __cs_buf_line_num (foreign-procedure __collect_safe "cs_buf_line_num" (int int) scheme-object))
+(define __cs_buf_mode_name_set (foreign-procedure "cs_buf_mode_name_set" (int string) void))
+(define __cs_buf_mode_name_get (foreign-procedure "cs_buf_mode_name_get" (int) scheme-object))
+(define __cs_buf_state_name_set (foreign-procedure "cs_buf_state_name_set" (int string) void))
+
+(define __cs_buf_file_open (foreign-procedure "cs_buf_file_open" (int string) scheme-object))
+(define __cs_buf_file_set (foreign-procedure "cs_buf_file_set" (int string) void))
+(define __cs_buf_file_get (foreign-procedure "cs_buf_file_get" (int) scheme-object))
+(define __cs_buf_save (foreign-procedure "cs_buf_save" (int) scheme-object))
+
+(define __cs_buf_is_visible (foreign-procedure __collect_safe "cs_buf_is_visible" (int) scheme-object))
+(define __cs_buf_is_term (foreign-procedure __collect_safe "cs_buf_is_term" (int) scheme-object))
+(define __cs_buf_term_set (foreign-procedure __collect_safe "cs_buf_term_set" (int int) void))
+
+(define __cs_buf_env_get (foreign-procedure __collect_safe "cs_buf_env_get" (int) scheme-object))
+
+(define __cs_buf_snapshot (foreign-procedure __collect_safe "cs_buf_snapshot" (int) void))
+(define __cs_buf_undo (foreign-procedure __collect_safe "cs_buf_undo" (int) void))
+(define __cs_buf_redo (foreign-procedure __collect_safe "cs_buf_redo" (int) void))
+
 (define %dir-locals-ht (make-hashtable string-hash string=?))
 
 (define file-match-mode (list))
