@@ -952,9 +952,6 @@ void window_focus(Window *c)
 
 void window_delete(Window *w)
 {
-	if (window_current() == w)
-		window_focus(w->next);
-
 	if (w != window_popup_get()) {
 		window_remove(w);
 	} else {
@@ -963,13 +960,18 @@ void window_delete(Window *w)
 	window_stack_remove(w);
 
 	if (window_current() == w) {
-		Window *next = window_first();
-		if (next) {
-			window_focus(next);
+		Window *last = window_last_selected();
+		Window *next = w->next;
+		Window *focus;
+
+		if (last) {
+			focus = last;
 		} else {
-			window_current_set(NULL);
+			focus = next;
 		}
+		window_focus(focus);
 	}
+
 	if (window_last_selected() == w)
 		window_last_selected_set(NULL);
 	ui_window_free(w->win);
