@@ -9,3 +9,5 @@ for scm in $SCHEME_PROG; do
         exit 0
     fi
 done
+
+exit 1
