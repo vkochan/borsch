@@ -1579,15 +1579,10 @@ int scheme_init(const char *init_script)
 	Sscheme_init(NULL);
 	Sregister_boot_file("/usr/lib/csv"VERSION"/"MACHINE_TYPE"/petite.boot");
 	Sregister_boot_file("/usr/lib/csv"VERSION"/"MACHINE_TYPE"/scheme.boot");
-	Sbuild_heap(NULL, NULL);
+	Sregister_boot_file("/usr/lib/csv"VERSION"/"MACHINE_TYPE"/borsch.boot");
+	Sbuild_heap(NULL, scheme_export_symbols);
 
 	CALL1("source-directories", Scons(Sstring(LIB_PATH), Snil));
-
-	scheme_export_symbols();
-
-	err = scheme_run_script(LIB_PATH"/main.ss");
-	if (err)
-		return err;
 
 	if (init_script)
 		scheme_run_init(init_script);

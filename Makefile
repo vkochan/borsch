@@ -46,22 +46,6 @@ CFLAGS += -I$(SCH_PATH) \
 
 OBJS += ${SRCS:.c=.o}
 
-define install_scheme
-	@echo installing scheme scripts
-	@mkdir -p ${DESTDIR}${LIB_PREFIX}
-	@for s in $$(find scheme/ -type f | sed -e 's|scheme/||'); do \
-		echo "installing ${DESTDIR}${LIB_PREFIX}/$$s"; \
-		install -D -m 0644 "scheme/$$s" "${DESTDIR}${LIB_PREFIX}/$$s"; \
-	done
-endef
-
-define uninstall_scheme
-	@for s in $$(find scheme/ -type f | sed -e 's|scheme/||'); do \
-		echo "removing ${DESTDIR}${LIB_PREFIX}/$$s"; \
-		rm -rf "${DESTDIR}${LIB_PREFIX}/$$s"; \
-	done
-endef
-
 BIN += ${PROGNAME}
 MANUALS = ${PROGNAME}.1
 
@@ -74,7 +58,10 @@ endif
 
 .PHONY: libtext libui
 
-all: ${PROGNAME}
+all: ${PROGNAME} ${PROGNAME}.boot
+
+${PROGNAME}.boot:
+	./scripts/mkboot.sh
 
 ${PROGNAME}: ${OBJS} libui libtext
 	${CC} ${CFLAGS} ${LDFLAGS} $(SCH_PATH)/kernel.o ${OBJS} ${LIBS} -o $@
@@ -101,6 +88,7 @@ clean:
 	@echo cleaning
 	@$(MAKE) -C text/ clean
 	@$(MAKE) -C ui/ clean
+	@rm -f ${PROGNAME}.boot
 	@rm -f ${PROGNAME} 
 	@rm -f ${OBJS}
 
@@ -115,7 +103,7 @@ install: all
 		cp -f "$$b" "${DESTDIR}${PREFIX}/bin" && \
 		chmod 755 "${DESTDIR}${PREFIX}/bin/$$b"; \
 	done
-	$(install_scheme)
+	@cp -f ${PROGNAME}.boot ${SCH_PATH}
 	@echo installing manual page to ${DESTDIR}${MANPREFIX}/man1
 	@mkdir -p ${DESTDIR}${MANPREFIX}/man1
 	@for m in ${MANUALS}; do \
@@ -130,7 +118,7 @@ uninstall:
 		echo "removing ${DESTDIR}${PREFIX}/bin/$$b"; \
 		rm -f "${DESTDIR}${PREFIX}/bin/$$b"; \
 	done
-	$(uninstall_scheme)
+	@rm -f ${SCH_PATH}/${PROGNAME}.boot
 	@echo removing manual page from ${DESTDIR}${MANPREFIX}/man1
 	@rm -f ${DESTDIR}${MANPREFIX}/man1/${PROGNAME}.1
 
