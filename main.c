@@ -1006,13 +1006,9 @@ static Window *window_get_by_id(int id)
 static void window_switch_buf(Window *w, Buffer *b)
 {
 	if (w && b && w->buf != b) {
-		buffer_ref_put(w->buf);
-
 		window_buffer_switch(w, b);
-
 		view_reload(w->view, buffer_text_get(b));
 		buffer_dirty_set(b, true);
-		buffer_ref_get(w->buf);
 	}
 }
 

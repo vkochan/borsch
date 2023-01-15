@@ -1075,6 +1075,8 @@ static void on_view_update_cb(UiWin *win)
 
 void window_buffer_switch(Window *w, Buffer *b)
 {
+	buffer_ref_put(w->buf);
+
 	w->prev_buf = w->buf;
 	w->buf = b;
 
@@ -1086,6 +1088,7 @@ void window_buffer_switch(Window *w, Buffer *b)
 		ui_window_on_resize_set(w->win, NULL);
 		ui_window_priv_set(w->win, w);
 	}
+	buffer_ref_get(w->buf);
 }
 
 Window *window_create(Buffer *buf)
