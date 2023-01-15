@@ -355,29 +355,24 @@ static int handle_ui_event(Ui *ui, enum UiEventType type, void *evt, void *arg)
 	return 0;
 }
 
-static void setup(void)
+static void setup_ui(void)
 {
-	setlocale(LC_CTYPE, "");
+	struct sigaction sa;
 
 	if (start_in_graphic)
 		ui = ui_x_new();
 	else
 		ui = ui_term_new();
+
 	ui->get_default_cell_style = get_default_cell_style;
 	ui_event_handler_set(ui, handle_ui_event);
 	ui_init(ui);
-
-	process_init();
 	init_default_keymap();
 	mouse_setup();
-	syntax_init();
-	style_init();
-	vt_init();
 	window_init(ui);
 	update_screen_size();
 	arrange();
 
-	struct sigaction sa;
 	memset(&sa, 0, sizeof sa);
 	sa.sa_flags = 0;
 	sigemptyset(&sa.sa_mask);
@@ -385,6 +380,19 @@ static void setup(void)
 	sigaction(SIGTERM, &sa, NULL);
 	sa.sa_handler = SIG_IGN;
 	sigaction(SIGPIPE, &sa, NULL);
+}
+
+static void setup(void)
+{
+	setlocale(LC_CTYPE, "");
+
+	process_init();
+	syntax_init();
+	style_init();
+	vt_init();
+
+	setup_ui();
+
 	scheme_init(scheme_init_script);
 }
 
