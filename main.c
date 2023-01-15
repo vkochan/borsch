@@ -355,8 +355,8 @@ static int handle_ui_event(Ui *ui, enum UiEventType type, void *evt, void *arg)
 	return 0;
 }
 
-static void
-setup(void) {
+static void setup(void)
+{
 	setlocale(LC_CTYPE, "");
 
 	if (start_in_graphic)
@@ -387,6 +387,7 @@ setup(void) {
 	sigaction(SIGPIPE, &sa, NULL);
 	scheme_init(scheme_init_script);
 	buf_list_update();
+	update_screen_size();
 }
 
 static Buffer *__buf_new(const char *name, KeyMap *kmap)
@@ -916,8 +917,6 @@ int main(int argc, char *argv[]) {
 
 	if (cmdfifo.fd != -1)
 		event_fd_handler_register(cmdfifo.fd, handle_cmdfifo, NULL);
-
-	update_screen_size();
 
 	while (running) {
 		if (ui_resize(ui)) {
