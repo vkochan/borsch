@@ -907,8 +907,6 @@ static void handle_keypress(KeyCode *key)
 int main(int argc, char *argv[]) {
 	sigset_t blockset;
 
-	setenv("BORSCH", VERSION, 1);
-
 	parse_args(argc, argv);
 	setup();
 
