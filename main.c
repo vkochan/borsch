@@ -973,8 +973,6 @@ void process_ui(void)
 			window_draw(window_current());
 		}
 	}
-
-	cleanup();
 }
 
 int main(int argc, char *argv[]) {
@@ -983,6 +981,7 @@ int main(int argc, char *argv[]) {
 
 	process_ui();
 
+	cleanup();
 	return 0;
 }
 
