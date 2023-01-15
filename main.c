@@ -386,8 +386,6 @@ static void setup(void)
 	sa.sa_handler = SIG_IGN;
 	sigaction(SIGPIPE, &sa, NULL);
 	scheme_init(scheme_init_script);
-	buf_list_update();
-	update_screen_size();
 }
 
 static Buffer *__buf_new(const char *name, KeyMap *kmap)
@@ -905,11 +903,12 @@ static void handle_keypress(KeyCode *key)
 	}
 }
 
-int main(int argc, char *argv[]) {
+void process_ui(void)
+{
 	sigset_t blockset;
 
-	parse_args(argc, argv);
-	setup();
+	buf_list_update();
+	update_screen_size();
 
 	sigemptyset(&blockset);
 	sigaddset(&blockset, SIGWINCH);
@@ -968,6 +967,14 @@ int main(int argc, char *argv[]) {
 	}
 
 	cleanup();
+}
+
+int main(int argc, char *argv[]) {
+	parse_args(argc, argv);
+	setup();
+
+	process_ui();
+
 	return 0;
 }
 
