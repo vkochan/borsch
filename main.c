@@ -776,10 +776,8 @@ usage(void) {
 	exit(EXIT_FAILURE);
 }
 
-static bool
-parse_args(int argc, char *argv[]) {
-	bool init = false;
-
+static void parse_args(int argc, char *argv[])
+{
 	if (!getenv("ESCDELAY"))
 		set_escdelay(100);
 
@@ -793,8 +791,6 @@ parse_args(int argc, char *argv[]) {
 			start_in_graphic = true;
 		}
 	}
-
-	return init;
 }
 
 static int buf_keymap_prop_match(Buffer *buf, int id, size_t start, size_t end, void *data,
@@ -913,9 +909,9 @@ int main(int argc, char *argv[]) {
 	event_t evt = {};
 
 	setenv("BORSCH", VERSION, 1);
-	if (!parse_args(argc, argv)) {
-		setup();
-	}
+
+	parse_args(argc, argv);
+	setup();
 
 	sigemptyset(&blockset);
 	sigaddset(&blockset, SIGWINCH);
