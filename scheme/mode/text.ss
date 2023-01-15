@@ -217,6 +217,14 @@
    )
 )
 
+(define text-mode-search
+   (lambda (fn)
+      (let ([pos (fn)])
+         (cursor-set pos)
+      )
+   )
+)
+
 (define text-mode-normal-map
    (let ([map (make-keymap)])
       (bind-key map "h" (lambda () (cursor-to-prev-char)))
@@ -280,10 +288,10 @@
       (bind-key map "g f" (lambda () (file-open-at-cursor)))
       (bind-key map "g r" (lambda () (if (local-bound? buffer-reload-func) ((get-local buffer-reload-func)))))
       (bind-key map "g ^" (lambda () (dirb (path-parent (buffer-filename)))))
-      (bind-key map "*" (lambda () (text-search-word-forward)))
-      (bind-key map "/" (lambda () (text-search-regex-read)))
-      (bind-key map "n" (lambda () (text-search-next)))
-      (bind-key map "N" (lambda () (text-search-prev)))
+      (bind-key map "*" (lambda () (text-mode-search text-search-word-forward)))
+      (bind-key map "/" (lambda () (text-mode-search text-search-regex-read)))
+      (bind-key map "n" (lambda () (text-mode-search text-search-next)))
+      (bind-key map "N" (lambda () (text-mode-search text-search-prev)))
       (bind-key map "C-s" (lambda () (text-mode-save-file)))
       (bind-key map ":" (lambda () (text-mode-command)))
       map

@@ -1058,13 +1058,13 @@
 
 (define text-search-next
    (lambda ()
-      (cursor-set (text-search-regex text-search-reg (cursor) +1))
+      (text-search-regex text-search-reg (cursor) +1)
    )
 )
 
 (define text-search-prev
    (lambda ()
-      (cursor-set (text-search-regex text-search-reg (cursor) -1))
+      (text-search-regex text-search-reg (cursor) -1)
    )
 )
 
@@ -1072,7 +1072,7 @@
    (lambda (word dir)
       (let ([pattern (format "\\<~a\\>" word)])
          (set! text-search-reg pattern)
-         (cursor-set (text-search-regex pattern (cursor) dir))
+         (text-search-regex pattern (cursor) dir)
       )
    )
 )
