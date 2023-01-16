@@ -919,8 +919,10 @@ void window_focus(Window *c)
 		Process *proc = buffer_proc_get(c->buf);
 		Selection *s;
 
-		window_stack_remove(c);
-		window_stack_insert(c);
+		if (!c->is_widget) {
+			window_stack_remove(c);
+			window_stack_insert(c);
+		}
 		c->urgent = false;
 
 		if (proc && buffer_ref_count(c->buf) > 1) {
