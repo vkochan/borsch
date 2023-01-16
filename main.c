@@ -410,12 +410,6 @@ static Buffer *__buf_new(const char *name, KeyMap *kmap)
 	return NULL;
 }
 
-static void __buf_del(Buffer *buf)
-{
-	/* buffer_del should care to detach from its window */
-	buffer_del(buf);
-}
-
 static void destroy(Window *w)
 {
 	Buffer *buf = w->buf;
@@ -443,7 +437,7 @@ cleanup(void) {
 	b = buffer_first_get();
 	while (b) {
 		Buffer *nextb = buffer_next_get(b);
-		__buf_del(b);
+		buffer_del(b);
 		b = nextb;
 	}
 
@@ -1305,7 +1299,7 @@ int win_new(int bid)
 
 	c = window_create(buf);
 	if (!c && !bid) {
-		__buf_del(buf);
+		buffer_del(buf);
  		return -1;
  	}
 
@@ -1628,7 +1622,7 @@ void buf_del(int bid)
 	Buffer *buf = buffer_by_id(bid);
 
 	if (buf) {
-		__buf_del(buf);
+		buffer_del(buf);
 	}
 }
 
@@ -2546,7 +2540,7 @@ int minibuf_create(void)
 
 	minibuf = widget_create(buf, 0, ui_height_get(ui)-1, layout_current_width(), 1);
 	if (!minibuf) {
-		__buf_del(buf);
+		buffer_del(buf);
 		return -1;
 	}
 	update_screen_size();
@@ -2559,7 +2553,7 @@ int topbar_create(void)
 
 	topbar = widget_create(buf, 0, 0, layout_current_width(), 1);
 	if (!topbar) {
-		__buf_del(buf);
+		buffer_del(buf);
 		return -1;
 	}
 	update_screen_size();
