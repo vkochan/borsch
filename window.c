@@ -923,7 +923,7 @@ void window_focus(Window *c)
 		window_stack_insert(c);
 		c->urgent = false;
 
-		if (proc && buffer_ref_count(c->buf) > 2) {
+		if (proc && buffer_ref_count(c->buf) > 1) {
 			vt_resize(process_term_get(proc),
 					ui_window_height_get(c->win) - ui_window_has_title(c->win),
 					ui_window_width_get(c->win));
@@ -952,6 +952,8 @@ void window_focus(Window *c)
 
 void window_delete(Window *w)
 {
+	Buffer *buf = w->buf;
+
 	if (w != window_popup_get()) {
 		window_remove(w);
 	} else {
@@ -977,6 +979,8 @@ void window_delete(Window *w)
 	ui_window_free(w->win);
 	view_free(w->view);
 	free(w);
+	if (buf)
+		buffer_ref_put(buf);
 	layout_changed(true);
 }
 
@@ -985,8 +989,6 @@ void window_close(Window *w)
 	Buffer *buf = w->buf;
 
 	window_delete(w);
-	if (buf)
-		buffer_ref_put(buf);
 }
 
 static void __style_draw(View *view, size_t start, size_t end, Style *style)
@@ -1101,8 +1103,8 @@ Window *window_create(Buffer *buf)
 	c = calloc(1, sizeof(Window));
 	if (!c)
 		return NULL;
-
 	c->id = ++win_id;
+
 	c->buf = buf;
 
 	c->view = view_new(buffer_text_get(c->buf));
@@ -1118,6 +1120,7 @@ Window *window_create(Buffer *buf)
 		return NULL;
 	}
 
+	buffer_ref_get(c->buf);
 	window_buffer_switch(c, buf);
 
 	ui_window_has_title_set(c->win, true);
@@ -1158,6 +1161,7 @@ Window *widget_create(Buffer *buf, int x, int y, int width, int height)
 		return NULL;
 	}
 
+	buffer_ref_get(w->buf);
 	window_buffer_switch(w, buf);
 
 	ui_window_resize(w->win, width, height);

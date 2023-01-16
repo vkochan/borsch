@@ -153,7 +153,7 @@ Buffer *buffer_new(const char *name)
 		free(buf);
 		return NULL;
 	}
-	buf->ref_count = 1;
+	buf->ref_count = 0;
 	buf->mark = EPOS;
 
 	buf_count++;
@@ -177,32 +177,23 @@ Buffer *buffer_new(const char *name)
 
 bool buffer_del(Buffer *buf)
 {
-	buffer_ref_put(buf);
-
-	if (buffer_proc_get(buf))
-		buffer_ref_put(buf);
-
-	if (!buf->ref_count) {
-		buffer_property_remove(buf, PROPERTY_TYPE_ALL, EPOS, EPOS, NULL, NULL);
-		if (buffer_proc_get(buf)) {
-			event_t evt = {};
-			evt.eid = EVT_PROC_EXIT;
-			evt.oid = process_pid_get(buffer_proc_get(buf));
-			scheme_event_handle(evt);
-		}
-		scheme_env_free(buffer_env_get(buf));
-		buffer_list_del(buf);
-		/* TODO: check if buffer is not saved and ask user to save it */
-		syntax_parser_delete(buf->parser);
-		keymap_free(buf->keymap);
-		text_free(buf->text);
-		free(buf->file.path);
-		free(buf);
-
-		return true;
+	buffer_property_remove(buf, PROPERTY_TYPE_ALL, EPOS, EPOS, NULL, NULL);
+	if (buffer_proc_get(buf)) {
+		event_t evt = {};
+		evt.eid = EVT_PROC_EXIT;
+		evt.oid = process_pid_get(buffer_proc_get(buf));
+		scheme_event_handle(evt);
 	}
+	scheme_env_free(buffer_env_get(buf));
+	buffer_list_del(buf);
+	/* TODO: check if buffer is not saved and ask user to save it */
+	syntax_parser_delete(buf->parser);
+	keymap_free(buf->keymap);
+	text_free(buf->text);
+	free(buf->file.path);
+	free(buf);
 
-	return false;
+	return true;
 }
 
 void buffer_readonly_set(Buffer *buf, bool is_readonly)
@@ -382,6 +373,8 @@ void buffer_ref_put(Buffer *buf)
 {
 	if (buf->ref_count)
 		buf->ref_count--;
+	if (!buf->ref_count)
+		buffer_del(buf);
 }
 
 int buffer_ref_count(Buffer *buf)

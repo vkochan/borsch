@@ -412,16 +412,16 @@ static Buffer *__buf_new(const char *name, KeyMap *kmap)
 
 static void __buf_del(Buffer *buf)
 {
-	buffer_ref_put(buf);
+	/* buffer_del should care to detach from its window */
 	buffer_del(buf);
 }
 
-static void
-destroy(Window *w) {
+static void destroy(Window *w)
+{
 	Buffer *buf = w->buf;
 
+	buffer_ref_put(buf);
 	window_delete(w);
-	__buf_del(buf);
 }
 
 static void
@@ -1299,13 +1299,12 @@ int win_new(int bid)
  	if (bid) {
 		buf = buffer_by_id(bid);
 		buffer_dirty_set(buf, true);
-		buffer_ref_get(buf);
  	} else {
 		buf = __buf_new("", global_kmap);
  	}
 
 	c = window_create(buf);
-	if (!c) {
+	if (!c && !bid) {
 		__buf_del(buf);
  		return -1;
  	}
