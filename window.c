@@ -460,11 +460,6 @@ Window *window_get_by_coord(unsigned int x, unsigned int y)
 	return NULL;
 }
 
-void window_current_set(Window *w)
-{
-	frame_current()->sel = w;
-}
-
 static Window *window_stack(void);
 
 Window *window_last_selected(void)
@@ -888,6 +883,11 @@ void window_draw_flags(Window *c, int flags)
 void window_draw(Window *c)
 {
 	window_draw_flags(c, 0);
+}
+
+static void window_current_set(Window *w)
+{
+	frame_current()->sel = w;
 }
 
 void window_focus(Window *c)
