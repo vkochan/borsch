@@ -470,11 +470,6 @@ Window *window_last_selected(void)
 	return frame_current()->lastsel;
 }
 
-void window_last_selected_set(Window *w)
-{
-	frame_current()->lastsel = w;
-}
-
 Window *windows_list_by_fid(int fid)
 {
 	return frame_get(fid)->windows;
@@ -891,6 +886,11 @@ void window_draw_flags(Window *c, int flags)
 void window_draw(Window *c)
 {
 	window_draw_flags(c, 0);
+}
+
+static void window_last_selected_set(Window *w)
+{
+	frame_current()->lastsel = w;
 }
 
 void window_focus(Window *c)
