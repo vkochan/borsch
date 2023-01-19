@@ -672,7 +672,7 @@ bool window_is_widget(Window *w)
 	return w->is_widget;
 }
 
-Window *window_stack(void)
+static Window *window_stack(void)
 {
 	return frame_current()->stack;
 }
@@ -682,13 +682,13 @@ static window_stack_set(Window *stack)
 	frame_current()->stack = stack;
 }
 
-void window_stack_insert(Window *c)
+static window_stack_insert(Window *c)
 {
 	c->snext = window_stack();
 	window_stack_set(c);
 }
 
-void window_stack_remove(Window *c)
+static window_stack_remove(Window *c)
 {
 	Window **tc;
 	for (tc = &frame_current()->stack; *tc && *tc != c; tc = &(*tc)->snext);
