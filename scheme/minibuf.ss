@@ -6,10 +6,8 @@
 (define minibuf-select-previous
    (lambda ()
       (let ([prev-sel (window-prev-selected)])
-         (let ([prev (if (equal? prev-sel minibuf-window) 0 prev-sel)])
-            (buffer-set-keymap 1)
-            (window-select prev)
-         )
+         (buffer-set-keymap 1)
+         (window-select prev-sel)
       )
    )
 )

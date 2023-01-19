@@ -465,9 +465,11 @@ void window_current_set(Window *w)
 	frame_current()->sel = w;
 }
 
+static Window *window_stack(void);
+
 Window *window_last_selected(void)
 {
-	return frame_current()->lastsel;
+	return window_stack();
 }
 
 Window *windows_list_by_fid(int fid)
@@ -888,39 +890,35 @@ void window_draw(Window *c)
 	window_draw_flags(c, 0);
 }
 
-static void window_last_selected_set(Window *w)
-{
-	frame_current()->lastsel = w;
-}
-
 void window_focus(Window *c)
 {
-	Window *lastsel;
-
 	if (!c)
 		c = window_stack();
 
 	if (window_current() == c)
 		return;
 
-	window_last_selected_set(window_current());
-	lastsel = window_last_selected();
-	window_current_set(c);
-	if (lastsel) {
-		ui_window_focus(lastsel->win, false);
-		lastsel->urgent = false;
+	if (window_current()) {
+		Window *cur = window_current();
+
+		ui_window_focus(cur->win, false);
+		cur->urgent = false;
 		if (!layout_is_arrange(LAYOUT_MAXIMIZED)) {
-			window_draw_title(lastsel);
-			ui_window_refresh(lastsel->win);
+			window_draw_title(cur);
+			ui_window_refresh(cur->win);
 		}
 	}
+
+	window_current_set(c);
 
 	if (c) {
 		Process *proc = buffer_proc_get(c->buf);
 		Selection *s;
 
-		window_stack_remove(c);
-		window_stack_insert(c);
+		if (!c->is_widget) {
+			window_stack_remove(c);
+			window_stack_insert(c);
+		}
 		c->urgent = false;
 
 		if (proc && buffer_ref_count(c->buf) > 1) {
@@ -962,7 +960,7 @@ void window_delete(Window *w)
 	window_stack_remove(w);
 
 	if (window_current() == w) {
-		Window *last = window_last_selected();
+		Window *last = window_stack();
 		Window *next = w->next;
 		Window *focus;
 
@@ -974,8 +972,6 @@ void window_delete(Window *w)
 		window_focus(focus);
 	}
 
-	if (window_last_selected() == w)
-		window_last_selected_set(NULL);
 	ui_window_free(w->win);
 	view_free(w->view);
 	free(w);

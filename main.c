@@ -271,7 +271,6 @@ arrange(void) {
 
 	ui_clear(ui);
 	layout_current_arrange();
-	window_focus(NULL);
 	ui_refresh(ui);
 	drawbar();
 	draw_all();
@@ -1145,16 +1144,12 @@ int win_current_set(int wid)
 {
 	Window *w;
 
-	if (!wid) {
-		window_current_set(NULL);
-		return 0;
-	}
-	
 	w = window_get_by_id(wid);
 	if (window_popup_get())
 		return 0;
 
-	window_focus(w);
+	if (w)
+		window_focus(w);
 	return 0;
 }
 
@@ -1162,8 +1157,6 @@ int win_prev_selected(void)
 {
 	if (window_last_selected())
 		return window_last_selected()->id;
-	if (window_current())
-		return window_current()->id;
 	return 0;
 }
 

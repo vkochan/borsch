@@ -52,7 +52,6 @@ typedef struct {
 	bool msticky;
 	Window *popup;
 	Window *sel;
-	Window *lastsel;
 	Window *windows;
 	Window *stack;
 } Frame;
