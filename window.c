@@ -892,24 +892,25 @@ void window_draw(Window *c)
 
 void window_focus(Window *c)
 {
+	Window *prev = window_current();
+
 	if (!c)
 		c = window_stack();
 
 	if (window_current() == c)
 		return;
 
-	if (window_current()) {
-		Window *cur = window_current();
+	window_current_set(c);
 
-		ui_window_focus(cur->win, false);
-		cur->urgent = false;
+	if (prev) {
+		ui_window_focus(prev->win, false);
+		prev->urgent = false;
 		if (!layout_is_arrange(LAYOUT_MAXIMIZED)) {
-			window_draw_title(cur);
-			ui_window_refresh(cur->win);
+			window_draw_title(prev);
+			ui_window_refresh(prev->win);
 		}
 	}
 
-	window_current_set(c);
 
 	if (c) {
 		Process *proc = buffer_proc_get(c->buf);
