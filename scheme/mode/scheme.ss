@@ -52,7 +52,7 @@
 (define scheme-syntax-number-match "(number) @number")
 (define scheme-syntax-char-match   "(character) @character")
 (define scheme-syntax-constant-builtin-match "(boolean) @constant.builtin")
-(define scheme-syntax-symbol-match "(abbreviation  \"'\" (symbol)) @constant")
+(define scheme-syntax-symbol-match "(quote  \"'\" (symbol)) @constant")
 (define scheme-syntax-string-match "[(string) (character)] @string")
 (define scheme-syntax-comment-match "[(comment) (block_comment) (directive)] @comment")
 (define scheme-syntax-bracket-match "[\"(\" \")\" \"[\" \"]\" \"{\" \"}\"] @punctuation.bracket")
