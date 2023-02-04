@@ -579,7 +579,7 @@
    )
 )
 
-(define for-all-buffer
+(define buffer-find
    (lambda (fn)
       (for-all
          (lambda (b)
@@ -593,7 +593,7 @@
 (define buffer-get-by-file
    (lambda (file)
       (let ([buf #f])
-         (for-all-buffer
+         (buffer-find
             (lambda (b)
                (when (equal? file (buffer-filename b))
                   (set! buf b)
