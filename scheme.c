@@ -28,7 +28,7 @@
  * only once. */
 static int scheme_initialized = 0;
 
-#define SCHEME_CONFIG_DIR "/."PROGNAME
+#define SCHEME_CONFIG_DIR "/.config/"PROGNAME
 
 static int scheme_run_script(const char *path)
 {
