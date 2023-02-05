@@ -112,7 +112,6 @@ static char *scheme_init_script = "";
 static bool start_in_graphic = false;
 
 /* commands for use by keybindings */
-static void killother(const char *args[]);
 static void quit(const char *args[]);
 static void redraw(const char *args[]);
 static void setlayout(const char *args[]);
@@ -508,16 +507,6 @@ static void vt_filter(Vt *vt, char *ch, size_t len, void *arg)
 	evt.len = len;
 	evt.str = ch;
 	scheme_event_handle(evt);
-}
-
-static void killother(const char *args[]) {
-	Window *c;
-
-	for_each_window(c) {
-		if (window_is_master_sticky(c) || window_current() == c)
-			continue;
-		destroy(c);
-	}
 }
 
 static void
