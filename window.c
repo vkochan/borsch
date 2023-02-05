@@ -1090,7 +1090,7 @@ void window_buffer_switch(Window *w, Buffer *b)
 	buffer_ref_get(w->buf);
 }
 
-Window *widget_create(Buffer *buf, int x, int y, int width, int height)
+Window *__window_create(Buffer *buf, bool is_widget, int x, int y, int width, int height)
 {
 	Window *w;
 
@@ -1101,7 +1101,7 @@ Window *widget_create(Buffer *buf, int x, int y, int width, int height)
 	if (!w)
 		return NULL;
 	w->id = ++win_id;
-
+	w->is_widget = is_widget;
 	w->buf = buf;
 
 	w->view = view_new(buffer_text_get(w->buf));
@@ -1128,8 +1128,8 @@ Window *widget_create(Buffer *buf, int x, int y, int width, int height)
 
 Window *window_create(Buffer *buf)
 {
-	Window *w = widget_create(buf, layout_current_x(), layout_current_x(),
-				  layout_current_width(), layout_current_height());
+	Window *w = __window_create(buf, false, layout_current_x(), layout_current_y(),
+				    layout_current_width(), layout_current_height());
 
 	if (!w)
 		return NULL;
@@ -1139,4 +1139,9 @@ Window *window_create(Buffer *buf)
 	window_focus(w);
 
 	return w;
+}
+
+Window *widget_create(Buffer *buf, int x, int y, int width, int height)
+{
+	return __window_create(buf, true, x, y, width, height);
 }
