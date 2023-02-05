@@ -126,6 +126,19 @@
    )
 )
 
+(define window-for-each
+   (lambda (fn)
+      (let ([ls (window-list)])
+         (for-each
+            (lambda (w)
+               (fn (first w))
+            )
+            ls
+         )
+      )
+   )
+)
+
 (define window-upper
    (case-lambda
       [()
@@ -288,11 +301,11 @@
 
 (define __window-get
    (case-lambda
-      [(st)
+      [()
        (win-state->symb (call-foreign (__cs_win_state_get (current-window))))]
 
-      [(wid st)
-       (win-state->symb (call-foreign (__cs_win_state_get (wid))))]
+      [(wid)
+       (win-state->symb (call-foreign (__cs_win_state_get wid)))]
    )
 )
 
@@ -375,6 +388,18 @@
       [(wid)
        (__window-toggle wid 'maximized)
        (run-hooks 'window-toggle-maximize-hook wid)
+      ]
+   )
+)
+
+(define window-is-sticky?
+   (case-lambda
+      [()
+       (window-is-sticky? (current-window))
+      ]
+
+      [(wid)
+       (and (window-is-master? wid) (layout-is-sticky?))
       ]
    )
 )

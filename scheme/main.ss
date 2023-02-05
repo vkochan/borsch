@@ -248,6 +248,18 @@
 
 (frame-set-cwd (current-directory))
 
+(define window-delete-non-sticky
+   (lambda ()
+      (window-for-each
+         (lambda (wid)
+            (when (not (window-is-sticky? wid))
+               (window-delete wid)
+            )
+         )
+      )
+   )
+)
+
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Default key bindings
 ;;;;;;;;;;;;;;;;;;;;;;;
@@ -257,11 +269,11 @@
 (bind-key "M-j"         window-select-lower)
 (bind-key "M-k"         window-select-upper)
 (bind-key "M-w d"       window-delete)
+(bind-key "M-w o d"     window-delete-non-sticky)
 (bind-key "M-w h"       window-select-left)
 (bind-key "M-w l"       window-select-right)
 (bind-key "M-w j"       window-select-lower)
 (bind-key "M-w k"       window-select-upper)
-(bind-key "M-w d"       window-delete)
 (bind-key "M-w +"       layout-n-master+)
 (bind-key "M-w -"       layout-n-master-)
 (bind-key "M-w H"       layout-%-master-)
@@ -290,6 +302,7 @@
 (bind-key "C-g c"       vterm)
 (bind-key "C-g C-x"     open-repl)
 (bind-key "C-g x x"     window-delete)
+(bind-key "C-g x o"     window-delete-non-sticky)
 (bind-key "C-g h"       window-select-left)
 (bind-key "C-g l"       window-select-right)
 (bind-key "C-g j"       window-select-lower)
