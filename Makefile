@@ -1,5 +1,9 @@
 include config.mk
 
+SCHEME_LIST = scheme chez chez-scheme
+$(foreach scm,$(SCHEME_LIST),$(if $(SCHEME),,$(eval SCHEME := $(shell command -v $(scm)))))
+$(if $(SCHEME),,$(error No scheme program found))
+
 PKG_CONFIG = pkg-config
 
 X11_LIB = /usr/X11R6/lib
@@ -21,8 +25,8 @@ SRCS = xstr.c \
       syntax.c \
       style.c
 
-SCH_VERSION := $(shell ./scripts/get_scheme_version.sh)
-SCH_MACHINE := $(shell ./scripts/get_scheme_machine.sh)
+SCH_VERSION := $(shell echo "(scheme-version)" | $(SCHEME) -q | sed -e 's|"||g' | cut -d ' ' -f4)
+SCH_MACHINE := $(shell echo "(machine-type)"   | $(SCHEME) -q)
 SCH_PREFIX ?= /usr
 SCH_PATH = $(SCH_PREFIX)/lib/csv$(SCH_VERSION)/$(SCH_MACHINE)
 LIBS += -lpthread -luuid -ldl -lm
@@ -61,7 +65,8 @@ endif
 all: ${PROGNAME} ${PROGNAME}.boot
 
 ${PROGNAME}.boot:
-	./scripts/mkboot.sh
+	echo '(source-directories (quote ("scheme"))) (make-boot-file "borsch.boot" (quote ("scheme" "petite")) "scheme/main.ss")' \
+	| $(SCHEME) -q
 
 ${PROGNAME}: ${OBJS} libui libtext
 	${CC} ${CFLAGS} ${LDFLAGS} $(SCH_PATH)/kernel.o ${OBJS} ${LIBS} -o $@
