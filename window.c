@@ -1090,46 +1090,6 @@ void window_buffer_switch(Window *w, Buffer *b)
 	buffer_ref_get(w->buf);
 }
 
-Window *window_create(Buffer *buf)
-{
-	Window *c;
-
-	if (!buf)
-		return NULL;
-
-	c = calloc(1, sizeof(Window));
-	if (!c)
-		return NULL;
-	c->id = ++win_id;
-
-	c->buf = buf;
-
-	c->view = view_new(buffer_text_get(c->buf));
-	if (!c->view) {
-		free(c);
-		return NULL;
-	}
-
-	c->win = ui_window_new(ui, c->view);
-	if (!c->win) {
-		view_free(c->view);
-		free(c);
-		return NULL;
-	}
-
-	buffer_ref_get(c->buf);
-	window_buffer_switch(c, buf);
-
-	ui_window_has_title_set(c->win, true);
-	ui_window_resize(c->win, layout_current_width(), layout_current_height());
-	ui_window_move(c->win, layout_current_x(), layout_current_y());
-	window_insert(c);
-	window_focus(c);
-	layout_changed(true);
-
-	return c;
-}
-
 Window *widget_create(Buffer *buf, int x, int y, int width, int height)
 {
 	Window *w;
@@ -1140,9 +1100,8 @@ Window *widget_create(Buffer *buf, int x, int y, int width, int height)
 	w = calloc(1, sizeof(Window));
 	if (!w)
 		return NULL;
-
 	w->id = ++win_id;
-	w->is_widget = true;
+
 	w->buf = buf;
 
 	w->view = view_new(buffer_text_get(w->buf));
@@ -1163,7 +1122,21 @@ Window *widget_create(Buffer *buf, int x, int y, int width, int height)
 
 	ui_window_resize(w->win, width, height);
 	ui_window_move(w->win, x, y);
-	ui_window_draw(w->win);
+	layout_changed(true);
+	return w;
+}
+
+Window *window_create(Buffer *buf)
+{
+	Window *w = widget_create(buf, layout_current_x(), layout_current_x(),
+				  layout_current_width(), layout_current_height());
+
+	if (!w)
+		return NULL;
+
+	ui_window_has_title_set(w->win, true);
+	window_insert(w);
+	window_focus(w);
 
 	return w;
 }
