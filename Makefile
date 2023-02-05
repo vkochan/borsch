@@ -65,8 +65,7 @@ endif
 all: ${PROGNAME} ${PROGNAME}.boot
 
 ${PROGNAME}.boot:
-	echo '(source-directories (quote ("scheme"))) (make-boot-file "borsch.boot" (quote ("scheme" "petite")) "scheme/main.ss")' \
-	| $(SCHEME) -q
+	cat mkboot.ss | $(SCHEME) -q
 
 ${PROGNAME}: ${OBJS} libui libtext
 	${CC} ${CFLAGS} ${LDFLAGS} $(SCH_PATH)/kernel.o ${OBJS} ${LIBS} -o $@
