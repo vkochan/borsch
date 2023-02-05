@@ -568,7 +568,7 @@
    )
 )
 
-(define for-each-buffer
+(define buffer-for-each
    (lambda (fn)
       (for-each
          (lambda (b)
