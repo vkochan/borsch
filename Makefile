@@ -56,7 +56,7 @@ ifeq ($(DEBUG),1)
 CFLAGS += -UNDEBUG -O0 -g -ggdb -Wall -Wextra -Wno-unused-parameter
 endif
 
-.PHONY: libtext libui
+.PHONY: libtext libui ${PROGNAME}.boot
 
 all: ${PROGNAME} ${PROGNAME}.boot
 
