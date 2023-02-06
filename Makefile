@@ -1,7 +1,7 @@
 include config.mk
 
 SCHEME_LIST = scheme chez chez-scheme
-$(foreach scm,$(SCHEME_LIST),$(if $(SCHEME),,$(eval SCHEME := $(shell command -v $(scm)))))
+$(foreach scm,$(SCHEME_LIST),$(if $(SCHEME),,$(eval SCHEME := $(shell which $(scm)))))
 $(if $(SCHEME),,$(error No scheme program found))
 
 PKG_CONFIG = pkg-config
