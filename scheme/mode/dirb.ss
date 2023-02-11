@@ -21,11 +21,7 @@
 
 (define dirb-ls
    (lambda (dir)
-      (let ([opts (if (get-local show-hidden) "-a" "")])
-         (string-split
-            (list-ref (process-get-output (format "ls -1 ~a ~a" opts dir)) 1)
-            #\newline)
-      )
+      (directory-list dir)
    )
 )
 
@@ -84,6 +80,8 @@
               )
             ) (dirb-ls dir)
          )
+         (set! dl (sort string-ci<? dl))
+         (set! fl (sort string-ci<? fl))
          (for-each
             (lambda (d)
                (dirb-insert-entry dir d dirb-dir-style)
