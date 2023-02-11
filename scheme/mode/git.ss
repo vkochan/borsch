@@ -48,7 +48,7 @@
    )
 )
 
-(define git-in-repo?
+(define git-repo?
    (lambda (path)
       (let ([ret (process-get-output (git-cmd-format (format "ls-files --error-unmatch ~a" path)))])
          (let ([status (list-ref ret 0)] [output (list-ref ret 1)])
@@ -959,7 +959,7 @@
 
 (define git-rename-dirb-entry
    (lambda (old new)
-      (when (git-in-repo? old)
+      (when (git-repo? old)
          (git-untrack-file-cmd old)
          (git-stage-file-cmd new)
       )
