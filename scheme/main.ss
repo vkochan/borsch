@@ -26,6 +26,7 @@
 (include "os.ss")
 (include "timer.ss")
 (include "syntax.ss")
+(include "git.ss")
 (include "mode/text.ss")
 (include "mode/dirb.ss")
 (include "mode/git.ss")
