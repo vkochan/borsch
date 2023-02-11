@@ -45,6 +45,7 @@
 
 (add-to-list 'file-match-mode '(".*\\.scm$" . scheme-mode))
 (add-to-list 'file-match-mode '(".*\\.sls$" . scheme-mode))
+(add-to-list 'file-match-mode '(".*\\.sps$" . scheme-mode))
 (add-to-list 'file-match-mode '(".*\\.ss$" . scheme-mode))
 (add-to-list 'file-match-mode '(".*\\.el$" . scheme-mode))
 
