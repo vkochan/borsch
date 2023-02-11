@@ -77,11 +77,9 @@
             (lambda (e)
                (when (not (and (equal? (string-ref e 0) #\.)
                                (not (get-local show-hidden))))
-                  (if (file-directory? (fmt "~a/~a" dir e))
-                     (set! dl (append dl (list e)))
-                  )
-                  (if (file-regular? (fmt "~a/~a" dir e))
-                     (set! fl (append fl (list e)))
+                  (cond
+                     [(file-directory? (fmt "~a/~a" dir e)) (set! dl (append dl (list e)))]
+                     [(file-regular? (fmt "~a/~a" dir e)) (set! fl (append fl (list e)))]
                   )
               )
             ) (dirb-ls dir)
