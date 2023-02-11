@@ -1120,6 +1120,8 @@ Window *__window_create(Buffer *buf, bool is_widget, int x, int y, int width, in
 	buffer_ref_get(w->buf);
 	window_buffer_switch(w, buf);
 
+	if (!is_widget)
+		ui_window_has_title_set(w->win, true);
 	ui_window_resize(w->win, width, height);
 	ui_window_move(w->win, x, y);
 	layout_changed(true);
@@ -1134,7 +1136,6 @@ Window *window_create(Buffer *buf)
 	if (!w)
 		return NULL;
 
-	ui_window_has_title_set(w->win, true);
 	window_insert(w);
 	window_focus(w);
 
