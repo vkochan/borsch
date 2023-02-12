@@ -520,6 +520,21 @@
    )
 )
 
+(define dirb-toggle-executable
+   (lambda ()
+      (let* (
+             [path (dirb-entry-path)]
+             [mode (get-mode path)]
+             [exec? (fxbit-field mode 6 7)]
+            )
+         (chmod path
+                (fxcopy-bit mode 6
+                            (fxbit-field (fxnot exec?) 0 1)))
+         (dirb-reload)
+      )
+   )
+)
+
 (define dirb-mode-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" dirb-open-entry)
@@ -547,6 +562,7 @@
       (bind-key map "o" dirb-open-entry-externally)
       (bind-key map "f f" dirb-find-file)
       (bind-key map "f d" dirb-find-dir)
+      (bind-key map "*" dirb-toggle-executable)
       map
    )
 )
