@@ -113,7 +113,6 @@ static bool start_in_graphic = false;
 
 /* commands for use by keybindings */
 static void quit(const char *args[]);
-static void redraw(const char *args[]);
 static void setlayout(const char *args[]);
 static void togglemouse(const char *args[]);
 static void doeval(const char *args[]);
@@ -264,6 +263,8 @@ static void
 arrange(void) {
 	unsigned int n = 0;
 	Window *c;
+
+	update_screen_size();
 
 	for_each_window(c)
 		c->order = ++n;
@@ -509,22 +510,6 @@ static void
 quit(const char *args[]) {
 	cleanup();
 	exit(EXIT_SUCCESS);
-}
-
-static void
-redraw(const char *args[]) {
-	Window *c;
-
-	for_each_window(c) {
-		Process *proc = buffer_proc_get(c->buf);
-
-		if (proc)
-			vt_dirty(process_term_get(proc));
-		ui_window_redraw(c->win);
-	}
-	ui_redraw(ui);
-	update_screen_size();
-	arrange();
 }
 
 static void
@@ -906,7 +891,7 @@ void process_ui(void)
 	while (running) {
 		if (ui_resize(ui)) {
 			update_screen_size();
-			redraw(NULL);
+			arrange();
 			continue;
 		}
 
@@ -1443,7 +1428,7 @@ void win_size_set(int wid, int width, int height)
 			window_draw_flags(w, WIN_DRAW_F_FORCE);
 			layout_changed(true);
 		} else {
-			redraw(NULL);
+			arrange();
 		}
 	}
 }
