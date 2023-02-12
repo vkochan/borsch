@@ -1294,6 +1294,14 @@ int scheme_layout_sticky_set(int tag, bool is_sticky)
 	return layout_sticky_set(tag, is_sticky);
 }
 
+static int bind_key(char *key, void (*act)(void), int kid, char *tname)
+{
+	KeyMap *kmap = keymap_by_id(kid);
+	if (!kmap)
+		return -1;
+	return keymap_bind(kmap, key, act, tname);
+}
+
 ptr scheme_bind_key(char *key, bind_key_cb_t cb, int mid, char *tname)
 {
 	int ret = bind_key(key, cb, mid, tname);
@@ -1302,6 +1310,15 @@ ptr scheme_bind_key(char *key, bind_key_cb_t cb, int mid, char *tname)
 		return Sinteger(ret);
 
 	return Sfalse;
+}
+
+static int unbind_key(char *key, int kid)
+{
+	KeyMap *kmap = keymap_by_id(kid);
+	if (!kmap)
+		return -1;
+
+	return keymap_unbind(kmap, key);
 }
 
 ptr scheme_unbind_key(char *key, int mid)

@@ -162,9 +162,6 @@ int layout_fmaster_set(int tag, float f);
 bool layout_sticky_get(int tag);
 int layout_sticky_set(int tag, bool is_sticky);
 
-int bind_key(char *map, bind_key_cb_t cb, int kid, char *tmap);
-int unbind_key(char *map, int kid);
-
 int fifo_create(void);
 
 int evt_fd_handler_add(int fd, void (*fn)(int fd, void *), void *);

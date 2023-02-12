@@ -2571,23 +2571,6 @@ int layout_sticky_set(int tab, bool is_sticky)
 	return 0;
 }
 
-int bind_key(char *key, void (*act)(void), int kid, char *tname)
-{
-	KeyMap *kmap = keymap_by_id(kid);
-	if (!kmap)
-		return -1;
-	return keymap_bind(kmap, key, act, tname);
-}
-
-int unbind_key(char *key, int kid)
-{
-	KeyMap *kmap = keymap_by_id(kid);
-	if (!kmap)
-		return -1;
-
-	return keymap_unbind(kmap, key);
-}
-
 int fifo_create(void)
 {
 	char *cmd, *ret, *sta;
