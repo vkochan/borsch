@@ -126,6 +126,12 @@
    )
 )
 
+(define window-last
+   (lambda ()
+      (first (list-ref (window-list) (- (length (window-list)) 1)))
+   )
+)
+
 (define window-for-each
    (lambda (fn)
       (let ([ls (window-list)])
