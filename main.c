@@ -48,9 +48,6 @@
 #include "syntax.h"
 #include "text/text-motions.h"
 #include "text/text-objects.h"
-#if defined __CYGWIN__ || defined __sun
-# include <termios.h>
-#endif
 #include "xstr.h"
 #include "api.h"
 #include "vt.h"
