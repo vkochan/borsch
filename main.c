@@ -1349,19 +1349,19 @@ int win_state_set(int wid, win_state_t st)
 
 	switch (st) {
 	case WIN_STATE_MAXIMIZED:
-		win_current_set(wid);
+		window_focus(c);
 		setlayout(maxi);
 		break;
 
 	case WIN_STATE_MASTER:
-		win_current_set(wid);
+		window_focus(c);
 		window_remove(c);
 		window_insert_first(c);
 		window_focus(c);
 		layout_changed(true);
 		/* switch to the original window */
 		if (orig)
-			win_current_set(orig->id);
+			window_focus(orig);
 		break;
 
         default: return -1;
