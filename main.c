@@ -2513,8 +2513,12 @@ int term_filter_enable(int bid, bool enable)
 
 int layout_sticky_set(int tab, bool is_sticky)
 {
+	Window *m;
+
 	tab_get(tab)->f->msticky = is_sticky;
-	draw_all();
+	
+	for_each_window_master(m)
+		buffer_dirty_set(m->buf, true);
 	return 0;
 }
 
