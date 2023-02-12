@@ -211,8 +211,10 @@ update_screen_size(void) {
 	layout_current_resize(waw, wah);
 	layout_current_move(wax, way);
 
-	if (minibuf)
+	if (minibuf) {
+		ui_window_width_set(minibuf->win, layout_current_width());
 		ui_window_move(minibuf->win, 0, ui_height_get(ui)-dec_h);
+	}
 }
 
 static void
