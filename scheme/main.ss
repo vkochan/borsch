@@ -17,7 +17,6 @@
 (include "text.ss")
 (include "command.ss")
 (include "complete.ss")
-(include "prompt.ss")
 (include "copybuf.ss")
 (include "topbar.ss")
 (include "process.ss")
