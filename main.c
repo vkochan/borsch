@@ -2573,34 +2573,19 @@ int layout_sticky_set(int tab, bool is_sticky)
 
 int bind_key(char *key, void (*act)(void), int kid, char *tname)
 {
-	KeyMap *kmap = global_kmap;
-
-	if (kid) {
-		kmap = keymap_by_id(kid);
-		if (!kmap)
-			return -1;
-	}
-
-	if (kmap)
-		return keymap_bind(kmap, key, act, tname);
-
-	return -1;
+	KeyMap *kmap = keymap_by_id(kid);
+	if (!kmap)
+		return -1;
+	return keymap_bind(kmap, key, act, tname);
 }
 
 int unbind_key(char *key, int kid)
 {
-	KeyMap *kmap = global_kmap;
+	KeyMap *kmap = keymap_by_id(kid);
+	if (!kmap)
+		return -1;
 
-	if (kid) {
-		kmap = keymap_by_id(kid);
-		if (!kmap)
-			return -1;
-	}
-
-	if (kmap)
-		return keymap_unbind(kmap, key);
-
-	return -1;
+	return keymap_unbind(kmap, key);
 }
 
 int fifo_create(void)

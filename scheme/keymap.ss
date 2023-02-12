@@ -30,7 +30,7 @@
 (define bind-key
    (case-lambda
       [(k p)
-       (bind-key 0 k p)]
+       (bind-key global-keymap k p)]
 
       [(m k t)
        (let ([map (%keymap-get m)])
