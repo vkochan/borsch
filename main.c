@@ -1528,63 +1528,6 @@ void win_buf_switch(int wid, int bid)
 	window_switch_buf(w, b);
 }
 
-int kmap_add(int pid)
-{
-	KeyMap *pmap = keymap_by_id(pid);
-	KeyMap *kmap;
-
-	kmap = keymap_new(pmap);
-	if (kmap) {
-		keymap_ref_get(kmap);
-		return keymap_id_get(kmap);
-	}
-
-	return -1;
-}
-
-int kmap_parent_set(int kid, char *name, int pid)
-{
-	KeyMap *kmap = keymap_by_id(kid);
-
-	if (kmap) {
-		keymap_parent_name_set(kmap, name);
-
-		if (pid > 0) {
-			KeyMap *parent = keymap_by_id(pid);
-			if (parent) {
-				keymap_parent_set(kmap, parent);
-			}
-		}
-		return 0;
-	}
-
-	return -1;
-}
-
-int kmap_parent_get(int kid)
-{
-	KeyMap *kmap = keymap_by_id(kid);
-
-	if (kmap) {
-		KeyMap *parent = keymap_parent_get(kmap);
-
-		if (parent)
-			return keymap_id_get(parent);
-	}
-
-	return -1;
-}
-
-void kmap_del(int kid)
-{
-	KeyMap *kmap = keymap_by_id(kid);
-
-	if (kmap) {
-		keymap_ref_put(kmap);
-		keymap_free(kmap);
-	}
-}
-
 int buf_new(char *name)
 {
 	Buffer *buf = __buf_new(name, global_kmap);

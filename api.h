@@ -71,11 +71,6 @@ int style_update(int id, Style *update);
 Style *style_get_by_id(int id);
 Style *style_get_by_name(const char *name);
 
-int kmap_add(int pid);
-int kmap_parent_set(int kid, char *name, int pid);
-int kmap_parent_get(int kid);
-void kmap_del(int kid);
-
 int buf_new(char *name);
 bool buf_is_valid(int bid);
 void buf_del(int bid);
