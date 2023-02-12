@@ -20,7 +20,6 @@
 (define __cs_win_state_set(foreign-procedure __collect_safe "cs_win_state_set" (int int) int))
 (define __cs_win_state_toggle(foreign-procedure __collect_safe "cs_win_state_toggle" (int int) int))
 (define __cs_win_buf_get (foreign-procedure __collect_safe "cs_win_buf_get" (int) scheme-object))
-(define __cs_win_popup (foreign-procedure __collect_safe "cs_win_popup" (int boolean) scheme-object))
 (define __cs_win_width_get (foreign-procedure __collect_safe "cs_win_width_get" (int) scheme-object))
 (define __cs_win_height_get (foreign-procedure __collect_safe "cs_win_height_get" (int) scheme-object))
 (define __cs_win_viewport_width_get (foreign-procedure __collect_safe "cs_win_viewport_width_get" (int) scheme-object))
@@ -417,16 +416,6 @@
 
       [(wid)
        (call-foreign (__cs_win_buf_get wid))]
-   )
-)
-
-(define window-popup
-   (case-lambda
-      [(e)
-       (call-foreign (__cs_win_popup (current-window) e))]
-
-      [(wid e)
-       (call-foreign (__cs_win_popup wid e))]
    )
 )
 

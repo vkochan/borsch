@@ -32,7 +32,6 @@
             (buffer-set-name s)
             (buffer-set-keymap 'prompt-read-map)
             (enable-insert #t)
-            (window-popup #t)
             (window-set-height 3)
          )
       )

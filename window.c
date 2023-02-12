@@ -229,9 +229,6 @@ layout_t layout_current_get(int tab)
 
 int layout_current_set(int tab, layout_t lay)
 {
-	if (window_popup_get())
-		return -1;
-
 	frame_current()->layout_prev = frame_current()->layout;
 	frame_current()->layout = layout_get(lay);
 	layout_changed(true);
@@ -291,7 +288,7 @@ int layout_nmaster_get(int tab)
 
 int layout_nmaster_set(int tab, int n)
 {
-	if (window_popup_get() || layout_is_arrange(LAYOUT_MAXIMIZED) || layout_is_arrange(LAYOUT_GRID))
+	if (layout_is_arrange(LAYOUT_MAXIMIZED) || layout_is_arrange(LAYOUT_GRID))
 		return -1;
 
 	tab_get(tab)->f->nmaster = n;
@@ -307,7 +304,7 @@ float layout_fmaster_get(int tab)
 
 int layout_fmaster_set(int tab, float mfact)
 {
-	if (window_popup_get() || layout_is_arrange(LAYOUT_MAXIMIZED) || layout_is_arrange(LAYOUT_GRID))
+	if (layout_is_arrange(LAYOUT_MAXIMIZED) || layout_is_arrange(LAYOUT_GRID))
 		return -1;
 
 	tab_get(tab)->f->mfact = mfact;
@@ -422,16 +419,6 @@ void window_init(Ui *_ui)
 void window_cleanup(void)
 {
 	tabs_cleanup();
-}
-
-Window *window_popup_get(void)
-{
-	return frame_current()->popup;
-}
-
-void *window_popup_set(Window *p)
-{
-	frame_current()->popup = p;
 }
 
 Window *window_current(void)
@@ -856,7 +843,7 @@ void window_draw_flags(Window *c, int flags)
 	bool fire_event = !(flags & WIN_DRAW_F_NO_EVENT);
 	bool force = flags & WIN_DRAW_F_FORCE;
 
-	if ((force || buffer_is_dirty(c->buf) && window_is_visible(c)) || c == window_popup_get()) {
+	if ((force || buffer_is_dirty(c->buf) && window_is_visible(c))) {
 		/* we assume that it will be set on EVT_WIN_DRAW */
 		/* ui_window_sidebar_width_set(c->win, 0); */
 		ui_window_clear(c->win);
@@ -953,12 +940,8 @@ void window_delete(Window *w)
 {
 	Buffer *buf = w->buf;
 
-	if (w != window_popup_get()) {
-		window_remove(w);
-	} else {
-		window_popup_set(NULL);
-	}
 	window_stack_remove(w);
+	window_remove(w);
 
 	if (window_current() == w) {
 		Window *last = window_stack();

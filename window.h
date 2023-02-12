@@ -50,7 +50,6 @@ typedef struct {
 	char *cwd;
 	char *name;
 	bool msticky;
-	Window *popup;
 	Window *sel;
 	Window *windows;
 	Window *stack;
@@ -122,8 +121,6 @@ Window *window_current(void);
 Window *window_get_by_coord(unsigned int x, unsigned int y);
 Window *window_last_selected(void);
 Window *windows_list_by_fid(int fid);
-Window *window_popup_get(void);
-void *window_popup_set(Window *p);
 Window *window_first(void);
 Window *window_upper(Window *w);
 Window *window_lower(Window *w);

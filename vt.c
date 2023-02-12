@@ -1501,11 +1501,6 @@ static void ui_window_resize_cb(UiWin *win)
 	int cols = ui_window_width_get(win);
 	Window *w = vt_data_get(t);
 
-	if (w == window_popup_get()) {
-		cols-=-2;
-		rows--;
-	}
-
 	vt_resize(t, rows - ui_window_has_title(win), cols);
 }
 

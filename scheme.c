@@ -245,11 +245,6 @@ void scheme_win_mark_highlight(int wid, bool enable)
 	win_mark_highlight(wid, enable);
 }
 
-void scheme_win_popup(int wid, bool enable)
-{
-	win_popup(wid, enable);
-}
-
 void scheme_win_size_set(int wid, int width, int height)
 {
 	win_size_set(wid, width, height);
@@ -1489,7 +1484,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_state_toggle", scheme_win_state_toggle);
 	Sregister_symbol("cs_win_buf_get", scheme_win_buf_get);
 	Sregister_symbol("cs_win_mark_highlight", scheme_win_mark_highlight);
-	Sregister_symbol("cs_win_popup", scheme_win_popup);
 	Sregister_symbol("cs_win_size_set", scheme_win_size_set);
 	Sregister_symbol("cs_win_width_get", scheme_win_width_get);
 	Sregister_symbol("cs_win_height_get", scheme_win_height_get);

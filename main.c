@@ -427,10 +427,6 @@ cleanup(void) {
 	scheme_uninit();
 	while (window_first())
 		destroy(window_first());
-	for(i=0; i <= MAXTABS; i++) {
-		if (tab_get(i)->f->popup)
-			destroy(tab_get(i)->f->popup);
-	}
 
 	b = buffer_first_get();
 	while (b) {
@@ -975,9 +971,7 @@ static Window *window_get_by_id(int id)
 			return c;
 	}
 
-	if (window_popup_get() && window_popup_get()->id == id)
-		return window_popup_get();
-	else if (minibuf && minibuf->id == id)
+	if (minibuf && minibuf->id == id)
 		return minibuf;
 	else if (topbar && topbar->id == id)
 		return topbar;
@@ -1134,9 +1128,6 @@ int win_current_set(int wid)
 	Window *w;
 
 	w = window_get_by_id(wid);
-	if (window_popup_get())
-		return 0;
-
 	if (w)
 		window_focus(w);
 	return 0;
@@ -1350,9 +1341,6 @@ int win_state_set(int wid, win_state_t st)
 	const char *maxi[] = { "[ ]" };
 	Window *c, *orig;
 
-	if (window_popup_get())
-		return -1;
-
 	c = window_get_by_id(wid);
 	if (!c)
 		return -1;
@@ -1427,42 +1415,6 @@ void win_mark_highlight(int wid, bool enable)
 		if (enable != c->highlight_mark)
 			buffer_dirty_set(c->buf, true);
 		c->highlight_mark = enable;
-	}
-}
-
-void win_popup(int wid, bool enable)
-{
-	Window *w = window_get_by_id(wid);
-
-	if (w) {
-		/* TODO: add support for term window */
-		if (buffer_proc_get(w->buf))
-			return;
-
-		if (enable) {
-			int waw = layout_current_width();
-			int wah = layout_current_height();
-			int pw = waw/3;
-			int ph = wah/3;
-
-			window_remove(w);
-
-			if (window_popup_get())
-				window_insert(window_popup_get());
-
-			ui_window_border_enable(w->win, true);
-			window_move_resize(w, waw-(waw-pw), wah-(wah-ph), pw, ph);
-			window_popup_set(w);
-			arrange();
-			window_focus(w);
-		} else {
-			window_popup_set(NULL);
-			ui_window_border_enable(w->win, false);
-			window_insert(w);
-			arrange();
-		}
-
-		ui_window_refresh(w->win);
 	}
 }
 
@@ -1682,8 +1634,6 @@ static void buf_list_update(void)
 	}
 	if (topbar)
 		window_update(topbar);
-	if (window_popup_get())
-		window_update(window_popup_get());
 	if (minibuf)
 		window_update(minibuf);
 }
@@ -2563,9 +2513,6 @@ int term_filter_enable(int bid, bool enable)
 
 int layout_sticky_set(int tab, bool is_sticky)
 {
-	if (window_popup_get())
-		return -1;
-
 	tab_get(tab)->f->msticky = is_sticky;
 	draw_all();
 	return 0;
