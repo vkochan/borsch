@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 
 #include "text/text.h"
+#include "process.h"
 #include "buffer.h"
 #include "window.h"
 #include "keymap.h"
@@ -1390,7 +1391,11 @@ ptr scheme_process_create(const char *prog, const char *cwd, bool redir_in, bool
 
 void scheme_process_delete(int pid)
 {
-	proc_del(pid);
+	Process *proc = process_by_pid(pid);
+
+	if (proc) {
+		process_destroy(proc);
+	}
 }
 
 void scheme_process_kill(int pid)

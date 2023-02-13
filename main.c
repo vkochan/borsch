@@ -2589,15 +2589,6 @@ int proc_status_get(pid_t pid)
 	return -1;
 }
 
-void proc_del(pid_t pid)
-{
-	Process *proc = process_by_pid(pid);
-
-	if (proc) {
-		process_destroy(proc);
-	}
-}
-
 void do_quit(void)
 {
 	quit(NULL);
