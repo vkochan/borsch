@@ -1369,6 +1369,7 @@ ptr scheme_process_create(const char *prog, const char *cwd, bool redir_in, bool
 {
 	int *in_ptr = NULL, *out_ptr = NULL, *err_ptr = NULL;
 	int in = -1, out = -1, err = -1;
+	Process *proc;
 	pid_t pid;
 	ptr ret;
 	
@@ -1379,14 +1380,14 @@ ptr scheme_process_create(const char *prog, const char *cwd, bool redir_in, bool
 	if (redir_err)
 		err_ptr = &err;
 
-	pid = proc_create(prog, cwd, in_ptr, out_ptr, err_ptr, scheme_list_to_env(env, NULL, 0), pty, async);
-	if (pid == -1)
+	proc = process_create(prog, cwd, in_ptr, out_ptr, err_ptr, scheme_list_to_env(env, NULL, 0), pty, async);
+	if (!proc)
 		return Sfalse;
 
 	return Scons(Sinteger(in),
 			Scons(Sinteger(out),
 				Scons(Sinteger(err),
-					Scons(Sinteger(pid), Snil))));
+					Scons(Sinteger(process_pid_get(proc)), Snil))));
 }
 
 void scheme_process_delete(int pid)

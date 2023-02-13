@@ -2545,17 +2545,6 @@ void evt_fd_handler_del(int fd)
 	event_fd_handler_unregister(fd);
 }
 
-pid_t proc_create(const char *prog, const char *cwd, int *in, int *out, int *err, const char **env, bool pty, bool async)
-{
-	Process *proc;
-
-	proc = process_create(prog, cwd, in, out, err, env, pty, async);
-	if (!proc)
-		return -1;	
-
-	return process_pid_get(proc);
-}
-
 void do_quit(void)
 {
 	quit(NULL);

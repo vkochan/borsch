@@ -166,8 +166,6 @@ int fifo_create(void);
 int evt_fd_handler_add(int fd, void (*fn)(int fd, void *), void *);
 void evt_fd_handler_del(int fd);
 
-pid_t proc_create(const char *prog, const char *cwd, int *in, int *out, int *err, const char **env, bool pty, bool async);
-
 void do_quit(void);
 
 int scheme_init(const char *);
