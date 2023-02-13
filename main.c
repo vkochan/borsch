@@ -944,22 +944,6 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 
-static Window *window_get_by_id(int id)
-{
-	Window *c;
-	for_each_window(c) {
-		if (c->id == id)
-			return c;
-	}
-
-	if (minibuf && minibuf->id == id)
-		return minibuf;
-	else if (topbar && topbar->id == id)
-		return topbar;
-
-	return NULL;
-}
-
 static void window_switch_buf(Window *w, Buffer *b)
 {
 	if (w && b && w->buf != b) {

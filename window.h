@@ -118,6 +118,7 @@ void window_init(Ui *ui);
 void window_cleanup(void);
 
 Window *window_current(void);
+Window *window_get_by_id(int id);
 Window *window_get_by_coord(unsigned int x, unsigned int y);
 Window *window_last_selected(void);
 Window *windows_list_by_fid(int fid);

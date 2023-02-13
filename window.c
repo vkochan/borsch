@@ -14,6 +14,9 @@
 #include "ui/ui.h"
 #include "xstr.h"
 
+#define for_each_widget(__w) \
+	for (__w = widgets; __w; __w = __w->next)
+
 static unsigned int waw, wah, wax, way;
 static bool layout_needs_arrange = false;
 static unsigned int curr_tab;
@@ -468,6 +471,22 @@ Window *window_get_by_coord(unsigned int x, unsigned int y)
 			return c;
 		}
 	}
+	return NULL;
+}
+
+Window *window_get_by_id(int id)
+{
+	Window *c;
+
+	for_each_window(c) {
+		if (c->id == id)
+			return c;
+	}
+	for_each_widget(c) {
+		if (c->id == id)
+			return c;
+	}
+
 	return NULL;
 }
 
