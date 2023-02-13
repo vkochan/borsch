@@ -1435,7 +1435,13 @@ ptr scheme_process_is_async(int pid)
 
 ptr scheme_process_status_get(int pid)
 {
-	return Sinteger(proc_status_get(pid));
+	Process *proc = process_by_pid(pid);
+
+	if (proc) {
+		return Sinteger(process_status_get(proc));
+	}
+
+	return Sinteger(-1);
 }
 
 extern char **environ;
