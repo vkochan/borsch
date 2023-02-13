@@ -367,7 +367,6 @@ static void setup_ui(void)
 	init_default_keymap();
 	mouse_setup();
 	window_init(ui);
-	update_screen_size();
 	arrange();
 
 	memset(&sa, 0, sizeof sa);
@@ -888,7 +887,6 @@ void process_ui(void)
 
 	while (running) {
 		if (ui_resize(ui)) {
-			update_screen_size();
 			arrange();
 			continue;
 		}
