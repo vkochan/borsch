@@ -18,6 +18,7 @@ static unsigned int waw, wah, wax, way;
 static bool layout_needs_arrange = false;
 static unsigned int curr_tab;
 static Tab tabs[MAXTABS + 1];
+static Window *widgets;
 static char *title;
 static int win_id;
 static Ui *ui;
@@ -408,6 +409,29 @@ static void tabs_cleanup(void)
 		free(tab_get(i)->f->cwd);
 		free(tab_get(i)->f);
 	}
+}
+
+static void widget_insert(Window *w)
+{
+	if (widgets)
+		widgets->prev = w;
+
+	w->next = widgets;
+	w->prev = NULL;
+
+	widgets = w;
+}
+
+static void widget_remove(Window *w)
+{
+	if (w->prev)
+		w->prev->next = w->next;
+	if (w->next) {
+		w->next->prev = w->prev;
+	}
+	if (w == widgets)
+		widgets = w->next;
+	w->next = w->prev = NULL;
 }
 
 void window_init(Ui *_ui)
@@ -941,7 +965,11 @@ void window_delete(Window *w)
 	Buffer *buf = w->buf;
 
 	window_stack_remove(w);
-	window_remove(w);
+
+	if (w->is_widget)
+		widget_remove(w);
+	else
+		window_remove(w);
 
 	if (window_current() == w) {
 		Window *last = window_stack();
@@ -1103,8 +1131,14 @@ Window *__window_create(Buffer *buf, bool is_widget, int x, int y, int width, in
 	buffer_ref_get(w->buf);
 	window_buffer_switch(w, buf);
 
-	if (!is_widget)
+	if (is_widget) {
+		widget_insert(w);
+	} else {
 		ui_window_has_title_set(w->win, true);
+		window_insert(w);
+		window_focus(w);
+	}
+
 	ui_window_resize(w->win, width, height);
 	ui_window_move(w->win, x, y);
 	layout_changed(true);
@@ -1113,16 +1147,8 @@ Window *__window_create(Buffer *buf, bool is_widget, int x, int y, int width, in
 
 Window *window_create(Buffer *buf)
 {
-	Window *w = __window_create(buf, false, layout_current_x(), layout_current_y(),
+	return __window_create(buf, false, layout_current_x(), layout_current_y(),
 				    layout_current_width(), layout_current_height());
-
-	if (!w)
-		return NULL;
-
-	window_insert(w);
-	window_focus(w);
-
-	return w;
 }
 
 Window *widget_create(Buffer *buf, int x, int y, int width, int height)
