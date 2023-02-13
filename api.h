@@ -163,9 +163,6 @@ int layout_sticky_set(int tag, bool is_sticky);
 
 int fifo_create(void);
 
-int evt_fd_handler_add(int fd, void (*fn)(int fd, void *), void *);
-void evt_fd_handler_del(int fd);
-
 void do_quit(void);
 
 int scheme_init(const char *);

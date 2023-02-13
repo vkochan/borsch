@@ -1328,7 +1328,7 @@ ptr scheme_unbind_key(char *key, int mid)
 
 ptr scheme_evt_fd_handler_add(int fd, void (*fn)(int fd, void *))
 {
-	int ret = evt_fd_handler_add(fd, fn, NULL);
+	int ret = event_fd_handler_register(fd, fn, NULL);
 
 	if (ret == 0)
 		return Sinteger(ret);
@@ -1337,7 +1337,7 @@ ptr scheme_evt_fd_handler_add(int fd, void (*fn)(int fd, void *))
 
 void scheme_evt_fd_handler_del(int fd)
 {
-	evt_fd_handler_del(fd);
+	event_fd_handler_unregister(fd);
 }
 
 ptr scheme_timer_add(void (*cb)(void *ctx))

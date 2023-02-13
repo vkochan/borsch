@@ -2535,16 +2535,6 @@ int fifo_create(void)
 	return 0;
 }
 
-int evt_fd_handler_add(int fd, void (*fn)(int fd, void *), void *arg)
-{
-	return event_fd_handler_register(fd, fn, arg);
-}
-
-void evt_fd_handler_del(int fd)
-{
-	event_fd_handler_unregister(fd);
-}
-
 void do_quit(void)
 {
 	quit(NULL);
