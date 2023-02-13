@@ -2598,15 +2598,6 @@ void proc_del(pid_t pid)
 	}
 }
 
-void proc_kill(pid_t pid)
-{
-	Process *proc = process_by_pid(pid);
-
-	if (proc) {
-		process_kill_async(proc);
-	}
-}
-
 void do_quit(void)
 {
 	quit(NULL);

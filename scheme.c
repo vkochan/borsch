@@ -1395,7 +1395,11 @@ void scheme_process_delete(int pid)
 
 void scheme_process_kill(int pid)
 {
-	proc_kill(pid);
+	Process *proc = process_by_pid(pid);
+
+	if (proc) {
+		process_kill_async(proc);
+	}
 }
 
 ptr scheme_process_wait(int pid)
