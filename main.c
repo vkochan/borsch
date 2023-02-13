@@ -1418,14 +1418,7 @@ void win_size_set(int wid, int width, int height)
 		if (!is_changed)
 			return;
 
-		if (window_is_widget(w)) {
-			update_screen_size();
-			buffer_dirty_set(w->buf, true);
-			window_draw_flags(w, WIN_DRAW_F_FORCE);
-			layout_changed(true);
-		} else {
-			arrange();
-		}
+		layout_changed(true);
 	}
 }
 
