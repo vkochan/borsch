@@ -1425,7 +1425,15 @@ ptr scheme_process_wait(int pid)
 
 ptr scheme_process_is_alive(int pid)
 {
-	return Sboolean(proc_is_alive(pid));
+	int status;
+	pid_t ret;
+
+	ret = waitpid(pid, &status, WNOHANG);
+	if (ret != pid) {
+		return Sboolean(false);
+	} else {
+		return Sboolean(true);
+	}
 }
 
 ptr scheme_process_is_async(int pid)

@@ -2556,19 +2556,6 @@ pid_t proc_create(const char *prog, const char *cwd, int *in, int *out, int *err
 	return process_pid_get(proc);
 }
 
-bool proc_is_alive(pid_t pid)
-{
-	int status;
-	pid_t ret;
-
-	ret = waitpid(pid, &status, WNOHANG);
-	if (ret != pid) {
-		return false;
-	} else {
-		return true;
-	}
-}
-
 void do_quit(void)
 {
 	quit(NULL);

@@ -167,7 +167,6 @@ int evt_fd_handler_add(int fd, void (*fn)(int fd, void *), void *);
 void evt_fd_handler_del(int fd);
 
 pid_t proc_create(const char *prog, const char *cwd, int *in, int *out, int *err, const char **env, bool pty, bool async);
-bool proc_is_alive(pid_t pid);
 
 void do_quit(void);
 
