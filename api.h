@@ -170,7 +170,6 @@ pid_t proc_create(const char *prog, const char *cwd, int *in, int *out, int *err
 bool proc_is_alive(pid_t pid);
 bool proc_is_async(pid_t pid);
 int proc_status_get(pid_t pid);
-int proc_wait(pid_t pid, int *status);
 void proc_del(pid_t pid);
 void proc_kill(pid_t pid);
 

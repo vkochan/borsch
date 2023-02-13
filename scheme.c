@@ -1400,12 +1400,17 @@ void scheme_process_kill(int pid)
 
 ptr scheme_process_wait(int pid)
 {
+	Process *proc = process_by_pid(pid);
 	int status = -1;
 	int err;
 
-	err = proc_wait(pid, &status);
+	if (!proc)
+		return Sfalse;
+
+	err = process_wait(proc, &status);
 	if (err)
 		return Sfalse;
+
 	return Sinteger(status);
 }
 

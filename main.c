@@ -2607,17 +2607,6 @@ void proc_kill(pid_t pid)
 	}
 }
 
-int proc_wait(pid_t pid, int *status)
-{
-	Process *proc = process_by_pid(pid);
-
-	if (!proc) {
-		return -1;
-	}
-
-	return process_wait(proc, status);
-}
-
 void do_quit(void)
 {
 	quit(NULL);
