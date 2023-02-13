@@ -1430,7 +1430,12 @@ ptr scheme_process_is_alive(int pid)
 
 ptr scheme_process_is_async(int pid)
 {
-	return Sboolean(proc_is_async(pid));
+	Process *proc = process_by_pid(pid);
+
+	if (proc) {
+		return Sboolean(process_is_async(proc));
+	}
+	return Sboolean(false);
 }
 
 ptr scheme_process_status_get(int pid)

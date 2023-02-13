@@ -2569,16 +2569,6 @@ bool proc_is_alive(pid_t pid)
 	}
 }
 
-bool proc_is_async(pid_t pid)
-{
-	Process *proc = process_by_pid(pid);
-
-	if (proc) {
-		return process_is_async(proc);
-	}
-	return false;
-}
-
 void do_quit(void)
 {
 	quit(NULL);
