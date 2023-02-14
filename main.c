@@ -152,8 +152,6 @@ static Cmd commands[] = {
 	{ "eval", { doeval, { NULL } } },
 };
 
-static void drawbar(void);
-
 static void
 term_title_handler(Vt *term, const char *title) {
 	/* Window *c = (Window *)vt_data_get(term); */
@@ -170,7 +168,6 @@ term_urgent_handler(Vt *term) {
 	c->urgent = true;
 	printf("\a");
 	fflush(stdout);
-	drawbar();
 	if (!layout_is_arrange(LAYOUT_MAXIMIZED) && window_current() != c)
 		window_draw_title(c);
 }
@@ -214,63 +211,6 @@ update_screen_size(void) {
 		ui_window_width_set(minibuf->win, layout_current_width());
 		ui_window_move(minibuf->win, 0, ui_height_get(ui)-dec_h);
 	}
-}
-
-static void
-drawbar(void) {
-	if (topbar)
-		window_draw_flags(topbar, WIN_DRAW_F_FORCE);
-}
-
-static void
-draw_all(void) {
-	if (topbar) {
-		window_draw_flags(topbar, WIN_DRAW_F_FORCE);
-	}
-	if (minibuf) {
-		window_draw_flags(minibuf, WIN_DRAW_F_FORCE);
-	}
-
-	if (!window_first()) {
-		ui_clear(ui);
-		drawbar();
-		ui_update(ui);
-		return;
-	}
-
-	if (!layout_is_arrange(LAYOUT_MAXIMIZED)) {
-		Window *c;
-		for_each_window(c) {
-			if (c != window_current()) {
-				window_draw_flags(c, WIN_DRAW_F_FORCE);
-			}
-		}
-	}
-
-	/* as a last step the selected window is redrawn,
-	 * this has the effect that the cursor position is
-	 * accurate
-	 */
-	if (window_current()) {
-		window_draw_flags(window_current(), WIN_DRAW_F_FORCE);
-	}
-}
-
-static void
-arrange(void) {
-	unsigned int n = 0;
-	Window *c;
-
-	update_screen_size();
-
-	for_each_window(c)
-		c->order = ++n;
-
-	ui_clear(ui);
-	layout_current_arrange();
-	ui_refresh(ui);
-	drawbar();
-	draw_all();
 }
 
 static KeyMap *buf_keymap_get(Buffer *buf);
@@ -351,6 +291,8 @@ static int handle_ui_event(Ui *ui, enum UiEventType type, void *evt, void *arg)
 	return 0;
 }
 
+static void draw_all(bool redraw);
+
 static void setup_ui(void)
 {
 	struct sigaction sa;
@@ -366,7 +308,8 @@ static void setup_ui(void)
 	init_default_keymap();
 	mouse_setup();
 	window_init(ui);
-	arrange();
+	
+	draw_all(true);
 
 	memset(&sa, 0, sizeof sa);
 	sa.sa_flags = 0;
@@ -829,6 +772,55 @@ static void handle_keypress(KeyCode *key)
 	}
 }
 
+static void draw_all(bool redraw)
+{
+	int force = 0;
+	Window *w;
+
+	if (ui_resize(ui) || layout_is_changed() || redraw) {
+		int n = 0;
+
+		force = WIN_DRAW_F_FORCE;
+		layout_changed(false);
+
+		update_screen_size();
+
+		for_each_window(w)
+			w->order = ++n;
+
+		ui_clear(ui);
+		layout_current_arrange();
+		ui_refresh(ui);
+	}
+
+        if (topbar) {
+		window_draw_flags(topbar, force);
+        }
+	if (minibuf) {
+		window_draw_flags(minibuf, force);
+	}
+
+	for_each_window(w) {
+		if (window_is_visible(w)) {
+			if (w != window_current()) {
+				window_draw_flags(w, force);
+			}
+		} else if (!layout_is_arrange(LAYOUT_MAXIMIZED)) {
+			window_draw_title(w);
+			ui_window_refresh(w->win);
+		}
+	}
+
+	if (window_is_visible(window_current())) {
+		if (buffer_proc_get(window_current()->buf)) {
+			Process *proc = buffer_proc_get(window_current()->buf);
+			ui_window_cursor_disable(window_current()->win,
+				!vt_cursor_visible(process_term_get(proc)));
+		}
+		window_draw_flags(window_current(), force);
+	}
+}
+
 void process_ui(void)
 {
 	sigset_t blockset;
@@ -844,49 +836,13 @@ void process_ui(void)
 		event_fd_handler_register(cmdfifo.fd, handle_cmdfifo, NULL);
 
 	while (running) {
-		if (ui_resize(ui)) {
-			arrange();
-			continue;
-		}
-
 		process_destroy_dead();
 
 		/* TODO: what to do with a died buffers ? */
 
 		ui_event_process(ui);
 
-		if (layout_is_changed()) {
-			layout_changed(false);
-			arrange();
-		}
-
-	        if (topbar) {
-			window_draw_flags(topbar, WIN_DRAW_F_FORCE);
-	        }
-		if (minibuf) {
-			window_draw_flags(minibuf, WIN_DRAW_F_FORCE);
-		}
-
-		Window *c;
-		for_each_window(c) {
-			if (window_is_visible(c)) {
-				if (c != window_current()) {
-					window_draw(c);
-				}
-			} else if (!layout_is_arrange(LAYOUT_MAXIMIZED)) {
-				window_draw_title(c);
-				ui_window_refresh(c->win);
-			}
-		}
-
-		if (window_is_visible(window_current())) {
-			if (buffer_proc_get(window_current()->buf)) {
-				Process *proc = buffer_proc_get(window_current()->buf);
-				ui_window_cursor_disable(window_current()->win,
-					!vt_cursor_visible(process_term_get(proc)));
-			}
-			window_draw(window_current());
-		}
+		draw_all(false);
 	}
 }
 
