@@ -19,7 +19,6 @@
 #include <stdint.h>
 #include <wchar.h>
 #include <limits.h>
-#include <libgen.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <sys/time.h>
@@ -450,47 +449,6 @@ cleanup(void) {
 	window_cleanup();
 }
 
-static void
-synctitle(Window *c)
-{
-	size_t len = 256;
-	char buf[128];
-	char path[64];
-	size_t blen;
-	char *eol;
-	pid_t pid;
-	int pty;
-	int ret;
-	int fd;
-
-	pty = vt_pty_get(process_term_get(buffer_proc_get(c->buf)));
-
-	pid = tcgetpgrp(pty);
-	if (pid == -1)
-		return;
-
-	snprintf(path, sizeof(path), "/proc/%d/cmdline", pid);
-
-	fd = open(path, O_RDONLY);
-	if (fd == -1)
-		return;
-
-	blen = MIN(sizeof(buf), len);
-
-	ret = read(fd, buf, blen);
-	if (ret <= 0)
-		goto done;
-
-	buf[ret - 1] = '\0';
-
-	buffer_name_set(c->buf, basename(buf));
-
-	if (!layout_is_arrange(LAYOUT_MAXIMIZED) || window_current() == c)
-		window_draw_title(c);
-done:
-	close(fd);
-}
-
 static void vt_filter(Vt *vt, char *ch, size_t len, void *arg)
 {
 	Buffer *buf = arg;
@@ -912,8 +870,6 @@ void process_ui(void)
 		Window *c;
 		for_each_window(c) {
 			if (window_is_visible(c)) {
-				if (buffer_proc_get(c->buf) && !buffer_name_is_locked(c->buf))
-					synctitle(c);
 				if (c != window_current()) {
 					window_draw(c);
 				}
