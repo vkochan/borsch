@@ -213,8 +213,6 @@ update_screen_size(void) {
 	}
 }
 
-static KeyMap *buf_keymap_get(Buffer *buf);
-
 static void
 sigterm_handler(int sig) {
 	running = false;
