@@ -2285,7 +2285,6 @@ int minibuf_create(void)
 		buffer_del(buf);
 		return -1;
 	}
-	update_screen_size();
 	return minibuf->id;
 }
 
@@ -2298,7 +2297,6 @@ int topbar_create(void)
 		buffer_del(buf);
 		return -1;
 	}
-	update_screen_size();
 	return topbar->id;
 }
 
