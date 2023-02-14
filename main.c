@@ -824,7 +824,6 @@ void process_ui(void)
 	sigset_t blockset;
 
 	buf_list_update();
-	update_screen_size();
 
 	sigemptyset(&blockset);
 	sigaddset(&blockset, SIGWINCH);
