@@ -1171,7 +1171,86 @@ Window *window_create(Buffer *buf)
 				    layout_current_width(), layout_current_height());
 }
 
-Window *widget_create(Buffer *buf, int x, int y, int width, int height)
+Window *widget_create(Buffer *buf, int x, int y, int width, int height, int pos_flags)
 {
-	return __window_create(buf, true, x, y, width, height);
+	Window *w = __window_create(buf, true, x, y, width, height);
+
+	if (!w)
+		return w;
+
+	w->pos_flags = pos_flags;
+	return w;
+}
+
+static void window_update_screen_size(void) {
+	int waw, wah, way = 0, wax = 0;
+	int top_h = 0;
+	int bot_h = 0;
+	Window *w;
+
+	for_each_widget(w) {
+		if (w->pos_flags & WIN_POS_F_TOP)
+			top_h += ui_window_height_get(w->win);
+		else if (w->pos_flags & WIN_POS_F_BOT)
+			bot_h += ui_window_height_get(w->win);
+	}
+
+	wah = ui_height_get(ui)-bot_h;
+	waw = ui_width_get(ui);
+	wah -= top_h;
+	way += top_h;
+
+	layout_current_resize(waw, wah);
+	layout_current_move(wax, way);
+
+	for_each_widget(w) {
+		ui_window_width_set(w->win, layout_current_width());
+		if (w->pos_flags & WIN_POS_F_BOT)
+			ui_window_move(w->win, 0, ui_height_get(ui)-bot_h);
+	}
+}
+
+void window_draw_all(bool redraw)
+{
+	int force = 0;
+	Window *w;
+
+	if (ui_resize(ui) || layout_is_changed() || redraw) {
+		int n = 0;
+
+		force = WIN_DRAW_F_FORCE;
+		layout_changed(false);
+
+		window_update_screen_size();
+
+		for_each_window(w)
+			w->order = ++n;
+
+		ui_clear(ui);
+		layout_current_arrange();
+		ui_refresh(ui);
+	}
+
+	for_each_widget(w) {
+		window_draw_flags(w, force);
+	}
+	for_each_window(w) {
+		if (window_is_visible(w)) {
+			if (w != window_current()) {
+				window_draw_flags(w, force);
+			}
+		} else if (!layout_is_arrange(LAYOUT_MAXIMIZED)) {
+			window_draw_title(w);
+			ui_window_refresh(w->win);
+		}
+	}
+
+	if (window_is_visible(window_current())) {
+		if (buffer_proc_get(window_current()->buf)) {
+			Process *proc = buffer_proc_get(window_current()->buf);
+			ui_window_cursor_disable(window_current()->win,
+				!vt_cursor_visible(process_term_get(proc)));
+		}
+		window_draw_flags(window_current(), force);
+	}
 }

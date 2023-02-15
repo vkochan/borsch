@@ -38,6 +38,7 @@ struct Window {
 	bool highlight_mark;
 	bool pending_draw_evt;
 	bool is_widget;
+	int pos_flags;
 };
 
 #define CWD_MAX		256
@@ -114,6 +115,9 @@ int frame_cwd_set(int tab, char *cwd);
 #define WIN_DRAW_F_FORCE	(1 << 0)
 #define WIN_DRAW_F_NO_EVENT	(1 << 1)
 
+#define WIN_POS_F_TOP		(1 << 0)
+#define WIN_POS_F_BOT		(1 << 1)
+
 void window_init(Ui *ui);
 void window_cleanup(void);
 
@@ -149,6 +153,7 @@ void window_delete(Window *w);
 void window_close(Window *w);
 void window_buffer_switch(Window *w, Buffer *b);
 Window *window_create(Buffer *buf);
-Window *widget_create(Buffer *buf, int x, int y, int width, int height);
+Window *widget_create(Buffer *buf, int x, int y, int width, int height, int pos_flags);
+void window_draw_all(bool redraw);
 
 #endif /* WINDOW_H */

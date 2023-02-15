@@ -189,31 +189,6 @@ error(const char *errstr, ...) {
 }
 
 static void
-update_screen_size(void) {
-	int waw, wah, way = 0, wax = 0;
-	int dec_h = 0;
-	int top_h = 0;
-
-	if (topbar)
-		top_h = ui_window_height_get(topbar->win);
-	if (minibuf)
-		dec_h = ui_window_height_get(minibuf->win);
-
-	wah = ui_height_get(ui)-dec_h;
-	waw = ui_width_get(ui);
-	wah -= top_h;
-	way += top_h;
-
-	layout_current_resize(waw, wah);
-	layout_current_move(wax, way);
-
-	if (minibuf) {
-		ui_window_width_set(minibuf->win, layout_current_width());
-		ui_window_move(minibuf->win, 0, ui_height_get(ui)-dec_h);
-	}
-}
-
-static void
 sigterm_handler(int sig) {
 	running = false;
 }
@@ -289,8 +264,6 @@ static int handle_ui_event(Ui *ui, enum UiEventType type, void *evt, void *arg)
 	return 0;
 }
 
-static void draw_all(bool redraw);
-
 static void setup_ui(void)
 {
 	struct sigaction sa;
@@ -307,7 +280,7 @@ static void setup_ui(void)
 	mouse_setup();
 	window_init(ui);
 	
-	draw_all(true);
+	window_draw_all(true);
 
 	memset(&sa, 0, sizeof sa);
 	sa.sa_flags = 0;
@@ -770,55 +743,6 @@ static void handle_keypress(KeyCode *key)
 	}
 }
 
-static void draw_all(bool redraw)
-{
-	int force = 0;
-	Window *w;
-
-	if (ui_resize(ui) || layout_is_changed() || redraw) {
-		int n = 0;
-
-		force = WIN_DRAW_F_FORCE;
-		layout_changed(false);
-
-		update_screen_size();
-
-		for_each_window(w)
-			w->order = ++n;
-
-		ui_clear(ui);
-		layout_current_arrange();
-		ui_refresh(ui);
-	}
-
-        if (topbar) {
-		window_draw_flags(topbar, force);
-        }
-	if (minibuf) {
-		window_draw_flags(minibuf, force);
-	}
-
-	for_each_window(w) {
-		if (window_is_visible(w)) {
-			if (w != window_current()) {
-				window_draw_flags(w, force);
-			}
-		} else if (!layout_is_arrange(LAYOUT_MAXIMIZED)) {
-			window_draw_title(w);
-			ui_window_refresh(w->win);
-		}
-	}
-
-	if (window_is_visible(window_current())) {
-		if (buffer_proc_get(window_current()->buf)) {
-			Process *proc = buffer_proc_get(window_current()->buf);
-			ui_window_cursor_disable(window_current()->win,
-				!vt_cursor_visible(process_term_get(proc)));
-		}
-		window_draw_flags(window_current(), force);
-	}
-}
-
 void process_ui(void)
 {
 	sigset_t blockset;
@@ -839,7 +763,7 @@ void process_ui(void)
 
 		ui_event_process(ui);
 
-		draw_all(false);
+		window_draw_all(false);
 	}
 }
 
@@ -2280,7 +2204,7 @@ int minibuf_create(void)
 {
 	Buffer *buf = __buf_new("*minibuf*", NULL);
 
-	minibuf = widget_create(buf, 0, ui_height_get(ui)-1, layout_current_width(), 1);
+	minibuf = widget_create(buf, 0, ui_height_get(ui)-1, layout_current_width(), 1, WIN_POS_F_BOT);
 	if (!minibuf) {
 		buffer_del(buf);
 		return -1;
@@ -2292,7 +2216,7 @@ int topbar_create(void)
 {
 	Buffer *buf = __buf_new("*topbar*", NULL);
 
-	topbar = widget_create(buf, 0, 0, layout_current_width(), 1);
+	topbar = widget_create(buf, 0, 0, layout_current_width(), 1, WIN_POS_F_TOP);
 	if (!topbar) {
 		buffer_del(buf);
 		return -1;
