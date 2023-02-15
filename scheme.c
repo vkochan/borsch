@@ -1036,23 +1036,39 @@ ptr scheme_buf_parser_set(int bid, const char *lang)
 	return Strue;
 }
 
-ptr scheme_stx_lang_style_add(const char *lang, int fg, int bg, int attr, const char *style_name, const char *match)
+ptr scheme_stx_lang_style_add(const char *lang, int fg, int bg, int attr, const char *style_name, const char *rule)
 {
-	int ret = stx_lang_style_add(lang, fg, bg, attr, style_name, match);
+	Style *style, *style_bind;
+	int err;
 
-	if (ret == 0)
-		return Strue;
-	return Sfalse;
+	style = style_new();
+	if (!style)
+		return Sfalse;
+
+	style_bind = style_get_by_name(style_name);
+	if (style_bind) {
+		style->id = style_bind->id;
+	} else {
+		style->attr = attr;
+		style->fg = fg;
+		style->bg = bg;
+	}
+
+	err = syntax_lang_rule_add(lang, SYNTAX_RULE_TYPE_STYLE, rule, style);
+	if (err)
+		return Sfalse;
+
+	return Strue;
 }
 
-void scheme_stx_lang_style_del(const char *lang, const char *match)
+void scheme_stx_lang_style_del(const char *lang, const char *rule)
 {
-	stx_lang_style_del(lang, match);
+	syntax_lang_rule_remove(lang, SYNTAX_RULE_TYPE_STYLE, rule);
 }
 
 void scheme_stx_lang_style_clear(const char *lang)
 {
-	stx_lang_style_clear(lang);
+	syntax_lang_rules_clear(lang, SYNTAX_RULE_TYPE_STYLE);
 }
 
 ptr scheme_style_add(const char *name, int fg, int bg, int attr)

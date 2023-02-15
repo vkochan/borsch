@@ -138,10 +138,6 @@ size_t buf_search_regex(int bid, size_t pos, const char *pattern, int dir);
 
 int buf_parser_set(int bid, const char *lang);
 
-int stx_lang_style_add(const char *lang, int fg, int bg, int attr, const char *style_name, const char *rule);
-void stx_lang_style_del(const char *lang, const char *rule);
-void stx_lang_style_clear(const char *lang);
-
 int minibuf_create(void);
 int topbar_create(void);
 

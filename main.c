@@ -2117,41 +2117,6 @@ int buf_parser_set(int bid, const char *lang)
 	return -1;
 }
 
-int stx_lang_style_add(const char *lang, int fg, int bg, int attr, const char *style_name, const char *rule)
-{
-	Style *style, *style_bind;
-	int err;
-
-	style = style_new();
-	if (!style)
-		return -1;
-
-	style_bind = style_get_by_name(style_name);
-	if (style_bind) {
-		style->id = style_bind->id;
-	} else {
-		style->attr = attr;
-		style->fg = fg;
-		style->bg = bg;
-	}
-
-	err = syntax_lang_rule_add(lang, SYNTAX_RULE_TYPE_STYLE, rule, style);
-	if (err)
-		return err;
-
-	return 0;
-}
-
-void stx_lang_style_del(const char *lang, const char *rule)
-{
-	syntax_lang_rule_remove(lang, SYNTAX_RULE_TYPE_STYLE, rule);
-}
-
-void stx_lang_style_clear(const char *lang)
-{
-	syntax_lang_rules_clear(lang, SYNTAX_RULE_TYPE_STYLE);
-}
-
 int minibuf_create(void)
 {
 	Buffer *buf = __buf_new("*minibuf*", NULL);
