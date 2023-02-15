@@ -151,14 +151,6 @@ int term_text_get(int bid, char **buf, size_t *len);
 int term_current_line_get(int bid, char **buf, size_t *len);
 int term_filter_enable(int bid, bool enable);
 
-layout_t layout_current_get(int tag);
-int layout_current_set(int tag, layout_t lay);
-int layout_nmaster_get(int tag);
-int layout_nmaster_set(int tag, int n);
-float layout_fmaster_get(int tag);
-int layout_fmaster_set(int tag, float f);
-bool layout_sticky_get(int tag);
-
 int fifo_create(void);
 
 void do_quit(void);
