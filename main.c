@@ -117,8 +117,6 @@ static void mouse_focus(const char *args[]);
 static void mouse_fullscreen(const char *args[]);
 static void mouse_zoom(const char *args[]);
 
-static void buf_list_update(void);
-
 static KeyMap *global_kmap;
 static KeyMap *curr_kmap;
 
@@ -746,8 +744,6 @@ static void handle_keypress(KeyCode *key)
 void process_ui(void)
 {
 	sigset_t blockset;
-
-	buf_list_update();
 
 	sigemptyset(&blockset);
 	sigaddset(&blockset, SIGWINCH);
@@ -1400,23 +1396,6 @@ int buf_by_name(const char *name)
 		return buffer_id_get(buf);
 
 	return 0;
-}
-
-static void buf_list_update(void)
-{
-	if (topbar)
-		window_update(topbar);
-
-	Window *w;
-	for_each_window(w) {
-		if (window_is_visible(w)) {
-			window_update(w);
-		}
-	}
-	if (topbar)
-		window_update(topbar);
-	if (minibuf)
-		window_update(minibuf);
 }
 
 size_t buf_text_insert(int bid, const char *text)
