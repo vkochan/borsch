@@ -158,7 +158,6 @@ int layout_nmaster_set(int tag, int n);
 float layout_fmaster_get(int tag);
 int layout_fmaster_set(int tag, float f);
 bool layout_sticky_get(int tag);
-int layout_sticky_set(int tag, bool is_sticky);
 
 int fifo_create(void);
 

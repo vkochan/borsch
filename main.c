@@ -2252,17 +2252,6 @@ int term_filter_enable(int bid, bool enable)
 	return -1;
 }
 
-int layout_sticky_set(int tab, bool is_sticky)
-{
-	Window *m;
-
-	tab_get(tab)->f->msticky = is_sticky;
-	
-	for_each_window_master(m)
-		buffer_dirty_set(m->buf, true);
-	return 0;
-}
-
 int fifo_create(void)
 {
 	char *cmd, *ret, *sta;

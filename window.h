@@ -92,6 +92,7 @@ int layout_nmaster_set(int tab, int n);
 float layout_fmaster_get(int tab);
 int layout_fmaster_set(int tab, float mfact);
 bool layout_sticky_get(int tab);
+int layout_sticky_set(int tab, bool is_sticky);
 
 Tab *tab_get(int tab);
 int tab_current_id_get(void);

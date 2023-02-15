@@ -322,6 +322,16 @@ bool layout_sticky_get(int tab)
 	return tab_get(tab)->f->msticky;
 }
 
+int layout_sticky_set(int tab, bool is_sticky)
+{
+	Window *m;
+
+	tab_get(tab)->f->msticky = is_sticky;
+	
+	for_each_window_master(m)
+		buffer_dirty_set(m->buf, true);
+	return 0;
+}
 
 Tab *tab_get(int tab)
 {
