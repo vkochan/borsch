@@ -783,42 +783,6 @@ static void window_switch_buf(Window *w, Buffer *b)
 }
 
 /* External API */
-int win_upper_get(int wid)
-{
-	Window *u = window_upper(window_get_by_id(wid));
-	if (u)
-		return u->id;
-
-	return 0;
-}
-
-int win_lower_get(int wid)
-{
-	Window *l = window_lower(window_get_by_id(wid));
-	if (l)
-		return l->id;
-
-	return 0;
-}
-
-int win_left_get(int wid)
-{
-	Window *l = window_left(window_get_by_id(wid));
-	if (l)
-		return l->id;
-
-	return 0;
-}
-
-int win_right_get(int wid)
-{
-	Window *r = window_right(window_get_by_id(wid));
-	if (r)
-		return r->id;
-
-	return 0;
-}
-
 int win_current_get(void)
 {
 	if (window_current())

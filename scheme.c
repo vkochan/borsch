@@ -136,40 +136,36 @@ ptr scheme_win_next_set(int wid, int next)
 
 ptr scheme_win_upper_get(int wid)
 {
-	int ret = win_upper_get(wid);
-
-	if (ret)
-		return Sinteger(ret);
+	Window *u = window_upper(window_get_by_id(wid));
+	if (u)
+		return Sinteger(u->id);
 
 	return Sfalse;
 }
 
 ptr scheme_win_lower_get(int wid)
 {
-	int ret = win_lower_get(wid);
-
-	if (ret)
-		return Sinteger(ret);
+	Window *l = window_lower(window_get_by_id(wid));
+	if (l)
+		return Sinteger(l->id);
 
 	return Sfalse;
 }
 
 ptr scheme_win_right_get(int wid)
 {
-	int ret = win_right_get(wid);
-
-	if (ret)
-		return Sinteger(ret);
+	Window *r = window_right(window_get_by_id(wid));
+	if (r)
+		return Sinteger(r->id);
 
 	return Sfalse;
 }
 
 ptr scheme_win_left_get(int wid)
 {
-	int ret = win_left_get(wid);
-
-	if (ret)
-		return Sinteger(ret);
+	Window *l = window_left(window_get_by_id(wid));
+	if (l)
+		return Sinteger(l->id);
 
 	return Sfalse;
 }

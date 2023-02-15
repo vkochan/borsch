@@ -26,10 +26,6 @@ void eprint(const char *errstr, ...);
  #define debug eprint
 #endif
 
-int win_upper_get(int wid);
-int win_lower_get(int wid);
-int win_right_get(int wid);
-int win_left_get(int wid);
 int win_current_get(void);
 int win_current_set(int wid);
 int win_new(int bid);
