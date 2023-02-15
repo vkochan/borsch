@@ -783,18 +783,6 @@ static void window_switch_buf(Window *w, Buffer *b)
 }
 
 /* External API */
-int win_first_get(int fid)
-{
-	int wid = 0;
-
-	fid = fid < 0 ? tab_current_id_get() : fid;
-
-	if (windows_list_by_fid(fid))
-		wid = windows_list_by_fid(fid)->id;
-
-	return wid;
-}
-
 int win_prev_get(int wid)
 {
 	Window *w = window_get_by_id(wid);

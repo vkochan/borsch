@@ -80,12 +80,14 @@ bool scheme_win_is_visible(int wid)
 
 ptr scheme_win_first_get(int fid)
 {
-	int ret = win_first_get(fid);
+	int wid = 0;
 
-	if (ret)
-		return Sinteger(ret);
+	fid = fid < 0 ? tab_current_id_get() : fid;
 
-	return Sfalse;
+	if (windows_list_by_fid(fid))
+		wid = windows_list_by_fid(fid)->id;
+
+	return wid ? Sinteger(wid) : Sfalse;
 }
 
 ptr scheme_win_prev_get(int wid)
