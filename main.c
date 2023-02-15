@@ -783,31 +783,6 @@ static void window_switch_buf(Window *w, Buffer *b)
 }
 
 /* External API */
-int win_current_get(void)
-{
-	if (window_current())
-		return window_current()->id;
-
-	return 0;
-}
-
-int win_current_set(int wid)
-{
-	Window *w;
-
-	w = window_get_by_id(wid);
-	if (w)
-		window_focus(w);
-	return 0;
-}
-
-int win_prev_selected(void)
-{
-	if (window_last_selected())
-		return window_last_selected()->id;
-	return 0;
-}
-
 int win_viewport_pos(int wid, char type)
 {
 	Window *w = window_get_by_id(wid);

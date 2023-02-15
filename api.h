@@ -26,8 +26,6 @@ void eprint(const char *errstr, ...);
  #define debug eprint
 #endif
 
-int win_current_get(void);
-int win_current_set(int wid);
 int win_new(int bid);
 void win_del(int wid);
 void win_close(int wid);
@@ -42,7 +40,6 @@ void win_size_set(int wid, int width, int height);
 int win_size_get(int wid, int *width, int *height);
 void win_border_set(int wid, bool enable);
 void win_buf_switch(int wid, int bid);
-int win_prev_selected(void);
 int win_viewport_pos(int wid, char type);
 int win_viewport_coord(int wid, int pos, int *l, int *x, int *y);
 int win_viewport_size_get(int wid, int *width, int *height);

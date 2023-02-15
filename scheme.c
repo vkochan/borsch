@@ -172,17 +172,17 @@ ptr scheme_win_left_get(int wid)
 
 ptr scheme_win_current_get(void)
 {
-	int ret = win_current_get();
-
-	if (ret)
-		return Sinteger(ret);
-
+	if (window_current())
+		return Sinteger(window_current()->id);
 	return Sfalse;
 }
 
 int scheme_win_current_set(int wid)
 {
-	return win_current_set(wid);
+	Window *w = window_get_by_id(wid);
+	if (w)
+		window_focus(w);
+	return 0;
 }
 
 ptr scheme_win_new(int bid)
@@ -310,10 +310,8 @@ void scheme_win_buf_switch(int wid, int bid)
 
 ptr scheme_win_prev_selected(void)
 {
-	int ret = win_prev_selected();
-
-	if (ret)
-		return Sinteger(ret);
+	if (window_last_selected())
+		return Sinteger(window_last_selected()->id);
 	return Sfalse;
 }
 
