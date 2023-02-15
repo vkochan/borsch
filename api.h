@@ -26,7 +26,6 @@ void eprint(const char *errstr, ...);
  #define debug eprint
 #endif
 
-bool win_is_visible(int wid);
 int win_first_get(int fid);
 int win_prev_get(int wid);
 int win_next_get(int wid);

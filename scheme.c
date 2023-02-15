@@ -73,7 +73,9 @@ ptr scheme_win_get_by_coord(int x, int y)
 
 bool scheme_win_is_visible(int wid)
 {
-	return win_is_visible(wid);
+	Window *w = window_get_by_id(wid);
+
+	return window_is_visible(w);
 }
 
 ptr scheme_win_first_get(int fid)

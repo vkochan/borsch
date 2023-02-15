@@ -783,13 +783,6 @@ static void window_switch_buf(Window *w, Buffer *b)
 }
 
 /* External API */
-bool win_is_visible(int wid)
-{
-	Window *c = window_get_by_id(wid);
-
-	return window_is_visible(c);
-}
-
 int win_first_get(int fid)
 {
 	int wid = 0;
