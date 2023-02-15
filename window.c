@@ -757,15 +757,12 @@ static void term_title_set(Window *c)
 	}
 }
 
-bool window_is_visible(Window *c)
+bool window_is_visible(Window *w)
 {
-	if (!c)
+	if (!w)
 		return false;
-	if (layout_is_arrange(LAYOUT_MAXIMIZED))
-		return window_current() == c;
-	else if (window_is_widget(c))
-		return true;
-	return true;
+
+	return window_is_widget(w) || w->frame == frame_current();
 }
 
 void window_update(Window *w)
@@ -1148,6 +1145,7 @@ Window *__window_create(Buffer *buf, bool is_widget, int x, int y, int width, in
 	w->id = ++win_id;
 	w->is_widget = is_widget;
 	w->buf = buf;
+	w->frame = frame_current();
 
 	w->view = view_new(buffer_text_get(w->buf));
 	if (!w->view) {

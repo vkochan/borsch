@@ -787,18 +787,7 @@ bool win_is_visible(int wid)
 {
 	Window *c = window_get_by_id(wid);
 
-	if (c) {
-		if (window_is_widget(c))
-			return true;
-
-		Window *m;
-		for_each_window(m) {
-			if (m->id == c->id)
-				return true;
-		}
-	}
-
-	return false;
+	return window_is_visible(c);
 }
 
 int win_first_get(int fid)

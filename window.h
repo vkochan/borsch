@@ -22,10 +22,13 @@ typedef struct {
 	void (*arrange)(unsigned int, unsigned int, unsigned int, unsigned int);
 } Layout;
 
+typedef struct _Frame Frame;
+
 typedef struct Window Window;
 struct Window {
 	Buffer *prev_buf;
 	Buffer *buf;
+	Frame *frame;
 	View *view;
 	UiWin *win;
 	const char *cmd;
@@ -43,7 +46,7 @@ struct Window {
 
 #define CWD_MAX		256
 
-typedef struct {
+typedef struct _Frame {
 	int nmaster;
 	float mfact;
 	Layout *layout;
