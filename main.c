@@ -815,27 +815,21 @@ int win_first_get(int fid)
 
 int win_prev_get(int wid)
 {
-	Window *c = window_get_by_id(wid);
+	Window *w = window_get_by_id(wid);
+	Window *p = window_prev(w);
 
-	if (!c)
-		return 0;
-
-	if (c->prev)
-		return c->prev->id;
-
+	if (p)
+		return p->id;
 	return 0;
 }
 
 int win_next_get(int wid)
 {
-	Window *c = window_get_by_id(wid);
+	Window *w = window_get_by_id(wid);
+	Window *n = window_next(w);
 
-	if (!c)
-		return 0;
-
-	if (c->next)
-		return c->next->id;
-
+	if (n)
+		return n->id;
 	return 0;
 }
 

@@ -592,6 +592,20 @@ void window_prev_set(Window *w, Window *p)
 	layout_changed(true);
 }
 
+Window *window_prev(Window *w)
+{
+	if (w)
+		return w->prev;
+	return NULL;
+}
+
+Window *window_next(Window *w)
+{
+	if (w)
+		return w->next;
+	return NULL;
+}
+
 void window_insert_first(Window *c)
 {
 	if (window_first())

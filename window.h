@@ -134,6 +134,8 @@ Window *window_right(Window *w);
 void window_first_set(Window *w);
 void window_next_set(Window *w, Window *n);
 void window_prev_set(Window *w, Window *n);
+Window *window_prev(Window *w);
+Window *window_next(Window *w);
 void window_insert_first(Window *c);
 void window_insert_after(Window *c, Window *a);
 void window_insert(Window *c);
