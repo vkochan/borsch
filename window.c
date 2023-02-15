@@ -772,6 +772,8 @@ bool window_is_visible(Window *w)
 	if (!w)
 		return false;
 
+	if (layout_is_arrange(LAYOUT_MAXIMIZED))
+		return window_current() == w;
 	return window_is_widget(w) || w->frame == frame_current();
 }
 
