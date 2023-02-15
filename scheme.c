@@ -64,11 +64,10 @@ ptr scheme_config_dir_get(void)
 
 ptr scheme_win_get_by_coord(int x, int y)
 {
-	int ret = win_get_by_coord(x, y);
+	Window *w = window_get_by_coord(x, y);
 
-	if (ret)
-		return Sinteger(ret);
-
+	if (w)
+		return Sinteger(w->id);
 	return Sfalse;
 }
 

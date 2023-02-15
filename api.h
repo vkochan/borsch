@@ -26,7 +26,6 @@ void eprint(const char *errstr, ...);
  #define debug eprint
 #endif
 
-int win_get_by_coord(int x, int y);
 bool win_is_visible(int wid);
 int win_first_get(int fid);
 int win_prev_get(int wid);

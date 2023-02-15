@@ -787,16 +787,6 @@ static void window_switch_buf(Window *w, Buffer *b)
 }
 
 /* External API */
-int win_get_by_coord(int x, int y)
-{
-	Window *c = window_get_by_coord(x, y);
-
-	if (c)
-		return c->id;
-
-	return 0;
-}
-
 bool win_is_visible(int wid)
 {
 	Window *c = window_get_by_id(wid);
