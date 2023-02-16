@@ -800,27 +800,7 @@ int win_viewport_size_get(int wid, int *width, int *height)
 
 int win_scroll(int wid, char type, int n)
 {
-	Window *w = window_get_by_id(wid);
-
-	if (!w)
-		return -1;
-
-	switch (type) {
-	case 'd':
-		return view_scroll_halfpage_down(w->view);
-	case 'u':
-		return view_scroll_halfpage_up(w->view);
-	case 'f':
-		return view_scroll_page_down(w->view);
-	case 'b':
-		return view_scroll_page_up(w->view);
-	case 'L':
-		return view_scroll_up(w->view, n);
-	case 'l':
-		return view_scroll_down(w->view, n);
-	}
-
-	return -1;
+	return window_scroll(window_get_by_id(wid), type, n);
 }
 
 void win_sidebar_set(int wid, int width)

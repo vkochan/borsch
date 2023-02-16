@@ -826,6 +826,30 @@ int window_viewport_size(Window *w, int *width, int *height)
 	return 0;
 }
 
+int window_scroll(Window *w, char type, int n)
+{
+	if (!w)
+		return -1;
+
+	switch (type) {
+	case 'd':
+		return view_scroll_halfpage_down(w->view);
+	case 'u':
+		return view_scroll_halfpage_up(w->view);
+	case 'f':
+		return view_scroll_page_down(w->view);
+	case 'b':
+		return view_scroll_page_up(w->view);
+	case 'L':
+		return view_scroll_up(w->view, n);
+	case 'l':
+		return view_scroll_down(w->view, n);
+	}
+
+	return -1;
+}
+
+
 void window_update(Window *w)
 {
 	View *view = w->view;
