@@ -152,6 +152,7 @@ char *window_title_get(Window *c);
 bool window_is_visible(Window *c);
 int window_viewport_pos(Window *w, char type);
 int window_viewport_pos_to_coord(Window *w, int pos, int *l, int *x, int *y);
+int window_viewport_size(Window *w, int *width, int *height);
 void window_update(Window *w);
 void window_draw_title(Window *c);
 void window_draw_flags(Window *c, int flags);

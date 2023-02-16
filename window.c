@@ -813,6 +813,19 @@ int window_viewport_pos_to_coord(Window *w, int pos, int *l, int *x, int *y)
 	return -1;
 }
 
+int window_viewport_size(Window *w, int *width, int *height)
+{
+	if (!w)
+		return -1;
+
+	if (width)
+		*width = view_width_get(w->view);
+	if (height)
+		*height = view_height_get(w->view);
+
+	return 0;
+}
+
 void window_update(Window *w)
 {
 	View *view = w->view;

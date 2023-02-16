@@ -795,17 +795,7 @@ int win_viewport_coord(int wid, int pos, int *l, int *x, int *y)
 
 int win_viewport_size_get(int wid, int *width, int *height)
 {
-	Window *w = window_get_by_id(wid);
-
-	if (!w)
-		return -1;
-
-	if (width)
-		*width = view_width_get(w->view);
-	if (height)
-		*height = view_height_get(w->view);
-
-	return 0;
+	return window_viewport_size(window_get_by_id(wid), width, height);
 }
 
 int win_scroll(int wid, char type, int n)
