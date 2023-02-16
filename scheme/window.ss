@@ -35,6 +35,7 @@
 (define __cs_win_sidebar_get (foreign-procedure __collect_safe "cs_win_sidebar_get" (int) scheme-object))
 (define __cs_win_sidebar_draw (foreign-procedure "cs_win_sidebar_draw" (int int int string int int int) scheme-object))
 (define __cs_win_update (foreign-procedure "cs_win_update" (int) void))
+(define __cs_widget_create (foreign-procedure "cs_widget_create" (string int int int int int) scheme-object))
 
 (define window-is-visible?
    (case-lambda
@@ -666,4 +667,14 @@
        [(w)
         (call-foreign (__cs_win_update w))]
     )
+)
+
+(define widget-create
+   (lambda (name x y w h type)
+      (let ([wtype (cond [(eq? type 'top) 1]
+                         [(eq? type 'bottom) 2])]
+           )
+         (call-foreign (__cs_widget_create name x y w h wtype))
+      )
+   )
 )

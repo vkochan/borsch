@@ -1,5 +1,3 @@
-(define __cs_minibuf_create (foreign-procedure "cs_minibuf_create" () scheme-object))
-
 (define minibuf-window #f)
 (define minibuf-buffer #f)
 
@@ -122,7 +120,7 @@
 
 (define minibuf-create
    (lambda ()
-      (let ([m (call-foreign (__cs_minibuf_create))])
+      (let ([m (widget-create "*minibuf*" 0 (- (screen-height) 1) (screen-width) 1 'bottom)])
          (set! minibuf-buffer (window-buffer m))
          (set! minibuf-window m)
 

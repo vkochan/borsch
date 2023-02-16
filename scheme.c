@@ -1165,20 +1165,36 @@ ptr scheme_style_get(const char *name)
 	return Sfalse;
 }
 
-ptr scheme_minibuf_create(void)
+static Buffer *__buf_new(const char *name, KeyMap *kmap)
 {
-	int ret = minibuf_create();
-	if (ret > 0)
-		return Sinteger(ret);
-	return Sfalse;
+	Buffer *buf = buffer_new(name);
+
+	if (buf) {
+		keymap_parent_set(buffer_keymap_get(buf), kmap);
+		buffer_env_set(buf, scheme_env_alloc());
+		buffer_ref_get(buf);
+		return buf;
+	}
+
+	return NULL;
 }
 
-ptr scheme_topbar_create(void)
+ptr scheme_widget_create(const char *name, int x, int y, int width, int height, int type)
 {
-	int ret = topbar_create();
-	if (ret > 0)
-		return Sinteger(ret);
-	return Sfalse;
+	Window *w;
+	Buffer *b;
+
+	b = __buf_new(name, NULL);
+	if (!b) {
+		return Sfalse;
+	}
+
+	w = widget_create(b, x, y, width, height, type);
+	if (!w) {
+		buffer_del(b);
+		return Sfalse;
+	}
+	return Sinteger(w->id);
 }
 
 static char *scheme_string_to_cptr(ptr str)
@@ -1673,8 +1689,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_style_set",  scheme_style_set);
 	Sregister_symbol("cs_style_get",  scheme_style_get);
 
-	Sregister_symbol("cs_minibuf_create", scheme_minibuf_create);
-	Sregister_symbol("cs_topbar_create", scheme_topbar_create);
+	Sregister_symbol("cs_widget_create", scheme_widget_create);
 
 	Sregister_symbol("cs_term_keys_send", scheme_term_keys_send);
 	Sregister_symbol("cs_term_text_send", scheme_term_text_send);

@@ -1812,32 +1812,6 @@ void buf_prop_walk(int bid, int type, int start, int end, char *name, void *arg,
 	buffer_properties_walk(buf, type, start, end, name, arg, cb);
 }
 
-int minibuf_create(void)
-{
-	Buffer *buf = __buf_new("*minibuf*", NULL);
-	Window *minibuf;
-
-	minibuf = widget_create(buf, 0, ui_height_get(g_ui)-1, ui_width_get(g_ui), 1, WIN_POS_F_BOT);
-	if (!minibuf) {
-		buffer_del(buf);
-		return -1;
-	}
-	return minibuf->id;
-}
-
-int topbar_create(void)
-{
-	Buffer *buf = __buf_new("*topbar*", NULL);
-	Window *topbar;
-
-	topbar = widget_create(buf, 0, 0, ui_width_get(g_ui), 1, WIN_POS_F_TOP);
-	if (!topbar) {
-		buffer_del(buf);
-		return -1;
-	}
-	return topbar->id;
-}
-
 int term_keys_send(int bid, char *keys)
 {
 	Buffer *buf = buffer_by_id(bid);

@@ -109,9 +109,6 @@ void buf_prop_walk(int bid, int type, int start, int end, char *name, void *arg,
 		void (*cb)(Buffer *buf, int id, size_t start, size_t end, void *data,
 				 void *arg));
 
-int minibuf_create(void);
-int topbar_create(void);
-
 int term_keys_send(int bid, char *keys);
 int term_text_send(int bid, char *text);
 int term_text_get(int bid, char **buf, size_t *len);

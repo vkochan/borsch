@@ -1,5 +1,3 @@
-(define __cs_topbar_create (foreign-procedure "cs_topbar_create" () scheme-object))
-
 (define topbar-window #f)
 (define topbar-buffer #f)
 
@@ -42,7 +40,7 @@
 
 (define topbar-create
    (lambda ()
-      (let ([w (call-foreign (__cs_topbar_create))])
+      (let ([w (widget-create "*topbar*" 0 0 (screen-width) 1 'top)])
          (set! topbar-buffer (window-buffer w))
          (set! topbar-window w)
       )
