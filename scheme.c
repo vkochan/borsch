@@ -350,7 +350,7 @@ ptr scheme_win_sidebar_get(int wid)
 
 void scheme_win_sidebar_draw(int wid, int x, int y, const char *text, short fg, short bg, int attr)
 {
-	win_sidebar_draw(wid, x, y, text, fg, bg, attr);
+	window_sidebar_draw(window_get_by_id(wid), x, y, text, fg, bg, attr);
 }
 
 void scheme_win_update(int wid)

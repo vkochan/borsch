@@ -155,6 +155,7 @@ int window_viewport_pos_to_coord(Window *w, int pos, int *l, int *x, int *y);
 int window_viewport_size(Window *w, int *width, int *height);
 void window_sidebar_width_set(Window *w, int width);
 int window_sidebar_width(Window *w);
+void window_sidebar_draw(Window *w, int x, int y, const char *text, short fg, short bg, int attr);
 void window_update(Window *w);
 int window_scroll(Window *w, char type, int n);
 void window_draw_title(Window *c);

@@ -783,15 +783,6 @@ static void window_switch_buf(Window *w, Buffer *b)
 }
 
 /* External API */
-void win_sidebar_draw(int wid, int x, int y, const char *text, short fg, short bg, int attr)
-{
-	Window *w = window_get_by_id(wid);
-
-	if (w) {
-		ui_window_sidebar_draw(w->win, x, y, text, fg, bg, attr);
-	}
-}
-
 void win_update(int wid)
 {
 	Window *w = window_get_by_id(wid);
