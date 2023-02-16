@@ -40,7 +40,6 @@ void win_size_set(int wid, int width, int height);
 int win_size_get(int wid, int *width, int *height);
 void win_border_set(int wid, bool enable);
 void win_buf_switch(int wid, int bid);
-int win_sidebar_get(int wid);
 void win_sidebar_draw(int wid, int x, int y, const char *text, short fg, short bg, int attr);
 void win_update(int wid);
 

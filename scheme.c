@@ -345,7 +345,7 @@ void scheme_win_sidebar_set(int wid, int width)
 
 ptr scheme_win_sidebar_get(int wid)
 {
-	return Sinteger(win_sidebar_get(wid));
+	return Sinteger(window_sidebar_width(window_get_by_id(wid)));
 }
 
 void scheme_win_sidebar_draw(int wid, int x, int y, const char *text, short fg, short bg, int attr)

@@ -858,6 +858,15 @@ void window_sidebar_width_set(Window *w, int width)
 	}
 }
 
+int window_sidebar_width(Window *w)
+{
+	if (w) {
+		return ui_window_sidebar_width_get(w->win);
+	}
+
+	return 0;
+}
+
 void window_update(Window *w)
 {
 	View *view = w->view;
