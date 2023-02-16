@@ -153,6 +153,7 @@ bool window_is_visible(Window *c);
 int window_viewport_pos(Window *w, char type);
 int window_viewport_pos_to_coord(Window *w, int pos, int *l, int *x, int *y);
 int window_viewport_size(Window *w, int *width, int *height);
+void window_sidebar_width_set(Window *w, int width);
 void window_update(Window *w);
 int window_scroll(Window *w, char type, int n);
 void window_draw_title(Window *c);

@@ -340,7 +340,7 @@ ptr scheme_win_scroll(int wid, char type, int n)
 
 void scheme_win_sidebar_set(int wid, int width)
 {
-	win_sidebar_set(wid, width);
+	window_sidebar_width_set(window_get_by_id(wid), width);
 }
 
 ptr scheme_win_sidebar_get(int wid)

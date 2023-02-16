@@ -783,17 +783,6 @@ static void window_switch_buf(Window *w, Buffer *b)
 }
 
 /* External API */
-void win_sidebar_set(int wid, int width)
-{
-	Window *w = window_get_by_id(wid);
-
-	if (w && width != ui_window_sidebar_width_get(w->win)) {
-		ui_window_sidebar_width_set(w->win, width);
-		buffer_dirty_set(w->buf, true);
-		window_draw_flags(w, WIN_DRAW_F_FORCE | WIN_DRAW_F_NO_EVENT);
-	}
-}
-
 int win_sidebar_get(int wid)
 {
 	Window *w = window_get_by_id(wid);
