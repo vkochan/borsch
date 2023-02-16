@@ -1325,7 +1325,7 @@ static void window_update_screen_size(void) {
 	layout_current_move(wax, way);
 
 	for_each_widget(w) {
-		ui_window_width_set(w->win, layout_current_width());
+		ui_window_width_set(w->win, ui_width_get(ui));
 		if (w->pos_flags & WIN_POS_F_BOT)
 			ui_window_move(w->win, 0, ui_height_get(ui)-bot_h);
 	}

@@ -1817,7 +1817,7 @@ int minibuf_create(void)
 	Buffer *buf = __buf_new("*minibuf*", NULL);
 	Window *minibuf;
 
-	minibuf = widget_create(buf, 0, ui_height_get(g_ui)-1, layout_current_width(), 1, WIN_POS_F_BOT);
+	minibuf = widget_create(buf, 0, ui_height_get(g_ui)-1, ui_width_get(g_ui), 1, WIN_POS_F_BOT);
 	if (!minibuf) {
 		buffer_del(buf);
 		return -1;
@@ -1830,7 +1830,7 @@ int topbar_create(void)
 	Buffer *buf = __buf_new("*topbar*", NULL);
 	Window *topbar;
 
-	topbar = widget_create(buf, 0, 0, layout_current_width(), 1, WIN_POS_F_TOP);
+	topbar = widget_create(buf, 0, 0, ui_width_get(g_ui), 1, WIN_POS_F_TOP);
 	if (!topbar) {
 		buffer_del(buf);
 		return -1;
