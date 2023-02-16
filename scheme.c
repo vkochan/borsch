@@ -973,7 +973,12 @@ ptr scheme_buf_prop_get(int bid, int type, int start, int end, char *name)
 
 ptr scheme_buf_env_get(int bid)
 {
-	void *env = buf_env_get(bid);
+	Buffer *buf = buffer_by_id(bid);
+	void *env = NULL;
+
+	if (buf) {
+		env = buffer_env_get(buf);
+	}
 
 	if (env)
 		return (ptr)env;

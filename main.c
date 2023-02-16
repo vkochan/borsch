@@ -1812,26 +1812,6 @@ void buf_prop_walk(int bid, int type, int start, int end, char *name, void *arg,
 	buffer_properties_walk(buf, type, start, end, name, arg, cb);
 }
 
-void *buf_env_get(int bid)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf) {
-		return buffer_env_get(buf);
-	}
-
-	return NULL;
-}
-
-void buf_env_set(int bid, void *env)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf) {
-		buffer_env_set(buf, env);
-	}
-}
-
 int minibuf_create(void)
 {
 	Buffer *buf = __buf_new("*minibuf*", NULL);
