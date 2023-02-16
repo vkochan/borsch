@@ -120,9 +120,6 @@ static void mouse_zoom(const char *args[]);
 static KeyMap *global_kmap;
 static KeyMap *curr_kmap;
 
-static Window *minibuf;
-static Window *topbar;
-
 #ifdef NCURSES_MOUSE_VERSION
 # define CONFIG_MOUSE /* compile in mouse support if we build against ncurses */
 #endif
@@ -1887,6 +1884,7 @@ int buf_parser_set(int bid, const char *lang)
 int minibuf_create(void)
 {
 	Buffer *buf = __buf_new("*minibuf*", NULL);
+	Window *minibuf;
 
 	minibuf = widget_create(buf, 0, ui_height_get(ui)-1, layout_current_width(), 1, WIN_POS_F_BOT);
 	if (!minibuf) {
@@ -1899,6 +1897,7 @@ int minibuf_create(void)
 int topbar_create(void)
 {
 	Buffer *buf = __buf_new("*topbar*", NULL);
+	Window *topbar;
 
 	topbar = widget_create(buf, 0, 0, layout_current_width(), 1, WIN_POS_F_TOP);
 	if (!topbar) {
