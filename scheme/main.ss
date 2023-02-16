@@ -46,7 +46,7 @@
    )
 )
 
-(define main-init
+(define load-init-script
    (lambda (init)
       (let ([init-script (if (string-empty? init)
                             (string-append (config-dir) "/init.ss")
@@ -58,6 +58,13 @@
             (run-hooks 'init-hook)
          )
       )
+   )
+)
+
+(define main-init
+   (lambda (init)
+      (when init
+         (load-init-script init))
    )
 )
 

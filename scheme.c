@@ -43,7 +43,7 @@ static int scheme_run_script(const char *path)
 
 static int scheme_run_init(const char *path)
 {
-	CALL1("main-init", Sstring(path));
+	CALL1("main-init", path ? Sstring(path) : Sfalse);
 }
 
 /* Scheme foreign interface */
@@ -1730,8 +1730,7 @@ int scheme_init(const char *init_script)
 
 	CALL1("source-directories", Scons(Sstring(LIB_PATH), Snil));
 
-	if (init_script)
-		scheme_run_init(init_script);
+	scheme_run_init(init_script);
 
 	err = fifo_create();
 	if (err) {
