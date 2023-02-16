@@ -1031,11 +1031,16 @@ int scheme_buf_tag_del(int bid, int tag)
 
 ptr scheme_buf_parser_set(int bid, const char *lang)
 {
-	int err = buf_parser_set(bid, lang);
+	Buffer *buf = buffer_by_id(bid);
 
-	if (err)
-		return Sfalse;
-	return Strue;
+	if (buf) {
+		int err = buffer_parser_set(buf, lang);
+		if (err)
+			return Sfalse;
+		return Strue;
+	}
+
+	return Sfalse;
 }
 
 ptr scheme_stx_lang_style_add(const char *lang, int fg, int bg, int attr, const char *style_name, const char *rule)

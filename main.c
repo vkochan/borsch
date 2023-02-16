@@ -1870,17 +1870,6 @@ size_t buf_search_regex(int bid, size_t pos, const char *pattern, int dir)
 	return EPOS;
 }
 
-int buf_parser_set(int bid, const char *lang)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf) {
-		return buffer_parser_set(buf, lang);
-	}
-
-	return -1;
-}
-
 int minibuf_create(void)
 {
 	Buffer *buf = __buf_new("*minibuf*", NULL);
