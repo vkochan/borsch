@@ -281,7 +281,7 @@ ptr scheme_win_viewport_width_get(int wid)
 	int width;
 	int err;
 
-	err = win_viewport_size_get(wid, &width, NULL);
+	err = window_viewport_size(window_get_by_id(wid), &width, NULL);
 	if (err)
 		return Sfalse;
 	return Sinteger(width);
@@ -292,7 +292,7 @@ ptr scheme_win_viewport_height_get(int wid)
 	int height;
 	int err;
 
-	err = win_viewport_size_get(wid, NULL, &height);
+	err = window_viewport_size(window_get_by_id(wid), NULL, &height);
 	if (err)
 		return Sfalse;
 	return Sinteger(height);

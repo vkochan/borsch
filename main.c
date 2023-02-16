@@ -783,11 +783,6 @@ static void window_switch_buf(Window *w, Buffer *b)
 }
 
 /* External API */
-int win_viewport_size_get(int wid, int *width, int *height)
-{
-	return window_viewport_size(window_get_by_id(wid), width, height);
-}
-
 int win_scroll(int wid, char type, int n)
 {
 	return window_scroll(window_get_by_id(wid), type, n);
