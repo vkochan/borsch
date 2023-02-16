@@ -783,11 +783,6 @@ static void window_switch_buf(Window *w, Buffer *b)
 }
 
 /* External API */
-int win_viewport_pos(int wid, char type)
-{
-	return window_viewport_pos(window_get_by_id(wid), type);
-}
-
 int win_viewport_coord(int wid, int pos, int *l, int *x, int *y)
 {
 	return window_viewport_pos_to_coord(window_get_by_id(wid), pos, l, x, y);

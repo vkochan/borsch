@@ -317,7 +317,7 @@ ptr scheme_win_prev_selected(void)
 
 ptr scheme_win_viewport_pos(int wid, char type)
 {
-	return Sinteger(win_viewport_pos(wid, type));
+	return Sinteger(window_viewport_pos(window_get_by_id(wid), type));
 }
 
 ptr scheme_win_viewport_coord(int wid, int pos)
