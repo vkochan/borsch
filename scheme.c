@@ -325,7 +325,7 @@ ptr scheme_win_viewport_coord(int wid, int pos)
 	int l, x, y;
 	int err;
 
-	err = win_viewport_coord(wid, pos, &l, &x, &y);
+	err = window_viewport_pos_to_coord(window_get_by_id(wid), pos, &l, &x, &y);
 	if (!err) {
 		return Scons(Sinteger(x), Scons(Sinteger(y), Scons(Sinteger(l), Snil)));
 	}
