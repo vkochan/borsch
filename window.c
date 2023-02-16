@@ -798,6 +798,21 @@ int window_viewport_pos(Window *w, char type)
 	return -1;
 }
 
+int window_viewport_pos_to_coord(Window *w, int pos, int *l, int *x, int *y)
+{
+	Line *line;
+
+	if (!w)
+		return -1;
+
+	if (view_coord_get(w->view, pos, &line, y, x)) {
+		*l = line->lineno;
+		return 0;
+	}
+
+	return -1;
+}
+
 void window_update(Window *w)
 {
 	View *view = w->view;
