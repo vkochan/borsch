@@ -110,10 +110,6 @@ void buf_prop_walk(int bid, int type, int start, int end, char *name, void *arg,
 void *buf_env_get(int bid);
 void buf_env_set(int bid, void *env);
 
-void buf_snapshot(int bid);
-void buf_undo(int bid);
-void buf_redo(int bid);
-
 int minibuf_create(void);
 int topbar_create(void);
 

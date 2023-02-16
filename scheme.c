@@ -982,17 +982,29 @@ ptr scheme_buf_env_get(int bid)
 
 void scheme_buf_snapshot(int bid)
 {
-	buf_snapshot(bid);
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_snapshot(buf);
+	}
 }
 
 void scheme_buf_undo(int bid)
 {
-	buf_undo(bid);
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_undo(buf);
+	}
 }
 
 void scheme_buf_redo(int bid)
 {
-	buf_redo(bid);
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_redo(buf);
+	}
 }
 
 ptr scheme_buf_search_regex(int bid, size_t pos, const char *pattern, int dir)
