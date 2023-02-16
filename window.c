@@ -418,6 +418,9 @@ static void tabs_init(void) {
 static void tabs_cleanup(void)
 {
 	for(int i = 0; i <= MAXTABS; i++) {
+		while (tab_get(i)->f->windows) {
+			window_delete(tab_get(i)->f->windows);
+		}
 		free(tab_get(i)->f->name);
 		free(tab_get(i)->f->cwd);
 		free(tab_get(i)->f);
@@ -455,6 +458,13 @@ void window_init(Ui *_ui)
 
 void window_cleanup(void)
 {
+	while (widgets) {
+		Window *w = widgets;
+		Buffer *buf = w->buf;
+
+		buffer_ref_put(buf);
+		window_delete(w);
+	}
 	tabs_cleanup();
 }
 

@@ -331,8 +331,8 @@ cleanup(void) {
 		event_fd_handler_unregister(cmdfifo.fd);
 
 	scheme_uninit();
-	while (window_first())
-		destroy(window_first());
+
+	window_cleanup();
 
 	b = buffer_first_get();
 	while (b) {
@@ -355,7 +355,6 @@ cleanup(void) {
 		close(retfifo.fd);
 	if (retfifo.file)
 		unlink(retfifo.file);
-	window_cleanup();
 }
 
 static void vt_filter(Vt *vt, char *ch, size_t len, void *arg)
