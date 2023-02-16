@@ -783,11 +783,6 @@ static void window_switch_buf(Window *w, Buffer *b)
 }
 
 /* External API */
-int win_scroll(int wid, char type, int n)
-{
-	return window_scroll(window_get_by_id(wid), type, n);
-}
-
 void win_sidebar_set(int wid, int width)
 {
 	Window *w = window_get_by_id(wid);

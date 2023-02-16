@@ -335,7 +335,7 @@ ptr scheme_win_viewport_coord(int wid, int pos)
 
 ptr scheme_win_scroll(int wid, char type, int n)
 {
-	return Sinteger(win_scroll(wid, type, n));
+	return Sinteger(window_scroll(window_get_by_id(wid), type, n));
 }
 
 void scheme_win_sidebar_set(int wid, int width)
