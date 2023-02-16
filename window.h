@@ -150,6 +150,7 @@ bool window_is_widget(Window *w);
 void window_move_resize(Window *c, int x, int y, int w, int h);
 char *window_title_get(Window *c);
 bool window_is_visible(Window *c);
+int window_viewport_pos(Window *w, char type);
 void window_update(Window *w);
 void window_draw_title(Window *c);
 void window_draw_flags(Window *c, int flags);

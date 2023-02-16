@@ -785,24 +785,7 @@ static void window_switch_buf(Window *w, Buffer *b)
 /* External API */
 int win_viewport_pos(int wid, char type)
 {
-	Window *w = window_get_by_id(wid);
-	Filerange v;
-	Text *text;
-
-	if (!w)
-		return -1;
-
-	v = view_viewport_get(w->view);
-	text = buffer_text_get(w->buf);
-
-	switch (type) {
-	case 'H':
-		return text_line_start(text, v.start);
-	case 'L':
-		return text_line_start(text, v.end > 0 ? v.end-1 : v.end);
-	}
-
-	return -1;
+	return window_viewport_pos(window_get_by_id(wid), type);
 }
 
 int win_viewport_coord(int wid, int pos, int *l, int *x, int *y)

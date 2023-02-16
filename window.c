@@ -777,6 +777,27 @@ bool window_is_visible(Window *w)
 	return window_is_widget(w) || w->frame == frame_current();
 }
 
+int window_viewport_pos(Window *w, char type)
+{
+	Filerange v;
+	Text *text;
+
+	if (!w)
+		return -1;
+
+	v = view_viewport_get(w->view);
+	text = buffer_text_get(w->buf);
+
+	switch (type) {
+	case 'H':
+		return text_line_start(text, v.start);
+	case 'L':
+		return text_line_start(text, v.end > 0 ? v.end-1 : v.end);
+	}
+
+	return -1;
+}
+
 void window_update(Window *w)
 {
 	View *view = w->view;
