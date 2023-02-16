@@ -334,6 +334,8 @@ cleanup(void) {
 
 	window_cleanup();
 
+	process_cleanup();
+
 	b = buffer_first_get();
 	while (b) {
 		Buffer *nextb = buffer_next_get(b);
@@ -341,7 +343,6 @@ cleanup(void) {
 		b = nextb;
 	}
 
-	process_cleanup();
 	keymap_free(global_kmap);
 	vt_shutdown();
 	syntax_cleanup();
