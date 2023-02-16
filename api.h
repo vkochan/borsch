@@ -114,8 +114,6 @@ void buf_snapshot(int bid);
 void buf_undo(int bid);
 void buf_redo(int bid);
 
-size_t buf_search_regex(int bid, size_t pos, const char *pattern, int dir);
-
 int minibuf_create(void);
 int topbar_create(void);
 

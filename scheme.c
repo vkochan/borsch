@@ -997,7 +997,12 @@ void scheme_buf_redo(int bid)
 
 ptr scheme_buf_search_regex(int bid, size_t pos, const char *pattern, int dir)
 {
-	size_t ret = buf_search_regex(bid, pos, pattern, dir);
+	Buffer *buf = buffer_by_id(bid);
+	int ret = EPOS;
+
+	if (buf) {
+		ret = buffer_search_regex(buf, pos, pattern, dir);
+	}
 
 	if (ret != EPOS)
 		return Sinteger(ret);
