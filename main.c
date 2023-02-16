@@ -101,7 +101,7 @@ typedef struct {
 	unsigned short int id;
 } Fifo;
 
-static Ui *ui;
+Ui *g_ui;
 
 static char *scheme_init_script = "";
 static bool start_in_graphic = false;
@@ -264,16 +264,16 @@ static void setup_ui(void)
 	struct sigaction sa;
 
 	if (start_in_graphic)
-		ui = ui_x_new();
+		g_ui = ui_x_new();
 	else
-		ui = ui_term_new();
+		g_ui = ui_term_new();
 
-	ui->get_default_cell_style = get_default_cell_style;
-	ui_event_handler_set(ui, handle_ui_event);
-	ui_init(ui);
+	g_ui->get_default_cell_style = get_default_cell_style;
+	ui_event_handler_set(g_ui, handle_ui_event);
+	ui_init(g_ui);
 	init_default_keymap();
 	mouse_setup();
-	window_init(ui);
+	window_init(g_ui);
 	
 	window_draw_all(true);
 
@@ -346,7 +346,7 @@ cleanup(void) {
 	vt_shutdown();
 	syntax_cleanup();
 	style_cleanup();
-	ui_free(ui);
+	ui_free(g_ui);
 	if (cmdfifo.fd > 0)
 		close(cmdfifo.fd);
 	if (cmdfifo.file)
@@ -754,7 +754,7 @@ void process_ui(void)
 
 		/* TODO: what to do with a died buffers ? */
 
-		ui_event_process(ui);
+		ui_event_process(g_ui);
 
 		window_draw_all(false);
 	}
@@ -1817,7 +1817,7 @@ int minibuf_create(void)
 	Buffer *buf = __buf_new("*minibuf*", NULL);
 	Window *minibuf;
 
-	minibuf = widget_create(buf, 0, ui_height_get(ui)-1, layout_current_width(), 1, WIN_POS_F_BOT);
+	minibuf = widget_create(buf, 0, ui_height_get(g_ui)-1, layout_current_width(), 1, WIN_POS_F_BOT);
 	if (!minibuf) {
 		buffer_del(buf);
 		return -1;

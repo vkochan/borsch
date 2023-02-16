@@ -62,6 +62,16 @@ ptr scheme_config_dir_get(void)
 	return sptr;
 }
 
+ptr scheme_screen_width_get(void)
+{
+	return Sinteger(ui_width_get(g_ui));
+}
+
+ptr scheme_screen_height_get(void)
+{
+	return Sinteger(ui_height_get(g_ui));
+}
+
 ptr scheme_win_get_by_coord(int x, int y)
 {
 	Window *w = window_get_by_coord(x, y);
@@ -1539,6 +1549,10 @@ void scheme_do_quit(void)
 static void scheme_export_symbols(void)
 {
 	Sregister_symbol("cs_config_dir_get", scheme_config_dir_get);
+
+	Sregister_symbol("cs_screen_width_get", scheme_screen_width_get);
+	Sregister_symbol("cs_screen_height_get", scheme_screen_height_get);
+
 	Sregister_symbol("cs_win_get_by_coord", scheme_win_get_by_coord);
 	Sregister_symbol("cs_win_is_visible", scheme_win_is_visible);
 	Sregister_symbol("cs_win_first_get", scheme_win_first_get);

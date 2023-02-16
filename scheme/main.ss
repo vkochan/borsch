@@ -10,6 +10,7 @@
 (include "common.ss")
 (include "style.ss")
 (include "keymap.ss")
+(include "screen.ss")
 (include "layout.ss")
 (include "frame.ss")
 (include "window.ss")

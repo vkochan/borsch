@@ -26,6 +26,8 @@ void eprint(const char *errstr, ...);
  #define debug eprint
 #endif
 
+extern Ui *g_ui;
+
 int win_new(int bid);
 void win_del(int wid);
 void win_close(int wid);
