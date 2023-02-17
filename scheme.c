@@ -740,12 +740,21 @@ ptr scheme_buf_file_open(int bid, const char *file)
 
 void scheme_buf_file_set(int bid, const char *file)
 {
-	buf_file_set(bid, file);
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_filename_set(buf, file);
+	}
 }
 
 ptr scheme_buf_file_get(int bid)
 {
-	char *name = buf_file_get(bid);
+	Buffer *buf = buffer_by_id(bid);
+	char *name = NULL;
+
+	if (buf) {
+		name = buffer_filename_get(buf);
+	}
 
 	if (name)
 		return Sstring(name);
