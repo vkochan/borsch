@@ -38,13 +38,6 @@ void win_border_set(int wid, bool enable);
 void win_buf_switch(int wid, int bid);
 void win_update(int wid);
 
-Style *style_new(void);
-
-int style_add(Style *style);
-int style_update(int id, Style *update);
-Style *style_get_by_id(int id);
-Style *style_get_by_name(const char *name);
-
 int buf_new(char *name);
 void buf_del(int bid);
 void buf_name_set(int bid, const char *name);
