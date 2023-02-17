@@ -98,7 +98,6 @@
          )
       )
       )
-      (cursor-set (get-local complete-prompt-cursor))
    )
 )
 
