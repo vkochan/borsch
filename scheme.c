@@ -269,12 +269,12 @@ int scheme_win_state_toggle(int wid, win_state_t st)
 
 ptr scheme_win_buf_get(int wid)
 {
-	int ret = win_buf_get(wid);
+	Window *c = window_get_by_id(wid);
 
-	if (ret)
-		return Sinteger(ret);
+	if (!c || !c->buf)
+		return Sfalse;
 
-	return Sfalse;
+	return Sinteger(buffer_id_get(c->buf));
 }
 
 void scheme_win_mark_highlight(int wid, bool enable)

@@ -879,16 +879,6 @@ int win_state_toggle(int wid, win_state_t st)
 	return 0;
 }
 
-int win_buf_get(int wid)
-{
-	Window *c = window_get_by_id(wid);
-
-	if (!c || !c->buf)
-		return -1;
-
-	return buffer_id_get(c->buf);
-}
-
 void win_mark_highlight(int wid, bool enable)
 {
 	Window *c = window_get_by_id(wid);
