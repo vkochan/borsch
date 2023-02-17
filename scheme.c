@@ -227,7 +227,11 @@ void scheme_win_close(int wid)
 
 ptr scheme_win_title_get(int wid)
 {
-	char *title = win_title_get(wid);
+	Window *w = window_get_by_id(wid);
+	char *title = NULL;
+
+	if (w)
+		title = window_title_get(w);
 
 	if (title)
 		return Sstring(title);
@@ -236,7 +240,16 @@ ptr scheme_win_title_get(int wid)
 
 int scheme_win_title_set(int wid, char *title)
 {
-	return win_title_set(wid, title);
+	Window *w = window_get_by_id(wid);
+
+	if (w) {
+		ui_window_title_set(w->win, title);
+		if (!layout_is_arrange(LAYOUT_MAXIMIZED))
+			window_draw_title(w);
+		return 0;
+	}
+
+	return -1;
 }
 
 int scheme_win_state_get(int wid)

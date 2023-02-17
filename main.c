@@ -802,30 +802,6 @@ int win_new(int bid)
  	return c->id;
 }
 
-char *win_title_get(int wid)
-{
-	Window *c = window_get_by_id(wid);
-
-	if (c)
-		return window_title_get(c);
-
-	return NULL;
-}
-
-int win_title_set(int wid, char *title)
-{
-	Window *c = window_get_by_id(wid);
-
-	if (c) {
-		ui_window_title_set(c->win, title);
-		if (!layout_is_arrange(LAYOUT_MAXIMIZED))
-			window_draw_title(c);
-		return 0;
-	}
-
-	return -1;
-}
-
 win_state_t win_state_get(int wid)
 {
 	Window *c = window_get_by_id(wid);

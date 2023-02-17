@@ -29,8 +29,6 @@ void eprint(const char *errstr, ...);
 extern Ui *g_ui;
 
 int win_new(int bid);
-char* win_title_get(int wid);
-int win_title_set(int wid, char *title);
 int win_state_set(int wid, win_state_t st);
 int win_state_toggle(int wid, win_state_t st);
 win_state_t win_state_get(int wid);
