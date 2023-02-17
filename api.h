@@ -47,8 +47,6 @@ Style *style_get_by_name(const char *name);
 
 int buf_new(char *name);
 void buf_del(int bid);
-int buf_kmap_set(int bid, char *name);
-int buf_kmap_get(int bid);
 void buf_name_set(int bid, const char *name);
 char *buf_name_get(int bid);
 void buf_readonly_set(int bid, bool is_readonly);

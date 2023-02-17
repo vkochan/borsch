@@ -507,12 +507,23 @@ void scheme_buf_del(int bid)
 
 void scheme_buf_kmap_set(int bid, char *name)
 {
-	buf_kmap_set(bid, name);
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_keymap_set(buf, name);
+	}
 }
 
 ptr scheme_buf_kmap_get(int bid)
 {
-	int ret = buf_kmap_get(bid);
+	Buffer *buf = buffer_by_id(bid);
+	KeyMap *kmap;
+	int ret;
+
+	if (buf)
+		kmap = buffer_keymap_get(buf);
+	if (kmap)
+		ret = keymap_id_get(kmap);
 
 	if (ret)
 		return Sinteger(ret);

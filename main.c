@@ -952,31 +952,6 @@ void buf_del(int bid)
 	}
 }
 
-int buf_kmap_set(int bid, char *name)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf) {
-		buffer_keymap_set(buf, name);
-		return 0;
-	}
-
-	return -1;
-}
-
-int buf_kmap_get(int bid)
-{
-	Buffer *buf = buffer_by_id(bid);
-	KeyMap *kmap;
-
-	if (buf)
-		kmap = buffer_keymap_get(buf);
-	if (kmap)
-		return keymap_id_get(kmap);
-
-	return -1;
-}
-
 void buf_name_set(int bid, const char *name)
 {
 	Buffer *buf = buffer_by_id(bid);
