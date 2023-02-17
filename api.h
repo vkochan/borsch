@@ -75,7 +75,6 @@ char *buf_mode_name_get(int bid);
 void buf_state_name_set(int bid, char *name);
 int buf_file_open(int bid, const char *file);
 
-int buf_save(int bid);
 bool buf_is_term(int bid);
 void buf_term_set(int bid, pid_t pid);
 bool buf_is_visible(int bid);

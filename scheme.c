@@ -774,7 +774,11 @@ ptr scheme_buf_file_get(int bid)
 
 ptr scheme_buf_save(int bid)
 {
-	return Sboolean(buf_save(bid));
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		return Sboolean(buffer_save(buf));
+	return Sfalse;
 }
 
 ptr scheme_buf_mark_is_set(int bid)

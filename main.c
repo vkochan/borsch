@@ -1467,14 +1467,6 @@ int buf_file_open(int bid, const char *file)
 	}
 }
 
-int buf_save(int bid)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf)
-		return buffer_save(buf);
-}
-
 bool buf_is_term(int bid)
 {
 	Buffer *buf = buffer_by_id(bid);
