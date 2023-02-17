@@ -768,22 +768,38 @@ ptr scheme_buf_save(int bid)
 
 ptr scheme_buf_mark_is_set(int bid)
 {
-	return Sboolean(buf_mark_is_set(bid));
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		return Sboolean(buffer_is_mark_set(buf));
+
+	return Sfalse;
 }
 
 void scheme_buf_mark_set(int bid, size_t pos)
 {
-	buf_mark_set(bid, pos);
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		buffer_mark_set(buf, pos);
 }
 
 ptr scheme_buf_mark_get(int bid)
 {
-	return Sinteger(buf_mark_get(bid));
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		return Sinteger(buffer_mark_get(buf));
+
+	return Sinteger(EPOS);
 }
 
 void scheme_buf_mark_clear(int bid)
 {
-	buf_mark_clear(bid);
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		buffer_mark_clear(buf);
 }
 
 ptr scheme_buf_is_term(int bid)

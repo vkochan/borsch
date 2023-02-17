@@ -78,10 +78,6 @@ void buf_state_name_set(int bid, char *name);
 int buf_file_open(int bid, const char *file);
 
 int buf_save(int bid);
-void buf_mark_set(int bid, size_t pos);
-bool buf_mark_is_set(int bid);
-size_t buf_mark_get(int bid);
-void buf_mark_clear(int bid);
 bool buf_is_term(int bid);
 void buf_term_set(int bid, pid_t pid);
 bool buf_is_visible(int bid);
