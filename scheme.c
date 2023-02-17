@@ -497,7 +497,7 @@ ptr scheme_buf_new(char *name)
 
 ptr scheme_buf_is_valid(int bid)
 {
-	return Sboolean(buf_is_valid(bid));
+	return Sboolean(!!buffer_by_id(bid));
 }
 
 void scheme_buf_del(int bid)

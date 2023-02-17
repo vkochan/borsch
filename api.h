@@ -46,7 +46,6 @@ Style *style_get_by_id(int id);
 Style *style_get_by_name(const char *name);
 
 int buf_new(char *name);
-bool buf_is_valid(int bid);
 void buf_del(int bid);
 int buf_kmap_set(int bid, char *name);
 int buf_kmap_get(int bid);
