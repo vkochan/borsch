@@ -279,7 +279,13 @@ ptr scheme_win_buf_get(int wid)
 
 void scheme_win_mark_highlight(int wid, bool enable)
 {
-	win_mark_highlight(wid, enable);
+	Window *w = window_get_by_id(wid);
+
+	if (w) {
+		if (enable != w->highlight_mark)
+			buffer_dirty_set(w->buf, true);
+		w->highlight_mark = enable;
+	}
 }
 
 void scheme_win_size_set(int wid, int width, int height)
