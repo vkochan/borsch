@@ -207,12 +207,22 @@ ptr scheme_win_new(int bid)
 
 void scheme_win_del(int wid)
 {
-	return win_del(wid);
+	Window *w = window_get_by_id(wid);
+
+	if (w) {
+		Buffer *buf = w->buf;
+
+		buffer_ref_put(buf);
+		window_delete(w);
+	}
 }
 
 void scheme_win_close(int wid)
 {
-	return win_close(wid);
+	Window *w = window_get_by_id(wid);
+
+	if (w)
+		window_close(w);
 }
 
 ptr scheme_win_title_get(int wid)

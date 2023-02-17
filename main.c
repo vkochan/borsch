@@ -314,14 +314,6 @@ static Buffer *__buf_new(const char *name, KeyMap *kmap)
 	return NULL;
 }
 
-static void destroy(Window *w)
-{
-	Buffer *buf = w->buf;
-
-	buffer_ref_put(buf);
-	window_delete(w);
-}
-
 static void
 cleanup(void) {
 	Buffer *b;
@@ -808,23 +800,6 @@ int win_new(int bid)
  	}
 
  	return c->id;
-}
-
-void win_del(int wid)
-{
-	Window *c = window_get_by_id(wid);
-
-	if (c) {
-		destroy(c);
-	}
-}
-
-void win_close(int wid)
-{
-	Window *w = window_get_by_id(wid);
-
-	if (w)
-		window_close(w);
 }
 
 char *win_title_get(int wid)
