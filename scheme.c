@@ -819,14 +819,23 @@ void scheme_buf_mark_clear(int bid)
 
 ptr scheme_buf_is_term(int bid)
 {
-	if (buf_is_term(bid))
-		return Strue;
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		return Sboolean(buffer_proc_get(buf) != NULL);
 	return Sfalse;
 }
 
 void scheme_buf_term_set(int bid, pid_t pid)
 {
-	buf_term_set(bid, pid);
+	Process *proc = process_by_pid(pid);
+	Buffer *buf = buffer_by_id(bid);
+
+	if (!proc || !buf)
+		return;
+
+	process_buffer_set(proc, buf);
+	buffer_proc_set(buf, proc);
 }
 
 ptr scheme_buf_is_visible(int bid)
