@@ -840,8 +840,14 @@ void scheme_buf_term_set(int bid, pid_t pid)
 
 ptr scheme_buf_is_visible(int bid)
 {
-	if (buf_is_visible(bid))
-		return Strue;
+	Buffer *buf = buffer_by_id(bid);
+	if (buf) {
+		Window *w;
+		for_each_window(w) {
+			if (w->buf == buf)
+				return Strue;
+		}
+	}
 	return Sfalse;
 }
 

@@ -1467,21 +1467,6 @@ int buf_file_open(int bid, const char *file)
 	}
 }
 
-bool buf_is_visible(int bid)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf) {
-		Window *c;
-		for_each_window(c) {
-			if (c->buf == buf)
-				return true;
-		}
-	}
-
-	return false;
-}
-
 int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end,
 		       const char *regex, char *name, bool expand)
 {
