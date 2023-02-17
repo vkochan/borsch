@@ -1003,38 +1003,6 @@ int buf_kmap_get(int bid)
 	return -1;
 }
 
-int buf_current_get(void)
-{
-	if (window_current())
-		return buffer_id_get(window_current()->buf);
-
-	return 0;
-}
-
-int buf_first_get(void)
-{
-	Buffer *buf = buffer_first_get();
-
-	if (buf)
-		return buffer_id_get(buf);
-
-	return 0;
-}
-
-int buf_next_get(int bid)
-{
-	Buffer *buf = buffer_by_id(bid);
-	Buffer *next;
-
-	if (buf) {
-		next = buffer_next_get(buf);
-		if (next)
-			return buffer_id_get(next);
-	}
-
-	return 0;
-}
-
 void buf_name_set(int bid, const char *name)
 {
 	Buffer *buf = buffer_by_id(bid);

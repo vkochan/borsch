@@ -516,30 +516,30 @@ ptr scheme_buf_kmap_get(int bid)
 
 ptr scheme_buf_current_get(void)
 {
-	int ret = buf_current_get();
-
-	if (ret)
-		return Sinteger(ret);
-
+	if (window_current())
+		return Sinteger(buffer_id_get(window_current()->buf));
 	return Sfalse;
 }
 
 ptr scheme_buf_first_get(void)
 {
-	int ret = buf_first_get();
+	Buffer *buf = buffer_first_get();
 
-	if (ret)
-		return Sinteger(ret);
-
+	if (buf)
+		return Sinteger(buffer_id_get(buf));
 	return Sfalse;
 }
 
 ptr scheme_buf_next_get(int bid)
 {
-	int ret = buf_next_get(bid);
+	Buffer *buf = buffer_by_id(bid);
+	Buffer *next;
 
-	if (ret)
-		return Sinteger(ret);
+	if (buf) {
+		next = buffer_next_get(buf);
+		if (next)
+			return Sinteger(buffer_id_get(next));
+	}
 
 	return Sfalse;
 }
