@@ -31,13 +31,13 @@
 (include "mode/dirb.ss")
 (include "mode/git.ss")
 (include "mode/grep.ss")
-(include "mode/scheme.ss")
-(include "mode/c.ss")
-(include "mode/dts.ss")
-(include "mode/diff.ss")
-(include "mode/gnumake.ss")
 (include "mode/org.ss")
 (include "mode/mail.ss")
+(include "mode/prog/c.ss")
+(include "mode/prog/dts.ss")
+(include "mode/prog/diff.ss")
+(include "mode/prog/scheme.ss")
+(include "mode/prog/gnumake.ss")
 
 (define message-recent "")
 
