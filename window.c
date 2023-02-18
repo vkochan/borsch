@@ -787,9 +787,11 @@ bool window_is_visible(Window *w)
 	if (!w)
 		return false;
 
-	if (layout_is_arrange(LAYOUT_MAXIMIZED))
+	if (window_is_widget(w))
+		return true;
+	else if (layout_is_arrange(LAYOUT_MAXIMIZED))
 		return window_current() == w;
-	return window_is_widget(w) || w->frame == frame_current();
+	return w->frame == frame_current();
 }
 
 int window_viewport_pos(Window *w, char type)
