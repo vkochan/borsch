@@ -3,6 +3,7 @@
 (define __cs_win_first_get (foreign-procedure __collect_safe "cs_win_first_get" (int) scheme-object))
 (define __cs_win_prev_get (foreign-procedure __collect_safe "cs_win_prev_get" (int) scheme-object))
 (define __cs_win_next_get (foreign-procedure __collect_safe "cs_win_next_get" (int) scheme-object))
+(define __cs_win_first_set (foreign-procedure __collect_safe "cs_win_first_set" (int) scheme-object))
 (define __cs_win_prev_set (foreign-procedure __collect_safe "cs_win_prev_set" (int int) scheme-object))
 (define __cs_win_next_set (foreign-procedure __collect_safe "cs_win_next_set" (int int) scheme-object))
 (define __cs_win_upper_get (foreign-procedure __collect_safe "cs_win_upper_get" (int) scheme-object))
@@ -78,6 +79,16 @@
 
       [(wid)
        (call-foreign (__cs_win_prev_get wid))]
+   )
+)
+
+(define window-set-first
+   (case-lambda
+      [()
+       (window-set-first (current-window))]
+
+      [(wid)
+       (call-foreign (__cs_win_first_set wid))]
    )
 )
 

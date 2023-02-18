@@ -628,6 +628,8 @@ Window *window_next(Window *w)
 
 void window_insert_first(Window *c)
 {
+	window_remove(c);
+
 	if (window_first())
 		window_first()->prev = c;
 
@@ -638,6 +640,7 @@ void window_insert_first(Window *c)
 
 	for (int o = 1; c; c = c->next, o++)
 		c->order = o;
+	layout_changed(true);
 }
 
 void window_insert_after(Window *c, Window *a)
@@ -670,6 +673,8 @@ static Window *window_last_master(void)
 
 void window_insert(Window *c)
 {
+	window_remove(c);
+
 	if (window_is_master_sticky(NULL)) {
 		Window *master = window_last_master();
 

@@ -120,6 +120,17 @@ ptr scheme_win_next_get(int wid)
 	return Sfalse;
 }
 
+ptr scheme_win_first_set(int wid)
+{
+	Window *w = window_get_by_id(wid);
+
+	if (!w)
+		return Sfalse;
+
+	window_insert_first(w);
+	return Strue;
+}
+
 ptr scheme_win_prev_set(int wid, int prev)
 {
 	Window *w = window_get_by_id(wid);
@@ -1658,6 +1669,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_first_get", scheme_win_first_get);
 	Sregister_symbol("cs_win_prev_get", scheme_win_prev_get);
 	Sregister_symbol("cs_win_next_get", scheme_win_next_get);
+	Sregister_symbol("cs_win_first_set", scheme_win_first_set);
 	Sregister_symbol("cs_win_prev_set", scheme_win_prev_set);
 	Sregister_symbol("cs_win_next_set", scheme_win_next_set);
 	Sregister_symbol("cs_win_upper_get", scheme_win_upper_get);
