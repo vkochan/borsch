@@ -855,13 +855,11 @@ int win_state_set(int wid, win_state_t st)
 int win_state_toggle(int wid, win_state_t st)
 {
 	const char *maxi[] = { "[ ]" };
-	Window *c, *orig;
+	Window *c;
 
 	c = window_get_by_id(wid);
 	if (!c)
 		return -1;
-
-	orig = window_current();
 
 	switch (st) {
 	case WIN_STATE_MAXIMIZED:
