@@ -50,6 +50,25 @@
    )
 )
 
+(define window-last-master
+   (lambda ()
+      (let ([m #f])
+         (window-for-each
+            (lambda (w)
+               (and
+                  (window-is-master? w)
+                  (begin
+                     (set! m w)
+                     #t
+                  )
+               )
+            )
+         )
+         m
+      )
+   )
+)
+
 (define window-first
    (case-lambda
      [()
@@ -105,10 +124,10 @@
 (define window-set-next
    (case-lambda
       [(next)
-       (call-foreign (__cs_win_next_set (current-window)))]
+       (call-foreign (__cs_win_next_set (current-window) next))]
 
       [(wid next)
-       (call-foreign (__cs_win_next_set wid))]
+       (call-foreign (__cs_win_next_set wid next))]
    )
 )
 
@@ -248,7 +267,19 @@
 
       [(b)
        (let ([w (call-foreign (__cs_win_new b))])
-         (when w (run-hooks 'window-create-hook w))
+         (when w
+            (if (layout-is-sticky?)
+               (let ([m (window-last-master)])
+                  (when m (window-set-next m w))
+               )
+               ;; else
+               (let ()
+                  (window-set-first w)
+               )
+            )
+            (run-hooks 'window-create-hook w)
+            (window-select w)
+         )
          w
        )
       ]

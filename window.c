@@ -17,10 +17,14 @@
 #define for_each_widget(__w) \
 	for (__w = widgets; __w; __w = __w->next)
 
+#define for_each_new_window(__w) \
+	for (__w = new_windows; __w; __w = __w->next)
+
 static unsigned int waw, wah, wax, way;
 static bool layout_needs_arrange = false;
 static unsigned int curr_tab;
 static Tab tabs[MAXTABS + 1];
+static Window *new_windows;
 static Window *widgets;
 static char *title;
 static int win_id;
@@ -458,6 +462,13 @@ void window_init(Ui *_ui)
 
 void window_cleanup(void)
 {
+	while (new_windows) {
+		Window *w = new_windows;
+		Buffer *buf = w->buf;
+
+		buffer_ref_put(buf);
+		window_delete(w);
+	}
 	while (widgets) {
 		Window *w = widgets;
 		Buffer *buf = w->buf;
@@ -498,6 +509,10 @@ Window *window_get_by_id(int id)
 {
 	Window *c;
 
+	for_each_new_window(c) {
+		if (c->id == id)
+			return c;
+	}
 	for_each_window(c) {
 		if (c->id == id)
 			return c;
@@ -588,11 +603,11 @@ void window_first_set(Window *w)
 
 void window_next_set(Window *w, Window *n)
 {
-	window_remove(w);
+	window_remove(n);
 
-	if (n->prev)
-		n->prev->next = w;
-	w->prev = n->prev;
+	if (w->next)
+		w->next->prev = n;
+	n->next = w->next;
 	w->next = n;
 	n->prev = w;
 
@@ -645,6 +660,8 @@ void window_insert_first(Window *c)
 
 void window_insert_after(Window *c, Window *a)
 {
+	window_remove(c);
+
 	if (c == a)
 		return;
 	if (!a)
@@ -671,6 +688,28 @@ static Window *window_last_master(void)
 	return last;
 }
 
+void window_insert_new(Window *w)
+{
+	w->prev = NULL;
+	w->next = new_windows;
+	if (new_windows)
+		new_windows->prev = w;
+	new_windows = w;
+	w->is_new = true;
+}
+
+void window_remove_new(Window *w)
+{
+	if (w->prev)
+		w->prev->next = w->next;
+	if (w->next)
+		w->next->prev = w->prev;
+	if (w == new_windows)
+		new_windows = w->next;
+	w->next = w->prev = NULL;
+	w->is_new = false;
+}
+
 void window_insert(Window *c)
 {
 	window_remove(c);
@@ -690,6 +729,12 @@ void window_insert(Window *c)
 void window_remove(Window *c)
 {
 	Window *d;
+
+	if (c->is_new) {
+		window_remove_new(c);
+		return;
+	}
+
 	if (c->prev)
 		c->prev->next = c->next;
 	if (c->next) {
@@ -1293,8 +1338,7 @@ Window *__window_create(Buffer *buf, bool is_widget, int x, int y, int width, in
 		widget_insert(w);
 	} else {
 		ui_window_has_title_set(w->win, true);
-		window_insert(w);
-		window_focus(w);
+		window_insert_new(w);
 	}
 
 	ui_window_resize(w->win, width, height);

@@ -41,6 +41,7 @@ struct Window {
 	bool highlight_mark;
 	bool pending_draw_evt;
 	bool is_widget;
+	bool is_new;
 	int pos_flags;
 };
 
