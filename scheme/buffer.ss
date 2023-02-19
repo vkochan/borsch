@@ -581,28 +581,23 @@
 
 (define buffer-find
    (lambda (fn)
-      (for-all
-         (lambda (b)
-            (fn (first b))
-         )
-         (buffer-list)
+      (let ([b (find
+                  (lambda (b)
+                     (fn (first b))
+                  )
+                  (buffer-list)
+               )
+            ]
+           )
+         (and b (first b))
       )
    )
 )
 
-(define buffer-get-by-file
-   (lambda (file)
-      (let ([buf #f])
-         (buffer-find
-            (lambda (b)
-               (when (equal? file (buffer-filename b))
-                  (set! buf b)
-                  #f
-               )
-            )
-         )
-         buf
-      )
+(define (buffer-get-by-file file)
+   (buffer-find
+      (lambda (b)
+         (equal? file (buffer-filename b)))
    )
 )
 
