@@ -616,11 +616,11 @@ void window_next_set(Window *w, Window *n)
 
 void window_prev_set(Window *w, Window *p)
 {
-	window_remove(w);
+	window_remove(p);
 
-	if (p->next)
-		p->next->prev = w;
-	w->next = p->next;
+	if (w->prev)
+		w->prev->next = p;
+	p->prev = w->prev;
 	w->prev = p;
 	p->next = w;
 
