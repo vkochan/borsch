@@ -30,9 +30,9 @@
 )
 
 (define frame-switch
-   (lambda (tag)
-      (call-foreign (__cs_frame_current_set tag))
-      (run-hooks 'frame-switch-hook tag)
+   (lambda (frame)
+      (call-foreign (__cs_frame_current_set frame))
+      (run-hooks 'frame-switch-hook frame)
    )
 )
 
@@ -101,8 +101,8 @@
       [()
        (call-foreign (__cs_frame_name_get (current-frame)))]
 
-      [(tag)
-       (call-foreign (__cs_frame_name_get tag))]
+      [(frame)
+       (call-foreign (__cs_frame_name_get frame))]
    )
 )
 
@@ -112,8 +112,8 @@
        (frame-set-name (current-frame) name)
       ]
 
-      [(tag name)
-       (call-foreign (__cs_frame_name_set tag name))
+      [(frame name)
+       (call-foreign (__cs_frame_name_set frame name))
        (run-hooks 'change-frame-name-hook)
       ]
    )
@@ -124,8 +124,8 @@
       [()
        (call-foreign (__cs_frame_cwd_get (current-frame)))]
 
-      [(tag)
-       (call-foreign (__cs_frame_cwd_get tag))]
+      [(frame)
+       (call-foreign (__cs_frame_cwd_get frame))]
    )
 )
 
@@ -134,8 +134,8 @@
       [(cwd)
        (frame-set-cwd (current-frame) cwd)]
 
-      [(tag cwd)
-       (call-foreign (__cs_frame_cwd_set tag cwd))
+      [(frame cwd)
+       (call-foreign (__cs_frame_cwd_set frame cwd))
        (run-hooks 'change-cwd-hook)
       ]
    )
