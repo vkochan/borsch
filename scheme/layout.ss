@@ -62,10 +62,10 @@
    )
 )
 
-(define layout-switch
+(define layout-set
    (case-lambda
         [(l)
-         (layout-switch (current-frame) l)]
+         (layout-set (current-frame) l)]
 
         [(tag l)
          (call-foreign (__cs_layout_current_set tag  l))
@@ -74,43 +74,43 @@
    )
 )
 
-(define layout-switch-tiled
+(define layout-set-tiled
    (case-lambda
         [()
-         (layout-switch-tiled (current-frame))]
+         (layout-set-tiled (current-frame))]
 
         [(tag)
-         (layout-switch tag (symb->layout 'tiled))]
+         (layout-set tag (symb->layout 'tiled))]
    )
 )
 
-(define layout-switch-grid
+(define layout-set-grid
    (case-lambda
         [()
-         (layout-switch-grid (current-frame))]
+         (layout-set-grid (current-frame))]
 
         [(tag)
-         (layout-switch tag (symb->layout 'grid))]
+         (layout-set tag (symb->layout 'grid))]
    )
 )
 
-(define layout-switch-bstack
+(define layout-set-bstack
    (case-lambda
         [()
-         (layout-switch-bstack (current-frame))]
+         (layout-set-bstack (current-frame))]
 
         [(tag)
-         (layout-switch tag (symb->layout 'bstack))]
+         (layout-set tag (symb->layout 'bstack))]
    )
 )
 
-(define layout-switch-maximized
+(define layout-set-maximized
    (case-lambda
         [()
-         (layout-switch-maximized (current-frame))]
+         (layout-set-maximized (current-frame))]
 
         [(tag)
-         (layout-switch tag (symb->layout 'maximized))]
+         (layout-set tag (symb->layout 'maximized))]
    )
 )
 
