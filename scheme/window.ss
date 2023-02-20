@@ -411,10 +411,10 @@
 (define window-set-master
    (case-lambda
       [()
-       (__window-set 'master)]
+       (window-set-master (current-window))]
 
       [(wid)
-       (__window-set wid 'master)]
+       (window-set-first wid)]
    )
 )
 

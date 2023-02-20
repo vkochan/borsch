@@ -835,17 +835,6 @@ int win_state_set(int wid, win_state_t st)
 		setlayout(maxi);
 		break;
 
-	case WIN_STATE_MASTER:
-		window_focus(c);
-		window_remove(c);
-		window_insert_first(c);
-		window_focus(c);
-		layout_changed(true);
-		/* switch to the original window */
-		if (orig)
-			window_focus(orig);
-		break;
-
         default: return -1;
 	}
 
