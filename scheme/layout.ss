@@ -45,8 +45,8 @@
         [()
          (layout->symb (call-foreign (__cs_layout_current_get (current-frame))))]
 
-        [(tag)
-         (layout->symb (call-foreign (__cs_layout_current_get tag)))]
+        [(frame)
+         (layout->symb (call-foreign (__cs_layout_current_get frame)))]
    )
 )
 
@@ -67,8 +67,8 @@
         [(l)
          (layout-set (current-frame) l)]
 
-        [(tag l)
-         (call-foreign (__cs_layout_current_set tag  l))
+        [(frame l)
+         (call-foreign (__cs_layout_current_set frame  l))
          (run-hooks 'layout-changed-hook)
         ]
    )
@@ -79,8 +79,8 @@
         [()
          (layout-set-tiled (current-frame))]
 
-        [(tag)
-         (layout-set tag (symb->layout 'tiled))]
+        [(frame)
+         (layout-set frame (symb->layout 'tiled))]
    )
 )
 
@@ -89,8 +89,8 @@
         [()
          (layout-set-grid (current-frame))]
 
-        [(tag)
-         (layout-set tag (symb->layout 'grid))]
+        [(frame)
+         (layout-set frame (symb->layout 'grid))]
    )
 )
 
@@ -99,8 +99,8 @@
         [()
          (layout-set-bstack (current-frame))]
 
-        [(tag)
-         (layout-set tag (symb->layout 'bstack))]
+        [(frame)
+         (layout-set frame (symb->layout 'bstack))]
    )
 )
 
@@ -109,8 +109,8 @@
         [()
          (layout-set-maximized (current-frame))]
 
-        [(tag)
-         (layout-set tag (symb->layout 'maximized))]
+        [(frame)
+         (layout-set frame (symb->layout 'maximized))]
    )
 )
 
@@ -119,8 +119,8 @@
         [()
          (equal? 'tiled (layout-current))]
 
-        [(tag)
-         (equal? 'tiled (layout-current tag))]
+        [(frame)
+         (equal? 'tiled (layout-current frame))]
    )
 )
 
@@ -129,8 +129,8 @@
         [()
          (equal? 'grid (layout-current))]
 
-        [(tag)
-         (equal? 'grid (layout-current tag))]
+        [(frame)
+         (equal? 'grid (layout-current frame))]
    )
 )
 
@@ -139,8 +139,8 @@
         [()
          (equal? 'bstack (layout-current))]
 
-        [(tag)
-         (equal? 'bstack (layout-current tag))]
+        [(frame)
+         (equal? 'bstack (layout-current frame))]
    )
 )
 
@@ -149,8 +149,8 @@
         [()
          (equal? 'maximized (layout-current))]
 
-        [(tag)
-         (equal? 'maximized (layout-current tag))]
+        [(frame)
+         (equal? 'maximized (layout-current frame))]
    )
 )
 
@@ -159,8 +159,8 @@
       [()
        (call-foreign (__cs_layout_nmaster_get (current-frame)))]
 
-      [(tag)
-       (call-foreign (__cs_layout_nmaster_get tag))]
+      [(frame)
+       (call-foreign (__cs_layout_nmaster_get frame))]
    )
 )
 
@@ -169,8 +169,8 @@
       [(n)
        (call-foreign (__cs_layout_nmaster_set (current-frame) n))]
 
-      [(tag n)
-       (call-foreign (__cs_layout_nmaster_set tag n))]
+      [(frame n)
+       (call-foreign (__cs_layout_nmaster_set frame n))]
    )
 )
 
@@ -186,9 +186,9 @@
           (current-frame) (+ (call-foreign (__cs_layout_nmaster_get (current-frame))) n)
        ))]
 
-      [(tag n)
+      [(frame n)
        (call-foreign (__cs_layout_nmaster_set
-          tag (+ (call-foreign (__cs_layout_nmaster_get tag)) n)
+          frame (+ (call-foreign (__cs_layout_nmaster_get frame)) n)
        ))]
    )
 )
@@ -205,9 +205,9 @@
           (current-frame) (- (call-foreign (__cs_layout_nmaster_get (current-frame))) n)
        ))]
 
-      [(tag n)
+      [(frame n)
        (call-foreign (__cs_layout_nmaster_set
-          tag (- (call-foreign (__cs_layout_nmaster_get tag)) n)
+          frame (- (call-foreign (__cs_layout_nmaster_get frame)) n)
        ))]
    )
 )
@@ -217,8 +217,8 @@
       [()
        (call-foreign (__cs_layout_fmaster_get (current-frame)))]
 
-      [(tag)
-       (call-foreign (__cs_layout_fmaster_get tag))]
+      [(frame)
+       (call-foreign (__cs_layout_fmaster_get frame))]
    )
 )
 
@@ -227,8 +227,8 @@
       [(f)
        (call-foreign (__cs_layout_fmaster_set (current-frame) f))]
 
-      [(tag f)
-       (call-foreign (__cs_layout_fmaster_set tag f))]
+      [(frame f)
+       (call-foreign (__cs_layout_fmaster_set frame f))]
    )
 )
 
@@ -244,9 +244,9 @@
           (current-frame) (+ (call-foreign (__cs_layout_fmaster_get (current-frame))) f)
        ))]
 
-      [(tag f)
+      [(frame f)
        (call-foreign (__cs_layout_fmaster_set
-          tag (+ (call-foreign (__cs_layout_fmaster_get tag)) f)
+          frame (+ (call-foreign (__cs_layout_fmaster_get frame)) f)
        ))]
    )
 )
@@ -263,9 +263,9 @@
           (current-frame) (- (call-foreign (__cs_layout_fmaster_get (current-frame))) f)
        ))]
 
-      [(tag f)
+      [(frame f)
        (call-foreign (__cs_layout_fmaster_set
-          tag (- (call-foreign (__cs_layout_fmaster_get tag)) f)
+          frame (- (call-foreign (__cs_layout_fmaster_get frame)) f)
        ))]
    )
 )
@@ -275,8 +275,8 @@
         [(s)
          (call-foreign (__cs_layout_sticky_set (current-frame) s))]
 
-        [(tag s)
-         (call-foreign (__cs_layout_sticky_set tag s))]
+        [(frame s)
+         (call-foreign (__cs_layout_sticky_set frame s))]
    )
 )
 
@@ -285,8 +285,8 @@
         [()
          (call-foreign (__cs_layout_sticky_get (current-frame)))]
 
-        [(tag)
-         (call-foreign (__cs_layout_sticky_get tag))]
+        [(frame)
+         (call-foreign (__cs_layout_sticky_get frame))]
    )
 )
 
@@ -295,7 +295,7 @@
       [()
        (layout-set-sticky (not (layout-is-sticky?)))]
 
-      [(tag)
-       (layout-set-sticky tag (not (layout-is-sticky? tag)))]
+      [(frame)
+       (layout-set-sticky frame (not (layout-is-sticky? frame)))]
    )
 )
