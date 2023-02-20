@@ -59,7 +59,7 @@
             (topbar-draw)
          )
       )
-      (add-hook 'layout-switch-hook
+      (add-hook 'layout-changed-hook
          (lambda ()
             (topbar-draw)
          )
