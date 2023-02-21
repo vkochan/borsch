@@ -157,7 +157,7 @@
 (define layout-n-master
    (case-lambda
       [()
-       (call-foreign (__cs_layout_nmaster_get (current-frame)))]
+       (layout-n-master (current-frame))]
 
       [(fr)
        (call-foreign (__cs_layout_nmaster_get (frame-id fr)))]
@@ -167,7 +167,7 @@
 (define layout-set-n-master
    (case-lambda
       [(n)
-       (call-foreign (__cs_layout_nmaster_set (current-frame) n))]
+       (layout-set-n-master (current-frame) n)]
 
       [(fr n)
        (call-foreign (__cs_layout_nmaster_set (frame-id fr) n))]
