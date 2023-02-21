@@ -136,8 +136,6 @@ void window_prev_set(Window *w, Window *n);
 Window *window_prev(Window *w);
 Window *window_next(Window *w);
 void window_insert_first(Window *c);
-void window_insert_after(Window *c, Window *a);
-void window_insert(Window *c);
 void window_remove(Window *c);
 bool window_is_master(Window *w);
 bool window_is_master_sticky(Window *c);

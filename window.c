@@ -624,26 +624,6 @@ void window_insert_first(Window *c)
 	layout_changed(true);
 }
 
-void window_insert_after(Window *c, Window *a)
-{
-	window_remove(c);
-
-	if (c == a)
-		return;
-	if (!a)
-		for_each_window_except_last(a);
-
-	if (a) {
-		if (a->next)
-			a->next->prev = c;
-		c->next = a->next;
-		c->prev = a;
-		a->next = c;
-		for (int o = a->order; c; c = c->next)
-			c->order = ++o;
-	}
-}
-
 static Window *window_last_master(void)
 {
 	Window *m, *last = NULL;
@@ -674,22 +654,6 @@ void window_remove_new(Window *w)
 		new_windows = w->next;
 	w->next = w->prev = NULL;
 	w->is_new = false;
-}
-
-void window_insert(Window *c)
-{
-	window_remove(c);
-
-	if (window_is_master_sticky(NULL)) {
-		Window *master = window_last_master();
-
-		if (master) {
-			window_insert_after(c, master);
-			return;
-		}
-	}
-
-	window_insert_first(c);
 }
 
 void window_remove(Window *c)
