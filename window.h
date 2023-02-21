@@ -45,8 +45,6 @@ struct Window {
 	int pos_flags;
 };
 
-#define CWD_MAX		256
-
 typedef struct _Frame {
 	int nmaster;
 	float mfact;
