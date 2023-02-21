@@ -6,12 +6,12 @@
       (with-current-buffer topbar-buffer
          (text-delete)
          (for-each
-            (lambda (tag)
+            (lambda (fr)
                (let (
-                     [tag-color (if (equal? tag (current-frame))
+                     [fr-color (if (equal? fr (current-frame))
                                     "blue"
                                     ;; else
-                                    (if (> (length (window-list tag)) 0)
+                                    (if (> (length (window-list fr)) 0)
                                        "green"
                                        ;;"bright-black"
                                        ;; else
@@ -20,17 +20,17 @@
                                     )
                                 )
                      ]
-                     [vname (frame-name tag)]
+                     [vname (frame-name fr)]
                     )
                   (let ([name (or vname "")])
                      (text-insert
-                        (format "[~a~a]" tag (if (equal? "" name) "" (string-append ":" name)))
-                       `(style: (fg: ,tag-color))
+                        (format "[~a~a]" (frame-id fr) (if (equal? "" name) "" (string-append ":" name)))
+                       `(style: (fg: ,fr-color))
                      )
                   )
                )
             )
-            '(1 2 3 4 5 6 7 8 9)
+            (list frame-1 frame-2 frame-3 frame-4 frame-5 frame-6 frame-7 frame-8 frame-9)
          )
          (text-insert (layout-name))
          (text-insert (format "[~a]" (current-cwd)) '(style: (fg: "bright-yellow")))
@@ -45,7 +45,7 @@
          (set! topbar-window w)
       )
       (add-hook 'frame-switch-hook
-         (lambda (tag)
+         (lambda (frame)
             (topbar-draw)
          )
       )

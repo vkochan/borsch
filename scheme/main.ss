@@ -11,8 +11,8 @@
 (include "style.ss")
 (include "keymap.ss")
 (include "screen.ss")
-(include "layout.ss")
 (include "frame.ss")
+(include "layout.ss")
 (include "window.ss")
 (include "buffer.ss")
 (include "text.ss")
@@ -255,8 +255,6 @@
 
 (minibuf-create)
 (topbar-create)
-
-(frame-set-cwd (current-directory))
 
 (define window-delete-non-sticky
    (lambda ()

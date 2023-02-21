@@ -373,35 +373,6 @@ int frame_current_set(int tab)
 	layout_changed(true);
 }
 
-const char *frame_name_get(int tab)
-{
-	if (tab_get(tab)->f->name && strlen(tab_get(tab)->f->name)) {
-		return tab_get(tab)->f->name;
-	} else {
-		return NULL;
-	}
-}
-
-int frame_name_set(int tab, char *name)
-{
-	free(tab_get(tab)->f->name);
-	tab_get(tab)->f->name = NULL;
-
-	if (name && strlen(name))
-		tab_get(tab)->f->name = strdup(name);
-}
-
-char *frame_cwd_get(int tab)
-{
-	return tab_get(tab)->f->cwd;
-}
-
-int frame_cwd_set(int tab, char *cwd)
-{
-	strncpy(tab_get(tab)->f->cwd, cwd, CWD_MAX - 1);
-	return 0;
-}
-
 static void tabs_init(void) {
 	int i;
 
@@ -413,9 +384,6 @@ static void tabs_init(void) {
 		tabs[i].f->layout = layouts;
 		tabs[i].f->layout_prev = layouts;
 		tabs[i].f->msticky = false;
-		tabs[i].f->name = NULL;
-		tabs[i].f->cwd = calloc(CWD_MAX, 1);
-		getcwd(tabs[i].f->cwd, CWD_MAX);
 	}
 }
 
@@ -425,8 +393,6 @@ static void tabs_cleanup(void)
 		while (tab_get(i)->f->windows) {
 			window_delete(tab_get(i)->f->windows);
 		}
-		free(tab_get(i)->f->name);
-		free(tab_get(i)->f->cwd);
 		free(tab_get(i)->f);
 	}
 }

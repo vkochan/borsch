@@ -72,11 +72,11 @@
 (define window-first
    (case-lambda
      [()
-      (window-first -1)
+      (window-first (current-frame))
      ]
 
-     [(fid)
-      (call-foreign (__cs_win_first_get fid))
+     [(fr)
+      (call-foreign (__cs_win_first_get (frame-id fr)))
      ]
    )
 )
@@ -134,11 +134,11 @@
 (define window-list
    (case-lambda
      [()
-      (window-list -1)
+      (window-list (current-frame))
      ]
 
-     [(fid)
-      (let ([win (window-first fid)]
+     [(fr)
+      (let ([win (window-first fr)]
             [lst   '()]
 	   )
 

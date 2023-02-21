@@ -1391,30 +1391,6 @@ int scheme_frame_current_set(int tag)
 	return frame_current_set(tag);
 }
 
-ptr scheme_frame_name_get(int tag)
-{
-	const char *name = frame_name_get(tag);
-
-	if (!name)
-		return Sfalse;
-	return Sstring(name);
-}
-
-int scheme_frame_name_set(int tag, char *name)
-{
-	return frame_name_set(tag, name);
-}
-
-ptr scheme_frame_cwd_get(int tag)
-{
-	return Sstring(frame_cwd_get(tag));
-}
-
-int scheme_frame_cwd_set(int tag, char *cwd)
-{
-	return frame_cwd_set(tag, cwd);
-}
-
 int scheme_layout_current_get(int tag)
 {
 	return layout_current_get(tag);
@@ -1795,10 +1771,6 @@ static void scheme_export_symbols(void)
 
 	Sregister_symbol("cs_frame_current_get", scheme_frame_current_get);
 	Sregister_symbol("cs_frame_current_set", scheme_frame_current_set);
-	Sregister_symbol("cs_frame_name_get", scheme_frame_name_get);
-	Sregister_symbol("cs_frame_name_set", scheme_frame_name_set);
-	Sregister_symbol("cs_frame_cwd_get", scheme_frame_cwd_get);
-	Sregister_symbol("cs_frame_cwd_set", scheme_frame_cwd_set);
 
 	Sregister_symbol("cs_layout_current_get", scheme_layout_current_get);
 	Sregister_symbol("cs_layout_current_set", scheme_layout_current_set);

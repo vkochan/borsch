@@ -52,8 +52,6 @@ typedef struct _Frame {
 	float mfact;
 	Layout *layout;
 	Layout *layout_prev;
-	char *cwd;
-	char *name;
 	bool msticky;
 	Window *sel;
 	Window *windows;
@@ -103,10 +101,6 @@ Frame *frame_get(int fid);
 Frame *frame_current(void);
 int frame_current_id(void);
 int frame_current_set(int tab);
-const char *frame_name_get(int tab);
-int frame_name_set(int tab, char *name);
-char *frame_cwd_get(int tab);
-int frame_cwd_set(int tab, char *cwd);
 
 #define for_each_window(__w) \
 	for (__w = window_first(); __w; __w = __w->next)

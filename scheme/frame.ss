@@ -1,13 +1,55 @@
-(define __cs_frame_current_get (foreign-procedure __collect_safe "cs_frame_current_get" () int))
 (define __cs_frame_current_set (foreign-procedure __collect_safe "cs_frame_current_set" (int) int))
-(define __cs_frame_name_get (foreign-procedure __collect_safe "cs_frame_name_get" (int) scheme-object))
-(define __cs_frame_name_set (foreign-procedure "cs_frame_name_set" (int string) int))
-(define __cs_frame_cwd_get (foreign-procedure __collect_safe "cs_frame_cwd_get" (int) scheme-object))
-(define __cs_frame_cwd_set (foreign-procedure "cs_frame_cwd_set" (int string) int))
+
+(define frame-list (make-eq-hashtable))
+
+(define frame-create
+   (lambda (name)
+      (let (
+            [id (hashtable-size frame-list)]
+            [frame (make-eq-hashtable)]
+           )
+         (hashtable-set! frame 'cwd (current-directory))
+         (hashtable-set! frame 'name name)
+         (hashtable-set! frame 'id id)
+         (hashtable-set! frame-list id frame)   
+         frame
+      )
+   )
+)
+
+(define frame-all (frame-create "all"))
+(define frame-1 (frame-create ""))
+(define frame-2 (frame-create ""))
+(define frame-3 (frame-create ""))
+(define frame-4 (frame-create ""))
+(define frame-5 (frame-create ""))
+(define frame-6 (frame-create ""))
+(define frame-7 (frame-create ""))
+(define frame-8 (frame-create ""))
+(define frame-9 (frame-create ""))
+
+(define *current-frame* frame-1)
 
 (define current-frame
    (lambda ()
-      (call-foreign (__cs_frame_current_get))
+      *current-frame*
+   )
+)
+
+
+(define-syntax (frame-set-var! stx)
+   (syntax-case stx ()
+      ((_ f s v)
+         #`(hashtable-set! f 's v)
+      )
+   )
+)
+
+(define-syntax (frame-get-var stx)
+   (syntax-case stx ()
+      ((_ f s)
+         #`(hashtable-ref f 's #f)
+      )
    )
 )
 
@@ -30,79 +72,90 @@
 )
 
 (define frame-switch
-   (lambda (frame)
-      (call-foreign (__cs_frame_current_set frame))
-      (run-hooks 'frame-switch-hook frame)
+   (lambda (fr)
+      (set! *current-frame* fr)
+      (call-foreign (__cs_frame_current_set (frame-id fr)))
+      (run-hooks 'frame-switch-hook fr)
    )
 )
 
 (define frame-switch-1
    (lambda ()
-      (frame-switch 1)
+      (frame-switch frame-1)
    )
 )
 
 (define frame-switch-2
    (lambda ()
-      (frame-switch 2)
+      (frame-switch frame-2)
    )
 )
 
 (define frame-switch-3
    (lambda ()
-      (frame-switch 3)
+      (frame-switch frame-3)
    )
 )
 
 (define frame-switch-4
    (lambda ()
-      (frame-switch 4)
+      (frame-switch frame-4)
    )
 )
 
 (define frame-switch-5
    (lambda ()
-      (frame-switch 5)
+      (frame-switch frame-5)
    )
 )
 
 (define frame-switch-6
    (lambda ()
-      (frame-switch 6)
+      (frame-switch frame-6)
    )
 )
 
 (define frame-switch-7
    (lambda ()
-      (frame-switch 7)
+      (frame-switch frame-7)
    )
 )
 
 (define frame-switch-8
    (lambda ()
-      (frame-switch 8)
+      (frame-switch frame-8)
    )
 )
 
 (define frame-switch-9
    (lambda ()
-      (frame-switch 9)
+      (frame-switch frame-9)
    )
 )
 
 (define frame-switch-all
    (lambda ()
-      (frame-switch 0)
+      (frame-switch frame-all)
+   )
+)
+
+(define frame-id
+   (case-lambda
+      [()
+       (frame-id (current-frame))]
+
+      [(fr)
+       (frame-get-var fr id)]
    )
 )
 
 (define frame-name
    (case-lambda
       [()
-       (call-foreign (__cs_frame_name_get (current-frame)))]
+       (frame-name (current-frame))]
 
-      [(frame)
-       (call-foreign (__cs_frame_name_get frame))]
+      [(fr)
+       (frame-get-var fr name)]
    )
 )
 
@@ -112,8 +165,8 @@
        (frame-set-name (current-frame) name)
       ]
 
-      [(frame name)
-       (call-foreign (__cs_frame_name_set frame name))
+      [(fr n)
+       (frame-set-var! fr name n)
        (run-hooks 'change-frame-name-hook)
       ]
    )
@@ -122,10 +175,10 @@
 (define frame-cwd
    (case-lambda
       [()
-       (call-foreign (__cs_frame_cwd_get (current-frame)))]
+       (frame-cwd (current-frame))]
 
-      [(frame)
-       (call-foreign (__cs_frame_cwd_get frame))]
+      [(fr)
+       (frame-get-var fr cwd)]
    )
 )
 
@@ -134,8 +187,8 @@
       [(cwd)
        (frame-set-cwd (current-frame) cwd)]
 
-      [(frame cwd)
-       (call-foreign (__cs_frame_cwd_set frame cwd))
+      [(fr c)
+       (frame-set-var! fr cwd c)
        (run-hooks 'change-cwd-hook)
       ]
    )
