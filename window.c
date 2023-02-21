@@ -624,16 +624,6 @@ void window_insert_first(Window *c)
 	layout_changed(true);
 }
 
-static Window *window_last_master(void)
-{
-	Window *m, *last = NULL;
-
-	for_each_window_master(m)
-		last = m;
-
-	return last;
-}
-
 void window_insert_new(Window *w)
 {
 	w->prev = NULL;
