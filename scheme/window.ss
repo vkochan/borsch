@@ -364,10 +364,12 @@
 (define window-is-maximized?
    (case-lambda
       [()
-       (equal? (__window-get) 'maximized)]
+       (window-is-maximized? (current-window))]
 
       [(wid)
-       (equal? (__window-get wid) 'maximized)]
+       (and (equal? (current-window) wid)
+            (layout-is-maximized?))
+      ]
    )
 )
 
