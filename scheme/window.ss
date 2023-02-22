@@ -52,12 +52,16 @@
 
 (define window-last-master
    (lambda ()
-      (let ([m #f])
+      (let (
+            [nm (layout-n-master)]
+            [m #f]
+           )
          (window-for-each
             (lambda (w)
                (and
-                  (window-is-master? w)
+                  (> nm 0)
                   (begin
+                     (set! nm (- nm 1))
                      (set! m w)
                      #t
                   )
