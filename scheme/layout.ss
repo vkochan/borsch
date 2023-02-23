@@ -80,7 +80,7 @@
          (layout-set-tiled (current-frame))]
 
         [(fr)
-         (layout-set (frame-id fr) (symb->layout 'tiled))]
+         (layout-set fr (symb->layout 'tiled))]
    )
 )
 
@@ -90,7 +90,7 @@
          (layout-set-grid (current-frame))]
 
         [(fr)
-         (layout-set (frame-id fr) (symb->layout 'grid))]
+         (layout-set fr (symb->layout 'grid))]
    )
 )
 
@@ -100,7 +100,7 @@
          (layout-set-bstack (current-frame))]
 
         [(fr)
-         (layout-set (frame-id fr) (symb->layout 'bstack))]
+         (layout-set fr (symb->layout 'bstack))]
    )
 )
 
@@ -110,7 +110,7 @@
          (layout-set-maximized (current-frame))]
 
         [(fr)
-         (layout-set (frame-id fr) (symb->layout 'maximized))]
+         (layout-set fr (symb->layout 'maximized))]
    )
 )
 
