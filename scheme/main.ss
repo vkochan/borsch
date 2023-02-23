@@ -260,7 +260,8 @@
    (lambda ()
       (window-for-each
          (lambda (wid)
-            (when (not (window-is-sticky? wid))
+            (when (and (not (window-is-sticky? wid))
+                       (not (equal? wid (current-window))))
                (window-delete wid)
             )
          )
