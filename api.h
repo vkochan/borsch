@@ -10,12 +10,6 @@
 
 typedef struct Buffer Buffer;
 
-typedef enum {
-	WIN_STATE_MINIMIZED = 0,
-	WIN_STATE_MAXIMIZED = 1,
-	WIN_STATE_MASTER    = 2,
-} win_state_t;
-
 typedef void (*bind_key_cb_t)(void);
 
 void eprint(const char *errstr, ...);
