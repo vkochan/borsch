@@ -17,7 +17,6 @@
 (define __cs_win_close (foreign-procedure __collect_safe "cs_win_close" (int) int))
 (define __cs_win_title_get (foreign-procedure __collect_safe "cs_win_title_get" (int) scheme-object))
 (define __cs_win_title_set (foreign-procedure "cs_win_title_set" (int string) int))
-(define __cs_win_state_get(foreign-procedure __collect_safe "cs_win_state_get" (int) int))
 (define __cs_win_state_set(foreign-procedure __collect_safe "cs_win_state_set" (int int) int))
 (define __cs_win_state_toggle(foreign-procedure __collect_safe "cs_win_state_toggle" (int int) int))
 (define __cs_win_buf_get (foreign-procedure __collect_safe "cs_win_buf_get" (int) scheme-object))
@@ -352,25 +351,6 @@
 
       [(wid title)
        (call-foreign (__cs_win_title_set wid title))]
-   )
-)
-
-(define win-state->symb
-   (lambda (st)
-      (case st
-	 [1 'maximized]
-         [2 'master   ]
-      )
-   )
-)
-
-(define __window-get
-   (case-lambda
-      [()
-       (__window-get (current-window))]
-
-      [(wid)
-       (win-state->symb (call-foreign (__cs_win_state_get wid)))]
    )
 )
 

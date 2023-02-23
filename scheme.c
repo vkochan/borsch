@@ -263,11 +263,6 @@ int scheme_win_title_set(int wid, char *title)
 	return -1;
 }
 
-int scheme_win_state_get(int wid)
-{
-	return win_state_get(wid);
-}
-
 int scheme_win_state_set(int wid, win_state_t st)
 {
 	return win_state_set(wid, st);
@@ -1659,7 +1654,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_close", scheme_win_close);
 	Sregister_symbol("cs_win_title_get", scheme_win_title_get);
 	Sregister_symbol("cs_win_title_set", scheme_win_title_set);
-	Sregister_symbol("cs_win_state_get", scheme_win_state_get);
 	Sregister_symbol("cs_win_state_set", scheme_win_state_set);
 	Sregister_symbol("cs_win_state_toggle", scheme_win_state_toggle);
 	Sregister_symbol("cs_win_buf_get", scheme_win_buf_get);
