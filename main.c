@@ -802,29 +802,6 @@ int win_new(int bid)
  	return c->id;
 }
 
-int win_state_set(int wid, win_state_t st)
-{
-	const char *maxi[] = { "[ ]" };
-	Window *c, *orig;
-
-	c = window_get_by_id(wid);
-	if (!c)
-		return -1;
-
-	orig = window_current();
-
-	switch (st) {
-	case WIN_STATE_MAXIMIZED:
-		window_focus(c);
-		setlayout(maxi);
-		break;
-
-        default: return -1;
-	}
-
-	return 0;
-}
-
 int win_state_toggle(int wid, win_state_t st)
 {
 	const char *maxi[] = { "[ ]" };
