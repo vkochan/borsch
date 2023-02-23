@@ -56,7 +56,7 @@
             [nm (layout-n-master)]
             [m #f]
            )
-         (window-for-each
+         (window-for-all
             (lambda (w)
                (and
                   (> nm 0)
@@ -170,6 +170,19 @@
    (lambda (fn)
       (let ([ls (window-list)])
          (for-each
+            (lambda (w)
+               (fn (first w))
+            )
+            ls
+         )
+      )
+   )
+)
+
+(define window-for-all
+   (lambda (fn)
+      (let ([ls (window-list)])
+         (for-all
             (lambda (w)
                (fn (first w))
             )
