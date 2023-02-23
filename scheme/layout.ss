@@ -280,6 +280,6 @@
        (layout-set-sticky (not (layout-is-sticky?)))]
 
       [(fr)
-       (layout-set-sticky (frame-id fr) (not (layout-is-sticky? (frame-id fr))))]
+       (layout-set-sticky fr (not (layout-is-sticky? fr)))]
    )
 )
