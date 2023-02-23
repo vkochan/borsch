@@ -68,6 +68,7 @@
          (layout-set (current-frame) l)]
 
         [(fr l)
+         (frame-set-prev-layout fr (layout-current fr))
          (call-foreign (__cs_layout_current_set (frame-id fr)  l))
          (run-hooks 'layout-changed-hook)
         ]
@@ -111,6 +112,21 @@
 
         [(fr)
          (layout-set fr (symb->layout 'maximized))]
+   )
+)
+
+(define layout-toggle-maximized
+   (case-lambda
+      [()
+       (layout-toggle-maximized (current-frame))]
+
+      [(fr)
+       (if (equal? (layout-current fr) 'maximized)
+          (layout-set fr (symb->layout (frame-prev-layout fr)))
+          ;; else
+          (layout-set fr (symb->layout 'maximized))
+       )
+      ]
    )
 )
 

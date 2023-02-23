@@ -9,6 +9,7 @@
             [frame (make-eq-hashtable)]
            )
          (hashtable-set! frame 'cwd (current-directory))
+         (hashtable-set! frame 'prev-layout #f)
          (hashtable-set! frame 'name name)
          (hashtable-set! frame 'id id)
          (hashtable-set! frame-list id frame)   
@@ -191,5 +192,25 @@
        (frame-set-var! fr cwd c)
        (run-hooks 'change-cwd-hook)
       ]
+   )
+)
+
+(define frame-prev-layout
+   (case-lambda
+      [()
+       (frame-prev-layout (current-frame))]
+
+      [(fr)
+       (frame-get-var fr prev-layout)]
+   )
+)
+
+(define frame-set-prev-layout
+   (case-lambda
+      [(l)
+       (frame-set-prev-layout (current-frame) l)]
+
+      [(fr l)
+       (frame-set-var! fr prev-layout l)]
    )
 )

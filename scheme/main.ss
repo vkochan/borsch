@@ -290,7 +290,7 @@
 (bind-key "M-w f"       layout-set-tiled)
 (bind-key "M-w g"       layout-set-grid)
 (bind-key "M-w b"       layout-set-bstack)
-(bind-key "M-w m"       window-toggle-maximized)
+(bind-key "M-w m"       layout-toggle-maximized)
 (bind-key "M-w <Enter>" window-set-master)
 (bind-key "M-b n"       new-text-buffer)
 (bind-key "M-b s"       minibuf-switch-buffer)
@@ -336,7 +336,7 @@
 (bind-key "C-g w f"   layout-set-tiled)
 (bind-key "C-g w g"   layout-set-grid)
 (bind-key "C-g w b"   layout-set-bstack)
-(bind-key "C-g m"   window-toggle-maximized)
+(bind-key "C-g m"   layout-toggle-maximized)
 (bind-key "C-g n"   new-text-buffer)
 (bind-key "C-g o"   open-file-prompt)
 
