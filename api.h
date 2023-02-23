@@ -29,7 +29,6 @@ void eprint(const char *errstr, ...);
 extern Ui *g_ui;
 
 int win_new(int bid);
-int win_state_toggle(int wid, win_state_t st);
 void win_size_set(int wid, int width, int height);
 int win_size_get(int wid, int *width, int *height);
 void win_border_set(int wid, bool enable);

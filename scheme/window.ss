@@ -17,7 +17,6 @@
 (define __cs_win_close (foreign-procedure __collect_safe "cs_win_close" (int) int))
 (define __cs_win_title_get (foreign-procedure __collect_safe "cs_win_title_get" (int) scheme-object))
 (define __cs_win_title_set (foreign-procedure "cs_win_title_set" (int string) int))
-(define __cs_win_state_toggle(foreign-procedure __collect_safe "cs_win_state_toggle" (int int) int))
 (define __cs_win_buf_get (foreign-procedure __collect_safe "cs_win_buf_get" (int) scheme-object))
 (define __cs_win_width_get (foreign-procedure __collect_safe "cs_win_width_get" (int) scheme-object))
 (define __cs_win_height_get (foreign-procedure __collect_safe "cs_win_height_get" (int) scheme-object))
@@ -407,28 +406,6 @@
 
       [(wid)
        (window-set-first wid)]
-   )
-)
-
-(define __window-toggle
-   (case-lambda
-      [(st)
-       (__window-toggle (current-window) st)]
-
-      [(wid st)
-       (call-foreign (__cs_win_state_toggle wid (symb->win-state st)))]
-   )
-)
-
-(define window-toggle-maximized
-   (case-lambda
-      [()
-       (window-toggle-maximized (current-window))]
-
-      [(wid)
-       (__window-toggle wid 'maximized)
-       (run-hooks 'window-toggle-maximize-hook wid)
-      ]
    )
 )
 

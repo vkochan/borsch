@@ -108,7 +108,6 @@ static bool start_in_graphic = false;
 
 /* commands for use by keybindings */
 static void quit(const char *args[]);
-static void setlayout(const char *args[]);
 static void togglemouse(const char *args[]);
 static void doeval(const char *args[]);
 
@@ -369,27 +368,6 @@ quit(const char *args[]) {
 }
 
 static void
-setlayout(const char *args[]) {
-	Layout *layout = frame_current()->layout;
-	unsigned int i;
-
-	if (!args || !args[0]) {
-		if (++layout == layout_get(LAYOUT_MAX))
-			layout = layout_get(LAYOUT_FIRST);
-	} else {
-		for (i = 0; i < LAYOUT_MAX; i++)
-			if (!strcmp(args[0], layout_get(i)->symbol))
-				break;
-		if (i == LAYOUT_MAX)
-			return;
-		layout = layout_get(i);
-	}
-	frame_current()->layout_prev = frame_current()->layout;
-	frame_current()->layout = layout;
-	layout_changed(true);
-}
-
-static void
 togglemouse(const char *args[]) {
 	mouse_events_enabled = !mouse_events_enabled;
 	mouse_setup();
@@ -404,7 +382,6 @@ mouse_focus(const char *args[]) {
 static void
 mouse_fullscreen(const char *args[]) {
 	mouse_focus(NULL);
-	setlayout(layout_is_arrange(LAYOUT_MAXIMIZED) ? NULL : args);
 }
 
 static void
@@ -800,31 +777,6 @@ int win_new(int bid)
  	}
 
  	return c->id;
-}
-
-int win_state_toggle(int wid, win_state_t st)
-{
-	const char *maxi[] = { "[ ]" };
-	Window *c;
-
-	c = window_get_by_id(wid);
-	if (!c)
-		return -1;
-
-	switch (st) {
-	case WIN_STATE_MAXIMIZED:
-		if (layout_is_arrange(LAYOUT_MAXIMIZED)) {
-			frame_current()->layout = frame_current()->layout_prev;
-			layout_changed(true);
-		} else {
-			setlayout(maxi);
-		}
-		break;
-
-        default: return -1;
-	}
-
-	return 0;
 }
 
 void win_size_set(int wid, int width, int height)
