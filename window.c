@@ -237,7 +237,6 @@ layout_t layout_current_get(int tab)
 
 int layout_current_set(int tab, layout_t lay)
 {
-	frame_current()->layout_prev = frame_current()->layout;
 	frame_current()->layout = layout_get(lay);
 	layout_changed(true);
 }
@@ -382,7 +381,6 @@ static void tabs_init(void) {
 		tabs[i].f->nmaster = NMASTER;
 		tabs[i].f->mfact = MFACT;
 		tabs[i].f->layout = layouts;
-		tabs[i].f->layout_prev = layouts;
 		tabs[i].f->msticky = false;
 	}
 }

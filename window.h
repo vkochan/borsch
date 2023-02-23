@@ -49,7 +49,6 @@ typedef struct _Frame {
 	int nmaster;
 	float mfact;
 	Layout *layout;
-	Layout *layout_prev;
 	bool msticky;
 	Window *sel;
 	Window *windows;
