@@ -389,10 +389,26 @@
 (define window-is-master?
    (case-lambda
       [()
-       (equal? (__window-get) 'master)]
+       (window-is-master? (current-window))]
 
       [(wid)
-       (equal? (__window-get wid) 'master)]
+       (let (
+             [nm (layout-n-master)]
+             [m? #f]
+            )
+          (window-for-all
+             (lambda (w)
+                (and
+                   (> nm 0)
+                   (not
+                      (let ([w-eq? (equal? w wid)])
+                         (set! m? w-eq?)
+                         m?))
+                   (begin
+                      (set! nm (- nm 1))
+                      (set! m w)
+                      #t))))
+          m?)]
    )
 )
 
