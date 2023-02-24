@@ -69,7 +69,7 @@
 
         [(fr l)
          (frame-set-prev-layout fr (layout-current fr))
-         (call-foreign (__cs_layout_current_set (frame-id fr)  l))
+         (call-foreign (__cs_layout_current_set (frame-id fr)  (symb->layout l)))
          (run-hooks 'layout-changed-hook)
         ]
    )
@@ -81,7 +81,7 @@
          (layout-set-tiled (current-frame))]
 
         [(fr)
-         (layout-set fr (symb->layout 'tiled))]
+         (layout-set fr 'tiled)]
    )
 )
 
@@ -91,7 +91,7 @@
          (layout-set-grid (current-frame))]
 
         [(fr)
-         (layout-set fr (symb->layout 'grid))]
+         (layout-set fr 'grid)]
    )
 )
 
@@ -101,7 +101,7 @@
          (layout-set-bstack (current-frame))]
 
         [(fr)
-         (layout-set fr (symb->layout 'bstack))]
+         (layout-set fr 'bstack)]
    )
 )
 
@@ -111,7 +111,7 @@
          (layout-set-maximized (current-frame))]
 
         [(fr)
-         (layout-set fr (symb->layout 'maximized))]
+         (layout-set fr 'maximized)]
    )
 )
 
@@ -122,9 +122,9 @@
 
       [(fr)
        (if (equal? (layout-current fr) 'maximized)
-          (layout-set fr (symb->layout (frame-prev-layout fr)))
+          (layout-set fr (frame-prev-layout fr))
           ;; else
-          (layout-set fr (symb->layout 'maximized))
+          (layout-set fr 'maximized)
        )
       ]
    )
