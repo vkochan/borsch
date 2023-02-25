@@ -108,34 +108,10 @@ static bool start_in_graphic = false;
 
 /* commands for use by keybindings */
 static void quit(const char *args[]);
-static void togglemouse(const char *args[]);
 static void doeval(const char *args[]);
-
-/* commands for use by mouse bindings */
-static void mouse_focus(const char *args[]);
-static void mouse_fullscreen(const char *args[]);
-static void mouse_zoom(const char *args[]);
 
 static KeyMap *global_kmap;
 static KeyMap *curr_kmap;
-
-#ifdef NCURSES_MOUSE_VERSION
-# define CONFIG_MOUSE /* compile in mouse support if we build against ncurses */
-#endif
-
-#define ENABLE_MOUSE true /* whether to enable mouse events by default */
-
-#ifdef CONFIG_MOUSE
-static Button buttons[] = {
-	{ BUTTON1_CLICKED,        { mouse_focus,      { NULL  } } },
-	{ BUTTON1_DOUBLE_CLICKED, { mouse_fullscreen, { "[ ]" } } },
-	{ BUTTON2_CLICKED,        { mouse_zoom,       { NULL  } } },
-};
-#endif /* CONFIG_MOUSE */
-
-/* global variables */
-static Window *msel = NULL;
-static bool mouse_events_enabled = ENABLE_MOUSE;
 
 static Fifo cmdfifo = { .fd = -1 };
 static Fifo retfifo = { .fd = -1 };
@@ -212,20 +188,6 @@ static void keypress(int code)
 	}
 }
 
-static void
-mouse_setup(void) {
-#ifdef CONFIG_MOUSE
-	mmask_t mask = 0;
-
-	if (mouse_events_enabled) {
-		mask = BUTTON1_CLICKED | BUTTON2_CLICKED;
-		for (unsigned int i = 0; i < LENGTH(buttons); i++)
-			mask |= buttons[i].mask;
-	}
-	mousemask(mask, NULL);
-#endif /* CONFIG_MOUSE */
-}
-
 static void init_default_keymap(void)
 {
 	global_kmap = keymap_new(NULL);
@@ -271,7 +233,6 @@ static void setup_ui(void)
 	ui_event_handler_set(g_ui, handle_ui_event);
 	ui_init(g_ui);
 	init_default_keymap();
-	mouse_setup();
 	window_init(g_ui);
 	
 	window_draw_all(true);
@@ -365,28 +326,6 @@ static void
 quit(const char *args[]) {
 	cleanup();
 	exit(EXIT_SUCCESS);
-}
-
-static void
-togglemouse(const char *args[]) {
-	mouse_events_enabled = !mouse_events_enabled;
-	mouse_setup();
-}
-
-/* commands for use by mouse bindings */
-static void
-mouse_focus(const char *args[]) {
-	window_focus(msel);
-}
-
-static void
-mouse_fullscreen(const char *args[]) {
-	mouse_focus(NULL);
-}
-
-static void
-mouse_zoom(const char *args[]) {
-	window_focus(msel);
 }
 
 static Cmd *
@@ -509,39 +448,6 @@ static void doeval(const char *args[]) {
 	ret = scheme_eval_file(args[0], args[1]);
 
 	write(retfifo.fd, tmp, snprintf(tmp, sizeof(tmp), "%u\n", ret));
-}
-
-static void
-handle_mouse(void) {
-#ifdef CONFIG_MOUSE
-	unsigned int i;
-	MEVENT event;
-	int w_x, w_y;
-
-	if (getmouse(&event) != OK)
-		return;
-
-	msel = window_get_by_coord(event.x, event.y);
-	if (!msel)
-		return;
-
-	w_x = ui_window_x_get(msel->win);
-	w_y = ui_window_y_get(msel->win);
-
-	debug("mouse x:%d y:%d cx:%d cy:%d mask:%d\n", event.x, event.y, event.x - w_x, event.y - w_y, event.bstate);
-
-	if (buffer_proc_get(msel->buf)) {
-		Process *proc = buffer_proc_get(msel->buf);
-		vt_mouse(process_term_get(proc), event.x - w_x, event.y - w_y, event.bstate);
-	}
-
-	for (i = 0; i < LENGTH(buttons); i++) {
-		if (event.bstate & buttons[i].mask)
-			buttons[i].action.cmd(buttons[i].action.args);
-	}
-
-	msel = NULL;
-#endif /* CONFIG_MOUSE */
 }
 
 static int
