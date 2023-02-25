@@ -770,44 +770,6 @@ int win_new(int bid)
  	return c->id;
 }
 
-void win_size_set(int wid, int width, int height)
-{
-	Window *w = window_get_by_id(wid);
-
-	if (w) {
-		bool is_changed = false;
-
-		if (width > 0 && width != ui_window_width_get(w->win)) {
-			ui_window_width_set(w->win, width);
-			is_changed = true;
-		}
-		if (height > 0 && height != ui_window_height_get(w->win)) {
-			ui_window_height_set(w->win, height);
-			is_changed = true;
-		}
-
-		if (!is_changed)
-			return;
-
-		layout_changed(true);
-	}
-}
-
-int win_size_get(int wid, int *width, int *height)
-{
-	Window *w = window_get_by_id(wid);
-
-	if (w) {
-		if (width)
-			*width = ui_window_width_get(w->win);
-		if (height)
-			*height = ui_window_height_get(w->win);
-		return 0;
-	}
-
-	return -1;
-}
-
 int buf_new(char *name)
 {
 	Buffer *buf = __buf_new(name, global_kmap);
