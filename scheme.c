@@ -335,7 +335,11 @@ ptr scheme_win_viewport_height_get(int wid)
 
 void scheme_win_border_set(int wid, bool enable)
 {
-	win_border_set(wid, enable);
+	Window *w = window_get_by_id(wid);
+
+	if (w) {
+		ui_window_border_enable(w->win, enable);
+	}
 }
 
 void scheme_win_buf_switch(int wid, int bid)

@@ -808,15 +808,6 @@ int win_size_get(int wid, int *width, int *height)
 	return -1;
 }
 
-void win_border_set(int wid, bool enable)
-{
-	Window *w = window_get_by_id(wid);
-
-	if (w) {
-		ui_window_border_enable(w->win, enable);
-	}
-}
-
 int buf_new(char *name)
 {
 	Buffer *buf = __buf_new(name, global_kmap);
