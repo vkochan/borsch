@@ -78,11 +78,6 @@ typedef struct {
 #define MAX_KEYS 4
 
 typedef struct {
-	mmask_t mask;
-	Action action;
-} Button;
-
-typedef struct {
 	const char *name;
 	Action action;
 } Cmd;
