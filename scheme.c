@@ -340,7 +340,14 @@ void scheme_win_border_set(int wid, bool enable)
 
 void scheme_win_buf_switch(int wid, int bid)
 {
-	win_buf_switch(wid, bid);
+	Window *w = window_get_by_id(wid);
+	Buffer *b = buffer_by_id(bid);
+
+	if (w && b && w->buf != b) {
+		window_buffer_switch(w, b);
+		view_reload(w->view, buffer_text_get(b));
+		buffer_dirty_set(b, true);
+	}
 }
 
 ptr scheme_win_prev_selected(void)

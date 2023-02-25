@@ -739,15 +739,6 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 
-static void window_switch_buf(Window *w, Buffer *b)
-{
-	if (w && b && w->buf != b) {
-		window_buffer_switch(w, b);
-		view_reload(w->view, buffer_text_get(b));
-		buffer_dirty_set(b, true);
-	}
-}
-
 /* External API */
 void win_update(int wid)
 {
@@ -824,14 +815,6 @@ void win_border_set(int wid, bool enable)
 	if (w) {
 		ui_window_border_enable(w->win, enable);
 	}
-}
-
-void win_buf_switch(int wid, int bid)
-{
-	Window *w = window_get_by_id(wid);
-	Buffer *b = buffer_by_id(bid);
-
-	window_switch_buf(w, b);
 }
 
 int buf_new(char *name)

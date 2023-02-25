@@ -26,7 +26,6 @@ int win_new(int bid);
 void win_size_set(int wid, int width, int height);
 int win_size_get(int wid, int *width, int *height);
 void win_border_set(int wid, bool enable);
-void win_buf_switch(int wid, int bid);
 void win_update(int wid);
 
 int buf_new(char *name);
