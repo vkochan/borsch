@@ -17,12 +17,9 @@
 #define _GNU_SOURCE
 #include <stdlib.h>
 #include <stdint.h>
-#include <wchar.h>
 #include <limits.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
-#include <sys/time.h>
-#include <sys/wait.h>
 #include <sys/types.h>
 #include <fcntl.h>
 #include <stdio.h>
