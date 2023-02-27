@@ -1359,7 +1359,7 @@ static void x_event_process(Ui *ui)
 		seltv.tv_nsec = 1E6 * (timeout - 1E3 * seltv.tv_sec);
 		tv = timeout >= 0 ? &seltv : NULL;
 
-		nfd = event_process(tv);
+		nfd = event_process();
 
 		clock_gettime(CLOCK_MONOTONIC, &now);
 

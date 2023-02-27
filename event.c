@@ -73,7 +73,7 @@ void event_fd_handler_unregister(int fd)
 	}
 }
 
-int event_process(struct timespec *t)
+int event_process(void)
 {
 	struct timespec seltv, *tv, now, lastblink, trigger;
 	sigset_t emptyset;

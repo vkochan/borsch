@@ -311,7 +311,7 @@ static void term_update(Ui *ui)
 static void term_event_process(Ui *ui)
 {
 	doupdate();
-	event_process(NULL);
+	event_process();
 }
 
 static void term_refresh(Ui *ui)
