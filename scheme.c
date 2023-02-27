@@ -17,6 +17,8 @@
 #include "timer.h"
 #include "xstr.h"
 #include "api.h"
+#include "syntax.h"
+#include "event.h"
 
 #define CALL0(who) Scall0(Stop_level_value(Sstring_to_symbol(who)))
 #define CALL1(who, arg) Scall1(Stop_level_value(Sstring_to_symbol(who)), arg)
