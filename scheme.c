@@ -93,12 +93,16 @@ bool scheme_win_is_visible(int wid)
 
 ptr scheme_win_first_get(int fid)
 {
+	Frame *f = frame_by_id(fid);
 	int wid = 0;
 
-	fid = fid < 0 ? tab_current_id_get() : fid;
+	if (!f)
+		f = frame_current();
+	if (!f)
+		return Sfalse;
 
-	if (windows_list_by_fid(fid))
-		wid = windows_list_by_fid(fid)->id;
+	if (windows_list(f))
+		wid = windows_list(f)->id;
 
 	return wid ? Sinteger(wid) : Sfalse;
 }
@@ -1413,54 +1417,120 @@ void scheme_term_filter_enable(int bid, bool enable)
 	term_filter_enable(bid, enable);
 }
 
-int scheme_frame_current_get(void)
+ptr scheme_frame_current_get(void)
 {
-	return frame_current_id();
+	if (frame_current())
+		return Sinteger(frame_current());
+	return Sfalse;
 }
 
-int scheme_frame_current_set(int tag)
+void scheme_frame_current_set(int fid)
 {
-	return frame_current_set(tag);
+	Frame *f = frame_by_id(fid);
+
+	if (f)
+		frame_current_set(f);
 }
 
-int scheme_layout_current_get(int tag)
+ptr scheme_frame_create(void)
 {
-	return layout_current_get(tag);
+	Frame *f = frame_create();
+
+	if (f)
+		return Sinteger(f->id);
+	return Sfalse;
 }
 
-int scheme_layout_current_set(int tag, layout_t lay)
+void scheme_frame_delete(int fid)
 {
-	return layout_current_set(tag, lay);
+	Frame *f = frame_by_id(fid);
+
+	if (f) {
+		frame_delete(f);
+	}
 }
 
-int scheme_layout_nmaster_get(int tag)
+ptr scheme_frame_first(void)
 {
-	return layout_nmaster_get(tag);
+	Frame *f = frame_first();
+
+	if (f) {
+		return Sinteger(f->id);
+	}
+
+	return Sfalse;
 }
 
-int scheme_layout_nmaster_set(int tag, int n)
+ptr scheme_frame_prev(int fid)
 {
-	return layout_nmaster_set(tag, n);
+	Frame *f = frame_by_id(fid);
+	Frame *p;
+
+	if (!f)
+		return Sfalse;
+
+	p = frame_prev(f);
+	if (p) {
+		return Sinteger(p->id);
+	}
+
+	return Sfalse;
 }
 
-float scheme_layout_fmaster_get(int tag)
+ptr scheme_frame_next(int fid)
 {
-	return layout_fmaster_get(tag);
+	Frame *f = frame_by_id(fid);
+	Frame *n;
+
+	if (!f)
+		return Sfalse;
+
+	n = frame_next(f);
+	if (n) {
+		return Sinteger(n->id);
+	}
+
+	return Sfalse;
 }
 
-int scheme_layout_fmaster_set(int tag, float f)
+int scheme_layout_current_get(int fid)
 {
-	return layout_fmaster_set(tag, f);
+	return layout_current_get(fid);
 }
 
-bool scheme_layout_sticky_get(int tag)
+int scheme_layout_current_set(int fid, layout_t lay)
 {
-	return layout_sticky_get(tag);
+	return layout_current_set(fid, lay);
 }
 
-int scheme_layout_sticky_set(int tag, bool is_sticky)
+int scheme_layout_nmaster_get(int fid)
 {
-	return layout_sticky_set(tag, is_sticky);
+	return layout_nmaster_get(fid);
+}
+
+int scheme_layout_nmaster_set(int fid, int n)
+{
+	return layout_nmaster_set(fid, n);
+}
+
+float scheme_layout_fmaster_get(int fid)
+{
+	return layout_fmaster_get(fid);
+}
+
+int scheme_layout_fmaster_set(int fid, float f)
+{
+	return layout_fmaster_set(fid, f);
+}
+
+bool scheme_layout_sticky_get(int fid)
+{
+	return layout_sticky_get(fid);
+}
+
+int scheme_layout_sticky_set(int fid, bool is_sticky)
+{
+	return layout_sticky_set(fid, is_sticky);
 }
 
 static int bind_key(char *key, void (*act)(void), int kid, char *tname)
@@ -1800,6 +1870,11 @@ static void scheme_export_symbols(void)
 
 	Sregister_symbol("cs_frame_current_get", scheme_frame_current_get);
 	Sregister_symbol("cs_frame_current_set", scheme_frame_current_set);
+	Sregister_symbol("cs_frame_create", scheme_frame_create);
+	Sregister_symbol("cs_frame_delete", scheme_frame_delete);
+	Sregister_symbol("cs_frame_first", scheme_frame_first);
+	Sregister_symbol("cs_frame_prev", scheme_frame_prev);
+	Sregister_symbol("cs_frame_next", scheme_frame_next);
 
 	Sregister_symbol("cs_layout_current_get", scheme_layout_current_get);
 	Sregister_symbol("cs_layout_current_set", scheme_layout_current_set);

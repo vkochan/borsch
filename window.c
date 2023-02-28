@@ -14,6 +14,9 @@
 #include "ui/ui.h"
 #include "xstr.h"
 
+#define for_each_frame(__f) \
+	for (__f = frame_list; __f; __f = __f->next)
+
 #define for_each_widget(__w) \
 	for (__w = widgets; __w; __w = __w->next)
 
@@ -22,12 +25,13 @@
 
 static unsigned int waw, wah, wax, way;
 static bool layout_needs_arrange = false;
-static unsigned int curr_tab;
-static Tab tabs[MAXTABS + 1];
-static Window *new_windows;
 static Window *widgets;
-static char *title;
+static Window *new_windows;
 static int win_id;
+static Frame *current_frame;
+static Frame *frame_list;
+static int frame_id;
+static char *title;
 static Ui *ui;
 
 static void layout_tiled(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
@@ -212,6 +216,9 @@ Layout *layout_get(int id)
 
 Layout *layout_current(void)
 {
+	if (!frame_current())
+		return NULL;
+
 	return frame_current()->layout;
 }
 
@@ -230,12 +237,12 @@ bool layout_is_arrange(int id)
 	return layout_current()->id == id;
 }
 
-layout_t layout_current_get(int tab)
+layout_t layout_current_get(int fid)
 {
-	return tab_get(tab)->f->layout->id;
+	return layout_current()->id;
 }
 
-int layout_current_set(int tab, layout_t lay)
+int layout_current_set(int fid, layout_t lay)
 {
 	frame_current()->layout = layout_get(lay);
 	layout_changed(true);
@@ -285,113 +292,157 @@ void layout_current_resize(unsigned int width, unsigned height)
 
 void layout_current_arrange(void)
 {
+	if (frame_current())
 	frame_current()->layout->arrange(wax, way, waw, wah);
 }
 
-int layout_nmaster_get(int tab)
+int layout_nmaster_get(int fid)
 {
-	return tab_get(tab)->f->nmaster;
+	return frame_current()->nmaster;
 }
 
-int layout_nmaster_set(int tab, int n)
+int layout_nmaster_set(int fid, int n)
 {
 	if (layout_is_arrange(LAYOUT_MAXIMIZED) || layout_is_arrange(LAYOUT_GRID))
 		return -1;
 
-	tab_get(tab)->f->nmaster = n;
+	frame_current()->nmaster = n;
 	layout_changed(true);
 
 	return 0;
 }
 
-float layout_fmaster_get(int tab)
+float layout_fmaster_get(int fid)
 {
-	return tab_get(tab)->f->mfact;
+	return frame_current()->mfact;
 }
 
-int layout_fmaster_set(int tab, float mfact)
+int layout_fmaster_set(int fid, float mfact)
 {
 	if (layout_is_arrange(LAYOUT_MAXIMIZED) || layout_is_arrange(LAYOUT_GRID))
 		return -1;
 
-	tab_get(tab)->f->mfact = mfact;
+	frame_current()->mfact = mfact;
 	layout_changed(true);
 
 	return 0;
 }
 
-bool layout_sticky_get(int tab)
+bool layout_sticky_get(int fid)
 {
-	return tab_get(tab)->f->msticky;
+	return frame_current()->msticky;
 }
 
-int layout_sticky_set(int tab, bool is_sticky)
+int layout_sticky_set(int fid, bool is_sticky)
 {
 	Window *m;
 
-	tab_get(tab)->f->msticky = is_sticky;
+	frame_current()->msticky = is_sticky;
 	
 	for_each_window_master(m)
 		buffer_dirty_set(m->buf, true);
 	return 0;
 }
 
-Tab *tab_get(int tab)
-{
-	return &tabs[tab];
-}
-
-int tab_current_id_get(void)
-{
-	return curr_tab;
-}
-
-void tab_current_id_set(int tab)
-{
-	curr_tab = tab;
-}
-
-Frame *frame_get(int fid)
-{
-	return tabs[fid].f;
-}
-
 int frame_current_id(void)
 {
-	return tab_current_id_get();
+	if (frame_current())
+		return frame_current()->id;
+	return 0;
 }
 
 Frame *frame_current(void)
 {
-	return frame_get(tab_current_id_get());
+	return current_frame;
 }
 
-int frame_current_set(int tab)
+int frame_current_set(Frame *f)
 {
-	tab_current_id_set(tab);
+	current_frame = f;
 	layout_changed(true);
 }
 
-static void tabs_init(void) {
-	int i;
-
-	tab_current_id_set(1);
-	for(i=0; i <= MAXTABS; i++) {
-		tabs[i].f = calloc(1, sizeof(Frame));
-		tabs[i].f->nmaster = NMASTER;
-		tabs[i].f->mfact = MFACT;
-		tabs[i].f->layout = layouts;
-		tabs[i].f->msticky = false;
-	}
+static frame_insert(Frame *f)
+{
+	f->prev = NULL;
+	f->next = frame_list;
+	if (frame_list)
+		frame_list->prev = f;
+	frame_list = f;
 }
 
-static void tabs_cleanup(void)
+static frame_remove(Frame *f)
 {
-	for(int i = 0; i <= MAXTABS; i++) {
-		while (tab_get(i)->f->windows) {
-			window_delete(tab_get(i)->f->windows);
-		}
-		free(tab_get(i)->f);
+	if (f->prev)
+		f->prev->next = f->next;
+	if (f->next)
+		f->next->prev = f->prev;
+	if (f == frame_list)
+		frame_list = f->next;
+	f->next = f->prev = NULL;
+}
+
+Frame *frame_create(void)
+{
+	Frame *f;
+
+	f = calloc(1, sizeof(Frame));
+	if (!f)
+		return NULL;
+
+	f->nmaster = NMASTER;
+	f->mfact = MFACT;
+	f->layout = layouts;
+	f->msticky = false;
+	f->id = ++frame_id;
+
+	frame_insert(f);
+
+	if (!current_frame)
+		current_frame = f;
+
+	return f;
+}
+
+void frame_delete(Frame *f)
+{
+	while (f->windows) {
+		window_delete(f->windows);
+	}
+	frame_remove(f);
+	free(f);
+}
+
+Frame *frame_by_id(int fid)
+{
+	Frame *f;
+
+	for_each_frame(f)
+		if (f->id == fid)
+			return f;
+
+	return NULL;
+}
+
+Frame *frame_first(void)
+{
+	return frame_list;
+}
+
+Frame *frame_prev(Frame *f)
+{
+	return f->prev;
+}
+
+Frame *frame_next(Frame *f)
+{
+	return f->next;
+}
+
+static void frames_cleanup(void)
+{
+	while (frame_list) {
+		frame_delete(frame_list);
 	}
 }
 
@@ -420,7 +471,6 @@ static void widget_remove(Window *w)
 
 void window_init(Ui *_ui)
 {
-	tabs_init();
 	ui = _ui;
 }
 
@@ -440,11 +490,14 @@ void window_cleanup(void)
 		buffer_ref_put(buf);
 		window_delete(w);
 	}
-	tabs_cleanup();
+	frames_cleanup();
 }
 
 Window *window_current(void)
 {
+	if (!frame_current())
+		return NULL;
+
 	return frame_current()->sel;
 }
 
@@ -496,14 +549,16 @@ Window *window_last_selected(void)
 	return window_stack();
 }
 
-Window *windows_list_by_fid(int fid)
+Window *windows_list(Frame *f)
 {
-	return frame_get(fid)->windows;
+	return f->windows;
 }
-
 
 Window *window_first(void)
 {
+	if (!frame_current())
+		return NULL;
+
 	return frame_current()->windows;
 }
 
@@ -562,7 +617,8 @@ Window *window_right(Window *w)
 
 void window_first_set(Window *w)
 {
-	frame_current()->windows = w;
+	if (frame_current())
+		frame_current()->windows = w;
 }
 
 void window_next_set(Window *w, Window *n)
@@ -683,6 +739,9 @@ bool window_is_master_sticky(Window *c)
 	int n = 0;
 	Window *m;
 
+	if (!frame_current())
+		return false;
+
 	if (!frame_current()->msticky)
 		return false;
 	if (!c)
@@ -698,12 +757,16 @@ bool window_is_widget(Window *w)
 
 static Window *window_stack(void)
 {
+	if (!frame_current())
+		return NULL;
+
 	return frame_current()->stack;
 }
 
 static window_stack_set(Window *stack)
 {
-	frame_current()->stack = stack;
+	if (frame_current())
+		frame_current()->stack = stack;
 }
 
 static window_stack_insert(Window *c)
@@ -1017,7 +1080,8 @@ void window_draw(Window *c)
 
 static void window_current_set(Window *w)
 {
-	frame_current()->sel = w;
+	if (frame_current())
+		frame_current()->sel = w;
 }
 
 void window_focus(Window *c)

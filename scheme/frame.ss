@@ -1,12 +1,49 @@
-(define __cs_frame_current_set (foreign-procedure __collect_safe "cs_frame_current_set" (int) int))
+(define __cs_frame_current_set (foreign-procedure __collect_safe "cs_frame_current_set" (int) void))
+(define __cs_frame_create (foreign-procedure __collect_safe "cs_frame_create" () scheme-object))
+(define __cs_frame_delete (foreign-procedure __collect_safe "cs_frame_delete" (int) void))
+(define __cs_frame_first (foreign-procedure __collect_safe "cs_frame_first" () scheme-object))
+(define __cs_frame_prev (foreign-procedure __collect_safe "cs_frame_prev" (int) scheme-object))
+(define __cs_frame_next (foreign-procedure __collect_safe "cs_frame_next" (int) scheme-object))
 
 (define frame-list (make-eq-hashtable))
+
+(define (*frame-create*)
+   (call-foreign (__cs_frame_create))
+)
+
+(define (*frame-delete* fid)
+   (call-foreign (__cs_frame_delete fid))
+)
+
+(define (*frame-first*)
+   (call-foreign (__cs_frame_first))
+)
+
+(define (*frame-prev* fid)
+   (call-foreign (__cs_frame_prev fid))
+)
+
+(define (*frame-next* fid)
+   (call-foreign (__cs_frame_next fid))
+)
+
+(define (*frame-list*)
+   (let ([fr  (*frame-first*)]
+         [lst '()]
+	)
+      (while fr
+         (set! lst (append lst (list fr)))
+         (set! fr (*frame-next* fr))
+      )
+      lst
+   )
+)
 
 (define frame-create
    (lambda (name)
       (let (
-            [id (hashtable-size frame-list)]
             [frame (make-eq-hashtable)]
+            [id (*frame-create*)]
            )
          (hashtable-set! frame 'cwd (current-directory))
          (hashtable-set! frame 'prev-layout #f)
@@ -18,7 +55,7 @@
    )
 )
 
-(define frame-all (frame-create "all"))
+;;(define frame-all (frame-create "all"))
 (define frame-1 (frame-create ""))
 (define frame-2 (frame-create ""))
 (define frame-3 (frame-create ""))
@@ -36,7 +73,6 @@
       *current-frame*
    )
 )
-
 
 (define-syntax (frame-set-var! stx)
    (syntax-case stx ()
@@ -134,7 +170,7 @@
    )
 )
 
-(define frame-switch-all
+#;(define frame-switch-all
    (lambda ()
       (frame-switch frame-all)
    )

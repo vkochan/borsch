@@ -306,7 +306,7 @@
 (bind-key "M-7"         frame-switch-7)
 (bind-key "M-8"         frame-switch-8)
 (bind-key "M-9"         frame-switch-9)
-(bind-key "M-0"         frame-switch-all)
+;;(bind-key "M-0"         frame-switch-all)
 
 (bind-key "C-g c"       vterm)
 (bind-key "C-g C-x"     open-repl)
@@ -327,7 +327,7 @@
 (bind-key "C-g f 7" frame-switch-7)
 (bind-key "C-g f 8" frame-switch-8)
 (bind-key "C-g f 9" frame-switch-9)
-(bind-key "C-g f 0" frame-switch-all)
+;;(bind-key "C-g f 0" frame-switch-all)
 
 (bind-key "C-g w i"   layout-n-master+)
 (bind-key "C-g w d"   layout-n-master-)

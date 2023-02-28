@@ -46,6 +46,9 @@ struct Window {
 };
 
 typedef struct _Frame {
+	struct _Frame *next;
+	struct _Frame *prev;
+	int id;
 	int nmaster;
 	float mfact;
 	Layout *layout;
@@ -55,16 +58,10 @@ typedef struct _Frame {
 	Window *stack;
 } Frame;
 
-typedef struct {
-	Frame *f;
-} Tab;
-
 /* master width factor [0.1 .. 0.9] */
 #define MFACT 0.5
 /* number of windows in master area */
 #define NMASTER 1
-
-#define MAXTABS	9
 
 Layout *layout_get(int id);
 Layout *layout_current(void);
@@ -72,8 +69,8 @@ bool layout_is_changed(void);
 void layout_changed(bool changed);
 void layout_set_arrange(int id, void (*arrange)(unsigned int, unsigned int, unsigned int, unsigned int));
 bool layout_is_arrange(int id);
-layout_t layout_current_get(int tab);
-int layout_current_set(int tab, layout_t lay);
+layout_t layout_current_get(int fid);
+int layout_current_set(int fid, layout_t lay);
 int layout_current_nmaster(void);
 float layout_current_fmaster(void);
 unsigned int layout_current_x(void);
@@ -83,21 +80,22 @@ unsigned int layout_current_width(void);
 unsigned int layout_current_height(void);
 void layout_current_resize(unsigned int width, unsigned height);
 void layout_current_arrange(void);
-int layout_nmaster_get(int tab);
-int layout_nmaster_set(int tab, int n);
-float layout_fmaster_get(int tab);
-int layout_fmaster_set(int tab, float mfact);
-bool layout_sticky_get(int tab);
-int layout_sticky_set(int tab, bool is_sticky);
+int layout_nmaster_get(int fid);
+int layout_nmaster_set(int fid, int n);
+float layout_fmaster_get(int fid);
+int layout_fmaster_set(int fid, float mfact);
+bool layout_sticky_get(int fid);
+int layout_sticky_set(int fid, bool is_sticky);
 
-Tab *tab_get(int tab);
-int tab_current_id_get(void);
-void tab_current_id_set(int tab);
-
-Frame *frame_get(int fid);
 Frame *frame_current(void);
 int frame_current_id(void);
-int frame_current_set(int tab);
+int frame_current_set(Frame *f);
+Frame *frame_create(void);
+void frame_delete(Frame *f);
+Frame *frame_by_id(int fid);
+Frame *frame_first(void);
+Frame *frame_prev(Frame *f);
+Frame *frame_next(Frame *f);
 
 #define for_each_window(__w) \
 	for (__w = window_first(); __w; __w = __w->next)
@@ -121,7 +119,7 @@ Window *window_current(void);
 Window *window_get_by_id(int id);
 Window *window_get_by_coord(unsigned int x, unsigned int y);
 Window *window_last_selected(void);
-Window *windows_list_by_fid(int fid);
+Window *windows_list(Frame *f);
 Window *window_first(void);
 Window *window_upper(Window *w);
 Window *window_lower(Window *w);
