@@ -1417,13 +1417,6 @@ void scheme_term_filter_enable(int bid, bool enable)
 	term_filter_enable(bid, enable);
 }
 
-ptr scheme_frame_current_get(void)
-{
-	if (frame_current())
-		return Sinteger(frame_current());
-	return Sfalse;
-}
-
 void scheme_frame_current_set(int fid)
 {
 	Frame *f = frame_by_id(fid);
@@ -1868,7 +1861,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_term_current_line_get", scheme_term_current_line_get);
 	Sregister_symbol("cs_term_filter_enable", scheme_term_filter_enable);
 
-	Sregister_symbol("cs_frame_current_get", scheme_frame_current_get);
 	Sregister_symbol("cs_frame_current_set", scheme_frame_current_set);
 	Sregister_symbol("cs_frame_create", scheme_frame_create);
 	Sregister_symbol("cs_frame_delete", scheme_frame_delete);
