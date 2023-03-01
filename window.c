@@ -615,12 +615,6 @@ Window *window_right(Window *w)
 	return window_get_by_coord(w_x + ui_window_width_get(w->win) + 1, w_y);
 }
 
-void window_first_set(Window *w)
-{
-	if (frame_current())
-		frame_current()->windows = w;
-}
-
 void window_next_set(Window *w, Window *n)
 {
 	window_remove(n);

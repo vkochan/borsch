@@ -125,7 +125,6 @@ Window *window_upper(Window *w);
 Window *window_lower(Window *w);
 Window *window_left(Window *w);
 Window *window_right(Window *w);
-void window_first_set(Window *w);
 void window_next_set(Window *w, Window *n);
 void window_prev_set(Window *w, Window *n);
 Window *window_prev(Window *w);
