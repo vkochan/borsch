@@ -665,13 +665,13 @@ void window_insert_first(Window *c)
 {
 	window_remove(c);
 
-	if (window_first())
-		window_first()->prev = c;
+	if (c->frame->windows)
+		c->frame->windows->prev = c;
 
-	c->next = window_first();
+	c->next = c->frame->windows;
 	c->prev = NULL;
 
-	window_first_set(c);
+	c->frame->windows = c;
 
 	for (int o = 1; c; c = c->next, o++)
 		c->order = o;
@@ -716,8 +716,8 @@ void window_remove(Window *c)
 		for (d = c->next; d; d = d->next)
 			--d->order;
 	}
-	if (c == window_first())
-		window_first_set(c->next);
+	if (c == c->frame->windows)
+		c->frame->windows = c->next;
 	c->next = c->prev = NULL;
 }
 
