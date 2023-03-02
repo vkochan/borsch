@@ -424,21 +424,6 @@ Frame *frame_by_id(int fid)
 	return NULL;
 }
 
-Frame *frame_first(void)
-{
-	return frame_list;
-}
-
-Frame *frame_prev(Frame *f)
-{
-	return f->prev;
-}
-
-Frame *frame_next(Frame *f)
-{
-	return f->next;
-}
-
 static void frames_cleanup(void)
 {
 	while (frame_list) {

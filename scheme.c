@@ -1443,49 +1443,6 @@ void scheme_frame_delete(int fid)
 	}
 }
 
-ptr scheme_frame_first(void)
-{
-	Frame *f = frame_first();
-
-	if (f) {
-		return Sinteger(f->id);
-	}
-
-	return Sfalse;
-}
-
-ptr scheme_frame_prev(int fid)
-{
-	Frame *f = frame_by_id(fid);
-	Frame *p;
-
-	if (!f)
-		return Sfalse;
-
-	p = frame_prev(f);
-	if (p) {
-		return Sinteger(p->id);
-	}
-
-	return Sfalse;
-}
-
-ptr scheme_frame_next(int fid)
-{
-	Frame *f = frame_by_id(fid);
-	Frame *n;
-
-	if (!f)
-		return Sfalse;
-
-	n = frame_next(f);
-	if (n) {
-		return Sinteger(n->id);
-	}
-
-	return Sfalse;
-}
-
 int scheme_layout_current_get(int fid)
 {
 	return layout_current_get(fid);
@@ -1864,9 +1821,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_frame_current_set", scheme_frame_current_set);
 	Sregister_symbol("cs_frame_create", scheme_frame_create);
 	Sregister_symbol("cs_frame_delete", scheme_frame_delete);
-	Sregister_symbol("cs_frame_first", scheme_frame_first);
-	Sregister_symbol("cs_frame_prev", scheme_frame_prev);
-	Sregister_symbol("cs_frame_next", scheme_frame_next);
 
 	Sregister_symbol("cs_layout_current_get", scheme_layout_current_get);
 	Sregister_symbol("cs_layout_current_set", scheme_layout_current_set);

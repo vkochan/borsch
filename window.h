@@ -93,9 +93,6 @@ int frame_current_set(Frame *f);
 Frame *frame_create(void);
 void frame_delete(Frame *f);
 Frame *frame_by_id(int fid);
-Frame *frame_first(void);
-Frame *frame_prev(Frame *f);
-Frame *frame_next(Frame *f);
 
 #define for_each_window(__w) \
 	for (__w = window_first(); __w; __w = __w->next)

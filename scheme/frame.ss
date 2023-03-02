@@ -1,9 +1,6 @@
 (define __cs_frame_current_set (foreign-procedure __collect_safe "cs_frame_current_set" (int) void))
 (define __cs_frame_create (foreign-procedure __collect_safe "cs_frame_create" () scheme-object))
 (define __cs_frame_delete (foreign-procedure __collect_safe "cs_frame_delete" (int) void))
-(define __cs_frame_first (foreign-procedure __collect_safe "cs_frame_first" () scheme-object))
-(define __cs_frame_prev (foreign-procedure __collect_safe "cs_frame_prev" (int) scheme-object))
-(define __cs_frame_next (foreign-procedure __collect_safe "cs_frame_next" (int) scheme-object))
 
 (define frame-list (make-eq-hashtable))
 
@@ -13,30 +10,6 @@
 
 (define (*frame-delete* fid)
    (call-foreign (__cs_frame_delete fid))
-)
-
-(define (*frame-first*)
-   (call-foreign (__cs_frame_first))
-)
-
-(define (*frame-prev* fid)
-   (call-foreign (__cs_frame_prev fid))
-)
-
-(define (*frame-next* fid)
-   (call-foreign (__cs_frame_next fid))
-)
-
-(define (*frame-list*)
-   (let ([fr  (*frame-first*)]
-         [lst '()]
-	)
-      (while fr
-         (set! lst (append lst (list fr)))
-         (set! fr (*frame-next* fr))
-      )
-      lst
-   )
 )
 
 (define frame-create
