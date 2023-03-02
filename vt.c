@@ -1520,6 +1520,20 @@ void vt_attach(Vt *vt, Window *w)
 	vt->win = w->win;
 }
 
+static void vt_detach(Vt *vt)
+{
+	if (!vt->w)
+		return;
+
+	ui_window_on_view_update_set(vt->w->win, NULL);
+	ui_window_sidebar_width_set(vt->w->win, 0);
+	ui_window_ops_draw_set(vt->w->win, NULL);
+	ui_window_priv_set(vt->w->win, NULL);
+	ui_window_on_resize_set(vt->w->win, NULL);
+	vt_data_set(vt, NULL);
+	vt->win = vt->w = NULL;
+}
+
 void vt_resize(Vt *t, int rows, int cols)
 {
 	struct winsize ws = { .ws_row = rows, .ws_col = cols };
@@ -1539,6 +1553,7 @@ void vt_destroy(Vt *t)
 {
 	if (!t)
 		return;
+	vt_detach(t);
 	buffer_free(&t->buffer_normal);
 	buffer_free(&t->buffer_alternate);
 	free(t->filter_buf);
