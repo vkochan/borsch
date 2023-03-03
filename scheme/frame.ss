@@ -28,6 +28,10 @@
    )
 )
 
+(define (frame-list)
+   (vector->list (hashtable-values frame-ht))
+)
+
 ;;(define frame-all (frame-create "all"))
 (define frame-1 (frame-create ""))
 (define frame-2 (frame-create ""))
