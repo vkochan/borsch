@@ -8,7 +8,7 @@
    (call-foreign (__cs_frame_create))
 )
 
-(define (*frame-delete* fid)
+(define (frame-delete fid)
    (call-foreign (__cs_frame_delete fid))
 )
 
