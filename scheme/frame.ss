@@ -2,7 +2,7 @@
 (define __cs_frame_create (foreign-procedure __collect_safe "cs_frame_create" () scheme-object))
 (define __cs_frame_delete (foreign-procedure __collect_safe "cs_frame_delete" (int) void))
 
-(define frame-list (make-eq-hashtable))
+(define frame-ht (make-eq-hashtable))
 
 (define (*frame-create*)
    (call-foreign (__cs_frame_create))
@@ -15,15 +15,15 @@
 (define frame-create
    (lambda (name)
       (let (
-            [frame (make-eq-hashtable)]
+            [fr (make-eq-hashtable)]
             [id (*frame-create*)]
            )
-         (hashtable-set! frame 'cwd (current-directory))
-         (hashtable-set! frame 'prev-layout #f)
-         (hashtable-set! frame 'name name)
-         (hashtable-set! frame 'id id)
-         (hashtable-set! frame-list id frame)   
-         frame
+         (hashtable-set! fr 'cwd (current-directory))
+         (hashtable-set! fr 'prev-layout #f)
+         (hashtable-set! fr 'name name)
+         (hashtable-set! fr 'id id)
+         (hashtable-set! frame-ht id fr)   
+         fr
       )
    )
 )
