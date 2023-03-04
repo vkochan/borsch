@@ -2,7 +2,7 @@
 (define __cs_frame_create (foreign-procedure __collect_safe "cs_frame_create" () scheme-object))
 (define __cs_frame_delete (foreign-procedure __collect_safe "cs_frame_delete" (int) void))
 
-(define frame-ht (make-eq-hashtable))
+(define frames-ht (make-eq-hashtable))
 
 (define (*frame-create*)
    (call-foreign (__cs_frame_create))
@@ -22,14 +22,14 @@
          (hashtable-set! fr 'prev-layout #f)
          (hashtable-set! fr 'name name)
          (hashtable-set! fr 'id id)
-         (hashtable-set! frame-ht id fr)   
+         (hashtable-set! frames-ht id fr)   
          fr
       )
    )
 )
 
 (define (frame-list)
-   (vector->list (hashtable-values frame-ht))
+   (vector->list (hashtable-values frames-ht))
 )
 
 ;;(define frame-all (frame-create "all"))
