@@ -28,28 +28,19 @@
          (vector-for-each
             (lambda (t)
                (let* ([fr (tab-current-frame t)]
-                      [fr-color (if (equal? t (current-tab))
-                                    "blue"
+                      [color (if (equal? t (current-tab))
+                                 "blue"
+                                 ;; else
+                                 (if (> (length (window-list fr)) 0)
+                                    "green"
+                                    ;;"bright-black"
                                     ;; else
-                                    (if (> (length (window-list fr)) 0)
-                                       "green"
-                                       ;;"bright-black"
-                                       ;; else
-                                       ;;"green"
-                                       "bright-black"
-                                    )
-                                )
-                      ]
-                      [vname (frame-name fr)]
-                    )
-                  (let ([name (or vname "")])
+                                    ;;"green"
+                                    "bright-black"))])
+                  (let ([name (or (frame-name fr) "")])
                      (text-insert
                         (format "[~a~a]" (tab-index t) (if (equal? "" name) "" (string-append ":" name)))
-                       `(style: (fg: ,fr-color))
-                     )
-                  )
-               )
-            )
+                       `(style: (fg: ,color))))))
             (hashtable-values tabs-ht)
          )
          (text-insert (layout-name))
