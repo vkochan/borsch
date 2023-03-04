@@ -93,66 +93,6 @@
    )
 )
 
-(define frame-switch-1
-   (lambda ()
-      (frame-switch frame-1)
-   )
-)
-
-(define frame-switch-2
-   (lambda ()
-      (frame-switch frame-2)
-   )
-)
-
-(define frame-switch-3
-   (lambda ()
-      (frame-switch frame-3)
-   )
-)
-
-(define frame-switch-4
-   (lambda ()
-      (frame-switch frame-4)
-   )
-)
-
-(define frame-switch-5
-   (lambda ()
-      (frame-switch frame-5)
-   )
-)
-
-(define frame-switch-6
-   (lambda ()
-      (frame-switch frame-6)
-   )
-)
-
-(define frame-switch-7
-   (lambda ()
-      (frame-switch frame-7)
-   )
-)
-
-(define frame-switch-8
-   (lambda ()
-      (frame-switch frame-8)
-   )
-)
-
-(define frame-switch-9
-   (lambda ()
-      (frame-switch frame-9)
-   )
-)
-
-#;(define frame-switch-all
-   (lambda ()
-      (frame-switch frame-all)
-   )
-)
-
 (define frame-id
    (case-lambda
       [()

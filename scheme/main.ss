@@ -41,6 +41,9 @@
 
 (define message-recent "")
 
+(minibuf-create)
+(topbar-create)
+
 (define open-repl
    (lambda ()
       (vterm "borsch-eval -i" "eval")
@@ -253,9 +256,6 @@
    )
 )
 
-(minibuf-create)
-(topbar-create)
-
 (define window-delete-non-sticky
    (lambda ()
       (window-for-each
@@ -297,16 +297,15 @@
 (bind-key "M-b s"       minibuf-switch-buffer)
 (bind-key "M-b c"       window-close)
 (bind-key "M-b o"       minibuf-open-buffer)
-(bind-key "M-1"         frame-switch-1)
-(bind-key "M-2"         frame-switch-2)
-(bind-key "M-3"         frame-switch-3)
-(bind-key "M-4"         frame-switch-4)
-(bind-key "M-5"         frame-switch-5)
-(bind-key "M-6"         frame-switch-6)
-(bind-key "M-7"         frame-switch-7)
-(bind-key "M-8"         frame-switch-8)
-(bind-key "M-9"         frame-switch-9)
-;;(bind-key "M-0"         frame-switch-all)
+(bind-key "M-1"         tab-switch-1)
+(bind-key "M-2"         tab-switch-2)
+(bind-key "M-3"         tab-switch-3)
+(bind-key "M-4"         tab-switch-4)
+(bind-key "M-5"         tab-switch-5)
+(bind-key "M-6"         tab-switch-6)
+(bind-key "M-7"         tab-switch-7)
+(bind-key "M-8"         tab-switch-8)
+(bind-key "M-9"         tab-switch-9)
 
 (bind-key "C-g c"       vterm)
 (bind-key "C-g C-x"     open-repl)
@@ -318,16 +317,15 @@
 (bind-key "C-g k"       window-select-upper)
 (bind-key "C-g <Enter>" window-set-master)
 
-(bind-key "C-g f 1" frame-switch-1)
-(bind-key "C-g f 2" frame-switch-2)
-(bind-key "C-g f 3" frame-switch-3)
-(bind-key "C-g f 4" frame-switch-4)
-(bind-key "C-g f 5" frame-switch-5)
-(bind-key "C-g f 6" frame-switch-6)
-(bind-key "C-g f 7" frame-switch-7)
-(bind-key "C-g f 8" frame-switch-8)
-(bind-key "C-g f 9" frame-switch-9)
-;;(bind-key "C-g f 0" frame-switch-all)
+(bind-key "C-g t 1" tab-switch-1)
+(bind-key "C-g t 2" tab-switch-2)
+(bind-key "C-g t 3" tab-switch-3)
+(bind-key "C-g t 4" tab-switch-4)
+(bind-key "C-g t 5" tab-switch-5)
+(bind-key "C-g t 6" tab-switch-6)
+(bind-key "C-g t 7" tab-switch-7)
+(bind-key "C-g t 8" tab-switch-8)
+(bind-key "C-g t 9" tab-switch-9)
 
 (bind-key "C-g w i"   layout-n-master+)
 (bind-key "C-g w d"   layout-n-master-)
