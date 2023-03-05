@@ -492,27 +492,6 @@ Window *window_current(void)
 	return frame_current()->sel;
 }
 
-Window *window_get_by_coord(unsigned int x, unsigned int y)
-{
-	Window *c;
-
-	if (y < way || y >= way+wah)
-		return NULL;
-	if (layout_is_arrange(LAYOUT_MAXIMIZED))
-		return window_current();
-	for_each_window(c) {
-		int w_h = ui_window_height_get(c->win);
-		int w_w = ui_window_width_get(c->win);
-		int w_y = ui_window_y_get(c->win);
-		int w_x = ui_window_x_get(c->win);
-
-		if (x >= w_x && x < w_x + w_w && y >= w_y && y < w_y + w_h) {
-			return c;
-		}
-	}
-	return NULL;
-}
-
 Window *window_get_by_id(int id)
 {
 	Window *c;
@@ -551,59 +530,6 @@ Window *window_first(void)
 		return NULL;
 
 	return frame_current()->windows;
-}
-
-Window *window_upper(Window *w)
-{
-	int w_x, w_y;
-
-	if (!w)
-		return NULL;
-
-	w_x = ui_window_x_get(w->win);
-	w_y = ui_window_y_get(w->win);
-
-	/* avoid vertical separator, hence +1 in x direction */
-	return window_get_by_coord(w_x + 1, w_y - 1);
-}
-
-Window *window_lower(Window *w)
-{
-	int w_x, w_y;
-	
-	if (!w)
-		return NULL;
-
-	w_x = ui_window_x_get(w->win);
-	w_y = ui_window_y_get(w->win);
-
-	return window_get_by_coord(w_x, w_y + ui_window_height_get(w->win));
-}
-
-Window *window_left(Window *w)
-{
-	int w_x, w_y;
-
-	if (!w)
-		return NULL;
-
-	w_x = ui_window_x_get(w->win);
-	w_y = ui_window_y_get(w->win);
-
-	return window_get_by_coord(w_x - 2, w_y);
-}
-
-Window *window_right(Window *w)
-{
-	int w_x, w_y;
-
-	if (!w)
-		return NULL;
-
-	w_x = ui_window_x_get(w->win);
-	w_y = ui_window_y_get(w->win);
-
-	return window_get_by_coord(w_x + ui_window_width_get(w->win) + 1, w_y);
 }
 
 void window_next_set(Window *w, Window *n)

@@ -75,15 +75,6 @@ ptr scheme_screen_height_get(void)
 	return Sinteger(ui_height_get(g_ui));
 }
 
-ptr scheme_win_get_by_coord(int x, int y)
-{
-	Window *w = window_get_by_coord(x, y);
-
-	if (w)
-		return Sinteger(w->id);
-	return Sfalse;
-}
-
 bool scheme_win_is_visible(int wid)
 {
 	Window *w = window_get_by_id(wid);
@@ -160,42 +151,6 @@ ptr scheme_win_next_set(int wid, int next)
 
 	window_next_set(w, n);
 	return Strue;
-}
-
-ptr scheme_win_upper_get(int wid)
-{
-	Window *u = window_upper(window_get_by_id(wid));
-	if (u)
-		return Sinteger(u->id);
-
-	return Sfalse;
-}
-
-ptr scheme_win_lower_get(int wid)
-{
-	Window *l = window_lower(window_get_by_id(wid));
-	if (l)
-		return Sinteger(l->id);
-
-	return Sfalse;
-}
-
-ptr scheme_win_right_get(int wid)
-{
-	Window *r = window_right(window_get_by_id(wid));
-	if (r)
-		return Sinteger(r->id);
-
-	return Sfalse;
-}
-
-ptr scheme_win_left_get(int wid)
-{
-	Window *l = window_left(window_get_by_id(wid));
-	if (l)
-		return Sinteger(l->id);
-
-	return Sfalse;
 }
 
 ptr scheme_win_coord_get(int wid)
@@ -1704,7 +1659,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_screen_width_get", scheme_screen_width_get);
 	Sregister_symbol("cs_screen_height_get", scheme_screen_height_get);
 
-	Sregister_symbol("cs_win_get_by_coord", scheme_win_get_by_coord);
 	Sregister_symbol("cs_win_is_visible", scheme_win_is_visible);
 	Sregister_symbol("cs_win_first_get", scheme_win_first_get);
 	Sregister_symbol("cs_win_prev_get", scheme_win_prev_get);
@@ -1712,10 +1666,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_first_set", scheme_win_first_set);
 	Sregister_symbol("cs_win_prev_set", scheme_win_prev_set);
 	Sregister_symbol("cs_win_next_set", scheme_win_next_set);
-	Sregister_symbol("cs_win_upper_get", scheme_win_upper_get);
-	Sregister_symbol("cs_win_lower_get", scheme_win_lower_get);
-	Sregister_symbol("cs_win_right_get", scheme_win_right_get);
-	Sregister_symbol("cs_win_left_get", scheme_win_left_get);
 	Sregister_symbol("cs_win_coord_get", scheme_win_coord_get);
 	Sregister_symbol("cs_win_current_get", scheme_win_current_get);
 	Sregister_symbol("cs_win_current_set", scheme_win_current_set);

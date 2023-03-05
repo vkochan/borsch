@@ -1,4 +1,3 @@
-(define __cs_win_get_by_coord (foreign-procedure __collect_safe "cs_win_get_by_coord" (int int) scheme-object))
 (define __cs_win_is_visible (foreign-procedure __collect_safe "cs_win_is_visible" (int) boolean))
 (define __cs_win_first_get (foreign-procedure __collect_safe "cs_win_first_get" (int) scheme-object))
 (define __cs_win_prev_get (foreign-procedure __collect_safe "cs_win_prev_get" (int) scheme-object))
@@ -6,10 +5,6 @@
 (define __cs_win_first_set (foreign-procedure __collect_safe "cs_win_first_set" (int) scheme-object))
 (define __cs_win_prev_set (foreign-procedure __collect_safe "cs_win_prev_set" (int int) scheme-object))
 (define __cs_win_next_set (foreign-procedure __collect_safe "cs_win_next_set" (int int) scheme-object))
-(define __cs_win_upper_get (foreign-procedure __collect_safe "cs_win_upper_get" (int) scheme-object))
-(define __cs_win_lower_get (foreign-procedure __collect_safe "cs_win_lower_get" (int) scheme-object))
-(define __cs_win_right_get (foreign-procedure __collect_safe "cs_win_right_get" (int) scheme-object))
-(define __cs_win_left_get (foreign-procedure __collect_safe "cs_win_left_get" (int) scheme-object))
 (define __cs_win_current_get (foreign-procedure __collect_safe "cs_win_current_get" () scheme-object))
 (define __cs_win_current_set (foreign-procedure __collect_safe "cs_win_current_set" (int) int))
 (define __cs_win_new (foreign-procedure "cs_win_new" (int) scheme-object))
@@ -196,7 +191,8 @@
        (window-upper (current-window))]
 
       [(wid)
-       (call-foreign (__cs_win_upper_get wid))]
+       (window-by-pos (+ 1 (window-x wid))
+                      (- (window-y wid) 1))]
    )
 )
 
@@ -206,7 +202,9 @@
        (window-lower (current-window))]
 
       [(wid)
-       (call-foreign (__cs_win_lower_get wid))]
+       (window-by-pos (window-x wid)
+                      (+ (window-y wid)
+                         (window-height wid)))]
    )
 )
 
@@ -216,7 +214,8 @@
        (window-right (current-window))]
 
       [(wid)
-       (call-foreign (__cs_win_right_get wid))]
+       (window-by-pos (+ (window-x wid) (window-width wid) 1)
+                      (window-y wid))]
    )
 )
 
@@ -226,7 +225,8 @@
        (window-left (current-window))]
 
       [(wid)
-       (call-foreign (__cs_win_left_get wid))]
+       (window-by-pos (- (window-x) 2)
+                      (window-y wid))]
    )
 )
 
@@ -716,5 +716,32 @@
           (cdr pos)
        )
       ]
+   )
+)
+
+(define window-find
+   (lambda (fn)
+      (let ([w (find
+                  (lambda (w)
+                     (fn (first w))
+                  )
+                  (window-list))])
+         (and w (first w)))))
+
+(define (window-by-pos x y)
+   (if (layout-is-maximized?)
+      (current-window)
+      ;; else
+      (window-find
+         (lambda (w)
+            (let ([wx (window-x w)]
+                  [wy (window-y w)]
+                  [ww (window-width w)]
+                  [wh (window-height w)])
+               (and (and (>= x wx) (< x (+ wx ww)))
+                    (and (>= y wy) (< y (+ wy wh))))
+            )
+         )
+      )
    )
 )
