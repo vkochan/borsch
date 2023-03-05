@@ -478,6 +478,12 @@ void window_cleanup(void)
 	frames_cleanup();
 }
 
+void window_coord(Window *w, int *x, int *y)
+{
+	if (x) *x = ui_window_x_get(w->win);
+	if (y) *y = ui_window_y_get(w->win);
+}
+
 Window *window_current(void)
 {
 	if (!frame_current())

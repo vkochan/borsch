@@ -34,6 +34,7 @@
 (define __cs_win_sidebar_draw (foreign-procedure "cs_win_sidebar_draw" (int int int string int int int) scheme-object))
 (define __cs_win_update (foreign-procedure "cs_win_update" (int) void))
 (define __cs_widget_create (foreign-procedure "cs_widget_create" (string int int int int int) scheme-object))
+(define __cs_win_coord_get (foreign-procedure __collect_safe "cs_win_coord_get" (int) scheme-object))
 
 (define window-is-visible?
    (case-lambda
@@ -687,5 +688,33 @@
            )
          (call-foreign (__cs_widget_create name x y w h wtype))
       )
+   )
+)
+
+(define window-x
+   (case-lambda
+      [()
+       (window-x (current-window))
+      ]
+
+      [(wid)
+       (let ([pos (call-foreign (__cs_win_coord_get wid))])
+          (car pos)
+       )
+      ]
+   )
+)
+
+(define window-y
+   (case-lambda
+      [()
+       (window-y (current-window))
+      ]
+
+      [(wid)
+       (let ([pos (call-foreign (__cs_win_coord_get wid))])
+          (cdr pos)
+       )
+      ]
    )
 )

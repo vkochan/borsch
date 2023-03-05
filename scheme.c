@@ -198,6 +198,18 @@ ptr scheme_win_left_get(int wid)
 	return Sfalse;
 }
 
+ptr scheme_win_coord_get(int wid)
+{
+	Window *w = window_get_by_id(wid);
+	int x, y;
+
+	if (!w)
+		return Sfalse;
+
+	window_coord(w, &x, &y);
+	return Scons(Sinteger(x), Sinteger(y));
+}
+
 ptr scheme_win_current_get(void)
 {
 	if (window_current())
@@ -1704,6 +1716,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_lower_get", scheme_win_lower_get);
 	Sregister_symbol("cs_win_right_get", scheme_win_right_get);
 	Sregister_symbol("cs_win_left_get", scheme_win_left_get);
+	Sregister_symbol("cs_win_coord_get", scheme_win_coord_get);
 	Sregister_symbol("cs_win_current_get", scheme_win_current_get);
 	Sregister_symbol("cs_win_current_set", scheme_win_current_set);
 	Sregister_symbol("cs_win_new", scheme_win_new);

@@ -112,6 +112,7 @@ Frame *frame_by_id(int fid);
 void window_init(Ui *ui);
 void window_cleanup(void);
 
+void window_coord(Window *w, int *x, int *y);
 Window *window_current(void);
 Window *window_get_by_id(int id);
 Window *window_get_by_coord(unsigned int x, unsigned int y);
