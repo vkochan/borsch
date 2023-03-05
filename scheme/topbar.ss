@@ -71,40 +71,31 @@
 )
 
 (define (tab-switch-1)
-    (tab-switch 1)
-)
+    (tab-switch 1))
 
 (define (tab-switch-2)
-    (tab-switch 2)
-)
+    (tab-switch 2))
 
 (define (tab-switch-3)
-    (tab-switch 3)
-)
+    (tab-switch 3))
 
 (define (tab-switch-4)
-    (tab-switch 4)
-)
+    (tab-switch 4))
 
 (define (tab-switch-5)
-    (tab-switch 5)
-)
+    (tab-switch 5))
 
 (define (tab-switch-6)
-    (tab-switch 6)
-)
+    (tab-switch 6))
 
 (define (tab-switch-7)
-    (tab-switch 7)
-)
+    (tab-switch 7))
 
 (define (tab-switch-8)
-    (tab-switch 8)
-)
+    (tab-switch 8))
 
 (define (tab-switch-9)
-    (tab-switch 9)
-)
+    (tab-switch 9))
 
 (define topbar-create
    (lambda ()
