@@ -1,10 +1,7 @@
 (define __cs_config_dir_get (foreign-procedure "cs_config_dir_get" () scheme-object))
 
-(define config-dir
-   (lambda ()
-      ((delay (__cs_config_dir_get)))
-   )
-)
+(define (config-dir)
+   ((delay (__cs_config_dir_get))))
 
 (include "pregexp.scm")
 (include "common.ss")
@@ -44,126 +41,77 @@
 (minibuf-create)
 (topbar-create)
 
-(define open-repl
-   (lambda ()
-      (vterm "borsch-eval -i" "eval")
-   )
-)
+(define (open-repl)
+   (vterm "borsch-eval -i" "eval"))
 
-(define load-init-script
-   (lambda (init)
-      (let ([init-script (if (string-empty? init)
-                            (string-append (config-dir) "/init.ss")
-                            ;; else
-                            init)]
-           )
-         (when (file-exists? init-script)
-            (try load init-script)
-            (run-hooks 'init-hook)
-         )
-      )
-   )
-)
+(define (load-init-script init)
+   (let ([init-script (if (string-empty? init)
+                         (string-append (config-dir) "/init.ss")
+                         ;; else
+                         init)])
+      (when (file-exists? init-script)
+         (try load init-script)
+         (run-hooks 'init-hook))))
 
-(define main-init
-   (lambda (init)
-      (when init
-         (load-init-script init))
-   )
-)
+(define (main-init init)
+   (when init
+      (load-init-script init)))
 
-(define __on-event-handler
-   (lambda (ev oid str)
-       (define __evt->symb
-	  (lambda (ev)
-	     (case ev
-		[1    'window-draw-hook ]
-		[2    'pre-draw-hook ]
-		[3    'post-draw-hook ]
-		[100  'key-press-hook   ]
-		[101  'text-insert-hook   ]
-		[200  'process-exit-hook   ]
-		[300  'vterm-filter-hook   ]
-		[else #f]
-             )
-          )
-       )
+(define (__on-event-handler ev oid str)
+   (define (__evt->symb ev)
+      (case ev
+         [1    'window-draw-hook ]
+         [2    'pre-draw-hook ]
+         [3    'post-draw-hook ]
+         [100  'key-press-hook   ]
+         [101  'text-insert-hook   ]
+         [200  'process-exit-hook   ]
+         [300  'vterm-filter-hook   ]
+         [else #f]))
 
-       (let ([h (__evt->symb ev)])
-          (when h
-             (if (or (eq? h 'post-draw-hook)
-                     (eq? h 'pre-draw-hook))
-                (run-hooks h)
-                ;; else
-		(if (eq? h 'vterm-filter-hook)
-                   (begin
-                      (with-current-buffer oid
-                         (let ([fn (get-local vterm-filter-func #f)])
-                            (when fn
-                               (try fn str)
-                            )
-                         )
-                      )
-                   )
-                   ;; else
-                   (run-hooks h oid)
-		)
-             )
-          )
-       )
-   )
-)
+   (let ([h (__evt->symb ev)])
+      (when h
+         (if (or (eq? h 'post-draw-hook)
+                 (eq? h 'pre-draw-hook))
+            (run-hooks h)
+            ;; else
+            (if (eq? h 'vterm-filter-hook)
+               (begin
+                  (with-current-buffer oid
+                     (let ([fn (get-local vterm-filter-func #f)])
+                        (when fn
+                           (try fn str)))))
+               ;; else
+               (run-hooks h oid))))))
 
 (add-hook 'text-insert-hook
    (lambda (code)
       (let ([b (current-buffer)])
          (when b
             (when (local-bound? text-insert-hook)
-               ((get-local text-insert-hook) (integer->char code))
-            )
-         )
-      )
-   )
-)
+               ((get-local text-insert-hook) (integer->char code)))))))
 
 (let ([m (buffer-new "*Messages*")])
    (with-current-buffer m
-      (text-mode)
-   )
-)
+      (text-mode)))
 
 (add-hook 'error-hook
    (lambda (e)
       (let ([m (buffer-get "*Messages*")])
          (when m
             (with-current-buffer m
-               (text-insert (format "~a\n" e) '(style: (fg: "red")))
-            )
-         )
-      )
-   )
-)
+               (text-insert (format "~a\n" e) '(style: (fg: "red"))))))))
 
-(define new-text-buffer
-   (lambda ()
-      (let ([b (buffer-create)])
-         (with-current-buffer b
-            (text-mode)
-         )
-      )
-   )
-)
+(define (new-text-buffer)
+   (let ([b (buffer-create)])
+      (with-current-buffer b
+         (text-mode))))
 
-(define open-file-prompt
-   (lambda ()
-      (minibuf-complete-path
-         (lambda (f)
-            (file-open f)
-         )
-         "open file"
-      )
-   )
-)
+(define (open-file-prompt)
+   (minibuf-complete-path
+      (lambda (f)
+         (file-open f))
+      "open file"))
 
 (add-hook 'window-draw-hook
    (lambda (w)
@@ -172,102 +120,52 @@
             (with-current-buffer b
                (when (local-bound? window-draw-hook)
                   (let ([h (get-local window-draw-hook)])
-                     (apply h (list w))
-                  )
-               )
-            )
-         )
-      )
-   )
-)
+                     (apply h (list w)))))))))
 
 (add-hook 'change-cwd-hook
    (lambda ()
-      (let (
-            [local-script (string-append (current-cwd) "/" ".borsch.ss")]
-           )
+      (let ([local-script (string-append (current-cwd) "/" ".borsch.ss")])
          (when (file-exists? local-script)
-            (load local-script)
-         )
-      )
-   )
-)
+            (load local-script)))))
 
 (add-hook 'message-hook
    (lambda (m)
-      (set! message-recent m)
-   )
-)
+      (set! message-recent m)))
 
-(define minibuf-buffer-list->complete
-   (lambda ()
-      (map
-         (lambda (b)
-            (let (
-                  [mode (buffer-mode-name (first b))]
-                  [name (buffer-name (first b))]
-                 )
-               (cons (format "(~a) ~a" mode name) (first b))
-            )
-         )
-         (buffer-list)
-      )
-   )
-)
+(define (minibuf-buffer-list->complete)
+   (map (lambda (b)
+           (let ([mode (buffer-mode-name (first b))]
+                 [name (buffer-name (first b))])
+              (cons (format "(~a) ~a" mode name) (first b))))
+        (buffer-list)))
 
-(define minibuf-switch-buffer
-   (lambda ()
-      (minibuf-complete
-         (minibuf-buffer-list->complete)
-         (lambda (b)
-            (window-switch-buffer b)
-         )
-         "Switch to buffer"
-      )
-   )
-)
+(define (minibuf-switch-buffer)
+   (minibuf-complete (minibuf-buffer-list->complete)
+                     (lambda (b)
+                        (window-switch-buffer b))
+                     "Switch to buffer"))
 
-(define minibuf-open-buffer
-   (lambda ()
-      (minibuf-complete
-         (minibuf-buffer-list->complete)
-         (lambda (b)
-            (window-create b)
-         )
-         "Open buffer"
-      )
-   )
-)
+(define (minibuf-open-buffer)
+   (minibuf-complete (minibuf-buffer-list->complete)
+                     (lambda (b)
+                        (window-create b))
+                     "Open buffer"))
 
-(define minibuf-cmd
-   (lambda ()
-      (minibuf-complete
-         (map
-            (lambda (c)
-               (cons (command-name c) c)
-            )
-            command-list
-         )
-         (lambda (c)
-            ((command-func c))
-         )
-         "Cmd"
-      )
-   )
-)
+(define (minibuf-cmd)
+   (minibuf-complete
+      (map (lambda (c)
+              (cons (command-name c) c))
+           command-list)
+      (lambda (c)
+         ((command-func c)))
+      "Cmd"))
 
-(define window-delete-non-sticky
-   (lambda ()
-      (window-for-each
-         (lambda (wid)
-            (when (and (not (window-is-sticky? wid))
-                       (not (equal? wid (current-window))))
-               (window-delete wid)
-            )
-         )
-      )
-   )
-)
+(define (window-delete-non-sticky)
+   (window-for-each
+      (lambda (wid)
+         (when (and (not (window-is-sticky? wid))
+                    (not (equal? wid (current-window))))
+            (window-delete wid)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Default key bindings
