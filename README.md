@@ -3,6 +3,9 @@
 It is a messy draft project with merging of code from dvtm, vis (text core), st
 and adding a Chez Scheme for customization.
 
+Tree-sitter is used only for syntax highlighting (and looks like
+not in an optimal way).
+
 ## Purpose
 
 Create Emacs-like development environment with Scheme.
