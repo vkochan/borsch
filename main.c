@@ -94,7 +94,6 @@ typedef struct {
 
 Ui *g_ui;
 
-static char *scheme_init_script = "";
 static bool start_in_graphic = false;
 
 /* commands for use by keybindings */
@@ -247,8 +246,6 @@ static void setup(void)
 	vt_init();
 
 	setup_ui();
-
-	scheme_init(scheme_init_script);
 }
 
 static Buffer *__buf_new(const char *name, KeyMap *kmap)
@@ -482,12 +479,7 @@ static void parse_args(int argc, char *argv[])
 		set_escdelay(100);
 
 	for (int arg = 1; arg < argc; arg++) {
-		if (strcmp(argv[arg], "-i") == 0) {
-			scheme_init_script = argv[arg+1];
-			arg++;
-		} else if (strcmp(argv[arg], "-n") == 0) {
-			scheme_init_script = NULL;
-		} else if (strcmp(argv[arg], "-g") == 0) {
+		if (strcmp(argv[arg], "-g") == 0) {
 			start_in_graphic = true;
 		}
 	}
@@ -628,7 +620,10 @@ void process_ui(void)
 
 int main(int argc, char *argv[]) {
 	parse_args(argc, argv);
+
 	setup();
+
+	scheme_init(argc, argv);
 
 	process_ui();
 

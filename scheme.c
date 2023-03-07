@@ -32,39 +32,45 @@
  * only once. */
 static int scheme_initialized = 0;
 
-#define SCHEME_CONFIG_DIR "/.config/"PROGNAME
-
-static int scheme_run_script(const char *path)
+struct scheme_list
 {
-	struct stat st;
+	ptr head;
+	ptr tail;
+};
 
-	if (stat(path, &st) == 0)
-		return Sscheme_script(path, 0, NULL);
+static void scheme_list_insert(struct scheme_list *slist, ptr data)
+{
+	ptr snew = Scons(data, Snil);
 
-	return 0;
+	if (slist->head) {
+		Sset_cdr(slist->tail, snew);
+	} else {
+		slist->head = snew;
+	}
+
+	slist->tail = snew;
 }
 
-static int scheme_run_init(const char *path)
+static void scheme_plist_insert(struct scheme_list *slist, const char *name, ptr data)
 {
-	CALL1("main-init", path ? Sstring(path) : Sfalse);
+	scheme_list_insert(slist, Sstring_to_symbol(name));
+	scheme_list_insert(slist, data);
+}
+
+static int scheme_run_init(int argc, char *argv[])
+{
+	struct scheme_list args_list = {0};
+	ptr scheme_args;
+
+	for (int i = 0; i < argc; i++) {
+		scheme_list_insert(&args_list, Sstring(argv[i]));
+	}
+	scheme_args = args_list.head ? args_list.head : Scons(Snil, Snil);
+
+	CALL1("main-init", scheme_args);
 }
 
 /* Scheme foreign interface */
-ptr scheme_config_dir_get(void)
-{
-	char *home = getenv("HOME");
-	xstr_t path;
-	ptr sptr;
-
-	if (!home)
-		home = "/root";
-
-	path = xstr_cat(xstr(home), xstr(SCHEME_CONFIG_DIR));
-	sptr = Sstring(xstr_cptr(path));
-	xstr_del(path);
-	return sptr;
-}
-
 ptr scheme_screen_width_get(void)
 {
 	return Sinteger(ui_width_get(g_ui));
@@ -914,31 +920,6 @@ void scheme_buf_prop_del(int bid, int type, int start, int end, const char *rege
 	buf_prop_del(bid, type, start, end, regex, name);
 }
 
-struct scheme_list
-{
-	ptr head;
-	ptr tail;
-};
-
-static void scheme_list_insert(struct scheme_list *slist, ptr data)
-{
-	ptr snew = Scons(data, Snil);
-
-	if (slist->head) {
-		Sset_cdr(slist->tail, snew);
-	} else {
-		slist->head = snew;
-	}
-
-	slist->tail = snew;
-}
-
-static void scheme_plist_insert(struct scheme_list *slist, const char *name, ptr data)
-{
-	scheme_list_insert(slist, Sstring_to_symbol(name));
-	scheme_list_insert(slist, data);
-}
-
 static ptr scheme_color_to_name(short color)
 {
 	const char *color_name = "default";
@@ -1654,8 +1635,6 @@ void scheme_do_quit(void)
 
 static void scheme_export_symbols(void)
 {
-	Sregister_symbol("cs_config_dir_get", scheme_config_dir_get);
-
 	Sregister_symbol("cs_screen_width_get", scheme_screen_width_get);
 	Sregister_symbol("cs_screen_height_get", scheme_screen_height_get);
 
@@ -1828,7 +1807,7 @@ static void *scheme_symb_resolver(keymap_symb_t type, char *name)
 	return (void *)Sinteger32_value(p);
 }
 
-int scheme_init(const char *init_script)
+int scheme_init(int argc, char *argv[])
 {
 	int err;
 
@@ -1840,7 +1819,7 @@ int scheme_init(const char *init_script)
 
 	CALL1("source-directories", Scons(Sstring(LIB_PATH), Snil));
 
-	scheme_run_init(init_script);
+	scheme_run_init(argc, argv);
 
 	err = fifo_create();
 	if (err) {

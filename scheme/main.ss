@@ -1,7 +1,6 @@
-(define __cs_config_dir_get (foreign-procedure "cs_config_dir_get" () scheme-object))
-
+(define *config-dir* #f)
 (define (config-dir)
-   ((delay (__cs_config_dir_get))))
+   *config-dir*)
 
 (include "pregexp.scm")
 (include "common.ss")
@@ -53,9 +52,26 @@
          (try load init-script)
          (run-hooks 'init-hook))))
 
-(define (main-init init)
-   (when init
-      (load-init-script init)))
+(define (main-init args)
+   (let ([do-init? #t]
+         [init-script ""]
+         [alen (length args)]
+         [i 0])
+      (while (< i (length args))
+         (let ([a (list-ref args i)])
+            (cond
+               ((= i 0)
+                (set! *config-dir* (string-append (getenv "HOME")
+                                                  "/.config/"
+                                                  (path-last a))))
+               ((equal? a "-n")
+                (set! do-init? #f))
+               ((equal? a "-i")
+                (when (<= i alen)
+                   (set! init-script (path-last (list-ref args (+ i 1))))))))
+         (set! i (+ i 1)))
+      (when do-init?
+         (load-init-script init-script))))
 
 (define (__on-event-handler ev oid str)
    (define (__evt->symb ev)

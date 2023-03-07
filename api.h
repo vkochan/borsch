@@ -75,7 +75,7 @@ int fifo_create(void);
 
 void do_quit(void);
 
-int scheme_init(const char *);
+int scheme_init(int argc, char *argv[]);
 void scheme_uninit(void);
 int scheme_event_handle(event_t evt);
 int scheme_eval_file(const char *scm_in, const char *out);
