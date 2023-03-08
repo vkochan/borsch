@@ -71,6 +71,11 @@ static int scheme_run_init(int argc, char *argv[])
 }
 
 /* Scheme foreign interface */
+void scheme_runtime_init(int ui_type)
+{
+	runtime_init(ui_type);
+}
+
 ptr scheme_screen_width_get(void)
 {
 	return Sinteger(ui_width_get(g_ui));
@@ -1635,6 +1640,8 @@ void scheme_do_quit(void)
 
 static void scheme_export_symbols(void)
 {
+	Sregister_symbol("cs_runtime_init", scheme_runtime_init);
+
 	Sregister_symbol("cs_screen_width_get", scheme_screen_width_get);
 	Sregister_symbol("cs_screen_height_get", scheme_screen_height_get);
 

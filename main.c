@@ -94,8 +94,6 @@ typedef struct {
 
 Ui *g_ui;
 
-static bool start_in_graphic = false;
-
 /* commands for use by keybindings */
 static void quit(const char *args[]);
 static void doeval(const char *args[]);
@@ -210,19 +208,18 @@ static int handle_ui_event(Ui *ui, enum UiEventType type, void *evt, void *arg)
 	return 0;
 }
 
-static void setup_ui(void)
+static void setup_ui(int ui_type)
 {
 	struct sigaction sa;
 
-	if (start_in_graphic)
-		g_ui = ui_x_new();
-	else
+	if (ui_type == 0)
 		g_ui = ui_term_new();
+	else
+		g_ui = ui_x_new();
 
 	g_ui->get_default_cell_style = get_default_cell_style;
 	ui_event_handler_set(g_ui, handle_ui_event);
 	ui_init(g_ui);
-	init_default_keymap();
 	window_init(g_ui);
 	
 	window_draw_all(true);
@@ -236,16 +233,9 @@ static void setup_ui(void)
 	sigaction(SIGPIPE, &sa, NULL);
 }
 
-static void setup(void)
+void runtime_init(int ui_type)
 {
-	setlocale(LC_CTYPE, "");
-
-	process_init();
-	syntax_init();
-	style_init();
-	vt_init();
-
-	setup_ui();
+	setup_ui(ui_type);
 }
 
 static Buffer *__buf_new(const char *name, KeyMap *kmap)
@@ -473,18 +463,6 @@ usage(void) {
 	exit(EXIT_FAILURE);
 }
 
-static void parse_args(int argc, char *argv[])
-{
-	if (!getenv("ESCDELAY"))
-		set_escdelay(100);
-
-	for (int arg = 1; arg < argc; arg++) {
-		if (strcmp(argv[arg], "-g") == 0) {
-			start_in_graphic = true;
-		}
-	}
-}
-
 static int buf_keymap_prop_match(Buffer *buf, int id, size_t start, size_t end, void *data,
 				 void *arg)
 {
@@ -619,9 +597,17 @@ void process_ui(void)
 }
 
 int main(int argc, char *argv[]) {
-	parse_args(argc, argv);
+	if (!getenv("ESCDELAY"))
+		set_escdelay(100);
 
-	setup();
+	setlocale(LC_CTYPE, "");
+
+	init_default_keymap();
+
+	process_init();
+	syntax_init();
+	style_init();
+	vt_init();
 
 	scheme_init(argc, argv);
 

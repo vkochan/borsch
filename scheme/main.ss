@@ -35,10 +35,9 @@
 (include "mode/prog/scheme.ss")
 (include "mode/prog/gnumake.ss")
 
-(define message-recent "")
+(define __cs_runtime_init (foreign-procedure "cs_runtime_init" (int) void))
 
-(minibuf-create)
-(topbar-create)
+(define message-recent "")
 
 (define (open-repl)
    (vterm "borsch-eval -i" "eval"))
@@ -56,6 +55,7 @@
    (let ([do-init? #t]
          [init-script ""]
          [alen (length args)]
+         [ui-type 0]
          [i 0])
       (while (< i (length args))
          (let ([a (list-ref args i)])
@@ -66,10 +66,21 @@
                                                   (path-last a))))
                ((equal? a "-n")
                 (set! do-init? #f))
+               ((equal? a "-g")
+                (set! ui-type 1))
                ((equal? a "-i")
                 (when (<= i alen)
                    (set! init-script (path-last (list-ref args (+ i 1))))))))
          (set! i (+ i 1)))
+      (call-foreign (__cs_runtime_init ui-type))
+      (minibuf-create)
+      (topbar-create)
+      (init-key-bindings)
+      (let ([m (buffer-new "*Messages*")])
+         (with-current-buffer m
+            (text-mode)))
+      (init-hooks)
+      (vterm)
       (when do-init?
          (load-init-script init-script))))
 
@@ -100,23 +111,39 @@
                ;; else
                (run-hooks h oid))))))
 
-(add-hook 'text-insert-hook
-   (lambda (code)
-      (let ([b (current-buffer)])
-         (when b
-            (when (local-bound? text-insert-hook)
-               ((get-local text-insert-hook) (integer->char code)))))))
+(define (init-hooks)
+   (add-hook 'text-insert-hook
+      (lambda (code)
+         (let ([b (current-buffer)])
+            (when b
+               (when (local-bound? text-insert-hook)
+                  ((get-local text-insert-hook) (integer->char code)))))))
 
-(let ([m (buffer-new "*Messages*")])
-   (with-current-buffer m
-      (text-mode)))
+   (add-hook 'error-hook
+      (lambda (e)
+         (let ([m (buffer-get "*Messages*")])
+            (when m
+               (with-current-buffer m
+                  (text-insert (format "~a\n" e) '(style: (fg: "red"))))))))
 
-(add-hook 'error-hook
-   (lambda (e)
-      (let ([m (buffer-get "*Messages*")])
-         (when m
-            (with-current-buffer m
-               (text-insert (format "~a\n" e) '(style: (fg: "red"))))))))
+   (add-hook 'window-draw-hook
+      (lambda (w)
+         (let ([b (window-buffer w)])
+            (when b
+               (with-current-buffer b
+                  (when (local-bound? window-draw-hook)
+                     (let ([h (get-local window-draw-hook)])
+                        (apply h (list w)))))))))
+
+   (add-hook 'change-cwd-hook
+      (lambda ()
+         (let ([local-script (string-append (current-cwd) "/" ".borsch.ss")])
+            (when (file-exists? local-script)
+               (load local-script)))))
+
+   (add-hook 'message-hook
+      (lambda (m)
+         (set! message-recent m))))
 
 (define (new-text-buffer)
    (let ([b (buffer-create)])
@@ -128,25 +155,6 @@
       (lambda (f)
          (file-open f))
       "open file"))
-
-(add-hook 'window-draw-hook
-   (lambda (w)
-      (let ([b (window-buffer w)])
-         (when b
-            (with-current-buffer b
-               (when (local-bound? window-draw-hook)
-                  (let ([h (get-local window-draw-hook)])
-                     (apply h (list w)))))))))
-
-(add-hook 'change-cwd-hook
-   (lambda ()
-      (let ([local-script (string-append (current-cwd) "/" ".borsch.ss")])
-         (when (file-exists? local-script)
-            (load local-script)))))
-
-(add-hook 'message-hook
-   (lambda (m)
-      (set! message-recent m)))
 
 (define (minibuf-buffer-list->complete)
    (map (lambda (b)
@@ -187,96 +195,92 @@
 ;; Default key bindings
 ;;;;;;;;;;;;;;;;;;;;;;;
 
-(bind-key "M-h"         window-select-left)
-(bind-key "M-l"         window-select-right)
-(bind-key "M-j"         window-select-lower)
-(bind-key "M-k"         window-select-upper)
-(bind-key "M-w d"       window-delete)
-(bind-key "M-w o d"     window-delete-non-sticky)
-(bind-key "M-w h"       window-select-left)
-(bind-key "M-w l"       window-select-right)
-(bind-key "M-w j"       window-select-lower)
-(bind-key "M-w k"       window-select-upper)
-(bind-key "M-w +"       layout-n-master+)
-(bind-key "M-w -"       layout-n-master-)
-(bind-key "M-w H"       layout-%-master-)
-(bind-key "M-w L"       layout-%-master+)
-(bind-key "M-w s"       layout-toggle-sticky)
-(bind-key "M-w f"       layout-set-tiled)
-(bind-key "M-w g"       layout-set-grid)
-(bind-key "M-w b"       layout-set-bstack)
-(bind-key "M-w m"       layout-toggle-maximized)
-(bind-key "M-w <Enter>" window-set-master)
-(bind-key "M-b n"       new-text-buffer)
-(bind-key "M-b s"       minibuf-switch-buffer)
-(bind-key "M-b c"       window-close)
-(bind-key "M-b o"       minibuf-open-buffer)
-(bind-key "M-1"         tab-switch-1)
-(bind-key "M-2"         tab-switch-2)
-(bind-key "M-3"         tab-switch-3)
-(bind-key "M-4"         tab-switch-4)
-(bind-key "M-5"         tab-switch-5)
-(bind-key "M-6"         tab-switch-6)
-(bind-key "M-7"         tab-switch-7)
-(bind-key "M-8"         tab-switch-8)
-(bind-key "M-9"         tab-switch-9)
+(define (init-key-bindings)
+   (bind-key "M-h"         window-select-left)
+   (bind-key "M-l"         window-select-right)
+   (bind-key "M-j"         window-select-lower)
+   (bind-key "M-k"         window-select-upper)
+   (bind-key "M-w d"       window-delete)
+   (bind-key "M-w o d"     window-delete-non-sticky)
+   (bind-key "M-w h"       window-select-left)
+   (bind-key "M-w l"       window-select-right)
+   (bind-key "M-w j"       window-select-lower)
+   (bind-key "M-w k"       window-select-upper)
+   (bind-key "M-w +"       layout-n-master+)
+   (bind-key "M-w -"       layout-n-master-)
+   (bind-key "M-w H"       layout-%-master-)
+   (bind-key "M-w L"       layout-%-master+)
+   (bind-key "M-w s"       layout-toggle-sticky)
+   (bind-key "M-w f"       layout-set-tiled)
+   (bind-key "M-w g"       layout-set-grid)
+   (bind-key "M-w b"       layout-set-bstack)
+   (bind-key "M-w m"       layout-toggle-maximized)
+   (bind-key "M-w <Enter>" window-set-master)
+   (bind-key "M-b n"       new-text-buffer)
+   (bind-key "M-b s"       minibuf-switch-buffer)
+   (bind-key "M-b c"       window-close)
+   (bind-key "M-b o"       minibuf-open-buffer)
+   (bind-key "M-1"         tab-switch-1)
+   (bind-key "M-2"         tab-switch-2)
+   (bind-key "M-3"         tab-switch-3)
+   (bind-key "M-4"         tab-switch-4)
+   (bind-key "M-5"         tab-switch-5)
+   (bind-key "M-6"         tab-switch-6)
+   (bind-key "M-7"         tab-switch-7)
+   (bind-key "M-8"         tab-switch-8)
+   (bind-key "M-9"         tab-switch-9)
 
-(bind-key "C-g c"       vterm)
-(bind-key "C-g C-x"     open-repl)
-(bind-key "C-g x x"     window-delete)
-(bind-key "C-g x o"     window-delete-non-sticky)
-(bind-key "C-g h"       window-select-left)
-(bind-key "C-g l"       window-select-right)
-(bind-key "C-g j"       window-select-lower)
-(bind-key "C-g k"       window-select-upper)
-(bind-key "C-g <Enter>" window-set-master)
+   (bind-key "C-g c"       vterm)
+   (bind-key "C-g C-x"     open-repl)
+   (bind-key "C-g x x"     window-delete)
+   (bind-key "C-g x o"     window-delete-non-sticky)
+   (bind-key "C-g h"       window-select-left)
+   (bind-key "C-g l"       window-select-right)
+   (bind-key "C-g j"       window-select-lower)
+   (bind-key "C-g k"       window-select-upper)
+   (bind-key "C-g <Enter>" window-set-master)
 
-(bind-key "C-g t 1" tab-switch-1)
-(bind-key "C-g t 2" tab-switch-2)
-(bind-key "C-g t 3" tab-switch-3)
-(bind-key "C-g t 4" tab-switch-4)
-(bind-key "C-g t 5" tab-switch-5)
-(bind-key "C-g t 6" tab-switch-6)
-(bind-key "C-g t 7" tab-switch-7)
-(bind-key "C-g t 8" tab-switch-8)
-(bind-key "C-g t 9" tab-switch-9)
+   (bind-key "C-g t 1" tab-switch-1)
+   (bind-key "C-g t 2" tab-switch-2)
+   (bind-key "C-g t 3" tab-switch-3)
+   (bind-key "C-g t 4" tab-switch-4)
+   (bind-key "C-g t 5" tab-switch-5)
+   (bind-key "C-g t 6" tab-switch-6)
+   (bind-key "C-g t 7" tab-switch-7)
+   (bind-key "C-g t 8" tab-switch-8)
+   (bind-key "C-g t 9" tab-switch-9)
 
-(bind-key "C-g w i"   layout-n-master+)
-(bind-key "C-g w d"   layout-n-master-)
-(bind-key "C-g w h"   layout-%-master-)
-(bind-key "C-g w l"   layout-%-master+)
-(bind-key "C-g C-s" layout-toggle-sticky)
-(bind-key "C-g w f"   layout-set-tiled)
-(bind-key "C-g w g"   layout-set-grid)
-(bind-key "C-g w b"   layout-set-bstack)
-(bind-key "C-g m"   layout-toggle-maximized)
-(bind-key "C-g n"   new-text-buffer)
-(bind-key "C-g o"   open-file-prompt)
+   (bind-key "C-g w i"   layout-n-master+)
+   (bind-key "C-g w d"   layout-n-master-)
+   (bind-key "C-g w h"   layout-%-master-)
+   (bind-key "C-g w l"   layout-%-master+)
+   (bind-key "C-g C-s" layout-toggle-sticky)
+   (bind-key "C-g w f"   layout-set-tiled)
+   (bind-key "C-g w g"   layout-set-grid)
+   (bind-key "C-g w b"   layout-set-bstack)
+   (bind-key "C-g m"   layout-toggle-maximized)
+   (bind-key "C-g n"   new-text-buffer)
+   (bind-key "C-g o"   open-file-prompt)
 
-(bind-key "C-x b s" minibuf-switch-buffer)
-(bind-key "C-x b c" window-close)
-(bind-key "C-x b o" minibuf-open-buffer)
+   (bind-key "C-x b s" minibuf-switch-buffer)
+   (bind-key "C-x b c" window-close)
+   (bind-key "C-x b o" minibuf-open-buffer)
 
-(bind-key "C-g y m" (lambda () (copybuf-put (pregexp-replace "\n$" message-recent ""))))
-(bind-key "C-g y w" (lambda () (copybuf-put (current-cwd))))
+   (bind-key "C-g y m" (lambda () (copybuf-put (pregexp-replace "\n$" message-recent ""))))
+   (bind-key "C-g y w" (lambda () (copybuf-put (current-cwd))))
 
-(bind-key "C-x g s" git-status)
-(bind-key "C-x g c" git-switch-branch)
-(bind-key "C-x g b" git-create-and-switch-branch)
-(bind-key "C-x g l" git-show-log)
-(bind-key "C-x g u" git-pull-changes-and-show)
+   (bind-key "C-x g s" git-status)
+   (bind-key "C-x g c" git-switch-branch)
+   (bind-key "C-x g b" git-create-and-switch-branch)
+   (bind-key "C-x g l" git-show-log)
+   (bind-key "C-x g u" git-pull-changes-and-show)
 
-(bind-key "M-e" minibuf-eval)
-(bind-key "M-x" minibuf-cmd)
+   (bind-key "M-e" minibuf-eval)
+   (bind-key "M-x" minibuf-cmd)
 
-(bind-key "C-x f d" dirb)
-(bind-key "C-x f f" minibuf-find-file)
+   (bind-key "C-x f d" dirb)
+   (bind-key "C-x f f" minibuf-find-file)
 
-(bind-key "C-x s g" grep)
+   (bind-key "C-x s g" grep)
 
-(bind-key "C-g q q" do-quit)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; start with a terminal
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(vterm)
+   (bind-key "C-g q q" do-quit))
