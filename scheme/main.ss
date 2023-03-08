@@ -51,6 +51,9 @@
          (try load init-script)
          (run-hooks 'init-hook))))
 
+(define (init-runtime ui-type)
+   (call-foreign (__cs_runtime_init ui-type)))
+
 (define (main-init args)
    (let ([do-init? #t]
          [init-script ""]
@@ -72,7 +75,7 @@
                 (when (<= i alen)
                    (set! init-script (path-last (list-ref args (+ i 1))))))))
          (set! i (+ i 1)))
-      (call-foreign (__cs_runtime_init ui-type))
+      (init-runtime ui-type)
       (minibuf-create)
       (topbar-create)
       (init-key-bindings)
