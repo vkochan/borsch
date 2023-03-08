@@ -657,7 +657,7 @@
 (define window-draw-sidebar
    (case-lambda
       [(w x y t)
-       (window-draw-sidebar w x y t '(fg: "black" bg: "white" attr: "bold"))
+       (window-draw-sidebar w x y t '(fg: "white" bg: "bright-blue"))
       ]
 
       [(w x y t s)
