@@ -51,43 +51,27 @@
 
 (define file-match-mode (list))
 
-(define mode-gen-map-symb
-   (lambda (m)
-         (string->symbol
-            (string-append (symbol->string m) "-map"))
-   )
-)
+(define (mode-gen-map-symb m)
+   (string->symbol
+      (string-append (symbol->string m) "-map")))
 
-(define mode-gen-map-value
-   (lambda (m)
-      (let ([s (mode-gen-map-symb m)])
-         (if (top-level-bound? s)
-            (top-level-value s)
-            ;; else
-            #f
-         )
-      )
-   )
-)
+(define (mode-gen-map-value m)
+   (let ([s (mode-gen-map-symb m)])
+      (if (top-level-bound? s)
+         (top-level-value s)
+         ;; else
+         #f)))
 
-(define mode-gen-hook-symb
-   (lambda (m)
-         (string->symbol
-            (string-append (symbol->string m) "-hook"))
-   )
-)
+(define (mode-gen-hook-symb m)
+   (string->symbol
+      (string-append (symbol->string m) "-hook")))
 
-(define mode-gen-hook-value
-   (lambda (h)
-      (let ([s (mode-gen-hook-symb h)])
-         (if (top-level-bound? s)
-            (top-level-value s)
-            ;; else
-            #f
-         )
-      )
-   )
-)
+(define (mode-gen-hook-value h)
+   (let ([s (mode-gen-hook-symb h)])
+      (if (top-level-bound? s)
+         (top-level-value s)
+         ;; else
+         #f)))
 
 (define-syntax (define-mode stx)
    (syntax-case stx ()
@@ -95,209 +79,121 @@
        #`(define-top-level-value 'mode
             (lambda ()
                (when parent
-                  ((top-level-value 'parent))
-               )
+                  ((top-level-value 'parent)))
                (define-local major-mode 'mode)
-	       (let ([m-map (mode-gen-map-symb 'mode)])
+               (let ([m-map (mode-gen-map-symb 'mode)])
                   (when (top-level-bound? m-map)
                      (when parent
-	                (let ([p-map (mode-gen-map-symb 'parent)])
+                        (let ([p-map (mode-gen-map-symb 'parent)])
                            (if (local-symbol-bound? p-map)
                               (keymap-set-parent (top-level-value m-map) (get-local-symbol p-map))
                               ;; else
-                              (keymap-set-parent (top-level-value m-map) p-map)
-                           )
-                        )
-		     )
-                     (buffer-set-keymap m-map)
-                  )
-		  (buffer-set-mode-name name)
+                              (keymap-set-parent (top-level-value m-map) p-map))))
+                     (buffer-set-keymap m-map))
+                  (buffer-set-mode-name name)
                   exp
                   ...
                   (run-hooks
-                     (mode-gen-hook-symb 'mode))
-               )
-            )
-         )
-      )
-   )
-)
+                     (mode-gen-hook-symb 'mode))))))))
 
-(define buffer-set-mode-name
-   (lambda (n)
-      (call-foreign (__cs_buf_mode_name_set (current-buffer) (format "~a" n)))
-   )
-)
+(define (buffer-set-mode-name n)
+   (call-foreign (__cs_buf_mode_name_set (current-buffer) (format "~a" n))))
 
 (define buffer-mode-name
    (case-lambda
       [()
-       (buffer-mode-name (current-buffer))
-      ]
+       (buffer-mode-name (current-buffer))]
 
       [(b)
-       (call-foreign (__cs_buf_mode_name_get b))
-      ]
-   )
-)
+       (call-foreign (__cs_buf_mode_name_get b))]))
 
-(define buffer-set-state-name
-   (lambda (n)
-      (call-foreign (__cs_buf_state_name_set (current-buffer) (format "~a" n)))
-   )
-)
+(define (buffer-set-state-name n)
+   (call-foreign (__cs_buf_state_name_set (current-buffer) (format "~a" n))))
 
-(define %buffer-local-keymap
-   (lambda ()
-       (call-foreign (__cs_buf_kmap_get (current-buffer)))
-   )
-)
+(define (%buffer-local-keymap)
+   (call-foreign (__cs_buf_kmap_get (current-buffer))))
 
-(define buffer-keymap
-   (lambda ()
-      (keymap-parent (%buffer-local-keymap))
-   )
-)
+(define (buffer-keymap)
+   (keymap-parent (%buffer-local-keymap)))
 
-(define buffer-set-keymap
-   (lambda (sym)
-      (let ([lmap (%buffer-local-keymap)])
-         (keymap-set-parent lmap sym)
-      )
-   )
-)
+(define (buffer-set-keymap sym)
+   (let ([lmap (%buffer-local-keymap)])
+      (keymap-set-parent lmap sym)))
 
-(define current-buffer
-   (lambda ()
-      (call-foreign (__cs_buf_current_get))
-   )
-)
+(define (current-buffer)
+   (call-foreign (__cs_buf_current_get)))
 
 (define *buffer-enable-eof* #t)
 
 (define-syntax (define-local stx)
    (syntax-case stx ()
-	       ((_ s v)
-		#`(define-top-level-value 's v (buffer-env))
-               )
-   )
-)
+      ((_ s v)
+       #`(define-top-level-value 's v (buffer-env)))))
 
 (define dir-local-symbol-bound?
    (case-lambda
       [(sym)
-       (dir-local-symbol-bound? (current-cwd) sym)
-      ]
+       (dir-local-symbol-bound? (current-cwd) sym)]
 
       [(dir sym)
-       (let (
-             [dir-env (hashtable-ref %dir-locals-ht dir #f)]
-            )
-          (and dir-env (top-level-bound? sym dir-env))
-       )
-      ]
-   )
-)
+       (let ([dir-env (hashtable-ref %dir-locals-ht dir #f)])
+          (and dir-env (top-level-bound? sym dir-env)))]))
 
-(define dir-get-local-symbol
-   (lambda (sym)
-      (let (
-            [dir-env (hashtable-ref %dir-locals-ht (path-parent (buffer-filename)) #f)]
-           )
-         (if (and dir-env (top-level-bound? sym dir-env))
-            (top-level-value sym dir-env)
-            ;; else
-            (let (
-                  [cwd-env (hashtable-ref %dir-locals-ht (current-cwd) #f)]
-                 )
-               (top-level-value sym cwd-env)
-            )
-         )
-      )
-   )
-)
+(define (dir-get-local-symbol sym)
+   (let ([dir-env (hashtable-ref %dir-locals-ht (path-parent (buffer-filename)) #f)])
+      (if (and dir-env (top-level-bound? sym dir-env))
+         (top-level-value sym dir-env)
+         ;; else
+         (let ([cwd-env (hashtable-ref %dir-locals-ht (current-cwd) #f)])
+            (top-level-value sym cwd-env)))))
 
-(define dir-set-local-symbol!
-   (lambda (dir sym val)
-      (let (
-            [dir-env (hashtable-ref %dir-locals-ht dir #f)]
-           )
-         (if dir-env
-            (set-top-level-value! sym val dir-env)
-            ;; else
-            (let ([env (copy-environment (scheme-environment))])
-               (hashtable-set! %dir-locals-ht dir env)
-               (define-top-level-value sym val env)
-            )
-         )
-      )
-   )
-)
+(define (dir-set-local-symbol! dir sym val)
+   (let ([dir-env (hashtable-ref %dir-locals-ht dir #f)])
+      (if dir-env
+         (set-top-level-value! sym val dir-env)
+         ;; else
+         (let ([env (copy-environment (scheme-environment))])
+            (hashtable-set! %dir-locals-ht dir env)
+            (define-top-level-value sym val env)))))
 
 (define-syntax (dir-set-local! stx)
    (syntax-case stx ()
-	       ((_ dir sym val)
-		#`(dir-set-local-symbol! dir 'sym val)
-               )
-   )
-)
+      ((_ dir sym val)
+       #`(dir-set-local-symbol! dir 'sym val))))
 
-(define local-symbol-bound?
-   (lambda (sym)
-      (or (top-level-bound? sym (buffer-env))
-          (dir-local-symbol-bound? (current-cwd) sym)
-          (dir-local-symbol-bound? (path-parent (buffer-filename)) sym))
-   )
-)
+(define (local-symbol-bound? sym)
+   (or (top-level-bound? sym (buffer-env))
+       (dir-local-symbol-bound? (current-cwd) sym)
+       (dir-local-symbol-bound? (path-parent (buffer-filename)) sym)))
 
-(define get-local-symbol
-   (lambda (sym)
-      (if (top-level-bound? sym (buffer-env))
-         (top-level-value sym (buffer-env))
-         ;; else
-         (dir-get-local-symbol sym)
-      )
-   )
-)
+(define (get-local-symbol sym)
+   (if (top-level-bound? sym (buffer-env))
+      (top-level-value sym (buffer-env))
+      ;; else
+      (dir-get-local-symbol sym)))
 
-(define set-local-symbol!
-   (lambda (sym val)
-      (set-top-level-value! sym val (buffer-env))
-   )
-)
+(define (set-local-symbol! sym val)
+   (set-top-level-value! sym val (buffer-env)))
 
 (define-syntax (get-local stx)
    (syntax-case stx ()
-	       ((_ s)
-		#`(get-local-symbol 's)
-               )
-	       ((_ s e)
-		#`(if (local-bound? s) (get-local s) e)
-               )
-   )
-)
+      ((_ s)
+       #`(get-local-symbol 's))
+      ((_ s e)
+       #`(if (local-bound? s) (get-local s) e))))
 
 (define-syntax (set-local! stx)
    (syntax-case stx ()
-	       ((_ s v)
-		#`(set-local-symbol! 's v)
-               )
-   )
-)
+      ((_ s v)
+       #`(set-local-symbol! 's v))))
 
 (define-syntax (local-bound? stx)
    (syntax-case stx ()
-	       ((_ s)
-		#`(local-symbol-bound? 's)
-               )
-   )
-)
+      ((_ s)
+       #`(local-symbol-bound? 's))))
 
-(define buffer-line-num
-   (lambda (pos)
-      (call-foreign (__cs_buf_line_num (current-buffer) pos))
-   )
-)
+(define (buffer-line-num pos)
+   (call-foreign (__cs_buf_line_num (current-buffer) pos)))
 
 (define buffer-name
    (case-lambda
@@ -305,21 +201,15 @@
        (call-foreign (__cs_buf_name_get (current-buffer)))]
 
       [(b)
-       (call-foreign (__cs_buf_name_get b))]
-   )
-)
+       (call-foreign (__cs_buf_name_get b))]))
 
 (define buffer-set-name
    (case-lambda
      [(n)
-      (buffer-set-name (current-buffer) n)
-     ]
+      (buffer-set-name (current-buffer) n)]
 
      [(b n)
-      (call-foreign (__cs_buf_name_set b n))
-     ]
-   )
-)
+      (call-foreign (__cs_buf_name_set b n))]))
 
 (define buffer-set-readonly
    (case-lambda
@@ -327,9 +217,7 @@
        (buffer-set-readonly (current-buffer) read-only?)]
 
       [(buf read-only?)
-       (call-foreign (__cs_buf_readonly_set buf read-only?))]
-   )
-)
+       (call-foreign (__cs_buf_readonly_set buf read-only?))]))
 
 (define buffer-is-readonly?
    (case-lambda
@@ -337,202 +225,126 @@
        (buffer-is-readonly? (current-buffer))]
 
       [(buf)
-       (call-foreign (__cs_buf_readonly_get buf))]
-   )
-)
+       (call-foreign (__cs_buf_readonly_get buf))]))
 
 (define buffer-create
    (case-lambda
       [() 
        (let ([b (window-buffer (window-create))])
           (set-text-style '(fg: "white"))
-          b
-       )
-      ]
+          b)]
 
       [(n) 
        (let ([b (buffer-create)])
           (buffer-set-name n)
-          b
-       )
-      ]
-   )
-)
+          b)]))
 
 (define buffer-create-text
    (case-lambda
       [() 
        (let ([b (buffer-create)])
           (text-mode)
-          b
-       )
-      ]
+          b)]
 
       [(n) 
        (let ([b (buffer-create n)])
           (text-mode)
-          b
-       )
-      ]
-   )
-)
+          b)]))
 
 (define buffer-new
    (case-lambda
       [() 
-       (buffer-new "")
-      ]
+       (buffer-new "")]
 
       [(n) 
        (let ([b (call-foreign (__cs_buf_new n))])
           (with-current-buffer b
-             (set-text-style '(fg: "white"))
-          )
-          b
-       )
-      ]
-   )
-)
+             (set-text-style '(fg: "white")))
+          b)]))
 
-(define buffer-is-valid?
-   (lambda (bid)
-      (call-foreign (__cs_buf_is_valid bid))
-   )
-)
+(define (buffer-is-valid? bid)
+   (call-foreign (__cs_buf_is_valid bid)))
 
 (define buffer-delete
    (case-lambda
       [()
-         (buffer-delete (current-buffer))]
+       (buffer-delete (current-buffer))]
 
       [(b)
-         (call-foreign (__cs_buf_del b))]
-   )
-)
+       (call-foreign (__cs_buf_del b))]))
 
-(define buffer-get
-   (lambda (n)
-      (call-foreign (__cs_buf_by_name n))
-   )
-)
+(define (buffer-get n)
+   (call-foreign (__cs_buf_by_name n)))
 
-(define buffer-get-or-create
-   (lambda (name)
-      (let ([buf (buffer-get name)])
-         (if buf
-            buf
-            ;; else
-            (buffer-create name)
-         )
-      )
-   )
-)
+(define (buffer-get-or-create name)
+   (let ([buf (buffer-get name)])
+      (if buf
+         buf
+         ;; else
+         (buffer-create name))))
 
-(define buffer-open-file
-   (lambda (f)
-      (let (
-            [bid (buffer-get-by-file f)]
-            [in-frame? #f]
-            [wid 0]
-           )
-         (if bid
-            (let ()
-               (set! wid (buffer-window bid))
-               (for-all
-                  (lambda (w)
-                     (when (equal? (first w) wid)
-                        (set! in-frame? #t)
-                        #f
-                     ) 
-                  )
-                  (window-list)
-               )
-               (if in-frame?
-                  (begin
-                     (window-select wid)
-                  )
-                  ;; else
-                  (window-create bid)
-               )
-               bid
-            )
-            ;; else
-            (let* (
-                   [b (buffer-create)]
-                   [ok (call-foreign (__cs_buf_file_open b f))]
-                  )
-               (with-current-buffer b
-                  (text-mode)
-                  (when ok
-                     (for-each
-                        (lambda (match)
-                           (let ([fname (buffer-filename)])
-                              (when (pregexp-match (car match) fname)
-                                 ((top-level-value (cdr match)))
-                              ) 
-                           )
-                        )
-                        file-match-mode
-                     )
-                  )
-               )
-               b
-            )
-         )
-      )
-   )
-)
+(define (buffer-open-file f)
+   (let (
+         [bid (buffer-get-by-file f)]
+         [in-frame? #f]
+         [wid 0]
+        )
+      (if bid
+         (let ()
+            (set! wid (buffer-window bid))
+            (for-all
+               (lambda (w)
+                  (when (equal? (first w) wid)
+                     (set! in-frame? #t)
+                     #f))
+               (window-list))
+            (if in-frame?
+               (begin
+                  (window-select wid))
+               ;; else
+               (window-create bid))
+            bid)
+         ;; else
+         (let* ([b (buffer-create)]
+                [ok (call-foreign (__cs_buf_file_open b f))])
+            (with-current-buffer b
+               (text-mode)
+               (when ok
+                  (for-each
+                     (lambda (match)
+                        (let ([fname (buffer-filename)])
+                           (when (pregexp-match (car match) fname)
+                              ((top-level-value (cdr match))))))
+                     file-match-mode)))
+            b))))
 
-(define buffer-reload
-   (lambda ()
-      (when (local-bound? buffer-reload-func)
-         ((get-local buffer-reload-func))
-      )
-   )
-)
+(define (buffer-reload)
+   (when (local-bound? buffer-reload-func)
+      ((get-local buffer-reload-func))))
 
 (define buffer-filename
    (case-lambda
      [()
-      (buffer-filename (current-buffer))
-     ]
+      (buffer-filename (current-buffer))]
 
      [(b)
-      (call-foreign (__cs_buf_file_get b))
-     ]
-   )
-)
+      (call-foreign (__cs_buf_file_get b))]))
 
-(define buffer-set-filename
-   (lambda (f)
-      (let (
-            [first-path (path-first f)]
-            [path f]
-           )
-         (if (equal? first-path "~")
-            (set! path
-               (format "~a/~a"
-                  (getenv "HOME")
-                  (path-rest f)
-               )
-            )
-         )
-         (call-foreign (__cs_buf_file_set (current-buffer) path))
-      )
-   )
-)
+(define (buffer-set-filename f)
+   (let ([first-path (path-first f)]
+         [path f])
+      (if (equal? first-path "~")
+         (set! path
+            (format "~a/~a"
+               (getenv "HOME")
+               (path-rest f))))
+      (call-foreign (__cs_buf_file_set (current-buffer) path))))
 
-(define buffer-save
-   (lambda ()
-      (call-foreign (__cs_buf_save (current-buffer)))
-   )
-)
+(define (buffer-save)
+   (call-foreign (__cs_buf_save (current-buffer))))
 
-(define buffer-first
-   (lambda ()
-       (call-foreign (__cs_buf_first_get))
-   )
-)
+(define (buffer-first)
+    (call-foreign (__cs_buf_first_get)))
 
 (define buffer-next
    (case-lambda
@@ -540,128 +352,79 @@
        (call-foreign (__cs_buf_next_get (current-buffer)))]
 
       [(bid)
-       (call-foreign (__cs_buf_next_get bid))]
-   )
-)
+       (call-foreign (__cs_buf_next_get bid))]))
 
-(define buffer-list
-   (lambda ()
-      (let ([buf (buffer-first)]
-            [lst   '()]
-	   )
+(define (buffer-list)
+   (let ([buf (buffer-first)]
+         [lst   '()])
+      (while buf
+         (when (and
+                  (not (equal? (buffer-name buf) "*minibuf*"))
+                  (not (equal? (buffer-name buf) "*topbar*")))
+            (set! lst (append lst
+                              (list (list buf (buffer-name buf))))))
+         (set! buf (buffer-next buf)))
+      lst))
 
-         (while buf
-            (when (and
-                     (not (equal? (buffer-name buf) "*minibuf*"))
-                     (not (equal? (buffer-name buf) "*topbar*"))
-                  )
-               (set! lst (append lst (list
-                                        (list buf (buffer-name buf))
-				     )
-               )         )
-            )
-            (set! buf (buffer-next buf))
-         )
+(define (buffer-for-each fn)
+   (for-each
+      (lambda (b)
+         (fn (first b)))
+      (buffer-list)))
 
-	 lst
-      )
-   )
-)
-
-(define buffer-for-each
-   (lambda (fn)
-      (for-each
-         (lambda (b)
-            (fn (first b))
-         )
-         (buffer-list)
-      )
-   )
-)
-
-(define buffer-find
-   (lambda (fn)
-      (let ([b (find
-                  (lambda (b)
-                     (fn (first b))
-                  )
-                  (buffer-list)
-               )
-            ]
-           )
-         (and b (first b))
-      )
-   )
-)
+(define (buffer-find fn)
+   (let ([b (find
+               (lambda (b)
+                  (fn (first b)))
+               (buffer-list))])
+      (and b (first b))))
 
 (define (buffer-get-by-file file)
    (buffer-find
       (lambda (b)
-         (equal? file (buffer-filename b)))
-   )
-)
+         (equal? file (buffer-filename b)))))
 
-(define enable-insert
-   (lambda (e)
-      (call-foreign (__cs_buf_text_input_enable (current-buffer) e))
-   )
-)
+(define (enable-insert e)
+   (call-foreign (__cs_buf_text_input_enable (current-buffer) e)))
 
-(define set-text-style
-   (lambda (s . e)
-      (let ([a (append (list s) e)])
-         (for-each
-            (lambda (o)
-               (cond
-                  [(equal? (car o) 'fg:)
-		     (call-foreign (__cs_buf_text_fg_set (current-buffer) (color-name->number (cadr o))))]
-                  [(equal? (car o) 'bg:)
-		     (call-foreign (__cs_buf_text_bg_set (current-buffer) (color-name->number (cadr o))))]
-                  [(equal? (car o) 'attr:)
-		     (call-foreign (__cs_buf_text_style_set (current-buffer) (style-name->number (cadr o))))]
-               )
-            )
-            a
-         )
-      )
-   )
-)
+(define (set-text-style s . e)
+   (let ([a (append (list s) e)])
+      (for-each
+         (lambda (o)
+            (cond
+               [(equal? (car o) 'fg:)
+                (call-foreign (__cs_buf_text_fg_set (current-buffer) (color-name->number (cadr o))))]
+               [(equal? (car o) 'bg:)
+                (call-foreign (__cs_buf_text_bg_set (current-buffer) (color-name->number (cadr o))))]
+               [(equal? (car o) 'attr:)
+                (call-foreign (__cs_buf_text_style_set (current-buffer) (style-name->number (cadr o))))]))
+         a)))
 
-(define symbol->text-property-type
-   (lambda (s)
-      (case s
-         ['style:     1]
-         ['highlight: 2]
-         ['keymap:    3]
-         ['symbol:    4]
-         ['data:      5]
-         ['all:       10000]
-         [else         0]
-      )
-   )
-)
+(define (symbol->text-property-type s)
+   (case s
+      ['style:     1]
+      ['highlight: 2]
+      ['keymap:    3]
+      ['symbol:    4]
+      ['data:      5]
+      ['all:       10000]
+      [else         0]))
 
 (define __add-style-property
    (case-lambda
       [(style regex)
-       (__add-style-property style -1 -1 regex)
-      ]
+       (__add-style-property style -1 -1 regex)]
 
       [(style start end)
-       (__add-style-property style start end #f)
-      ]
+       (__add-style-property style start end #f)]
 
       [(style start end regex)
-       (__add-style-property style start end #f #f)
-      ]
+       (__add-style-property style start end #f #f)]
       
       [(style start end regex name)
        (let ([l (if (symbol? style)
                     (list -1 -1 -1)
-                    (style->list style)
-                )
-             ]
-            )
+                    (style->list style))])
          (call-foreign
             (__cs_buf_prop_style_add
                (current-buffer)
@@ -671,177 +434,117 @@
                (list-ref l 2)
                (if (symbol? style)
                   (symbol->string style)
-                  #f
-               )
+                  ;; else
+                  #f)
                start
                end
                regex
                name
-               (plist-get style 'expand:)
-            )
-         )
-       )
-      ]
-   )
-)
+               (plist-get style 'expand:))))]))
 
 (define __add-keymap-property
    (case-lambda
       [(kmap regex)
-       (__add-keymap-property kmap -1 -1 regex)
-      ]
+       (__add-keymap-property kmap -1 -1 regex)]
 
       [(kmap start end)
-       (__add-keymap-property kmap start end #f)
-      ]
+       (__add-keymap-property kmap start end #f)]
 
       [(kmap start end regex)
-       (__add-keymap-property kmap start end #f #f)
-      ]
+       (__add-keymap-property kmap start end #f #f)]
       
       [(kmap start end regex name)
-       (call-foreign (__cs_buf_prop_kmap_add (current-buffer) kmap start end regex name))
-      ]
-   )
-)
+       (call-foreign (__cs_buf_prop_kmap_add (current-buffer) kmap start end regex name))]))
 
 (define __add-symbol-property
    (case-lambda
       [(symbol start end)
-       (__add-symbol-property symbol start end #f)
-      ]
+       (__add-symbol-property symbol start end #f)]
 
       [(symbol start end regex)
-       (__add-symbol-property symbol start end #f #f)
-      ]
+       (__add-symbol-property symbol start end #f #f)]
       
       [(symbol start end regex name)
-       (call-foreign (__cs_buf_prop_symbol_add (current-buffer) (symbol->string symbol) start end regex name))
-      ]
-   )
-)
+       (call-foreign (__cs_buf_prop_symbol_add (current-buffer) (symbol->string symbol) start end regex name))]))
 
 (define __add-data-property
    (case-lambda
       [(data start end)
-       (__add-data-property data start end #f)
-      ]
+       (__add-data-property data start end #f)]
 
       [(data start end regex)
-       (__add-data-property data start end #f #f)
-      ]
+       (__add-data-property data start end #f #f)]
       
       [(data start end regex name)
-       (call-foreign (__cs_buf_prop_data_add (current-buffer) data start end regex name))
-      ]
-   )
-)
+       (call-foreign (__cs_buf_prop_data_add (current-buffer) data start end regex name))]))
 
 (define add-text-property
    (case-lambda
       [(regex plist)
-       (add-text-property -1 -1 regex plist)
-      ]
+       (add-text-property -1 -1 regex plist)]
 
       [(start end plist)
-       (let (
-             [name (plist-get plist ':name)]
-             [regex (plist-get plist ':regex)]
-            )
+       (let ([name (plist-get plist ':name)]
+             [regex (plist-get plist ':regex)])
           (plist-for-each plist
              (lambda (prop val)
                 (case prop
                    ['style: (__add-style-property val start end regex name)]
                    ['keymap: (__add-keymap-property val start end regex name)]
                    ['symbol: (__add-symbol-property val start end regex name)]
-                   ['data: (__add-data-property val start end regex name)]
-                )
-             )
-          )
-       )
-      ]
-   )
-)
+                   ['data: (__add-data-property val start end regex name)]))))]))
 
 (define remove-text-property
    (case-lambda
       [()
-       (remove-text-property 'all: -1 -1 #f)
-      ]
+       (remove-text-property 'all: -1 -1 #f)]
     
       [(name)
-       (remove-text-property 'all: -1 -1 name)
-      ]
+       (remove-text-property 'all: -1 -1 name)]
     
       [(start end)
-       (remove-text-property 'all: start end #f)
-      ]
+       (remove-text-property 'all: start end #f)]
 
       [(type start end)
-       (remove-text-property type start end #f)
-      ]
+       (remove-text-property type start end #f)]
 
       [(type start end name)
-       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type type) start end #f name))
-      ]
-   )
-)
+       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type type) start end #f name))]))
 
 (define get-text-property
    (case-lambda
       [(name)
-       (get-text-property 'all: -1 -1 name)
-      ]
+       (get-text-property 'all: -1 -1 name)]
     
       [(start end)
-       (get-text-property 'all: start end #f)
-      ]
+       (get-text-property 'all: start end #f)]
 
       [(type start end)
-       (get-text-property type start end #f)
-      ]
+       (get-text-property type start end #f)]
 
       [(type start end name)
-       (call-foreign (__cs_buf_prop_get (current-buffer) (symbol->text-property-type type) start end name))
-      ]
-   )
-)
+       (call-foreign (__cs_buf_prop_get (current-buffer) (symbol->text-property-type type) start end name))]))
 
 (define set-text-property
    (case-lambda
       [(start end plist)
-       (set-text-property start end #f plist)
-      ]
+       (set-text-property start end #f plist)]
       
       [(start end name plist)
        (let ([type #f])
           (plist-for-each plist
              (lambda (prop val)
                 (when (member prop '(style: data: symbol: keymap:))
-                   (set! type prop)
-                )
-             )
-          )
+                   (set! type prop))))
           (when type
              (remove-text-property type start end name)
-             (add-text-property start end plist)
-          )
-       )
-      ]
-   )
-)
+             (add-text-property start end plist)))]))
 
-(define highlight-range
-   (lambda (s e)
-      (call-foreign (__cs_buf_prop_style_add (current-buffer) 2 -1 -1 -1 "highlight" s e #f #f #f))
-   )
-)
+(define (highlight-range s e)
+   (call-foreign (__cs_buf_prop_style_add (current-buffer) 2 -1 -1 -1 "highlight" s e #f #f #f)))
 
-(define highlight-clear
-   (lambda ()
-      (call-foreign (__cs_buf_prop_del (current-buffer) 2 -1 -1 #f #f))
-   )
-)
+(define (highlight-clear)
+   (call-foreign (__cs_buf_prop_del (current-buffer) 2 -1 -1 #f #f)))
 
 (define buffer-is-visible?
    (case-lambda
@@ -849,21 +552,15 @@
        (call-foreign (__cs_buf_is_visible (current-buffer)))]
 
       [(b)
-       (call-foreign (__cs_buf_is_visible b))]
-   )
-)
+       (call-foreign (__cs_buf_is_visible b))]))
 
 (define buffer-set-vterm
    (case-lambda
       [(pid)
-       (buffer-set-vterm (current-buffer) pid)
-      ]
+       (buffer-set-vterm (current-buffer) pid)]
 
       [(b pid)
-       (call-foreign (__cs_buf_term_set b pid))
-      ]
-   )
-)
+       (call-foreign (__cs_buf_term_set b pid))]))
 
 (define buffer-is-vterm?
    (case-lambda
@@ -871,15 +568,10 @@
        (call-foreign (__cs_buf_is_term (current-buffer)))]
 
       [(b)
-       (call-foreign (__cs_buf_is_term b))]
-   )
-)
+       (call-foreign (__cs_buf_is_term b))]))
 
-(define buffer-env
-   (lambda ()
-      (call-foreign (__cs_buf_env_get (current-buffer)))
-   )
-)
+(define (buffer-env)
+   (call-foreign (__cs_buf_env_get (current-buffer))))
 
 (define buffer-window
    (case-lambda
@@ -888,47 +580,26 @@
       ]
 
       [(b)
-       (let (
-             [win-lst (filter
+       (let ([win-lst (filter
                          (lambda (w)
-                            (equal? (window-buffer (first w)) b)
-                         ) (window-list)
-                      )
-             ]
-            )
+                            (equal? (window-buffer (first w)) b))
+                         (window-list))])
           (if (null? win-lst)
              #f
              ;; else
-             (first (first win-lst))
-          )
-       )
-      ]
-   )
-)
+             (first (first win-lst))))]))
 
-(define buffer-snapshot
-   (lambda()
-      (call-foreign (__cs_buf_snapshot (current-buffer)))
-   )
-)
+(define (buffer-snapshot)
+   (call-foreign (__cs_buf_snapshot (current-buffer))))
 
-(define buffer-undo
-   (lambda()
-      (call-foreign (__cs_buf_undo (current-buffer)))
-   )
-)
+(define (buffer-undo)
+   (call-foreign (__cs_buf_undo (current-buffer))))
 
-(define buffer-redo
-   (lambda()
-      (call-foreign (__cs_buf_redo (current-buffer)))
-   )
-)
+(define (buffer-redo)
+   (call-foreign (__cs_buf_redo (current-buffer))))
 
-(define current-cwd
-   (lambda ()
-      (frame-cwd)
-   )
-)
+(define (current-cwd)
+   (frame-cwd))
 
 (define-syntax (with-current-cwd stx)
    (syntax-case stx ()
@@ -937,27 +608,14 @@
             (fluid-let ([current-cwd (lambda () c)])
                (begin
                   exp
-                  ...
-               )
-            )
-         )
-      )
-   )
-)
+                  ...))))))
 
-(define buffer-set-cwd
-   (lambda (cwd)
-      (define-local current-cwd cwd)
-   )
-)
+(define (buffer-set-cwd cwd)
+   (define-local current-cwd cwd))
 
-(define buffer-cwd
-   (lambda ()
-      (if (and (local-bound? current-cwd) (get-local current-cwd))
-         (get-local current-cwd)
-         ;; else
-         (current-cwd)
-      )
-   )
-)
+(define (buffer-cwd)
+   (if (and (local-bound? current-cwd) (get-local current-cwd))
+      (get-local current-cwd)
+      ;; else
+      (current-cwd)))
 
