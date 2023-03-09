@@ -140,9 +140,7 @@
 	   )
 
          (while win
-            (set! lst (append lst (list
-                                    (list win (window-name win) (window-buffer win))
-				  )
+            (set! lst (append lst (list win)
             )         )
             (set! win (window-next win))
          )
@@ -155,7 +153,7 @@
 
 (define window-last
    (lambda ()
-      (first (list-ref (window-list) (- (length (window-list)) 1)))
+      (list-ref (window-list) (- (length (window-list)) 1))
    )
 )
 
@@ -164,7 +162,7 @@
       (let ([ls (window-list)])
          (for-each
             (lambda (w)
-               (fn (first w))
+               (fn w)
             )
             ls
          )
@@ -177,7 +175,7 @@
       (let ([ls (window-list)])
          (for-all
             (lambda (w)
-               (fn (first w))
+               (fn w)
             )
             ls
          )
@@ -723,10 +721,10 @@
    (lambda (fn)
       (let ([w (find
                   (lambda (w)
-                     (fn (first w))
+                     (fn w)
                   )
                   (window-list))])
-         (and w (first w)))))
+         w)))
 
 (define (window-by-pos x y)
    (if (layout-is-maximized?)

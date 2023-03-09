@@ -161,9 +161,9 @@
 
 (define (minibuf-buffer-list->complete)
    (map (lambda (b)
-           (let ([mode (buffer-mode-name (first b))]
-                 [name (buffer-name (first b))])
-              (cons (format "(~a) ~a" mode name) (first b))))
+           (let ([mode (buffer-mode-name b)]
+                 [name (buffer-name b)])
+              (cons (format "(~a) ~a" mode name) b)))
         (buffer-list)))
 
 (define (minibuf-switch-buffer)

@@ -294,7 +294,7 @@
             (set! wid (buffer-window bid))
             (for-all
                (lambda (w)
-                  (when (equal? (first w) wid)
+                  (when (equal? w wid)
                      (set! in-frame? #t)
                      #f))
                (window-list))
@@ -361,23 +361,22 @@
          (when (and
                   (not (equal? (buffer-name buf) "*minibuf*"))
                   (not (equal? (buffer-name buf) "*topbar*")))
-            (set! lst (append lst
-                              (list (list buf (buffer-name buf))))))
+            (set! lst (append lst (list buf))))
          (set! buf (buffer-next buf)))
       lst))
 
 (define (buffer-for-each fn)
    (for-each
       (lambda (b)
-         (fn (first b)))
+         (fn b))
       (buffer-list)))
 
 (define (buffer-find fn)
    (let ([b (find
                (lambda (b)
-                  (fn (first b)))
+                  (fn b))
                (buffer-list))])
-      (and b (first b))))
+      b))
 
 (define (buffer-get-by-file file)
    (buffer-find
@@ -582,12 +581,12 @@
       [(b)
        (let ([win-lst (filter
                          (lambda (w)
-                            (equal? (window-buffer (first w)) b))
+                            (equal? (window-buffer w) b))
                          (window-list))])
           (if (null? win-lst)
              #f
              ;; else
-             (first (first win-lst))))]))
+             (first win-lst)))]))
 
 (define (buffer-snapshot)
    (call-foreign (__cs_buf_snapshot (current-buffer))))
