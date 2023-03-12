@@ -116,10 +116,24 @@
          (close-port port-in))
       ))
 
+(define (c-assembler-output)
+   (define (on-gcc-exit status buf-out buf-err)
+      (with-current-buffer buf-out
+         (text-mode))
+      (window-create buf-out))
+
+   (let ([cmd "gcc -x c -masm=intel -fverbose-asm -O0 -S -o- -"]
+         [buf (buffer-new)])
+      (let* ([p (process-create cmd buf on-gcc-exit)]
+             [port-in (process-port-in p)])
+         (put-string port-in (text-string))
+         (close-port port-in))))
+
 (define-mode c-mode "C" text-mode
    (bind-key-local "C-c C-c" c-compile-buffer)
    (bind-key-local "C-c C-r" c-compile-and-run-buffer)
    (bind-key-local "C-c C-e" c-compile-and-eval-buffer)
+   (bind-key-local "C-c C-a" c-assembler-output)
    (syntax-set-lang 'c)
 )
 
