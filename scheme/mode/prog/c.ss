@@ -59,9 +59,67 @@
    )
 )
 
+(define (c-compile-and-eval-buffer)
+   (define (wrap-expr expr)
+      (string-append
+         "
+         #include <stdio.h>
+
+         #define print_val(X) _Generic((X), \\
+            double: print_val_double, \\
+            default: print_val_void,  \\
+            float: print_val_float,  \\
+            char*: print_val_cptr, \\
+            int: print_val_int, \\
+            unsigned int: print_val_uint, \\
+            long: print_val_long, \\
+            unsigned long: print_val_ulong, \\
+            char: print_val_char, \\
+            unsigned char: print_val_uchar \\
+         )(X)
+
+         void print_val_void(void *val) { printf(\"(void)\\n\"); }
+         void print_val_double(double val) { printf(\"%lf\\n\", val); }
+         void print_val_float(float val) { printf(\"%f\\n\", val); }
+         void print_val_uint(unsigned int val) { printf(\"%u (0x%x)\\n\", val, val); }
+         void print_val_int(int val) { printf(\"%d (0x%x)\\n\", val, val); }
+         void print_val_ulong(unsigned long val) { printf(\"%lu (0x%lx)\\n\", val, val); }
+         void print_val_long(long val) { printf(\"%ld (0x%lx)\\n\", val, val); }
+         void print_val_char(char val) { printf(\"%d (0x%x)\\n\", val, val); }
+         void print_val_uchar(unsigned char val) { printf(\"%u (0x%x)\\n\", val, val); }
+         void print_val_cptr(char *val) { printf(\"[\\\"%s\\\"]\\n\", val); }
+
+         void main(void)
+         {
+             print_val((
+             {
+             /* c-mode-start-of-eval-expr */
+             "
+"            " expr
+             ";
+             }
+             ));
+         }")
+   )
+
+   (define (on-eval-exit status buf-out buf-err)
+      (window-create buf-out))
+
+   (let* ([prog (format "/tmp/borsch-c-eval-~a" (random 65000))]
+          [cmd (format "gcc -x c -o ~a - && ~a" prog prog)]
+          [buf (buffer-new)])
+      (let* ([p (process-create cmd buf (lambda (status out err)
+                                           (delete-file prog)
+                                           (on-eval-exit status out err)))]
+             [port-in (process-port-in p)])
+         (put-string port-in (wrap-expr (text-string)))
+         (close-port port-in))
+      ))
+
 (define-mode c-mode "C" text-mode
    (bind-key-local "C-c C-c" c-compile-buffer)
    (bind-key-local "C-c C-r" c-compile-and-run-buffer)
+   (bind-key-local "C-c C-e" c-compile-and-eval-buffer)
    (syntax-set-lang 'c)
 )
 
