@@ -529,14 +529,11 @@
       (window-list)))
 
 (define (window-by-pos x y)
-   (if (layout-is-maximized?)
-      (current-window)
-      ;; else
-      (window-find
-         (lambda (w)
-            (let ([wx (window-x w)]
-                  [wy (window-y w)]
-                  [ww (window-width w)]
-                  [wh (window-height w)])
-               (and (and (>= x wx) (< x (+ wx ww)))
-                    (and (>= y wy) (< y (+ wy wh)))))))))
+   (window-find
+      (lambda (w)
+         (let ([wx (window-x w)]
+               [wy (window-y w)]
+               [ww (window-width w)]
+               [wh (window-height w)])
+            (and (and (>= x wx) (< x (+ wx ww)))
+                 (and (>= y wy) (< y (+ wy wh))))))))
