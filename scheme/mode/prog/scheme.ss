@@ -1,47 +1,29 @@
-(define scheme-eval
-   (lambda (s)
-      (let (
-            [code (open-string-input-port (format "(begin ~a)" s))]
-            [ret '()]
-            [out ""]
-           )
-         (set! out (with-output-to-string
-                      (lambda ()
-                         (set! ret (try eval-port->str code))
-                      )
-                   )
-         )
-         (close-port code)
-         (set! out (string-append out (second ret)))
-         (message out)
-      )
-   )
-)
+(define (scheme-eval s)
+   (let ([code (open-string-input-port (format "(begin ~a)" s))]
+         [ret '()]
+         [out ""])
+      (set! out (with-output-to-string
+                   (lambda ()
+                      (set! ret (try eval-port->str code)))))
+      (close-port code)
+      (set! out (string-append out (second ret)))
+      (message out)))
 
-(define scheme-eval-buffer
-   (lambda ()
-      (if (text-is-selection-set?)
-         (let ([sel (text-selection)])
-            (text-clear-selection)
-            (scheme-eval sel)
-         )
-         ;; else
-         (scheme-eval (text-string))
-      )
-   )
-)
+(define (scheme-eval-buffer)
+   (if (text-is-selection-set?)
+      (let ([sel (text-selection)])
+         (text-clear-selection)
+         (scheme-eval sel))
+      ;; else
+      (scheme-eval (text-string))))
 
-(define scheme-extract-word
-   (lambda ()
-      (pregexp-replace* "\\[|\\]|\\'|\\(|\\)" (text-longword) "")
-   )
-)
+(define (scheme-extract-word)
+   (pregexp-replace* "\\[|\\]|\\'|\\(|\\)" (text-longword) ""))
 
 (define-mode scheme-mode "Scheme" text-mode
    (bind-key-local "C-c C-c" scheme-eval-buffer)
    (syntax-set-lang 'scheme)
-   (define-local text-word-func scheme-extract-word)
-)
+   (define-local text-word-func scheme-extract-word))
 
 (add-to-list 'file-match-mode '(".*\\.scm$" . scheme-mode))
 (add-to-list 'file-match-mode '(".*\\.sls$" . scheme-mode))
@@ -62,14 +44,13 @@
      .
      (symbol) @keyword
      (#match? @keyword
-      \"^((define)|(let)|(let\\*)|(lambda)|(if)|(cond)|(case)|(else)|(and)|(or)|(not)|(set!)|(begin)|(when))$\"))"
-)
+      \"^((define)|(let)|(let\\*)|(lambda)|(if)|(cond)|(case)|(else)|(and)|(or)|(not)|(set!)|(begin)|(when))$\"))")
+
 (define scheme-syntax-operator-match
    "(list
      .
      (symbol) @operator
-     (#match? @operator \"^([+*/<>=-]|(<=)|(>=))$\"))"
-)
+     (#match? @operator \"^([+*/<>=-]|(<=)|(>=))$\"))")
 
 (define scheme-syntax-keyword-style             '(fg: "green"))
 (define scheme-syntax-string-style              '(fg: "bright-yellow"))
