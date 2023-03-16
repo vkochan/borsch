@@ -632,9 +632,6 @@ int win_new(int bid)
 	Buffer *buf;
 	Window *c;
 
-	if (bid <= 0)
-		return -1;
-
 	buf = buffer_by_id(bid);
 	buffer_dirty_set(buf, true);
 
