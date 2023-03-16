@@ -194,23 +194,18 @@
                       (window-next)
                       (window-first))))
 
-(define window-create
-   (case-lambda
-      [()
-       (window-create 0)]
-
-      [(b)
-       (let ([w (call-foreign (__cs_win_new b))])
-         (when w
-            (if (layout-is-sticky?)
-               (let ([m (window-last-master)])
-                  (when m (window-set-next m w)))
-               ;; else
-               (let ()
-                  (window-set-first w)))
-            (run-hooks 'window-create-hook w)
-            (window-select w))
-         w)]))
+(define (window-create b)
+   (let ([w (call-foreign (__cs_win_new b))])
+      (when w
+         (if (layout-is-sticky?)
+            (let ([m (window-last-master)])
+               (when m (window-set-next m w)))
+            ;; else
+            (let ()
+               (window-set-first w)))
+         (run-hooks 'window-create-hook w)
+         (window-select w))
+      w))
 
 (define window-delete
     (case-lambda

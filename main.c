@@ -632,12 +632,11 @@ int win_new(int bid)
 	Buffer *buf;
 	Window *c;
 
- 	if (bid) {
-		buf = buffer_by_id(bid);
-		buffer_dirty_set(buf, true);
- 	} else {
-		buf = __buf_new("", global_kmap);
- 	}
+	if (bid <= 0)
+		return -1;
+
+	buf = buffer_by_id(bid);
+	buffer_dirty_set(buf, true);
 
 	c = window_create(buf);
 	if (!c && !bid) {
