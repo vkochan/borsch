@@ -283,11 +283,9 @@
          (buffer-create name))))
 
 (define (buffer-open-file f)
-   (let (
-         [bid (buffer-get-by-file f)]
+   (let ([bid (buffer-get-by-file f)]
          [in-frame? #f]
-         [wid 0]
-        )
+         [wid 0])
       (if bid
          (let ()
             (set! wid (buffer-window bid))
@@ -574,8 +572,7 @@
 (define buffer-window
    (case-lambda
       [()
-       (buffer-window (current-buffer))
-      ]
+       (buffer-window (current-buffer))]
 
       [(b)
        (let ([win-lst (filter
