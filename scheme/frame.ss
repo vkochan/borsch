@@ -2,6 +2,14 @@
 (define __cs_frame_create (foreign-procedure __collect_safe "cs_frame_create" () scheme-object))
 (define __cs_frame_delete (foreign-procedure __collect_safe "cs_frame_delete" (int) void))
 
+(define-record-type %frame%
+   (fields
+      id
+      (mutable name)
+      (mutable cwd)
+      (mutable prev-layout)
+      (mutable env)))
+
 (define frames-ht (make-eq-hashtable))
 
 (define (*frame-create*)
@@ -11,14 +19,14 @@
    (call-foreign (__cs_frame_delete fid)))
 
 (define (frame-create name)
-   (let ([fr (make-eq-hashtable)]
-         [id (*frame-create*)])
-      (hashtable-set! fr 'cwd (current-directory))
-      (hashtable-set! fr 'prev-layout #f)
-      (hashtable-set! fr 'name name)
-      (hashtable-set! fr 'id id)
-      (hashtable-set! frames-ht id fr)   
-      fr))
+   (let ([id (*frame-create*)])
+      (let ([fr (make-%frame% id
+                              name
+                              (current-directory)
+                              #f
+                              (make-eq-hashtable))])
+         (hashtable-set! frames-ht id fr)
+         fr)))
 
 (define (frame-list)
    (vector->list (hashtable-values frames-ht)))
@@ -42,12 +50,12 @@
 (define-syntax (frame-set-var! stx)
    (syntax-case stx ()
       ((_ f s v)
-         #`(hashtable-set! f 's v))))
+         #`(hashtable-set! (%frame%-env f) 's v))))
 
 (define-syntax (frame-get-var stx)
    (syntax-case stx ()
       ((_ f s)
-         #`(hashtable-ref f 's #f))))
+         #`(hashtable-ref (%frame%-env f) 's #f))))
 
 (define-syntax (with-current-frame stx)
    (syntax-case stx ()
@@ -71,7 +79,7 @@
        (frame-id (current-frame))]
 
       [(fr)
-       (frame-get-var fr id)]))
+       (%frame%-id fr)]))
 
 (define frame-name
    (case-lambda
@@ -79,7 +87,7 @@
        (frame-name (current-frame))]
 
       [(fr)
-       (frame-get-var fr name)]))
+       (%frame%-name fr)]))
 
 (define frame-set-name
    (case-lambda
@@ -87,7 +95,7 @@
        (frame-set-name (current-frame) name)]
 
       [(fr n)
-       (frame-set-var! fr name n)
+       (%frame%-name-set! fr n)
        (run-hooks 'change-frame-name-hook)]))
 
 (define frame-cwd
@@ -96,7 +104,7 @@
        (frame-cwd (current-frame))]
 
       [(fr)
-       (frame-get-var fr cwd)]))
+       (%frame%-cwd fr)]))
 
 (define frame-set-cwd
    (case-lambda
@@ -104,7 +112,7 @@
        (frame-set-cwd (current-frame) cwd)]
 
       [(fr c)
-       (frame-set-var! fr cwd c)
+       (%frame%-cwd-set! fr c)
        (run-hooks 'change-cwd-hook)]))
 
 (define frame-prev-layout
@@ -113,7 +121,7 @@
        (frame-prev-layout (current-frame))]
 
       [(fr)
-       (frame-get-var fr prev-layout)]))
+       (%frame%-prev-layout fr)]))
 
 (define frame-set-prev-layout
    (case-lambda
@@ -121,4 +129,4 @@
        (frame-set-prev-layout (current-frame) l)]
 
       [(fr l)
-       (frame-set-var! fr prev-layout l)]))
+       (%frame%-prev-layout-set! fr l)]))
