@@ -245,7 +245,7 @@
 
       [(n) 
        (let ([b (buffer-new n)])
-          (buffer-set-name n)
+          (buffer-set-name b n)
           (window-create b)
           b)]))
 
