@@ -639,10 +639,8 @@ int win_new(int bid)
 	buffer_dirty_set(buf, true);
 
 	c = window_create(buf);
-	if (!c && !bid) {
-		buffer_del(buf);
+	if (!c)
  		return -1;
- 	}
 
  	return c->id;
 }
