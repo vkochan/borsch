@@ -227,16 +227,26 @@
       [(buf)
        (call-foreign (__cs_buf_readonly_get buf))]))
 
+(define buffer-new
+   (case-lambda
+      [() 
+       (buffer-new "")]
+
+      [(n) 
+       (let ([b (call-foreign (__cs_buf_new n))])
+          (with-current-buffer b
+             (set-text-style '(fg: "white")))
+          b)]))
+
 (define buffer-create
    (case-lambda
       [() 
-       (let ([b (window-buffer (window-create))])
-          (set-text-style '(fg: "white"))
-          b)]
+       (buffer-create "")]
 
       [(n) 
-       (let ([b (buffer-create)])
+       (let ([b (buffer-new n)])
           (buffer-set-name n)
+          (window-create b)
           b)]))
 
 (define buffer-create-text
@@ -249,17 +259,6 @@
       [(n) 
        (let ([b (buffer-create n)])
           (text-mode)
-          b)]))
-
-(define buffer-new
-   (case-lambda
-      [() 
-       (buffer-new "")]
-
-      [(n) 
-       (let ([b (call-foreign (__cs_buf_new n))])
-          (with-current-buffer b
-             (set-text-style '(fg: "white")))
           b)]))
 
 (define (buffer-is-valid? bid)
