@@ -465,14 +465,12 @@ void window_cleanup(void)
 		Window *w = new_windows;
 		Buffer *buf = w->buf;
 
-		buffer_ref_put(buf);
 		window_delete(w);
 	}
 	while (widgets) {
 		Window *w = widgets;
 		Buffer *buf = w->buf;
 
-		buffer_ref_put(buf);
 		window_delete(w);
 	}
 	frames_cleanup();
@@ -1081,8 +1079,6 @@ void window_delete(Window *w)
 	ui_window_free(w->win);
 	view_free(w->view);
 	free(w);
-	if (buf)
-		buffer_ref_put(buf);
 	layout_changed(true);
 }
 
@@ -1179,8 +1175,6 @@ static void on_view_update_cb(UiWin *win)
 
 void window_buffer_switch(Window *w, Buffer *b)
 {
-	buffer_ref_put(w->buf);
-
 	w->prev_buf = w->buf;
 	w->buf = b;
 
@@ -1193,7 +1187,6 @@ void window_buffer_switch(Window *w, Buffer *b)
 		ui_window_on_resize_set(w->win, NULL);
 		ui_window_priv_set(w->win, w);
 	}
-	buffer_ref_get(w->buf);
 }
 
 Window *__window_create(Buffer *buf, bool is_widget, int x, int y, int width, int height)
@@ -1224,7 +1217,6 @@ Window *__window_create(Buffer *buf, bool is_widget, int x, int y, int width, in
 		return NULL;
 	}
 
-	buffer_ref_get(w->buf);
 	window_buffer_switch(w, buf);
 
 	if (is_widget) {

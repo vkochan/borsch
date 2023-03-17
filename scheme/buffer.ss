@@ -1,4 +1,7 @@
 (define __cs_buf_new (foreign-procedure "cs_buf_new" (string) scheme-object))
+(define __cs_buf_ref_get (foreign-procedure "cs_buf_ref_get" (int) scheme-object))
+(define __cs_buf_ref_put (foreign-procedure "cs_buf_ref_put" (int) scheme-object))
+(define __cs_buf_ref (foreign-procedure "cs_buf_ref" (int) scheme-object))
 (define __cs_buf_is_valid (foreign-procedure "cs_buf_is_valid" (int) scheme-object))
 (define __cs_buf_del (foreign-procedure __collect_safe "cs_buf_del" (int) void))
 (define __cs_buf_kmap_get (foreign-procedure __collect_safe "cs_buf_kmap_get" (int) scheme-object))
@@ -227,6 +230,22 @@
       [(buf)
        (call-foreign (__cs_buf_readonly_get buf))]))
 
+(define buffer-ref-get
+   (case-lambda
+      [()
+       (buffer-ref-get (current-buffer))]
+
+      [(buf)
+       (call-foreign (__cs_buf_ref_get buf))]))
+
+(define buffer-ref-put
+   (case-lambda
+      [()
+       (buffer-ref-put (current-buffer))]
+
+      [(buf)
+       (call-foreign (__cs_buf_ref_put buf))]))
+
 (define buffer-new
    (case-lambda
       [() 
@@ -234,6 +253,7 @@
 
       [(n) 
        (let ([b (call-foreign (__cs_buf_new n))])
+          (buffer-ref-get b)
           (with-current-buffer b
              (set-text-style '(fg: "white")))
           b)]))

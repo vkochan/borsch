@@ -217,8 +217,10 @@
            (if (equal? n "*Messages*")
               (window-close w)
               ;; else
-              (begin
+              (let ([b (window-buffer w)])
 	         (call-foreign (__cs_win_del w))
+                 (buffer-ref-put b)
+                 (buffer-ref-put b)
                  (run-hooks 'window-delete-hook w))))]))
 
 (define window-close
@@ -228,6 +230,7 @@
 
        [(w)
 	(call-foreign (__cs_win_close w))
+        (buffer-ref-put b)
         (run-hooks 'window-close-hook w)]))
 
 (define window-name
@@ -351,7 +354,9 @@
        (window-switch-buffer (current-window) b)]
 
       [(wid b)
-       (call-foreign (__cs_win_buf_switch wid b))]))
+       (buffer-ref-put (window-buffer wid))
+       (call-foreign (__cs_win_buf_switch wid b))
+       (buffer-ref-get (window-buffer wid))]))
 
 (define window-begin-pos
    (case-lambda
