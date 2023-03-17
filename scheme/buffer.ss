@@ -7,8 +7,6 @@
 (define __cs_buf_kmap_get (foreign-procedure __collect_safe "cs_buf_kmap_get" (int) scheme-object))
 (define __cs_buf_kmap_set (foreign-procedure "cs_buf_kmap_set" (int string) scheme-object))
 (define __cs_buf_current_get (foreign-procedure __collect_safe "cs_buf_current_get" () scheme-object))
-(define __cs_buf_first_get (foreign-procedure __collect_safe "cs_buf_first_get" () scheme-object))
-(define __cs_buf_next_get (foreign-procedure __collect_safe "cs_buf_next_get" (int) scheme-object))
 (define __cs_buf_name_get (foreign-procedure __collect_safe "cs_buf_name_get" (int) scheme-object))
 (define __cs_buf_name_set (foreign-procedure "cs_buf_name_set" (int string) void))
 (define __cs_buf_readonly_set (foreign-procedure __collect_safe "cs_buf_readonly_set" (int boolean) void))
@@ -49,6 +47,8 @@
 (define __cs_buf_snapshot (foreign-procedure __collect_safe "cs_buf_snapshot" (int) void))
 (define __cs_buf_undo (foreign-procedure __collect_safe "cs_buf_undo" (int) void))
 (define __cs_buf_redo (foreign-procedure __collect_safe "cs_buf_redo" (int) void))
+
+(define %buffer-list% (list))
 
 (define %dir-locals-ht (make-hashtable string-hash string=?))
 
@@ -230,6 +230,20 @@
       [(buf)
        (call-foreign (__cs_buf_readonly_get buf))]))
 
+(define (buffer-insert b)
+   (set! %buffer-list% (append %buffer-list% (list b))))
+
+(define (buffer-remove b)
+   (set! %buffer-list% (remove b %buffer-list%)))
+
+(define buffer-ref-count
+   (case-lambda
+      [()
+       (buffer-ref-count (current-buffer))]
+
+      [(buf)
+       (call-foreign (__cs_buf_ref buf))]))
+
 (define buffer-ref-get
    (case-lambda
       [()
@@ -244,6 +258,8 @@
        (buffer-ref-put (current-buffer))]
 
       [(buf)
+       (when (= 1 (buffer-ref-count buf))
+          (buffer-remove buf))
        (call-foreign (__cs_buf_ref_put buf))]))
 
 (define buffer-new
@@ -254,6 +270,7 @@
       [(n) 
        (let ([b (call-foreign (__cs_buf_new n))])
           (buffer-ref-get b)
+          (buffer-insert b)
           (with-current-buffer b
              (set-text-style '(fg: "white")))
           b)]))
@@ -290,7 +307,8 @@
        (buffer-delete (current-buffer))]
 
       [(b)
-       (call-foreign (__cs_buf_del b))]))
+       (call-foreign (__cs_buf_del b))
+       (buffer-remove b)]))
 
 (define (buffer-get n)
    (call-foreign (__cs_buf_by_name n)))
@@ -360,27 +378,8 @@
 (define (buffer-save)
    (call-foreign (__cs_buf_save (current-buffer))))
 
-(define (buffer-first)
-    (call-foreign (__cs_buf_first_get)))
-
-(define buffer-next
-   (case-lambda
-      [()
-       (call-foreign (__cs_buf_next_get (current-buffer)))]
-
-      [(bid)
-       (call-foreign (__cs_buf_next_get bid))]))
-
 (define (buffer-list)
-   (let ([buf (buffer-first)]
-         [lst   '()])
-      (while buf
-         (when (and
-                  (not (equal? (buffer-name buf) "*minibuf*"))
-                  (not (equal? (buffer-name buf) "*topbar*")))
-            (set! lst (append lst (list buf))))
-         (set! buf (buffer-next buf)))
-      lst))
+   %buffer-list%)
 
 (define (buffer-for-each fn)
    (for-each
