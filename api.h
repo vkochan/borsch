@@ -22,7 +22,6 @@ void eprint(const char *errstr, ...);
 
 extern Ui *g_ui;
 
-int win_new(int bid);
 void win_update(int wid);
 
 int buf_new(char *name);

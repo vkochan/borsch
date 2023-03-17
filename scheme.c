@@ -193,12 +193,16 @@ int scheme_win_current_set(int wid)
 
 ptr scheme_win_new(int bid)
 {
-	int ret = win_new(bid);
+	Buffer *buf;
+	Window *w;
 
-	if (ret)
-		return Sinteger(ret);
+	buf = buffer_by_id(bid);
+	buffer_dirty_set(buf, true);
 
-	return Sfalse;
+	w = window_create(buf);
+	if (!w)
+ 		return Sfalse;
+	return Sinteger(w->id);
 }
 
 void scheme_win_del(int wid)

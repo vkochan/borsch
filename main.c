@@ -627,21 +627,6 @@ void win_update(int wid)
 	}
 }
 
-int win_new(int bid)
-{
-	Buffer *buf;
-	Window *c;
-
-	buf = buffer_by_id(bid);
-	buffer_dirty_set(buf, true);
-
-	c = window_create(buf);
-	if (!c)
- 		return -1;
-
- 	return c->id;
-}
-
 int buf_new(char *name)
 {
 	Buffer *buf = __buf_new(name, global_kmap);
