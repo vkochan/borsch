@@ -651,15 +651,6 @@ int buf_new(char *name)
 	return 0;
 }
 
-void buf_del(int bid)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf) {
-		buffer_del(buf);
-	}
-}
-
 void buf_name_set(int bid, const char *name)
 {
 	Buffer *buf = buffer_by_id(bid);

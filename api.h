@@ -26,7 +26,6 @@ int win_new(int bid);
 void win_update(int wid);
 
 int buf_new(char *name);
-void buf_del(int bid);
 void buf_name_set(int bid, const char *name);
 char *buf_name_get(int bid);
 void buf_readonly_set(int bid, bool is_readonly);

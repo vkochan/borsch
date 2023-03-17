@@ -527,7 +527,11 @@ ptr scheme_buf_is_valid(int bid)
 
 void scheme_buf_del(int bid)
 {
-	buf_del(bid);
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_del(buf);
+	}
 }
 
 void scheme_buf_kmap_set(int bid, char *name)
