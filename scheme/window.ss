@@ -197,6 +197,7 @@
 (define (window-create b)
    (let ([w (call-foreign (__cs_win_new b))])
       (when w
+         (buffer-ref-get b)
          (if (layout-is-sticky?)
             (let ([m (window-last-master)])
                (when m (window-set-next m w)))
@@ -220,7 +221,8 @@
               (let ([b (window-buffer w)])
 	         (call-foreign (__cs_win_del w))
                  (buffer-ref-put b)
-                 (buffer-ref-put b)
+	         (when (>= 1 (buffer-ref-count b))
+                    (buffer-ref-put b))
                  (run-hooks 'window-delete-hook w))))]))
 
 (define window-close

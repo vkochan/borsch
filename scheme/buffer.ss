@@ -269,7 +269,6 @@
 
       [(n) 
        (let ([b (call-foreign (__cs_buf_new n))])
-          (buffer-ref-get b)
           (buffer-insert b)
           (with-current-buffer b
              (set-text-style '(fg: "white")))
