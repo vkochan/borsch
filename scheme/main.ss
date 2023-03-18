@@ -80,6 +80,7 @@
       (topbar-create)
       (init-key-bindings)
       (let ([m (buffer-new "*Messages*")])
+         (frame-remove-buffer m)
          (with-current-buffer m
             (text-mode)))
       (init-hooks)

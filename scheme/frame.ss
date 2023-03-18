@@ -8,7 +8,8 @@
       (mutable name)
       (mutable cwd)
       (mutable prev-layout)
-      (mutable env)))
+      (mutable env)
+      (mutable buffers)))
 
 (define frames-ht (make-eq-hashtable))
 
@@ -24,7 +25,8 @@
                               name
                               (current-directory)
                               #f
-                              (make-eq-hashtable))])
+                              (make-eq-hashtable)
+                              (list))])
          (hashtable-set! frames-ht id fr)
          fr)))
 
@@ -130,3 +132,27 @@
 
       [(fr l)
        (%frame%-prev-layout-set! fr l)]))
+
+(define frame-buffer-list
+   (case-lambda
+      [()
+       (frame-buffer-list (current-frame))]
+
+      [(fr)
+       (%frame%-buffers fr)]))
+
+(define frame-insert-buffer
+   (case-lambda
+      [(b)
+       (frame-insert-buffer (current-frame) b)]
+
+      [(fr b)
+       (%frame%-buffers-set! fr (append (%frame%-buffers fr) (list b)))]))
+
+(define frame-remove-buffer
+   (case-lambda
+      [(b)
+       (frame-remove-buffer (current-frame) b)]
+
+      [(fr b)
+       (%frame%-buffers-set! fr (remove b (%frame%-buffers fr)))]))

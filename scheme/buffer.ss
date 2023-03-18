@@ -259,6 +259,7 @@
 
       [(buf)
        (when (= 1 (buffer-ref-count buf))
+          (frame-remove-buffer buf)
           (buffer-remove buf))
        (call-foreign (__cs_buf_ref_put buf))]))
 
@@ -269,6 +270,7 @@
 
       [(n) 
        (let ([b (call-foreign (__cs_buf_new n))])
+          (frame-insert-buffer b)
           (buffer-insert b)
           (with-current-buffer b
              (set-text-style '(fg: "white")))
