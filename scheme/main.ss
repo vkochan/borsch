@@ -38,6 +38,7 @@
 (define __cs_runtime_init (foreign-procedure "cs_runtime_init" (int) void))
 
 (define message-recent "")
+(define message-buf #f)
 
 (define (open-repl)
    (vterm "borsch-eval -i" "eval"))
@@ -80,6 +81,7 @@
       (topbar-create)
       (init-key-bindings)
       (let ([m (buffer-new "*Messages*")])
+         (set! message-buf m)
          (frame-remove-buffer m)
          (with-current-buffer m
             (text-mode)))
@@ -160,24 +162,43 @@
          (file-open f))
       "open file"))
 
-(define (minibuf-buffer-list->complete)
+(define (minibuf-buffer-list-all->complete)
    (map (lambda (b)
            (let ([mode (buffer-mode-name b)]
                  [name (buffer-name b)])
               (cons (format "(~a) ~a" mode name) b)))
         (buffer-list)))
 
-(define (minibuf-switch-buffer)
-   (minibuf-complete (minibuf-buffer-list->complete)
+(define (minibuf-buffer-list-in-frame->complete)
+   (map (lambda (b)
+           (let ([mode (buffer-mode-name b)]
+                 [name (buffer-name b)])
+              (cons (format "(~a) ~a" mode name) b)))
+        (append (frame-buffer-list) (list message-buf))))
+
+(define (minibuf-switch-buffer-all)
+   (minibuf-complete (minibuf-buffer-list-all->complete)
                      (lambda (b)
                         (window-switch-buffer b))
                      "Switch to buffer"))
 
-(define (minibuf-open-buffer)
-   (minibuf-complete (minibuf-buffer-list->complete)
+(define (minibuf-open-buffer-all)
+   (minibuf-complete (minibuf-buffer-list-all->complete)
                      (lambda (b)
                         (window-create b))
                      "Open buffer"))
+
+(define (minibuf-switch-buffer-in-frame)
+   (minibuf-complete (minibuf-buffer-list-in-frame->complete)
+                     (lambda (b)
+                        (window-switch-buffer b))
+                     "Switch to buffer in frame"))
+
+(define (minibuf-open-buffer-in-frame)
+   (minibuf-complete (minibuf-buffer-list-in-frame->complete)
+                     (lambda (b)
+                        (window-create b))
+                     "Open buffer in frame"))
 
 (define (minibuf-cmd)
    (minibuf-complete
@@ -221,9 +242,11 @@
    (bind-key "M-w m"       layout-toggle-maximized)
    (bind-key "M-w <Enter>" window-set-master)
    (bind-key "M-b n"       new-text-buffer)
-   (bind-key "M-b s"       minibuf-switch-buffer)
+   (bind-key "M-b S"       minibuf-switch-buffer-all)
+   (bind-key "M-b s"       minibuf-switch-buffer-in-frame)
    (bind-key "M-b c"       window-close)
-   (bind-key "M-b o"       minibuf-open-buffer)
+   (bind-key "M-b O"       minibuf-open-buffer-all)
+   (bind-key "M-b o"       minibuf-open-buffer-in-frame)
    (bind-key "M-1"         tab-switch-1)
    (bind-key "M-2"         tab-switch-2)
    (bind-key "M-3"         tab-switch-3)
@@ -266,9 +289,11 @@
    (bind-key "C-g n"   new-text-buffer)
    (bind-key "C-g o"   open-file-prompt)
 
-   (bind-key "C-x b s" minibuf-switch-buffer)
+   (bind-key "C-x b S" minibuf-switch-buffer-all)
+   (bind-key "C-x b s" minibuf-switch-buffer-in-frame)
    (bind-key "C-x b c" window-close)
-   (bind-key "C-x b o" minibuf-open-buffer)
+   (bind-key "C-x b O" minibuf-open-buffer-all)
+   (bind-key "C-x b o" minibuf-open-buffer-in-frame)
 
    (bind-key "C-g y m" (lambda () (copybuf-put (pregexp-replace "\n$" message-recent ""))))
    (bind-key "C-g y w" (lambda () (copybuf-put (current-cwd))))
