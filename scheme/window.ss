@@ -231,8 +231,8 @@
 	(window-close (current-window))]
 
        [(w)
+        (buffer-ref-put (window-buffer))
 	(call-foreign (__cs_win_close w))
-        (buffer-ref-put b)
         (run-hooks 'window-close-hook w)]))
 
 (define window-name
