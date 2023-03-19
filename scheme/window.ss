@@ -32,6 +32,8 @@
 (define __cs_win_coord_get (foreign-procedure __collect_safe "cs_win_coord_get" (int) scheme-object))
 (define __cs_win_draw_all (foreign-procedure __collect_safe "cs_win_draw_all" (boolean) void))
 
+(define %widget-list% (list))
+
 (define (window-draw-all)
    (call-foreign (__cs_win_draw_all #f)))
 
@@ -103,6 +105,14 @@
       [(wid next)
        (call-foreign (__cs_win_next_set wid next))]))
 
+(define (%window-list% fr)
+   (let ([win (window-first fr)]
+         [lst   '()])
+      (while win
+         (set! lst (append lst (list win)))
+         (set! win (window-next win)))
+      lst))
+
 (define window-list
    (case-lambda
      [()
@@ -110,12 +120,7 @@
      ]
 
      [(fr)
-      (let ([win (window-first fr)]
-            [lst   '()])
-         (while win
-            (set! lst (append lst (list win)))
-            (set! win (window-next win)))
-         lst)]))
+      (append (%window-list% fr) %widget-list%)]))
 
 (define (window-last)
    (list-ref (window-list) (- (length (window-list)) 1)))
@@ -508,7 +513,10 @@
 (define (widget-create name x y w h type)
    (let ([wtype (cond [(eq? type 'top) 1]
                       [(eq? type 'bottom) 2])])
-      (call-foreign (__cs_widget_create name x y w h wtype))))
+      (let ([wid (call-foreign (__cs_widget_create name x y w h wtype))])
+         (when (> wid 0)
+            (set! %widget-list% (append %widget-list% (list wid))))
+         wid)))
 
 (define window-x
    (case-lambda
