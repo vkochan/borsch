@@ -36,6 +36,7 @@
 (include "mode/prog/gnumake.ss")
 
 (define __cs_runtime_init (foreign-procedure "cs_runtime_init" (int) void))
+(define __cs_ui_process (foreign-procedure "cs_ui_process" () void))
 
 (define message-recent "")
 (define message-buf #f)
@@ -53,6 +54,9 @@
 
 (define (init-runtime ui-type)
    (call-foreign (__cs_runtime_init ui-type)))
+
+(define (ui-process)
+   (call-foreign (__cs_ui_process)))
 
 (define (main-init args)
    (let ([do-init? #t]
@@ -88,7 +92,8 @@
       (init-hooks)
       (vterm)
       (when do-init?
-         (load-init-script init-script))))
+         (load-init-script init-script))
+      (ui-process)))
 
 (define (__on-event-handler ev oid str)
    (define (__evt->symb ev)

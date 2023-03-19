@@ -76,6 +76,11 @@ void scheme_runtime_init(int ui_type)
 	runtime_init(ui_type);
 }
 
+void scheme_ui_process(void)
+{
+	ui_process();
+}
+
 ptr scheme_screen_width_get(void)
 {
 	return Sinteger(ui_width_get(g_ui));
@@ -1654,6 +1659,7 @@ void scheme_do_quit(void)
 static void scheme_export_symbols(void)
 {
 	Sregister_symbol("cs_runtime_init", scheme_runtime_init);
+	Sregister_symbol("cs_ui_process", scheme_ui_process);
 
 	Sregister_symbol("cs_screen_width_get", scheme_screen_width_get);
 	Sregister_symbol("cs_screen_height_get", scheme_screen_height_get);
@@ -1840,8 +1846,6 @@ int scheme_init(int argc, char *argv[])
 
 	CALL1("source-directories", Scons(Sstring(LIB_PATH), Snil));
 
-	scheme_run_init(argc, argv);
-
 	err = fifo_create();
 	if (err) {
 		fprintf(stderr, "failed to create fifo\n");
@@ -1851,6 +1855,8 @@ int scheme_init(int argc, char *argv[])
 	keymap_symb_resolver_set(scheme_symb_resolver);
 
 	scheme_initialized = 1;
+
+	scheme_run_init(argc, argv);
 	return 0;
 }
 

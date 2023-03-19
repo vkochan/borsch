@@ -574,17 +574,8 @@ static void handle_keypress(KeyCode *key)
 	}
 }
 
-void process_ui(void)
+void ui_process(void)
 {
-	sigset_t blockset;
-
-	sigemptyset(&blockset);
-	sigaddset(&blockset, SIGWINCH);
-	sigprocmask(SIG_BLOCK, &blockset, NULL);
-
-	if (cmdfifo.fd != -1)
-		event_fd_handler_register(cmdfifo.fd, handle_cmdfifo, NULL);
-
 	while (running) {
 		process_destroy_dead();
 
@@ -597,6 +588,8 @@ void process_ui(void)
 }
 
 int main(int argc, char *argv[]) {
+	sigset_t blockset;
+
 	if (!getenv("ESCDELAY"))
 		set_escdelay(100);
 
@@ -609,9 +602,14 @@ int main(int argc, char *argv[]) {
 	style_init();
 	vt_init();
 
-	scheme_init(argc, argv);
+	sigemptyset(&blockset);
+	sigaddset(&blockset, SIGWINCH);
+	sigprocmask(SIG_BLOCK, &blockset, NULL);
 
-	process_ui();
+	if (cmdfifo.fd != -1)
+		event_fd_handler_register(cmdfifo.fd, handle_cmdfifo, NULL);
+
+	scheme_init(argc, argv);
 
 	cleanup();
 	return 0;
