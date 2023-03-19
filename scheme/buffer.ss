@@ -315,11 +315,8 @@
    (call-foreign (__cs_buf_by_name n)))
 
 (define (buffer-get-or-create name)
-   (let ([buf (buffer-get name)])
-      (if buf
-         buf
-         ;; else
-         (buffer-create name))))
+   (or (buffer-get name)
+       (buffer-create name)))
 
 (define (buffer-open-file f)
    (let ([bid (buffer-get-by-file f)]
