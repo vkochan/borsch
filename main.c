@@ -575,17 +575,6 @@ static void handle_keypress(KeyCode *key)
 	}
 }
 
-void ui_process(void)
-{
-	process_destroy_dead();
-
-	/* TODO: what to do with a died buffers ? */
-
-	ui_event_process(g_ui);
-
-	window_draw_all(false);
-}
-
 int main(int argc, char *argv[]) {
 	if (!getenv("ESCDELAY"))
 		set_escdelay(100);

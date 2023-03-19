@@ -17,6 +17,11 @@
 
 (define __cs_evt_fd_handler_del (foreign-procedure __collect_safe "cs_evt_fd_handler_del" (int) void))
 
+(define __cs_process_destroy_dead (foreign-procedure "cs_process_destroy_dead" () void))
+
+(define (process-destroy-dead)
+   (call-foreign (__cs_process_destroy_dead)))
+   
 (define __process-environment '())
 
 (define process-environment

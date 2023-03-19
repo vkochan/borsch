@@ -72,7 +72,6 @@ int term_filter_enable(int bid, bool enable);
 int fifo_create(void);
 
 void runtime_init(int ui_type);
-void ui_process(void);
 void do_quit(void);
 
 int scheme_init(int argc, char *argv[]);

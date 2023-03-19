@@ -76,9 +76,9 @@ void scheme_ui_init(int ui_type)
 	runtime_init(ui_type);
 }
 
-void scheme_ui_process(void)
+void scheme_ui_event_process(void)
 {
-	ui_process();
+	ui_event_process(g_ui);
 }
 
 ptr scheme_screen_width_get(void)
@@ -89,6 +89,11 @@ ptr scheme_screen_width_get(void)
 ptr scheme_screen_height_get(void)
 {
 	return Sinteger(ui_height_get(g_ui));
+}
+
+void scheme_win_draw_all(bool enforce)
+{
+	window_draw_all(enforce);
 }
 
 bool scheme_win_is_visible(int wid)
@@ -1529,6 +1534,11 @@ void scheme_timer_time_set(int fd, unsigned long sec, unsigned long nsec)
 	timer_time_set(fd, sec, nsec);
 }
 
+void scheme_process_destroy_dead(void)
+{
+	process_destroy_dead();
+}
+
 ptr scheme_process_create(const char *prog, const char *cwd, bool redir_in, bool redir_out, bool redir_err, ptr env, bool pty, bool async)
 {
 	int *in_ptr = NULL, *out_ptr = NULL, *err_ptr = NULL;
@@ -1659,11 +1669,12 @@ void scheme_do_quit(void)
 static void scheme_export_symbols(void)
 {
 	Sregister_symbol("cs_ui_init", scheme_ui_init);
-	Sregister_symbol("cs_ui_process", scheme_ui_process);
+	Sregister_symbol("cs_ui_event_process", scheme_ui_event_process);
 
 	Sregister_symbol("cs_screen_width_get", scheme_screen_width_get);
 	Sregister_symbol("cs_screen_height_get", scheme_screen_height_get);
 
+	Sregister_symbol("cs_win_draw_all", scheme_win_draw_all);
 	Sregister_symbol("cs_win_is_visible", scheme_win_is_visible);
 	Sregister_symbol("cs_win_first_get", scheme_win_first_get);
 	Sregister_symbol("cs_win_prev_get", scheme_win_prev_get);
@@ -1814,6 +1825,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_process_is_alive", scheme_process_is_alive);
 	Sregister_symbol("cs_process_is_async", scheme_process_is_async);
 	Sregister_symbol("cs_process_status_get", scheme_process_status_get);
+	Sregister_symbol("cs_process_destroy_dead", scheme_process_destroy_dead);
 	Sregister_symbol("cs_process_create", scheme_process_create);
 	Sregister_symbol("cs_process_del", scheme_process_delete);
 	Sregister_symbol("cs_process_kill", scheme_process_kill);

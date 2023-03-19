@@ -30,6 +30,10 @@
 (define __cs_win_update (foreign-procedure "cs_win_update" (int) void))
 (define __cs_widget_create (foreign-procedure "cs_widget_create" (string int int int int int) scheme-object))
 (define __cs_win_coord_get (foreign-procedure __collect_safe "cs_win_coord_get" (int) scheme-object))
+(define __cs_win_draw_all (foreign-procedure __collect_safe "cs_win_draw_all" (boolean) void))
+
+(define (window-draw-all)
+   (call-foreign (__cs_win_draw_all #t)))
 
 (define window-is-visible?
    (case-lambda
