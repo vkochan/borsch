@@ -133,10 +133,10 @@
       [(fr l)
        (%frame%-prev-layout-set! fr l)]))
 
-(define frame-buffer-list
+(define frame-list-buffer
    (case-lambda
       [()
-       (frame-buffer-list (current-frame))]
+       (frame-list-buffer (current-frame))]
 
       [(fr)
        (%frame%-buffers fr)]))
@@ -156,3 +156,30 @@
 
       [(fr b)
        (%frame%-buffers-set! fr (remove b (%frame%-buffers fr)))]))
+
+(define (frame-for-each-buffer fn)
+   (for-each
+      (lambda (b)
+         (fn b))
+      (frame-list-buffer)))
+
+(define (frame-find-buffer fn)
+   (let ([b (find
+               (lambda (b)
+                  (fn b))
+               (frame-list-buffer))])
+      b))
+
+(define (frame-get-buffer-by-file file)
+   (frame-find-buffer
+      (lambda (b)
+         (equal? file (buffer-filename b)))))
+
+(define (frame-get-buffer name)
+   (frame-find-buffer
+      (lambda (b)
+         (equal? name (buffer-name b)))))
+
+(define (frame-get-or-create-buffer name)
+   (or (frame-get-buffer name)
+       (buffer-create name)))
