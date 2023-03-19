@@ -208,9 +208,12 @@ static int handle_ui_event(Ui *ui, enum UiEventType type, void *evt, void *arg)
 	return 0;
 }
 
+static void handle_cmdfifo(int fd, void *arg);
+
 static void setup_ui(int ui_type)
 {
 	struct sigaction sa;
+	sigset_t blockset;
 
 	if (ui_type == 0)
 		g_ui = ui_term_new();
@@ -231,6 +234,13 @@ static void setup_ui(int ui_type)
 	sigaction(SIGTERM, &sa, NULL);
 	sa.sa_handler = SIG_IGN;
 	sigaction(SIGPIPE, &sa, NULL);
+
+	sigemptyset(&blockset);
+	sigaddset(&blockset, SIGWINCH);
+	sigprocmask(SIG_BLOCK, &blockset, NULL);
+
+	if (cmdfifo.fd != -1)
+		event_fd_handler_register(cmdfifo.fd, handle_cmdfifo, NULL);
 }
 
 void runtime_init(int ui_type)
@@ -588,8 +598,6 @@ void ui_process(void)
 }
 
 int main(int argc, char *argv[]) {
-	sigset_t blockset;
-
 	if (!getenv("ESCDELAY"))
 		set_escdelay(100);
 
@@ -601,13 +609,6 @@ int main(int argc, char *argv[]) {
 	syntax_init();
 	style_init();
 	vt_init();
-
-	sigemptyset(&blockset);
-	sigaddset(&blockset, SIGWINCH);
-	sigprocmask(SIG_BLOCK, &blockset, NULL);
-
-	if (cmdfifo.fd != -1)
-		event_fd_handler_register(cmdfifo.fd, handle_cmdfifo, NULL);
 
 	scheme_init(argc, argv);
 
