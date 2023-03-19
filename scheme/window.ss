@@ -33,7 +33,7 @@
 (define __cs_win_draw_all (foreign-procedure __collect_safe "cs_win_draw_all" (boolean) void))
 
 (define (window-draw-all)
-   (call-foreign (__cs_win_draw_all #t)))
+   (call-foreign (__cs_win_draw_all #f)))
 
 (define window-is-visible?
    (case-lambda
