@@ -61,6 +61,10 @@
                   s)
                p)))))
 
+(define (text-append t . s)
+   (cursor-to-end)
+   (apply text-insert t s))
+
 (define (text-insert-char char)
    (call-foreign (__cs_buf_text_insert_char (current-buffer) char)))
 

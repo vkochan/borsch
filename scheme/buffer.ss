@@ -287,6 +287,9 @@
           (window-create b)
           b)]))
 
+(define (buffer-open b)
+   (or (buffer-is-visible? b) (window-create b)))
+
 (define buffer-create-text
    (case-lambda
       [() 
