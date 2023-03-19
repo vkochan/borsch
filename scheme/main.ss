@@ -6,7 +6,7 @@
 (include "common.ss")
 (include "style.ss")
 (include "keymap.ss")
-(include "screen.ss")
+(include "ui.ss")
 (include "frame.ss")
 (include "layout.ss")
 (include "window.ss")

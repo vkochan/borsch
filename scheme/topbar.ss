@@ -99,7 +99,7 @@
 
 (define topbar-create
    (lambda ()
-      (let ([w (widget-create "*topbar*" 0 0 (screen-width) 1 'top)])
+      (let ([w (widget-create "*topbar*" 0 0 (ui-screen-width) 1 'top)])
          (set! topbar-buffer (window-buffer w))
          (set! topbar-window w)
       )

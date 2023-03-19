@@ -120,7 +120,7 @@
 
 (define minibuf-create
    (lambda ()
-      (let ([m (widget-create "*minibuf*" 0 (- (screen-height) 1) (screen-width) 1 'bottom)])
+      (let ([m (widget-create "*minibuf*" 0 (- (ui-screen-height) 1) (ui-screen-width) 1 'bottom)])
          (set! minibuf-buffer (window-buffer m))
          (set! minibuf-window m)
 
