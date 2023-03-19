@@ -104,8 +104,6 @@ static KeyMap *curr_kmap;
 static Fifo cmdfifo = { .fd = -1 };
 static Fifo retfifo = { .fd = -1 };
 
-static volatile sig_atomic_t running = true;
-
 static Cmd commands[] = {
 	{ "eval", { doeval, { NULL } } },
 };
@@ -144,11 +142,6 @@ error(const char *errstr, ...) {
 	vfprintf(stderr, errstr, ap);
 	va_end(ap);
 	exit(EXIT_FAILURE);
-}
-
-static void
-sigterm_handler(int sig) {
-	running = false;
 }
 
 static void keypress(int code)
@@ -230,8 +223,6 @@ static void setup_ui(int ui_type)
 	memset(&sa, 0, sizeof sa);
 	sa.sa_flags = 0;
 	sigemptyset(&sa.sa_mask);
-	sa.sa_handler = sigterm_handler;
-	sigaction(SIGTERM, &sa, NULL);
 	sa.sa_handler = SIG_IGN;
 	sigaction(SIGPIPE, &sa, NULL);
 
@@ -586,15 +577,13 @@ static void handle_keypress(KeyCode *key)
 
 void ui_process(void)
 {
-	while (running) {
-		process_destroy_dead();
+	process_destroy_dead();
 
-		/* TODO: what to do with a died buffers ? */
+	/* TODO: what to do with a died buffers ? */
 
-		ui_event_process(g_ui);
+	ui_event_process(g_ui);
 
-		window_draw_all(false);
-	}
+	window_draw_all(false);
 }
 
 int main(int argc, char *argv[]) {

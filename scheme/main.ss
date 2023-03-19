@@ -55,6 +55,11 @@
 (define (init-runtime ui-type)
    (call-foreign (__cs_runtime_init ui-type)))
 
+(define is-running? #t)
+
+(define (sigterm-handle-func num)
+   (set! is-running? #f))
+
 (define (ui-process)
    (call-foreign (__cs_ui_process)))
 
@@ -93,7 +98,9 @@
       (vterm)
       (when do-init?
          (load-init-script init-script))
-      (ui-process)))
+      (register-signal-handler 15 sigterm-handle-func)
+      (while is-running?
+         (ui-process))))
 
 (define (__on-event-handler ev oid str)
    (define (__evt->symb ev)
