@@ -71,7 +71,7 @@ static int scheme_run_init(int argc, char *argv[])
 }
 
 /* Scheme foreign interface */
-void scheme_runtime_init(int ui_type)
+void scheme_ui_init(int ui_type)
 {
 	runtime_init(ui_type);
 }
@@ -1658,7 +1658,7 @@ void scheme_do_quit(void)
 
 static void scheme_export_symbols(void)
 {
-	Sregister_symbol("cs_runtime_init", scheme_runtime_init);
+	Sregister_symbol("cs_ui_init", scheme_ui_init);
 	Sregister_symbol("cs_ui_process", scheme_ui_process);
 
 	Sregister_symbol("cs_screen_width_get", scheme_screen_width_get);

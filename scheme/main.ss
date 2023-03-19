@@ -35,9 +35,6 @@
 (include "mode/prog/scheme.ss")
 (include "mode/prog/gnumake.ss")
 
-(define __cs_runtime_init (foreign-procedure "cs_runtime_init" (int) void))
-(define __cs_ui_process (foreign-procedure "cs_ui_process" () void))
-
 (define message-recent "")
 (define message-buf #f)
 
@@ -52,16 +49,10 @@
       (when (file-exists? init-script)
          (try load init-script))))
 
-(define (init-runtime ui-type)
-   (call-foreign (__cs_runtime_init ui-type)))
-
 (define is-running? #t)
 
 (define (sigterm-handle-func num)
    (set! is-running? #f))
-
-(define (ui-process)
-   (call-foreign (__cs_ui_process)))
 
 (define (main-init args)
    (let ([do-init? #t]
@@ -84,7 +75,7 @@
                 (when (<= i alen)
                    (set! init-script (path-last (list-ref args (+ i 1))))))))
          (set! i (+ i 1)))
-      (init-runtime ui-type)
+      (ui-init ui-type)
       (run-hooks 'init-hook)
       (minibuf-create)
       (topbar-create)
