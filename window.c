@@ -510,11 +510,11 @@ Window *window_get_by_id(int id)
 	return NULL;
 }
 
-static Window *window_stack(void);
+static Window *window_stack_top(void);
 
 Window *window_last_selected(void)
 {
-	return window_stack();
+	return window_stack_top();
 }
 
 Window *windows_list(Frame *f)
@@ -664,7 +664,7 @@ bool window_is_widget(Window *w)
 	return w->is_widget;
 }
 
-static Window *window_stack(void)
+static Window *window_stack_top(void)
 {
 	if (!frame_current())
 		return NULL;
@@ -680,7 +680,7 @@ static window_stack_set(Window *stack)
 
 static window_stack_insert(Window *c)
 {
-	c->snext = window_stack();
+	c->snext = window_stack_top();
 	window_stack_set(c);
 }
 
@@ -1061,7 +1061,7 @@ void window_delete(Window *w)
 		window_remove(w);
 
 	if (window_current() == w) {
-		Window *last = window_stack();
+		Window *last = window_stack_top();
 		Window *next = w->next;
 		Window *focus;
 
