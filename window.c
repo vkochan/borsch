@@ -997,9 +997,6 @@ void window_focus(Window *c)
 {
 	Window *prev = window_current();
 
-	if (!c)
-		c = window_stack();
-
 	if (window_current() == c)
 		return;
 
