@@ -224,15 +224,12 @@
 
        [(w)
         (let ([n (buffer-name (window-buffer w))])
-           (if (equal? n "*Messages*")
-              (window-close w)
-              ;; else
-              (let ([b (window-buffer w)])
-	         (call-foreign (__cs_win_del w))
-                 (buffer-ref-put b)
-	         (when (>= 1 (buffer-ref-count b))
-                    (buffer-ref-put b))
-                 (run-hooks 'window-delete-hook w))))]))
+           (let ([b (window-buffer w)])
+              (call-foreign (__cs_win_del w))
+              (buffer-ref-put b)
+	      (when (>= 1 (buffer-ref-count b))
+                 (buffer-ref-put b))
+              (run-hooks 'window-delete-hook w)))]))
 
 (define window-close
     (case-lambda

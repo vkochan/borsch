@@ -81,6 +81,7 @@
       (topbar-create)
       (init-key-bindings)
       (let ([m (buffer-new "*Messages*")])
+         (buffer-ref-get m)
          (set! message-buf m)
          (frame-remove-buffer m)
          (with-current-buffer m
