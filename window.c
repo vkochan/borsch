@@ -1079,13 +1079,6 @@ void window_delete(Window *w)
 	layout_changed(true);
 }
 
-void window_close(Window *w)
-{
-	Buffer *buf = w->buf;
-
-	window_delete(w);
-}
-
 static void __style_draw(View *view, size_t start, size_t end, Style *style)
 {
 	Style *default_style = style_get_by_id(0);

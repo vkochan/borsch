@@ -143,7 +143,6 @@ void window_draw_flags(Window *c, int flags);
 void window_draw(Window *c);
 void window_focus(Window *c);
 void window_delete(Window *w);
-void window_close(Window *w);
 void window_buffer_switch(Window *w, Buffer *b);
 Window *window_create(Buffer *buf);
 Window *widget_create(Buffer *buf, int x, int y, int width, int height, int pos_flags);

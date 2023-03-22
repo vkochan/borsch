@@ -9,7 +9,6 @@
 (define __cs_win_current_set (foreign-procedure __collect_safe "cs_win_current_set" (int) int))
 (define __cs_win_new (foreign-procedure "cs_win_new" (int) scheme-object))
 (define __cs_win_del (foreign-procedure __collect_safe "cs_win_del" (int) int))
-(define __cs_win_close (foreign-procedure __collect_safe "cs_win_close" (int) int))
 (define __cs_win_title_get (foreign-procedure __collect_safe "cs_win_title_get" (int) scheme-object))
 (define __cs_win_title_set (foreign-procedure "cs_win_title_set" (int string) int))
 (define __cs_win_buf_get (foreign-procedure __collect_safe "cs_win_buf_get" (int) scheme-object))
@@ -217,6 +216,9 @@
          (window-select w))
       w))
 
+(define (%window-delete% w)
+   (call-foreign (__cs_win_del w)))
+
 (define window-delete
     (case-lambda
        [()
@@ -225,7 +227,7 @@
        [(w)
         (let ([n (buffer-name (window-buffer w))])
            (let ([b (window-buffer w)])
-              (call-foreign (__cs_win_del w))
+              (%window-delete% w)
               (buffer-ref-put b)
 	      (when (>= 1 (buffer-ref-count b))
                  (buffer-ref-put b))
@@ -238,8 +240,7 @@
 
        [(w)
         (buffer-ref-put (window-buffer))
-	(call-foreign (__cs_win_close w))
-        (run-hooks 'window-close-hook w)]))
+        (%window-delete% w)]))
 
 (define window-name
    (case-lambda
