@@ -1,6 +1,6 @@
-(define __cs_frame_current_set (foreign-procedure __collect_safe "cs_frame_current_set" (int) void))
-(define __cs_frame_create (foreign-procedure __collect_safe "cs_frame_create" () scheme-object))
-(define __cs_frame_delete (foreign-procedure __collect_safe "cs_frame_delete" (int) void))
+(define __cs_frame_current_set (foreign-procedure "cs_frame_current_set" (int) void))
+(define __cs_frame_create (foreign-procedure "cs_frame_create" () scheme-object))
+(define __cs_frame_delete (foreign-procedure "cs_frame_delete" (int) void))
 
 (define-record-type %frame%
    (fields

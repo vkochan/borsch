@@ -3,19 +3,19 @@
 
 (define __cs_process_wait (foreign-procedure "cs_process_wait" (int) scheme-object))
 
-(define __cs_process_is_alive (foreign-procedure __collect_safe "cs_process_is_alive" (int) scheme-object))
+(define __cs_process_is_alive (foreign-procedure "cs_process_is_alive" (int) scheme-object))
 
-(define __cs_process_is_async (foreign-procedure __collect_safe "cs_process_is_async" (int) scheme-object))
+(define __cs_process_is_async (foreign-procedure "cs_process_is_async" (int) scheme-object))
 
-(define __cs_process_status_get (foreign-procedure __collect_safe "cs_process_status_get" (int) scheme-object))
+(define __cs_process_status_get (foreign-procedure "cs_process_status_get" (int) scheme-object))
 
 (define __cs_process_del (foreign-procedure "cs_process_del" (int) void))
 
 (define __cs_process_kill (foreign-procedure "cs_process_kill" (int) void))
 
-(define __cs_evt_fd_handler_add (foreign-procedure __collect_safe "cs_evt_fd_handler_add" (int void*) int))
+(define __cs_evt_fd_handler_add (foreign-procedure "cs_evt_fd_handler_add" (int void*) int))
 
-(define __cs_evt_fd_handler_del (foreign-procedure __collect_safe "cs_evt_fd_handler_del" (int) void))
+(define __cs_evt_fd_handler_del (foreign-procedure "cs_evt_fd_handler_del" (int) void))
 
 (define __cs_process_destroy_dead (foreign-procedure "cs_process_destroy_dead" () void))
 

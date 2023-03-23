@@ -1,5 +1,5 @@
-(define __cs_screen_width_get (foreign-procedure __collect_safe "cs_screen_width_get" () scheme-object))
-(define __cs_screen_height_get (foreign-procedure __collect_safe "cs_screen_height_get" () scheme-object))
+(define __cs_screen_width_get (foreign-procedure "cs_screen_width_get" () scheme-object))
+(define __cs_screen_height_get (foreign-procedure "cs_screen_height_get" () scheme-object))
 (define __cs_ui_init (foreign-procedure "cs_ui_init" (int) void))
 (define __cs_ui_event_process (foreign-procedure "cs_ui_event_process" () void))
 
