@@ -126,11 +126,10 @@
 (define window-list
    (case-lambda
      [()
-      (window-list (current-frame))
-     ]
+      (window-list (current-frame))]
 
      [(fr)
-      (append (%window-list% fr) %widget-list%)]))
+      (%window-list% fr)]))
 
 (define (window-last)
    (list-ref (window-list) (- (length (window-list)) 1)))
