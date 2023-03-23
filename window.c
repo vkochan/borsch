@@ -958,6 +958,17 @@ void window_draw_flags(Window *c, int flags)
 	bool fire_event = !(flags & WIN_DRAW_F_NO_EVENT);
 	bool force = flags & WIN_DRAW_F_FORCE;
 
+	if (!c)
+		return;
+
+	if (c == window_current() && window_is_visible(c)) {
+		if (buffer_proc_get(window_current()->buf)) {
+			Process *proc = buffer_proc_get(window_current()->buf);
+			ui_window_cursor_disable(window_current()->win,
+				!vt_cursor_visible(process_term_get(proc)));
+		}
+	}
+
 	if ((force || buffer_is_dirty(c->buf) && window_is_visible(c))) {
 		/* we assume that it will be set on EVT_WIN_DRAW */
 		/* ui_window_sidebar_width_set(c->win, 0); */
@@ -1306,13 +1317,5 @@ void window_draw_all(int force)
 			ui_window_refresh(w->win);
 		}
 	}
-
-	if (window_is_visible(window_current())) {
-		if (buffer_proc_get(window_current()->buf)) {
-			Process *proc = buffer_proc_get(window_current()->buf);
-			ui_window_cursor_disable(window_current()->win,
-				!vt_cursor_visible(process_term_get(proc)));
-		}
-		window_draw_flags(window_current(), force);
-	}
+	window_draw_flags(window_current(), force);
 }
