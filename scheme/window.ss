@@ -35,6 +35,9 @@
 
 (define %widget-list% (list))
 
+(define (widget-list)
+   %widget-list%)
+
 (define (window-layout-is-changed)
    (call-foreign (__cs_win_layout_is_changed)))
 
