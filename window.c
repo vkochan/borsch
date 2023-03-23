@@ -1299,23 +1299,3 @@ void window_update_layout(void)
 	layout_current_arrange();
 	ui_refresh(ui);
 }
-
-void window_draw_all(int force)
-{
-	Window *w;
-
-	for_each_widget(w) {
-		window_draw_flags(w, force);
-	}
-	for_each_window(w) {
-		if (window_is_visible(w)) {
-			if (w != window_current()) {
-				window_draw_flags(w, force);
-			}
-		} else if (!layout_is_arrange(LAYOUT_MAXIMIZED)) {
-			window_draw_title(w);
-			ui_window_refresh(w->win);
-		}
-	}
-	window_draw_flags(window_current(), force);
-}

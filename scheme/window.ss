@@ -29,7 +29,7 @@
 (define __cs_win_update (foreign-procedure "cs_win_update" (int) void))
 (define __cs_widget_create (foreign-procedure "cs_widget_create" (string int int int int int) scheme-object))
 (define __cs_win_coord_get (foreign-procedure __collect_safe "cs_win_coord_get" (int) scheme-object))
-(define __cs_win_draw_all (foreign-procedure __collect_safe "cs_win_draw_all" (boolean) void))
+(define __cs_win_draw (foreign-procedure __collect_safe "cs_win_draw" (int boolean) void))
 (define __cs_win_layout_is_changed (foreign-procedure __collect_safe "cs_win_layout_is_changed" () boolean))
 (define __cs_win_update_layout (foreign-procedure __collect_safe "cs_win_update_layout" () void))
 
@@ -44,11 +44,25 @@
 (define (window-update-layout)
    (call-foreign (__cs_win_update_layout)))
 
+(define window-draw
+   (case-lambda
+      [(w)
+       (window-draw w #f)]
+
+      [(w enforce?)
+       (when w
+          (call-foreign (__cs_win_draw w enforce?)))]))
+
 (define (window-draw-all)
    (let ([enforce (window-layout-is-changed)])
       (when enforce
          (window-update-layout))
-      (call-foreign (__cs_win_draw_all enforce))))
+      (for-each
+         (lambda (w)
+            (when (not (equal? w (current-window)))
+               (window-draw w enforce)))
+         (append (widget-list) (window-list)))
+      (window-draw (current-window) enforce)))
 
 (define window-is-visible?
    (case-lambda

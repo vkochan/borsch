@@ -101,10 +101,14 @@ void scheme_win_update_layout(void)
 	window_update_layout();
 }
 
-void scheme_win_draw_all(bool enforce)
+void scheme_win_draw(int wid, bool enforce)
 {
 	int draw_flags = enforce ? WIN_DRAW_F_FORCE : 0;
-	window_draw_all(draw_flags);
+	Window *w = window_get_by_id(wid);
+
+	if (w) {
+		window_draw_flags(w, draw_flags);
+	}
 }
 
 bool scheme_win_is_visible(int wid)
@@ -1679,7 +1683,7 @@ static void scheme_export_symbols(void)
 
 	Sregister_symbol("cs_win_layout_is_changed", scheme_win_layout_is_changed);
 	Sregister_symbol("cs_win_update_layout", scheme_win_update_layout);
-	Sregister_symbol("cs_win_draw_all", scheme_win_draw_all);
+	Sregister_symbol("cs_win_draw", scheme_win_draw);
 	Sregister_symbol("cs_win_is_visible", scheme_win_is_visible);
 	Sregister_symbol("cs_win_first_get", scheme_win_first_get);
 	Sregister_symbol("cs_win_prev_get", scheme_win_prev_get);
