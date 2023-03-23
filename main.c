@@ -218,8 +218,6 @@ static void setup_ui(int ui_type)
 	ui_init(g_ui);
 	window_init(g_ui);
 	
-	window_draw_all(true);
-
 	memset(&sa, 0, sizeof sa);
 	sa.sa_flags = 0;
 	sigemptyset(&sa.sa_mask);
