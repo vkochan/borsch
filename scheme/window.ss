@@ -30,11 +30,22 @@
 (define __cs_widget_create (foreign-procedure "cs_widget_create" (string int int int int int) scheme-object))
 (define __cs_win_coord_get (foreign-procedure __collect_safe "cs_win_coord_get" (int) scheme-object))
 (define __cs_win_draw_all (foreign-procedure __collect_safe "cs_win_draw_all" (boolean) void))
+(define __cs_win_layout_is_changed (foreign-procedure __collect_safe "cs_win_layout_is_changed" () boolean))
+(define __cs_win_update_layout (foreign-procedure __collect_safe "cs_win_update_layout" () void))
 
 (define %widget-list% (list))
 
+(define (window-layout-is-changed)
+   (call-foreign (__cs_win_layout_is_changed)))
+
+(define (window-update-layout)
+   (call-foreign (__cs_win_update_layout)))
+
 (define (window-draw-all)
-   (call-foreign (__cs_win_draw_all #f)))
+   (let ([enforce (window-layout-is-changed)])
+      (when enforce
+         (window-update-layout))
+      (call-foreign (__cs_win_draw_all enforce))))
 
 (define window-is-visible?
    (case-lambda

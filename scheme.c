@@ -91,9 +91,20 @@ ptr scheme_screen_height_get(void)
 	return Sinteger(ui_height_get(g_ui));
 }
 
+bool scheme_win_layout_is_changed(void)
+{
+	return window_layout_is_changed();
+}
+
+void scheme_win_update_layout(void)
+{
+	window_update_layout();
+}
+
 void scheme_win_draw_all(bool enforce)
 {
-	window_draw_all(enforce);
+	int draw_flags = enforce ? WIN_DRAW_F_FORCE : 0;
+	window_draw_all(draw_flags);
 }
 
 bool scheme_win_is_visible(int wid)
@@ -1666,6 +1677,8 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_screen_width_get", scheme_screen_width_get);
 	Sregister_symbol("cs_screen_height_get", scheme_screen_height_get);
 
+	Sregister_symbol("cs_win_layout_is_changed", scheme_win_layout_is_changed);
+	Sregister_symbol("cs_win_update_layout", scheme_win_update_layout);
 	Sregister_symbol("cs_win_draw_all", scheme_win_draw_all);
 	Sregister_symbol("cs_win_is_visible", scheme_win_is_visible);
 	Sregister_symbol("cs_win_first_get", scheme_win_first_get);

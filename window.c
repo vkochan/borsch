@@ -1267,26 +1267,31 @@ static void window_update_screen_size(void) {
 	}
 }
 
-void window_draw_all(bool redraw)
+bool window_layout_is_changed(void)
 {
-	int force = 0;
+	return ui_resize(ui) || layout_is_changed();
+}
+
+void window_update_layout(void)
+{
+	int n = 0;
 	Window *w;
 
-	if (ui_resize(ui) || layout_is_changed() || redraw) {
-		int n = 0;
+	layout_changed(false);
 
-		force = WIN_DRAW_F_FORCE;
-		layout_changed(false);
+	window_update_screen_size();
 
-		window_update_screen_size();
+	for_each_window(w)
+		w->order = ++n;
 
-		for_each_window(w)
-			w->order = ++n;
+	ui_clear(ui);
+	layout_current_arrange();
+	ui_refresh(ui);
+}
 
-		ui_clear(ui);
-		layout_current_arrange();
-		ui_refresh(ui);
-	}
+void window_draw_all(int force)
+{
+	Window *w;
 
 	for_each_widget(w) {
 		window_draw_flags(w, force);
