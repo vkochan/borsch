@@ -1041,13 +1041,6 @@ void window_focus(Window *c)
 
 		ui_window_focus(c->win, true);
 
-		if (layout_is_arrange(LAYOUT_MAXIMIZED)) {
-			window_draw_flags(c, WIN_DRAW_F_FORCE);
-		} else {
-			window_draw_title(c);
-			ui_window_refresh(c->win);
-		}
-
 		if (proc) {
 			ui_window_cursor_disable(c->win,
 				!vt_cursor_visible(process_term_get(proc)));
@@ -1055,8 +1048,8 @@ void window_focus(Window *c)
 			size_t curs_view = view_cursor_get(c->view);
 
 			buffer_cursor_set(c->buf, curs_view);
-			buffer_dirty_set(c->buf, true);
 		}
+		buffer_dirty_set(c->buf, true);
 	}
 }
 
