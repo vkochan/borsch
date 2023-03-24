@@ -571,7 +571,7 @@
       [(s)
        (call-foreign (__cs_buf_mark_set (current-buffer) s))]))
 
-(define (text-get-selectiona)
+(define (text-get-selection)
    (call-foreign (__cs_buf_mark_get (current-buffer))))
 
 (define (text-is-selection-set?)
