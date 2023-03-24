@@ -379,13 +379,6 @@ void term_window_draw_char(UiWin *win, int x, int y, unsigned int ch, int n)
 	mvwhline(twin->cwin, y, x, ch, n);
 }
 
-void term_window_draw_text(UiWin *win, int x, int y, const char *text, int n)
-{
-	WinTerm *twin = (WinTerm*)win;
-
-	mvwaddnstr(twin->cwin, y, x, text, n);
-}
-
 void term_window_draw_char_attr(UiWin *win, int x, int y, unsigned ch, int n,
 				short fg, short bg, ui_text_style_t style)
 {
@@ -561,7 +554,6 @@ Ui *ui_term_new(void)
 	tui->ui.window_clear = term_window_clear;
 	tui->ui.window_resize = term_window_resize;
 	tui->ui.window_move = term_window_move;
-	tui->ui.window_draw_text = term_window_draw_text;
 	tui->ui.window_draw_char_attr = term_window_draw_char_attr;
 	tui->ui.window_draw_text_attr = term_window_draw_text_attr;
 

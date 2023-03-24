@@ -1441,30 +1441,6 @@ static void x_window_refresh(UiWin *win)
 	x_window_draw(win);
 }
 
-void x_window_draw_text(UiWin *win, int x, int y, const char *text, int n)
-{
-	int w = ui_window_width_get(win);
-	int x0 = ui_window_x_get(win);
-	int y0 = ui_window_y_get(win);
-	XUi *xui = (XUi*)win->ui;
-	XWin *xwin = (XWin*)win;
-
-	n = MIN(w - x, n);
-	for (int i = 0; n--; i++) {
-		Cell c = {0};
-		c.style.attr = UI_TEXT_STYLE_NORMAL;
-		c.style.fg = defaultfg;
-		c.style.bg = defaultbg;
-		c.len = 1;
-
-		if (*text) {
-			c.len = utf8encode(*text, c.data);
-			text++;
-		}
-		x_drawglyph(xui, c, x0+x+i, y0+y);
-	}
-}
-
 void x_window_draw_char_attr(UiWin *win, int x, int y, unsigned ch, int n,
 			     short fg, short bg, ui_text_style_t style)
 {
@@ -1533,7 +1509,6 @@ Ui *ui_x_new(void)
 	xui->ui.window_clear = x_window_clear;
 	xui->ui.window_focus = x_window_draw;
 	xui->ui.window_draw = x_window_draw;
-	xui->ui.window_draw_text = x_window_draw_text;
 	xui->ui.window_draw_char_attr = x_window_draw_char_attr;
 	xui->ui.window_draw_text_attr = x_window_draw_text_attr;
 

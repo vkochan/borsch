@@ -228,15 +228,6 @@ void ui_window_move(UiWin *win, int x, int y)
 	}
 }
 
-void ui_window_draw_text(UiWin *win, int x, int y, const char *text, int n)
-{
-	int skip_x = win->has_border;
-	int skip_y = win->has_border;
-
-	if (win->ui->window_draw_text)
-		win->ui->window_draw_text(win, x+skip_x, y+skip_y, text, n);
-}
-
 void ui_window_draw_char_attr(UiWin *win, int x, int y, unsigned ch, int n,
 			      short fg, short bg, ui_text_style_t style)
 {

@@ -102,7 +102,6 @@ struct Ui {
 	void (*window_clear)(UiWin*);
 	void (*window_resize)(UiWin*, int width, int height);
 	void (*window_move)(UiWin*, int x, int y);
-	void (*window_draw_text)(UiWin *win, int x, int y, const char *text, int n);
 	void (*window_draw_char_attr)(UiWin *win, int x, int y, unsigned ch, int n,
 				      short fg, short bg, ui_text_style_t style);
 	void (*window_draw_text_attr)(UiWin *win, int x, int y, const char *text, int n,
@@ -171,7 +170,6 @@ void ui_window_cursor_get(UiWin *win, int *x, int *y);
 void ui_window_cursor_disable(UiWin *win, bool disable);
 bool ui_window_is_cursor_disabled(UiWin *win);
 void ui_window_draw(UiWin *win);
-void ui_window_draw_text(UiWin *win, int x, int y, const char *text, int n);
 void ui_window_draw_char_attr(UiWin *win, int x, int y, unsigned ch, int n,
 			      short fg, short bg, ui_text_style_t style);
 void ui_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int n,
