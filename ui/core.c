@@ -88,6 +88,12 @@ void ui_draw_char_vert(Ui *ui, int x, int y, unsigned int ch, int n)
 		ui->draw_char_vert(ui, x, y, ch, n);
 }
 
+void ui_draw_wchar(Ui *ui, int x, int y, wchar_t ch, short fg, short bg, ui_text_style_t style)
+{
+	if (ui->draw_wchar)
+		ui->draw_wchar(ui, x, y, ch, fg, bg, style);
+}
+
 short ui_colors_max_get(Ui *ui)
 {
 	if (ui->colors_max_get)

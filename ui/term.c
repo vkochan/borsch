@@ -329,6 +329,17 @@ static void term_draw_char_vert(Ui *ui, int x, int y, unsigned int ch, int n)
 	mvvline(y, x, ch, n);
 }
 
+static void term_draw_wchar(Ui *ui, int x, int y, wchar_t ch, short fg, short bg, ui_text_style_t style)
+{
+	attrset(term_style2attr(style));
+	color_set(term_color_make(ui, term_color2curses(fg), term_color2curses(bg)), NULL);
+
+	mvaddnwstr(y, x, &ch, 1);
+
+	attrset(A_NORMAL);
+	color_set(term_color_make(ui, default_fg, default_bg), NULL);
+}
+
 static UiWin *term_window_new(Ui *ui, View *view)
 {
 	WinTerm *twin;
@@ -552,6 +563,7 @@ Ui *ui_term_new(void)
 	tui->ui.colors_max_get = term_colors_max_get;
 	tui->ui.draw_char = term_draw_char;
 	tui->ui.draw_char_vert = term_draw_char_vert;
+	tui->ui.draw_wchar = term_draw_wchar;
 	tui->ui.window_new = term_window_new;
 	tui->ui.window_free = term_window_free;
 	tui->ui.window_draw = term_window_draw;

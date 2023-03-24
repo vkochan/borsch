@@ -1225,6 +1225,19 @@ static void x_draw_char_vert(Ui *ui, int x, int y, unsigned int ch, int n)
 	}
 }
 
+static void x_draw_wchar(Ui *ui, int x, int y, wchar_t ch, short fg, short bg, ui_text_style_t style)
+{
+	XUi *xui = (XUi *)ui;
+	Cell c = {};
+
+	c.style.attr = style;
+	c.style.fg = fg;
+	c.style.bg = bg;
+	c.len = utf8encode(ch, c.data);
+
+	x_drawglyph(xui, c, x, y);
+}
+
 #if 0
 void x_drawcursor(XWin *xwin)
 {
@@ -1548,6 +1561,7 @@ Ui *ui_x_new(void)
 	xui->ui.event_process = x_event_process;
 	xui->ui.draw_char = x_draw_char;
 	xui->ui.draw_char_vert = x_draw_char_vert;
+	xui->ui.draw_wchar = x_draw_wchar;
 	xui->ui.window_new = x_window_new;
 	xui->ui.window_free = x_window_free;
 	xui->ui.window_clear = x_window_clear;
