@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "common.h"
 #include "ui/ui.h"
 
 int ui_init(Ui *ui)
@@ -84,8 +85,9 @@ void ui_draw_char(Ui *ui, int x, int y, unsigned int ch, int n)
 
 void ui_draw_char_vert(Ui *ui, int x, int y, unsigned int ch, int n)
 {
-	if (ui->draw_char_vert)
-		ui->draw_char_vert(ui, x, y, ch, n);
+	n = MIN(n, ui_height_get(ui));
+	for (; n--; y++)
+		ui_draw_char(ui, x, y, ch, 1);
 }
 
 void ui_draw_wchar(Ui *ui, int x, int y, wchar_t ch, short fg, short bg, ui_text_style_t style)

@@ -324,11 +324,6 @@ static void term_draw_char(Ui *ui, int x, int y, unsigned int ch, int n)
 	mvhline(y, x, ch, n);
 }
 
-static void term_draw_char_vert(Ui *ui, int x, int y, unsigned int ch, int n)
-{
-	mvvline(y, x, ch, n);
-}
-
 static void term_draw_wchar(Ui *ui, int x, int y, wchar_t ch, short fg, short bg, ui_text_style_t style)
 {
 	attrset(term_style2attr(style));
@@ -562,7 +557,6 @@ Ui *ui_term_new(void)
 	tui->ui.refresh = term_refresh;
 	tui->ui.colors_max_get = term_colors_max_get;
 	tui->ui.draw_char = term_draw_char;
-	tui->ui.draw_char_vert = term_draw_char_vert;
 	tui->ui.draw_wchar = term_draw_wchar;
 	tui->ui.window_new = term_window_new;
 	tui->ui.window_free = term_window_free;

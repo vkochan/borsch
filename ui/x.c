@@ -1209,22 +1209,6 @@ static void x_draw_char(Ui *ui, int x, int y, unsigned int ch, int n)
 	}
 }
 
-static void x_draw_char_vert(Ui *ui, int x, int y, unsigned int ch, int n)
-{
-	XUi *xui = (XUi *)ui;
-	Cell c = {};
-
-	c.style.attr = UI_TEXT_STYLE_NORMAL;
-	c.style.fg = defaultfg;
-	c.style.bg = defaultbg;
-	c.len = utf8encode(ch, c.data);
-
-	n = MIN(rows - y, n);
-	for (; n--; y++) {
-		x_drawglyph(xui, c, x, y);
-	}
-}
-
 static void x_draw_wchar(Ui *ui, int x, int y, wchar_t ch, short fg, short bg, ui_text_style_t style)
 {
 	XUi *xui = (XUi *)ui;
@@ -1560,7 +1544,6 @@ Ui *ui_x_new(void)
 	xui->ui.update = x_update;
 	xui->ui.event_process = x_event_process;
 	xui->ui.draw_char = x_draw_char;
-	xui->ui.draw_char_vert = x_draw_char_vert;
 	xui->ui.draw_wchar = x_draw_wchar;
 	xui->ui.window_new = x_window_new;
 	xui->ui.window_free = x_window_free;

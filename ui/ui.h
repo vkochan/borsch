@@ -109,7 +109,6 @@ struct Ui {
 				      short fg, short bg, ui_text_style_t style);
 	void (*draw)(Ui*);
 	void (*draw_char)(Ui *ui, int x, int y, unsigned int ch, int n);
-	void (*draw_char_vert)(Ui *ui, int x, int y, unsigned int ch, int n);
 	void (*draw_wchar)(Ui *ui, int x, int y, wchar_t ch, short fg, short bg, ui_text_style_t style);
 	void (*redraw)(Ui*);
 	bool (*resize)(Ui*);
