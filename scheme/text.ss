@@ -111,7 +111,7 @@
 (define (cursor-to-longword-end)
    (cursor-set (text-longword-end-pos)))
 
-(define (cursor-to-line)
+(define (cursor-to-line n)
    (cursor-set (text-next-line-pos (current-buffer) 0 (- n 1))))
 
 (define (cursor-to-line-up)
