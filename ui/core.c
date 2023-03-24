@@ -83,11 +83,11 @@ void ui_draw_char(Ui *ui, int x, int y, unsigned int ch, int n)
 		ui->draw_char(ui, x, y, ch, n);
 }
 
-void ui_draw_char_vert(Ui *ui, int x, int y, unsigned int ch, int n)
+void ui_draw_wchar_vert(Ui *ui, int x, int y, wchar_t ch, int n, short fg, short bg, ui_text_style_t style)
 {
 	n = MIN(n, ui_height_get(ui));
 	for (; n--; y++)
-		ui_draw_char(ui, x, y, ch, 1);
+		ui_draw_wchar(ui, x, y, ch, fg, bg, style);
 }
 
 void ui_draw_wchar(Ui *ui, int x, int y, wchar_t ch, short fg, short bg, ui_text_style_t style)
