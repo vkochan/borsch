@@ -549,7 +549,6 @@ Ui *ui_term_new(void)
 	tui->ui.update = term_update;
 	tui->ui.event_process = term_event_process;
 	tui->ui.refresh = term_refresh;
-	tui->ui.color_make = term_color_make;
 	tui->ui.colors_max_get = term_colors_max_get;
 	tui->ui.draw_char = term_draw_char;
 	tui->ui.draw_char_vert = term_draw_char_vert;
