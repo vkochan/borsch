@@ -77,12 +77,6 @@ int ui_width_get(Ui *ui)
 	return 0;
 }
 
-void ui_draw_char(Ui *ui, int x, int y, unsigned int ch, int n)
-{
-	if (ui->draw_char)
-		ui->draw_char(ui, x, y, ch, n);
-}
-
 void ui_draw_wchar_vert(Ui *ui, int x, int y, wchar_t ch, int n, short fg, short bg, ui_text_style_t style)
 {
 	n = MIN(n, ui_height_get(ui));
