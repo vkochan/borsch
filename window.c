@@ -1027,13 +1027,9 @@ void window_focus(Window *c)
 
 	if (prev) {
 		ui_window_focus(prev->win, false);
+		buffer_dirty_set(prev->buf, true);
 		prev->urgent = false;
-		if (!layout_is_arrange(LAYOUT_MAXIMIZED)) {
-			window_draw_title(prev);
-			ui_window_refresh(prev->win);
-		}
 	}
-
 
 	if (c) {
 		Process *proc = buffer_proc_get(c->buf);
