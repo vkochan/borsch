@@ -435,10 +435,6 @@ static void term_window_draw(UiWin *win)
 	int x0 = win->has_border + sidebar;
 	int y = 0;
 	int curs_x, curs_y;
-	int sx, sy;
-
-	getyx(twin->cwin, sy, sx);
-	wmove(twin->cwin, y, x0);
 
 	ui_window_cursor_get(win, &curs_x, &curs_y);
 
@@ -488,7 +484,6 @@ static void term_window_draw(UiWin *win)
 			term_color2curses(ui_window_text_bg_get(win))),
 			NULL);
 
-	wmove(twin->cwin, sy, sx);
 	wnoutrefresh(twin->cwin);
 }
 
