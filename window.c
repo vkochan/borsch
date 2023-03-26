@@ -917,9 +917,8 @@ void window_draw_title(Window *c)
 	title_x = has_border;
 	w_w -= has_border;
 
-	ui_window_draw_char_attr(c->win, title_x, title_y, ACS_HLINE, w_w-(has_border*2),
-				 title_bg, title_bg,
-				 UI_TEXT_STYLE_NORMAL);
+	ui_window_draw_wchar(c->win, title_x, title_y, UI_TEXT_SYMBOL_HLINE, w_w-(has_border*2),
+			     title_bg, title_bg, UI_TEXT_STYLE_NORMAL);
 
 	maxlen = ui_window_width_get(c->win) - 3;
 	bname_str = xstr(buffer_name_get(c->buf));

@@ -1376,10 +1376,8 @@ void x_window_clear(UiWin *win)
 	XWin *xwin = (XWin*)win;
 
 	if (sidebar) {
-		char ch = ' ';
-
 		for (; y < h - 1; y++) {
-			ui_window_draw_char_attr(win, 0, y, ch, sidebar,
+			ui_window_draw_wchar(win, 0, y, L' ', sidebar,
 				defaultfg, defaultbg, UI_TEXT_STYLE_NORMAL);
 		}
 	}
@@ -1434,27 +1432,6 @@ static void x_window_refresh(UiWin *win)
 	x_window_draw(win);
 }
 
-void x_window_draw_char_attr(UiWin *win, int x, int y, unsigned ch, int n,
-			     short fg, short bg, ui_text_style_t style)
-{
-	int w = ui_window_width_get(win);
-	int x0 = ui_window_x_get(win);
-	int y0 = ui_window_y_get(win);
-	XUi *xui = (XUi*)win->ui;
-	XWin *xwin = (XWin*)win;
-	Cell c = {0};
-
-	c.style.attr = style;
-	c.style.fg = fg;
-	c.style.bg = bg;
-	c.len = utf8encode(ch, c.data);
-
-	n = MIN(w - x, n);
-	for (; n--; x++) {
-		x_drawglyph(xui, c, x0+x, y0+y);
-	}
-}
-
 void x_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int n,
 			     short fg, short bg, ui_text_style_t style)
 {
@@ -1500,7 +1477,6 @@ Ui *ui_x_new(void)
 	xui->ui.window_free = x_window_free;
 	xui->ui.window_clear = x_window_clear;
 	xui->ui.window_draw = x_window_draw;
-	xui->ui.window_draw_char_attr = x_window_draw_char_attr;
 	xui->ui.window_draw_text_attr = x_window_draw_text_attr;
 
 	return (Ui *)xui;

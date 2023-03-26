@@ -204,14 +204,15 @@ void ui_window_move(UiWin *win, int x, int y)
 	}
 }
 
-void ui_window_draw_char_attr(UiWin *win, int x, int y, unsigned ch, int n,
-			      short fg, short bg, ui_text_style_t style)
+void ui_window_draw_wchar(UiWin *win, int x, int y, wchar_t ch, int n,
+			  short fg, short bg, ui_text_style_t style)
 {
 	int skip_x = win->has_border;
 	int skip_y = win->has_border;
 
-	if (win->ui->window_draw_char_attr)
-		win->ui->window_draw_char_attr(win, x+skip_x, y+skip_y, ch, n, fg, bg, style);
+	n = MIN(n, ui_window_width_get(win));
+	for (; n--; x++)
+		ui_draw_wchar(win->ui, win->x + x + skip_x, win->y + y + skip_y, ch, fg, bg, style);
 }
 
 void ui_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int n,

@@ -366,33 +366,6 @@ void term_window_draw_char(UiWin *win, int x, int y, unsigned int ch, int n)
 	mvwhline(term_window(win), y, x, ch, n);
 }
 
-void term_window_draw_char_attr(UiWin *win, int x, int y, unsigned ch, int n,
-				short fg, short bg, ui_text_style_t style)
-{
-	WinTerm *twin = (WinTerm*)win;
-	unsigned tmp_attr = ui_window_text_style_get(win);
-	short tmp_fg = ui_window_text_fg_get(win);
-	short tmp_bg = ui_window_text_bg_get(win);
-	WINDOW *cwin = term_window(win);
-	int x_abs, y_abs;
-
-	term_window_abs_xy(win, &x_abs, &y_abs);
-
-	wattrset(cwin, term_style2attr(style));
-	wcolor_set(cwin,
-		   term_color_make(win->ui, term_color2curses(fg),
-			   term_color2curses(bg)),
-		   NULL);
-
-	mvwhline(cwin, y_abs + y, x_abs + x, ch, n);
-
-	wattrset(cwin, term_style2curses(tmp_attr));
-	wcolor_set(cwin,
-		   term_color_make(win->ui, term_color2curses(tmp_fg),
-			   term_color2curses(tmp_bg)),
-		   NULL);
-}
-
 void term_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int n,
 				short fg, short bg, ui_text_style_t style)
 {
@@ -522,7 +495,6 @@ Ui *ui_term_new(void)
 	tui->ui.window_free = term_window_free;
 	tui->ui.window_draw = term_window_draw;
 	tui->ui.window_clear = term_window_clear;
-	tui->ui.window_draw_char_attr = term_window_draw_char_attr;
 	tui->ui.window_draw_text_attr = term_window_draw_text_attr;
 
 	return (Ui *)tui;
