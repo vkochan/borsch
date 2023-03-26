@@ -75,13 +75,16 @@ void ui_draw_wchar_vert(Ui *ui, int x, int y, wchar_t ch, int n, short fg, short
 {
 	n = MIN(n, ui_height_get(ui));
 	for (; n--; y++)
-		ui_draw_wchar(ui, x, y, ch, fg, bg, style);
+		ui_draw_wchar(ui, x, y, ch, 1, fg, bg, style);
 }
 
-void ui_draw_wchar(Ui *ui, int x, int y, wchar_t ch, short fg, short bg, ui_text_style_t style)
+void ui_draw_wchar(Ui *ui, int x, int y, wchar_t ch, int n, short fg, short bg, ui_text_style_t style)
 {
-	if (ui->draw_wchar)
-		ui->draw_wchar(ui, x, y, ch, fg, bg, style);
+	if (ui->draw_wchar) {
+		n = MIN(n, ui_width_get(ui));
+		for (; n--; x++)
+			ui->draw_wchar(ui, x, y, ch, fg, bg, style);
+	}
 }
 
 short ui_colors_max_get(Ui *ui)
@@ -211,8 +214,7 @@ void ui_window_draw_wchar(UiWin *win, int x, int y, wchar_t ch, int n,
 	int skip_y = win->has_border;
 
 	n = MIN(n, ui_window_width_get(win));
-	for (; n--; x++)
-		ui_draw_wchar(win->ui, win->x + x + skip_x, win->y + y + skip_y, ch, fg, bg, style);
+	ui_draw_wchar(win->ui, win->x + x + skip_x, win->y + y + skip_y, ch, n, fg, bg, style);
 }
 
 void ui_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int n,

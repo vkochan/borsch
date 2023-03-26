@@ -151,7 +151,7 @@ void ui_refresh(Ui *ui);
 int ui_height_get(Ui *ui);
 int ui_width_get(Ui *ui);
 void ui_draw_wchar_vert(Ui *ui, int x, int y, wchar_t ch, int n, short fg, short bg, ui_text_style_t style);
-void ui_draw_wchar(Ui *ui, int x, int y, wchar_t ch, short fg, short bg, ui_text_style_t style);
+void ui_draw_wchar(Ui *ui, int x, int y, wchar_t ch, int n, short fg, short bg, ui_text_style_t style);
 short ui_colors_max_get(Ui *ui);
 
 UiWin *ui_window_new(Ui *ui, View *view);

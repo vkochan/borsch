@@ -72,14 +72,14 @@ static void layout_tiled(unsigned int wax, unsigned int way, unsigned int waw, u
 				nx += mw;
 				ui_draw_wchar_vert(ui, nx, ny, UI_TEXT_SYMBOL_VLINE, wah,
 							UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
-				ui_draw_wchar(ui, nx, ny, UI_TEXT_SYMBOL_TTEE,
+				ui_draw_wchar(ui, nx, ny, UI_TEXT_SYMBOL_TTEE, 1,
 						UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
 				nx++;
 				nw = waw - mw -1;
 			}
 			nh = (i < n - 1) ? th : (lay + wah) - ny;
 			if (i > m)
-				ui_draw_wchar(ui, nx - 1, ny, UI_TEXT_SYMBOL_LTEE,
+				ui_draw_wchar(ui, nx - 1, ny, UI_TEXT_SYMBOL_LTEE, 1,
 						UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
 		}
 		window_move_resize(c, nx, ny+(way-lay), nw, nh);
@@ -91,7 +91,7 @@ static void layout_tiled(unsigned int wax, unsigned int way, unsigned int waw, u
 	if (n > m) {
 		ny = lay + mh;
 		for (i = 1; i < m; i++) {
-			ui_draw_wchar(ui, nx - 1, ny, ((ny - 1) % th ? UI_TEXT_SYMBOL_RTEE : UI_TEXT_SYMBOL_PLUS),
+			ui_draw_wchar(ui, nx - 1, ny, ((ny - 1) % th ? UI_TEXT_SYMBOL_RTEE : UI_TEXT_SYMBOL_PLUS), 1,
 					UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
 			ny += mh;
 		}
@@ -139,10 +139,10 @@ static void layout_grid(unsigned int wax, unsigned int way, unsigned int waw, un
 			if (i <= cols
 			    || (i >= rows * cols - cols && n % cols
 				&& (cols - (n % cols)) % 2))
-				ui_draw_wchar(ui, nx, ny, UI_TEXT_SYMBOL_TTEE,
+				ui_draw_wchar(ui, nx, ny, UI_TEXT_SYMBOL_TTEE, 1,
 						UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
 			else
-				ui_draw_wchar(ui, nx, ny, UI_TEXT_SYMBOL_PLUS,
+				ui_draw_wchar(ui, nx, ny, UI_TEXT_SYMBOL_PLUS, 1,
 						UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
 			nx++, aw--;
 		}
@@ -172,7 +172,7 @@ static void layout_bstack(unsigned int wax, unsigned int way, unsigned int waw, 
 			if (i > 0) {
 				ui_draw_wchar_vert(ui, nx, ny, UI_TEXT_SYMBOL_VLINE, nh,
 							UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
-				ui_draw_wchar(ui, nx, ny, UI_TEXT_SYMBOL_TTEE,
+				ui_draw_wchar(ui, nx, ny, UI_TEXT_SYMBOL_TTEE, 1,
 						UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
 				nx++;
 			}
@@ -187,7 +187,7 @@ static void layout_bstack(unsigned int wax, unsigned int way, unsigned int waw, 
 			if (i > m) {
 				ui_draw_wchar_vert(ui, nx, ny, UI_TEXT_SYMBOL_VLINE, nh,
 							UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
-				ui_draw_wchar(ui, nx, ny, UI_TEXT_SYMBOL_TTEE,
+				ui_draw_wchar(ui, nx, ny, UI_TEXT_SYMBOL_TTEE, 1,
 						UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
 				nx++;
 			}
@@ -203,7 +203,7 @@ static void layout_bstack(unsigned int wax, unsigned int way, unsigned int waw, 
 		nx = lax;
 		for (i = 0; i < m; i++) {
 			if (i > 0) {
-				ui_draw_wchar(ui, nx, ny, UI_TEXT_SYMBOL_PLUS,
+				ui_draw_wchar(ui, nx, ny, UI_TEXT_SYMBOL_PLUS, 1,
 						UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
 				nx++;
 			}
