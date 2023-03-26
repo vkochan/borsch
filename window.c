@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include <curses.h>
 
 #include "process.h"
 #include "vt.h"
