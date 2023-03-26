@@ -1311,13 +1311,6 @@ static void x_update(Ui *ui)
 	x_finishdraw(xui);
 }
 
-static void x_redraw(Ui *ui)
-{
-	XUi *xui = (XUi *)ui;
-	__x_clear(xui, 0, 0, xui->w, xui->h);
-	x_finishdraw(xui);
-}
-
 static struct timespec lastblink, trigger;
 
 static void x_event_process(Ui *ui)
@@ -1500,14 +1493,12 @@ Ui *ui_x_new(void)
 	xui->ui.width_get = x_width_get;
 	xui->ui.resize = x_check_resize;
 	xui->ui.clear = x_clear;
-	xui->ui.redraw = x_redraw;
 	xui->ui.update = x_update;
 	xui->ui.event_process = x_event_process;
 	xui->ui.draw_wchar = x_draw_wchar;
 	xui->ui.window_new = x_window_new;
 	xui->ui.window_free = x_window_free;
 	xui->ui.window_clear = x_window_clear;
-	xui->ui.window_focus = x_window_draw;
 	xui->ui.window_draw = x_window_draw;
 	xui->ui.window_draw_char_attr = x_window_draw_char_attr;
 	xui->ui.window_draw_text_attr = x_window_draw_text_attr;

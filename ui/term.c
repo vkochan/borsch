@@ -511,7 +511,6 @@ Ui *ui_term_new(void)
 	tui->ui.free = term_free;
 	tui->ui.height_get = term_height_get;
 	tui->ui.width_get = term_width_get;
-	tui->ui.redraw = term_redraw;
 	tui->ui.resize = term_resize;
 	tui->ui.clear = term_clear;
 	tui->ui.update = term_update;

@@ -1000,8 +1000,6 @@ void window_draw_flags(Window *c, int flags)
 
 		if (!layout_is_arrange(LAYOUT_MAXIMIZED) || c == window_current())
 			window_draw_title(c);
-
-		ui_window_refresh(c->win);
 	}
 }
 

@@ -94,21 +94,15 @@ struct Ui {
 	int (*height_get)(Ui*);
 	int (*width_get)(Ui*);
 	UiWin* (*window_new)(Ui*, View *view);
-	void (*window_focus)(UiWin*, bool);
 	void (*window_free)(UiWin*);
 	void (*window_draw)(UiWin *);
-	void (*window_redraw)(UiWin*);
-	void (*window_refresh)(UiWin*);
 	void (*window_clear)(UiWin*);
-	void (*window_resize)(UiWin*, int width, int height);
-	void (*window_move)(UiWin*, int x, int y);
 	void (*window_draw_char_attr)(UiWin *win, int x, int y, unsigned ch, int n,
 				      short fg, short bg, ui_text_style_t style);
 	void (*window_draw_text_attr)(UiWin *win, int x, int y, const char *text, int n,
 				      short fg, short bg, ui_text_style_t style);
 	void (*draw)(Ui*);
 	void (*draw_wchar)(Ui *ui, int x, int y, wchar_t ch, short fg, short bg, ui_text_style_t style);
-	void (*redraw)(Ui*);
 	bool (*resize)(Ui*);
 	void (*clear)(Ui*);
 	void (*update)(Ui*);
@@ -150,7 +144,6 @@ Ui *ui_x_new(void);
 
 int ui_init(Ui *ui);
 void ui_free(Ui *ui);
-void ui_redraw(Ui *ui);
 bool ui_resize(Ui *ui);
 void ui_clear(Ui *ui);
 void ui_update(Ui *ui);
@@ -174,8 +167,6 @@ void ui_window_draw_char_attr(UiWin *win, int x, int y, unsigned ch, int n,
 			      short fg, short bg, ui_text_style_t style);
 void ui_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int n,
 			      short fg, short bg, ui_text_style_t style);
-void ui_window_redraw(UiWin *win);
-void ui_window_refresh(UiWin *win);
 void ui_window_clear(UiWin *win);
 void ui_window_resize(UiWin *win, int width, int height);
 void ui_window_move(UiWin *win, int x, int y);

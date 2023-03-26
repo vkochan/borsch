@@ -20,12 +20,6 @@ void ui_free(Ui *ui)
 		free(ui);
 }
 
-void ui_redraw(Ui *ui)
-{
-	if (ui->redraw)
-		ui->redraw(ui);
-}
-
 bool ui_resize(Ui *ui)
 {
 	if (ui->resize)
@@ -176,18 +170,6 @@ void ui_window_draw(UiWin *win)
 	__ui_window_draw(win, false);
 }
 
-void ui_window_redraw(UiWin *win)
-{
-	if (win->ui->window_redraw)
-		win->ui->window_redraw(win);
-}
-
-void ui_window_refresh(UiWin *win)
-{
-	if (win->ui->window_refresh)
-		win->ui->window_refresh(win);
-}
-
 void ui_window_clear(UiWin *win)
 {
 	if (win->ui->window_clear)
@@ -207,9 +189,6 @@ void ui_window_resize(UiWin *win, int width, int height)
 		view_resize(win->view, win->width - win->sidebar_width - (border*2),
 				       win->height - (border + win->has_title));
 
-		if (win->ui->window_resize)
-			win->ui->window_resize(win, win->width, win->height);
-
 		ui_window_clear(win);
 	}
 
@@ -222,9 +201,6 @@ void ui_window_move(UiWin *win, int x, int y)
 	if (x != win->x || y != win->y) {
 		win->x = x;
 		win->y = y;
-
-		if (win->ui->window_move)
-			win->ui->window_move(win, x, y);
 	}
 }
 
@@ -408,9 +384,6 @@ void ui_window_update(UiWin *win)
 void ui_window_focus(UiWin *win, bool focus)
 {
 	win->is_focused = focus;
-
-	if (win->ui->window_focus)
-		win->ui->window_focus(win, focus);
 }
 
 bool ui_window_is_focused(UiWin *win)
