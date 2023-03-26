@@ -32,7 +32,6 @@ struct Window {
 	View *view;
 	UiWin *win;
 	const char *cmd;
-	int order;
 	unsigned short int id;
 	bool urgent;
 	Window *next;

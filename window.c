@@ -593,8 +593,6 @@ void window_insert_first(Window *c)
 
 	c->frame->windows = c;
 
-	for (int o = 1; c; c = c->next, o++)
-		c->order = o;
 	layout_changed(true);
 }
 
@@ -633,8 +631,6 @@ void window_remove(Window *c)
 		c->prev->next = c->next;
 	if (c->next) {
 		c->next->prev = c->prev;
-		for (d = c->next; d; d = d->next)
-			--d->order;
 	}
 	if (c == c->frame->windows)
 		c->frame->windows = c->next;
@@ -926,13 +922,12 @@ void window_draw_title(Window *c)
 	line = view_cursors_line(view_cursor);
 	col = view_cursors_cell_get(view_cursor);
 
-	status_len = snprintf(status, sizeof(status), "[%d:%d] %s(%s) %s  [%d|%s]%s",
+	status_len = snprintf(status, sizeof(status), "[%d:%d] %s(%s) %s %s %s",
 			line,
 			col,
 			buffer_is_modified(c->buf) ? "[+] " : "",
 			buffer_mode_name_get(c->buf),
 			buffer_state_name_get(c->buf),
-			c->order,
 			window_is_master_sticky(c) ? "*" : "",
 			buffer_is_readonly(c->buf) ? "[RO]" : "");
 
@@ -1288,9 +1283,6 @@ void window_update_layout(void)
 	layout_changed(false);
 
 	window_update_screen_size();
-
-	for_each_window(w)
-		w->order = ++n;
 
 	layout_current_arrange();
 }
