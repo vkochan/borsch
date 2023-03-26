@@ -43,7 +43,6 @@ typedef struct {
 
 typedef struct {
 	UiWin win;
-	WINDOW *cwin;
 	int cur_x, cur_y;
 } WinTerm;
 
@@ -330,17 +329,22 @@ static void term_draw_wchar(Ui *ui, int x, int y, wchar_t ch, short fg, short bg
 	color_set(term_color_make(ui, default_fg, default_bg), NULL);
 }
 
+static WINDOW *term_window(UiWin *win)
+{
+	return stdscr;
+}
+
+static void term_window_abs_xy(UiWin *win, int *x, int *y)
+{
+	*x = win->x;
+	*y = win->y;
+}
+
 static UiWin *term_window_new(Ui *ui, View *view)
 {
 	WinTerm *twin;
 
 	twin = calloc(1, sizeof(*twin));
-
-	twin->cwin = newwin(0, 0, 0, 0);
-	if (!twin->cwin) {
-		free(twin);
-		return NULL;
-	}
 
 	ui_window_text_fg_set(&twin->win, default_fg);
 	ui_window_text_bg_set(&twin->win, default_bg);
@@ -352,31 +356,14 @@ static void term_window_free(UiWin *win)
 {
 	WinTerm *twin = (WinTerm*)win;
 
-	werase(twin->cwin);
-	wnoutrefresh(twin->cwin);
-	delwin(twin->cwin);
 	free(twin);
-}
-
-static void term_window_resize(UiWin *win, int w, int h)
-{
-	WinTerm *twin = (WinTerm*)win;
-
-	wresize(twin->cwin, h, w);
-}
-
-static void term_window_move(UiWin *win, int x, int y)
-{
-	WinTerm *twin = (WinTerm*)win;
-
-	mvwin(twin->cwin, y, x);
 }
 
 void term_window_draw_char(UiWin *win, int x, int y, unsigned int ch, int n)
 {
 	WinTerm *twin = (WinTerm*)win;
 
-	mvwhline(twin->cwin, y, x, ch, n);
+	mvwhline(term_window(win), y, x, ch, n);
 }
 
 void term_window_draw_char_attr(UiWin *win, int x, int y, unsigned ch, int n,
@@ -386,17 +373,21 @@ void term_window_draw_char_attr(UiWin *win, int x, int y, unsigned ch, int n,
 	unsigned tmp_attr = ui_window_text_style_get(win);
 	short tmp_fg = ui_window_text_fg_get(win);
 	short tmp_bg = ui_window_text_bg_get(win);
+	WINDOW *cwin = term_window(win);
+	int x_abs, y_abs;
 
-	wattrset(twin->cwin, term_style2attr(style));
-	wcolor_set(twin->cwin,
+	term_window_abs_xy(win, &x_abs, &y_abs);
+
+	wattrset(cwin, term_style2attr(style));
+	wcolor_set(cwin,
 		   term_color_make(win->ui, term_color2curses(fg),
 			   term_color2curses(bg)),
 		   NULL);
 
-	mvwhline(twin->cwin, y, x, ch, n);
+	mvwhline(cwin, y_abs + y, x_abs + x, ch, n);
 
-	wattrset(twin->cwin, term_style2curses(tmp_attr));
-	wcolor_set(twin->cwin,
+	wattrset(cwin, term_style2curses(tmp_attr));
+	wcolor_set(cwin,
 		   term_color_make(win->ui, term_color2curses(tmp_fg),
 			   term_color2curses(tmp_bg)),
 		   NULL);
@@ -409,21 +400,23 @@ void term_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int 
 	unsigned tmp_attr = ui_window_text_style_get(win);
 	short tmp_fg = ui_window_text_fg_get(win);
 	short tmp_bg = ui_window_text_bg_get(win);
+	WINDOW *cwin = term_window(win);
+	int x_abs, y_abs;
 
-	wattrset(twin->cwin, term_style2attr(style));
-	wcolor_set(twin->cwin,
+	term_window_abs_xy(win, &x_abs, &y_abs);
+
+	wattrset(cwin, term_style2attr(style));
+	wcolor_set(cwin,
 		   term_color_make(win->ui, term_color2curses(fg),
 				   term_color2curses(bg)),
 		   NULL);
 
-	mvwaddnstr(twin->cwin, y, x, text, n);
+	mvwaddnstr(cwin, y_abs + y, x_abs + x, text, n);
 
-	wattrset(twin->cwin, term_style2curses(tmp_attr));
-	wcolor_set(twin->cwin,
+	wattrset(cwin, term_style2curses(tmp_attr));
+	wcolor_set(cwin,
 		   term_color_make(win->ui, tmp_fg, tmp_bg),
 		   NULL);
-	/* TODO: better to call it via separate ui_ api call */
-	wnoutrefresh(twin->cwin);
 }
 
 static void term_window_draw(UiWin *win)
@@ -431,10 +424,14 @@ static void term_window_draw(UiWin *win)
 	const Line *line = view_lines_first(win->view);
 	int view_width = view_width_get(win->view);
 	WinTerm *twin = (WinTerm*)win;
+	WINDOW *cwin = term_window(win);
 	int sidebar = ui_window_sidebar_width_get(win);
 	int x0 = win->has_border + sidebar;
 	int y = 0;
 	int curs_x, curs_y;
+	int x_abs, y_abs;
+
+	term_window_abs_xy(win, &x_abs, &y_abs);
 
 	ui_window_cursor_get(win, &curs_x, &curs_y);
 
@@ -452,74 +449,56 @@ static void term_window_draw(UiWin *win)
 				c.style.fg = default_bg;
 				c.style.bg = default_fg;
 			}
-			/* wattrset(twin->cwin, term_style2attr(c->style.attr)); */
+			/* wattrset(cwin, term_style2attr(c->style.attr)); */
 
-			/* wcolor_set(twin->cwin, term_window_color_get(win, */
+			/* wcolor_set(cwin, term_window_color_get(win, */
 			/* 			term_color2curses(c->style.fg), */
 			/* 			term_color2curses(c->style.bg)), */
 			/* 		NULL); */
-			wattrset(twin->cwin, term_style2attr(c.style.attr));
-			wcolor_set(twin->cwin,
+			wattrset(cwin, term_style2attr(c.style.attr));
+			wcolor_set(cwin,
 					term_color_make(win->ui, term_color2curses(c.style.fg),
 						term_color2curses(c.style.bg)),
 					NULL);
 
-			wmove(twin->cwin, y, x);
-			waddnstr(twin->cwin, c.data, c.len);
+			wmove(cwin, y_abs + y, x_abs + x);
+			waddnstr(cwin, c.data, c.len);
 		}
 	}
 
 	if (win->has_border) {
-		mvwhline(twin->cwin, 0, 1, ACS_HLINE, ui_window_width_get(win)-2);
-		mvwhline(twin->cwin, 0, 0, ACS_ULCORNER, 1);
-		mvwhline(twin->cwin, 0, ui_window_width_get(win)-1, ACS_URCORNER, 1);
-		mvwvline(twin->cwin, 1, 0, ACS_VLINE, ui_window_height_get(win)-1);
-		mvwvline(twin->cwin, 1, ui_window_width_get(win)-1, ACS_VLINE,
+		mvwhline(cwin, y_abs + 0, x_abs + 1, ACS_HLINE, ui_window_width_get(win)-2);
+		mvwhline(cwin, y_abs + 0, x_abs + 0, ACS_ULCORNER, 1);
+		mvwhline(cwin, y_abs + 0, x_abs + ui_window_width_get(win)-1, ACS_URCORNER, 1);
+		mvwvline(cwin, y_abs + 1, x_abs + 0, ACS_VLINE, ui_window_height_get(win)-1);
+		mvwvline(cwin, y_abs + 1, x_abs + ui_window_width_get(win)-1, ACS_VLINE,
 				ui_window_height_get(win)-1);
 	}
 
-	wattrset(twin->cwin, term_style2attr(ui_window_text_style_get(win)));
-	wcolor_set(twin->cwin, term_color_make(win->ui,
+	wattrset(cwin, term_style2attr(ui_window_text_style_get(win)));
+	wcolor_set(cwin, term_color_make(win->ui,
 			term_color2curses(ui_window_text_fg_get(win)),
 			term_color2curses(ui_window_text_bg_get(win))),
 			NULL);
-
-	wnoutrefresh(twin->cwin);
-}
-
-static void term_window_refresh(UiWin *win)
-{
-	WinTerm *twin = (WinTerm*)win;
-
-	wnoutrefresh(twin->cwin);
 }
 
 static void term_window_clear(UiWin *win)
 {
 	int sidebar = ui_window_sidebar_width_get(win);
 	WinTerm *twin = (WinTerm*)win;
+	WINDOW *cwin = term_window(win);
+	int x_abs, y_abs;
+
+	term_window_abs_xy(win, &x_abs, &y_abs);
 
 	if (sidebar) {
 		int y = win->has_border;
 		char ch = ' ';
-		int sx, sy;
-
-		getyx(twin->cwin, sy, sx);
 
 		for (; y < ui_window_height_get(win) - 1; y++) {
-			mvwhline(twin->cwin, y, 0, ch, sidebar);
+			mvwhline(cwin, y_abs + y, x_abs + 0, ch, sidebar);
 		}
-
-		wmove(twin->cwin, sy, sx);
-		wnoutrefresh(twin->cwin);
 	}
-}
-
-static void term_window_redraw(UiWin *win)
-{
-	WinTerm *twin = (WinTerm*)win;
-
-	redrawwin(twin->cwin);
 }
 
 Ui *ui_term_new(void)
@@ -543,12 +522,7 @@ Ui *ui_term_new(void)
 	tui->ui.window_new = term_window_new;
 	tui->ui.window_free = term_window_free;
 	tui->ui.window_draw = term_window_draw;
-	tui->ui.window_redraw = term_window_redraw;
-	tui->ui.window_refresh = term_window_refresh;
-	tui->ui.window_refresh = term_window_draw;
 	tui->ui.window_clear = term_window_clear;
-	tui->ui.window_resize = term_window_resize;
-	tui->ui.window_move = term_window_move;
 	tui->ui.window_draw_char_attr = term_window_draw_char_attr;
 	tui->ui.window_draw_text_attr = term_window_draw_text_attr;
 

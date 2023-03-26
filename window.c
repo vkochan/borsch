@@ -1296,7 +1296,5 @@ void window_update_layout(void)
 	for_each_window(w)
 		w->order = ++n;
 
-	ui_clear(ui);
 	layout_current_arrange();
-	ui_refresh(ui);
 }

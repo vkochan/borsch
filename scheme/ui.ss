@@ -11,7 +11,8 @@
 (define (ui-process)
    (process-destroy-dead)
    (ui-process-event)
-   (window-draw-all))
+   (window-draw-all)
+   (ui-update))
 
 (define (ui-process-event)
    (call-foreign (__cs_ui_event_process)))
@@ -22,7 +23,7 @@
 (define (ui-screen-height)
    (call-foreign (__cs_screen_height_get)))
 
-(define (ui-refresh)
+(define (ui-update)
    (call-foreign (__cs_ui_refresh_screen)))
 
 (define (ui-clear)

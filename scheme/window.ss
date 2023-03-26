@@ -54,15 +54,16 @@
           (call-foreign (__cs_win_draw w enforce?)))]))
 
 (define (window-draw-all)
-   (let ([enforce (window-layout-is-changed)])
-      (when enforce
+   (let ([redraw? (window-layout-is-changed)])
+      (when redraw?
+         (ui-clear)
          (window-update-layout))
       (for-each
          (lambda (w)
             (when (not (equal? w (current-window)))
-               (window-draw w enforce)))
+               (window-draw w redraw?)))
          (append (widget-list) (window-list)))
-      (window-draw (current-window) enforce)))
+      (window-draw (current-window) redraw?)))
 
 (define window-is-visible?
    (case-lambda
