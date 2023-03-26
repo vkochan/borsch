@@ -115,7 +115,7 @@ term_title_handler(Vt *term, const char *title) {
 	/* 	strncpy(c->title, title, sizeof(c->title) - 1); */
 	/* c->title[title ? sizeof(c->title) - 1 : 0] = '\0'; */
 	/* if (!layout_is_arrange(LAYOUT_MAXIMIZED)) */
-	/* 	window_draw_title(c); */
+		/*buffer_dirty_set(c->buf, true);*/
 }
 
 static void
@@ -125,7 +125,7 @@ term_urgent_handler(Vt *term) {
 	printf("\a");
 	fflush(stdout);
 	if (!layout_is_arrange(LAYOUT_MAXIMIZED) && window_current() != c)
-		window_draw_title(c);
+		buffer_dirty_set(c->buf, true);
 }
 
 void eprint(const char *errstr, ...) {
@@ -622,7 +622,7 @@ void buf_name_set(int bid, const char *name)
 		Window *c;
 		for_each_window(c) {
 			if (c->buf == buf)
-				window_draw_title(c);
+				buffer_dirty_set(c->buf, true);
 		}
 	}
 }
@@ -647,7 +647,7 @@ void buf_readonly_set(int bid, bool is_readonly)
 		Window *w;
 		for_each_window(w) {
 			if (w->buf == buf)
-				window_draw_title(w);
+				buffer_dirty_set(w->buf, true);
 		}
 	}
 }
@@ -1077,7 +1077,7 @@ void buf_mode_name_set(int bid, char *name)
 	if (buf) {
 		buffer_mode_name_set(buf, name);
 		if (window_current())
-			window_draw_title(window_current());
+			buffer_dirty_set(window_current()->buf, true);
 	}
 }
 
@@ -1099,7 +1099,7 @@ void buf_state_name_set(int bid, char *name)
 	if (buf) {
 		buffer_state_name_set(buf, name);
 		if (window_current())
-			window_draw_title(window_current());
+			buffer_dirty_set(window_current()->buf, true);
 	}
 }
 

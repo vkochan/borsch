@@ -268,7 +268,7 @@ int scheme_win_title_set(int wid, char *title)
 	if (w) {
 		ui_window_title_set(w->win, title);
 		if (!layout_is_arrange(LAYOUT_MAXIMIZED))
-			window_draw_title(w);
+			buffer_dirty_set(w->buf, true);
 		return 0;
 	}
 
