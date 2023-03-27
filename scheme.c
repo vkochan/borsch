@@ -86,6 +86,11 @@ void scheme_ui_clear_screen(void)
 	ui_clear(g_ui);
 }
 
+void scheme_ui_draw_char(int x, int y, wchar_t ch, int n, short fg, short bg, int style)
+{
+	ui_draw_wchar(g_ui, x, y, ch, n, fg, bg, style);
+}
+
 void scheme_ui_refresh_screen(void)
 {
 	ui_refresh(g_ui);
@@ -1689,6 +1694,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_ui_event_process", scheme_ui_event_process);
 	Sregister_symbol("cs_ui_refresh_screen", scheme_ui_refresh_screen);
 	Sregister_symbol("cs_ui_clear_screen", scheme_ui_clear_screen);
+	Sregister_symbol("cs_ui_draw_char", scheme_ui_draw_char);
 
 	Sregister_symbol("cs_screen_width_get", scheme_screen_width_get);
 	Sregister_symbol("cs_screen_height_get", scheme_screen_height_get);

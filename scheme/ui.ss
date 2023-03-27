@@ -4,6 +4,7 @@
 (define __cs_ui_event_process (foreign-procedure "cs_ui_event_process" () void))
 (define __cs_ui_refresh_screen (foreign-procedure "cs_ui_refresh_screen" () void))
 (define __cs_ui_clear_screen (foreign-procedure "cs_ui_clear_screen" () void))
+(define __cs_ui_draw_char (foreign-procedure "cs_ui_draw_char" (int int wchar int int int int) void))
 
 (define (ui-init ui-type)
    (call-foreign (__cs_ui_init ui-type)))
@@ -28,3 +29,20 @@
 
 (define (ui-clear)
    (call-foreign (__cs_ui_clear_screen)))
+
+(define ui-draw-char
+   (case-lambda
+      [(x y ch)
+       (ui-draw-char x y ch 1 "default" "default" "normal")]
+
+      [(x y ch fg bg)
+       (ui-draw-char x y ch 1 fg bg "normal")]
+
+      [(x y ch n fg bg)
+       (ui-draw-char x y ch n fg bg "normal")]
+
+      [(x y ch n fg bg style)
+       (let ([fg-num (color-name->number fg)]
+             [bg-num (color-name->number bg)]
+             [style-num (style-name->number style)])
+          (call-foreign (__cs_ui_draw_char x y ch n fg-num bg-num style-num)))]))
