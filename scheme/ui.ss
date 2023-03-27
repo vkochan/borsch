@@ -46,3 +46,20 @@
              [bg-num (color-name->number bg)]
              [style-num (style-name->number style)])
           (call-foreign (__cs_ui_draw_char x y ch n fg-num bg-num style-num)))]))
+
+(define ui-draw-text
+   (case-lambda
+      [(x y str)
+       (ui-draw-text x y str "default" "default" "normal")]
+
+      [(x y str fg bg)
+       (ui-draw-text x y str fg bg "normal")]
+
+      [(x y str fg bg style)
+       (let ([fg-num (color-name->number fg)]
+             [bg-num (color-name->number bg)]
+             [style-num (style-name->number style)])
+          (let loop ([x x] [chars (string->list str)])
+             (when (not (null? chars))
+                (call-foreign (__cs_ui_draw_char x y (first chars) 1 fg-num bg-num style-num))
+                (loop (+ x 1) (cdr chars)))))]))
