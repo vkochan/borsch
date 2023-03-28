@@ -11,6 +11,7 @@
 (define __cs_buf_name_set (foreign-procedure "cs_buf_name_set" (int string) void))
 (define __cs_buf_readonly_set (foreign-procedure "cs_buf_readonly_set" (int boolean) void))
 (define __cs_buf_readonly_get (foreign-procedure "cs_buf_readonly_get" (int) scheme-object))
+(define __cs_buf_is_modified (foreign-procedure "cs_buf_is_modified" (int) scheme-object))
 (define __cs_buf_by_name (foreign-procedure "cs_buf_by_name" (string) scheme-object))
 (define __cs_buf_text_input_enable (foreign-procedure "cs_buf_text_input_enable" (int boolean) void))
 
@@ -229,6 +230,14 @@
 
       [(buf)
        (call-foreign (__cs_buf_readonly_get buf))]))
+
+(define buffer-is-modified?
+   (case-lambda
+      [()
+       (buffer-is-modified? (current-buffer))]
+
+      [(buf)
+       (call-foreign (__cs_buf_is_modified buf))]))
 
 (define (buffer-insert b)
    (set! %buffer-list% (append %buffer-list% (list b))))

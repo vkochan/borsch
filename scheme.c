@@ -650,6 +650,15 @@ ptr scheme_buf_readonly_get(int bid)
 	return Sfalse;
 }
 
+ptr scheme_buf_is_modified(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		return Sboolean(buffer_is_modified(buf));
+	return Sfalse;
+}
+
 void scheme_buf_readonly_set(int bid, bool is_readonly)
 {
 	Buffer *buf = buffer_by_id(bid);
@@ -1766,6 +1775,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_name_set", scheme_buf_name_set);
 	Sregister_symbol("cs_buf_readonly_get", scheme_buf_readonly_get);
 	Sregister_symbol("cs_buf_readonly_set", scheme_buf_readonly_set);
+	Sregister_symbol("cs_buf_is_modified", scheme_buf_is_modified);
 	Sregister_symbol("cs_buf_by_name", scheme_buf_by_name);
 	Sregister_symbol("cs_buf_text_insert", scheme_buf_text_insert);
 	Sregister_symbol("cs_buf_text_insert_char", scheme_buf_text_insert_char);
