@@ -44,6 +44,25 @@
 (define (window-update-layout)
    (call-foreign (__cs_win_update_layout)))
 
+(define window-draw-char
+   (case-lambda
+      [(w x y ch)
+       (window-draw-char w x y ch 1 '(fg: "default" bg: "default" attr: "normal"))]
+
+      [(w x y ch n)
+       (window-draw-char w x y ch n '(fg: "default" bg: "default" attr: "normal"))]
+
+      [(w x y ch n opts)
+       (ui-draw-char (+ (window-x w) x) (+ (window-y w) y) ch n opts)]))
+
+(define window-draw-text
+   (case-lambda
+      [(w x y str)
+       (window-draw-text w x y str '(fg: "default" bg: "default" attr: "normal"))]
+
+      [(w x y str opts)
+       (ui-draw-text (+ (window-x w) x) (+ (window-y w) y) str opts)]))
+
 (define window-draw
    (case-lambda
       [(w)
