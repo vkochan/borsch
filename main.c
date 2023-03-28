@@ -611,16 +611,6 @@ int buf_new(char *name)
 	return 0;
 }
 
-int buf_by_name(const char *name)
-{
-	Buffer *buf = buffer_by_name(name);
-
-	if (buf)
-		return buffer_id_get(buf);
-
-	return 0;
-}
-
 size_t buf_text_insert(int bid, const char *text)
 {
 	Buffer *buf = buffer_by_id(bid);

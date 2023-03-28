@@ -25,7 +25,6 @@ extern Ui *g_ui;
 void win_update(int wid);
 
 int buf_new(char *name);
-int buf_by_name(const char *name);
 size_t buf_text_insert(int bid, const char *text);
 size_t buf_text_insert_char(int bid, char ch);
 size_t buf_text_insert_nl(int bid, int pos);

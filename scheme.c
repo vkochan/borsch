@@ -692,10 +692,10 @@ void scheme_buf_readonly_set(int bid, bool is_readonly)
 
 ptr scheme_buf_by_name(const char *name)
 {
-	int ret = buf_by_name(name);
+	Buffer *buf = buffer_by_name(name);
 
-	if (ret)
-		return Sinteger(ret);
+	if (buf)
+		return Sinteger(buffer_id_get(buf));
 
 	return Sfalse;
 }
