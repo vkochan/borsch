@@ -643,12 +643,26 @@ void scheme_buf_name_set(int bid, const char *name)
 
 ptr scheme_buf_readonly_get(int bid)
 {
-	return Sboolean(buf_is_readonly(bid));
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		return Sboolean(buffer_is_readonly(buf));
+	return Sfalse;
 }
 
 void scheme_buf_readonly_set(int bid, bool is_readonly)
 {
-	buf_readonly_set(bid, is_readonly);
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_readonly_set(buf, is_readonly);
+
+		Window *w;
+		for_each_window(w) {
+			if (w->buf == buf)
+				buffer_dirty_set(w->buf, true);
+		}
+	}
 }
 
 ptr scheme_buf_by_name(const char *name)

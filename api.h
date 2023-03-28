@@ -27,8 +27,6 @@ void win_update(int wid);
 int buf_new(char *name);
 void buf_name_set(int bid, const char *name);
 char *buf_name_get(int bid);
-void buf_readonly_set(int bid, bool is_readonly);
-bool buf_is_readonly(int bid);
 int buf_by_name(const char *name);
 size_t buf_text_insert(int bid, const char *text);
 size_t buf_text_insert_char(int bid, char ch);

@@ -637,31 +637,6 @@ char *buf_name_get(int bid)
 	return NULL;
 }
 
-void buf_readonly_set(int bid, bool is_readonly)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf) {
-		buffer_readonly_set(buf, is_readonly);
-
-		Window *w;
-		for_each_window(w) {
-			if (w->buf == buf)
-				buffer_dirty_set(w->buf, true);
-		}
-	}
-}
-
-bool buf_is_readonly(int bid)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf)
-		return buffer_is_readonly(buf);
-
-	return false;
-}
-
 int buf_by_name(const char *name)
 {
 	Buffer *buf = buffer_by_name(name);
