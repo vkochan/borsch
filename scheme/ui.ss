@@ -13,6 +13,7 @@
    (process-destroy-dead)
    (ui-process-event)
    (window-draw-all)
+   (run-hooks 'ui-update-hook)
    (ui-update))
 
 (define (ui-process-event)
