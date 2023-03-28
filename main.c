@@ -611,32 +611,6 @@ int buf_new(char *name)
 	return 0;
 }
 
-void buf_name_set(int bid, const char *name)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf) {
-		buffer_name_lock(buf, true);
-		buffer_name_set(buf, name);
-
-		Window *c;
-		for_each_window(c) {
-			if (c->buf == buf)
-				buffer_dirty_set(c->buf, true);
-		}
-	}
-}
-
-char *buf_name_get(int bid)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf)
-		return buffer_name_get(buf);
-
-	return NULL;
-}
-
 int buf_by_name(const char *name)
 {
 	Buffer *buf = buffer_by_name(name);

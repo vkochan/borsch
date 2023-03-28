@@ -633,12 +633,28 @@ ptr scheme_buf_current_get(void)
 
 ptr scheme_buf_name_get(int bid)
 {
-	return Sstring(buf_name_get(bid));
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf)
+		return Sstring(buffer_name_get(buf));
+
+	return Sstring(NULL);
 }
 
 void scheme_buf_name_set(int bid, const char *name)
 {
-	buf_name_set(bid, name);
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_name_lock(buf, true);
+		buffer_name_set(buf, name);
+
+		Window *c;
+		for_each_window(c) {
+			if (c->buf == buf)
+				buffer_dirty_set(c->buf, true);
+		}
+	}
 }
 
 ptr scheme_buf_readonly_get(int bid)
