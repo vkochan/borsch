@@ -33,33 +33,29 @@
 (define ui-draw-char
    (case-lambda
       [(x y ch)
-       (ui-draw-char x y ch 1 "default" "default" "normal")]
+       (ui-draw-char x y ch 1 '(fg: "default" bg: "default" attr: "normal"))]
 
-      [(x y ch fg bg)
-       (ui-draw-char x y ch 1 fg bg "normal")]
+      [(x y ch n)
+       (ui-draw-char x y ch n '(fg: "default" bg: "default" attr: "normal"))]
 
-      [(x y ch n fg bg)
-       (ui-draw-char x y ch n fg bg "normal")]
-
-      [(x y ch n fg bg style)
-       (let ([fg-num (color-name->number fg)]
-             [bg-num (color-name->number bg)]
-             [style-num (style-name->number style)])
-          (call-foreign (__cs_ui_draw_char x y ch n fg-num bg-num style-num)))]))
+      [(x y ch n opts)
+       (let ([lst (style->list opts)])
+          (let ([fg-num (list-ref lst 0)]
+                [bg-num (list-ref lst 1)]
+                [style-num (list-ref lst 2)])
+             (call-foreign (__cs_ui_draw_char x y ch n fg-num bg-num style-num))))]))
 
 (define ui-draw-text
    (case-lambda
       [(x y str)
-       (ui-draw-text x y str "default" "default" "normal")]
+       (ui-draw-text x y str '(fg: "default" bg: "default" attr: "normal"))]
 
-      [(x y str fg bg)
-       (ui-draw-text x y str fg bg "normal")]
-
-      [(x y str fg bg style)
-       (let ([fg-num (color-name->number fg)]
-             [bg-num (color-name->number bg)]
-             [style-num (style-name->number style)])
-          (let loop ([x x] [chars (string->list str)])
-             (when (not (null? chars))
-                (call-foreign (__cs_ui_draw_char x y (first chars) 1 fg-num bg-num style-num))
-                (loop (+ x 1) (cdr chars)))))]))
+      [(x y str opts)
+       (let ([lst (style->list opts)])
+          (let ([fg-num (list-ref lst 0)]
+                [bg-num (list-ref lst 1)]
+                [style-num (list-ref lst 2)])
+             (let loop ([x x] [chars (string->list str)])
+                (when (not (null? chars))
+                   (call-foreign (__cs_ui_draw_char x y (first chars) 1 fg-num bg-num style-num))
+                   (loop (+ x 1) (cdr chars))))))]))
