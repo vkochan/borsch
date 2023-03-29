@@ -876,6 +876,16 @@ void scheme_buf_state_name_set(int bid, char *name)
 	}
 }
 
+ptr scheme_buf_state_name_get(int bid)
+{
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		return Sstring(buffer_state_name_get(buf));
+	}
+	return Sstring("");
+}
+
 ptr scheme_buf_file_open(int bid, const char *file)
 {
 	return Sinteger(buf_file_open(bid, file));
@@ -1835,6 +1845,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_mode_name_set", scheme_buf_mode_name_set);
 	Sregister_symbol("cs_buf_mode_name_get", scheme_buf_mode_name_get);
 	Sregister_symbol("cs_buf_state_name_set", scheme_buf_state_name_set);
+	Sregister_symbol("cs_buf_state_name_get", scheme_buf_state_name_get);
 	Sregister_symbol("cs_buf_cursor_get", scheme_buf_cursor_get);
 	Sregister_symbol("cs_buf_cursor_set", scheme_buf_cursor_set);
 	Sregister_symbol("cs_buf_line_num", scheme_buf_line_num);

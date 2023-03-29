@@ -33,6 +33,7 @@
 (define __cs_buf_mode_name_set (foreign-procedure "cs_buf_mode_name_set" (int string) void))
 (define __cs_buf_mode_name_get (foreign-procedure "cs_buf_mode_name_get" (int) scheme-object))
 (define __cs_buf_state_name_set (foreign-procedure "cs_buf_state_name_set" (int string) void))
+(define __cs_buf_state_name_get (foreign-procedure "cs_buf_state_name_get" (int) scheme-object))
 
 (define __cs_buf_file_open (foreign-procedure "cs_buf_file_open" (int string) scheme-object))
 (define __cs_buf_file_set (foreign-procedure "cs_buf_file_set" (int string) void))
@@ -113,6 +114,14 @@
 
 (define (buffer-set-state-name n)
    (call-foreign (__cs_buf_state_name_set (current-buffer) (format "~a" n))))
+
+(define buffer-state-name
+   (case-lambda
+      [()
+       (buffer-state-name (current-buffer))]
+
+      [(b)
+       (call-foreign (__cs_buf_state_name_get b))]))
 
 (define (%buffer-local-keymap)
    (call-foreign (__cs_buf_kmap_get (current-buffer))))
