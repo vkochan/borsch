@@ -39,8 +39,6 @@ void buf_text_bg_set(int bid, short bg);
 short buf_text_bg_get(int bid);
 void buf_text_style_set(int bid, int style);
 int buf_text_style_get(int bid);
-size_t buf_cursor_get(int bid);
-void buf_cursor_set(int bid, size_t pos);
 size_t buf_line_num(int bid, size_t pos);
 void buf_input_enable(int bid, bool enable);
 void buf_mode_name_set(int bid, char *name);

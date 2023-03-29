@@ -968,27 +968,6 @@ int buf_text_style_get(int bid)
 	return -1;
 }
 
-size_t buf_cursor_get(int bid)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf)
-		return buffer_cursor_get(buf);
-
-	return EPOS;
-}
-
-void buf_cursor_set(int bid, size_t pos)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf) {
-		buffer_cursor_set(buf, pos);
-		/* just to make UI update */
-		buffer_dirty_set(buf, true);
-	}
-}
-
 size_t buf_line_num(int bid, size_t pos)
 {
 	Buffer *buf = buffer_by_id(bid);

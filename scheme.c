@@ -810,17 +810,26 @@ ptr scheme_buf_text_style_get(int bid)
 
 ptr scheme_buf_cursor_get(int bid)
 {
-	size_t pos = buf_cursor_get(bid);
+	Buffer *buf = buffer_by_id(bid);
 
-	if (pos != EPOS)
-		return Sinteger(pos);
+	if (buf) {
+		size_t pos = buffer_cursor_get(buf);
+		if (pos != EPOS)
+			return Sinteger(pos);
+	}
 
 	return Sfalse;
 }
 
 void scheme_buf_cursor_set(int bid, size_t pos)
 {
-	buf_cursor_set(bid, pos);
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_cursor_set(buf, pos);
+		/* just to make UI update */
+		buffer_dirty_set(buf, true);
+	}
 }
 
 ptr scheme_buf_line_num(int bid, size_t pos)
