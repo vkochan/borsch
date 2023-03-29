@@ -1010,17 +1010,6 @@ char *buf_mode_name_get(int bid)
 	return "";
 }
 
-void buf_state_name_set(int bid, char *name)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf) {
-		buffer_state_name_set(buf, name);
-		if (window_current())
-			buffer_dirty_set(window_current()->buf, true);
-	}
-}
-
 int buf_file_open(int bid, const char *file)
 {
 	Buffer *buf = buffer_by_id(bid);

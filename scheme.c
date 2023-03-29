@@ -857,9 +857,13 @@ ptr scheme_buf_mode_name_get(int bid)
 	return Sstring(buf_mode_name_get(bid));
 }
 
-void scheme_buf_state_name_set(int bid, char *mode)
+void scheme_buf_state_name_set(int bid, char *name)
 {
-	buf_state_name_set(bid, mode);
+	Buffer *buf = buffer_by_id(bid);
+	if (buf) {
+		buffer_state_name_set(buf, name);
+		buffer_dirty_set(buf, true);
+	}
 }
 
 ptr scheme_buf_file_open(int bid, const char *file)
