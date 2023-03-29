@@ -41,8 +41,6 @@ void buf_text_style_set(int bid, int style);
 int buf_text_style_get(int bid);
 size_t buf_line_num(int bid, size_t pos);
 void buf_input_enable(int bid, bool enable);
-void buf_mode_name_set(int bid, char *name);
-char *buf_mode_name_get(int bid);
 int buf_file_open(int bid, const char *file);
 
 int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end,

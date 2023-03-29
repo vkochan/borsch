@@ -988,28 +988,6 @@ void buf_input_enable(int bid, bool enable)
 	}
 }
 
-void buf_mode_name_set(int bid, char *name)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf) {
-		buffer_mode_name_set(buf, name);
-		if (window_current())
-			buffer_dirty_set(window_current()->buf, true);
-	}
-}
-
-char *buf_mode_name_get(int bid)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf) {
-		return buffer_mode_name_get(buf);
-	}
-
-	return "";
-}
-
 int buf_file_open(int bid, const char *file)
 {
 	Buffer *buf = buffer_by_id(bid);

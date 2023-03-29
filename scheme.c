@@ -847,14 +847,24 @@ void scheme_buf_text_input_enable(int bid, bool enable)
 	buf_input_enable(bid, enable);
 }
 
-void scheme_buf_mode_name_set(int bid, char *mode)
+void scheme_buf_mode_name_set(int bid, char *name)
 {
-	buf_mode_name_set(bid, mode);
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_mode_name_set(buf, name);
+		buffer_dirty_set(buf, true);
+	}
 }
 
 ptr scheme_buf_mode_name_get(int bid)
 {
-	return Sstring(buf_mode_name_get(bid));
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		return Sstring(buffer_mode_name_get(buf));
+	}
+	return Sstring("");
 }
 
 void scheme_buf_state_name_set(int bid, char *name)
