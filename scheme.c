@@ -454,6 +454,15 @@ void scheme_win_update(int wid)
 	win_update(wid);
 }
 
+bool scheme_win_has_title(int wid)
+{
+	Window *w = window_get_by_id(wid);
+
+	if (w)
+		return ui_window_has_title(w->win);
+	return false;
+}
+
 static int kmap_add(int pid)
 {
 	KeyMap *pmap = keymap_by_id(pid);
@@ -1805,6 +1814,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_sidebar_get", scheme_win_sidebar_get);
 	Sregister_symbol("cs_win_sidebar_draw", scheme_win_sidebar_draw);
 	Sregister_symbol("cs_win_update", scheme_win_update);
+	Sregister_symbol("cs_win_has_title", scheme_win_has_title);
 
 	Sregister_symbol("cs_kmap_add", scheme_kmap_add);
 	Sregister_symbol("cs_kmap_parent_set", scheme_kmap_parent_set);

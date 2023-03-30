@@ -32,6 +32,7 @@
 (define __cs_win_draw (foreign-procedure "cs_win_draw" (int boolean) void))
 (define __cs_win_layout_is_changed (foreign-procedure "cs_win_layout_is_changed" () boolean))
 (define __cs_win_update_layout (foreign-procedure "cs_win_update_layout" () void))
+(define __cs_win_has_title (foreign-procedure "cs_win_has_title" (int) boolean))
 
 (define %widget-list% (list))
 
@@ -62,6 +63,14 @@
 
       [(w x y str opts)
        (ui-draw-text (+ (window-x w) x) (+ (window-y w) y) str opts)]))
+
+(define window-has-title?
+   (case-lambda
+      [()
+       (window-has-title? (current-window))]
+
+      [(wid)
+       (call-foreign (__cs_win_has_title wid))]))
 
 (define window-draw
    (case-lambda
