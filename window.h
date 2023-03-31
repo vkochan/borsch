@@ -137,6 +137,7 @@ int window_sidebar_width(Window *w);
 void window_sidebar_draw(Window *w, int x, int y, const char *text, short fg, short bg, int attr);
 void window_update(Window *w);
 int window_scroll(Window *w, char type, int n);
+void window_draw_title(Window *c);
 void window_draw_flags(Window *c, int flags);
 void window_draw(Window *c);
 void window_focus(Window *c);

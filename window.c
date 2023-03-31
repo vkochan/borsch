@@ -882,6 +882,82 @@ void window_update(Window *w)
 	}
 }
 
+void window_draw_title(Window *c)
+{
+	ui_text_style_t title_style = UI_TEXT_STYLE_NORMAL;
+	int title_fg = UI_TEXT_COLOR_WHITE;
+	int title_bg = UI_TEXT_COLOR_BRIGHT_BLACK;
+	int maxlen, title_y, title_x;
+	int w_w = ui_window_width_get(c->win);
+	int has_border = ui_window_border_is_enabled(c->win);
+	size_t status_len, name_len;
+	Selection *view_cursor = view_selections_primary_get(c->view);
+	size_t line, col;
+	char status[100];
+	char title[256];
+	char name[200];
+	char *name_ptr;
+	xstr_t bname_str;
+
+	if (!ui_window_has_title(c->win))
+		return;
+
+	if (window_current() == c) {
+		title_fg = UI_TEXT_COLOR_BLACK;
+		title_bg = UI_TEXT_COLOR_WHITE;
+	}
+
+	title_y = ui_window_height_get(c->win)-1;
+	title_y -= has_border;
+	title_x = has_border;
+	w_w -= has_border;
+
+	ui_window_draw_wchar(c->win, title_x, title_y, UI_TEXT_SYMBOL_HLINE, w_w-(has_border*2),
+			     title_bg, title_bg, UI_TEXT_STYLE_NORMAL);
+
+	maxlen = ui_window_width_get(c->win) - 3;
+	bname_str = xstr(buffer_name_get(c->buf));
+	name_ptr = xstr_cptr(bname_str);
+
+	line = view_cursors_line(view_cursor);
+	col = view_cursors_cell_get(view_cursor);
+
+	status_len = snprintf(status, sizeof(status), "[%d:%d] %s(%s) %s %s %s",
+			line,
+			col,
+			buffer_is_modified(c->buf) ? "[+] " : "",
+			buffer_mode_name_get(c->buf),
+			buffer_state_name_get(c->buf),
+			window_is_master_sticky(c) ? "*" : "",
+			buffer_is_readonly(c->buf) ? "[RO]" : "");
+
+	name_len = MIN(xstr_len(bname_str), maxlen - status_len);
+
+	if (name_len < xstr_len(bname_str)) {
+		name_ptr += xstr_len(bname_str) - name_len;
+	}
+
+	strncpy(name, name_ptr, MIN(sizeof(name)-1, name_len));
+	name[MIN(sizeof(name)-1, name_len)] = '\0';
+
+	if (name_len >= 3 && name_len < xstr_len(bname_str)) {
+		name[0] = '.';
+		name[1] = '.';
+		name[2] = '.';
+	}
+
+	snprintf(title, sizeof(title), "%s %s", status, name);
+
+	ui_window_draw_text_attr(c->win, 0, title_y, title, w_w,
+			title_fg, title_bg,
+			UI_TEXT_STYLE_NORMAL);
+
+	if (window_current() == c)
+		term_title_set(c);
+
+	xstr_del(bname_str);
+}
+
 void window_draw_flags(Window *c, int flags)
 {
 	bool fire_event = !(flags & WIN_DRAW_F_NO_EVENT);
@@ -914,6 +990,9 @@ void window_draw_flags(Window *c, int flags)
 		}
 
 		ui_window_draw(c->win);
+
+		if (!layout_is_arrange(LAYOUT_MAXIMIZED) || c == window_current())
+			window_draw_title(c);
 	}
 }
 
