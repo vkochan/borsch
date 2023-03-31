@@ -874,11 +874,10 @@ void window_update(Window *w)
 				if (w == window_current())
 					ui_window_cursor_set(win, x, y);
 			}
-
-			/* TODO: better to make buffer to know about it's
-			 * windows and mark them as dirty on text update */
-			buffer_dirty_set(buf, false);
 		}
+		/* TODO: better to make buffer to know about it's
+		 * windows and mark them as dirty on text update */
+		buffer_dirty_set(buf, false);
 	}
 }
 
