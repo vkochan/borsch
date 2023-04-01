@@ -72,14 +72,77 @@
       [(wid)
        (call-foreign (__cs_win_has_title wid))]))
 
+(define window-is-dirty?
+   (case-lambda
+      [()
+       (window-is-dirty? (current-window))]
+
+      [(w)
+       (buffer-is-dirty? (window-buffer w))]))
+
+(define (window-draw-title w)
+   (define (cursor-row/col w)
+      (with-current-buffer (window-buffer)
+         (let ([curs (cursor)])
+            (let ([coord (window-pos->coord w curs)])
+               (if coord
+                  (let ([x (list-ref coord 0)]
+                        [y (list-ref coord 1)]
+                        [l (list-ref coord 2)])
+                     (list l x))
+                  ;; else
+                  (list 0 0))))))
+
+   (define (title-style w)
+      (if (equal? w (current-window))
+         '(fg: "black" bg: "white")
+         ;; else
+         '(fg: "white" bg: "bright-black")))
+
+   (let* ([wx (window-x w)]
+          [wy (window-y w)]
+          [ww (window-width w)]
+          [wh (window-height w)]
+          [bf (window-buffer w)]
+          [ro? (buffer-is-readonly? bf)]
+          [mo? (buffer-is-modified? bf)]
+          [st? (and (window-is-master? w) (window-is-sticky? w))]
+          [bn (buffer-name bf)]
+          [mn (buffer-mode-name bf)]
+          [sn (buffer-state-name bf)]
+          [style (title-style w)]
+          [row-col (cursor-row/col w)])
+      (window-draw-char w 0 (- wh 1) #\space ww style)
+      (let* ([row (list-ref row-col 0)]
+             [col (list-ref row-col 1)]
+             [st (format "[~d:~d] ~a(~a) ~a ~a ~a | "
+                         row
+                         col
+                         (if mo? "[+]" "")
+                         mn
+                         sn
+                         (if st? "*" "")
+                         (if ro? "[RO]" ""))]
+             [max (- ww (string-length st) 5 )]
+             [nl (string-length bn)])
+         (when (> nl max)
+            (let ([over (- nl max)]) 
+               (set! st (string-append st "..."))
+               (set! bn (substring bn over nl))))
+         (set! st (string-append st bn))
+         (window-draw-text w 0 (- wh 1) st style))))
+
+
 (define window-draw
    (case-lambda
       [(w)
        (window-draw w #f)]
 
       [(w enforce?)
-       (when w
-          (call-foreign (__cs_win_draw w enforce?)))]))
+       (when (and w (or enforce? (window-is-dirty? w)))
+          (call-foreign (__cs_win_draw w enforce?))
+          (when (window-has-title? w)
+             (window-draw-title w)))]))
 
 (define (window-draw-all)
    (let ([redraw? (window-layout-is-changed)])
