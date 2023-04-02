@@ -862,7 +862,11 @@ ptr scheme_buf_line_num(int bid, size_t pos)
 
 void scheme_buf_text_input_enable(int bid, bool enable)
 {
-	buf_input_enable(bid, enable);
+	Buffer *buf = buffer_by_id(bid);
+
+	if (buf) {
+		buffer_text_input_enable(buf, enable);
+	}
 }
 
 void scheme_buf_mode_name_set(int bid, char *name)

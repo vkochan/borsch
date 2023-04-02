@@ -979,15 +979,6 @@ size_t buf_line_num(int bid, size_t pos)
 	return EPOS;
 }
 
-void buf_input_enable(int bid, bool enable)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf) {
-		buffer_text_input_enable(buf, enable);
-	}
-}
-
 int buf_file_open(int bid, const char *file)
 {
 	Buffer *buf = buffer_by_id(bid);
