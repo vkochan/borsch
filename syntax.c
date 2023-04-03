@@ -259,6 +259,21 @@ static void __syntax_func_delete(SyntaxFunc *func)
 	array_release(&func->args);
 }
 
+static void __syntax_rule_add_func(SyntaxRule *rule, SyntaxFunc *func)
+{
+	array_add(&rule->func_array, func);
+}
+
+static int __syntax_rule_func_count(SyntaxRule *rule)
+{
+	return array_length(&rule->func_array);
+}
+
+static SyntaxFunc *__syntax_rule_get_func(SyntaxRule *rule, int i)
+{
+	return array_get(&rule->func_array, i);
+}
+
 static int __syntax_rule_parse_func(SyntaxRule *rule)
 {
 	const TSQueryPredicateStep *preds;
@@ -290,7 +305,7 @@ static int __syntax_rule_parse_func(SyntaxRule *rule)
 				return -1;
 			}
 
-			array_add(&rule->func_array, &func);
+			__syntax_rule_add_func(rule, &func);
 			__syntax_func_reset(&func);
 			break;
 
@@ -314,8 +329,8 @@ static int __syntax_rule_parse_func(SyntaxRule *rule)
 		}
 	}
 
-	for (i = 0; i < array_length(&rule->func_array); i++) {
-		SyntaxFunc *func = array_get(&rule->func_array, i);
+	for (i = 0; i < __syntax_rule_func_count(rule); i++) {
+		SyntaxFunc *func = __syntax_rule_get_func(rule, i);
 
 		if (func->init) {
 			err = func->init(func, rule);
@@ -330,8 +345,8 @@ static int __syntax_rule_parse_func(SyntaxRule *rule)
 
 static SyntaxFuncReturnType __syntax_rule_call_func(SyntaxRule *rule, SyntaxParser *parser, const TSQueryMatch *match)
 {
-	for (int i = 0; i < array_length(&rule->func_array); i++) {
-		SyntaxFunc *func = array_get(&rule->func_array, i);
+	for (int i = 0; i < __syntax_rule_func_count(rule); i++) {
+		SyntaxFunc *func = __syntax_rule_get_func(rule, i);
 		SyntaxFuncReturnType ret = SyntaxFuncReturnTypeSuccess;
 
 		ret = func->call(func, rule, parser, match);
@@ -346,8 +361,8 @@ static void __syntax_rule_delete(SyntaxRule *rule)
 {
 	size_t i;
 
-	for (i = 0; i < array_length(&rule->func_array); i++) {
-		__syntax_func_delete(array_get(&rule->func_array, i));
+	for (i = 0; i < __syntax_rule_func_count(rule); i++) {
+		__syntax_func_delete(__syntax_rule_get_func(rule, i));
 	}
 	array_release(&rule->func_array);
 	ts_query_delete(rule->query);
