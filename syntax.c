@@ -43,9 +43,14 @@ typedef struct _SyntaxFuncArg
 
 typedef struct
 {
+	Array func_array;
+} SyntaxPattern;
+
+typedef struct
+{
 	int type;
 	const char *match;
-	Array func_array;
+	Array pattern_array;
 	TSQuery *query;
 	void *data;
 } SyntaxRule;
@@ -259,19 +264,22 @@ static void __syntax_func_delete(SyntaxFunc *func)
 	array_release(&func->args);
 }
 
-static void __syntax_rule_add_func(SyntaxRule *rule, SyntaxFunc *func)
+static void __syntax_rule_add_func(SyntaxRule *rule, int pat_id, SyntaxFunc *func)
 {
-	array_add(&rule->func_array, func);
+	SyntaxPattern *pat = array_get(&rule->pattern_array, pat_id);
+	array_add(&pat->func_array, func);
 }
 
-static int __syntax_rule_func_count(SyntaxRule *rule)
+static int __syntax_rule_func_count(SyntaxRule *rule, int pat_id)
 {
-	return array_length(&rule->func_array);
+	SyntaxPattern *pat = array_get(&rule->pattern_array, pat_id);
+	return array_length(&pat->func_array);
 }
 
-static SyntaxFunc *__syntax_rule_get_func(SyntaxRule *rule, int i)
+static SyntaxFunc *__syntax_rule_get_func(SyntaxRule *rule, int pat_id, int i)
 {
-	return array_get(&rule->func_array, i);
+	SyntaxPattern *pat = array_get(&rule->pattern_array, pat_id);
+	return array_get(&pat->func_array, i);
 }
 
 static int __syntax_rule_parse_func(SyntaxRule *rule)
@@ -282,10 +290,13 @@ static int __syntax_rule_parse_func(SyntaxRule *rule)
 	const char *str_value;
 	SyntaxFuncArg arg;
 	SyntaxFunc func;
+	int pat_id;
 	int err;
 	int i;
 
-	preds = ts_query_predicates_for_pattern(rule->query, 0, &pred_length);
+	pat_id = 0;
+
+	preds = ts_query_predicates_for_pattern(rule->query, pat_id, &pred_length);
 
 	__syntax_func_reset(&func);
 
@@ -305,7 +316,7 @@ static int __syntax_rule_parse_func(SyntaxRule *rule)
 				return -1;
 			}
 
-			__syntax_rule_add_func(rule, &func);
+			__syntax_rule_add_func(rule, pat_id, &func);
 			__syntax_func_reset(&func);
 			break;
 
@@ -329,8 +340,8 @@ static int __syntax_rule_parse_func(SyntaxRule *rule)
 		}
 	}
 
-	for (i = 0; i < __syntax_rule_func_count(rule); i++) {
-		SyntaxFunc *func = __syntax_rule_get_func(rule, i);
+	for (i = 0; i < __syntax_rule_func_count(rule, pat_id); i++) {
+		SyntaxFunc *func = __syntax_rule_get_func(rule, pat_id, i);
 
 		if (func->init) {
 			err = func->init(func, rule);
@@ -343,10 +354,10 @@ static int __syntax_rule_parse_func(SyntaxRule *rule)
 	return 0;
 }
 
-static SyntaxFuncReturnType __syntax_rule_call_func(SyntaxRule *rule, SyntaxParser *parser, const TSQueryMatch *match)
+static SyntaxFuncReturnType __syntax_rule_call_func(SyntaxRule *rule, SyntaxParser *parser, const TSQueryMatch *match, int pat_id)
 {
-	for (int i = 0; i < __syntax_rule_func_count(rule); i++) {
-		SyntaxFunc *func = __syntax_rule_get_func(rule, i);
+	for (int i = 0; i < __syntax_rule_func_count(rule, pat_id); i++) {
+		SyntaxFunc *func = __syntax_rule_get_func(rule, pat_id, i);
 		SyntaxFuncReturnType ret = SyntaxFuncReturnTypeSuccess;
 
 		ret = func->call(func, rule, parser, match);
@@ -359,12 +370,15 @@ static SyntaxFuncReturnType __syntax_rule_call_func(SyntaxRule *rule, SyntaxPars
 
 static void __syntax_rule_delete(SyntaxRule *rule)
 {
-	size_t i;
+	for (int i = 0; i < array_length(&rule->pattern_array); i++) {
+		SyntaxPattern *pat = array_get(&rule->pattern_array, i);
 
-	for (i = 0; i < __syntax_rule_func_count(rule); i++) {
-		__syntax_func_delete(__syntax_rule_get_func(rule, i));
+		for (int j = 0; j < __syntax_rule_func_count(rule, i); j++) {
+			__syntax_func_delete(__syntax_rule_get_func(rule, i, j));
+		}
+		array_release(&pat->func_array);
 	}
-	array_release(&rule->func_array);
+	array_release(&rule->pattern_array);
 	ts_query_delete(rule->query);
 	free(rule->data);
 }
@@ -376,6 +390,7 @@ int syntax_lang_rule_add(const char *lang_name, int type, const char *match, voi
 	TSQuery *query;
 	SyntaxRule rule = {0};
 	SyntaxLang *lang;
+	int pattern_count;
 	int err;
 
 	lang = get_lang_by_name(lang_name);
@@ -401,7 +416,16 @@ int syntax_lang_rule_add(const char *lang_name, int type, const char *match, voi
 		return -2;
 	}
 
-	array_init_sized(&rule.func_array, sizeof(SyntaxFunc));
+	pattern_count = ts_query_pattern_count(query);
+	array_init_sized(&rule.pattern_array, sizeof(SyntaxPattern));
+
+	for (int i = 0; i < pattern_count; i++) {
+		SyntaxPattern pat = {0};
+
+		array_init_sized(&pat.func_array, sizeof(SyntaxFunc));
+		array_add(&rule.pattern_array, &pat);
+	}
+
 	rule.match = match;
 	rule.query = query;
 	rule.type = type;
@@ -583,9 +607,10 @@ void syntax_parser_rules_walk(
 			while (ts_query_cursor_next_match(cursor, &match)) {
 				int count = match.capture_count;
 				SyntaxFuncReturnType func_return;
+				int pat_id = 0;
 				int i;
 
-				func_return = __syntax_rule_call_func(rule, parser, &match);
+				func_return = __syntax_rule_call_func(rule, parser, &match, pat_id);
 				if (func_return != SyntaxFuncReturnTypeSuccess)
 					continue;
 
