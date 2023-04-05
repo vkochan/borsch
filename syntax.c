@@ -51,6 +51,7 @@ typedef struct
 	int type;
 	const char *match;
 	Array pattern_array;
+	Array capture_array;
 	TSQuery *query;
 	void *data;
 } SyntaxRule;
@@ -379,11 +380,12 @@ static void __syntax_rule_delete(SyntaxRule *rule)
 		array_release(&pat->func_array);
 	}
 	array_release(&rule->pattern_array);
+	array_release(&rule->capture_array);
 	ts_query_delete(rule->query);
 	free(rule->data);
 }
 
-int syntax_lang_rule_add(const char *lang_name, int type, const char *match, void *data)
+int syntax_lang_rule_add(const char *lang_name, int type, const char *match, void *data, int (*bind)(SyntaxCapture *cap))
 {
 	TSQueryError error_type;
 	uint32_t error_offset;
@@ -391,6 +393,7 @@ int syntax_lang_rule_add(const char *lang_name, int type, const char *match, voi
 	SyntaxRule rule = {0};
 	SyntaxLang *lang;
 	int pattern_count;
+	int capture_count;
 	int err;
 
 	lang = get_lang_by_name(lang_name);
@@ -424,6 +427,20 @@ int syntax_lang_rule_add(const char *lang_name, int type, const char *match, voi
 
 		array_init_sized(&pat.func_array, sizeof(SyntaxFunc));
 		array_add(&rule.pattern_array, &pat);
+	}
+
+	capture_count = ts_query_capture_count(query);
+	array_init_sized(&rule.capture_array, sizeof(SyntaxCapture));
+
+	for (int i = 0; i < capture_count; i++) {
+		SyntaxCapture cap = {0};
+
+		cap.name = ts_query_capture_name_for_id(query, i, NULL);
+		cap.id = i;
+
+		if (bind)
+			bind(&cap);
+		array_add(&rule.capture_array, &cap);
 	}
 
 	rule.match = match;

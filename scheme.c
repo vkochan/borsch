@@ -1316,7 +1316,7 @@ ptr scheme_stx_lang_style_add(const char *lang, int fg, int bg, int attr, const 
 		style->bg = bg;
 	}
 
-	err = syntax_lang_rule_add(lang, SYNTAX_RULE_TYPE_STYLE, rule, style);
+	err = syntax_lang_rule_add(lang, SYNTAX_RULE_TYPE_STYLE, rule, style, NULL);
 	if (err)
 		return Sfalse;
 

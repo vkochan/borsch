@@ -5,6 +5,13 @@ typedef struct SyntaxParser SyntaxParser;
 
 typedef struct
 {
+	int id;
+	char *name;
+	void *data;
+} SyntaxCapture;
+
+typedef struct
+{
 	const char * (* chunk_read)(void *payload, uint32_t index, uint32_t *size);
 	size_t       (* text_read)(void *payload, size_t pos, size_t len, char *buf);
 	void 	*payload;
@@ -13,7 +20,7 @@ typedef struct
 int syntax_init(void);
 void syntax_cleanup(void);
 
-int syntax_lang_rule_add(const char *lang_name, int type, const char *match, void *data);
+int syntax_lang_rule_add(const char *lang_name, int type, const char *match, void *data, int (*bind)(SyntaxCapture *cap));
 void syntax_lang_rule_remove(const char *lang_name, int type, const char *match);
 void syntax_lang_rules_clear(const char *lang_name, int type);
 
