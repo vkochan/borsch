@@ -51,8 +51,8 @@ typedef struct
 	int type;
 	const char *match;
 	Array pattern_array;
+	Array capture_array;
 	TSQuery *query;
-	void *data;
 } SyntaxRule;
 
 typedef struct _SyntaxFunc
@@ -282,7 +282,7 @@ static SyntaxFunc *__syntax_rule_get_func(SyntaxRule *rule, int pat_id, int i)
 	return array_get(&pat->func_array, i);
 }
 
-static int __syntax_rule_parse_func(SyntaxRule *rule)
+static int __syntax_rule_parse_func(SyntaxRule *rule, int pat_id)
 {
 	const TSQueryPredicateStep *preds;
 	uint32_t pred_length;
@@ -290,11 +290,8 @@ static int __syntax_rule_parse_func(SyntaxRule *rule)
 	const char *str_value;
 	SyntaxFuncArg arg;
 	SyntaxFunc func;
-	int pat_id;
 	int err;
 	int i;
-
-	pat_id = 0;
 
 	preds = ts_query_predicates_for_pattern(rule->query, pat_id, &pred_length);
 
@@ -379,11 +376,11 @@ static void __syntax_rule_delete(SyntaxRule *rule)
 		array_release(&pat->func_array);
 	}
 	array_release(&rule->pattern_array);
+	array_release(&rule->capture_array);
 	ts_query_delete(rule->query);
-	free(rule->data);
 }
 
-int syntax_lang_rule_add(const char *lang_name, int type, const char *match, void *data)
+int syntax_lang_rule_add(const char *lang_name, int type, const char *match, void *arg, int (*bind)(SyntaxCapture *cap, void *arg))
 {
 	TSQueryError error_type;
 	uint32_t error_offset;
@@ -391,6 +388,7 @@ int syntax_lang_rule_add(const char *lang_name, int type, const char *match, voi
 	SyntaxRule rule = {0};
 	SyntaxLang *lang;
 	int pattern_count;
+	int capture_count;
 	int err;
 
 	lang = get_lang_by_name(lang_name);
@@ -416,6 +414,10 @@ int syntax_lang_rule_add(const char *lang_name, int type, const char *match, voi
 		return -2;
 	}
 
+	rule.match = match;
+	rule.query = query;
+	rule.type = type;
+
 	pattern_count = ts_query_pattern_count(query);
 	array_init_sized(&rule.pattern_array, sizeof(SyntaxPattern));
 
@@ -424,17 +426,27 @@ int syntax_lang_rule_add(const char *lang_name, int type, const char *match, voi
 
 		array_init_sized(&pat.func_array, sizeof(SyntaxFunc));
 		array_add(&rule.pattern_array, &pat);
+
+		err = __syntax_rule_parse_func(&rule, i);
+		if (err) {
+			__syntax_rule_delete(&rule);
+			return -1;
+		}
 	}
 
-	rule.match = match;
-	rule.query = query;
-	rule.type = type;
-	rule.data = data;
+	capture_count = ts_query_capture_count(query);
+	array_init_sized(&rule.capture_array, sizeof(SyntaxCapture));
 
-	err = __syntax_rule_parse_func(&rule);
-	if (err) {
-		__syntax_rule_delete(&rule);
-		return -1;
+	for (int i = 0; i < capture_count; i++) {
+		SyntaxCapture cap = {0};
+		uint32_t len;
+
+		cap.name = ts_query_capture_name_for_id(query, i, &len);
+		cap.id = i;
+
+		if (bind)
+			bind(&cap, arg);
+		array_add(&rule.capture_array, &cap);
 	}
 
 	array_add(&lang->rules, &rule);
@@ -607,7 +619,7 @@ void syntax_parser_rules_walk(
 			while (ts_query_cursor_next_match(cursor, &match)) {
 				int count = match.capture_count;
 				SyntaxFuncReturnType func_return;
-				int pat_id = 0;
+				int pat_id = match.pattern_index;
 				int i;
 
 				func_return = __syntax_rule_call_func(rule, parser, &match, pat_id);
@@ -616,10 +628,11 @@ void syntax_parser_rules_walk(
 
 				for (i = 0; i < count; i++) {
 					const TSQueryCapture *cap = &match.captures[i];
+					SyntaxCapture *s_cap = array_get(&rule->capture_array, cap->index);
 					uint32_t node_start = ts_node_start_byte(cap->node);
 					uint32_t node_end = ts_node_end_byte(cap->node);
 
-					cb(parser, type, node_start, node_end-1, rule->data, arg);
+					cb(parser, type, node_start, node_end-1, s_cap->data, arg);
 				}
 			}
 		}

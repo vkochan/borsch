@@ -1298,6 +1298,11 @@ ptr scheme_buf_parser_set(int bid, const char *lang)
 	return Sfalse;
 }
 
+static void scheme_syntax_style_bind(SyntaxCapture *cap, void *arg)
+{
+	cap->data = arg;
+}
+
 ptr scheme_stx_lang_style_add(const char *lang, int fg, int bg, int attr, const char *style_name, const char *rule)
 {
 	Style *style, *style_bind;
@@ -1316,7 +1321,7 @@ ptr scheme_stx_lang_style_add(const char *lang, int fg, int bg, int attr, const 
 		style->bg = bg;
 	}
 
-	err = syntax_lang_rule_add(lang, SYNTAX_RULE_TYPE_STYLE, rule, style);
+	err = syntax_lang_rule_add(lang, SYNTAX_RULE_TYPE_STYLE, rule, style, scheme_syntax_style_bind);
 	if (err)
 		return Sfalse;
 
