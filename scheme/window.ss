@@ -153,7 +153,13 @@
          (lambda (w)
             (when (not (equal? w (current-window)))
                (window-draw w redraw?)))
-         (append (widget-list) (window-list)))
+         (widget-list))
+      (when (not (layout-is-maximized?))
+         (for-each
+            (lambda (w)
+               (when (not (equal? w (current-window)))
+                  (window-draw w redraw?)))
+            (window-list)))
       (window-draw (current-window) redraw?)))
 
 (define window-is-visible?
