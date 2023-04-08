@@ -1338,6 +1338,39 @@ void scheme_stx_lang_style_clear(const char *lang)
 	syntax_lang_rules_clear(lang, SYNTAX_RULE_TYPE_STYLE);
 }
 
+static void scheme_syntax_highlight_bind(SyntaxCapture *cap, void *arg)
+{
+	xstr_t stx_prefix = xstr("syntax-");
+	xstr_t stx_capname = xstr(cap->name);
+	xstr_t style_name = xstr_cat(stx_prefix, stx_capname);
+	Style *style_bind;
+
+	style_bind = style_get_by_name(xstr_cptr(style_name));
+	if (style_bind) {
+		Style *style = style_new();
+		if (style) {
+			style->id = style_bind->id;
+			cap->data = style;
+		}
+	}
+
+	xstr_del(style_name);
+	xstr_del(stx_prefix);
+	xstr_del(stx_capname);
+}
+
+ptr scheme_stx_highlight_qry(const char *lang, char *qry)
+{
+	int err;
+
+	err = syntax_lang_rule_add(lang, SYNTAX_RULE_TYPE_STYLE, qry, NULL, scheme_syntax_highlight_bind);
+	if (err) {
+		return Sfalse;
+	}
+
+	return Strue;
+}
+
 ptr scheme_style_add(const char *name, int fg, int bg, int attr)
 {
 	Style style = {
@@ -1914,6 +1947,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_stx_lang_style_add", scheme_stx_lang_style_add);
 	Sregister_symbol("cs_stx_lang_style_del", scheme_stx_lang_style_del);
 	Sregister_symbol("cs_stx_lang_style_clear", scheme_stx_lang_style_clear);
+	Sregister_symbol("cs_stx_highlight_qry", scheme_stx_highlight_qry);
 
 	Sregister_symbol("cs_style_add",  scheme_style_add);
 	Sregister_symbol("cs_style_set",  scheme_style_set);

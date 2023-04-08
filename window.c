@@ -1045,7 +1045,8 @@ static int style_syntax_draw(SyntaxParser *parser, int id, size_t start, size_t 
 	Style *style = data;
 	View *view = arg;
 
-	__style_draw(view, start, end, style);
+	if (data)
+		__style_draw(view, start, end, style);
 
 	return 0;
 }

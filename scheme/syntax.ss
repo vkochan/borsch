@@ -2,6 +2,7 @@
 (define __cs_stx_lang_style_add (foreign-procedure "cs_stx_lang_style_add" (string int int int string string) scheme-object))
 (define __cs_stx_lang_style_del (foreign-procedure "cs_stx_lang_style_del" (string string) void))
 (define __cs_stx_lang_style_clear (foreign-procedure "cs_stx_lang_style_clear" (string string) void))
+(define __cs_stx_highlight_qry (foreign-procedure "cs_stx_highlight_qry" (string string) void))
 
 (define syntax-set-lang
    (lambda (lang)
@@ -51,3 +52,18 @@
          (__cs_stx_lang_style_clear (symbol->string lang)))
    )
 )
+
+(define (syntax-highlight lang qry)
+   (call-foreign
+      (__cs_stx_highlight_qry (symbol->string lang) qry)))
+
+(define-style syntax-function         fg: "cyan")
+(define-style syntax-bracket          fg: "yellow" attr: "bold")
+(define-style syntax-string           fg: "bright-yellow")
+(define-style syntax-keyword          fg: "green")
+(define-style syntax-comment          fg: "bright-black")
+(define-style syntax-symbol           fg: "cyan")
+(define-style syntax-operator         fg: "yellow" attr: "bold")
+(define-style syntax-number           fg: "blue"   attr: "bold")
+(define-style syntax-constant         fg: "blue"   attr: "bold")
+(define-style syntax-constant.builtin fg: "red"    attr: "bold")

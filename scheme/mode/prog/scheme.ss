@@ -38,7 +38,7 @@
 (define scheme-syntax-symbol-match "(quote  \"'\" (symbol)) @constant")
 (define scheme-syntax-string-match "[(string) (character)] @string")
 (define scheme-syntax-comment-match "[(comment) (block_comment) (directive)] @comment")
-(define scheme-syntax-bracket-match "[\"(\" \")\" \"[\" \"]\" \"{\" \"}\"] @punctuation.bracket")
+(define scheme-syntax-bracket-match "[\"(\" \")\" \"[\" \"]\" \"{\" \"}\"] @bracket")
 (define scheme-syntax-keyword-match
    "(list
      .
@@ -52,21 +52,15 @@
      (symbol) @operator
      (#match? @operator \"^([+*/<>=-]|(<=)|(>=))$\"))")
 
-(define scheme-syntax-keyword-style             '(fg: "green"))
-(define scheme-syntax-string-style              '(fg: "bright-yellow"))
-(define scheme-syntax-function-style            '(fg: "cyan"))
-(define scheme-syntax-operator-style            '(fg: "yellow" attr: "bold"))
-(define scheme-syntax-bracket-style             '(fg: "yellow" attr: "bold"))
-(define scheme-syntax-comment-style             '(fg: "bright-black"))
-(define scheme-syntax-number-style              '(fg: "blue"))
-(define scheme-syntax-symbol-style              '(fg: "cyan"))
-(define scheme-syntax-constant-builtin-style    '(fg: "blue"))
-
-(syntax-set-style 'scheme scheme-syntax-string-match scheme-syntax-string-style)
-(syntax-set-style 'scheme scheme-syntax-function-match scheme-syntax-function-style)
-(syntax-set-style 'scheme scheme-syntax-keyword-match scheme-syntax-keyword-style)
-(syntax-set-style 'scheme scheme-syntax-comment-match scheme-syntax-comment-style)
-(syntax-set-style 'scheme scheme-syntax-number-match scheme-syntax-number-style)
-(syntax-set-style 'scheme scheme-syntax-symbol-match scheme-syntax-symbol-style)
-(syntax-set-style 'scheme scheme-syntax-constant-builtin-match scheme-syntax-constant-builtin-style)
-(syntax-set-style 'scheme scheme-syntax-bracket-match scheme-syntax-bracket-style)
+(syntax-highlight 'scheme
+   (string-append
+      scheme-syntax-function-match
+      scheme-syntax-number-match
+      scheme-syntax-char-match
+      scheme-syntax-symbol-match
+      scheme-syntax-string-match
+      scheme-syntax-comment-match
+      scheme-syntax-bracket-match
+      scheme-syntax-keyword-match
+      scheme-syntax-constant-builtin-match
+      scheme-syntax-operator-match))
