@@ -84,4 +84,4 @@
 (define-style syntax-operator         '(fg: "yellow" attr: "bold"))
 (define-style syntax-number           '(fg: "blue"   attr: "bold"))
 (define-style syntax-constant         '(fg: "blue"   attr: "bold"))
-(define-style syntax-constant.builtin '(fg: "red"    attr: "bold"))
+(define-style syntax-constant-builtin '(fg: "red"    attr: "bold"))
