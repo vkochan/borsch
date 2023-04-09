@@ -44,7 +44,7 @@
      .
      (symbol) @keyword
      (#match? @keyword
-      \"^((define)|(define-syntax)|(syntax-case)|(let)|(let\\*)|(lambda)|(if)|(cond)|(case)|(else)|(and)|(or)|(not)|(set!)|(begin)|(when))$\"))")
+      \"^((define)|(define-syntax)|(syntax-case)|(let)|(let\\*)|(lambda)|(case-lambda)|(if)|(cond)|(case)|(else)|(and)|(or)|(not)|(set!)|(begin)|(when))$\"))")
 
 (define scheme-syntax-operator-match
    "(list
