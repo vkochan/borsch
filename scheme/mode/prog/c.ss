@@ -188,7 +188,7 @@
     \"#ifndef\"
     \"#include\"
      (preproc_directive)
-    ] @preproc"
+    ] @macro"
 )
 
 (define c-syntax-type-id-match         "(type_identifier) @type")
@@ -200,7 +200,7 @@
 
 (define c-syntax-func-match "(call_expression function: (identifier) @function)")
 (define c-syntax-func-call-match "(call_expression function: (field_expression field: (field_identifier) @function))")
-(define c-syntax-func-decl-match "(function_declarator declarator: (identifier) @function) (preproc_function_def name: (identifier) @function.special)")
+(define c-syntax-func-decl-match "(function_declarator declarator: (identifier) @function) (preproc_function_def name: (identifier) @function-special)")
 
 (define c-syntax-operator-match
    "[
@@ -241,34 +241,23 @@
 
 (define c-syntax-comment-match "(comment) @comment")
 
-(define c-syntax-keywords-style      '(fg: "bright-yellow"))
-(define c-syntax-preproc-style       '(fg: "green"))
-(define c-syntax-type-style          '(fg: "green"))
-(define c-syntax-string-style        '(fg: "bright-yellow"))
-(define c-syntax-func-style          '(fg: "cyan"))
-(define c-syntax-operator-style      '(fg: "yellow" attr: "bold"))
-(define c-syntax-delimiter-style     '(fg: "green"))
-(define c-syntax-comment-style       '(fg: "bright-black"))
-(define c-syntax-variable-style      '(fg: "cyan"))
-(define c-syntax-number-style        '(fg: "blue"))
-(define c-syntax-constant-style      '(fg: "blue"))
-(define c-syntax-label-style         '(fg: "red"))
-
-(syntax-set-style 'c c-syntax-constant-null-match c-syntax-constant-style)
-(syntax-set-style 'c c-syntax-keywords-match c-syntax-keywords-style)
-(syntax-set-style 'c c-syntax-type-id-match c-syntax-type-style)
-(syntax-set-style 'c c-syntax-type-primitive-match c-syntax-type-style)
-(syntax-set-style 'c c-syntax-type-sized-spec-match c-syntax-type-style)
-(syntax-set-style 'c c-syntax-string-match c-syntax-string-style)
-(syntax-set-style 'c c-syntax-string-sys-lib-match c-syntax-string-style)
-(syntax-set-style 'c c-syntax-operator-match c-syntax-operator-style)
-(syntax-set-style 'c c-syntax-delimiter-match c-syntax-delimiter-style)
-(syntax-set-style 'c c-syntax-comment-match c-syntax-comment-style)
-(syntax-set-style 'c c-syntax-variable-match c-syntax-variable-style)
-(syntax-set-style 'c c-syntax-number-match c-syntax-number-style)
-(syntax-set-style 'c c-syntax-preproc-match c-syntax-preproc-style)
-;;(syntax-set-style 'c c-syntax-property-match c-syntax-variable-style)
-;;(syntax-set-style 'c c-syntax-label-match c-syntax-label-style)
-(syntax-set-style 'c c-syntax-func-call-match c-syntax-func-style)
-(syntax-set-style 'c c-syntax-func-decl-match c-syntax-func-style)
-(syntax-set-style 'c c-syntax-func-match c-syntax-func-style)
+(syntax-highlight 'c
+   (string-append
+      c-syntax-constant-null-match
+      c-syntax-keywords-match
+      c-syntax-type-id-match
+      c-syntax-type-primitive-match
+      c-syntax-type-sized-spec-match
+      c-syntax-string-match
+      c-syntax-string-sys-lib-match
+      c-syntax-operator-match
+      c-syntax-delimiter-match
+      c-syntax-comment-match
+      c-syntax-number-match
+      c-syntax-property-match
+      c-syntax-label-match
+      c-syntax-func-match
+      c-syntax-func-call-match
+      c-syntax-func-decl-match
+      c-syntax-preproc-match
+      #;c-syntax-variable-match))
