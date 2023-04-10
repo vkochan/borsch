@@ -1,229 +1,143 @@
 (define delbuf-is-linewise #f)
 (define delbuf-reg "")
 
-(define delbuf-put
-   (lambda (s)
-      (set! delbuf-reg s)
-   )
-)
+(define (delbuf-put s)
+   (set! delbuf-reg s))
 
-(define delbuf-paste-inplace
-   (lambda ()
-      (text-insert delbuf-reg)
-   )
-)
+(define (delbuf-paste-inplace)
+   (text-insert delbuf-reg))
 
-(define delbuf-paste
-   (lambda ()
-      (if (not delbuf-is-linewise)
-         (begin
-            (when (not (equal? #\newline (text-char)))
-               (cursor-to-next-char)
-            )
-            (delbuf-paste-inplace)
-            (cursor-to-prev-char)
-          )
-          ;; else
-          (let ([has-newline (equal? (string-ref delbuf-reg 0) #\newline)])
-             (cursor-to-line-end)
-             (when (not has-newline) (text-insert "\n"))
-             (with-saved-cursor
-                (delbuf-paste-inplace)
-                (when (not has-newline) (text-delete-char))
-             )
-          )
-      )
-   )
-)
+(define (delbuf-paste)
+   (if (not delbuf-is-linewise)
+      (begin
+         (when (not (equal? #\newline (text-char)))
+            (cursor-to-next-char))
+         (delbuf-paste-inplace)
+         (cursor-to-prev-char))
+       ;; else
+       (let ([has-newline (equal? (string-ref delbuf-reg 0) #\newline)])
+          (cursor-to-line-end)
+          (when (not has-newline) (text-insert "\n"))
+          (with-saved-cursor
+             (delbuf-paste-inplace)
+             (when (not has-newline) (text-delete-char))))))
 
-(define text-mode-set-keymap
-   (lambda (m)
-      (keymap-set-parent (get-local text-mode-map) (get-local-symbol m))
-   )
-)
+(define (text-mode-set-keymap m)
+   (keymap-set-parent (get-local text-mode-map) (get-local-symbol m)))
 
-(define text-mode-normal
-   (lambda ()
-      (text-mode-set-keymap 'text-mode-normal-local-map)
-      (buffer-set-state-name "")
-      (buffer-snapshot)
-      (enable-insert #f)
-      (text-highlight-selection #f)
-   )
-)
+(define (text-mode-normal)
+   (text-mode-set-keymap 'text-mode-normal-local-map)
+   (buffer-set-state-name "")
+   (buffer-snapshot)
+   (enable-insert #f)
+   (text-highlight-selection #f))
 
-(define text-mode-insert
-   (lambda ()
-      (text-modify
-         (text-mode-set-keymap 'text-mode-insert-local-map)
-         (buffer-set-state-name "<I>")
-         (enable-insert #t)
-      )
-   )
-)
+(define (text-mode-insert)
+   (text-modify
+      (text-mode-set-keymap 'text-mode-insert-local-map)
+      (buffer-set-state-name "<I>")
+      (enable-insert #t)))
 
-(define text-mode-visual
-   (lambda ()
-      (text-mode-set-keymap 'text-mode-visual-local-map)
-      (buffer-set-state-name "<V>")
-      (enable-insert #f)
-      (text-set-selection)
-      (text-highlight-selection #t)
-   )
-)
+(define (text-mode-visual)
+   (text-mode-set-keymap 'text-mode-visual-local-map)
+   (buffer-set-state-name "<V>")
+   (enable-insert #f)
+   (text-set-selection)
+   (text-highlight-selection #t))
 
-(define text-mode-visual-linewise
-   (lambda ()
-      (text-mode-set-keymap 'text-mode-visual-linewise-local-map)
-      (buffer-set-state-name "<V *L*>")
-      (enable-insert #f)
-      (text-set-selection (text-line-begin-pos))
-      (cursor-to-line-end)
-      (text-highlight-selection #t)
-   )
-)
+(define (text-mode-visual-linewise)
+   (text-mode-set-keymap 'text-mode-visual-linewise-local-map)
+   (buffer-set-state-name "<V *L*>")
+   (enable-insert #f)
+   (text-set-selection (text-line-begin-pos))
+   (cursor-to-line-end)
+   (text-highlight-selection #t))
 
-(define get-file-location
-   (lambda (s)
-      (if (file-regular? s)
-         (values s 0)
-         ;; else
-         (begin
-            (let ([grep-line (string-split s #\:)])
-               (if (> (length grep-line) 1)
-                  (values (list-ref grep-line 0) (string->number (list-ref grep-line 1)))
-                  ;; else
-                  (values (list-ref grep-line 0) 0)
-               )
-            )
-         )
-      )
-   )
-)
-
-(define file-open
-   (lambda (p)
-      (let ([p (path-expand p)])
-         (if (file-regular? p)
-            (buffer-open-file p)
-            ;; else
-            (if (file-directory? p)
-               (dirb p)
+(define (get-file-location s)
+   (if (file-regular? s)
+      (values s 0)
+      ;; else
+      (begin
+         (let ([grep-line (string-split s #\:)])
+            (if (> (length grep-line) 1)
+               (values (list-ref grep-line 0) (string->number (list-ref grep-line 1)))
                ;; else
-               (message (format "path does not exist: ~a" p))
-            )
-         )
-      )
-   )
-)
+               (values (list-ref grep-line 0) 0))))))
 
-(define file-open-at-cursor
-   (lambda ()
-      (let-values ([(f l) (get-file-location (text-object))])
-         (let ([p (if (equal? #\/ (string-ref f 0)) f (string-append (buffer-cwd) "/" f))])
-            (file-open p)
-            (cursor-to-line l)
-         )
-      )
-   )
-)
-
-(define text-mode-save
-   (lambda ()
-      (if (buffer-save)
-         (message (format "~a is saved" (buffer-filename)))
+(define (file-open p)
+   (let ([p (path-expand p)])
+      (if (file-regular? p)
+         (buffer-open-file p)
          ;; else
-         (message (format "Can't save ~a" (buffer-filename)))
-      )
-   )
-)
-
-(define text-mode-save-file
-   (lambda ()
-      (let ([f (buffer-filename)])
-         (if (not (equal? f ""))
-            (text-mode-save)
+         (if (file-directory? p)
+            (dirb p)
             ;; else
-            (begin
-               (minibuf-read "Save as:" (buffer-name)
-                  (lambda (f)
-                     (define-local tmp-file-name f)
-                     (if (file-exists? f)
-                        (minibuf-ask (format "~a already exists, overwrite ?" f)
-                           (lambda (a)
-                              (if (equal? a 'yes)
-                                 (begin
-                                    (buffer-set-filename (get-local tmp-file-name))
-                                    (text-mode-save)
-                                 )
-                              )
-                           )
-                        )
-                        ;; else
-                        (begin
-                           (buffer-set-filename f)
-                           (text-mode-save)
-                        )
-                     )
-                  )
-               )
-            )
-         )
-      )
-   )
-)
+            (message (format "path does not exist: ~a" p))))))
 
-(define text-mode-command
-   (lambda ()
-      (minibuf-read ":"
-        (lambda (val)
-            (let ([line (string->number val)])
-               (if line
-                  (cursor-to-line line)
-                  ;; else
-                  (message "Unknown command")
-               )
-            )
-         )
-      )
-   )
-)
+(define (file-open-at-cursor)
+   (let-values ([(f l) (get-file-location (text-object))])
+      (let ([p (if (equal? #\/ (string-ref f 0)) f (string-append (buffer-cwd) "/" f))])
+         (file-open p)
+         (cursor-to-line l))))
 
-(define text-mode-delete
-   (lambda (fn)
-      (set! delbuf-is-linewise #f)
-      (delbuf-put (text-track-deletion (fn)))
-      (buffer-snapshot)
-   )
-)
-(define text-mode-delete-linewise
-   (lambda (fn)
-      (set! delbuf-is-linewise #t)
-      (delbuf-put (text-track-deletion (fn)))
-      (buffer-snapshot)
-   )
-)
+(define (text-mode-save)
+   (if (buffer-save)
+      (message (format "~a is saved" (buffer-filename)))
+      ;; else
+      (message (format "Can't save ~a" (buffer-filename)))))
 
-(define text-mode-join-lines
-   (lambda ()
-      (cursor-to-line-end)
-      (text-delete-to-next-char)
-      (text-insert " ")
-      (cursor-to-prev-char)
-      (text-delete-word)
-      (when (not (eq? (cursor) (text-end-pos)))
-         (text-insert " ")
-      )
-   )
-)
+(define (text-mode-save-file)
+   (let ([f (buffer-filename)])
+      (if (not (equal? f ""))
+         (text-mode-save)
+         ;; else
+         (begin
+            (minibuf-read "Save as:" (buffer-name)
+               (lambda (f)
+                  (define-local tmp-file-name f)
+                  (if (file-exists? f)
+                     (minibuf-ask (format "~a already exists, overwrite ?" f)
+                        (lambda (a)
+                           (if (equal? a 'yes)
+                              (begin
+                                 (buffer-set-filename (get-local tmp-file-name))
+                                 (text-mode-save)))))
+                     ;; else
+                     (begin
+                        (buffer-set-filename f)
+                        (text-mode-save)))))))))
 
-(define text-mode-search
-   (lambda (fn)
-      (let ([pos (fn)])
-         (cursor-set pos)
-      )
-   )
-)
+(define (text-mode-command)
+   (minibuf-read ":"
+     (lambda (val)
+         (let ([line (string->number val)])
+            (if line
+               (cursor-to-line line)
+               ;; else
+               (message "Unknown command"))))))
+
+(define (text-mode-delete fn)
+   (set! delbuf-is-linewise #f)
+   (delbuf-put (text-track-deletion (fn)))
+   (buffer-snapshot))
+
+(define (text-mode-delete-linewise fn)
+   (set! delbuf-is-linewise #t)
+   (delbuf-put (text-track-deletion (fn)))
+   (buffer-snapshot))
+
+(define (text-mode-join-lines)
+   (cursor-to-line-end)
+   (text-delete-to-next-char)
+   (text-insert " ")
+   (cursor-to-prev-char)
+   (text-delete-word)
+   (when (not (eq? (cursor) (text-end-pos)))
+      (text-insert " ")))
+
+(define (text-mode-search fn)
+   (let ([pos (fn)])
+      (cursor-set pos)))
 
 (define text-mode-normal-map
    (let ([map (make-keymap)])
@@ -294,9 +208,7 @@
       (bind-key map "N" (lambda () (text-mode-search text-search-prev)))
       (bind-key map "C-s" (lambda () (text-mode-save-file)))
       (bind-key map ":" (lambda () (text-mode-command)))
-      map
-   )
-)
+      map))
 
 (define text-mode-insert-map
    (let ([map (make-keymap)])
@@ -304,23 +216,14 @@
       (bind-key map "<Backspace>" (lambda () (text-delete-to-prev-char)))
       (bind-key map "<Esc>" text-mode-normal)
       (bind-key map "M-<Space>" text-mode-normal)
-      map
-   )
-)
+      map))
 
-(define text-mode-visual-file-open
-   (lambda ()
-      (let* (
-             [f (text-selection)]
-             [p (if (equal? #\/ (string-ref f 0)) f (string-append (buffer-cwd) "/" f))]
-            )
-         (text-clear-selection)
-         (when (file-exists? p)
-            (file-open p)
-         )
-      )
-   )
-)
+(define (text-mode-visual-file-open)
+   (let* ([f (text-selection)]
+          [p (if (equal? #\/ (string-ref f 0)) f (string-append (buffer-cwd) "/" f))])
+      (text-clear-selection)
+      (when (file-exists? p)
+         (file-open p))))
 
 (define text-mode-visual-map
    (let ([map (make-keymap 'text-mode-normal-map)])
@@ -332,39 +235,25 @@
       (bind-key map "a" (lambda () (text-append-selection) (text-clear-selection)))
       (bind-key map "A" (lambda () (text-append-selection-linewise) (text-clear-selection)))
       (bind-key map "g f" text-mode-visual-file-open)
-      map
-   )
-)
+      map))
 
-(define text-mode-visual-line-fixup
-   (lambda ()
-      (if (>= (cursor) (text-get-selection))
-         (begin
-            (text-set-selection (text-line-begin-pos (text-get-selection)))
-            (cursor-to-line-end)
-         )
-         ;; else
-         (begin
-            (text-set-selection (text-line-end-pos (text-get-selection)))
-            (cursor-to-line-begin)
-         )
-      )
-   )
-)
+(define (text-mode-visual-line-fixup)
+   (if (>= (cursor) (text-get-selection))
+      (begin
+         (text-set-selection (text-line-begin-pos (text-get-selection)))
+         (cursor-to-line-end))
+      ;; else
+      (begin
+         (text-set-selection (text-line-end-pos (text-get-selection)))
+         (cursor-to-line-begin))))
 
-(define text-mode-visual-line-move-up
-   (lambda ()
-      (cursor-to-line-up)
-      (text-mode-visual-line-fixup)
-   )
-)
+(define (text-mode-visual-line-move-up)
+   (cursor-to-line-up)
+   (text-mode-visual-line-fixup))
 
-(define text-mode-visual-line-move-down
-   (lambda ()
-      (cursor-to-line-down)
-      (text-mode-visual-line-fixup)
-   )
-)
+(define (text-mode-visual-line-move-down)
+   (cursor-to-line-down)
+   (text-mode-visual-line-fixup))
 
 (define text-mode-visual-linewise-map
    (let ([map (make-keymap)])
@@ -379,78 +268,49 @@
       (bind-key map "a" (lambda () (text-append-selection) (text-clear-selection)))
       (bind-key map "A" (lambda () (text-append-selection-linewise) (text-clear-selection)))
       (bind-key map "G" (lambda () (cursor-to-end)))
-      map
-   )
-)
+      map))
 
-(define text-mode-linenum-width
-   (lambda (w)
-      (if (not (buffer-is-vterm? (window-buffer w)))
-         (begin
-            (let ([b (window-buffer w)])
-               (with-current-buffer b
-                  (count-digits-num (buffer-line-num (text-end-pos)))
-               )
-            )
-         )
-       )
-   )
-)
+(define (text-mode-linenum-width w)
+   (if (not (buffer-is-vterm? (window-buffer w)))
+      (begin
+         (let ([b (window-buffer w)])
+            (with-current-buffer b
+               (count-digits-num (buffer-line-num (text-end-pos))))))))
 
 (define text-mode-linenum-draw
    (lambda (w)
       (when (and (local-bound? linenum-enable) (get-local linenum-enable))
          (let ([width (text-mode-linenum-width w)])
             (when (not (eq? width (window-sidebar-width w)))
-               (window-set-sidebar-width w width)
-            )
+               (window-set-sidebar-width w width))
             (let ([lines (window-lines-coord w)])
                (for-each
                   (lambda (c)
                      (let ([line (list-ref c 2)])
                         (window-draw-sidebar w 0 (list-ref c 1)
-                                                 (format (string-append "~" (number->string width) "@a ") line))
-                     )
-                  ) lines
-               )
-            )
-         )
-      )
-   )
-)
+                                                 (format (string-append "~" (number->string width) "@a ") line))))
+                  lines))))))
 
-(define text-mode-insert-char
-   (lambda (char)
-      (text-insert-char char)
-   )
-)
+(define (text-mode-insert-char char)
+   (text-insert-char char))
 
 (define-mode text-mode "Text" #f
    (when (not (local-bound? text-mode-map))
       (let ([map (make-keymap)])
          (define-local text-mode-map map)
-         (buffer-set-keymap map)
-      )
-   )
-
+         (buffer-set-keymap map)))
    (or (local-bound? text-mode-visual-local-map)
        (define-local text-mode-visual-local-map (make-keymap 'text-mode-visual-map)))
-
    (or (local-bound? text-mode-visual-linewise-local-map)
        (define-local text-mode-visual-linewise-local-map (make-keymap 'text-mode-visual-linewise-map)))
-
    (or (local-bound? text-mode-normal-local-map)
        (define-local text-mode-normal-local-map (make-keymap 'text-mode-normal-map)))
-
    (or (local-bound? text-mode-insert-local-map)
        (define-local text-mode-insert-local-map (make-keymap 'text-mode-insert-map)))
-
    (or (local-bound? buffer-reload-func)
        (define-local buffer-reload-func text-reload-file))
-
    (define-local window-draw-hook text-mode-linenum-draw)
    (define-local text-insert-hook text-mode-insert-char)
    (define-local text-clear-selection-hook text-mode-normal)
    (define-local linenum-enable #t)
-   (text-mode-normal)
-)
+   (text-mode-normal))
