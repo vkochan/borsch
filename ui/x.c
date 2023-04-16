@@ -1424,14 +1424,6 @@ static void x_window_draw(UiWin *win)
 	}
 }
 
-static void x_window_refresh(UiWin *win)
-{
-	XUi *xui = (XUi *)win->ui;
-	XWin *xwin = (XWin*)win;
-
-	x_window_draw(win);
-}
-
 void x_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int n,
 			     short fg, short bg, ui_text_style_t style)
 {
