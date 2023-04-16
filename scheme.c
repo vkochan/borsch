@@ -126,13 +126,6 @@ void scheme_win_draw(int wid, bool enforce)
 	}
 }
 
-bool scheme_win_is_visible(int wid)
-{
-	Window *w = window_get_by_id(wid);
-
-	return window_is_visible(w);
-}
-
 ptr scheme_win_first_get(int fid)
 {
 	Frame *f = frame_by_id(fid);
@@ -1834,7 +1827,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_layout_is_changed", scheme_win_layout_is_changed);
 	Sregister_symbol("cs_win_update_layout", scheme_win_update_layout);
 	Sregister_symbol("cs_win_draw", scheme_win_draw);
-	Sregister_symbol("cs_win_is_visible", scheme_win_is_visible);
 	Sregister_symbol("cs_win_first_get", scheme_win_first_get);
 	Sregister_symbol("cs_win_prev_get", scheme_win_prev_get);
 	Sregister_symbol("cs_win_next_get", scheme_win_next_get);

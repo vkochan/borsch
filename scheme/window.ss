@@ -1,4 +1,3 @@
-(define __cs_win_is_visible (foreign-procedure "cs_win_is_visible" (int) boolean))
 (define __cs_win_first_get (foreign-procedure "cs_win_first_get" (int) scheme-object))
 (define __cs_win_prev_get (foreign-procedure "cs_win_prev_get" (int) scheme-object))
 (define __cs_win_next_get (foreign-procedure "cs_win_next_get" (int) scheme-object))
@@ -139,10 +138,18 @@
        (window-draw w #f)]
 
       [(w enforce?)
-       (when (and w (or enforce? (window-is-dirty? w)))
+       (when (and w (or enforce? (window-is-dirty? w)) (window-is-visible? w))
           (call-foreign (__cs_win_draw w enforce?))
           (when (window-has-title? w)
              (window-draw-title w)))]))
+
+(define window-is-widget?
+   (case-lambda
+      [()
+       (window-is-widget? (current-window))]
+
+      [(w)
+       (member w (widget-list))]))
 
 (define (window-draw-all)
    (let ([redraw? (window-layout-is-changed)])
@@ -154,12 +161,11 @@
             (when (not (equal? w (current-window)))
                (window-draw w redraw?)))
          (widget-list))
-      (when (not (layout-is-maximized?))
-         (for-each
-            (lambda (w)
-               (when (not (equal? w (current-window)))
-                  (window-draw w redraw?)))
-            (window-list)))
+      (for-each
+         (lambda (w)
+            (when (not (equal? w (current-window)))
+               (window-draw w redraw?)))
+         (window-list))
       (window-draw (current-window) redraw?)))
 
 (define window-is-visible?
@@ -167,8 +173,13 @@
       [()
        (window-is-visible? (current-window))]
 
-      [(wid)
-       (call-foreign (__cs_win_is_visible wid))]))
+      [(w)
+       (or
+          (window-is-widget? w)
+          (if (layout-is-maximized?)
+             (equal? w (current-window))
+             ;; else
+             #t))]))
 
 (define (window-last-master)
    (let ([nm (layout-n-master)]
