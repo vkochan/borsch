@@ -149,23 +149,21 @@ static void keypress(int code)
 	Window *c = window_current();
 	char buf[8] = { '\e' };
 
-	if (window_is_visible(c)) {
-		c->urgent = false;
+	c->urgent = false;
 
-		if (buffer_proc_get(c->buf)) {
-			Vt *term = process_term_get(buffer_proc_get(c->buf));
+	if (buffer_proc_get(c->buf)) {
+		Vt *term = process_term_get(buffer_proc_get(c->buf));
 
-			if (code == '\e')
-				vt_write(term, buf, 1);
-			else
-				vt_keypress(term, code);
-		} else if (buffer_text_input_is_enabled(c->buf)) {
-			event_t evt = {};
+		if (code == '\e')
+			vt_write(term, buf, 1);
+		else
+			vt_keypress(term, code);
+	} else if (buffer_text_input_is_enabled(c->buf)) {
+		event_t evt = {};
 
-			evt.eid = EVT_TEXT_INSERT;
-			evt.oid = code;
-			scheme_event_handle(evt);
-		}
+		evt.eid = EVT_TEXT_INSERT;
+		evt.oid = code;
+		scheme_event_handle(evt);
 	}
 }
 

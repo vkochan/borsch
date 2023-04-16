@@ -128,7 +128,6 @@ bool window_is_master_sticky(Window *c);
 bool window_is_widget(Window *w);
 void window_move_resize(Window *c, int x, int y, int w, int h);
 char *window_title_get(Window *c);
-bool window_is_visible(Window *c);
 int window_viewport_pos(Window *w, char type);
 int window_viewport_pos_to_coord(Window *w, int pos, int *l, int *x, int *y);
 int window_viewport_size(Window *w, int *width, int *height);

@@ -724,18 +724,6 @@ static void term_title_set(Window *c)
 	}
 }
 
-bool window_is_visible(Window *w)
-{
-	if (!w)
-		return false;
-
-	if (window_is_widget(w))
-		return true;
-	else if (layout_is_arrange(LAYOUT_MAXIMIZED))
-		return window_current() == w;
-	return w->frame == frame_current();
-}
-
 int window_viewport_pos(Window *w, char type)
 {
 	Filerange v;
@@ -889,7 +877,7 @@ void window_draw_flags(Window *c, int flags)
 	if (!c)
 		return;
 
-	if (c == window_current() && window_is_visible(c)) {
+	if (c == window_current()) {
 		if (buffer_proc_get(window_current()->buf)) {
 			Process *proc = buffer_proc_get(window_current()->buf);
 			ui_window_cursor_disable(window_current()->win,
@@ -897,7 +885,7 @@ void window_draw_flags(Window *c, int flags)
 		}
 	}
 
-	if ((force || buffer_is_dirty(c->buf) && window_is_visible(c))) {
+	if ((force || buffer_is_dirty(c->buf))) {
 		/* we assume that it will be set on EVT_WIN_DRAW */
 		/* ui_window_sidebar_width_set(c->win, 0); */
 		ui_window_clear(c->win);
