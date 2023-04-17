@@ -91,7 +91,7 @@
 (define (style->list s)
    (let ([f -1]
          [b -1]
-         [a 0])
+         [a #f])
         (let loop ([l s])
            (let ([t (car l)])
               (cond
@@ -106,7 +106,10 @@
                  [(equal? t 'attr:)
                   (set! a (style-name->number (cadr l)))
                   (when (> (length l) 2) (loop (cdr (cdr l))))])))
-      (list f b a)))
+      (list
+         f
+         b
+         (or a (bit 0)))))
 
 (define (colors-show)
    (let ([cls '("default" "black" "red" "green" "yellow" "blue" "magenta" "cyan" "white"
