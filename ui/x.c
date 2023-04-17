@@ -1344,60 +1344,6 @@ static void x_event_process(Ui *ui)
 	XFlush(xui->dpy);
 }
 
-static void x_event_process2(Ui *ui)
-{
-	struct timespec seltv, *tv, now;
-	double timeout = -1;
-	int drawing = 0;
-	XUi *xui = (XUi *)ui;
-
-	ui_update(ui);
-
-	while (true) {
-		int xev = 0;
-		int nfd;
-
-		if (XPending(xui->dpy))
-			timeout = 0;  /* existing events might not set xfd */
-
-		seltv.tv_sec = timeout / 1E3;
-		seltv.tv_nsec = 1E6 * (timeout - 1E3 * seltv.tv_sec);
-		tv = timeout >= 0 ? &seltv : NULL;
-
-		nfd = event_process(NULL);
-
-		clock_gettime(CLOCK_MONOTONIC, &now);
-
-		xev = x_handle_events(0, xui);
-
-		/*
-		 * To reduce flicker and tearing, when new content or event
-		 * triggers drawing, we first wait a bit to ensure we got
-		 * everything, and if nothing new arrives - we draw.
-		 * We start with trying to wait minlatency ms. If more content
-		 * arrives sooner, we retry with shorter and shorter periods,
-		 * and eventually draw even without idle after maxlatency ms.
-		 * Typically this results in low latency while interacting,
-		 * maximum latency intervals during `cat huge.txt`, and perfect
-		 * sync with periodic updates from animations/key-repeats/etc.
-		 */
-		if (nfd > 0 || xev) {
-			if (!drawing) {
-				trigger = now;
-				drawing = 1;
-			}
-			timeout = (maxlatency - TIMEDIFF(now, trigger)) \
-			          / maxlatency * minlatency;
-			if (timeout > 0)
-				continue;  /* we have time, try to find idle */
-		}
-
-		/* idle detected or maxlatency exhausted -> draw */
-		break;
-	}
-	XFlush(xui->dpy);
-}
-
 void x_window_clear(UiWin *win)
 {
 	int sidebar = ui_window_sidebar_width_get(win);
