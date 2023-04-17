@@ -693,6 +693,9 @@ bool x_handle_events(int fd, void *arg)
 	return xev;
 }
 
+static double x_event_update_timeout(double timeout, void *arg);
+static bool x_event_pre_handler(void *arg);
+
 static int x_init(Ui *ui)
 {
 	XGCValues gcvalues;
@@ -832,6 +835,9 @@ static int x_init(Ui *ui)
 	} while (ev.type != MapNotify);
 
 	x_cresize(xui, w, h);
+
+	event_update_timeout_cb_set(x_event_update_timeout);
+	event_pre_handler_cb_set(x_event_pre_handler);
 
 	event_fd_handler_register(XConnectionNumber(xui->dpy), NULL, NULL);
 
@@ -1313,7 +1319,32 @@ static void x_update(Ui *ui)
 
 static struct timespec lastblink, trigger;
 
+static double x_event_update_timeout(double timeout, void *arg)
+{
+	XUi *xui = (XUi *)arg;
+
+	if (XPending(xui->dpy))
+		return 0;  /* existing events might not set xfd */
+	return timeout;
+}
+
+static bool x_event_pre_handler(void *arg)
+{
+	XUi *xui = (XUi *)arg;
+
+	return x_handle_events(0, xui);
+}
+
 static void x_event_process(Ui *ui)
+{
+	XUi *xui = (XUi *)ui;
+
+	ui_update(ui);
+	event_process(xui);
+	XFlush(xui->dpy);
+}
+
+static void x_event_process2(Ui *ui)
 {
 	struct timespec seltv, *tv, now;
 	double timeout = -1;
@@ -1333,7 +1364,7 @@ static void x_event_process(Ui *ui)
 		seltv.tv_nsec = 1E6 * (timeout - 1E3 * seltv.tv_sec);
 		tv = timeout >= 0 ? &seltv : NULL;
 
-		nfd = event_process();
+		nfd = event_process(NULL);
 
 		clock_gettime(CLOCK_MONOTONIC, &now);
 

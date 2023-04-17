@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <signal.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <time.h>
 #include <sys/param.h>
 #include <sys/select.h>
@@ -22,6 +23,9 @@ static event_fd_t event_fd_list;
 static double minlatency = 8;
 static double maxlatency = 33;
 
+static double (*event_update_timeout_cb)(double timeout, void *arg);
+static bool (*event_pre_handler_cb)(void *arg);
+
 static void event_fd_list_insert(event_fd_t *list, event_fd_t *evt)
 {
 	evt->next = list->next;
@@ -39,6 +43,16 @@ static void event_fd_list_delete(event_fd_t *evt)
 
 	if (evt->next)
 		evt->next->prev = evt->prev;
+}
+
+void event_update_timeout_cb_set(double (*cb)(double timeout, void *arg))
+{
+	event_update_timeout_cb = cb;
+}
+
+void event_pre_handler_cb_set(bool (*cb)(void *arg))
+{
+	event_pre_handler_cb = cb;
 }
 
 int event_fd_handler_register(int fd, void (*fn)(int fd, void *arg), void *arg)
@@ -73,17 +87,18 @@ void event_fd_handler_unregister(int fd)
 	}
 }
 
-int event_process(void)
+int event_process(void *arg)
 {
 	struct timespec seltv, *tv, now, lastblink, trigger;
 	sigset_t emptyset;
-	double timeout;
+	double timeout = -1;
 	event_fd_t *evt;
 	int r, nfds = 0;
 	fd_set rd;
 	int idle;
 
-	for (timeout = -1, idle = 0;;) {
+	for (idle = 0;;) {
+		bool ev = false;
 		FD_ZERO(&rd);
 
 		sigemptyset(&emptyset);
@@ -92,6 +107,9 @@ int event_process(void)
 			FD_SET(evt->fd, &rd);
 			nfds = MAX(nfds, evt->fd);
 		}
+
+		if (event_update_timeout_cb)
+			timeout = event_update_timeout_cb(timeout, arg);
 
 		seltv.tv_sec = timeout / 1E3;
 		seltv.tv_nsec = 1E6 * (timeout - 1E3 * seltv.tv_sec);
@@ -103,6 +121,9 @@ int event_process(void)
 				continue;
 		}
 		clock_gettime(CLOCK_MONOTONIC, &now);
+
+		if (event_pre_handler_cb)
+			ev = event_pre_handler_cb(arg);
 
 		evt = event_fd_list.next;
 		while (evt) {
@@ -125,7 +146,7 @@ int event_process(void)
 		 * maximum latency intervals during `cat huge.txt`, and perfect
 		 * sync with periodic updates from animations/key-repeats/etc.
 		 */
-		if (r) {
+		if (r || ev) {
 			if (!idle) {
 				trigger = now;
 				idle = 1;
