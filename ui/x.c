@@ -84,21 +84,6 @@ static const Rune utfmin[UTF_SIZ + 1] = {       0,    0,  0x80,  0x800,  0x10000
 static const Rune utfmax[UTF_SIZ + 1] = {0x10FFFF, 0x7F, 0x7FF, 0xFFFF, 0x10FFFF};
 
 /*
- * draw latency range in ms - from new content/keypress/etc until drawing.
- * within this range, st draws when content stops arriving (idle). mostly it's
- * near minlatency, but it waits longer for slow updates to avoid partial draw.
- * low minlatency will tear/flicker more, as it can "detect" idle too early.
- */
-static double minlatency = 8;
-static double maxlatency = 33;
-
-/*
- * blinking timeout (set to 0 to disable blinking) for the terminal blinking
- * attribute.
- */
-static unsigned int blinktimeout = 800;
-
-/*
  * Default columns and rows numbers
  */
 static unsigned int cols = 120;
@@ -1316,8 +1301,6 @@ static void x_update(Ui *ui)
 	XUi *xui = (XUi *)ui;
 	x_finishdraw(xui);
 }
-
-static struct timespec lastblink, trigger;
 
 static double x_event_update_timeout(double timeout, void *arg)
 {
