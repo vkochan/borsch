@@ -85,6 +85,18 @@ typedef struct {
 	CellColor fg, bg;
 } CellStyle;
 
+typedef struct {
+	char data[16];      /* utf8 encoded character displayed in this cell (might be more than
+	                       one Unicode codepoint. might also not be the same as in the
+	                       underlying text, for example tabs get expanded */
+	size_t len;         /* number of bytes the character displayed in this cell uses, for
+	                       characters which use more than 1 column to display, their length
+	                       is stored in the leftmost cell whereas all following cells
+	                       occupied by the same character have a length of 0. */
+	int width;          /* display width i.e. number of columns occupied by this character */
+	CellStyle style;    /* colors and attributes used to display this cell */
+} Cell;
+
 #include "text/text.h"
 #include "view.h"
 
@@ -95,12 +107,12 @@ struct Ui {
 	int (*width_get)(Ui*);
 	UiWin* (*window_new)(Ui*, View *view);
 	void (*window_free)(UiWin*);
-	void (*window_draw)(UiWin *);
 	void (*window_clear)(UiWin*);
 	void (*window_draw_text_attr)(UiWin *win, int x, int y, const char *text, int n,
 				      short fg, short bg, ui_text_style_t style);
 	void (*draw)(Ui*);
 	void (*draw_wchar)(Ui *ui, int x, int y, wchar_t ch, short fg, short bg, ui_text_style_t style);
+	void (*draw_cell)(Ui *ui, int x, int y, Cell *c);
 	bool (*resize)(Ui*);
 	void (*clear)(Ui*);
 	void (*update)(Ui*);

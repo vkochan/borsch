@@ -1197,6 +1197,13 @@ static void x_draw_wchar(Ui *ui, int x, int y, wchar_t ch, short fg, short bg, u
 	x_drawglyph(xui, c, x, y);
 }
 
+static void x_draw_cell(Ui *ui, int x, int y, Cell *c)
+{
+	XUi *xui = (XUi *)ui;
+
+	x_drawglyph(xui, *c, x, y);
+}
+
 #if 0
 void x_drawcursor(XWin *xwin)
 {
@@ -1343,47 +1350,6 @@ void x_window_clear(UiWin *win)
 	}
 }
 
-static void x_window_draw(UiWin *win)
-{
-	const Line *line = view_lines_first(win->view);
-	int view_width = view_width_get(win->view);
-	XUi *xui = (XUi *)win->ui;
-	XWin *xwin = (XWin*)win;
-	int sidebar = ui_window_sidebar_width_get(win);
-	int x0 = win->has_border + sidebar;
-	int curs_x, curs_y;
-	int y = 0;
-	int sx, sy;
-
-	sx = ui_window_x_get(win);
-	sy = ui_window_y_get(win);
-
-	ui_window_cursor_get(win, &curs_x, &curs_y);
-
-	for (const Line *l = line; l; l = l->next, y++) {
-		for (int cx = 0, x = x0; cx < view_width; cx++,x++) {
-			Cell c = l->cells[cx];
-
-			/* TODO: fix it in generic place, attr is checked against 0 in
-			 * glyph rendering.
-			 */
-			if (!c.style.attr)
-				c.style.attr = 1;
-			if (!c.len) {
-				c.data[0] = ' ';
-				c.len = 1;
-			}
-			if (cx == curs_x && y == curs_y &&
-				ui_window_is_focused(win) && !ui_window_is_cursor_disabled(win)) {
-				c.style.fg = defaultbg;
-				c.style.bg = defaultfg;
-			}
-
-			x_drawglyph(xui, c, sx+x, sy+y);
-		}
-	}
-}
-
 void x_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int n,
 			     short fg, short bg, ui_text_style_t style)
 {
@@ -1425,10 +1391,10 @@ Ui *ui_x_new(void)
 	xui->ui.update = x_update;
 	xui->ui.event_process = x_event_process;
 	xui->ui.draw_wchar = x_draw_wchar;
+	xui->ui.draw_cell = x_draw_cell;
 	xui->ui.window_new = x_window_new;
 	xui->ui.window_free = x_window_free;
 	xui->ui.window_clear = x_window_clear;
-	xui->ui.window_draw = x_window_draw;
 	xui->ui.window_draw_text_attr = x_window_draw_text_attr;
 
 	return (Ui *)xui;

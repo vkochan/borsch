@@ -153,6 +153,43 @@ bool ui_window_is_cursor_disabled(UiWin *win)
 	return win->curs_disable;
 }
 
+
+static void draw_window(UiWin *win)
+{
+	const Line *line = view_lines_first(win->view);
+	int view_width = view_width_get(win->view);
+	int sidebar = ui_window_sidebar_width_get(win);
+	int x0 = win->has_border + sidebar;
+	int curs_x, curs_y;
+	int y = 0;
+	int sx, sy;
+
+	sx = ui_window_x_get(win);
+	sy = ui_window_y_get(win);
+
+	ui_window_cursor_get(win, &curs_x, &curs_y);
+
+	for (const Line *l = line; l; l = l->next, y++) {
+		for (int cx = 0, x = x0; cx < view_width; cx++,x++) {
+			Cell c = l->cells[cx];
+
+			if (!c.style.attr)
+				c.style.attr = 1;
+			if (!c.len) {
+				c.data[0] = ' ';
+				c.len = 1;
+			}
+			if (cx == curs_x && y == curs_y &&
+				ui_window_is_focused(win) && !ui_window_is_cursor_disabled(win)) {
+				c.style.fg = UI_TEXT_COLOR_BLACK;
+				c.style.bg = UI_TEXT_COLOR_WHITE;
+			}
+
+			win->ui->draw_cell(win->ui, sx+x, sy+y, &c);
+		}
+	}
+}
+
 void __ui_window_draw(UiWin *win, bool force)
 {
 	if (force)
@@ -161,10 +198,10 @@ void __ui_window_draw(UiWin *win, bool force)
 	if (view_update(win->view) || win->draw) {
 		if (win->draw)
 			win->draw(win);
-		else if (win->ui->window_draw)
+		else
 			view_draw(win->view);
 
-		win->ui->window_draw(win);
+		draw_window(win);
 	}
 }
 
