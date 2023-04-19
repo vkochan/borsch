@@ -437,11 +437,6 @@ ptr scheme_win_sidebar_get(int wid)
 	return Sinteger(window_sidebar_width(window_get_by_id(wid)));
 }
 
-void scheme_win_sidebar_draw(int wid, int x, int y, const char *text, short fg, short bg, int attr)
-{
-	window_sidebar_draw(window_get_by_id(wid), x, y, text, fg, bg, attr);
-}
-
 void scheme_win_update(int wid)
 {
 	win_update(wid);
@@ -1855,7 +1850,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_scroll", scheme_win_scroll);
 	Sregister_symbol("cs_win_sidebar_set", scheme_win_sidebar_set);
 	Sregister_symbol("cs_win_sidebar_get", scheme_win_sidebar_get);
-	Sregister_symbol("cs_win_sidebar_draw", scheme_win_sidebar_draw);
 	Sregister_symbol("cs_win_update", scheme_win_update);
 	Sregister_symbol("cs_win_has_title", scheme_win_has_title);
 

@@ -24,7 +24,6 @@
 (define __cs_win_scroll (foreign-procedure "cs_win_scroll" (int char int) scheme-object))
 (define __cs_win_sidebar_set (foreign-procedure "cs_win_sidebar_set" (int int) void))
 (define __cs_win_sidebar_get (foreign-procedure "cs_win_sidebar_get" (int) scheme-object))
-(define __cs_win_sidebar_draw (foreign-procedure "cs_win_sidebar_draw" (int int int string int int int) scheme-object))
 (define __cs_win_update (foreign-procedure "cs_win_update" (int) void))
 (define __cs_widget_create (foreign-procedure "cs_widget_create" (string int int int int int) scheme-object))
 (define __cs_win_coord_get (foreign-procedure "cs_win_coord_get" (int) scheme-object))
@@ -623,18 +622,6 @@
 
       [(w)
        (call-foreign (__cs_win_sidebar_get w))]))
-
-(define window-draw-sidebar
-   (case-lambda
-      [(w x y t)
-       (window-draw-sidebar w x y t '(fg: "white" bg: "bright-blue"))]
-
-      [(w x y t s)
-       (let ([l (style->list  s)])
-         (call-foreign (__cs_win_sidebar_draw w x y t
-                                (list-ref l 0)
-                                (list-ref l 1)
-                                (list-ref l 2))))]))
 
 (define window-update
     (case-lambda 

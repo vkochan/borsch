@@ -203,8 +203,6 @@ void ui_window_border_enable(UiWin *win, bool enable);
 bool ui_window_border_is_enabled(UiWin *win);
 void ui_window_sidebar_width_set(UiWin *win, int width);
 int ui_window_sidebar_width_get(UiWin *win);
-void ui_window_sidebar_draw(UiWin *win, int x, int y, const char *text,
-			    short fg, short bg, ui_text_style_t style);
 void ui_window_has_title_set(UiWin *win, bool has_title);
 bool ui_window_has_title(UiWin *win);
 

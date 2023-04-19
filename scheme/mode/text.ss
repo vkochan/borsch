@@ -287,8 +287,9 @@
                (for-each
                   (lambda (c)
                      (let ([line (list-ref c 2)])
-                        (window-draw-sidebar w 0 (list-ref c 1)
-                                                 (format (string-append "~" (number->string width) "@a ") line))))
+                        (window-draw-text w 0 (list-ref c 1)
+                                          (format (string-append "~" (number->string width) "@a ") line)
+                                          '(fg: "white" bg: "bright-blue"))))
                   lines))))))
 
 (define (text-mode-insert-char char)

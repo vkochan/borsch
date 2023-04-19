@@ -814,13 +814,6 @@ int window_sidebar_width(Window *w)
 	return 0;
 }
 
-void window_sidebar_draw(Window *w, int x, int y, const char *text, short fg, short bg, int attr)
-{
-	if (w) {
-		ui_window_sidebar_draw(w->win, x, y, text, fg, bg, attr);
-	}
-}
-
 void window_update(Window *w)
 {
 	View *view = w->view;

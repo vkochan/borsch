@@ -387,17 +387,6 @@ int ui_window_sidebar_width_get(UiWin *win)
 	return win->sidebar_width;
 }
 
-void ui_window_sidebar_draw(UiWin *win, int x, int y, const char *text,
-			    short fg, short bg, ui_text_style_t style)
-{
-	int skip_x = win->has_border;
-	int skip_y = win->has_border;
-
-	if (win->ui->window_draw_text_attr)
-		win->ui->window_draw_text_attr(win, x+skip_x, y+skip_y, text,
-				strlen(text), fg, bg, style);
-}
-
 void ui_window_has_title_set(UiWin *win, bool has_title)
 {
 	win->has_title = has_title;
