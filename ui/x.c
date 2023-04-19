@@ -793,7 +793,7 @@ static int x_init(Ui *ui)
 			PropModeReplace, (uchar *)&thispid, 1);
 
 	xui->mode = MODE_NUMLOCK;
-	//x_settitle(xui, NULL);
+	x_settitle(xui, NULL);
 	x_hints(xui);
 	XMapWindow(xui->dpy, xui->win);
 	XSync(xui->dpy, False);
