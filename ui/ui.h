@@ -107,7 +107,6 @@ struct Ui {
 	int (*width_get)(Ui*);
 	UiWin* (*window_new)(Ui*, View *view);
 	void (*window_free)(UiWin*);
-	void (*window_clear)(UiWin*);
 	void (*window_draw_text_attr)(UiWin *win, int x, int y, const char *text, int n,
 				      short fg, short bg, ui_text_style_t style);
 	void (*draw)(Ui*);
