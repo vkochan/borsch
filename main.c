@@ -535,11 +535,6 @@ static void handle_keypress(KeyCode *key)
 		curr_kmap = global_kmap;
 	};
 
-	if (code < 0) {
-		curr_kmap = NULL;
-		return;
-	}
-
 	evt.eid = EVT_KEY_PRESS;
 	evt.oid = code;
 	scheme_event_handle(evt);

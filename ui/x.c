@@ -647,31 +647,31 @@ bool x_handle_events(int fd, void *arg)
 			}
 		} else if (ev.type == KeyPress) {
 			int len = XLookupString(&ev.xkey, text, sizeof(text), &key_sym, 0);
-			if (len) {
+
+			for (int i = 0; i < len; i++) {
 				KeyCode key_code = {};
+				Rune code = text[i];
 				int flags = 0;
-				Rune code;
 
-				utf8decode(text, &code, len);
-				if (len == 1 && ev.xkey.state & Mod1Mask) {
-					flags |= KEY_MOD_F_ALT;
-				} else if (code < 0x1f && code != 0xd && code != 0x9) {
-					flags |= KEY_MOD_F_CTL;
-					code = code + 0x60;
+				if (len == 1) {
+					if (ev.xkey.state & Mod1Mask) {
+						flags |= KEY_MOD_F_ALT;
+					} else if (code < 0x1f && code != 0xd && code != 0x9) {
+						flags |= KEY_MOD_F_CTL;
+						code = code + 0x60;
+					}
+
+					switch (key_sym) {
+					case XK_BackSpace: flags = 0; code = 0x107; break;
+					case XK_Escape: flags = 0; code = 27; break;
+					}
 				}
 
-				switch (key_sym) {
-				case XK_BackSpace: flags = 0; code = 0x107; break;
-				case XK_Escape: flags = 0; code = 27; break;
-				}
+				key_code.flags = flags;
+				key_code.code = code;
 
-				if (code > 0) {
-					key_code.flags = flags;
-					key_code.code = code;
-
-					if (xui->ui.event_handler_cb)
-						xui->ui.event_handler_cb(&xui->ui, UiEventType_KeyPress, &key_code);
-				}
+				if (xui->ui.event_handler_cb)
+					xui->ui.event_handler_cb(&xui->ui, UiEventType_KeyPress, &key_code);
 			}
 		}
 	}

@@ -69,7 +69,7 @@
       map))
 
 (define (minibuf-insert-char char)
-   (text-insert (string char)))
+   (text-insert-char char))
 
 (define (minibuf-create)
    (let ([m (widget-create "*minibuf*" 0 (- (ui-screen-height) 1) (ui-screen-width) 1 'bottom)])

@@ -721,7 +721,7 @@ ptr scheme_buf_text_insert(int bid, const char *text)
 	return Sfalse;
 }
 
-ptr scheme_buf_text_insert_char(int bid, char ch)
+ptr scheme_buf_text_insert_char(int bid, int ch)
 {
 	size_t pos = buf_text_insert_char(bid, ch);
 
