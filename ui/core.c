@@ -246,16 +246,6 @@ void ui_window_draw_wchar(UiWin *win, int x, int y, wchar_t ch, int n,
 	ui_draw_wchar(win->ui, win->x + x + skip_x, win->y + y + skip_y, ch, n, fg, bg, style);
 }
 
-void ui_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int n,
-			      short fg, short bg, ui_text_style_t style)
-{
-	int skip_x = win->has_border;
-	int skip_y = win->has_border;
-
-	if (win->ui->window_draw_text_attr)
-		win->ui->window_draw_text_attr(win, x+skip_x, y+skip_y, text, n, fg, bg, style);
-}
-
 void ui_window_title_set(UiWin *win, const char *title)
 {
 	strncpy(win->title, title, sizeof(win->title));

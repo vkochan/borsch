@@ -136,48 +136,6 @@ static unsigned int term_color_hash(short fg, short bg)
 	return fg * (COLORS + 2) + bg;
 }
 
-static short term_window_color_get(UiWin *win, short fg, short bg)
-{
-	WinTerm *t = (WinTerm*)win;
-	short curr_fg = term_color2curses(ui_window_text_fg_get(win));
-	short curr_bg = term_color2curses(ui_window_text_bg_get(win));
-
-	if (fg >= COLORS)
-		fg = (t ? curr_fg : default_fg);
-	if (bg >= COLORS)
-		bg = (t ? curr_bg : default_bg);
-
-	if (!has_default_colors) {
-		if (fg == -1)
-			fg = (t && curr_fg != -1 ? curr_fg : default_fg);
-		if (bg == -1)
-			bg = (t && curr_bg != -1 ? curr_bg : default_bg);
-	}
-
-	if (!color2palette || (fg == -1 && bg == -1))
-		return 0;
-	unsigned int index = term_color_hash(fg, bg);
-	if (color2palette[index] == 0) {
-		short oldfg, oldbg;
-		for (;;) {
-			if (++color_pair_current >= color_pairs_max)
-				color_pair_current = color_pairs_reserved + 1;
-			pair_content(color_pair_current, &oldfg, &oldbg);
-			unsigned int old_index = term_color_hash(oldfg, oldbg);
-			if (color2palette[old_index] >= 0) {
-				if (init_pair(color_pair_current, fg, bg) == OK) {
-					color2palette[old_index] = 0;
-					color2palette[index] = color_pair_current;
-				}
-				break;
-			}
-		}
-	}
-
-	short color_pair = color2palette[index];
-	return color_pair >= 0 ? color_pair : -color_pair;
-}
-
 short term_color_make(Ui *ui, short fg, short bg)
 {
 	if (!color2palette || fg >= COLORS || bg >= COLORS)
@@ -340,17 +298,6 @@ static void term_draw_cell(Ui *ui, int x, int y, Cell *c)
 	color_set(term_color_make(ui, default_fg, default_bg), NULL);
 }
 
-static WINDOW *term_window(UiWin *win)
-{
-	return stdscr;
-}
-
-static void term_window_abs_xy(UiWin *win, int *x, int *y)
-{
-	*x = win->x;
-	*y = win->y;
-}
-
 static UiWin *term_window_new(Ui *ui, View *view)
 {
 	WinTerm *twin;
@@ -368,32 +315,6 @@ static void term_window_free(UiWin *win)
 	WinTerm *twin = (WinTerm*)win;
 
 	free(twin);
-}
-
-void term_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int n,
-				short fg, short bg, ui_text_style_t style)
-{
-	WinTerm *twin = (WinTerm*)win;
-	unsigned tmp_attr = ui_window_text_style_get(win);
-	short tmp_fg = ui_window_text_fg_get(win);
-	short tmp_bg = ui_window_text_bg_get(win);
-	WINDOW *cwin = term_window(win);
-	int x_abs, y_abs;
-
-	term_window_abs_xy(win, &x_abs, &y_abs);
-
-	wattrset(cwin, term_style2attr(style));
-	wcolor_set(cwin,
-		   term_color_make(win->ui, term_color2curses(fg),
-				   term_color2curses(bg)),
-		   NULL);
-
-	mvwaddnstr(cwin, y_abs + y, x_abs + x, text, n);
-
-	wattrset(cwin, term_style2curses(tmp_attr));
-	wcolor_set(cwin,
-		   term_color_make(win->ui, tmp_fg, tmp_bg),
-		   NULL);
 }
 
 Ui *ui_term_new(void)
@@ -416,7 +337,6 @@ Ui *ui_term_new(void)
 	tui->ui.draw_cell = term_draw_cell;
 	tui->ui.window_new = term_window_new;
 	tui->ui.window_free = term_window_free;
-	tui->ui.window_draw_text_attr = term_window_draw_text_attr;
 
 	return (Ui *)tui;
 }

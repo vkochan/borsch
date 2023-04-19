@@ -1334,32 +1334,6 @@ static void x_event_process(Ui *ui)
 	XFlush(xui->dpy);
 }
 
-void x_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int n,
-			     short fg, short bg, ui_text_style_t style)
-{
-	int w = ui_window_width_get(win);
-	int x0 = ui_window_x_get(win);
-	int y0 = ui_window_y_get(win);
-	XUi *xui = (XUi*)win->ui;
-	XWin *xwin = (XWin*)win;
-	int i;
-
-	n = MIN(w - x, n);
-	for (i = 0; n--; i++) {
-		Cell c = {0};
-		c.style.attr = style;
-		c.style.fg = fg;
-		c.style.bg = bg;
-		c.len = 1;
-
-		if (*text) {
-			c.len = utf8encode(*text, c.data);
-			text++;
-		}
-		x_drawglyph(xui, c, x0+x+i, y0+y);
-	}
-}
-
 Ui *ui_x_new(void)
 {
 	XUi *xui;
@@ -1378,7 +1352,6 @@ Ui *ui_x_new(void)
 	xui->ui.draw_cell = x_draw_cell;
 	xui->ui.window_new = x_window_new;
 	xui->ui.window_free = x_window_free;
-	xui->ui.window_draw_text_attr = x_window_draw_text_attr;
 
 	return (Ui *)xui;
 }
