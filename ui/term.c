@@ -396,25 +396,6 @@ void term_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int 
 		   NULL);
 }
 
-static void term_window_clear(UiWin *win)
-{
-	int sidebar = ui_window_sidebar_width_get(win);
-	WinTerm *twin = (WinTerm*)win;
-	WINDOW *cwin = term_window(win);
-	int x_abs, y_abs;
-
-	term_window_abs_xy(win, &x_abs, &y_abs);
-
-	if (sidebar) {
-		int y = win->has_border;
-		char ch = ' ';
-
-		for (; y < ui_window_height_get(win) - 1; y++) {
-			mvwhline(cwin, y_abs + y, x_abs + 0, ch, sidebar);
-		}
-	}
-}
-
 Ui *ui_term_new(void)
 {
 	UiTerm *tui;
@@ -435,7 +416,6 @@ Ui *ui_term_new(void)
 	tui->ui.draw_cell = term_draw_cell;
 	tui->ui.window_new = term_window_new;
 	tui->ui.window_free = term_window_free;
-	tui->ui.window_clear = term_window_clear;
 	tui->ui.window_draw_text_attr = term_window_draw_text_attr;
 
 	return (Ui *)tui;

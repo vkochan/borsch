@@ -886,10 +886,6 @@ void window_draw_flags(Window *c, int flags)
 	}
 
 	if ((force || buffer_is_dirty(c->buf))) {
-		/* we assume that it will be set on EVT_WIN_DRAW */
-		/* ui_window_sidebar_width_set(c->win, 0); */
-		ui_window_clear(c->win);
-
 		window_update(c);
 
 		if (fire_event) {

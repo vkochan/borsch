@@ -177,7 +177,6 @@ void ui_window_draw_wchar(UiWin *win, int x, int y, wchar_t ch, int n,
 			  short fg, short bg, ui_text_style_t style);
 void ui_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int n,
 			      short fg, short bg, ui_text_style_t style);
-void ui_window_clear(UiWin *win);
 void ui_window_resize(UiWin *win, int width, int height);
 void ui_window_move(UiWin *win, int x, int y);
 void ui_window_title_set(UiWin *win, const char *title);

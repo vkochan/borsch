@@ -210,12 +210,6 @@ void ui_window_draw(UiWin *win)
 	__ui_window_draw(win, false);
 }
 
-void ui_window_clear(UiWin *win)
-{
-	if (win->ui->window_clear)
-		win->ui->window_clear(win);
-}
-
 void ui_window_resize(UiWin *win, int width, int height)
 {
 	if (width != win->width || height != win->height) {
@@ -228,8 +222,6 @@ void ui_window_resize(UiWin *win, int width, int height)
 
 		view_resize(win->view, win->width - win->sidebar_width - (border*2),
 				       win->height - (border + win->has_title));
-
-		ui_window_clear(win);
 	}
 
 	if (win->on_resize)

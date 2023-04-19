@@ -1334,22 +1334,6 @@ static void x_event_process(Ui *ui)
 	XFlush(xui->dpy);
 }
 
-void x_window_clear(UiWin *win)
-{
-	int sidebar = ui_window_sidebar_width_get(win);
-	int h = ui_window_height_get(win);
-	int y = win->has_border;
-	XUi *xui = (XUi*)win->ui;
-	XWin *xwin = (XWin*)win;
-
-	if (sidebar) {
-		for (; y < h - 1; y++) {
-			ui_window_draw_wchar(win, 0, y, L' ', sidebar,
-				defaultfg, defaultbg, UI_TEXT_STYLE_NORMAL);
-		}
-	}
-}
-
 void x_window_draw_text_attr(UiWin *win, int x, int y, const char *text, int n,
 			     short fg, short bg, ui_text_style_t style)
 {
@@ -1394,7 +1378,6 @@ Ui *ui_x_new(void)
 	xui->ui.draw_cell = x_draw_cell;
 	xui->ui.window_new = x_window_new;
 	xui->ui.window_free = x_window_free;
-	xui->ui.window_clear = x_window_clear;
 	xui->ui.window_draw_text_attr = x_window_draw_text_attr;
 
 	return (Ui *)xui;
