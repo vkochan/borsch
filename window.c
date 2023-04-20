@@ -1122,10 +1122,9 @@ Window *__window_create(Buffer *buf, bool is_widget, int x, int y, int width, in
 	return w;
 }
 
-Window *window_create(Buffer *buf)
+Window *window_create(Buffer *buf, int x, int y, int width, int height)
 {
-	return __window_create(buf, false, layout_current_x(), layout_current_y(),
-				    layout_current_width(), layout_current_height());
+	return __window_create(buf, false, x, y, width, height);
 }
 
 Window *widget_create(Buffer *buf, int x, int y, int width, int height, int pos_flags)

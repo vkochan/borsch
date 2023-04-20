@@ -6,7 +6,7 @@
 (define __cs_win_next_set (foreign-procedure "cs_win_next_set" (int int) scheme-object))
 (define __cs_win_current_get (foreign-procedure "cs_win_current_get" () scheme-object))
 (define __cs_win_current_set (foreign-procedure "cs_win_current_set" (int) int))
-(define __cs_win_new (foreign-procedure "cs_win_new" (int) scheme-object))
+(define __cs_win_new (foreign-procedure "cs_win_new" (int int int int int) scheme-object))
 (define __cs_win_del (foreign-procedure "cs_win_del" (int) int))
 (define __cs_win_title_get (foreign-procedure "cs_win_title_get" (int) scheme-object))
 (define __cs_win_title_set (foreign-procedure "cs_win_title_set" (int string) int))
@@ -339,7 +339,12 @@
                       (window-first))))
 
 (define (window-create b)
-   (let ([w (call-foreign (__cs_win_new b))])
+   (let ([w (call-foreign (__cs_win_new
+                             b
+                             (layout-x)
+                             (layout-y)
+                             (layout-width)
+                             (layout-height)))])
       (when w
          (buffer-ref-get b)
          (if (layout-is-sticky?)

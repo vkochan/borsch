@@ -224,7 +224,7 @@ int scheme_win_current_set(int wid)
 	return 0;
 }
 
-ptr scheme_win_new(int bid)
+ptr scheme_win_new(int bid, int x, int y, int width, int height)
 {
 	Buffer *buf;
 	Window *w;
@@ -232,7 +232,7 @@ ptr scheme_win_new(int bid)
 	buf = buffer_by_id(bid);
 	buffer_dirty_set(buf, true);
 
-	w = window_create(buf);
+	w = window_create(buf, x, y, width, height);
 	if (!w)
  		return Sfalse;
 	return Sinteger(w->id);
