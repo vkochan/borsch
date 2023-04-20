@@ -7,113 +7,84 @@
 (define __cs_layout_sticky_get (foreign-procedure "cs_layout_sticky_get" (int) boolean))
 (define __cs_layout_sticky_set (foreign-procedure "cs_layout_sticky_set" (int boolean) int))
 
-(define layout->symb
-   (lambda (l)
-      (case l 
-         [0 'tiled       ]
-         [1 'grid        ]
-         [2 'bstack      ]
-         [3 'maximized   ]
-      )
-   )
-)
+(define (layout->symb l)
+   (case l 
+      [0 'tiled       ]
+      [1 'grid        ]
+      [2 'bstack      ]
+      [3 'maximized   ]))
 
-(define layout->name
-   (lambda (l)
-      (case l 
-         [0 "[]="        ]
-         [1 "+++"        ]
-         [2 "TTT"        ]
-         [3 "[ ]"        ]
-      )
-   )
-)
+(define (layout->name l)
+   (case l 
+      [0 "[]="]
+      [1 "+++"]
+      [2 "TTT"]
+      [3 "[ ]"]))
 
-(define symb->layout
-   (lambda (s)
-      (case s 
-         ['tiled       0]
-         ['grid        1]
-         ['bstack      2]
-         ['maximized   3]
-      )
-   )
-)
+(define (symb->layout s)
+   (case s 
+      ['tiled       0]
+      ['grid        1]
+      ['bstack      2]
+      ['maximized   3]))
 
 (define layout-current
    (case-lambda
-        [()
-         (layout-current (current-frame))]
+      [()
+       (layout-current (current-frame))]
 
-        [(fr)
-         (layout->symb (call-foreign (__cs_layout_current_get (frame-id fr))))]
-   )
-)
+      [(fr)
+       (layout->symb (call-foreign (__cs_layout_current_get (frame-id fr))))]))
 
 (define layout-name
    (case-lambda
       [()
-       (layout-name (layout-current))
-      ]
+       (layout-name (layout-current))]
 
       [(symb)
-       (layout->name (symb->layout symb))
-      ]
-   )
-)
+       (layout->name (symb->layout symb))]))
 
 (define layout-set
    (case-lambda
-        [(l)
-         (layout-set (current-frame) l)]
+      [(l)
+       (layout-set (current-frame) l)]
 
-        [(fr l)
-         (frame-set-prev-layout fr (layout-current fr))
-         (call-foreign (__cs_layout_current_set (frame-id fr)  (symb->layout l)))
-         (run-hooks 'layout-changed-hook)
-        ]
-   )
-)
+      [(fr l)
+       (frame-set-prev-layout fr (layout-current fr))
+       (call-foreign (__cs_layout_current_set (frame-id fr)  (symb->layout l)))
+       (run-hooks 'layout-changed-hook)]))
 
 (define layout-set-tiled
    (case-lambda
-        [()
-         (layout-set-tiled (current-frame))]
+      [()
+       (layout-set-tiled (current-frame))]
 
-        [(fr)
-         (layout-set fr 'tiled)]
-   )
-)
+      [(fr)
+       (layout-set fr 'tiled)]))
 
 (define layout-set-grid
    (case-lambda
-        [()
-         (layout-set-grid (current-frame))]
+      [()
+       (layout-set-grid (current-frame))]
 
-        [(fr)
-         (layout-set fr 'grid)]
-   )
-)
+      [(fr)
+       (layout-set fr 'grid)]))
 
 (define layout-set-bstack
    (case-lambda
-        [()
-         (layout-set-bstack (current-frame))]
+      [()
+       (layout-set-bstack (current-frame))]
 
-        [(fr)
-         (layout-set fr 'bstack)]
-   )
-)
+      [(fr)
+       (layout-set fr 'bstack)]))
 
 (define layout-set-maximized
    (case-lambda
-        [()
-         (layout-set-maximized (current-frame))]
+      [()
+       (layout-set-maximized (current-frame))]
 
-        [(fr)
-         (layout-set fr 'maximized)]
-   )
-)
+      [(fr)
+       (layout-set fr 'maximized)]))
 
 (define layout-toggle-maximized
    (case-lambda
@@ -124,51 +95,39 @@
        (if (equal? (layout-current fr) 'maximized)
           (layout-set fr (frame-prev-layout fr))
           ;; else
-          (layout-set fr 'maximized)
-       )
-      ]
-   )
-)
+          (layout-set fr 'maximized))]))
 
 (define layout-is-tiled?
    (case-lambda
-        [()
-         (equal? 'tiled (layout-current))]
+      [()
+       (equal? 'tiled (layout-current))]
 
-        [(fr)
-         (equal? 'tiled (layout-current (frame-id fr)))]
-   )
-)
+      [(fr)
+       (equal? 'tiled (layout-current (frame-id fr)))]))
 
 (define layout-is-grid?
    (case-lambda
-        [()
-         (equal? 'grid (layout-current))]
+      [()
+       (equal? 'grid (layout-current))]
 
-        [(fr)
-         (equal? 'grid (layout-current (frame-id fr)))]
-   )
-)
+      [(fr)
+       (equal? 'grid (layout-current (frame-id fr)))]))
 
 (define layout-is-bstack?
    (case-lambda
-        [()
-         (equal? 'bstack (layout-current))]
+      [()
+       (equal? 'bstack (layout-current))]
 
-        [(fr)
-         (equal? 'bstack (layout-current (frame-id fr)))]
-   )
-)
+      [(fr)
+       (equal? 'bstack (layout-current (frame-id fr)))]))
 
 (define layout-is-maximized?
    (case-lambda
-        [()
-         (equal? 'maximized (layout-current))]
+      [()
+       (equal? 'maximized (layout-current))]
 
-        [(fr)
-         (equal? 'maximized (layout-current (frame-id fr)))]
-   )
-)
+      [(fr)
+       (equal? 'maximized (layout-current (frame-id fr)))]))
 
 (define layout-n-master
    (case-lambda
@@ -176,9 +135,7 @@
        (layout-n-master (current-frame))]
 
       [(fr)
-       (call-foreign (__cs_layout_nmaster_get (frame-id fr)))]
-   )
-)
+       (call-foreign (__cs_layout_nmaster_get (frame-id fr)))]))
 
 (define layout-set-n-master
    (case-lambda
@@ -186,9 +143,7 @@
        (layout-set-n-master (current-frame) n)]
 
       [(fr n)
-       (call-foreign (__cs_layout_nmaster_set (frame-id fr) n))]
-   )
-)
+       (call-foreign (__cs_layout_nmaster_set (frame-id fr) n))]))
 
 (define layout-n-master+
    (case-lambda
@@ -200,10 +155,7 @@
 
       [(fr n)
        (call-foreign (__cs_layout_nmaster_set
-          (frame-id fr) (+ (call-foreign (__cs_layout_nmaster_get (frame-id fr))) n)
-       ))]
-   )
-)
+                        (frame-id fr) (+ (call-foreign (__cs_layout_nmaster_get (frame-id fr))) n)))]))
 
 (define layout-n-master-
    (case-lambda
@@ -215,10 +167,7 @@
 
       [(fr n)
        (call-foreign (__cs_layout_nmaster_set
-          (frame-id fr) (- (call-foreign (__cs_layout_nmaster_get (frame-id fr))) n)
-       ))]
-   )
-)
+                        (frame-id fr) (- (call-foreign (__cs_layout_nmaster_get (frame-id fr))) n)))]))
 
 (define layout-%-master
    (case-lambda
@@ -226,9 +175,7 @@
        (layout-%-master (current-frame))]
 
       [(fr)
-       (call-foreign (__cs_layout_fmaster_get (frame-id fr)))]
-   )
-)
+       (call-foreign (__cs_layout_fmaster_get (frame-id fr)))]))
 
 (define layout-set-%-master
    (case-lambda
@@ -236,9 +183,7 @@
        (layout-set-%-master (current-frame) f)]
 
       [(fr f)
-       (call-foreign (__cs_layout_fmaster_set (frame-id fr) f))]
-   )
-)
+       (call-foreign (__cs_layout_fmaster_set (frame-id fr) f))]))
 
 (define layout-%-master+
    (case-lambda
@@ -250,10 +195,7 @@
 
       [(fr f)
        (call-foreign (__cs_layout_fmaster_set
-          (frame-id fr) (+ (call-foreign (__cs_layout_fmaster_get (frame-id fr))) f)
-       ))]
-   )
-)
+                        (frame-id fr) (+ (call-foreign (__cs_layout_fmaster_get (frame-id fr))) f)))]))
 
 (define layout-%-master-
    (case-lambda
@@ -265,30 +207,23 @@
 
       [(fr f)
        (call-foreign (__cs_layout_fmaster_set
-          (frame-id fr) (- (call-foreign (__cs_layout_fmaster_get (frame-id fr))) f)
-       ))]
-   )
-)
+                        (frame-id fr) (- (call-foreign (__cs_layout_fmaster_get (frame-id fr))) f)))]))
 
 (define layout-set-sticky
    (case-lambda
-        [(s)
-         (layout-set-sticky (current-frame) s)]
+      [(s)
+       (layout-set-sticky (current-frame) s)]
 
-        [(fr s)
-         (call-foreign (__cs_layout_sticky_set (frame-id fr) s))]
-   )
-)
+      [(fr s)
+       (call-foreign (__cs_layout_sticky_set (frame-id fr) s))]))
 
 (define layout-is-sticky?
    (case-lambda
-        [()
-         (layout-is-sticky? (current-frame))]
+      [()
+       (layout-is-sticky? (current-frame))]
 
-        [(fr)
-         (call-foreign (__cs_layout_sticky_get (frame-id fr)))]
-   )
-)
+      [(fr)
+       (call-foreign (__cs_layout_sticky_get (frame-id fr)))]))
 
 (define layout-toggle-sticky
    (case-lambda
@@ -296,6 +231,4 @@
        (layout-set-sticky (not (layout-is-sticky?)))]
 
       [(fr)
-       (layout-set-sticky fr (not (layout-is-sticky? fr)))]
-   )
-)
+       (layout-set-sticky fr (not (layout-is-sticky? fr)))]))
