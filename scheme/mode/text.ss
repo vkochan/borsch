@@ -283,14 +283,20 @@
          (let ([width (text-mode-linenum-width w)])
             (when (not (eq? width (window-sidebar-width w)))
                (window-set-sidebar-width w width))
-            (let ([lines (window-lines-coord w)])
+            (let ([lines (window-lines-coord w)]
+                  [wh    (window-inner-height w)])
+               (while (> wh 0)
+                  (window-draw-text w 0 (- wh 1)
+                                        (format (string-append "~" (number->string width) "@a ") ""))
+                  (set! wh (- wh 1)))
                (for-each
                   (lambda (c)
                      (let ([line (list-ref c 2)])
                         (window-draw-text w 0 (list-ref c 1)
                                           (format (string-append "~" (number->string width) "@a ") line)
                                           '(fg: "white" bg: "bright-blue"))))
-                  lines))))))
+                  lines)
+               )))))
 
 (define (text-mode-insert-char char)
    (text-insert-char char))
