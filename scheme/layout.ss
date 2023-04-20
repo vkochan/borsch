@@ -28,10 +28,10 @@
       ['bstack      2]
       ['maximized   3]))
 
-(define layout-current
+(define current-layout
    (case-lambda
       [()
-       (layout-current (current-frame))]
+       (current-layout (current-frame))]
 
       [(fr)
        (layout->symb (call-foreign (__cs_layout_current_get (frame-id fr))))]))
@@ -39,7 +39,7 @@
 (define layout-name
    (case-lambda
       [()
-       (layout-name (layout-current))]
+       (layout-name (current-layout))]
 
       [(symb)
        (layout->name (symb->layout symb))]))
@@ -50,7 +50,7 @@
        (layout-set (current-frame) l)]
 
       [(fr l)
-       (frame-set-prev-layout fr (layout-current fr))
+       (frame-set-prev-layout fr (current-layout fr))
        (call-foreign (__cs_layout_current_set (frame-id fr)  (symb->layout l)))
        (frame-set-layout fr l)
        (run-hooks 'layout-changed-hook)]))
@@ -93,7 +93,7 @@
        (layout-toggle-maximized (current-frame))]
 
       [(fr)
-       (if (equal? (layout-current fr) 'maximized)
+       (if (equal? (current-layout fr) 'maximized)
           (layout-set fr (frame-prev-layout fr))
           ;; else
           (layout-set fr 'maximized))]))
@@ -101,34 +101,34 @@
 (define layout-is-tiled?
    (case-lambda
       [()
-       (equal? 'tiled (layout-current))]
+       (equal? 'tiled (current-layout))]
 
       [(fr)
-       (equal? 'tiled (layout-current (frame-id fr)))]))
+       (equal? 'tiled (current-layout (frame-id fr)))]))
 
 (define layout-is-grid?
    (case-lambda
       [()
-       (equal? 'grid (layout-current))]
+       (equal? 'grid (current-layout))]
 
       [(fr)
-       (equal? 'grid (layout-current (frame-id fr)))]))
+       (equal? 'grid (current-layout (frame-id fr)))]))
 
 (define layout-is-bstack?
    (case-lambda
       [()
-       (equal? 'bstack (layout-current))]
+       (equal? 'bstack (current-layout))]
 
       [(fr)
-       (equal? 'bstack (layout-current (frame-id fr)))]))
+       (equal? 'bstack (current-layout (frame-id fr)))]))
 
 (define layout-is-maximized?
    (case-lambda
       [()
-       (equal? 'maximized (layout-current))]
+       (equal? 'maximized (current-layout))]
 
       [(fr)
-       (equal? 'maximized (layout-current (frame-id fr)))]))
+       (equal? 'maximized (current-layout (frame-id fr)))]))
 
 (define layout-n-master
    (case-lambda
