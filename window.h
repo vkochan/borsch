@@ -69,7 +69,7 @@ void layout_changed(bool changed);
 void layout_set_arrange(int id, void (*arrange)(unsigned int, unsigned int, unsigned int, unsigned int));
 bool layout_is_arrange(int id);
 layout_t layout_current_get(int fid);
-void layout_arrange(int id);
+void layout_arrange(int id, int lx, int ly, int lw, int lh);
 int layout_current_set(int fid, layout_t lay);
 int layout_current_nmaster(void);
 float layout_current_fmaster(void);

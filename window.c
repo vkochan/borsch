@@ -301,9 +301,9 @@ void layout_current_resize(unsigned int width, unsigned height)
 	wah = height;
 }
 
-void layout_arrange(int id)
+void layout_arrange(int id, int lx, int ly, int lw, int lh)
 {
-	layout_get(id)->arrange(wax, way, waw, wah);
+	layout_get(id)->arrange(lx, ly, lw, lh);
 }
 
 int layout_nmaster_get(int fid)

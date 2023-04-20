@@ -6,7 +6,7 @@
 (define __cs_layout_fmaster_set (foreign-procedure "cs_layout_fmaster_set" (int float) int))
 (define __cs_layout_sticky_get (foreign-procedure "cs_layout_sticky_get" (int) boolean))
 (define __cs_layout_sticky_set (foreign-procedure "cs_layout_sticky_set" (int boolean) int))
-(define __cs_layout_arrange (foreign-procedure "cs_layout_arrange" (int) void))
+(define __cs_layout_arrange (foreign-procedure "cs_layout_arrange" (int int int int int) void))
 (define __cs_layout_xy (foreign-procedure "cs_layout_xy" () scheme-object))
 (define __cs_layout_wh (foreign-procedure "cs_layout_wh" () scheme-object))
 
@@ -61,7 +61,12 @@
        (layout-arrange (current-layout))]
 
       [(symb)
-       (call-foreign (__cs_layout_arrange (symb->layout symb)))]))
+       (call-foreign (__cs_layout_arrange
+                        (symb->layout symb)
+                        (layout-x)
+                        (layout-y)
+                        (layout-width)
+                        (layout-height)))]))
 
 (define layout-name
    (case-lambda

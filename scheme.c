@@ -1601,9 +1601,9 @@ int scheme_layout_sticky_set(int fid, bool is_sticky)
 	return layout_sticky_set(fid, is_sticky);
 }
 
-int scheme_layout_arrange(int id)
+int scheme_layout_arrange(int id, int lx, int ly, int lw, int lh)
 {
-	layout_arrange(id);
+	layout_arrange(id, lx, ly, lw, lh);
 }
 
 ptr scheme_layout_xy(void)
