@@ -301,10 +301,9 @@ void layout_current_resize(unsigned int width, unsigned height)
 	wah = height;
 }
 
-void layout_current_arrange(void)
+void layout_arrange(int id)
 {
-	if (frame_current())
-	frame_current()->layout->arrange(wax, way, waw, wah);
+	layout_get(id)->arrange(wax, way, waw, wah);
 }
 
 int layout_nmaster_get(int fid)
@@ -1181,6 +1180,4 @@ void window_update_layout(void)
 	layout_changed(false);
 
 	window_update_screen_size();
-
-	layout_current_arrange();
 }

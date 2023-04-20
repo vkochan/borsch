@@ -1601,6 +1601,11 @@ int scheme_layout_sticky_set(int fid, bool is_sticky)
 	return layout_sticky_set(fid, is_sticky);
 }
 
+int scheme_layout_arrange(int id)
+{
+	layout_arrange(id);
+}
+
 static int bind_key(char *key, void (*act)(void), int kid, char *tname)
 {
 	KeyMap *kmap = keymap_by_id(kid);
@@ -1959,6 +1964,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_layout_fmaster_set", scheme_layout_fmaster_set);
 	Sregister_symbol("cs_layout_sticky_get", scheme_layout_sticky_get);
 	Sregister_symbol("cs_layout_sticky_set", scheme_layout_sticky_set);
+	Sregister_symbol("cs_layout_arrange", scheme_layout_arrange);
 
 	Sregister_symbol("cs_bind_key", scheme_bind_key);
 	Sregister_symbol("cs_unbind_key", scheme_unbind_key);
