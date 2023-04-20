@@ -8,6 +8,7 @@
       (mutable name)
       (mutable cwd)
       (mutable prev-layout)
+      (mutable layout)
       (mutable env)
       (mutable buffers)))
 
@@ -25,6 +26,7 @@
                               name
                               (current-directory)
                               #f
+                              'tiled
                               (make-eq-hashtable)
                               (list))])
          (hashtable-set! frames-ht id fr)
@@ -132,6 +134,22 @@
 
       [(fr l)
        (%frame%-prev-layout-set! fr l)]))
+
+(define frame-layout
+   (case-lambda
+      [()
+       (frame-layout (current-frame))]
+
+      [(fr)
+       (%frame%-layout fr)]))
+
+(define frame-set-layout
+   (case-lambda
+      [(l)
+       (frame-set-layout (current-frame) l)]
+
+      [(fr l)
+       (%frame%-layout-set! fr l)]))
 
 (define frame-list-buffer
    (case-lambda

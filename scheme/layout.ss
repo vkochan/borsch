@@ -52,6 +52,7 @@
       [(fr l)
        (frame-set-prev-layout fr (layout-current fr))
        (call-foreign (__cs_layout_current_set (frame-id fr)  (symb->layout l)))
+       (frame-set-layout fr l)
        (run-hooks 'layout-changed-hook)]))
 
 (define layout-set-tiled
