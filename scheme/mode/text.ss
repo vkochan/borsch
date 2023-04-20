@@ -15,12 +15,12 @@
          (delbuf-paste-inplace)
          (cursor-to-prev-char))
        ;; else
-       (let ([has-newline (equal? (string-ref delbuf-reg 0) #\newline)])
-          (cursor-to-line-end)
-          (when (not has-newline) (text-insert "\n"))
-          (with-saved-cursor
-             (delbuf-paste-inplace)
-             (when (not has-newline) (text-delete-char))))))
+      (let ([has-newline (equal? (string-ref delbuf-reg 0) #\newline)])
+         (cursor-to-line-end)
+         (when (not has-newline) (text-insert "\n"))
+         (with-saved-cursor
+            (delbuf-paste-inplace)
+            (when (not has-newline) (text-delete-char))))))
 
 (define (text-mode-set-keymap m)
    (keymap-set-parent (get-local text-mode-map) (get-local-symbol m)))
