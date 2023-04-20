@@ -7,6 +7,8 @@
 (define __cs_layout_sticky_get (foreign-procedure "cs_layout_sticky_get" (int) boolean))
 (define __cs_layout_sticky_set (foreign-procedure "cs_layout_sticky_set" (int boolean) int))
 (define __cs_layout_arrange (foreign-procedure "cs_layout_arrange" (int) void))
+(define __cs_layout_xy (foreign-procedure "cs_layout_xy" () scheme-object))
+(define __cs_layout_wh (foreign-procedure "cs_layout_wh" () scheme-object))
 
 (define (layout->symb l)
    (case l 
@@ -36,6 +38,22 @@
 
       [(fr)
        (layout->symb (call-foreign (__cs_layout_current_get (frame-id fr))))]))
+
+(define (layout-x)
+   (let ([xy (call-foreign (__cs_layout_xy))])
+      (car xy)))
+
+(define (layout-y)
+   (let ([xy (call-foreign (__cs_layout_xy))])
+      (cdr xy)))
+
+(define (layout-width)
+   (let ([wh (call-foreign (__cs_layout_wh))])
+      (car wh)))
+
+(define (layout-height)
+   (let ([wh (call-foreign (__cs_layout_wh))])
+      (cdr wh)))
 
 (define layout-arrange
    (case-lambda
