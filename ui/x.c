@@ -25,20 +25,14 @@
 #define UTF_SIZ       4
 
 /* macros */
-#define MIN(a, b)		((a) < (b) ? (a) : (b))
 #define MAX(a, b)		((a) < (b) ? (b) : (a))
 #define LEN(a)			(sizeof(a) / sizeof(a)[0])
 #define BETWEEN(x, a, b)	((a) <= (x) && (x) <= (b))
 #define DIVCEIL(n, d)		(((n) + ((d) - 1)) / (d))
 #define DEFAULT(a, b)		(a) = (a) ? (a) : (b)
-#define LIMIT(x, a, b)		(x) = (x) < (a) ? (a) : (x) > (b) ? (b) : (x)
 #define ATTRCMP(a, b)		((a).style.attr != (b).style.attr || (a).style.fg != (b).style.fg || \
 				(a).style.bg != (b).style.bg)
-#define TIMEDIFF(t1, t2)	((t1.tv_sec-t2.tv_sec)*1000 + \
-				(t1.tv_nsec-t2.tv_nsec)/1E6)
-#define MODBIT(x, set, bit)	((set) ? ((x) |= (bit)) : ((x) &= ~(bit)))
 
-#define TRUECOLOR(r,g,b)	(1 << 24 | (r) << 16 | (g) << 8 | (b))
 #define IS_TRUECOL(x)		(1 << 24 & (x))
 #define TRUERED(x)		(((x) & 0xff0000) >> 8)
 #define TRUEGREEN(x)		(((x) & 0xff00))
@@ -575,14 +569,6 @@ void x_hints(XUi *xui)
 		sizeh->min_width = sizeh->max_width = xui->w;
 		sizeh->min_height = sizeh->max_height = xui->h;
 	}
-	#if 0
-	if (xui->gm & (XValue|YValue)) {
-		sizeh->flags |= USPosition | PWinGravity;
-		sizeh->x = xui->l;
-		sizeh->y = xui->t;
-		sizeh->win_gravity = xgeommasktogravity(xui->gm);
-	}
-	#endif
 
 	XSetWMProperties(xui->dpy, xui->win, NULL, NULL, NULL, 0, sizeh, &wm,
 			&class);
@@ -756,14 +742,6 @@ static int x_init(Ui *ui)
 	/* Xft rendering context */
 	xui->draw = XftDrawCreate(xui->dpy, xui->buf, xui->vis, xui->cmap);
 
-#if 0
-	/* input methods */
-	if (!ximopen(xw.dpy)) {
-		XRegisterIMInstantiateCallback(xw.dpy, NULL, NULL, NULL,
-	                                       ximinstantiate, NULL);
-	}
-#endif
-
 	/* white cursor, black outline */
 	cursor = XCreateFontCursor(xui->dpy, mouseshape);
 	XDefineCursor(xui->dpy, xui->win, cursor);
@@ -798,9 +776,6 @@ static int x_init(Ui *ui)
 	XMapWindow(xui->dpy, xui->win);
 	XSync(xui->dpy, False);
 
-	//clock_gettime(CLOCK_MONOTONIC, &xsel.tclick1);
-	//clock_gettime(CLOCK_MONOTONIC, &xsel.tclick2);
-	
 	/* Waiting for window mapping */
 	w = xui->w;
 	h = xui->h;
@@ -1019,61 +994,6 @@ void x_drawglyphfontspecs(XUi *xui, const XftGlyphFontSpec *specs, Cell base, in
 		bg = &xui->dc.col[base.style.bg];
 	}
 
-	/* Change basic system colors [0-7] to bright system colors [8-15] */
-	#if 0
-	if ((attr & ATTR_BOLD_FAINT) == ATTR_BOLD && BETWEEN(base.style.fg, 0, 7))
-		fg = &dc.col[base.style.fg + 8];
-	#endif
-
-	#if 0
-	if (IS_SET(MODE_REVERSE)) {
-		if (fg == &xui->dc.col[defaultfg]) {
-			fg = &xui->dc.col[defaultbg];
-		} else {
-			colfg.red = ~fg->color.red;
-			colfg.green = ~fg->color.green;
-			colfg.blue = ~fg->color.blue;
-			colfg.alpha = fg->color.alpha;
-			XftColorAllocValue(xui->dpy, xui->vis, xui->cmap, &colfg,
-					&revfg);
-			fg = &revfg;
-		}
-
-		if (bg == &xui->dc.col[defaultbg]) {
-			bg = &xui->dc.col[defaultfg];
-		} else {
-			colbg.red = ~bg->color.red;
-			colbg.green = ~bg->color.green;
-			colbg.blue = ~bg->color.blue;
-			colbg.alpha = bg->color.alpha;
-			XftColorAllocValue(xui->dpy, xui->vis, xw.cmap, &colbg,
-					&revbg);
-			bg = &revbg;
-		}
-	}
-
-	if ((attr & ATTR_BOLD_FAINT) == ATTR_FAINT) {
-		colfg.red = fg->color.red / 2;
-		colfg.green = fg->color.green / 2;
-		colfg.blue = fg->color.blue / 2;
-		colfg.alpha = fg->color.alpha;
-		XftColorAllocValue(xui->dpy, xui->vis, xui->cmap, &colfg, &revfg);
-		fg = &revfg;
-	}
-
-	if (attr & UI_TEXT_STYLE_REVERSE) {
-		temp = fg;
-		fg = bg;
-		bg = temp;
-	}
-
-	if (attr & UI_TEXT_STYLE_BLINK && xui->mode & MODE_BLINK)
-		fg = bg;
-
-	if (attr & UI_TEXT_STYLE_INVISIBLE)
-		fg = bg;
-	#endif
-
 	/* Intelligent cleaning up of the borders. */
 	if (x == 0) {
 		__x_clear(xui, 0, (y == 0)? 0 : winy, borderpx,
@@ -1203,99 +1123,6 @@ static void x_draw_cell(Ui *ui, int x, int y, Cell *c)
 
 	x_drawglyph(xui, *c, x, y);
 }
-
-#if 0
-void x_drawcursor(XWin *xwin)
-{
-	int x0 = ui_window_x_get(&xwin->win);
-	int y0 = ui_window_y_get(&xwin->win);
-	int cx = x0 + xwin->cur_x;
-	int cy = y0 + xwin->cur_y;
-	XUi *xui = (XUi*)xwin->win.ui;
-	Color drawcol;
-	Cell c = {0};
-
-#if 0
-	/* remove the old cursor */
-	if (selected(ox, oy))
-		og.mode ^= ATTR_REVERSE;
-	x_drawglyph(og, ox, oy);
-
-	if (IS_SET(MODE_HIDE))
-		return;
-
-	/*
-	 * Select the right color for the right mode.
-	 */
-	g.mode &= ATTR_BOLD|ATTR_ITALIC|ATTR_UNDERLINE|ATTR_STRUCK|ATTR_WIDE;
-
-#endif
-	if (/*IS_SET(MODE_REVERSE)*/false) {
-		c.style.attr |= UI_TEXT_STYLE_REVERSE;
-		c.style.bg = defaultfg;
-		if (/*selected(cx, cy)*/false) {
-			drawcol = xui->dc.col[defaultcs];
-			c.style.fg = defaultrcs;
-		} else {
-			drawcol = xui->dc.col[defaultrcs];
-			c.style.fg = defaultcs;
-		}
-	} else {
-		if (/*selected(cx, cy)*/false) {
-			c.style.fg = defaultfg;
-			c.style.bg = defaultrcs;
-		} else {
-			c.style.fg = defaultbg;
-			c.style.bg = defaultcs;
-		}
-		drawcol = xui->dc.col[c.style.bg];
-		c.style.attr = UI_TEXT_STYLE_NORMAL;
-	}
-
-	/* draw the new one */
-	if (/*IS_SET(MODE_FOCUSED)*/true) {
-		switch (xui->cursor) {
-		case 0: /* Blinking Block */
-		case 1: /* Blinking Block (Default) */
-		case 2: /* Steady Block */
-			x_drawglyph(xui, c, cx, cy);
-			break;
-		case 3: /* Blinking Underline */
-		case 4: /* Steady Underline */
-			XftDrawRect(xui->draw, &drawcol,
-					borderpx + cx * xui->cw,
-					borderpx + (cy + 1) * xui->ch - \
-						cursorthickness,
-					xui->cw, cursorthickness);
-			break;
-		case 5: /* Blinking bar */
-		case 6: /* Steady bar */
-			XftDrawRect(xui->draw, &drawcol,
-					borderpx + cx * xui->cw,
-					borderpx + cy * xui->ch,
-					cursorthickness, xui->ch);
-			break;
-		}
-	} else {
-		XftDrawRect(xui->draw, &drawcol,
-				borderpx + cx * xui->cw,
-				borderpx + cy * xui->ch,
-				xui->cw - 1, 1);
-		XftDrawRect(xui->draw, &drawcol,
-				borderpx + cx * xui->cw,
-				borderpx + cy * xui->ch,
-				1, xui->ch - 1);
-		XftDrawRect(xui->draw, &drawcol,
-				borderpx + (cx + 1) * xui->cw - 1,
-				borderpx + cy * xui->ch,
-				1, xui->ch - 1);
-		XftDrawRect(xui->draw, &drawcol,
-				borderpx + cx * xui->cw,
-				borderpx + (cy + 1) * xui->ch - 1,
-				xui->cw, 1);
-	}
-}
-#endif
 
 static void x_clear(Ui *ui)
 {
