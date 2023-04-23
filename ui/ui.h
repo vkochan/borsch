@@ -83,6 +83,7 @@ static inline bool cell_color_equal(CellColor c1, CellColor c2) {
 typedef struct {
 	CellAttr attr;
 	CellColor fg, bg;
+	wchar_t ch;
 } CellStyle;
 
 typedef struct {

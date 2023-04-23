@@ -4,6 +4,7 @@
 typedef struct {
 	bool expand;
 	const char *name;
+	char ch;
 	short fg;
 	short bg;
 	int attr;

@@ -996,7 +996,7 @@ int buf_file_open(int bid, const char *file)
 }
 
 int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end,
-		       const char *regex, char *name, bool expand)
+		       const char *regex, char *name, bool expand, wchar_t ch)
 {
 	Buffer *buf = buffer_by_id(bid);
 	Style *style, *style_bind;
@@ -1017,6 +1017,7 @@ int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *
 		style->fg = fg;
 		style->bg = bg;
 		style->expand = expand;
+		style->ch = ch;
 	}
 
 	err = buffer_property_add(buf, type, start, end, style, regex, name, NULL);

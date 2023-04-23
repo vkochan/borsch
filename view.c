@@ -1345,6 +1345,12 @@ void view_style(View *view, CellStyle style, size_t start, size_t end, bool expa
 
 	size_t pos = view->start;
 	Line *line = view->topline;
+	Cell tmp_cell;
+
+	if (style.ch) {
+		tmp_cell.len = wcrtomb(tmp_cell.data, style.ch, NULL);
+		tmp_cell.width = wcwidth(style.ch);
+	}
 
 	/* skip lines before range to be styled */
 	while (line && pos + line->len <= start) {
@@ -1366,6 +1372,11 @@ void view_style(View *view, CellStyle style, size_t start, size_t end, bool expa
 			pos += line->cells[col].len;
 			if (line->cells[col].len || expand)
 				line->cells[col].style = style;
+			if (style.ch) {
+				memcpy(line->cells[col].data, tmp_cell.data, sizeof(tmp_cell.data));
+				line->cells[col].width = tmp_cell.width >= 0 ?: 0;
+				line->cells[col].len = tmp_cell.len;
+			}
 			col++;
 		}
 		col = 0;

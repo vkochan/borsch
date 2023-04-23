@@ -993,6 +993,7 @@ static void __style_draw(View *view, size_t start, size_t end, Style *style)
 	cell_style.attr = style->attr;
 	cell_style.fg = style->fg;
 	cell_style.bg = style->bg;
+	cell_style.ch = style->ch;
 
 	if (cell_style.attr == 0)
 		cell_style.attr = default_style->attr;

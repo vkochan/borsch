@@ -23,7 +23,7 @@
 (define __cs_buf_text_bg_get (foreign-procedure "cs_buf_text_bg_get" (int) scheme-object))
 (define __cs_buf_text_style_get (foreign-procedure "cs_buf_text_style_get" (int) scheme-object))
 
-(define __cs_buf_prop_style_add (foreign-procedure "cs_buf_prop_style_add" (int int int int int string int int string string boolean) scheme-object))
+(define __cs_buf_prop_style_add (foreign-procedure "cs_buf_prop_style_add" (int int int int int string int int string string boolean wchar) scheme-object))
 (define __cs_buf_prop_kmap_add (foreign-procedure "cs_buf_prop_kmap_add" (int int int int string string) scheme-object))
 (define __cs_buf_prop_symbol_add (foreign-procedure "cs_buf_prop_symbol_add" (int string int int string string) scheme-object))
 (define __cs_buf_prop_data_add (foreign-procedure "cs_buf_prop_data_add" (int scheme-object int int string string) scheme-object))
@@ -483,7 +483,8 @@
                end
                regex
                name
-               (plist-get style 'expand:))))]))
+               (plist-get style 'expand:)
+               (list-ref l 3))))]))
 
 (define __add-keymap-property
    (case-lambda
