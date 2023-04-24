@@ -760,9 +760,9 @@ int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *d
 	return 0;
 }
 
-bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern, char *name, void *arg,
-		void (*cb)(Buffer *buf, size_t type, size_t start, size_t end,
-			void *data, void *arg))
+static bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern, char *name, void *arg,
+					void (*cb)(Buffer *buf, size_t type, size_t start, size_t end,
+					void *data, void *arg))
 {
 	TextProperty *it = buf->props.next;
 	size_t rem_count = 0;
