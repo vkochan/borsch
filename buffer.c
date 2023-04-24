@@ -760,6 +760,25 @@ int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *d
 	return 0;
 }
 
+static void __buffer_property_remove(Buffer *buf, TextProperty *it)
+{
+	if (it->free)
+		it->free(it->data);
+	else
+		free(it->data);
+
+	if (it == buf->min_prop)
+		buf->min_prop = it->next;
+	if (it == buf->max_prop)
+		buf->max_prop = it->prev;
+
+	text_regex_free(it->regex);
+	free(it->regex_pattern);
+	free(it->name);
+	text_property_remove(it);
+	free(it);
+}
+
 static bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern, char *name)
 {
 	TextProperty *it = buf->props.next;
@@ -794,22 +813,8 @@ static bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, si
 			match++;
 
 		if (match >= exp) {
-			if (it->free)
-				it->free(it->data);
-			else
-				free(it->data);
-
-			if (it == buf->min_prop)
-				buf->min_prop = it->next;
-			if (it == buf->max_prop)
-				buf->max_prop = it->prev;
-
-			text_regex_free(it->regex);
-			free(it->regex_pattern);
-			free(it->name);
-			text_property_remove(it);
+			__buffer_property_remove(buf, it);
 			rem_count++;
-			free(it);
 		}
 		it = next;
 	}
