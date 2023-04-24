@@ -760,9 +760,7 @@ int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *d
 	return 0;
 }
 
-static bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern, char *name, void *arg,
-					void (*cb)(Buffer *buf, size_t type, size_t start, size_t end,
-					void *data, void *arg))
+static bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern, char *name)
 {
 	TextProperty *it = buf->props.next;
 	size_t rem_count = 0;
@@ -796,9 +794,7 @@ static bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, si
 			match++;
 
 		if (match >= exp) {
-			if (cb)
-				cb(buf, it->type, it->start, it->start + it->len, it->data, arg);
-			else if (it->free)
+			if (it->free)
 				it->free(it->data);
 			else
 				free(it->data);
@@ -823,7 +819,7 @@ static bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, si
 
 bool buffer_property_remove(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern, char *name)
 {
-	if (buffer_property_remove_cb(buf, type, start, end, pattern, name, NULL, NULL)) {
+	if (buffer_property_remove_cb(buf, type, start, end, pattern, name)) {
 		buf->is_dirty = true;
 		return true;
 	}
