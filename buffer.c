@@ -22,7 +22,7 @@ typedef struct TextProperty {
 	struct TextProperty *prev;
 	struct TextProperty *next;
 	size_t start;
-	size_t end;
+	size_t len;
 	void *data;
 	int prio;
 	int type;
@@ -725,7 +725,7 @@ int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *d
 	p->free = free_fn;
 	p->start = start;
 	p->data = data;
-	p->end = end;
+	p->len = end - start;
 	p->type = type;
 
 	if (name)
@@ -784,7 +784,7 @@ bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t en
 		TextProperty *next = it->next;
 		int match = 0;
 
-		if (it->start >= start && it->end <= end)
+		if (it->start >= start && it->start + it->len <= end)
 			match++;
 		if (type == it->type)
 			match++;
@@ -797,7 +797,7 @@ bool buffer_property_remove_cb(Buffer *buf, size_t type, size_t start, size_t en
 
 		if (match >= exp) {
 			if (cb)
-				cb(buf, it->type, it->start, it->end, it->data, arg);
+				cb(buf, it->type, it->start, it->start + it->len, it->data, arg);
 			else if (it->free)
 				it->free(it->data);
 			else
@@ -857,7 +857,7 @@ void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, cha
 			continue;
 		}
 
-		if (it->end >= start && (it->start >= start && it->start <= end ||
+		if (it->start + it->len >= start && (it->start >= start && it->start <= end ||
 				start >= it->start && it->start <= end))
 			match++;
 		if (it->type == type)
@@ -868,7 +868,7 @@ void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, cha
 			match++;
 
 		if (match >= exp)
-			cb(buf, it->type, it->start, it->end, it->data, arg);
+			cb(buf, it->type, it->start, it->start + it->len, it->data, arg);
 	}
 }
 
@@ -879,7 +879,7 @@ static void buffer_properties_pos_update(Buffer *buf, size_t pos, int len)
 	for (; it; it = it->next) {
 		if (it->start >= pos) {
 			it->start += len;
-			it->end += len;
+			it->len += len;
 		}
 	}
 }
