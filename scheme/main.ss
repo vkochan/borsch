@@ -261,6 +261,8 @@
    (bind-key "M-7"         tab-switch-7)
    (bind-key "M-8"         tab-switch-8)
    (bind-key "M-9"         tab-switch-9)
+   (bind-key "M-f d" dirb)
+   (bind-key "M-f f" minibuf-find-file)
 
    (bind-key "C-g c"       vterm)
    (bind-key "C-g C-x"     open-repl)
