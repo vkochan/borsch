@@ -115,7 +115,7 @@ static Fontcache *frc = NULL;
 static int frclen = 0;
 static int frccap = 0;
 
-static char *font = "Liberation Mono:pixelsize=12:antialias=true:autohint=true";
+static char *font = "Liberation Mono:pixelsize=16:antialias=true:autohint=true";
 static char *usedfont = NULL;
 static double usedfontsize = 0;
 static double defaultfontsize = 0;
