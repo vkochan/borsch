@@ -877,11 +877,25 @@ static void buffer_properties_pos_update(Buffer *buf, size_t pos, int len)
 {
 	TextProperty *it = buf->props.next;
 
-	for (; it; it = it->next) {
-		if (it->start >= pos) {
+	while (it) {
+		size_t pos_end = pos + abs(len);
+
+		if (it->start >= pos_end) {
 			it->start += len;
+		} else if (pos >= it->start && pos <= it->start + it->len && ((pos_end >= it->start + it->len) || (pos_end <= it->start + it->len))) {
+			if (len < 0)
+				len = -MIN(abs(len), it->len);
 			it->len += len;
+
+			if (it->len == 0) {
+				TextProperty *next = it->next;
+
+				__buffer_property_remove(buf, it);
+				it = next;
+				continue;
+			}
 		}
+		it = it->next;
 	}
 }
 
