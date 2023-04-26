@@ -1,14 +1,10 @@
-(define c-compile-options
-   (lambda ()
-      (get-local c-compile-options "")
-   )
-)
+(define (c-compile-options)
+   (get-local c-compile-options ""))
 
 (define c-compile-buffer
    (case-lambda
       [()
-       (c-compile-buffer "-c" #f)
-      ]
+       (c-compile-buffer "-c" #f)]
 
       [(ext-opts fn)
        (let ([buf-out (buffer-new)] [buf-err (buffer-new)] [fn fn])
@@ -21,43 +17,24 @@
                    (begin
                       (message "Compilation is successful")
                       (buffer-delete out)
-                      (buffer-delete err)
-                   )
+                      (buffer-delete err))
                    ;; else
                    (begin
                       (buffer-delete out)
                       (window-create err)
                       (text-mode)
-                      (message "Compilation failed")
-                   )
-                )
+                      (message "Compilation failed")))
                 (when fn
-                   (fn status out err)
-                )
-             )
-          )
-       )
-      ]
-   )
-)
+                   (fn status out err)))))]))
 
-(define c-compile-and-run-buffer
-   (lambda ()
-      (let (
-            [prog (path-root (buffer-filename))]
-            [file (buffer-filename)]
-           )
-         (c-compile-buffer
-            (format "-o ~a" prog)
-            (lambda (status out err)
-               (when (eq? status 0)
-                  (vterm (format "~a ; read" prog))
-               )
-            )
-         )
-      )
-   )
-)
+(define (c-compile-and-run-buffer)
+   (let ([prog (path-root (buffer-filename))]
+         [file (buffer-filename)])
+      (c-compile-buffer
+         (format "-o ~a" prog)
+         (lambda (status out err)
+            (when (eq? status 0)
+               (vterm (format "~a ; read" prog)))))))
 
 (define (c-compile-and-eval-buffer)
    (define (wrap-expr expr)
@@ -115,8 +92,7 @@
                                            (on-eval-exit status out err)))]
              [port-in (process-port-in p)])
          (put-string port-in (wrap-expr (text-string)))
-         (close-port port-in))
-      ))
+         (close-port port-in))))
 
 (define (c-assembler-output)
    (define (on-gcc-exit status buf-out buf-err)
@@ -136,8 +112,7 @@
    (bind-key-local "C-c C-r" c-compile-and-run-buffer)
    (bind-key-local "C-c C-e" c-compile-and-eval-buffer)
    (bind-key-local "C-c C-a" c-assembler-output)
-   (syntax-set-lang 'c)
-)
+   (syntax-set-lang 'c))
 
 (add-to-list 'file-match-mode '(".*\\.h$" . c-mode))
 (add-to-list 'file-match-mode '(".*\\.c$" . c-mode))
@@ -174,8 +149,7 @@
     \"#ifndef\"
     \"#include\"
      (preproc_directive)
-    ] @keyword"
-)
+    ] @keyword")
 
 (define c-syntax-preproc-match
    "[
@@ -188,8 +162,7 @@
     \"#ifndef\"
     \"#include\"
      (preproc_directive)
-    ] @macro"
-)
+    ] @macro")
 
 (define c-syntax-type-id-match         "(type_identifier) @type")
 (define c-syntax-type-primitive-match  "(primitive_type) @type")
@@ -225,8 +198,7 @@
     \"==\"
     \">\"
     \"||\"
-   ] @operator"
-)
+   ] @operator")
 
 (define c-syntax-constant-null-match "(null) @constant")
 (define c-syntax-constant-match "((identifier) @constant (#match? @constant \"^[A-Z][A-Z\\d_]*$\"))")
