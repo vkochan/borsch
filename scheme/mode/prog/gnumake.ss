@@ -10,7 +10,7 @@
     \")\"
     \"{\"
     \"}\"
-   ] @punctuation.bracket"
+   ] @bracket"
 )
 
 (define gnumake-syntax-delimiter-match
@@ -23,20 +23,20 @@
     \"\"\"
     \"'\"
     \",\"
-   ] @punctuation.delimiter"
+   ] @delimiter"
 )
 
 (define gnumake-syntax-special-match
    "[
     \"$\"
     \"$$\"
-   ] @punctuation.special"
+   ] @variable-prefix"
 )
 
 (define gnumake-syntax-special-match2
    "(automatic_variable
        [ \"@\" \"%\" \"<\" \"?\" \"^\" \"+\" \"/\" \"*\" \"D\" \"F\"]
-       @punctuation.special)"
+       @variable-prefix)"
 )
 
 (define gnumake-syntax-error-match
@@ -133,7 +133,7 @@
     \"file\"
     \"value\"
     \"shell\"
-   ] @keyword.function"
+   ] @function"
 )
 
 (define gnumake-syntax-exception-match
@@ -147,12 +147,12 @@
 ;; Variable
 (define gnumake-syntax-variable-assign-match 
    "(variable_assignment
-     name: (word) @constant)"
+     name: (word) @variable)"
 )
 
 (define gnumake-syntax-variable-ref-match
    "(variable_reference
-     (word) @constant)"
+     (word) @variable)"
 )
 
 (define gnumake-syntax-comment-match "(comment) @comment")
@@ -205,45 +205,32 @@
 ;; Standart targets
 (define gnumake-syntax-target-standart-match
    "(targets
-     (word) @constant.macro
-     (#match? @constant.macro \"^(all|install|install-html|install-dvi|install-pdf|install-ps|uninstall|install-strip|clean|distclean|mostlyclean|maintainer-clean|TAGS|info|dvi|html|pdf|ps|dist|check|installcheck|installdirs)$\"))"
+     (word) @macro
+     (#match? @macro \"^(all|install|install-html|install-dvi|install-pdf|install-ps|uninstall|install-strip|clean|distclean|mostlyclean|maintainer-clean|TAGS|info|dvi|html|pdf|ps|dist|check|installcheck|installdirs)$\"))"
 )
 
 ;; Builtin targets
 (define gnumake-syntax-target-builtin-match
    "(targets
-     (word) @constant.macro
-     (#match? @constant.macro \"^\\.(PHONY|SUFFIXES|DEFAULT|PRECIOUS|INTERMEDIATE|SECONDARY|SECONDEXPANSION|DELETE_ON_ERROR|IGNORE|LOW_RESOLUTION_TIME|SILENT|EXPORT_ALL_VARIABLES|NOTPARALLEL|ONESHELL|POSIX)$\"))"
+     (word) @macro
+     (#match? @macro \"^\\.(PHONY|SUFFIXES|DEFAULT|PRECIOUS|INTERMEDIATE|SECONDARY|SECONDEXPANSION|DELETE_ON_ERROR|IGNORE|LOW_RESOLUTION_TIME|SILENT|EXPORT_ALL_VARIABLES|NOTPARALLEL|ONESHELL|POSIX)$\"))"
 )
 
-(define gnumake-syntax-bracket-style          '(fg: "yellow"))
-(define gnumake-syntax-special-style          '(fg: "bright-yellow" attr: "bold"))
-(define gnumake-syntax-operator-style         '(fg: "green"))
-(define gnumake-syntax-string-style           '(fg: "bright-yellow"))
-(define gnumake-syntax-conditional-style      '(fg: "green"))
-(define gnumake-syntax-loop-style             '(fg: "green"))
-(define gnumake-syntax-keyword-style          '(fg: "green"))
-(define gnumake-syntax-include-style          '(fg: "green"))
-(define gnumake-syntax-builtin-function-style '(fg: "magenta"))
-(define gnumake-syntax-comment-style          '(fg: "bright-black"))
-(define gnumake-syntax-target-style           '(fg: "blue"))
-(define gnumake-syntax-variable-style         '(fg: "cyan"))
-(define gnumake-syntax-exception-style        '(fg: "magenta"))
-
-(syntax-set-style 'gnumake gnumake-syntax-bracket-match gnumake-syntax-bracket-style)
-(syntax-set-style 'gnumake gnumake-syntax-special-match gnumake-syntax-special-style)
-(syntax-set-style 'gnumake gnumake-syntax-special-match2 gnumake-syntax-special-style)
-(syntax-set-style 'gnumake gnumake-syntax-operator-match gnumake-syntax-operator-style)
-(syntax-set-style 'gnumake gnumake-syntax-string-match gnumake-syntax-string-style)
-;;(syntax-set-style 'gnumake gnumake-syntax-string-match2 gnumake-syntax-string-style)
-(syntax-set-style 'gnumake gnumake-syntax-conditional-match gnumake-syntax-conditional-style)
-(syntax-set-style 'gnumake gnumake-syntax-loop-match gnumake-syntax-loop-style)
-(syntax-set-style 'gnumake gnumake-syntax-keyword-match gnumake-syntax-keyword-style)
-(syntax-set-style 'gnumake gnumake-syntax-include-match gnumake-syntax-include-style)
-(syntax-set-style 'gnumake gnumake-syntax-builtin-function-match gnumake-syntax-builtin-function-style)
-(syntax-set-style 'gnumake gnumake-syntax-comment-match gnumake-syntax-comment-style)
-(syntax-set-style 'gnumake gnumake-syntax-target-standart-match gnumake-syntax-target-style)
-(syntax-set-style 'gnumake gnumake-syntax-target-builtin-match gnumake-syntax-target-style)
-(syntax-set-style 'gnumake gnumake-syntax-variable-assign-match gnumake-syntax-variable-style)
-(syntax-set-style 'gnumake gnumake-syntax-variable-ref-match gnumake-syntax-variable-style)
-(syntax-set-style 'gnumake gnumake-syntax-exception-match gnumake-syntax-exception-style)
+(syntax-highlight 'gnumake
+   (string-append
+      gnumake-syntax-bracket-match
+      gnumake-syntax-special-match
+      gnumake-syntax-special-match2
+      gnumake-syntax-operator-match
+      gnumake-syntax-string-match
+      gnumake-syntax-conditional-match
+      gnumake-syntax-loop-match
+      gnumake-syntax-keyword-match
+      gnumake-syntax-include-match
+      gnumake-syntax-builtin-function-match
+      gnumake-syntax-comment-match
+      gnumake-syntax-target-standart-match
+      gnumake-syntax-target-builtin-match
+      gnumake-syntax-variable-assign-match
+      gnumake-syntax-variable-ref-match
+      gnumake-syntax-exception-match))
