@@ -634,6 +634,20 @@ bool x_handle_events(int fd, void *arg)
 		} else if (ev.type == KeyPress) {
 			int len = XLookupString(&ev.xkey, text, sizeof(text), &key_sym, 0);
 
+			if (key_sym == XK_Up) {
+				strcpy(text, "\033[A");
+				len = strlen(text);
+			} else if (key_sym == XK_Down) {
+				strcpy(text, "\033[B");
+				len = strlen(text);
+			} else if (key_sym == XK_Right) {
+				strcpy(text, "\033[C");
+				len = strlen(text);
+			} else if (key_sym == XK_Left) {
+				strcpy(text, "\033[D");
+				len = strlen(text);
+			}
+
 			for (int i = 0; i < len; i++) {
 				KeyCode key_code = {};
 				Rune code = text[i];
