@@ -882,7 +882,7 @@ static void buffer_properties_pos_update(Buffer *buf, size_t pos, int len)
 
 		if (it->start >= pos_end) {
 			it->start += len;
-		} else if (pos >= it->start && pos <= it->start + it->len && ((pos_end >= it->start + it->len) || (pos_end <= it->start + it->len))) {
+		} else if (pos >= it->start && pos < it->start + it->len && ((pos_end >= it->start + it->len) || (pos_end <= it->start + it->len))) {
 			if (len < 0)
 				len = -MIN(abs(len), it->len);
 			it->len += len;
