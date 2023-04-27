@@ -57,10 +57,14 @@
 (define (vterm-mode-paste)
    (vterm-send-text copybuf-reg))
 
+(define (vterm-mode-paste-clipboard)
+   (vterm-send-text (copybuf-clip-get)))
+
 (define vterm-mode-map
   (let ([map (make-keymap)])
      (bind-key map "C-y" vterm-mode-copy-enter)
      (bind-key map "C-p" vterm-mode-paste)
+     (bind-key map "C-v" vterm-mode-paste-clipboard)
      map))
 
 (define vterm

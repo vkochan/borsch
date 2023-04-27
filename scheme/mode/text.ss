@@ -210,9 +210,13 @@
       (bind-key map ":" (lambda () (text-mode-command)))
       map))
 
+(define (text-insert-clipboard)
+   (text-insert (copybuf-clip-get)))
+
 (define text-mode-insert-map
    (let ([map (make-keymap)])
       (bind-key map "<Enter>" (lambda () (text-insert-nl)))
+      (bind-key map "C-v" (lambda () (text-insert-clipboard)))
       (bind-key map "<Backspace>" (lambda () (text-delete-to-prev-char)))
       (bind-key map "<Esc>" text-mode-normal)
       (bind-key map "M-<Space>" text-mode-normal)
