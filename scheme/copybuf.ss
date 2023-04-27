@@ -70,10 +70,9 @@
    (or copybuf-clip-app (copybuf-check-clip-app)))
 
 (define (copybuf-clip-get)
-   (let ([app (copybuf-get-clip-app)]
-         [arg copybuf-clip-arg-get])
+   (let ([app (copybuf-get-clip-app)])
       (if app
-         (let ([ret (process (format "~a ~a" app arg))])
+         (let ([ret (process (format "~a ~a" app copybuf-clip-arg-get))])
             (let ([out (list-ref ret 0)]
                   [in (list-ref ret 1)]
                   [str ""])
@@ -86,10 +85,9 @@
          "")))
 
 (define (copybuf-clip-put str)
-   (let ([app (copybuf-get-clip-app)]
-         [arg copybuf-clip-arg-put])
+   (let ([app (copybuf-get-clip-app)])
       (if app
-         (let ([ret (process (format "~a ~a" app arg))])
+         (let ([ret (process (format "~a ~a" app copybuf-clip-arg-put))])
             (let ([out (list-ref ret 0)]
                   [in (list-ref ret 1)])
                (put-string-some in str)
