@@ -38,9 +38,9 @@
    (call-foreign
       (__cs_stx_highlight_qry (symbol->string lang) qry)))
 
-(define-style syntax-headline1    '(fg: "blue"))
-(define-style syntax-headline2    '(fg: "magenta"))
-(define-style syntax-headline3    '(fg: "cyan"))
+(define-style syntax-headline1    '(fg: "blue" attr: "bold"))
+(define-style syntax-headline2    '(fg: "magenta" attr: "bold"))
+(define-style syntax-headline3    '(fg: "cyan" attr: "bold"))
 (define-style syntax-keyword-todo  '(fg: "red" attr: "bold"))
 (define-style syntax-keyword-done  '(fg: "green" attr: "bold"))
 (define-style syntax-bold          '(attr: "bold"))
