@@ -64,16 +64,6 @@
                ;; else
                (values (list-ref grep-line 0) 0))))))
 
-(define (file-open p)
-   (let ([p (path-expand p)])
-      (if (file-regular? p)
-         (buffer-open-file p)
-         ;; else
-         (if (file-directory? p)
-            (dirb p)
-            ;; else
-            (message (format "path does not exist: ~a" p))))))
-
 (define (file-open-at-cursor)
    (let-values ([(f l) (get-file-location (text-object))])
       (let ([p (if (equal? #\/ (string-ref f 0)) f (string-append (buffer-cwd) "/" f))])

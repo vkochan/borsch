@@ -4,6 +4,7 @@
 
 (include "pregexp.scm")
 (include "common.ss")
+(include "file.ss")
 (include "style.ss")
 (include "keymap.ss")
 (include "ui.ss")
