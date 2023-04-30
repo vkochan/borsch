@@ -12,8 +12,50 @@
          ;; else
          dir)))
 
-(define (dirb-ls dir)
+(define (dirb-path-type-local p)
+   (cond
+      [(file-directory? p) 'path-directory]
+      [(file-regular? p)   'path-file]
+      [else 'path-unknown]))
+
+(define (dirb-path-type p)
+   ((get-local dirb-path-type-func) p))
+
+(define (dirb-path-is-file? p)
+   (eq? (dirb-path-type p) 'path-file))
+
+(define (dirb-path-is-directory? p)
+   (eq? (dirb-path-type p) 'path-directory))
+
+(define (dirb-mkdir-local dir)
+   (mkdir dir))
+
+(define (dirb-move-local from to)
+   (system (format "mv ~a ~a" from to)))
+
+(define (dirb-copy-local from to opts)
+   (system (format "cp -r ~a ~a" from to)))
+
+(define (dirb-delete-local path opts)
+   (rm-rf path))
+
+(define (dirb-list-local dir)
    (sort string-ci<? (directory-list dir)))
+
+(define (dirb-delete path)
+   ((get-local dirb-delete-func) path '()))
+
+(define (dirb-move from to)
+   ((get-local dirb-move-func) from to))
+
+(define (dirb-copy from to)
+   ((get-local dirb-copy-func) from to '()))
+
+(define (dirb-mkdir dir)
+   ((get-local dirb-mkdir-func) dir))
+
+(define (dirb-list dir)
+   ((get-local dirb-list-func) dir))
 
 (define (dirb-current-dir)
    (get-local current-dir))
@@ -24,9 +66,9 @@
 (define (dirb-insert-entry dir path style)
    (let ([slist (dirb-get-selection)]
          [entry path])
-      (if (file-directory? (fmt "~a/~a" dir path))
+      (if (dirb-path-is-directory? (fmt "~a/~a" dir path))
          (set! entry (fmt "~a/\n" path)))
-      (if (file-regular? (fmt "~a/~a" dir path))
+      (if (dirb-path-is-file? (fmt "~a/~a" dir path))
          (set! entry (fmt "~a\n" path)))
       (when (member (fmt "~a/~a" dir path) slist)
          (set! style (plist-put style 'bg: "blue")))
@@ -46,9 +88,9 @@
             (when (not (and (equal? (string-ref e 0) #\.)
                             (not (get-local show-hidden))))
                (cond
-                  [(file-directory? (fmt "~a/~a" dir e)) (set! dl (append dl (list e)))]
-                  [(file-regular? (fmt "~a/~a" dir e)) (set! fl (append fl (list e)))])))
-         (dirb-ls dir))
+                  [(dirb-path-is-directory? (fmt "~a/~a" dir e)) (set! dl (append dl (list e)))]
+                  [(dirb-path-is-file? (fmt "~a/~a" dir e)) (set! fl (append fl (list e)))])))
+         (dirb-list dir))
       (for-each
          (lambda (d)
             (dirb-insert-entry dir d dirb-dir-style))
@@ -98,11 +140,11 @@
 (define (dirb-open-entry)
    (let* ([e (text-line-inner)]
           [p (fmt "~a/~a" (dirb-current-dir) e)])
-      (if (file-directory? p)
+      (if (dirb-path-is-directory? p)
          (let ([s (get-local prev-cursor)])
             (stack-push! s (cursor))
             (dirb-open-dir p)))
-      (if (file-regular? p)
+      (if (dirb-path-is-file? p)
          (buffer-open-file p))))
 
 (define (dirb-show-hidden)
@@ -136,7 +178,7 @@
 (define (dirb-create-dir)
    (minibuf-read "new dir:"
       (lambda (f)
-         (mkdir (string-append (dirb-current-dir) "/" f))
+         (dirb-mkdir (string-append (dirb-current-dir) "/" f))
          (dirb-reload))))
 
 (define (dirb-clear-selection)
@@ -149,7 +191,7 @@
          (let*([e (text-line-inner)]
                [p (string-append (dirb-current-dir) "/" e)])
             (when (eq? v 'yes)
-               (rm-rf p)
+               (dirb-delete p)
                (dirb-reload))))))
 
 (define (dirb-paste-selection)
@@ -159,7 +201,7 @@
             (if (> count 1)
                (for-each
                   (lambda (p)
-                     (system (format "cp -r ~a ~a" p (dirb-current-dir))))
+                     (dirb-copy p (dirb-current-dir)))
                   (dirb-get-selection))
                ;; else - single file, check if copy to same dir
                (let ([p (first (dirb-get-selection))])
@@ -170,14 +212,14 @@
                            (lambda (v)
                               (let ([old (string-append (dirb-current-dir) "/" (get-local defval))]
                                     [new (string-append (dirb-current-dir) "/" v)])
-                                 (system (format "cp -r ~a ~a" old new))
+                                 (dirb-copy old new)
                                  (dirb-reload)
                                  (dirb-clear-selection)))))
                      ;; else
                      (begin
                         (dirb-reload)
                         (dirb-clear-selection)
-                        (system (format "cp -r ~a ~a" p (dirb-current-dir)))
+                        (dirb-copy p (dirb-current-dir))
                         (message (format "~d files were copied" count))))))
             (dirb-reload)
             (dirb-clear-selection)
@@ -201,7 +243,7 @@
                   (for-each
                      (lambda (p)
                         (let ([dest (format "~a/~a" (dirb-current-dir) (path-last p))])
-                           (system (format "mv ~a ~a" p dest))))
+                           (dirb-move p dest)))
                      (dirb-get-selection))
                   (dirb-open-dir (dirb-current-dir))
                   (dirb-clear-selection)
@@ -251,7 +293,7 @@
          (lambda (v)
             (let ([old (string-append (dirb-current-dir) "/" (get-local defval))]
                   [new (string-append (dirb-current-dir) "/" v)])
-               (rename-file old new)
+               (dirb-move old new)
                (run-hooks 'dirb-rename-entry-hook old new)
                (dirb-reload))))))
 
@@ -350,6 +392,12 @@
    (define-local defval #f)
    (define-local buffer-reload-func dirb-reload)
    (set-local! linenum-enable #f)
+   (define-local dirb-move-func dirb-move-local)
+   (define-local dirb-delete-func dirb-delete-local)
+   (define-local dirb-copy-func dirb-copy-local)
+   (define-local dirb-mkdir-func dirb-mkdir-local)
+   (define-local dirb-list-func dirb-list-local)
+   (define-local dirb-path-type-func dirb-path-type-local)
 )
 
 (define dirb
