@@ -71,7 +71,7 @@
    )
 )
 
-(define-record-type process
+(define-record-type (process make-process-entry process?)
    (fields
       port-in
       port-out
@@ -236,7 +236,7 @@
                    [port-out (if (eq? out-fd -1) #f (open-fd-input-port out-fd (buffer-mode block) (native-transcoder)))]
                    [port-err (if (eq? err-fd -1) #f (open-fd-input-port err-fd (buffer-mode block) (native-transcoder)))]
                   )
-                (let ([proc (make-process port-in port-out port-err pid buf-out buf-err on-exit reader)])
+                (let ([proc (make-process-entry port-in port-out port-err pid buf-out buf-err on-exit reader)])
                    (hashtable-set! %process-pid-ht pid proc)
                    (when buf-out
                       (hashtable-set! %process-fd-ht out-fd proc)
@@ -254,6 +254,31 @@
       ]
    )
 )
+
+(define (process-create-plist plist)
+   (let ([cmd     (plist-get plist 'cmd:)]
+         [buf-out (plist-get plist 'stdout:)]
+         [buf-err (plist-get plist 'stderr:)]
+         [on-exit (plist-get plist 'on-exit:)]
+         [async?  (plist-get plist 'async?: #t)]
+         [pty?    (plist-get plist 'pty?: #t)])
+      (process-create cmd buf-out buf-err on-exit async? pty?)))
+
+(define-syntax make-process
+   (lambda (x)
+      (syntax-case x ()
+         ((_)
+          #'(make-process "sh"))
+         ((_ cmd e* ...)
+          (let loop ([ret (list)]
+                     [e #'(e* ...)])
+             (syntax-case e ()
+                (() #`(process-create-plist (list #,@(append (list #''cmd: #'cmd) ret))))
+
+                ((k v kv* ...)
+                 (and (identifier? #'k)
+                      (member (syntax->datum #'k) '(stdout: stderr: on-exit: async?: pty?:)))
+                 (loop (append ret (list #''k #'v)) #'(kv* ...)))))))))
 
 (define-syntax (with-process-temp-buffer stx)
    (syntax-case stx ()
