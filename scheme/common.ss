@@ -111,16 +111,21 @@
 (define (second ls)
    (car (cdr ls)))
 
-(define (plist-get plist prop)
-   (let loop ([plist plist])
-      (if (< (length plist) 2)
-         #f
-         ;; else
-         (let ([name (first plist)] [val (second plist)])
-            (if (equal? name prop)
-               val
-               ;; else
-               (loop (cdr (cdr plist))))))))
+(define plist-get
+   (case-lambda
+      ((plist prop)
+       (plist-get plist prop #f))
+
+      ((plist prop def)
+       (let loop ([plist plist])
+          (if (< (length plist) 2)
+             def
+             ;; else
+             (let ([name (first plist)] [val (second plist)])
+                (if (equal? name prop)
+                   val
+                   ;; else
+                   (loop (cdr (cdr plist))))))))))
 
 (define (plist-put plist prop value)
    (let loop ([plist plist] [set? #f])
