@@ -56,7 +56,6 @@ int term_keys_send(int bid, char *keys);
 int term_text_send(int bid, char *text);
 int term_text_get(int bid, char **buf, size_t *len);
 int term_current_line_get(int bid, char **buf, size_t *len);
-int term_filter_enable(int bid, bool enable);
 
 int fifo_create(void);
 

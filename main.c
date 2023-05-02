@@ -285,18 +285,6 @@ cleanup(void) {
 		unlink(retfifo.file);
 }
 
-static void vt_filter(Vt *vt, char *ch, size_t len, void *arg)
-{
-	Buffer *buf = arg;
-	event_t evt = {};
-
-	evt.eid = EVT_VTERM_FILTER;
-	evt.oid = buffer_id_get(buf);
-	evt.len = len;
-	evt.str = ch;
-	scheme_event_handle(evt);
-}
-
 static void
 quit(const char *args[]) {
 	cleanup();
@@ -1163,26 +1151,6 @@ int term_current_line_get(int bid, char **buf, size_t *len)
 	} else {
 		return -1;
 	}
-}
-
-int term_filter_enable(int bid, bool enable)
-{
-	Buffer *b = buffer_by_id(bid);
-
-	if (b && buffer_proc_get(b)) {
-		Process *proc = buffer_proc_get(b);
-		Vt *vt = process_term_get(proc);
-
-		if (enable) {
-			vt_filter_set(vt, vt_filter, b);
-		} else {
-			vt_filter_set(vt, NULL, NULL);
-		} 
-
-		return 0;
-	}
-
-	return -1;
 }
 
 int fifo_create(void)

@@ -105,7 +105,7 @@
          [100  'key-press-hook   ]
          [101  'text-insert-hook   ]
          [200  'process-exit-hook   ]
-         [300  'vterm-filter-hook   ]
+         [300  'process-filter-hook   ]
          [else #f]))
 
    (let ([h (__evt->symb ev)])
@@ -114,12 +114,8 @@
                  (eq? h 'pre-draw-hook))
             (run-hooks h)
             ;; else
-            (if (eq? h 'vterm-filter-hook)
-               (begin
-                  (with-current-buffer oid
-                     (let ([fn (get-local vterm-filter-func #f)])
-                        (when fn
-                           (try fn str)))))
+            (if (eq? h 'process-filter-hook)
+               (run-hooks h oid str)
                ;; else
                (run-hooks h oid))))))
 

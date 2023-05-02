@@ -19,6 +19,10 @@
 
 (define __cs_process_destroy_dead (foreign-procedure "cs_process_destroy_dead" () void))
 
+(define __cs_process_filter_enable (foreign-procedure "cs_process_filter_enable" (int boolean) scheme-object))
+
+(define __cs_process_text_send (foreign-procedure "cs_process_text_send" (int string) int))
+
 (define (process-destroy-dead)
    (call-foreign (__cs_process_destroy_dead)))
    
@@ -81,6 +85,7 @@
       buffer-err
       on-exit
       (mutable port-reader)
+      (mutable filter)
     )
 )
 
@@ -182,11 +187,18 @@
    )
 )
 
+(define (process-send-text proc text)
+   (call-foreign (__cs_process_text_send (process-pid proc) text)))
+
 (define process-status
    (lambda (pid)
       (call-foreign (__cs_process_status_get pid))
    )
 )
+
+(define (process-set-filter proc func)
+   (process-filter-set! proc func)
+   (call-foreign (__cs_process_filter_enable (process-pid proc) (or func))))
 
 (define process-create
    (case-lambda
@@ -211,6 +223,10 @@
       ]
 
       [(cmd buf-out buf-err on-exit async? pty?)
+       (process-create cmd buf-out buf-err on-exit async? pty? #f)
+      ]
+
+      [(cmd buf-out buf-err on-exit async? pty? filter)
        (let*(
              [env (process-environment)]
              [p (call-foreign (__cs_process_create
@@ -231,12 +247,14 @@
                 [err-fd (list-ref p 2)]
                 [pid    (list-ref p 3)]
                )
+             (when (and pty? filter)
+                (call-foreign (__cs_process_filter_enable pid #t)))
              (let (
                    [port-in (if (eq? in-fd -1) #f (open-fd-output-port in-fd (buffer-mode block) (native-transcoder)))]
                    [port-out (if (eq? out-fd -1) #f (open-fd-input-port out-fd (buffer-mode block) (native-transcoder)))]
                    [port-err (if (eq? err-fd -1) #f (open-fd-input-port err-fd (buffer-mode block) (native-transcoder)))]
                   )
-                (let ([proc (make-process-entry port-in port-out port-err pid buf-out buf-err on-exit reader)])
+                (let ([proc (make-process-entry port-in port-out port-err pid buf-out buf-err on-exit reader filter)])
                    (hashtable-set! %process-pid-ht pid proc)
                    (when buf-out
                       (hashtable-set! %process-fd-ht out-fd proc)
@@ -261,8 +279,9 @@
          [buf-err (plist-get plist 'stderr:)]
          [on-exit (plist-get plist 'on-exit:)]
          [async?  (plist-get plist 'async?: #t)]
-         [pty?    (plist-get plist 'pty?: #t)])
-      (process-create cmd buf-out buf-err on-exit async? pty?)))
+         [pty?    (plist-get plist 'pty?: #t)]
+         [filter    (plist-get plist 'filter:)])
+      (process-create cmd buf-out buf-err on-exit async? pty? filter)))
 
 (define-syntax make-process
    (lambda (x)
@@ -277,7 +296,7 @@
 
                 ((k v kv* ...)
                  (and (identifier? #'k)
-                      (member (syntax->datum #'k) '(stdout: stderr: on-exit: async?: pty?:)))
+                      (member (syntax->datum #'k) '(stdout: stderr: on-exit: async?: pty?: filter:)))
                  (loop (append ret (list #''k #'v)) #'(kv* ...)))))))))
 
 (define-syntax (with-process-temp-buffer stx)
@@ -438,3 +457,14 @@
    )
 )
 (add-hook 'process-exit-hook on-process-exit)
+
+(define (process-filter-func pid str)
+   (let ([proc (hashtable-ref %process-pid-ht pid #f)])
+      (when proc
+         (when (process-filter proc)
+            (try
+               (process-filter proc)
+                  proc
+                  str
+            )))))
+(add-hook 'process-filter-hook process-filter-func)

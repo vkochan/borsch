@@ -251,6 +251,28 @@ static void puttab(Vt *t, int count);
 static void process_nonprinting(Vt *t, wchar_t wc);
 static void send_curs(Vt *t);
 
+static void append_filter_buf(Vt *vt, wchar_t wc)
+{
+	int start = vt->filter_buf_len;
+	char wb[MB_CUR_MAX];
+	int len;
+
+	len = wctomb(wb, wc);
+	if (len < 1)
+		return;
+
+	vt->filter_buf_len += len;
+
+	if (vt->filter_buf_len > vt->filter_buf_cap) {
+		vt->filter_buf = realloc(vt->filter_buf, sizeof(*vt->filter_buf) * vt->filter_buf_len);
+		vt->filter_buf_cap = vt->filter_buf_len;
+	}
+	if (!vt->filter_buf)
+		return;
+
+	memcpy(vt->filter_buf + start, wb, len);
+}
+
 static void row_set(VtRow *row, int start, int len, VtBuffer *t)
 {
 	VtCell cell = {
@@ -550,6 +572,8 @@ static void cursor_line_down(Vt *t)
 	VtBuffer *b = t->buffer;
 	row_set(b->curs_row, b->cols, b->maxcols - b->cols, NULL);
 	b->curs_row++;
+	if (t->vt_filter)
+		append_filter_buf(t, L'\n');
 	if (b->curs_row < b->scroll_bot)
 		return;
 
@@ -1336,28 +1360,6 @@ static wchar_t get_vt100_graphic(char c)
 	return '\0';
 }
 
-static void append_filter_buf(Vt *vt, wchar_t wc)
-{
-	int start = vt->filter_buf_len;
-	char wb[MB_CUR_MAX];
-	int len;
-
-	len = wctomb(wb, wc);
-	if (len < 1)
-		return;
-
-	vt->filter_buf_len += len;
-
-	if (vt->filter_buf_len > vt->filter_buf_cap) {
-		vt->filter_buf = realloc(vt->filter_buf, sizeof(*vt->filter_buf) * vt->filter_buf_len);
-		vt->filter_buf_cap = vt->filter_buf_len;
-	}
-	if (!vt->filter_buf)
-		return;
-
-	memcpy(vt->filter_buf + start, wb, len);
-}
-
 bool put_wc(Vt *t, wchar_t wc)
 {
 	int width = 0;
@@ -1396,7 +1398,6 @@ bool put_wc(Vt *t, wchar_t wc)
 		}
 
 		if (b->curs_col >= b->cols) {
-			t->filter_buf_len = 0;
 			b->curs_col = 0;
 			cursor_line_down(t);
 		}
@@ -1462,8 +1463,9 @@ int vt_process(Vt *t)
 	t->rlen -= pos;
 	memmove(t->rbuf, t->rbuf + pos, t->rlen);
 
-	if (t->vt_filter) {
+	if (t->vt_filter && t->filter_buf_len) {
 		t->vt_filter(t, t->filter_buf, t->filter_buf_len, t->vt_filter_arg);
+		t->filter_buf_len = 0;
 	}
 
 	return 0;

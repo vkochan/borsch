@@ -2,7 +2,6 @@
 (define __cs_term_text_send (foreign-procedure "cs_term_text_send" (int string) int))
 (define __cs_term_text_get (foreign-procedure "cs_term_text_get" (int) scheme-object))
 (define __cs_term_current_line_get (foreign-procedure "cs_term_current_line_get" (int) scheme-object))
-(define __cs_term_filter_enable (foreign-procedure "cs_term_filter_enable" (int boolean) scheme-object))
 
 (define vterm-send-keys
    (case-lambda
@@ -91,13 +90,3 @@
                 (buffer-set-name title)))
           (window-create b)
           b)]))
-
-(define vterm-set-filter
-   (case-lambda
-      [(fn)
-       (vterm-set-filter (current-buffer) fn)]
-
-      [(bid fn)
-       (with-current-buffer bid
-          (set-local! vterm-filter-func fn))
-       (call-foreign (__cs_term_filter_enable bid (or fn)))]))

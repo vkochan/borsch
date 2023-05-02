@@ -1530,11 +1530,6 @@ ptr scheme_term_current_line_get(int bid)
 	return s;
 }
 
-void scheme_term_filter_enable(int bid, bool enable)
-{
-	term_filter_enable(bid, enable);
-}
-
 void scheme_frame_current_set(int fid)
 {
 	Frame *f = frame_by_id(fid);
@@ -1789,6 +1784,50 @@ ptr scheme_process_status_get(int pid)
 	return Sinteger(-1);
 }
 
+static void vt_filter(Vt *vt, char *ch, size_t len, void *arg)
+{
+	event_t evt = {};
+
+	evt.eid = EVT_VTERM_FILTER;
+	evt.oid = vt_pid_get(vt);
+	evt.len = len;
+	evt.str = ch;
+	scheme_event_handle(evt);
+}
+
+int scheme_process_filter_enable(int pid, bool enable)
+{
+	Process *proc = process_by_pid(pid);
+
+	if (proc) {
+		Vt *vt = process_term_get(proc);
+
+		if (enable) {
+			vt_filter_set(vt, vt_filter, NULL);
+		} else {
+			vt_filter_set(vt, NULL, NULL);
+		} 
+
+		return 0;
+	}
+
+	return -1;
+}
+
+int scheme_process_text_send(int pid, char *text)
+{
+	Process *proc = process_by_pid(pid);
+
+	if (!proc)
+		return -1;
+
+	if (process_term_get(proc)) {
+		vt_write(process_term_get(proc), text, strlen(text));
+		return 0;
+	}
+	return -1;
+}
+
 extern char **environ;
 
 static ptr scheme_os_environment_list(char **env)
@@ -1960,7 +1999,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_term_text_send", scheme_term_text_send);
 	Sregister_symbol("cs_term_text_get", scheme_term_text_get);
 	Sregister_symbol("cs_term_current_line_get", scheme_term_current_line_get);
-	Sregister_symbol("cs_term_filter_enable", scheme_term_filter_enable);
 
 	Sregister_symbol("cs_frame_current_set", scheme_frame_current_set);
 	Sregister_symbol("cs_frame_create", scheme_frame_create);
@@ -1992,6 +2030,8 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_process_is_alive", scheme_process_is_alive);
 	Sregister_symbol("cs_process_is_async", scheme_process_is_async);
 	Sregister_symbol("cs_process_status_get", scheme_process_status_get);
+	Sregister_symbol("cs_process_filter_enable", scheme_process_filter_enable);
+	Sregister_symbol("cs_process_text_send", scheme_process_text_send);
 	Sregister_symbol("cs_process_destroy_dead", scheme_process_destroy_dead);
 	Sregister_symbol("cs_process_create", scheme_process_create);
 	Sregister_symbol("cs_process_del", scheme_process_delete);
