@@ -147,17 +147,13 @@ error(const char *errstr, ...) {
 static void keypress(int code)
 {
 	Window *c = window_current();
-	char buf[8] = { '\e' };
 
 	c->urgent = false;
 
 	if (buffer_proc_get(c->buf)) {
 		Vt *term = process_term_get(buffer_proc_get(c->buf));
 
-		if (code == '\e')
-			vt_write(term, buf, 1);
-		else
-			vt_keypress(term, code);
+		vt_keypress(term, code);
 	} else if (buffer_text_input_is_enabled(c->buf)) {
 		event_t evt = {};
 
