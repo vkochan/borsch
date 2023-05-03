@@ -869,14 +869,6 @@ void window_draw_flags(Window *c, int flags)
 	if (!c)
 		return;
 
-	if (c == window_current()) {
-		if (buffer_proc_get(window_current()->buf)) {
-			Process *proc = buffer_proc_get(window_current()->buf);
-			ui_window_cursor_disable(window_current()->win,
-				!vt_cursor_visible(process_term_get(proc)));
-		}
-	}
-
 	if ((force || buffer_is_dirty(c->buf))) {
 		window_update_cursor(c);
 

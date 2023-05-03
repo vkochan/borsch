@@ -1511,7 +1511,6 @@ static void ui_window_resize_cb(UiWin *win)
 void vt_attach(Vt *vt, Window *w)
 {
 	vt->w = w;
-
 	ui_window_on_view_update_set(w->win, NULL);
 	ui_window_sidebar_width_set(w->win, 0);
 	ui_window_ops_update_set(w->win, vt_draw);
@@ -1682,7 +1681,9 @@ void vt_draw(UiWin *win)
 
 		row->dirty = false;
 	}
+
 	ui_window_cursor_set(win, scol + b->curs_col, srow + b->curs_row - b->lines);
+	ui_window_cursor_disable(win, !vt_cursor_visible(t));
 }
 
 void vt_scroll(Vt *t, int rows)
