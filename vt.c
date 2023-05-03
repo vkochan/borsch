@@ -572,8 +572,6 @@ static void cursor_line_down(Vt *t)
 	VtBuffer *b = t->buffer;
 	row_set(b->curs_row, b->cols, b->maxcols - b->cols, NULL);
 	b->curs_row++;
-	if (t->vt_filter)
-		append_filter_buf(t, L'\n');
 	if (b->curs_row < b->scroll_bot)
 		return;
 
@@ -1315,6 +1313,8 @@ static void process_nonprinting(Vt *t, wchar_t wc)
 	case '\v': /* VT */
 	case '\f': /* FF */
 	case '\n': /* LF */
+		if (t->vt_filter)
+			append_filter_buf(t, L'\n');
 		cursor_line_down(t);
 		break;
 	case '\016': /* SO: shift out, invoke the G1 character set */
