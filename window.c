@@ -1074,7 +1074,7 @@ void window_buffer_switch(Window *w, Buffer *b)
 	} else {
 		ui_window_cursor_disable(w->win, false);
 		ui_window_on_view_update_set(w->win, on_view_update_cb);
-		ui_window_ops_draw_set(w->win, NULL);
+		ui_window_ops_update_set(w->win, NULL);
 		ui_window_on_resize_set(w->win, NULL);
 		ui_window_priv_set(w->win, w);
 	}

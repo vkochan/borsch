@@ -1514,7 +1514,7 @@ void vt_attach(Vt *vt, Window *w)
 
 	ui_window_on_view_update_set(w->win, NULL);
 	ui_window_sidebar_width_set(w->win, 0);
-	ui_window_ops_draw_set(w->win, vt_draw);
+	ui_window_ops_update_set(w->win, vt_draw);
 	ui_window_priv_set(w->win, vt);
 	ui_window_on_resize_set(w->win, ui_window_resize_cb);
 	vt_data_set(vt, w);
@@ -1529,7 +1529,7 @@ static void vt_detach(Vt *vt)
 
 	ui_window_on_view_update_set(vt->w->win, NULL);
 	ui_window_sidebar_width_set(vt->w->win, 0);
-	ui_window_ops_draw_set(vt->w->win, NULL);
+	ui_window_ops_update_set(vt->w->win, NULL);
 	ui_window_priv_set(vt->w->win, NULL);
 	ui_window_on_resize_set(vt->w->win, NULL);
 	vt_data_set(vt, NULL);

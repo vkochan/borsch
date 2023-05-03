@@ -195,9 +195,9 @@ void __ui_window_draw(UiWin *win, bool force)
 	if (force)
 		view_invalidate(win->view);
 
-	if (view_update(win->view) || win->draw) {
-		if (win->draw)
-			win->draw(win);
+	if (view_update(win->view) || win->view_draw) {
+		if (win->view_draw)
+			win->view_draw(win);
 		else
 			view_draw(win->view);
 
@@ -296,14 +296,14 @@ void *ui_window_priv_get(UiWin *win)
 	return win->priv;
 }
 
-void ui_window_ops_draw_set(UiWin *win, void (*fn)(UiWin *))
+void ui_window_ops_update_set(UiWin *win, void (*fn)(UiWin *))
 {
-	win->draw = fn;
+	win->view_draw = fn;
 }
 
-void *ui_window_ops_draw_get(UiWin *win)
+void *ui_window_ops_update_get(UiWin *win)
 {
-	return win->draw;
+	return win->view_draw;
 }
 
 void ui_window_text_fg_set(UiWin *win, short fg)
