@@ -1,5 +1,4 @@
 (define __cs_term_keys_send (foreign-procedure "cs_term_keys_send" (int string) int))
-(define __cs_term_text_send (foreign-procedure "cs_term_text_send" (int string) int))
 (define __cs_term_text_get (foreign-procedure "cs_term_text_get" (int) scheme-object))
 (define __cs_term_current_line_get (foreign-procedure "cs_term_current_line_get" (int) scheme-object))
 
@@ -11,13 +10,8 @@
       [(bid keys)
        (call-foreign (__cs_term_keys_send bid keys))]))
 
-(define vterm-send-text
-   (case-lambda
-      [(text)
-       (call-foreign (__cs_term_text_send (current-buffer) text))]
-
-      [(bid text)
-       (call-foreign (__cs_term_text_send bid text))]))
+(define (vterm-send-text text)
+   (process-send-text (get-local process) text))
 
 (define vterm-string
    (case-lambda
@@ -83,6 +77,7 @@
           (with-current-buffer b
              (define-local major-mode 'vterm-mode)
              (define-local vterm-filter-func #f)
+             (define-local process p)
              (buffer-set-keymap 'vterm-mode-map)
              (buffer-set-mode-name "VTerm")
              (buffer-set-vterm (process-pid p))

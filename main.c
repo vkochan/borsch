@@ -1112,21 +1112,6 @@ int term_keys_send(int bid, char *keys)
 	return 0;
 }
 
-int term_text_send(int bid, char *text)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (!buf)
-		return -1;
-
-	if (buffer_proc_get(buf)) {
-		Process *proc = buffer_proc_get(buf);
-
-		vt_write(process_term_get(proc), text, strlen(text));
-	}
-	return 0;
-}
-
 int term_text_get(int bid, char **buf, size_t *len)
 {
 	Buffer *b = buffer_by_id(bid);

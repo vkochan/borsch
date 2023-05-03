@@ -1491,11 +1491,6 @@ int scheme_term_keys_send(int bid, char *text)
 	return term_keys_send(bid, text);
 }
 
-int scheme_term_text_send(int bid, char *text)
-{
-	return term_text_send(bid, text);
-}
-
 ptr scheme_term_text_get(int bid)
 {
 	char *text = NULL;
@@ -1996,7 +1991,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_widget_create", scheme_widget_create);
 
 	Sregister_symbol("cs_term_keys_send", scheme_term_keys_send);
-	Sregister_symbol("cs_term_text_send", scheme_term_text_send);
 	Sregister_symbol("cs_term_text_get", scheme_term_text_get);
 	Sregister_symbol("cs_term_current_line_get", scheme_term_current_line_get);
 
