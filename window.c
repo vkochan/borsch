@@ -813,7 +813,7 @@ int window_sidebar_width(Window *w)
 	return 0;
 }
 
-void window_update(Window *w)
+static void window_update_cursor(Window *w)
 {
 	View *view = w->view;
 	Buffer *buf = w->buf;
@@ -878,7 +878,7 @@ void window_draw_flags(Window *c, int flags)
 	}
 
 	if ((force || buffer_is_dirty(c->buf))) {
-		window_update(c);
+		window_update_cursor(c);
 
 		if (fire_event) {
 			event_t evt = {};
