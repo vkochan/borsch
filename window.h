@@ -135,7 +135,6 @@ int window_sidebar_width(Window *w);
 void window_update(Window *w);
 int window_scroll(Window *w, char type, int n);
 void window_draw_flags(Window *c, int flags);
-void window_draw(Window *c);
 void window_focus(Window *c);
 void window_delete(Window *w);
 void window_buffer_switch(Window *w, Buffer *b);

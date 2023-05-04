@@ -881,11 +881,6 @@ void window_draw_flags(Window *c, int flags)
 	}
 }
 
-void window_draw(Window *c)
-{
-	window_draw_flags(c, 0);
-}
-
 static void window_current_set(Window *w)
 {
 	if (frame_current())
