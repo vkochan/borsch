@@ -797,11 +797,8 @@ int window_scroll(Window *w, char type, int n)
 
 void window_sidebar_width_set(Window *w, int width)
 {
-	if (w && width != ui_window_sidebar_width_get(w->win)) {
-		ui_window_sidebar_width_set(w->win, width);
-		buffer_dirty_set(w->buf, true);
-		ui_window_update(w->win);
-	}
+	ui_window_sidebar_width_set(w->win, width);
+	buffer_dirty_set(w->buf, true);
 }
 
 int window_sidebar_width(Window *w)
