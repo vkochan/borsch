@@ -863,7 +863,6 @@ static void window_update_cursor(Window *w)
 
 void window_draw_flags(Window *c, int flags)
 {
-	bool fire_event = !(flags & WIN_DRAW_F_NO_EVENT);
 	bool force = flags & WIN_DRAW_F_FORCE;
 
 	if (!c)
@@ -872,13 +871,11 @@ void window_draw_flags(Window *c, int flags)
 	if ((force || buffer_is_dirty(c->buf))) {
 		window_update_cursor(c);
 
-		if (fire_event) {
-			event_t evt = {};
+		event_t evt = {};
 
-			evt.eid = EVT_WIN_DRAW;
-			evt.oid = c->id;
-			scheme_event_handle(evt);
-		}
+		evt.eid = EVT_WIN_DRAW;
+		evt.oid = c->id;
+		scheme_event_handle(evt);
 
 		ui_window_draw(c->win);
 	}

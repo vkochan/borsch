@@ -103,7 +103,6 @@ Frame *frame_by_id(int fid);
 	for (int __n = ({__m = window_first();0;}); __m && __n < layout_current_nmaster(); __m = __m->next, __n++)
 
 #define WIN_DRAW_F_FORCE	(1 << 0)
-#define WIN_DRAW_F_NO_EVENT	(1 << 1)
 
 #define WIN_POS_F_TOP		(1 << 0)
 #define WIN_POS_F_BOT		(1 << 1)
