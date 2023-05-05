@@ -99,7 +99,6 @@
 (define (__on-event-handler ev oid str)
    (define (__evt->symb ev)
       (case ev
-         [1    'window-draw-hook ]
          [2    'pre-draw-hook ]
          [3    'post-draw-hook ]
          [100  'key-press-hook   ]

@@ -118,11 +118,10 @@ void scheme_win_update_layout(void)
 
 void scheme_win_draw(int wid, bool enforce)
 {
-	int draw_flags = enforce ? WIN_DRAW_F_FORCE : 0;
 	Window *w = window_get_by_id(wid);
 
 	if (w) {
-		window_draw_flags(w, draw_flags);
+		ui_window_draw(w->win);
 	}
 }
 
@@ -437,9 +436,21 @@ ptr scheme_win_sidebar_get(int wid)
 	return Sinteger(window_sidebar_width(window_get_by_id(wid)));
 }
 
-void scheme_win_update(int wid)
+void scheme_win_update_cursor(int wid)
 {
-	win_update(wid);
+	Window *w = window_get_by_id(wid);
+
+	if (w)
+		window_update_cursor(w);
+}
+
+ptr scheme_win_update(int wid)
+{
+	Window *w = window_get_by_id(wid);
+
+	if (w)
+		return Sboolean(ui_window_update(w->win, true));
+	return Sfalse;
 }
 
 bool scheme_win_has_title(int wid)
@@ -1900,6 +1911,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_sidebar_set", scheme_win_sidebar_set);
 	Sregister_symbol("cs_win_sidebar_get", scheme_win_sidebar_get);
 	Sregister_symbol("cs_win_update", scheme_win_update);
+	Sregister_symbol("cs_win_update_cursor", scheme_win_update_cursor);
 	Sregister_symbol("cs_win_has_title", scheme_win_has_title);
 
 	Sregister_symbol("cs_kmap_add", scheme_kmap_add);

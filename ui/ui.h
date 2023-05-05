@@ -202,7 +202,7 @@ int ui_window_sidebar_width_get(UiWin *win);
 void ui_window_has_title_set(UiWin *win, bool has_title);
 bool ui_window_has_title(UiWin *win);
 
-void ui_window_update(UiWin *win);
+bool ui_window_update(UiWin *win, bool force);
 
 void ui_window_focus(UiWin *win, bool focus);
 bool ui_window_is_focused(UiWin *win);

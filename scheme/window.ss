@@ -25,7 +25,8 @@
 (define __cs_win_scroll (foreign-procedure "cs_win_scroll" (int char int) scheme-object))
 (define __cs_win_sidebar_set (foreign-procedure "cs_win_sidebar_set" (int int) void))
 (define __cs_win_sidebar_get (foreign-procedure "cs_win_sidebar_get" (int) scheme-object))
-(define __cs_win_update (foreign-procedure "cs_win_update" (int) void))
+(define __cs_win_update (foreign-procedure "cs_win_update" (int) scheme-object))
+(define __cs_win_update_cursor (foreign-procedure "cs_win_update_cursor" (int) void))
 (define __cs_win_coord_get (foreign-procedure "cs_win_coord_get" (int) scheme-object))
 (define __cs_win_draw (foreign-procedure "cs_win_draw" (int boolean) void))
 (define __cs_win_layout_is_changed (foreign-procedure "cs_win_layout_is_changed" () boolean))
@@ -139,6 +140,9 @@
 
       [(w enforce?)
        (when (and w (or enforce? (window-is-dirty? w)) (window-is-visible? w))
+          (window-update-cursor w)
+          (window-update w) 
+          (run-hooks 'window-draw-hook w)
           (call-foreign (__cs_win_draw w enforce?))
           (when (window-has-title? w)
              (window-draw-title w)))]))
@@ -628,6 +632,14 @@
 
       [(w)
        (call-foreign (__cs_win_sidebar_get w))]))
+
+(define window-update-cursor
+    (case-lambda 
+       [()
+        (window-update-cursor (current-window))]
+
+       [(w)
+        (call-foreign (__cs_win_update_cursor w))]))
 
 (define window-update
     (case-lambda 

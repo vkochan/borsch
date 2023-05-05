@@ -209,8 +209,7 @@ static bool __ui_window_update(UiWin *win, bool force)
 
 void ui_window_draw(UiWin *win)
 {
-	if (__ui_window_update(win, false))
-		draw_window(win);
+	draw_window(win);
 }
 
 void ui_window_resize(UiWin *win, int width, int height)
@@ -390,9 +389,9 @@ bool ui_window_has_title(UiWin *win)
 	return win->has_title;
 }
 
-void ui_window_update(UiWin *win)
+bool ui_window_update(UiWin *win, bool force)
 {
-	__ui_window_update(win, true);
+	return __ui_window_update(win, force);
 }
 
 void ui_window_focus(UiWin *win, bool focus)

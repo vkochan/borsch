@@ -570,15 +570,6 @@ int main(int argc, char *argv[]) {
 }
 
 /* External API */
-void win_update(int wid)
-{
-	Window *w = window_get_by_id(wid);
-
-	if (w) {
-		ui_window_update(w->win);
-	}
-}
-
 int buf_new(char *name)
 {
 	Buffer *buf = __buf_new(name, global_kmap);

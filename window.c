@@ -810,7 +810,7 @@ int window_sidebar_width(Window *w)
 	return 0;
 }
 
-static void window_update_cursor(Window *w)
+void window_update_cursor(Window *w)
 {
 	View *view = w->view;
 	Buffer *buf = w->buf;
@@ -855,26 +855,6 @@ static void window_update_cursor(Window *w)
 		/* TODO: better to make buffer to know about it's
 		 * windows and mark them as dirty on text update */
 		buffer_dirty_set(buf, false);
-	}
-}
-
-void window_draw_flags(Window *c, int flags)
-{
-	bool force = flags & WIN_DRAW_F_FORCE;
-
-	if (!c)
-		return;
-
-	if ((force || buffer_is_dirty(c->buf))) {
-		window_update_cursor(c);
-
-		event_t evt = {};
-
-		evt.eid = EVT_WIN_DRAW;
-		evt.oid = c->id;
-		scheme_event_handle(evt);
-
-		ui_window_draw(c->win);
 	}
 }
 

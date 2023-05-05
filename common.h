@@ -2,7 +2,6 @@
 #define COMMON_H
 
 typedef enum {
-	EVT_WIN_DRAW     = 1,
 	EVT_PRE_DRAW     = 2,
 	EVT_POST_DRAW	 = 3,
 	EVT_KEY_PRESS    = 100,
