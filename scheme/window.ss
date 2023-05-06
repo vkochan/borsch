@@ -157,7 +157,7 @@
        (when (and w (or enforce? (window-is-dirty? w)) (window-is-visible? w))
           (window-update-cursor w)
           (window-update w) 
-          (run-hooks 'window-draw-hook w)
+          (run-hooks 'text-draw-hook w)
           (call-foreign (__cs_win_draw w enforce?))
           (when (window-has-title? w)
              (window-draw-title w)))]))

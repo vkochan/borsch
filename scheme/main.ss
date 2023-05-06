@@ -133,13 +133,13 @@
                (with-current-buffer m
                   (text-insert (format "~a\n" e) '(style: (fg: "red"))))))))
 
-   (add-hook 'window-draw-hook
+   (add-hook 'text-draw-hook
       (lambda (w)
          (let ([b (window-buffer w)])
             (when b
                (with-current-buffer b
-                  (when (local-bound? window-draw-hook)
-                     (let ([h (get-local window-draw-hook)])
+                  (when (local-bound? text-draw-hook)
+                     (let ([h (get-local text-draw-hook)])
                         (apply h (list w)))))))))
 
    (add-hook 'change-cwd-hook

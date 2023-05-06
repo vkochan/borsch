@@ -310,7 +310,7 @@
        (define-local text-mode-insert-local-map (make-keymap 'text-mode-insert-map)))
    (or (local-bound? buffer-reload-func)
        (define-local buffer-reload-func text-reload-file))
-   (define-local window-draw-hook text-mode-linenum-draw)
+   (define-local text-draw-hook text-mode-linenum-draw)
    (define-local text-insert-hook text-mode-insert-char)
    (define-local text-clear-selection-hook text-mode-normal)
    (define-local linenum-enable #t)
