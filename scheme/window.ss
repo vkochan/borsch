@@ -159,6 +159,7 @@
           (window-update w) 
           (run-hooks 'text-draw-hook w)
           (call-foreign (__cs_win_draw w enforce?))
+          (run-hooks 'window-draw-hook w)
           (when (window-has-title? w)
              (window-draw-title w)))]))
 
