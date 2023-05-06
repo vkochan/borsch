@@ -375,6 +375,21 @@ ptr scheme_win_viewport_height_get(int wid)
 	return Sinteger(height);
 }
 
+void scheme_win_viewport_cell_set(int wid, size_t start, size_t end, short fg, short bg, int attr, wchar_t ch, int set)
+{
+	Window *w = window_get_by_id(wid);
+	CellStyle style = {0};
+
+	if (w) {
+		style.fg = fg;
+		style.bg = bg;
+		style.attr = attr;
+		style.ch = ch;
+
+		view_style(w->view, style, start, end, false, set);
+	}
+}
+
 void scheme_win_border_set(int wid, bool enable)
 {
 	Window *w = window_get_by_id(wid);
@@ -1902,6 +1917,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_height_get", scheme_win_height_get);
 	Sregister_symbol("cs_win_viewport_width_get", scheme_win_viewport_width_get);
 	Sregister_symbol("cs_win_viewport_height_get", scheme_win_viewport_height_get);
+	Sregister_symbol("cs_win_viewport_cell_set", scheme_win_viewport_cell_set);
 	Sregister_symbol("cs_win_border_set", scheme_win_border_set);
 	Sregister_symbol("cs_win_buf_switch", scheme_win_buf_switch);
 	Sregister_symbol("cs_win_prev_selected", scheme_win_prev_selected);

@@ -963,7 +963,7 @@ static void __style_draw(View *view, size_t start, size_t end, Style *style)
 	if (cell_style.bg == -1)
 		cell_style.bg = default_style->bg;
 
-	view_style(view, cell_style, start, end, style->expand);
+	view_style(view, cell_style, start, end, style->expand, 0);
 }
 
 static int style_prop_draw(Buffer *buf, int id, size_t start, size_t end, void *data,
@@ -1014,7 +1014,7 @@ static void on_view_update_cb(UiWin *win)
 			.bg = highlight_style->bg,
 		};
 
-		view_style(w->view, cell_style, MIN(start, end), MAX(start, end), false);
+		view_style(w->view, cell_style, MIN(start, end), MAX(start, end), false, 0);
 	}
 
 	for (Line *l = view_lines_last(w->view)->next; l; l = l->next) {

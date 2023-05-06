@@ -22,6 +22,7 @@
 (define __cs_win_prev_selected (foreign-procedure "cs_win_prev_selected" () scheme-object))
 (define __cs_win_viewport_pos (foreign-procedure "cs_win_viewport_pos" (int char) scheme-object))
 (define __cs_win_viewport_coord (foreign-procedure "cs_win_viewport_coord" (int int) scheme-object))
+(define __cs_win_viewport_cell_set (foreign-procedure "cs_win_viewport_cell_set" (int int int int int int wchar int) void))
 (define __cs_win_scroll (foreign-procedure "cs_win_scroll" (int char int) scheme-object))
 (define __cs_win_sidebar_set (foreign-procedure "cs_win_sidebar_set" (int int) void))
 (define __cs_win_sidebar_get (foreign-procedure "cs_win_sidebar_get" (int) scheme-object))
@@ -79,6 +80,20 @@
 
       [(w)
        (buffer-is-dirty? (window-buffer w))]))
+
+(define window-set-text-style
+   (case-lambda
+      [(start end style)
+       (window-set-text-style (current-window) style)]
+
+      [(wid start end style)
+       (let ([ls-style (style->list style)])
+          (call-foreign (__cs_win_viewport_cell_set wid start end
+                                                    (list-ref ls-style 0)
+                                                    (list-ref ls-style 1)
+                                                    (list-ref ls-style 2)
+                                                    (list-ref ls-style 3)
+                                                    (list-ref ls-style 4))))]))
 
 (define (window-draw-title w)
    (define (cursor-row/col w)

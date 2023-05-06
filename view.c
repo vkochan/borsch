@@ -1339,7 +1339,7 @@ bool view_style_define(View *view, enum UiStyle id, const char *style) {
 	return view->ui->style_define(view->ui, id, style);
 }
 
-void view_style(View *view, CellStyle style, size_t start, size_t end, bool expand) {
+void view_style(View *view, CellStyle style, size_t start, size_t end, bool expand, int set) {
 	if (end < view->start || start > view->end)
 		return;
 
@@ -1371,7 +1371,16 @@ void view_style(View *view, CellStyle style, size_t start, size_t end, bool expa
 		while ((pos <= end || expand) && col < width) {
 			pos += line->cells[col].len;
 			if (line->cells[col].len || expand)
-				line->cells[col].style = style;
+				if (set) {
+					if (set & (1 << 0))
+						line->cells[col].style.fg = style.fg;
+					if (set & (1 << 1))
+						line->cells[col].style.bg = style.bg;
+					if (set & (1 << 2))
+						line->cells[col].style.attr = style.attr;
+				} else {
+					line->cells[col].style = style;
+				}
 			if (style.ch) {
 				memcpy(line->cells[col].data, tmp_cell.data, sizeof(tmp_cell.data));
 				line->cells[col].width = tmp_cell.width >= 0 ?: 0;

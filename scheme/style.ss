@@ -92,22 +92,27 @@
    (let ([f -1]
          [b -1]
          [a #f]
-         [c #\nul])
+         [c #\nul]
+         [is-set 0])
         (let loop ([l s])
            (let ([t (car l)])
               (cond
                  [(equal? t 'fg:)
                   (set! f (color-name->number (cadr l)))
+                  (set! is-set (fxior is-set (bit 0)))
                   (when (> (length l) 2) (loop (cdr (cdr l))))
                  ]
                  [(equal? t 'bg:)
                   (set! b (color-name->number (cadr l)))
+                  (set! is-set (fxior is-set (bit 1)))
                   (when (> (length l) 2) (loop (cdr (cdr l))))
                  ]
                  [(equal? t 'attr:)
                   (set! a (style-name->number (cadr l)))
+                  (set! is-set (fxior is-set (bit 2)))
                   (when (> (length l) 2) (loop (cdr (cdr l))))]
                  [(equal? t 'char:)
+                  (set! is-set (fxior is-set (bit 3)))
                   (set! c (cadr l))
                  ]
                   )))
@@ -115,7 +120,8 @@
          f
          b
          (or a (bit 0))
-         c)))
+         c
+         is-set)))
 
 (define (colors-show)
    (let ([cls '("default" "black" "red" "green" "yellow" "blue" "magenta" "cyan" "white"
