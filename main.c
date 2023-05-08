@@ -148,6 +148,9 @@ static void keypress(int code)
 {
 	Window *c = window_current();
 
+	if (!c)
+		return;
+
 	c->urgent = false;
 
 	if (buffer_proc_get(c->buf)) {
