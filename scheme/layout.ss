@@ -55,18 +55,28 @@
    (let ([wh (call-foreign (__cs_layout_wh))])
       (cdr wh)))
 
+(define (layout-arrange-maximized)
+   (window-for-each
+      (lambda (w)
+         (window-move w (layout-x) (layout-y))
+         (window-set-height w (layout-height))
+         (window-set-width w (layout-width)))))
+
 (define layout-arrange
    (case-lambda
       [()
        (layout-arrange (current-layout))]
 
       [(symb)
-       (call-foreign (__cs_layout_arrange
-                        (symb->layout symb)
-                        (layout-x)
-                        (layout-y)
-                        (layout-width)
-                        (layout-height)))]))
+       (case symb
+          ['maximized (layout-arrange-maximized)]
+          [else
+             (call-foreign (__cs_layout_arrange
+                              (symb->layout symb)
+                              (layout-x)
+                              (layout-y)
+                              (layout-width)
+                              (layout-height)))])]))
 
 (define layout-name
    (case-lambda
@@ -257,7 +267,7 @@
 
       [(fr)
        (call-foreign (__cs_layout_sticky_get (frame-id fr)))]))
-
+ 
 (define layout-toggle-sticky
    (case-lambda
       [()

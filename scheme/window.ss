@@ -17,6 +17,7 @@
 (define __cs_win_viewport_width_get (foreign-procedure "cs_win_viewport_width_get" (int) scheme-object))
 (define __cs_win_viewport_height_get (foreign-procedure "cs_win_viewport_height_get" (int) scheme-object))
 (define __cs_win_size_set (foreign-procedure "cs_win_size_set" (int int int) void))
+(define __cs_win_move (foreign-procedure "cs_win_move" (int int int) void))
 (define __cs_win_border_set (foreign-procedure "cs_win_border_set" (int boolean) void))
 (define __cs_win_buf_switch (foreign-procedure "cs_win_buf_switch" (int int) void))
 (define __cs_win_prev_selected (foreign-procedure "cs_win_prev_selected" () scheme-object))
@@ -501,6 +502,14 @@
 
       [(wid w)
        (call-foreign (__cs_win_size_set wid w -1))]))
+
+(define window-move
+   (case-lambda
+      [(x y)
+       (window-move (current-window) x y)]
+
+      [(wid x y)
+       (call-foreign (__cs_win_move wid x y))]))
 
 (define window-set-height
    (case-lambda

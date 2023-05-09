@@ -316,6 +316,15 @@ void scheme_win_size_set(int wid, int width, int height)
 	}
 }
 
+void scheme_win_move(int wid, int x, int y)
+{
+	Window *w = window_get_by_id(wid);
+
+	if (w) {
+		ui_window_move(w->win, x, y);
+	}
+}
+
 static int win_size_get(int wid, int *width, int *height)
 {
 	Window *w = window_get_by_id(wid);
@@ -1913,6 +1922,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_buf_get", scheme_win_buf_get);
 	Sregister_symbol("cs_win_mark_highlight", scheme_win_mark_highlight);
 	Sregister_symbol("cs_win_size_set", scheme_win_size_set);
+	Sregister_symbol("cs_win_move", scheme_win_move);
 	Sregister_symbol("cs_win_width_get", scheme_win_width_get);
 	Sregister_symbol("cs_win_height_get", scheme_win_height_get);
 	Sregister_symbol("cs_win_viewport_width_get", scheme_win_viewport_width_get);

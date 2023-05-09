@@ -36,14 +36,13 @@ static Ui *ui;
 static void layout_tiled(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
 static void layout_grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
 static void layout_bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
-static void layout_fullscreen(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
 
 /* by default the first layout entry is used */
 static Layout layouts[] = {
 	{ LAYOUT_TILED,     "[]=", layout_tiled },
 	{ LAYOUT_GRID,      "+++", layout_grid },
 	{ LAYOUT_BSTACK,    "TTT", layout_bstack },
-	{ LAYOUT_MAXIMIZED, "[ ]", layout_fullscreen },
+	{ LAYOUT_MAXIMIZED, "[ ]", NULL },
 };
 
 static void layout_tiled(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
@@ -211,13 +210,6 @@ static void layout_bstack(unsigned int wax, unsigned int way, unsigned int waw, 
 			nx += nw;
 		}
 	}
-}
-
-static void layout_fullscreen(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
-{
-	Window *c;
-	for_each_window(c)
-		window_move_resize(c, wax, way, waw, wah);
 }
 
 Layout *layout_get(int id)
