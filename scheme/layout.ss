@@ -55,6 +55,75 @@
    (let ([wh (call-foreign (__cs_layout_wh))])
       (cdr wh)))
 
+(define TEXT-SYMBOL-LTEE  #\x251c)
+(define TEXT-SYMBOL-RTEE  #\x2524)
+(define TEXT-SYMBOL-TTEE  #\x252C)
+(define TEXT-SYMBOL-VLINE #\x2502)
+(define TEXT-SYMBOL-PLUS  #\x253c)
+
+(define (layout-arrange-tiled)
+   (let*([wax (layout-x)]
+         [way (layout-y)]
+         [waw (layout-width)]
+         [wah (layout-height)]
+         [lax wax]
+         [lay (- way 1)]
+         [law waw]
+         [lah wah]
+         [i 0]
+         [n (length (window-list))]
+         [nx lax]
+         [ny lay]
+         [m (max 1 (min n (layout-n-master)))]
+         [mw (cond [(= n m) waw]
+                   [else (flonum->fixnum (inexact (* (layout-%-master) waw)))])]
+         [mh (fx/ wah m)]
+         [th (cond [(= n m) 0]
+                   [else (fx/ wah (- n m))])])
+
+      (define (arrange-master w)
+         (set! nw mw)
+         (set! nh (cond [(< i (- m 1)) mh]
+                        [else (- (+ lay wah) ny)])))
+
+      (define (arrange-tile w)
+         (when (= i m)
+            (set! ny lay)
+            (set! nx (+ nx mw))
+            (ui-draw-char-vert nx ny TEXT-SYMBOL-VLINE wah)
+            (ui-draw-char nx ny TEXT-SYMBOL-TTEE)
+            (set! nx (+ 1 nx))
+            (set! nw (- waw mw 1))
+         )
+         (set! nh (cond [(< i (- n 1)) th]
+                        [else (- (+ lay wah) ny)]))
+         (when (> i m)
+            (ui-draw-char (- nx 1) ny TEXT-SYMBOL-LTEE 1)))
+
+      (define (fill-n-masters)
+         (let loop ([i 1]
+                    [ny (+ lay mh)])
+            (when (< i m)
+               (let ([ch (cond [(> (fxmodulo (- ny 1) th) 0) TEXT-SYMBOL-RTEE]
+                               [else                         TEXT-SYMBOL-PLUS])]
+                     [x (- nx 1)]
+                     [y ny])
+                  (ui-draw-char x y ch))
+               (loop (+ i 1) (+ ny mh)))))
+
+      (window-for-each
+         (lambda (w)
+            (cond [(< i m) (arrange-master w)]
+                  [else    (arrange-tile w)])
+            (window-move w nx (+ ny (- way lay)))
+            (window-set-height w nh)
+            (window-set-width w nw)
+            (set! ny (+ ny nh))
+            (set! i (+ i 1))))
+      ;; Fill in n-master intersections
+      (when (> n m)
+         (fill-n-masters))))
+
 (define (layout-arrange-maximized)
    (window-for-each
       (lambda (w)
@@ -70,6 +139,7 @@
       [(symb)
        (case symb
           ['maximized (layout-arrange-maximized)]
+          ['tiled     (layout-arrange-tiled)]
           [else
              (call-foreign (__cs_layout_arrange
                               (symb->layout symb)

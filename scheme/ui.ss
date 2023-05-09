@@ -46,6 +46,17 @@
                 [style-num (list-ref lst 2)])
              (call-foreign (__cs_ui_draw_char x y ch n fg-num bg-num style-num))))]))
 
+(define ui-draw-char-vert
+   (case-lambda
+      [(x y ch n)
+       (ui-draw-char-vert x y ch n '(fg: "default" bg: "default" attr: "normal"))]
+
+      [(x y ch n opts)
+       (let loop ([y y][n n])
+          (when (> n 0)
+             (ui-draw-char x y ch n opts)
+             (loop (+ y 1) (- n 1)) ))]))
+
 (define ui-draw-text
    (case-lambda
       [(x y str)

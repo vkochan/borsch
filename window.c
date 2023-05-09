@@ -33,69 +33,16 @@ static int frame_id;
 static char *title;
 static Ui *ui;
 
-static void layout_tiled(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
 static void layout_grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
 static void layout_bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
 
 /* by default the first layout entry is used */
 static Layout layouts[] = {
-	{ LAYOUT_TILED,     "[]=", layout_tiled },
+	{ LAYOUT_TILED,     "[]=", NULL },
 	{ LAYOUT_GRID,      "+++", layout_grid },
 	{ LAYOUT_BSTACK,    "TTT", layout_bstack },
 	{ LAYOUT_MAXIMIZED, "[ ]", NULL },
 };
-
-static void layout_tiled(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
-{
-	unsigned int lax = wax, lay = way-1, law = waw, lah = wah;
-	unsigned int i = 0, n = 0, nx, ny, nw, nh, m, mw, mh, th;
-	Window *c;
-
-	for_each_window(c)
-		n++;
-
-	m  = MAX(1, MIN(n, layout_current_nmaster()));
-	mw = n == m ? waw : layout_current_fmaster() * waw;
-	mh = wah / m;
-	th = n == m ? 0 : wah / (n - m);
-	nx = lax;
-	ny = lay;
-
-	for_each_window(c) {
-		if (i < m) {	/* master */
-			nw = mw;
-			nh = (i < m - 1) ? mh : (lay + wah) - ny;
-		} else {	/* tile window */
-			if (i == m) {
-				ny = lay;
-				nx += mw;
-				ui_draw_wchar_vert(ui, nx, ny, UI_TEXT_SYMBOL_VLINE, wah,
-							UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
-				ui_draw_wchar(ui, nx, ny, UI_TEXT_SYMBOL_TTEE, 1,
-						UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
-				nx++;
-				nw = waw - mw -1;
-			}
-			nh = (i < n - 1) ? th : (lay + wah) - ny;
-			if (i > m)
-				ui_draw_wchar(ui, nx - 1, ny, UI_TEXT_SYMBOL_LTEE, 1,
-						UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
-		}
-		window_move_resize(c, nx, ny+(way-lay), nw, nh);
-		ny += nh;
-		i++;
-	}
-
-	/* Fill in nmaster intersections */
-	if (n > m) {
-		ny = lay + mh;
-		for (i = 1; i < m; i++) {
-			ui_draw_wchar(ui, nx - 1, ny, ((ny - 1) % th ? UI_TEXT_SYMBOL_RTEE : UI_TEXT_SYMBOL_PLUS), 1,
-					UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
-			ny += mh;
-		}
-	}
-}
 
 static void layout_grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
 {
