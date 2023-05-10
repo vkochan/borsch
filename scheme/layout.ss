@@ -124,6 +124,111 @@
       (when (> n m)
          (fill-n-masters))))
 
+(define (layout-arrange-grid)
+   (define (grid-cols n)
+      (let loop ([cols 0])
+         (cond [(or (> cols (fx/ n 2))
+                    (>= (fx* cols cols) n))
+                cols]
+               [else (loop (+ cols 1))])))
+
+   (define (grid-rows n cols)
+      (cond [(and (> cols 0)
+                  (>= (* (- cols 1)
+                         cols)
+                      n))
+             (- cols 1)]
+            [else cols]))
+
+   (let*([wax (layout-x)]
+         [way (layout-y)]
+         [waw (layout-width)]
+         [wah (layout-height)]
+         [law waw]
+         [lah wah]
+         [lax wax]
+         [lay (- way 1)]
+         [i 0]
+         [n (length (window-list))]
+         [cols (grid-cols n)]
+         [rows (grid-rows n cols)]
+         [nh (fx/ lah (cond [(> rows 0) rows] [else 1]))]
+         [nw (fx/ law (cond [(> cols 0) cols] [else 1]))]
+         [nx 0]
+         [ny 0]
+         [aw 0]
+         [ah 0])
+
+      (window-for-each
+         (lambda (w)
+            ;; if there are less windows in the last row than normal adjust the
+            ;; split rate to fill the empty space
+            (when (and (> rows
+                          1)
+                       (= i
+                          (- (* rows cols)
+                             cols))
+                       (<= (- n i)
+                           (fxmodulo n cols)))
+               (set! nw (fx/ law
+                             (- n i))))
+            (set! nx (+ lax
+                        (* nw
+                           (fxmodulo i cols))))
+            (set! ny (+ lay
+                        (* nh
+                           (fx/ i cols))))
+            ;; adjust height/width of last row/column's windows
+            (set! ah (cond [(>= i
+                                (* cols
+                                   (- rows 1)))
+                            (- lah
+                               (* nh rows))]
+                           [else 0]))
+            ;; special case if there are less windows in the last row
+            (set! aw (cond [(and (> rows 1)
+                                 (= i (- n 1))
+                                 (< (- n i)
+                                    (fxmodulo n cols)))
+                            ;; (n % cols) == number of windows in the last row
+                            (- law
+                               (* nw
+                                  (fxmodulo n cols)))]
+                           [else (cond [(= (fxmodulo (+ i 1)
+                                                     cols)
+                                           0)
+                                        (- law
+                                           (* nw cols))]
+                                       [else 0])]))
+            (when (> (fxmodulo i cols)
+                     0)
+               (ui-draw-char-vert nx ny TEXT-SYMBOL-VLINE (+ nh ah))
+               ;; if we are on the first row, or on the last one and there are fewer windows
+               ;; than normal whose border does not match the line above, print a top tree char
+               ;; otherwise a plus sign.
+               (cond [(or (<= i cols)
+                          (and (>= i
+                                   (- (* rows cols)
+                                      cols))
+                               (> (fxmodulo n cols)
+                                  0)
+                               (> (fxmodulo (- cols
+                                               (fxmodulo n cols))
+                                            2)
+                                  0)))
+                      (ui-draw-char nx ny TEXT-SYMBOL-TTEE)]
+                     [else
+                      (ui-draw-char nx ny TEXT-SYMBOL-PLUS)])
+               (set! nx (+ nx 1))
+               (set! aw (- aw 1))
+            )
+            (window-set-height w (+ nh ah))
+            (window-set-width w (+ nw aw))
+            (window-move w nx (+ ny
+                                 (- way lay)))
+            (set! i (+ i 1))
+            ))))
+
 (define (layout-arrange-maximized)
    (window-for-each
       (lambda (w)
@@ -139,6 +244,7 @@
       [(symb)
        (case symb
           ['maximized (layout-arrange-maximized)]
+          ['grid      (layout-arrange-grid)]
           ['tiled     (layout-arrange-tiled)]
           [else
              (call-foreign (__cs_layout_arrange

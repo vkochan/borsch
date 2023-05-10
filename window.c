@@ -33,69 +33,15 @@ static int frame_id;
 static char *title;
 static Ui *ui;
 
-static void layout_grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
 static void layout_bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
 
 /* by default the first layout entry is used */
 static Layout layouts[] = {
 	{ LAYOUT_TILED,     "[]=", NULL },
-	{ LAYOUT_GRID,      "+++", layout_grid },
+	{ LAYOUT_GRID,      "+++", NULL },
 	{ LAYOUT_BSTACK,    "TTT", layout_bstack },
 	{ LAYOUT_MAXIMIZED, "[ ]", NULL },
 };
-
-static void layout_grid(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
-{
-	unsigned int lax = wax, lay = way-1, law = waw, lah = wah;
-	unsigned int i = 0, n = 0, nx, ny, nw, nh, aw, ah, cols, rows;
-	Window *c;
-
-	for_each_window(c)
-		n++;
-	
-	/* grid dimensions */
-	for (cols = 0; cols <= n / 2; cols++)
-		if (cols * cols >= n)
-			break;
-	rows = (cols && (cols - 1) * cols >= n) ? cols - 1 : cols;
-	/* window geoms (cell height/width) */
-	nh = lah / (rows ? rows : 1);
-	nw = law / (cols ? cols : 1);
-	for_each_window(c) {
-		/* if there are less windows in the last row than normal adjust the
-		 * split rate to fill the empty space */
-		if (rows > 1 && i == (rows * cols) - cols && (n - i) <= (n % cols))
-			nw = law / (n - i);
-		nx = (i % cols) * nw + lax;
-		ny = (i / cols) * nh + lay;
-		/* adjust height/width of last row/column's windows */
-		ah = (i >= cols * (rows - 1)) ? lah - nh * rows : 0;
-		/* special case if there are less windows in the last row */
-		if (rows > 1 && i == n - 1 && (n - i) < (n % cols))
-			/* (n % cols) == number of windows in the last row */
-			aw = law - nw * (n % cols);
-		else
-			aw = ((i + 1) % cols == 0) ? law - nw * cols : 0;
-		if (i % cols) {
-			ui_draw_wchar_vert(ui, nx, ny, UI_TEXT_SYMBOL_VLINE, nh + ah,
-						UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
-			/* if we are on the first row, or on the last one and there are fewer windows
-			 * than normal whose border does not match the line above, print a top tree char
-			 * otherwise a plus sign. */
-			if (i <= cols
-			    || (i >= rows * cols - cols && n % cols
-				&& (cols - (n % cols)) % 2))
-				ui_draw_wchar(ui, nx, ny, UI_TEXT_SYMBOL_TTEE, 1,
-						UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
-			else
-				ui_draw_wchar(ui, nx, ny, UI_TEXT_SYMBOL_PLUS, 1,
-						UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
-			nx++, aw--;
-		}
-		window_move_resize(c, nx, ny+(way-lay), nw + aw, nh + ah);
-		i++;
-	}
-}
 
 static void layout_bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
 {
