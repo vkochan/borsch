@@ -35,10 +35,10 @@ static Ui *ui;
 
 /* by default the first layout entry is used */
 static Layout layouts[] = {
-	{ LAYOUT_TILED,     "[]=", NULL },
-	{ LAYOUT_GRID,      "+++", NULL },
-	{ LAYOUT_BSTACK,    "TTT", NULL },
-	{ LAYOUT_MAXIMIZED, "[ ]", NULL },
+	{ LAYOUT_TILED,     },
+	{ LAYOUT_GRID,      },
+	{ LAYOUT_BSTACK,    },
+	{ LAYOUT_MAXIMIZED, },
 };
 
 Layout *layout_get(int id)

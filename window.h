@@ -18,7 +18,6 @@ typedef enum {
 
 typedef struct {
 	int id;
-	const char *symbol;
 } Layout;
 
 typedef struct _Frame Frame;
