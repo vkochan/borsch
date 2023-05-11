@@ -269,8 +269,7 @@ int scheme_win_title_set(int wid, char *title)
 
 	if (w) {
 		ui_window_title_set(w->win, title);
-		if (!layout_is_arrange(LAYOUT_MAXIMIZED))
-			buffer_dirty_set(w->buf, true);
+		buffer_dirty_set(w->buf, true);
 		return 0;
 	}
 
@@ -1591,16 +1590,6 @@ void scheme_frame_delete(int fid)
 	}
 }
 
-int scheme_layout_current_get(int fid)
-{
-	return layout_current_get(fid);
-}
-
-int scheme_layout_current_set(int fid, layout_t lay)
-{
-	return layout_current_set(fid, lay);
-}
-
 ptr scheme_layout_xy(void)
 {
 	return Scons(Sinteger(layout_current_x()), Sinteger(layout_current_y()));
@@ -2007,8 +1996,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_frame_create", scheme_frame_create);
 	Sregister_symbol("cs_frame_delete", scheme_frame_delete);
 
-	Sregister_symbol("cs_layout_current_get", scheme_layout_current_get);
-	Sregister_symbol("cs_layout_current_set", scheme_layout_current_set);
 	Sregister_symbol("cs_layout_xy", scheme_layout_xy);
 	Sregister_symbol("cs_layout_wh", scheme_layout_wh);
 

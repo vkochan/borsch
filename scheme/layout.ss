@@ -1,5 +1,3 @@
-(define __cs_layout_current_get (foreign-procedure "cs_layout_current_get" (int) int))
-(define __cs_layout_current_set (foreign-procedure "cs_layout_current_set" (int int) int))
 (define __cs_layout_xy (foreign-procedure "cs_layout_xy" () scheme-object))
 (define __cs_layout_wh (foreign-procedure "cs_layout_wh" () scheme-object))
 
@@ -30,7 +28,7 @@
        (current-layout (current-frame))]
 
       [(fr)
-       (layout->symb (call-foreign (__cs_layout_current_get (frame-id fr))))]))
+       (frame-layout fr)]))
 
 (define (layout-x)
    (let ([xy (call-foreign (__cs_layout_xy))])
@@ -338,8 +336,8 @@
 
       [(fr l)
        (frame-set-prev-layout fr (current-layout fr))
-       (call-foreign (__cs_layout_current_set (frame-id fr)  (symb->layout l)))
        (frame-set-layout fr l)
+       (window-layout-set-changed #t)
        (run-hooks 'layout-changed-hook)]))
 
 (define layout-set-tiled

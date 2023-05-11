@@ -120,12 +120,14 @@ term_title_handler(Vt *term, const char *title) {
 
 static void
 term_urgent_handler(Vt *term) {
+	/*
 	Window *c = (Window *)vt_data_get(term);
 	c->urgent = true;
 	printf("\a");
 	fflush(stdout);
 	if (!layout_is_arrange(LAYOUT_MAXIMIZED) && window_current() != c)
 		buffer_dirty_set(c->buf, true);
+	*/
 }
 
 void eprint(const char *errstr, ...) {

@@ -33,27 +33,6 @@ static int frame_id;
 static char *title;
 static Ui *ui;
 
-/* by default the first layout entry is used */
-static Layout layouts[] = {
-	{ LAYOUT_TILED,     },
-	{ LAYOUT_GRID,      },
-	{ LAYOUT_BSTACK,    },
-	{ LAYOUT_MAXIMIZED, },
-};
-
-Layout *layout_get(int id)
-{
-	return &layouts[id];
-}
-
-Layout *layout_current(void)
-{
-	if (!frame_current())
-		return NULL;
-
-	return frame_current()->layout;
-}
-
 bool layout_is_changed(void)
 {
 	return layout_needs_arrange;
@@ -62,22 +41,6 @@ bool layout_is_changed(void)
 void layout_changed(bool changed)
 {
 	layout_needs_arrange = changed;
-}
-
-bool layout_is_arrange(int id)
-{
-	return layout_current()->id == id;
-}
-
-layout_t layout_current_get(int fid)
-{
-	return layout_current()->id;
-}
-
-int layout_current_set(int fid, layout_t lay)
-{
-	frame_current()->layout = layout_get(lay);
-	layout_changed(true);
 }
 
 unsigned int layout_current_x(void)
@@ -158,7 +121,6 @@ Frame *frame_create(void)
 	if (!f)
 		return NULL;
 
-	f->layout = layouts;
 	f->id = ++frame_id;
 
 	frame_insert(f);

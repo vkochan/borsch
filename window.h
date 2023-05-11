@@ -6,20 +6,6 @@
 #include "buffer.h"
 #include "view.h"
 
-typedef enum {
-	LAYOUT_FIRST = 0,
-	LAYOUT_TILED = LAYOUT_FIRST,
-	LAYOUT_GRID = 1,
-	LAYOUT_BSTACK = 2,
-	LAYOUT_MAXIMIZED = 3,
-
-	LAYOUT_MAX
-} layout_t;
-
-typedef struct {
-	int id;
-} Layout;
-
 typedef struct _Frame Frame;
 
 typedef struct Window Window;
@@ -46,20 +32,14 @@ typedef struct _Frame {
 	struct _Frame *next;
 	struct _Frame *prev;
 	int id;
-	Layout *layout;
 	Window *sel;
 	Window *windows;
 	Window *stack;
 } Frame;
 
-Layout *layout_get(int id);
-Layout *layout_current(void);
 bool layout_is_changed(void);
 void layout_changed(bool changed);
 void layout_set_arrange(int id, void (*arrange)(unsigned int, unsigned int, unsigned int, unsigned int));
-bool layout_is_arrange(int id);
-layout_t layout_current_get(int fid);
-int layout_current_set(int fid, layout_t lay);
 unsigned int layout_current_x(void);
 unsigned int layout_current_y(void);
 void layout_current_move(unsigned int x, unsigned y);
