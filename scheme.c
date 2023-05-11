@@ -111,6 +111,11 @@ bool scheme_win_layout_is_changed(void)
 	return window_layout_is_changed();
 }
 
+void scheme_win_layout_set_changed(bool changed)
+{
+	layout_changed(changed);
+}
+
 void scheme_win_update_layout(void)
 {
 	window_update_layout();
@@ -1616,16 +1621,6 @@ int scheme_layout_fmaster_set(int fid, float f)
 	return layout_fmaster_set(fid, f);
 }
 
-bool scheme_layout_sticky_get(int fid)
-{
-	return layout_sticky_get(fid);
-}
-
-int scheme_layout_sticky_set(int fid, bool is_sticky)
-{
-	return layout_sticky_set(fid, is_sticky);
-}
-
 int scheme_layout_arrange(int id, int lx, int ly, int lw, int lh)
 {
 	layout_arrange(id, lx, ly, lw, lh);
@@ -1904,6 +1899,7 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_screen_height_get", scheme_screen_height_get);
 
 	Sregister_symbol("cs_win_layout_is_changed", scheme_win_layout_is_changed);
+	Sregister_symbol("cs_win_layout_set_changed", scheme_win_layout_set_changed);
 	Sregister_symbol("cs_win_update_layout", scheme_win_update_layout);
 	Sregister_symbol("cs_win_draw", scheme_win_draw);
 	Sregister_symbol("cs_win_first_get", scheme_win_first_get);
@@ -2042,8 +2038,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_layout_nmaster_set", scheme_layout_nmaster_set);
 	Sregister_symbol("cs_layout_fmaster_get", scheme_layout_fmaster_get);
 	Sregister_symbol("cs_layout_fmaster_set", scheme_layout_fmaster_set);
-	Sregister_symbol("cs_layout_sticky_get", scheme_layout_sticky_get);
-	Sregister_symbol("cs_layout_sticky_set", scheme_layout_sticky_set);
 	Sregister_symbol("cs_layout_arrange", scheme_layout_arrange);
 	Sregister_symbol("cs_layout_xy", scheme_layout_xy);
 	Sregister_symbol("cs_layout_wh", scheme_layout_wh);

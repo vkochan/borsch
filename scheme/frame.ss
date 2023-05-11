@@ -10,7 +10,8 @@
       (mutable prev-layout)
       (mutable layout)
       (mutable env)
-      (mutable buffers)))
+      (mutable buffers)
+      (mutable sticky)))
 
 (define frames-ht (make-eq-hashtable))
 
@@ -28,7 +29,8 @@
                               #f
                               'tiled
                               (make-eq-hashtable)
-                              (list))])
+                              (list)
+                              #f)])
          (hashtable-set! frames-ht id fr)
          fr)))
 
@@ -201,3 +203,19 @@
 (define (frame-get-or-create-buffer name)
    (or (frame-get-buffer name)
        (buffer-create name)))
+
+(define frame-is-sticky?
+   (case-lambda
+      [()
+       (frame-is-sticky? (current-frame))]
+
+      [(fr)
+       (%frame%-sticky fr)]))
+
+(define frame-set-sticky
+   (case-lambda
+      [(l)
+       (frame-set-sticky (current-frame) l)]
+
+      [(fr l)
+       (%frame%-sticky-set! fr l)]))

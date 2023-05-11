@@ -51,7 +51,6 @@ typedef struct _Frame {
 	int nmaster;
 	float mfact;
 	Layout *layout;
-	bool msticky;
 	Window *sel;
 	Window *windows;
 	Window *stack;
@@ -83,8 +82,6 @@ int layout_nmaster_get(int fid);
 int layout_nmaster_set(int fid, int n);
 float layout_fmaster_get(int fid);
 int layout_fmaster_set(int fid, float mfact);
-bool layout_sticky_get(int fid);
-int layout_sticky_set(int fid, bool is_sticky);
 
 Frame *frame_current(void);
 int frame_current_id(void);
@@ -120,7 +117,6 @@ Window *window_next(Window *w);
 void window_insert_first(Window *c);
 void window_remove(Window *c);
 bool window_is_master(Window *w);
-bool window_is_master_sticky(Window *c);
 bool window_is_widget(Window *w);
 void window_move_resize(Window *c, int x, int y, int w, int h);
 char *window_title_get(Window *c);

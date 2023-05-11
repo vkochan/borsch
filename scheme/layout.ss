@@ -4,8 +4,6 @@
 (define __cs_layout_nmaster_set (foreign-procedure "cs_layout_nmaster_set" (int int) int))
 (define __cs_layout_fmaster_get (foreign-procedure "cs_layout_fmaster_get" (int) float))
 (define __cs_layout_fmaster_set (foreign-procedure "cs_layout_fmaster_set" (int float) int))
-(define __cs_layout_sticky_get (foreign-procedure "cs_layout_sticky_get" (int) boolean))
-(define __cs_layout_sticky_set (foreign-procedure "cs_layout_sticky_set" (int boolean) int))
 (define __cs_layout_arrange (foreign-procedure "cs_layout_arrange" (int int int int int) void))
 (define __cs_layout_xy (foreign-procedure "cs_layout_xy" () scheme-object))
 (define __cs_layout_wh (foreign-procedure "cs_layout_wh" () scheme-object))
@@ -517,7 +515,8 @@
        (layout-set-sticky (current-frame) s)]
 
       [(fr s)
-       (call-foreign (__cs_layout_sticky_set (frame-id fr) s))]))
+       (frame-set-sticky fr s)
+       (window-layout-set-changed #t)]))
 
 (define layout-is-sticky?
    (case-lambda
@@ -525,7 +524,7 @@
        (layout-is-sticky? (current-frame))]
 
       [(fr)
-       (call-foreign (__cs_layout_sticky_get (frame-id fr)))]))
+       (frame-is-sticky? fr)]))
  
 (define layout-toggle-sticky
    (case-lambda

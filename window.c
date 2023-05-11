@@ -159,22 +159,6 @@ int layout_fmaster_set(int fid, float mfact)
 	return 0;
 }
 
-bool layout_sticky_get(int fid)
-{
-	return frame_current()->msticky;
-}
-
-int layout_sticky_set(int fid, bool is_sticky)
-{
-	Window *m;
-
-	frame_current()->msticky = is_sticky;
-	
-	for_each_window_master(m)
-		buffer_dirty_set(m->buf, true);
-	return 0;
-}
-
 int frame_current_id(void)
 {
 	if (frame_current())
@@ -224,7 +208,6 @@ Frame *frame_create(void)
 	f->nmaster = NMASTER;
 	f->mfact = MFACT;
 	f->layout = layouts;
-	f->msticky = false;
 	f->id = ++frame_id;
 
 	frame_insert(f);
@@ -468,22 +451,6 @@ bool window_is_master(Window *w)
 	}
 
 	return false;
-}
-
-bool window_is_master_sticky(Window *c)
-{
-	int n = 0;
-	Window *m;
-
-	if (!frame_current())
-		return false;
-
-	if (!frame_current()->msticky)
-		return false;
-	if (!c)
-		return true;
-
-	return window_is_master(c);
 }
 
 bool window_is_widget(Window *w)
