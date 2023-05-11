@@ -124,6 +124,88 @@
       (when (> n m)
          (fill-n-masters))))
 
+(define (layout-arrange-bstack)
+   (let*([wax (layout-x)]
+         [way (layout-y)]
+         [waw (layout-width)]
+         [wah (layout-height)]
+         [lax wax]
+         [lay (- way 1)]
+         [law waw]
+         [lah wah]
+         [i 0]
+         [n (length (window-list))]
+         [nx lax]
+         [ny lay]
+         [nh 0]
+         [m (max 1 (min n (layout-n-master)))]
+         [mh (cond [(= n m) lah]
+                   [else (flonum->fixnum (inexact (* (layout-%-master) lah)))])]
+         [mw (fx/ law m)]
+         [tw (cond [(= n m) 0]
+                   [else (fx/ law
+                              (- n m))])])
+      (define (arrange-master w)
+         (when (> i 0)
+            (ui-draw-char-vert nx ny TEXT-SYMBOL-VLINE nh)
+            (ui-draw-char nx ny TEXT-SYMBOL-TTEE)
+            (set! nx (+ nx 1)))
+         (set! nh mh)
+         (set! nw (cond [(< i
+                            (- m 1))
+                         mw]
+                        [else (- (+ lax law)
+                                 nx)])))
+
+      (define (arrange-tile w)
+         (when (= i m)
+            (set! nx lax)
+            (set! ny (+ ny mh))
+            (set! nh (- (+ lay lah)
+                        ny)))
+         (when (> i m)
+            (ui-draw-char-vert nx ny TEXT-SYMBOL-VLINE nh)
+            (ui-draw-char nx ny TEXT-SYMBOL-TTEE)
+            (set! nx (+ nx
+                        1))
+         )
+         (set! nw (cond [(< i
+                            (- n
+                               1))
+                         tw]
+                        [else (- (+ lax
+                                    law)
+                                 nx)])))
+
+      (define (fill-n-masters)
+         (set! nx lax)
+         (let loop ([i 0])
+            (when (< i m)
+               (when (> i 0)
+                  (ui-draw-char nx ny TEXT-SYMBOL-PLUS)
+                  (set! nx (+ nx 1))
+               )
+               (set! nw (cond [(< i
+                                  (- m 1))
+                               mw]
+                              [else (- (+ lax law)
+                                       nx)]))
+               (set! nx (+ nx nw))
+               (loop (+ i 1)))))
+ 
+      (window-for-each
+         (lambda (w)
+            (cond [(< i m) (arrange-master w)]
+                  [else    (arrange-tile w)])
+            (window-move w nx (+ ny (- way lay)))
+            (window-set-height w nh)
+            (window-set-width w nw)
+            (set! nx (+ nx nw))
+            (set! i (+ i 1))))
+      ;; Fill in n-master intersections
+      (when (> n m)
+         (fill-n-masters))))
+
 (define (layout-arrange-grid)
    (define (grid-cols n)
       (let loop ([cols 0])
@@ -246,6 +328,7 @@
           ['maximized (layout-arrange-maximized)]
           ['grid      (layout-arrange-grid)]
           ['tiled     (layout-arrange-tiled)]
+          ['bstack    (layout-arrange-bstack)]
           [else
              (call-foreign (__cs_layout_arrange
                               (symb->layout symb)

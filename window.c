@@ -33,77 +33,13 @@ static int frame_id;
 static char *title;
 static Ui *ui;
 
-static void layout_bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah);
-
 /* by default the first layout entry is used */
 static Layout layouts[] = {
 	{ LAYOUT_TILED,     "[]=", NULL },
 	{ LAYOUT_GRID,      "+++", NULL },
-	{ LAYOUT_BSTACK,    "TTT", layout_bstack },
+	{ LAYOUT_BSTACK,    "TTT", NULL },
 	{ LAYOUT_MAXIMIZED, "[ ]", NULL },
 };
-
-static void layout_bstack(unsigned int wax, unsigned int way, unsigned int waw, unsigned int wah)
-{
-	unsigned int lax = wax, lay = way-1, law = waw, lah = wah;
-	unsigned int i = 0, n = 0, nx, ny, nw, nh, m, mw, mh, tw;
-	Window *c;
-
-	for_each_window(c)
-		n++;
-
-	m  = MAX(1, MIN(n, layout_current_nmaster()));
-	mh = n == m ? lah : layout_current_fmaster() * lah;
-	mw = law / m;
-	tw = n == m ? 0 : law / (n - m);
-	nx = lax;
-	ny = lay;
-
-	for_each_window(c) {
-		if (i < m) {	/* master */
-			if (i > 0) {
-				ui_draw_wchar_vert(ui, nx, ny, UI_TEXT_SYMBOL_VLINE, nh,
-							UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
-				ui_draw_wchar(ui, nx, ny, UI_TEXT_SYMBOL_TTEE, 1,
-						UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
-				nx++;
-			}
-			nh = mh;
-			nw = (i < m - 1) ? mw : (lax + law) - nx;
-		} else {	/* tile window */
-			if (i == m) {
-				nx = lax;
-				ny += mh;
-				nh = (lay + lah) - ny;
-			}
-			if (i > m) {
-				ui_draw_wchar_vert(ui, nx, ny, UI_TEXT_SYMBOL_VLINE, nh,
-							UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
-				ui_draw_wchar(ui, nx, ny, UI_TEXT_SYMBOL_TTEE, 1,
-						UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
-				nx++;
-			}
-			nw = (i < n - 1) ? tw : (lax + law) - nx;
-		}
-		window_move_resize(c, nx, ny+(way-lay), nw, nh);
-		nx += nw;
-		i++;
-	}
-
-	/* Fill in nmaster intersections */
-	if (n > m) {
-		nx = lax;
-		for (i = 0; i < m; i++) {
-			if (i > 0) {
-				ui_draw_wchar(ui, nx, ny, UI_TEXT_SYMBOL_PLUS, 1,
-						UI_TEXT_COLOR_DEFAULT, UI_TEXT_COLOR_DEFAULT, UI_TEXT_STYLE_NORMAL);
-				nx++;
-			}
-			nw = (i < m - 1) ? mw : (lax + law) - nx;
-			nx += nw;
-		}
-	}
-}
 
 Layout *layout_get(int id)
 {
