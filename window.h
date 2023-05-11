@@ -96,9 +96,6 @@ Frame *frame_by_id(int fid);
 #define for_each_window(__w) \
 	for (__w = window_first(); __w; __w = __w->next)
 
-#define for_each_window_except_last(__w) \
-	for (__w = window_first(); __w && __w->next; __w = __w->next)
-
 #define for_each_window_master(__m) \
 	for (int __n = ({__m = window_first();0;}); __m && __n < layout_current_nmaster(); __m = __m->next, __n++)
 
