@@ -2,7 +2,6 @@
 (define __cs_layout_current_set (foreign-procedure "cs_layout_current_set" (int int) int))
 (define __cs_layout_fmaster_get (foreign-procedure "cs_layout_fmaster_get" (int) float))
 (define __cs_layout_fmaster_set (foreign-procedure "cs_layout_fmaster_set" (int float) int))
-(define __cs_layout_arrange (foreign-procedure "cs_layout_arrange" (int int int int int) void))
 (define __cs_layout_xy (foreign-procedure "cs_layout_xy" () scheme-object))
 (define __cs_layout_wh (foreign-procedure "cs_layout_wh" () scheme-object))
 
@@ -324,14 +323,7 @@
           ['maximized (layout-arrange-maximized)]
           ['grid      (layout-arrange-grid)]
           ['tiled     (layout-arrange-tiled)]
-          ['bstack    (layout-arrange-bstack)]
-          [else
-             (call-foreign (__cs_layout_arrange
-                              (symb->layout symb)
-                              (layout-x)
-                              (layout-y)
-                              (layout-width)
-                              (layout-height)))])]))
+          ['bstack    (layout-arrange-bstack)])]))
 
 (define layout-name
    (case-lambda

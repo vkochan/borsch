@@ -1611,11 +1611,6 @@ int scheme_layout_fmaster_set(int fid, float f)
 	return layout_fmaster_set(fid, f);
 }
 
-int scheme_layout_arrange(int id, int lx, int ly, int lw, int lh)
-{
-	layout_arrange(id, lx, ly, lw, lh);
-}
-
 ptr scheme_layout_xy(void)
 {
 	return Scons(Sinteger(layout_current_x()), Sinteger(layout_current_y()));
@@ -2026,7 +2021,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_layout_current_set", scheme_layout_current_set);
 	Sregister_symbol("cs_layout_fmaster_get", scheme_layout_fmaster_get);
 	Sregister_symbol("cs_layout_fmaster_set", scheme_layout_fmaster_set);
-	Sregister_symbol("cs_layout_arrange", scheme_layout_arrange);
 	Sregister_symbol("cs_layout_xy", scheme_layout_xy);
 	Sregister_symbol("cs_layout_wh", scheme_layout_wh);
 

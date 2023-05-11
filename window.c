@@ -117,11 +117,6 @@ void layout_current_resize(unsigned int width, unsigned height)
 	wah = height;
 }
 
-void layout_arrange(int id, int lx, int ly, int lw, int lh)
-{
-	layout_get(id)->arrange(lx, ly, lw, lh);
-}
-
 float layout_fmaster_get(int fid)
 {
 	return frame_current()->mfact;

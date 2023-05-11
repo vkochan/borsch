@@ -19,7 +19,6 @@ typedef enum {
 typedef struct {
 	int id;
 	const char *symbol;
-	void (*arrange)(unsigned int, unsigned int, unsigned int, unsigned int);
 } Layout;
 
 typedef struct _Frame Frame;
@@ -65,7 +64,6 @@ void layout_changed(bool changed);
 void layout_set_arrange(int id, void (*arrange)(unsigned int, unsigned int, unsigned int, unsigned int));
 bool layout_is_arrange(int id);
 layout_t layout_current_get(int fid);
-void layout_arrange(int id, int lx, int ly, int lw, int lh);
 int layout_current_set(int fid, layout_t lay);
 float layout_current_fmaster(void);
 unsigned int layout_current_x(void);
