@@ -1601,16 +1601,6 @@ int scheme_layout_current_set(int fid, layout_t lay)
 	return layout_current_set(fid, lay);
 }
 
-int scheme_layout_nmaster_get(int fid)
-{
-	return layout_nmaster_get(fid);
-}
-
-int scheme_layout_nmaster_set(int fid, int n)
-{
-	return layout_nmaster_set(fid, n);
-}
-
 float scheme_layout_fmaster_get(int fid)
 {
 	return layout_fmaster_get(fid);
@@ -2034,8 +2024,6 @@ static void scheme_export_symbols(void)
 
 	Sregister_symbol("cs_layout_current_get", scheme_layout_current_get);
 	Sregister_symbol("cs_layout_current_set", scheme_layout_current_set);
-	Sregister_symbol("cs_layout_nmaster_get", scheme_layout_nmaster_get);
-	Sregister_symbol("cs_layout_nmaster_set", scheme_layout_nmaster_set);
 	Sregister_symbol("cs_layout_fmaster_get", scheme_layout_fmaster_get);
 	Sregister_symbol("cs_layout_fmaster_set", scheme_layout_fmaster_set);
 	Sregister_symbol("cs_layout_arrange", scheme_layout_arrange);

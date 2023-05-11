@@ -48,7 +48,6 @@ typedef struct _Frame {
 	struct _Frame *next;
 	struct _Frame *prev;
 	int id;
-	int nmaster;
 	float mfact;
 	Layout *layout;
 	Window *sel;
@@ -58,8 +57,6 @@ typedef struct _Frame {
 
 /* master width factor [0.1 .. 0.9] */
 #define MFACT 0.5
-/* number of windows in master area */
-#define NMASTER 1
 
 Layout *layout_get(int id);
 Layout *layout_current(void);
@@ -70,7 +67,6 @@ bool layout_is_arrange(int id);
 layout_t layout_current_get(int fid);
 void layout_arrange(int id, int lx, int ly, int lw, int lh);
 int layout_current_set(int fid, layout_t lay);
-int layout_current_nmaster(void);
 float layout_current_fmaster(void);
 unsigned int layout_current_x(void);
 unsigned int layout_current_y(void);
@@ -78,8 +74,6 @@ void layout_current_move(unsigned int x, unsigned y);
 unsigned int layout_current_width(void);
 unsigned int layout_current_height(void);
 void layout_current_resize(unsigned int width, unsigned height);
-int layout_nmaster_get(int fid);
-int layout_nmaster_set(int fid, int n);
 float layout_fmaster_get(int fid);
 int layout_fmaster_set(int fid, float mfact);
 
@@ -92,9 +86,6 @@ Frame *frame_by_id(int fid);
 
 #define for_each_window(__w) \
 	for (__w = window_first(); __w; __w = __w->next)
-
-#define for_each_window_master(__m) \
-	for (int __n = ({__m = window_first();0;}); __m && __n < layout_current_nmaster(); __m = __m->next, __n++)
 
 #define WIN_DRAW_F_FORCE	(1 << 0)
 

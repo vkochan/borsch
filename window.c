@@ -80,11 +80,6 @@ int layout_current_set(int fid, layout_t lay)
 	layout_changed(true);
 }
 
-int layout_current_nmaster(void)
-{
-	return frame_current()->nmaster;
-}
-
 float layout_current_fmaster(void)
 {
 	return frame_current()->mfact;
@@ -125,22 +120,6 @@ void layout_current_resize(unsigned int width, unsigned height)
 void layout_arrange(int id, int lx, int ly, int lw, int lh)
 {
 	layout_get(id)->arrange(lx, ly, lw, lh);
-}
-
-int layout_nmaster_get(int fid)
-{
-	return frame_current()->nmaster;
-}
-
-int layout_nmaster_set(int fid, int n)
-{
-	if (layout_is_arrange(LAYOUT_MAXIMIZED) || layout_is_arrange(LAYOUT_GRID))
-		return -1;
-
-	frame_current()->nmaster = n;
-	layout_changed(true);
-
-	return 0;
 }
 
 float layout_fmaster_get(int fid)
@@ -205,7 +184,6 @@ Frame *frame_create(void)
 	if (!f)
 		return NULL;
 
-	f->nmaster = NMASTER;
 	f->mfact = MFACT;
 	f->layout = layouts;
 	f->id = ++frame_id;
@@ -438,19 +416,6 @@ void window_remove(Window *c)
 	if (c == c->frame->windows)
 		c->frame->windows = c->next;
 	c->next = c->prev = NULL;
-}
-
-
-bool window_is_master(Window *w)
-{
-	Window *m;
-
-	for_each_window_master(m) {
-		if (w == m)
-			return true;
-	}
-
-	return false;
 }
 
 bool window_is_widget(Window *w)
