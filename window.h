@@ -47,15 +47,11 @@ typedef struct _Frame {
 	struct _Frame *next;
 	struct _Frame *prev;
 	int id;
-	float mfact;
 	Layout *layout;
 	Window *sel;
 	Window *windows;
 	Window *stack;
 } Frame;
-
-/* master width factor [0.1 .. 0.9] */
-#define MFACT 0.5
 
 Layout *layout_get(int id);
 Layout *layout_current(void);
@@ -65,15 +61,12 @@ void layout_set_arrange(int id, void (*arrange)(unsigned int, unsigned int, unsi
 bool layout_is_arrange(int id);
 layout_t layout_current_get(int fid);
 int layout_current_set(int fid, layout_t lay);
-float layout_current_fmaster(void);
 unsigned int layout_current_x(void);
 unsigned int layout_current_y(void);
 void layout_current_move(unsigned int x, unsigned y);
 unsigned int layout_current_width(void);
 unsigned int layout_current_height(void);
 void layout_current_resize(unsigned int width, unsigned height);
-float layout_fmaster_get(int fid);
-int layout_fmaster_set(int fid, float mfact);
 
 Frame *frame_current(void);
 int frame_current_id(void);

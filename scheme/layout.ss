@@ -1,7 +1,5 @@
 (define __cs_layout_current_get (foreign-procedure "cs_layout_current_get" (int) int))
 (define __cs_layout_current_set (foreign-procedure "cs_layout_current_set" (int int) int))
-(define __cs_layout_fmaster_get (foreign-procedure "cs_layout_fmaster_get" (int) float))
-(define __cs_layout_fmaster_set (foreign-procedure "cs_layout_fmaster_set" (int float) int))
 (define __cs_layout_xy (foreign-procedure "cs_layout_xy" () scheme-object))
 (define __cs_layout_wh (foreign-procedure "cs_layout_wh" () scheme-object))
 
@@ -466,7 +464,7 @@
        (layout-%-master (current-frame))]
 
       [(fr)
-       (call-foreign (__cs_layout_fmaster_get (frame-id fr)))]))
+       (frame-%-master fr)]))
 
 (define layout-set-%-master
    (case-lambda
@@ -474,7 +472,8 @@
        (layout-set-%-master (current-frame) f)]
 
       [(fr f)
-       (call-foreign (__cs_layout_fmaster_set (frame-id fr) f))]))
+       (frame-set-%-master fr f)
+       (window-layout-set-changed #t)]))
 
 (define layout-%-master+
    (case-lambda
@@ -485,8 +484,8 @@
        (layout-%-master+ (current-frame) f)]
 
       [(fr f)
-       (call-foreign (__cs_layout_fmaster_set
-                        (frame-id fr) (+ (call-foreign (__cs_layout_fmaster_get (frame-id fr))) f)))]))
+       (layout-set-%-master fr (+ (frame-%-master fr)
+                                 f))]))
 
 (define layout-%-master-
    (case-lambda
@@ -497,8 +496,8 @@
        (layout-%-master- (current-frame) f)]
 
       [(fr f)
-       (call-foreign (__cs_layout_fmaster_set
-                        (frame-id fr) (- (call-foreign (__cs_layout_fmaster_get (frame-id fr))) f)))]))
+       (layout-set-%-master fr (- (frame-%-master fr)
+                                 f))]))
 
 (define layout-set-sticky
    (case-lambda

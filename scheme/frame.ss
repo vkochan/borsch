@@ -12,7 +12,8 @@
       (mutable env)
       (mutable buffers)
       (mutable sticky)
-      (mutable n-master)))
+      (mutable n-master)
+      (mutable %-master)))
 
 (define frames-ht (make-eq-hashtable))
 
@@ -32,7 +33,8 @@
                               (make-eq-hashtable)
                               (list)
                               #f
-                              1)])
+                              1
+                              0.5)])
          (hashtable-set! frames-ht id fr)
          fr)))
 
@@ -237,3 +239,19 @@
 
       [(fr n)
        (%frame%-n-master-set! fr n)]))
+
+(define frame-%-master
+   (case-lambda
+      [()
+       (frame-%-master (current-frame))]
+
+      [(fr)
+       (%frame%-%-master fr)]))
+
+(define frame-set-%-master
+   (case-lambda
+      [(n)
+       (frame-set-%-master (current-frame) n)]
+
+      [(fr n)
+       (%frame%-%-master-set! fr n)]))

@@ -80,11 +80,6 @@ int layout_current_set(int fid, layout_t lay)
 	layout_changed(true);
 }
 
-float layout_current_fmaster(void)
-{
-	return frame_current()->mfact;
-}
-
 unsigned int layout_current_x(void)
 {
 	return wax;
@@ -115,22 +110,6 @@ void layout_current_resize(unsigned int width, unsigned height)
 {
 	waw = width;
 	wah = height;
-}
-
-float layout_fmaster_get(int fid)
-{
-	return frame_current()->mfact;
-}
-
-int layout_fmaster_set(int fid, float mfact)
-{
-	if (layout_is_arrange(LAYOUT_MAXIMIZED) || layout_is_arrange(LAYOUT_GRID))
-		return -1;
-
-	frame_current()->mfact = mfact;
-	layout_changed(true);
-
-	return 0;
 }
 
 int frame_current_id(void)
@@ -179,7 +158,6 @@ Frame *frame_create(void)
 	if (!f)
 		return NULL;
 
-	f->mfact = MFACT;
 	f->layout = layouts;
 	f->id = ++frame_id;
 
