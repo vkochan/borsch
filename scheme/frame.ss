@@ -81,6 +81,7 @@
 (define (frame-switch fr)
    (set! *current-frame* fr)
    (call-foreign (__cs_frame_current_set (frame-id fr)))
+   (window-layout-set-changed #t)
    (run-hooks 'frame-switch-hook fr))
 
 (define frame-id

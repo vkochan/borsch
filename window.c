@@ -90,7 +90,6 @@ Frame *frame_current(void)
 int frame_current_set(Frame *f)
 {
 	current_frame = f;
-	layout_changed(true);
 }
 
 static frame_insert(Frame *f)
