@@ -623,7 +623,6 @@ void window_delete(Window *w)
 	ui_window_free(w->win);
 	view_free(w->view);
 	free(w);
-	layout_changed(true);
 }
 
 static void __style_draw(View *view, size_t start, size_t end, Style *style)

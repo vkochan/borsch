@@ -398,7 +398,8 @@
               (buffer-ref-put b)
 	      (when (>= 1 (buffer-ref-count b))
                  (buffer-ref-put b))
-              (run-hooks 'window-delete-hook w)))]))
+              (run-hooks 'window-delete-hook w)
+              (window-layout-set-changed #t)))]))
 
 (define window-close
     (case-lambda
