@@ -37,7 +37,6 @@ typedef struct _Frame {
 	Window *stack;
 } Frame;
 
-void layout_set_arrange(int id, void (*arrange)(unsigned int, unsigned int, unsigned int, unsigned int));
 unsigned int layout_current_x(void);
 unsigned int layout_current_y(void);
 void layout_current_move(unsigned int x, unsigned y);
