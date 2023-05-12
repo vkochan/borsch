@@ -499,13 +499,28 @@
       [(wid)
        (call-foreign (__cs_win_height_get wid))]))
 
+(define window-set-size
+   (case-lambda
+      [(w h)
+       (window-set-size (current-window) w h)]
+
+      [(wid w h)
+       (let ([old-w (window-width w)]
+             [old-h (window-height w)])
+          (when (or (and (positive? w)
+                         (not (eq? w old-w)))
+                    (and (positive? h)
+                         (not (eq? h old-h))))
+             (call-foreign (__cs_win_size_set wid w h))
+             (window-layout-set-changed #t)))]))
+
 (define window-set-width
    (case-lambda
       [(w)
        (window-set-width (current-window) w)]
 
       [(wid w)
-       (call-foreign (__cs_win_size_set wid w -1))]))
+       (window-set-size wid w -1)]))
 
 (define window-move
    (case-lambda
@@ -521,7 +536,7 @@
        (window-set-height (current-window) h)]
 
       [(wid h)
-       (call-foreign (__cs_win_size_set wid -1 h))]))
+       (window-set-size wid -1 h)]))
 
 (define window-set-border
    (case-lambda

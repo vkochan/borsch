@@ -302,21 +302,12 @@ void scheme_win_size_set(int wid, int width, int height)
 	Window *w = window_get_by_id(wid);
 
 	if (w) {
-		bool is_changed = false;
-
-		if (width > 0 && width != ui_window_width_get(w->win)) {
+		if (width > 0) {
 			ui_window_width_set(w->win, width);
-			is_changed = true;
 		}
-		if (height > 0 && height != ui_window_height_get(w->win)) {
+		if (height > 0) {
 			ui_window_height_set(w->win, height);
-			is_changed = true;
 		}
-
-		if (!is_changed)
-			return;
-
-		layout_changed(true);
 	}
 }
 
