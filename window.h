@@ -94,6 +94,6 @@ void window_buffer_switch(Window *w, Buffer *b);
 Window *window_create(Buffer *buf, int x, int y, int width, int height);
 Window *widget_create(Buffer *buf, int x, int y, int width, int height, int pos_flags);
 bool window_layout_is_changed(void);
-void window_update_layout(void);
+void window_update_layout_size(void);
 
 #endif /* WINDOW_H */

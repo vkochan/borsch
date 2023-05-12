@@ -33,7 +33,7 @@
 (define __cs_win_draw (foreign-procedure "cs_win_draw" (int boolean) void))
 (define __cs_win_layout_is_changed (foreign-procedure "cs_win_layout_is_changed" () boolean))
 (define __cs_win_layout_set_changed (foreign-procedure "cs_win_layout_set_changed" (boolean) void))
-(define __cs_win_update_layout (foreign-procedure "cs_win_update_layout" () void))
+(define __cs_win_update_layout_size (foreign-procedure "cs_win_update_layout_size" () void))
 (define __cs_win_has_title (foreign-procedure "cs_win_has_title" (int) boolean))
 
 (define %widget-list% (list))
@@ -47,8 +47,8 @@
 (define (window-layout-set-changed changed?)
    (call-foreign (__cs_win_layout_set_changed changed?)))
 
-(define (window-update-layout)
-   (call-foreign (__cs_win_update_layout))
+(define (window-update-layout-size)
+   (call-foreign (__cs_win_update_layout_size))
    (layout-arrange)
    (window-layout-set-changed #f))
 
@@ -181,7 +181,7 @@
    (let ([redraw? (window-layout-is-changed)])
       (when redraw?
          (ui-clear)
-         (window-update-layout))
+         (window-update-layout-size))
       (for-each
          (lambda (w)
             (when (not (equal? w (current-window)))

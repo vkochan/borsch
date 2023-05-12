@@ -779,7 +779,7 @@ Window *widget_create(Buffer *buf, int x, int y, int width, int height, int pos_
 	return w;
 }
 
-static void window_update_screen_size(void) {
+void window_update_layout_size(void) {
 	int waw, wah, way = 0, wax = 0;
 	int top_h = 0;
 	int bot_h = 0;
@@ -810,12 +810,4 @@ static void window_update_screen_size(void) {
 bool window_layout_is_changed(void)
 {
 	return ui_resize(ui) || layout_is_changed();
-}
-
-void window_update_layout(void)
-{
-	int n = 0;
-	Window *w;
-
-	window_update_screen_size();
 }

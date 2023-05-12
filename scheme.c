@@ -116,9 +116,9 @@ void scheme_win_layout_set_changed(bool changed)
 	layout_changed(changed);
 }
 
-void scheme_win_update_layout(void)
+void scheme_win_update_layout_size(void)
 {
-	window_update_layout();
+	window_update_layout_size();
 }
 
 void scheme_win_draw(int wid, bool enforce)
@@ -1855,7 +1855,7 @@ static void scheme_export_symbols(void)
 
 	Sregister_symbol("cs_win_layout_is_changed", scheme_win_layout_is_changed);
 	Sregister_symbol("cs_win_layout_set_changed", scheme_win_layout_set_changed);
-	Sregister_symbol("cs_win_update_layout", scheme_win_update_layout);
+	Sregister_symbol("cs_win_update_layout_size", scheme_win_update_layout_size);
 	Sregister_symbol("cs_win_draw", scheme_win_draw);
 	Sregister_symbol("cs_win_first_get", scheme_win_first_get);
 	Sregister_symbol("cs_win_prev_get", scheme_win_prev_get);
