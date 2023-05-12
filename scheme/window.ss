@@ -49,7 +49,8 @@
 
 (define (window-update-layout)
    (call-foreign (__cs_win_update_layout))
-   (layout-arrange))
+   (layout-arrange)
+   (window-layout-set-changed #f))
 
 (define window-draw-char
    (case-lambda

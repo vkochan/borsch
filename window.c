@@ -817,7 +817,5 @@ void window_update_layout(void)
 	int n = 0;
 	Window *w;
 
-	layout_changed(false);
-
 	window_update_screen_size();
 }
