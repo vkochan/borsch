@@ -379,6 +379,7 @@
             (let ()
                (window-set-first w)))
          (run-hooks 'window-create-hook w)
+         (window-layout-set-changed #t)
          (window-select w))
       w))
 
@@ -698,7 +699,8 @@
                       [(eq? type 'bottom) 2])])
       (let ([wid (call-foreign (__cs_widget_create name x y w h wtype))])
          (when (> wid 0)
-            (set! %widget-list% (append %widget-list% (list wid))))
+            (set! %widget-list% (append %widget-list% (list wid)))
+            (window-layout-set-changed #t))
          wid)))
 
 (define window-x

@@ -767,7 +767,6 @@ Window *__window_create(Buffer *buf, bool is_widget, int x, int y, int width, in
 
 	ui_window_resize(w->win, width, height);
 	ui_window_move(w->win, x, y);
-	layout_changed(true);
 	return w;
 }
 
