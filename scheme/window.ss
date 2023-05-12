@@ -248,7 +248,8 @@
        (window-set-first (current-window))]
 
       [(wid)
-       (call-foreign (__cs_win_first_set wid))]))
+       (call-foreign (__cs_win_first_set wid))
+       (window-layout-set-changed #t)]))
 
 (define window-set-prev
    (case-lambda
@@ -256,7 +257,8 @@
        (window-set-prev (current-window) prev)]
 
       [(wid prev)
-       (call-foreign (__cs_win_prev_set wid prev))]))
+       (call-foreign (__cs_win_prev_set wid prev))
+       (window-layout-set-changed #t)]))
 
 (define window-set-next
    (case-lambda
@@ -264,7 +266,8 @@
        (window-set-next (current-window) next)]
 
       [(wid next)
-       (call-foreign (__cs_win_next_set wid next))]))
+       (call-foreign (__cs_win_next_set wid next))
+       (window-layout-set-changed #t)]))
 
 (define (%window-list% fr)
    (let ([win (window-first fr)]

@@ -265,8 +265,6 @@ void window_next_set(Window *w, Window *n)
 	n->next = w->next;
 	w->next = n;
 	n->prev = w;
-
-	layout_changed(true);
 }
 
 void window_prev_set(Window *w, Window *p)
@@ -278,8 +276,6 @@ void window_prev_set(Window *w, Window *p)
 	p->prev = w->prev;
 	w->prev = p;
 	p->next = w;
-
-	layout_changed(true);
 }
 
 Window *window_prev(Window *w)
@@ -307,8 +303,6 @@ void window_insert_first(Window *c)
 	c->prev = NULL;
 
 	c->frame->windows = c;
-
-	layout_changed(true);
 }
 
 void window_insert_new(Window *w)
