@@ -31,10 +31,10 @@
 (define __cs_win_update_cursor (foreign-procedure "cs_win_update_cursor" (int) void))
 (define __cs_win_coord_get (foreign-procedure "cs_win_coord_get" (int) scheme-object))
 (define __cs_win_draw (foreign-procedure "cs_win_draw" (int boolean) void))
-(define __cs_win_layout_is_changed (foreign-procedure "cs_win_layout_is_changed" () boolean))
-(define __cs_win_layout_set_changed (foreign-procedure "cs_win_layout_set_changed" (boolean) void))
 (define __cs_win_update_layout_size (foreign-procedure "cs_win_update_layout_size" () void))
 (define __cs_win_has_title (foreign-procedure "cs_win_has_title" (int) boolean))
+
+(define %window-layout-changed% #f)
 
 (define %widget-list% (list))
 
@@ -42,10 +42,11 @@
    %widget-list%)
 
 (define (window-layout-is-changed)
-   (call-foreign (__cs_win_layout_is_changed)))
+   (or %window-layout-changed%
+       (ui-size-changed)))
 
 (define (window-layout-set-changed changed?)
-   (call-foreign (__cs_win_layout_set_changed changed?)))
+   (set! %window-layout-changed% changed?))
 
 (define (window-update-layout-size)
    (call-foreign (__cs_win_update_layout_size))

@@ -76,6 +76,11 @@ void scheme_ui_init(int ui_type)
 	runtime_init(ui_type);
 }
 
+ptr scheme_ui_size_changed(void)
+{
+	Sboolean(ui_resize(g_ui));
+}
+
 void scheme_ui_event_process(void)
 {
 	ui_event_process(g_ui);
@@ -104,16 +109,6 @@ ptr scheme_screen_width_get(void)
 ptr scheme_screen_height_get(void)
 {
 	return Sinteger(ui_height_get(g_ui));
-}
-
-bool scheme_win_layout_is_changed(void)
-{
-	return window_layout_is_changed();
-}
-
-void scheme_win_layout_set_changed(bool changed)
-{
-	layout_changed(changed);
 }
 
 void scheme_win_update_layout_size(void)
@@ -1845,6 +1840,7 @@ void scheme_do_quit(void)
 static void scheme_export_symbols(void)
 {
 	Sregister_symbol("cs_ui_init", scheme_ui_init);
+	Sregister_symbol("cs_ui_size_changed", scheme_ui_size_changed);
 	Sregister_symbol("cs_ui_event_process", scheme_ui_event_process);
 	Sregister_symbol("cs_ui_refresh_screen", scheme_ui_refresh_screen);
 	Sregister_symbol("cs_ui_clear_screen", scheme_ui_clear_screen);
@@ -1853,8 +1849,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_screen_width_get", scheme_screen_width_get);
 	Sregister_symbol("cs_screen_height_get", scheme_screen_height_get);
 
-	Sregister_symbol("cs_win_layout_is_changed", scheme_win_layout_is_changed);
-	Sregister_symbol("cs_win_layout_set_changed", scheme_win_layout_set_changed);
 	Sregister_symbol("cs_win_update_layout_size", scheme_win_update_layout_size);
 	Sregister_symbol("cs_win_draw", scheme_win_draw);
 	Sregister_symbol("cs_win_first_get", scheme_win_first_get);

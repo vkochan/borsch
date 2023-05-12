@@ -23,7 +23,6 @@
 	for (__w = new_windows; __w; __w = __w->next)
 
 static unsigned int waw, wah, wax, way;
-static bool layout_needs_arrange = false;
 static Window *widgets;
 static Window *new_windows;
 static int win_id;
@@ -32,16 +31,6 @@ static Frame *frame_list;
 static int frame_id;
 static char *title;
 static Ui *ui;
-
-bool layout_is_changed(void)
-{
-	return layout_needs_arrange;
-}
-
-void layout_changed(bool changed)
-{
-	layout_needs_arrange = changed;
-}
 
 unsigned int layout_current_x(void)
 {
@@ -805,9 +794,4 @@ void window_update_layout_size(void) {
 		if (w->pos_flags & WIN_POS_F_BOT)
 			ui_window_move(w->win, 0, ui_height_get(ui)-bot_h);
 	}
-}
-
-bool window_layout_is_changed(void)
-{
-	return ui_resize(ui) || layout_is_changed();
 }

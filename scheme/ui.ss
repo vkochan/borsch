@@ -5,6 +5,10 @@
 (define __cs_ui_refresh_screen (foreign-procedure "cs_ui_refresh_screen" () void))
 (define __cs_ui_clear_screen (foreign-procedure "cs_ui_clear_screen" () void))
 (define __cs_ui_draw_char (foreign-procedure "cs_ui_draw_char" (int int wchar int int int int) void))
+(define __cs_ui_size_changed (foreign-procedure "cs_ui_size_changed" () scheme-object))
+
+(define (ui-size-changed)
+   (call-foreign (__cs_ui_size_changed)))
 
 (define (ui-init ui-type)
    (call-foreign (__cs_ui_init ui-type)))
