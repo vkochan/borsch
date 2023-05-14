@@ -1,5 +1,7 @@
-(define __cs_layout_xy (foreign-procedure "cs_layout_xy" () scheme-object))
-(define __cs_layout_wh (foreign-procedure "cs_layout_wh" () scheme-object))
+(define %layout-x% 0)
+(define %layout-y% 0)
+(define %layout-width% 10)
+(define %layout-height% 10)
 
 (define (layout->symb l)
    (case l 
@@ -31,20 +33,28 @@
        (frame-layout fr)]))
 
 (define (layout-x)
-   (let ([xy (call-foreign (__cs_layout_xy))])
-      (car xy)))
+   %layout-x%)
+
+(define (layout-set-x x)
+   (set! %layout-x% x))
 
 (define (layout-y)
-   (let ([xy (call-foreign (__cs_layout_xy))])
-      (cdr xy)))
+   %layout-y%)
+
+(define (layout-set-y y)
+   (set! %layout-y% y))
 
 (define (layout-width)
-   (let ([wh (call-foreign (__cs_layout_wh))])
-      (car wh)))
+   %layout-width%)
+
+(define (layout-set-width w)
+   (set! %layout-width% w))
 
 (define (layout-height)
-   (let ([wh (call-foreign (__cs_layout_wh))])
-      (cdr wh)))
+   %layout-height%)
+
+(define (layout-set-height h)
+   (set! %layout-height% h))
 
 (define TEXT-SYMBOL-LTEE  #\x251c)
 (define TEXT-SYMBOL-RTEE  #\x2524)

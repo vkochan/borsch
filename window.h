@@ -37,13 +37,6 @@ typedef struct _Frame {
 	Window *stack;
 } Frame;
 
-unsigned int layout_current_x(void);
-unsigned int layout_current_y(void);
-void layout_current_move(unsigned int x, unsigned y);
-unsigned int layout_current_width(void);
-unsigned int layout_current_height(void);
-void layout_current_resize(unsigned int width, unsigned height);
-
 Frame *frame_current(void);
 int frame_current_id(void);
 int frame_current_set(Frame *f);
@@ -90,6 +83,5 @@ void window_delete(Window *w);
 void window_buffer_switch(Window *w, Buffer *b);
 Window *window_create(Buffer *buf, int x, int y, int width, int height);
 Window *widget_create(Buffer *buf, int x, int y, int width, int height, int pos_flags);
-void window_update_layout_size(void);
 
 #endif /* WINDOW_H */

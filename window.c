@@ -22,7 +22,6 @@
 #define for_each_new_window(__w) \
 	for (__w = new_windows; __w; __w = __w->next)
 
-static unsigned int waw, wah, wax, way;
 static Window *widgets;
 static Window *new_windows;
 static int win_id;
@@ -31,38 +30,6 @@ static Frame *frame_list;
 static int frame_id;
 static char *title;
 static Ui *ui;
-
-unsigned int layout_current_x(void)
-{
-	return wax;
-}
-
-unsigned int layout_current_y(void)
-{
-	return way;
-}
-
-void layout_current_move(unsigned int x, unsigned y)
-{
-	wax = x;
-	way = y;
-}
-
-unsigned int layout_current_width(void)
-{
-	return waw;
-}
-
-unsigned int layout_current_height(void)
-{
-	return wah;
-}
-
-void layout_current_resize(unsigned int width, unsigned height)
-{
-	waw = width;
-	wah = height;
-}
 
 int frame_current_id(void)
 {
@@ -766,32 +733,4 @@ Window *widget_create(Buffer *buf, int x, int y, int width, int height, int pos_
 
 	w->pos_flags = pos_flags;
 	return w;
-}
-
-void window_update_layout_size(void) {
-	int waw, wah, way = 0, wax = 0;
-	int top_h = 0;
-	int bot_h = 0;
-	Window *w;
-
-	for_each_widget(w) {
-		if (w->pos_flags & WIN_POS_F_TOP)
-			top_h += ui_window_height_get(w->win);
-		else if (w->pos_flags & WIN_POS_F_BOT)
-			bot_h += ui_window_height_get(w->win);
-	}
-
-	wah = ui_height_get(ui)-bot_h;
-	waw = ui_width_get(ui);
-	wah -= top_h;
-	way += top_h;
-
-	layout_current_resize(waw, wah);
-	layout_current_move(wax, way);
-
-	for_each_widget(w) {
-		ui_window_width_set(w->win, ui_width_get(ui));
-		if (w->pos_flags & WIN_POS_F_BOT)
-			ui_window_move(w->win, 0, ui_height_get(ui)-bot_h);
-	}
 }

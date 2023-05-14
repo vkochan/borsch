@@ -111,11 +111,6 @@ ptr scheme_screen_height_get(void)
 	return Sinteger(ui_height_get(g_ui));
 }
 
-void scheme_win_update_layout_size(void)
-{
-	window_update_layout_size();
-}
-
 void scheme_win_draw(int wid, bool enforce)
 {
 	Window *w = window_get_by_id(wid);
@@ -1576,16 +1571,6 @@ void scheme_frame_delete(int fid)
 	}
 }
 
-ptr scheme_layout_xy(void)
-{
-	return Scons(Sinteger(layout_current_x()), Sinteger(layout_current_y()));
-}
-
-ptr scheme_layout_wh(void)
-{
-	return Scons(Sinteger(layout_current_width()), Sinteger(layout_current_height()));
-}
-
 static int bind_key(char *key, void (*act)(void), int kid, char *tname)
 {
 	KeyMap *kmap = keymap_by_id(kid);
@@ -1849,7 +1834,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_screen_width_get", scheme_screen_width_get);
 	Sregister_symbol("cs_screen_height_get", scheme_screen_height_get);
 
-	Sregister_symbol("cs_win_update_layout_size", scheme_win_update_layout_size);
 	Sregister_symbol("cs_win_draw", scheme_win_draw);
 	Sregister_symbol("cs_win_first_get", scheme_win_first_get);
 	Sregister_symbol("cs_win_prev_get", scheme_win_prev_get);
@@ -1980,9 +1964,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_frame_current_set", scheme_frame_current_set);
 	Sregister_symbol("cs_frame_create", scheme_frame_create);
 	Sregister_symbol("cs_frame_delete", scheme_frame_delete);
-
-	Sregister_symbol("cs_layout_xy", scheme_layout_xy);
-	Sregister_symbol("cs_layout_wh", scheme_layout_wh);
 
 	Sregister_symbol("cs_bind_key", scheme_bind_key);
 	Sregister_symbol("cs_unbind_key", scheme_unbind_key);

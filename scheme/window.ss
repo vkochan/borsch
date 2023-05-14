@@ -31,11 +31,12 @@
 (define __cs_win_update_cursor (foreign-procedure "cs_win_update_cursor" (int) void))
 (define __cs_win_coord_get (foreign-procedure "cs_win_coord_get" (int) scheme-object))
 (define __cs_win_draw (foreign-procedure "cs_win_draw" (int boolean) void))
-(define __cs_win_update_layout_size (foreign-procedure "cs_win_update_layout_size" () void))
 (define __cs_win_has_title (foreign-procedure "cs_win_has_title" (int) boolean))
 
 (define %window-layout-changed% #f)
 
+(define %widget-list-top% (list))
+(define %widget-list-bottom% (list))
 (define %widget-list% (list))
 
 (define (widget-list)
@@ -49,7 +50,40 @@
    (set! %window-layout-changed% changed?))
 
 (define (window-update-layout-size)
-   (call-foreign (__cs_win_update_layout_size))
+   (let ([waw 0]
+         [wah 0]
+         [wax 0]
+         [way 0]
+         [top_h 0]
+         [bot_h 0])
+      (for-each
+         (lambda (w)
+            (cond
+               [(widget-is-top? w)
+                (set! top_h (+ top_h
+                               (window-height w)))]
+               [(widget-is-bottom? w)
+                (set! bot_h (+ bot_h
+                               (window-height w)))]))
+         (widget-list))
+      (set! wah (- (ui-screen-height)
+                   bot_h))
+      (set! waw (ui-screen-width))
+      (set! wah (- wah
+                   top_h))
+      (set! way (+ way
+                   top_h))
+      (layout-set-x wax)
+      (layout-set-y way)
+      (layout-set-width waw)
+      (layout-set-height wah)
+      (for-each
+         (lambda (w)
+            (window-set-width w (ui-screen-width))
+            (when (widget-is-bottom? w)
+               (window-move w 0 (- (ui-screen-height)
+                                   bot_h))))
+         (widget-list)))
    (layout-arrange)
    (window-layout-set-changed #f))
 
@@ -177,6 +211,22 @@
 
       [(w)
        (member w (widget-list))]))
+
+(define widget-is-top?
+   (case-lambda
+      [()
+       (widget-is-top? (current-window))]
+
+      [(w)
+       (member w %widget-list-top%)]))
+
+(define widget-is-bottom?
+   (case-lambda
+      [()
+       (widget-is-top? (current-window))]
+
+      [(w)
+       (member w %widget-list-bottom%)]))
 
 (define (window-draw-all)
    (let ([redraw? (window-layout-is-changed)])
@@ -705,6 +755,9 @@
                       [(eq? type 'bottom) 2])])
       (let ([wid (call-foreign (__cs_widget_create name x y w h wtype))])
          (when (> wid 0)
+            (case type
+               ['top    (set! %widget-list-top% (append %widget-list-top% (list wid)))]
+               ['bottom (set! %widget-list-bottom% (append %widget-list-bottom% (list wid)))])
             (set! %widget-list% (append %widget-list% (list wid)))
             (window-layout-set-changed #t))
          wid)))
