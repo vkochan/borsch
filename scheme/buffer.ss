@@ -258,10 +258,12 @@
        (call-foreign (__cs_buf_is_dirty buf))]))
 
 (define (buffer-insert b)
-   (set! %buffer-list% (append %buffer-list% (list b))))
+   (set! %buffer-list% (append %buffer-list% (list b)))
+   (frame-insert-buffer b))
 
 (define (buffer-remove b)
-   (set! %buffer-list% (remove b %buffer-list%)))
+   (set! %buffer-list% (remove b %buffer-list%))
+   (frame-remove-buffer b))
 
 (define buffer-ref-count
    (case-lambda
@@ -286,7 +288,6 @@
 
       [(buf)
        (when (= 1 (buffer-ref-count buf))
-          (frame-remove-buffer buf)
           (buffer-remove buf))
        (call-foreign (__cs_buf_ref_put buf))]))
 
@@ -297,7 +298,6 @@
 
       [(n) 
        (let ([b (call-foreign (__cs_buf_new n))])
-          (frame-insert-buffer b)
           (buffer-insert b)
           (with-current-buffer b
              (set-text-style '(fg: "white")))
