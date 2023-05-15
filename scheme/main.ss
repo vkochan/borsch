@@ -175,7 +175,7 @@
            (let ([mode (buffer-mode-name b)]
                  [name (buffer-name b)])
               (cons (format "(~a) ~a" mode name) b)))
-        (append (frame-list-buffer) (list message-buf))))
+        (append (frame-buffer-list) (list message-buf))))
 
 (define (minibuf-switch-buffer-all)
    (minibuf-complete (minibuf-buffer-list-all->complete)

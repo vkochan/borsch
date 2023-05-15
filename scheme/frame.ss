@@ -158,10 +158,10 @@
       [(fr l)
        (%frame%-layout-set! fr l)]))
 
-(define frame-list-buffer
+(define frame-buffer-list
    (case-lambda
       [()
-       (frame-list-buffer (current-frame))]
+       (frame-buffer-list (current-frame))]
 
       [(fr)
        (%frame%-buffers fr)]))
@@ -186,13 +186,13 @@
    (for-each
       (lambda (b)
          (fn b))
-      (frame-list-buffer)))
+      (frame-buffer-list)))
 
 (define (frame-find-buffer fn)
    (let ([b (find
                (lambda (b)
                   (fn b))
-               (frame-list-buffer))])
+               (frame-buffer-list))])
       b))
 
 (define (frame-get-buffer-by-file file)
