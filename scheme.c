@@ -655,7 +655,7 @@ ptr scheme_buf_name_get(int bid)
 	if (buf)
 		return Sstring(buffer_name_get(buf));
 
-	return Sstring(NULL);
+	return Sfalse;
 }
 
 void scheme_buf_name_set(int bid, const char *name)
@@ -894,7 +894,7 @@ ptr scheme_buf_mode_name_get(int bid)
 	if (buf) {
 		return Sstring(buffer_mode_name_get(buf));
 	}
-	return Sstring("");
+	return Sfalse;
 }
 
 void scheme_buf_state_name_set(int bid, char *name)
@@ -913,7 +913,7 @@ ptr scheme_buf_state_name_get(int bid)
 	if (buf) {
 		return Sstring(buffer_state_name_get(buf));
 	}
-	return Sstring("");
+	return Sfalse;
 }
 
 ptr scheme_buf_file_open(int bid, const char *file)
