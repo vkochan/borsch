@@ -254,7 +254,8 @@
        (or
           (window-is-widget? w)
           (if (layout-is-maximized?)
-             (equal? w (current-window))
+             (or (equal? w (current-window))
+                 (equal? w (window-prev-selected)))
              ;; else
              #t))]))
 
