@@ -138,7 +138,7 @@
 
 (define (window-draw-title w)
    (define (cursor-row/col w)
-      (with-current-buffer (window-buffer)
+      (with-current-buffer (window-buffer w)
          (let ([curs (cursor)])
             (let ([coord (window-pos->coord w curs)])
                (if coord
