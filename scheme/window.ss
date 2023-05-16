@@ -6,7 +6,7 @@
 (define __cs_win_next_set (foreign-procedure "cs_win_next_set" (int int) scheme-object))
 (define __cs_win_current_get (foreign-procedure "cs_win_current_get" () scheme-object))
 (define __cs_win_current_set (foreign-procedure "cs_win_current_set" (int) int))
-(define __cs_widget_create (foreign-procedure "cs_widget_create" (string int int int int int) scheme-object))
+(define __cs_widget_create (foreign-procedure "cs_widget_create" (string int int int int) scheme-object))
 (define __cs_win_new (foreign-procedure "cs_win_new" (int int int int int) scheme-object))
 (define __cs_win_del (foreign-procedure "cs_win_del" (int) int))
 (define __cs_win_title_get (foreign-procedure "cs_win_title_get" (int) scheme-object))
@@ -752,16 +752,14 @@
         (call-foreign (__cs_win_update w))]))
 
 (define (widget-create name x y w h type)
-   (let ([wtype (cond [(eq? type 'top) 1]
-                      [(eq? type 'bottom) 2])])
-      (let ([wid (call-foreign (__cs_widget_create name x y w h wtype))])
-         (when (> wid 0)
-            (case type
-               ['top    (set! %widget-list-top% (append %widget-list-top% (list wid)))]
-               ['bottom (set! %widget-list-bottom% (append %widget-list-bottom% (list wid)))])
-            (set! %widget-list% (append %widget-list% (list wid)))
-            (window-layout-set-changed #t))
-         wid)))
+   (let ([wid (call-foreign (__cs_widget_create name x y w h))])
+      (when (> wid 0)
+         (case type
+            ['top    (set! %widget-list-top% (append %widget-list-top% (list wid)))]
+            ['bottom (set! %widget-list-bottom% (append %widget-list-bottom% (list wid)))])
+         (set! %widget-list% (append %widget-list% (list wid)))
+         (window-layout-set-changed #t))
+      wid))
 
 (define window-x
    (case-lambda

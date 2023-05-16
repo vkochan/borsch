@@ -724,13 +724,12 @@ Window *window_create(Buffer *buf, int x, int y, int width, int height)
 	return __window_create(buf, false, x, y, width, height);
 }
 
-Window *widget_create(Buffer *buf, int x, int y, int width, int height, int pos_flags)
+Window *widget_create(Buffer *buf, int x, int y, int width, int height)
 {
 	Window *w = __window_create(buf, true, x, y, width, height);
 
 	if (!w)
 		return w;
 
-	w->pos_flags = pos_flags;
 	return w;
 }

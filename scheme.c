@@ -1448,7 +1448,7 @@ static Buffer *__buf_new(const char *name, KeyMap *kmap)
 	return NULL;
 }
 
-ptr scheme_widget_create(const char *name, int x, int y, int width, int height, int type)
+ptr scheme_widget_create(const char *name, int x, int y, int width, int height)
 {
 	Window *w;
 	Buffer *b;
@@ -1458,7 +1458,7 @@ ptr scheme_widget_create(const char *name, int x, int y, int width, int height, 
 		return Sfalse;
 	}
 
-	w = widget_create(b, x, y, width, height, type);
+	w = widget_create(b, x, y, width, height);
 	if (!w) {
 		buffer_del(b);
 		return Sfalse;

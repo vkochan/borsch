@@ -25,7 +25,6 @@ struct Window {
 	bool pending_draw_evt;
 	bool is_widget;
 	bool is_new;
-	int pos_flags;
 };
 
 typedef struct _Frame {
@@ -82,6 +81,6 @@ void window_focus(Window *c);
 void window_delete(Window *w);
 void window_buffer_switch(Window *w, Buffer *b);
 Window *window_create(Buffer *buf, int x, int y, int width, int height);
-Window *widget_create(Buffer *buf, int x, int y, int width, int height, int pos_flags);
+Window *widget_create(Buffer *buf, int x, int y, int width, int height);
 
 #endif /* WINDOW_H */
