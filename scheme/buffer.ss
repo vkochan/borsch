@@ -363,7 +363,7 @@
                (window-list))
             (if in-frame?
                (begin
-                  (window-select wid))
+                  (window-focus wid))
                ;; else
                (window-create bid))
             bid)

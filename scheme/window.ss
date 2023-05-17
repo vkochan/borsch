@@ -402,26 +402,26 @@
 (define (window-prev-selected)
     (call-foreign (__cs_win_prev_selected)))
 
-(define (window-select wid)
+(define (window-focus wid)
    (when wid
       (call-foreign (__cs_win_current_set wid))
-      (run-hooks 'window-select-hook wid)))
+      (run-hooks 'window-focus-hook wid)))
 
-(define (window-select-left)
-   (window-select (window-left)))
+(define (window-focus-left)
+   (window-focus (window-left)))
 
-(define (window-select-right)
-   (window-select (window-right)))
+(define (window-focus-right)
+   (window-focus (window-right)))
 
-(define (window-select-upper)
-   (window-select (or (window-upper)
-                      (window-prev)
-                      (window-last))))
+(define (window-focus-upper)
+   (window-focus (or (window-upper)
+                     (window-prev)
+                     (window-last))))
 
-(define (window-select-lower)
-   (window-select (or (window-lower)
-                      (window-next)
-                      (window-first))))
+(define (window-focus-lower)
+   (window-focus (or (window-lower)
+                     (window-next)
+                     (window-first))))
 
 (define (window-create b)
    (let ([w (call-foreign (__cs_win_new
@@ -440,7 +440,7 @@
                (window-set-first w)))
          (run-hooks 'window-create-hook w)
          (window-layout-set-changed #t)
-         (window-select w))
+         (window-focus w))
       w))
 
 (define (%window-delete% w)

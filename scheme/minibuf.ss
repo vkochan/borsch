@@ -4,7 +4,7 @@
 (define (minibuf-select-previous)
    (let ([prev-sel (window-prev-selected)])
       (buffer-set-keymap 1)
-      (window-select prev-sel)))
+      (window-focus prev-sel)))
 
 (define (minibuf-cancel-read)
    (enable-insert #f)
@@ -123,7 +123,7 @@
             (buffer-set-keymap map)
             (when def
                (text-insert def)))
-         (window-select minibuf-window))))
+         (window-focus minibuf-window))))
 
 (define minibuf-read
    (case-lambda
@@ -188,7 +188,7 @@
             (set-local! orig-buf (if (equal? minibuf-buffer (current-buffer)) #f (current-buffer)))
             (set-local! orig-win (if (equal? minibuf-window (current-window)) #f (current-window)))
             (window-set-height minibuf-window 11)
-            (window-select minibuf-window)
+            (window-focus minibuf-window)
             (complete lst minibuf-complete-handle prompt init)))]))
 
 (define minibuf-complete-path
