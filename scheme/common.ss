@@ -369,6 +369,7 @@
             [(eqv? msg 'empty?) (null? st)]
             [(eqv? msg 'push!) (set! st (cons (car args) st))]
             [(eqv? msg 'top)   (car st)]
+            [(eqv? msg 'remove!) (set! st (remove (first args) st))]
             [(eqv? msg 'pop!) (let ([v (car st)]) (set! st (cdr st)) v)]))))
 
 (define (stack-empty? st)
@@ -379,6 +380,9 @@
 
 (define (stack-top st)
    (st 'top))
+
+(define (stack-remove! st val)
+   (st 'remove! val))
 
 (define (stack-pop! st)
    (st 'pop!))
