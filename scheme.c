@@ -652,8 +652,10 @@ ptr scheme_buf_name_get(int bid)
 {
 	Buffer *buf = buffer_by_id(bid);
 
-	if (buf)
-		return Sstring(buffer_name_get(buf));
+	if (buf) {
+		const char *name = buffer_name_get(buf);
+		return Sstring_utf8(name, strlen(name));
+	}
 
 	return Sfalse;
 }
