@@ -183,8 +183,12 @@
              [nl (string-length bn)])
          (when (> nl max)
             (let ([over (- nl max)]) 
-               (set! st (string-append st "..."))
-               (set! bn (substring bn over nl))))
+               (if (> over nl)
+                  (set! bn "")
+                  ;; else
+                  (begin
+                     (set! st (string-append st "..."))
+                     (set! bn (substring bn over nl))))))
          (set! st (string-append st bn))
          (window-draw-text w 0 (- wh 1) st style))))
 
