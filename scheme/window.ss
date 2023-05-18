@@ -20,7 +20,6 @@
 (define __cs_win_move (foreign-procedure "cs_win_move" (int int int) void))
 (define __cs_win_border_set (foreign-procedure "cs_win_border_set" (int boolean) void))
 (define __cs_win_buf_switch (foreign-procedure "cs_win_buf_switch" (int int) void))
-(define __cs_win_prev_selected (foreign-procedure "cs_win_prev_selected" () scheme-object))
 (define __cs_win_viewport_pos (foreign-procedure "cs_win_viewport_pos" (int char) scheme-object))
 (define __cs_win_viewport_coord (foreign-procedure "cs_win_viewport_coord" (int int) scheme-object))
 (define __cs_win_viewport_cell_set (foreign-procedure "cs_win_viewport_cell_set" (int int int int int int wchar int) void))
@@ -397,13 +396,18 @@
                       (window-y wid))]))
 
 (define (current-window)
-   (call-foreign (__cs_win_current_get)))
+   (frame-current-window))
 
 (define (window-prev-selected)
-    (call-foreign (__cs_win_prev_selected)))
+    (frame-prev-focused-window))
 
 (define (window-focus wid)
-   (when wid
+   (when (and wid
+              (not (equal? wid (current-window))))
+      (when (and (current-window)
+                 (not (window-is-widget? (current-window))))
+         (frame-set-prev-focused-window (current-window)))
+      (frame-set-current-window wid)
       (call-foreign (__cs_win_current_set wid))
       (run-hooks 'window-focus-hook wid)))
 
@@ -444,6 +448,14 @@
       w))
 
 (define (%window-delete% w)
+   (frame-delete-window w)
+   (when (equal? w (current-window))
+      (let ([focus (or (frame-prev-focused-window)
+                       (window-next w)
+                       (window-prev w))])
+         (when focus
+            (frame-set-current-window #f)
+            (window-focus focus))))
    (call-foreign (__cs_win_del w)))
 
 (define window-delete

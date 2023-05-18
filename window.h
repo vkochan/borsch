@@ -33,7 +33,6 @@ typedef struct _Frame {
 	int id;
 	Window *sel;
 	Window *windows;
-	Window *stack;
 } Frame;
 
 Frame *frame_current(void);
@@ -57,7 +56,6 @@ void window_cleanup(void);
 void window_coord(Window *w, int *x, int *y);
 Window *window_current(void);
 Window *window_get_by_id(int id);
-Window *window_last_selected(void);
 Window *windows_list(Frame *f);
 Window *window_first(void);
 void window_next_set(Window *w, Window *n);

@@ -405,13 +405,6 @@ void scheme_win_buf_switch(int wid, int bid)
 	}
 }
 
-ptr scheme_win_prev_selected(void)
-{
-	if (window_last_selected())
-		return Sinteger(window_last_selected()->id);
-	return Sfalse;
-}
-
 ptr scheme_win_viewport_pos(int wid, char type)
 {
 	return Sinteger(window_viewport_pos(window_get_by_id(wid), type));
@@ -1861,7 +1854,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_viewport_cell_set", scheme_win_viewport_cell_set);
 	Sregister_symbol("cs_win_border_set", scheme_win_border_set);
 	Sregister_symbol("cs_win_buf_switch", scheme_win_buf_switch);
-	Sregister_symbol("cs_win_prev_selected", scheme_win_prev_selected);
 	Sregister_symbol("cs_win_viewport_pos", scheme_win_viewport_pos);
 	Sregister_symbol("cs_win_viewport_coord", scheme_win_viewport_coord);
 	Sregister_symbol("cs_win_scroll", scheme_win_scroll);

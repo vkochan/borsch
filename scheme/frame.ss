@@ -13,7 +13,9 @@
       (mutable buffers)
       (mutable sticky)
       (mutable n-master)
-      (mutable %-master)))
+      (mutable %-master)
+      (mutable focus-stack)
+      (mutable current-window)))
 
 (define frames-ht (make-eq-hashtable))
 
@@ -34,7 +36,9 @@
                               (list)
                               #f
                               1
-                              0.5)])
+                              0.5
+                              (make-stack)
+                              #f)])
          (hashtable-set! frames-ht id fr)
          fr)))
 
@@ -256,3 +260,48 @@
 
       [(fr n)
        (%frame%-%-master-set! fr n)]))
+
+(define frame-set-prev-focused-window
+   (case-lambda
+      [(w)
+       (frame-set-prev-focused-window (current-frame) w)]
+
+      [(fr w)
+       (when w
+          (let ([st (%frame%-focus-stack fr)])
+             (stack-remove! st w)
+             (stack-push! st w)))]))
+
+(define frame-prev-focused-window
+   (case-lambda
+      [()
+       (frame-prev-focused-window (current-frame))]
+
+      [(fr)
+       (let ([st (%frame%-focus-stack fr)])
+          (stack-top st))]))
+
+(define frame-current-window
+   (case-lambda
+      [()
+       (frame-current-window (current-frame))]
+
+      [(fr)
+       (%frame%-current-window fr)]))
+
+(define frame-set-current-window
+   (case-lambda
+      [(w)
+       (frame-set-current-window (current-frame) w)]
+
+      [(fr w)
+       (%frame%-current-window-set! fr w)]))
+
+(define frame-delete-window
+   (case-lambda
+      [(w)
+       (frame-delete-window (current-frame) w)]
+
+      [(fr w)
+       (let ([st (%frame%-focus-stack fr)])
+          (stack-remove! st w))]))
