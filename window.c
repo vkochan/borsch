@@ -546,7 +546,7 @@ static void __style_draw(View *view, size_t start, size_t end, Style *style)
 	if (cell_style.bg == -1)
 		cell_style.bg = default_style->bg;
 
-	view_style(view, cell_style, start, end, style->expand, 0);
+	view_style(view, cell_style, start, end, style->expand, style->is_set);
 }
 
 static int style_prop_draw(Buffer *buf, int id, size_t start, size_t end, void *data,

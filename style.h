@@ -9,6 +9,7 @@ typedef struct {
 	short bg;
 	int attr;
 	int id;
+	int is_set;
 } Style;
 
 int style_init(void);

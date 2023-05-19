@@ -40,7 +40,7 @@ int buf_text_style_get(int bid);
 size_t buf_line_num(int bid, size_t pos);
 int buf_file_open(int bid, const char *file);
 
-int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, const char *style_name, int start, int end,
+int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, int is_set, const char *style_name, int start, int end,
 		       const char *regex, char *name, bool expand, wchar_t ch);
 int buf_prop_kmap_add(int bid, int kid, int start, int end, const char *regex, char *name);
 int buf_prop_symbol_add(int bid, const char *symbol, int start, int end, const char *regex, char *name);
