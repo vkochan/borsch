@@ -181,7 +181,8 @@
 
 (define (minibuf-buffer-list-in-frame->complete)
    (minibuf-buffer-list->complete
-      (append (frame-buffer-list) (list message-buf))))
+      (append (frame-buffer-list) (list message-buf))
+      (lambda (b) (not (buffer-is-visible? b)))))
 
 (define (minibuf-buffer-list-all->complete)
    (minibuf-buffer-list->complete (buffer-list)))
