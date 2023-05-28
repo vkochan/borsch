@@ -163,19 +163,28 @@
          (file-open f))
       "open file"))
 
-(define (minibuf-buffer-list-all->complete)
-   (map (lambda (b)
-           (let ([mode (buffer-mode-name b)]
-                 [name (buffer-name b)])
-              (cons (format "(~a) ~a" mode name) b)))
-        (buffer-list)))
+(define minibuf-buffer-list->complete
+   (case-lambda
+      [()
+       (minibuf-buffer-list->complete (lambda (b) #t))]
+
+      [(lst)
+       (minibuf-buffer-list->complete lst (lambda (b) #t))]
+
+      [(lst fn-filter)
+       (map
+            (lambda (b)
+               (let ([mode (buffer-mode-name b)]
+                     [name (buffer-name b)])
+                  (cons (format "(~a) ~a" mode name) b)))
+            (filter fn-filter lst))]))
 
 (define (minibuf-buffer-list-in-frame->complete)
-   (map (lambda (b)
-           (let ([mode (buffer-mode-name b)]
-                 [name (buffer-name b)])
-              (cons (format "(~a) ~a" mode name) b)))
-        (append (frame-buffer-list) (list message-buf))))
+   (minibuf-buffer-list->complete
+      (append (frame-buffer-list) (list message-buf))))
+
+(define (minibuf-buffer-list-all->complete)
+   (minibuf-buffer-list->complete (buffer-list)))
 
 (define (minibuf-switch-buffer-all)
    (minibuf-complete (minibuf-buffer-list-all->complete)
