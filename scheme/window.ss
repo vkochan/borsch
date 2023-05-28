@@ -199,7 +199,8 @@
 
       [(w enforce?)
        (when (and w (or enforce? (window-is-dirty? w)) (window-is-visible? w))
-          (window-update-cursor w)
+          (when (equal? w (current-window))
+             (window-update-cursor w))
           (window-update w) 
           (run-hooks 'text-draw-hook w)
           (call-foreign (__cs_win_draw w enforce?))
