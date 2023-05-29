@@ -45,18 +45,7 @@
 (define (frame-list)
    (vector->list (hashtable-values frames-ht)))
 
-;;(define frame-all (frame-create "all"))
-(define frame-1 (frame-create ""))
-(define frame-2 (frame-create ""))
-(define frame-3 (frame-create ""))
-(define frame-4 (frame-create ""))
-(define frame-5 (frame-create ""))
-(define frame-6 (frame-create ""))
-(define frame-7 (frame-create ""))
-(define frame-8 (frame-create ""))
-(define frame-9 (frame-create ""))
-
-(define *current-frame* frame-1)
+(define *current-frame* #f)
 
 (define (current-frame)
    *current-frame*)
