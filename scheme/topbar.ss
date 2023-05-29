@@ -5,21 +5,15 @@
 
 (define *current-tab* #f)
 
-(define (current-tab)
-   *current-tab*
-)
+(define (current-tab) *current-tab*)
 
-(define (tab-set-current t)
-   (set! *current-tab* t)
-)
+(define (tab-set-current t) (set! *current-tab* t))
 
 (define-record-type tab
    (fields
       index
       (mutable frame-list)
-      (mutable current-frame)
-   )
-)
+      (mutable current-frame)))
 
 (define topbar-draw
    (lambda ()
@@ -41,13 +35,9 @@
                      (text-insert
                         (format "[~a~a]" (tab-index t) (if (equal? "" name) "" (string-append ":" name)))
                        `(style: (fg: ,color))))))
-            (hashtable-values tabs-ht)
-         )
+            (hashtable-values tabs-ht))
          (text-insert (layout-name))
-         (text-insert (format "[~a]" (current-cwd)) '(style: (fg: "bright-yellow")))
-      )
-   )
-)
+         (text-insert (format "[~a]" (current-cwd)) '(style: (fg: "bright-yellow"))))))
 
 (define (tab-create)
    (let* ([n (+ 1 (hashtable-size tabs-ht))]
@@ -57,18 +47,13 @@
       (or (current-tab) (tab-set-current t))
       (tab-frame-list-set! t (list f))
       (tab-current-frame-set! t f)
-      (hashtable-set! tabs-ht n t)
-   )
-)
+      (hashtable-set! tabs-ht n t)))
 
 (define (tab-switch n)
    (let ([t (hashtable-ref tabs-ht n #f)])
       (when t
          (tab-set-current t)
-         (frame-switch (tab-current-frame t))
-      )
-   )
-)
+         (frame-switch (tab-current-frame t)))))
 
 (define (tab-switch-1)
     (tab-switch 1))
@@ -101,40 +86,25 @@
    (lambda ()
       (let ([w (widget-create "*topbar*" 0 0 (ui-screen-width) 1 'top)])
          (set! topbar-buffer (window-buffer w))
-         (set! topbar-window w)
-      )
+         (set! topbar-window w))
       (for-each
          (lambda (n)
-            (tab-create)
-         )
-         '(1 2 3 4 5 6 7 8 9)
-      )
+            (tab-create))
+         '(1 2 3 4 5 6 7 8 9))
       (tab-switch 1)
       (add-hook 'frame-switch-hook
          (lambda (frame)
-            (topbar-draw)
-         )
-      )
+            (topbar-draw)))
       (add-hook 'change-frame-name-hook
          (lambda ()
-            (topbar-draw)
-         )
-      )
+            (topbar-draw)))
       (add-hook 'change-cwd-hook
          (lambda ()
-            (topbar-draw)
-         )
-      )
+            (topbar-draw)))
       (add-hook 'layout-changed-hook
          (lambda ()
-            (topbar-draw)
-         )
-      )
+            (topbar-draw)))
       (add-hook 'window-toggle-maximize-hook
          (lambda (w)
-            (topbar-draw)
-         )
-      )
-      (topbar-draw)
-   )
-)
+            (topbar-draw)))
+      (topbar-draw)))
