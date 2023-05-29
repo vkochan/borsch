@@ -10,19 +10,15 @@ typedef struct _Frame Frame;
 
 typedef struct Window Window;
 struct Window {
-	Buffer *prev_buf;
 	Buffer *buf;
 	Frame *frame;
 	View *view;
 	UiWin *win;
-	const char *cmd;
 	unsigned short int id;
 	bool urgent;
 	Window *next;
 	Window *prev;
-	Window *snext;
 	bool highlight_mark;
-	bool pending_draw_evt;
 	bool is_widget;
 	bool is_new;
 };

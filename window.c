@@ -610,7 +610,6 @@ static void on_view_update_cb(UiWin *win)
 
 void window_buffer_switch(Window *w, Buffer *b)
 {
-	w->prev_buf = w->buf;
 	w->buf = b;
 
 	if (buffer_proc_get(b)) {
