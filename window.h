@@ -43,9 +43,6 @@ Frame *frame_by_id(int fid);
 
 #define WIN_DRAW_F_FORCE	(1 << 0)
 
-#define WIN_POS_F_TOP		(1 << 0)
-#define WIN_POS_F_BOT		(1 << 1)
-
 void window_init(Ui *ui);
 void window_cleanup(void);
 
