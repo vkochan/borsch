@@ -75,7 +75,7 @@
          (frame-delete f))))
 
 (define (tab-rename-frame)
-   (minibuf-read "Rename frame" (frame-name (current-frame))
+   (minibuf-read "Rename frame: " (frame-name (current-frame))
       (lambda (v)
          (frame-set-name v))))
 
