@@ -39,12 +39,49 @@
          (text-insert (layout-name))
          (text-insert (format "[~a]" (current-cwd)) '(style: (fg: "bright-yellow"))))))
 
+(define (tab-switch-frame fr)
+   (tab-current-frame-set! (current-tab) fr)
+   (frame-switch fr))
+
+(define (tab-create-frame)
+   (let ([t (current-tab)]
+         [f (frame-create)])
+      (tab-frame-list-set! t (append (tab-frame-list t)
+                                     (list f)))
+      (tab-switch-frame f)))
+
+(define (tab-find-frame)
+   (minibuf-complete
+      (map
+         (lambda (fr)
+            (cons (frame-name fr)
+                  fr))
+         (tab-frame-list (current-tab)))
+      (lambda (fr)
+         (tab-switch-frame fr))
+      "Switch to frame"))
+
+(define (tab-delete-frame)
+   (let ([f (current-frame)]
+         [t (current-tab)])
+      (when (> (length (tab-frame-list t))
+               1)
+         (tab-frame-list-set! t (remove f (tab-frame-list t)))
+         (when (not (null? (tab-frame-list t)))
+            (tab-switch-frame (first (tab-frame-list t))))
+         (frame-delete f))))
+
+(define (tab-rename-frame)
+   (minibuf-read "Rename frame" (frame-name (current-frame))
+      (lambda (v)
+         (frame-set-name v))))
+
 (define (tab-create)
    (let* ([n (+ 1 (hashtable-size tabs-ht))]
           [t (make-tab n '() #f)]
-          [f (frame-create "")]
-         )
-      (or (current-tab) (tab-set-current t))
+          [f (frame-create "main")])
+      (or (current-tab)
+          (tab-set-current t))
       (tab-frame-list-set! t (list f))
       (tab-current-frame-set! t f)
       (hashtable-set! tabs-ht n t)))

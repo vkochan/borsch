@@ -270,6 +270,11 @@
    (bind-key "M-f d" dirb)
    (bind-key "M-f f" minibuf-find-file)
 
+   (bind-key "C-g f f"     tab-find-frame)
+   (bind-key "C-g f d"     tab-delete-frame)
+   (bind-key "C-g f n"     tab-create-frame)
+   (bind-key "C-g f r"     tab-rename-frame)
+
    (bind-key "C-g c"       vterm)
    (bind-key "C-g C-x"     open-repl)
    (bind-key "C-g x x"     window-delete)

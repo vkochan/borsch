@@ -22,25 +22,32 @@
 (define (*frame-create*)
    (call-foreign (__cs_frame_create)))
 
-(define (frame-delete fid)
-   (call-foreign (__cs_frame_delete fid)))
+(define (frame-delete fr)
+   (call-foreign (__cs_frame_delete (frame-id fr)))
+   (hashtable-delete! frames-ht (frame-id fr)))
 
-(define (frame-create name)
-   (let ([id (*frame-create*)])
-      (let ([fr (make-%frame% id
-                              name
-                              (current-directory)
-                              #f
-                              'tiled
-                              (make-eq-hashtable)
-                              (list)
-                              #f
-                              1
-                              0.5
-                              (make-stack)
-                              #f)])
-         (hashtable-set! frames-ht id fr)
-         fr)))
+(define frame-create
+   (case-lambda
+     [()
+      (frame-create #f)]
+
+     [(name)
+      (let ([id (*frame-create*)])
+         (let ([fr (make-%frame% id
+                                 (or name
+                                     (format "frame~a" id))
+                                 (current-directory)
+                                 #f
+                                 'tiled
+                                 (make-eq-hashtable)
+                                 (list)
+                                 #f
+                                 1
+                                 0.5
+                                 (make-stack)
+                                 #f)])
+            (hashtable-set! frames-ht id fr)
+            fr))]))
 
 (define (frame-list)
    (vector->list (hashtable-values frames-ht)))
