@@ -22,8 +22,11 @@
          (vector-for-each
             (lambda (t)
                (let* ([fr (tab-current-frame t)]
+                      [attr (if (equal? t (current-tab))
+                                "bold"
+                                "normal")]
                       [color (if (equal? t (current-tab))
-                                 "blue"
+                                 "white"
                                  ;; else
                                  (if (> (length (window-list fr)) 0)
                                     "green"
@@ -34,7 +37,7 @@
                   (let ([name (or (frame-name fr) "")])
                      (text-insert
                         (format "[~a~a]" (tab-index t) (if (equal? "" name) "" (string-append ":" name)))
-                       `(style: (fg: ,color))))))
+                       `(style: (fg: ,color attr: ,attr))))))
             (hashtable-values tabs-ht))
          (text-insert (layout-name))
          (text-insert (format "[~a]" (current-cwd)) '(style: (fg: "bright-yellow"))))))
