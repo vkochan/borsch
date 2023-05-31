@@ -12,6 +12,7 @@
 (define-record-type tab
    (fields
       index
+      (mutable name)
       (mutable frame-list)
       (mutable current-frame)))
 
@@ -34,9 +35,18 @@
                                     ;; else
                                     ;;"green"
                                     "bright-black"))])
-                  (let ([name (or (frame-name fr) "")])
+                  (let ([fname (frame-name fr)]
+                        [tname (tab-name t)])
                      (text-insert
-                        (format "[~a~a]" (tab-index t) (if (equal? "" name) "" (string-append ":" name)))
+                        (format "[~a~a~a]" (tab-index t)
+                                           (if (equal? "" tname) "" (string-append ":" tname))
+                                           (if (and (equal? t (current-tab))
+                                                    (> (length (tab-frame-list t))
+                                                       1)
+                                                    (not (equal? fname "")))
+                                              (string-append "|" fname)
+                                              ;; else
+                                              ""))
                        `(style: (fg: ,color attr: ,attr))))))
             (hashtable-values tabs-ht))
          (text-insert (layout-name))
@@ -79,9 +89,15 @@
       (lambda (v)
          (frame-set-name v))))
 
+(define (tab-rename)
+   (minibuf-read "Rename tab: " (tab-name (current-tab))
+      (lambda (v)
+         (tab-name-set! (current-tab) v)
+         (topbar-draw))))
+
 (define (tab-create)
    (let* ([n (+ 1 (hashtable-size tabs-ht))]
-          [t (make-tab n '() #f)]
+          [t (make-tab n "" '() #f)]
           [f (frame-create "main")])
       (or (current-tab)
           (tab-set-current t))

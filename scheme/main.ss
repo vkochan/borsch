@@ -294,6 +294,7 @@
    (bind-key "C-g t 7" tab-switch-7)
    (bind-key "C-g t 8" tab-switch-8)
    (bind-key "C-g t 9" tab-switch-9)
+   (bind-key "C-g t r" tab-rename)
 
    (bind-key "C-g w i"   layout-n-master+)
    (bind-key "C-g w d"   layout-n-master-)
