@@ -106,7 +106,7 @@
    (copybuf-put (complete-selected-value)))
 
 (define (complete-paste-value)
-   (copybuf-paste)
+   (text-insert (string-trim copybuf-reg '(#\space #\newline)))
    (complete-update-text))
 
 (define (complete-append-value)
