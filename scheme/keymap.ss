@@ -1,11 +1,7 @@
-(define key-cb
-   (lambda (p)
-      (let ([code (foreign-callable (lambda () (try p)) () void)])
-	 (lock-object code)
-	 (foreign-callable-entry-point code)
-      )
-   )
-)
+(define (key-cb p)
+   (let ([code (foreign-callable (lambda () (try p)) () void)])
+      (lock-object code)
+      (foreign-callable-entry-point code) ))
 
 (define __cs_kmap_add (foreign-procedure "cs_kmap_add" (string) scheme-object))
 (define __cs_kmap_parent_set (foreign-procedure "cs_kmap_parent_set" (int string int) void))
@@ -17,15 +13,11 @@
 
 (define global-keymap 1)
 
-(define %keymap-get
-   (lambda (m)
-      (if (and (symbol? m) (current-buffer) (local-symbol-bound? m))
-         (get-local-symbol m)
-         ;; else
-         m
-      )
-   )
-)
+(define (%keymap-get m)
+   (if (and (symbol? m) (current-buffer) (local-symbol-bound? m))
+      (get-local-symbol m)
+      ;; else
+      m ))
 
 (define bind-key
    (case-lambda
@@ -37,18 +29,10 @@
           (if (procedure? t)
              (__cs_bind_key k (key-cb t) map "")
              ;; else
-             (__cs_bind_key k 0 map (symbol->string t))
-          )
-       )
-      ]
-   )
-)
+             (__cs_bind_key k 0 map (symbol->string t)) ))] ))
 
-(define bind-key-local
-   (lambda (k p)
-      (bind-key (%buffer-local-keymap) k p)
-   )
-)
+(define (bind-key-local k p)
+   (bind-key (%buffer-local-keymap) k p))
 
 (define unbind-key
    (case-lambda
@@ -57,17 +41,10 @@
 
       [(m k)
        (let ([map (%keymap-get m)])
-          (__cs_unbind_key k map)
-       )
-      ]
-   )
-)
+          (__cs_unbind_key k map) )]))
 
-(define make-empty-keymap
-   (lambda ()
-     (call-foreign (__cs_kmap_add ""))
-   )
-)
+(define (make-empty-keymap)
+   (call-foreign (__cs_kmap_add "")) )
 
 (define make-keymap
    (case-lambda
@@ -75,28 +52,16 @@
        (call-foreign (__cs_kmap_add (symbol->string 'global-keymap)))]
 
       [(p)
-       (call-foreign (__cs_kmap_add (symbol->string p)))]
-   )
-)
+       (call-foreign (__cs_kmap_add (symbol->string p))) ]))
 
-(define keymap-parent
-   (lambda (k)
-       (call-foreign (__cs_kmap_parent_get k))
-   )
-)
+(define (keymap-parent k)
+   (call-foreign (__cs_kmap_parent_get k)) )
 
-(define keymap-set-parent
-   (lambda (k p)
-       (if (symbol? p)
-          (call-foreign (__cs_kmap_parent_set k (symbol->string p) -1))
-          ;; else
-          (call-foreign (__cs_kmap_parent_set k "" p))
-       )
-   )
-)
+(define (keymap-set-parent k p)
+   (if (symbol? p)
+      (call-foreign (__cs_kmap_parent_set k (symbol->string p) -1))
+      ;; else
+      (call-foreign (__cs_kmap_parent_set k "" p)) ))
 
-(define keymap-del
-   (lambda (k)
-       (call-foreign (__cs_kmap_del k))
-   )
-)
+(define (keymap-del k)
+   (call-foreign (__cs_kmap_del k)) )
