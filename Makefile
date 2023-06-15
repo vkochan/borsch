@@ -1,4 +1,18 @@
-include config.mk
+PROGNAME = borsch
+
+PREFIX ?= /usr
+MANPREFIX = ${PREFIX}/share/man
+# specify your systems terminfo directory
+# leave empty to install into your home folder
+TERMINFO := ${DESTDIR}${PREFIX}/share/terminfo
+LIB_PREFIX = ${PREFIX}/lib/${PROGNAME}
+
+INCS = -I.
+LIBS = -lc -lutil -lncursesw -ltinfo
+CPPFLAGS = -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -D_XOPEN_SOURCE_EXTENDED
+CFLAGS += -std=c99 ${INCS} -DNDEBUG ${CPPFLAGS}
+LDFLAGS += -L ./text -L ./ui
+CC ?= cc
 
 SCHEME_LIST = scheme chez chez-scheme
 $(foreach scm,$(SCHEME_LIST),$(if $(SCHEME),,$(eval SCHEME := $(shell which $(scm)))))
@@ -33,7 +47,6 @@ LIBS += -lpthread -luuid -ldl -lm
 BIN += ${PROGNAME}-eval
 SRCS += scheme.c
 
-LDFLAGS += -L ./text -L ./ui
 LIBS += -ltext -lui -ltree-sitter $(X11_LIBS)
 
 SRCS += syntax/c/parser.c \
