@@ -59,3 +59,6 @@
    (let ([p (open-output-file file 'append)])
       (put-string p str)
       (close-port p)))
+
+(define (file-is-executable? path)
+   (= 1 (fxbit-field (get-mode path) 6 7)))

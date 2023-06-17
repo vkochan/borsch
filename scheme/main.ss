@@ -298,6 +298,8 @@
    (bind-key "C-g k"       window-focus-upper)
    (bind-key "C-g <Enter>" window-set-master)
 
+   (bind-key "C-c C-r" buffer-run)
+
    (bind-key "C-g t 1" tab-switch-1)
    (bind-key "C-g t 2" tab-switch-2)
    (bind-key "C-g t 3" tab-switch-3)

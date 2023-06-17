@@ -663,3 +663,10 @@
       ;; else
       (current-cwd)))
 
+(define (buffer-run)
+   (let ([fname (buffer-filename)])
+      (if (file-is-executable? fname)
+         (vterm (format "~a ; read" fname))
+         ;; else
+         (message (format "File is not executable: ~a" fname))
+      )))
