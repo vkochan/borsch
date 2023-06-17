@@ -202,7 +202,7 @@ static int handle_ui_event(Ui *ui, enum UiEventType type, void *evt, void *arg)
 
 static void handle_cmdfifo(int fd, void *arg);
 
-static void setup_ui(int ui_type)
+void setup_ui(int ui_type)
 {
 	struct sigaction sa;
 	sigset_t blockset;
@@ -229,11 +229,6 @@ static void setup_ui(int ui_type)
 
 	if (cmdfifo.fd != -1)
 		event_fd_handler_register(cmdfifo.fd, handle_cmdfifo, NULL);
-}
-
-void runtime_init(int ui_type)
-{
-	setup_ui(ui_type);
 }
 
 static Buffer *__buf_new(const char *name, KeyMap *kmap)
@@ -556,6 +551,12 @@ static void handle_keypress(KeyCode *key)
 }
 
 int main(int argc, char *argv[]) {
+	return scheme_init(argc, argv);
+}
+
+/* External API */
+int runtime_init(void)
+{
 	if (!getenv("ESCDELAY"))
 		set_escdelay(100);
 
@@ -567,14 +568,13 @@ int main(int argc, char *argv[]) {
 	syntax_init();
 	style_init();
 	vt_init();
-
-	scheme_init(argc, argv);
-
-	cleanup();
-	return 0;
 }
 
-/* External API */
+void runtime_cleanup(void)
+{
+	cleanup();
+}
+
 int buf_new(char *name)
 {
 	Buffer *buf = __buf_new(name, global_kmap);

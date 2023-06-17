@@ -22,6 +22,9 @@ void eprint(const char *errstr, ...);
 
 extern Ui *g_ui;
 
+int runtime_init(void);
+void runtime_cleanup(void);
+
 int buf_new(char *name);
 size_t buf_text_insert(int bid, const char *text);
 size_t buf_text_insert_char(int bid, char ch);
@@ -56,7 +59,7 @@ int term_current_line_get(int bid, char **buf, size_t *len);
 
 int fifo_create(void);
 
-void runtime_init(int ui_type);
+void setup_ui(int ui_type);
 void do_quit(void);
 
 int scheme_init(int argc, char *argv[]);

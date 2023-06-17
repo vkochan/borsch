@@ -2,6 +2,17 @@
 (define (config-dir)
    *config-dir*)
 
+(define __cs_runtime_init (foreign-procedure "cs_runtime_init" () int))
+(define __cs_runtime_cleanup (foreign-procedure "cs_runtime_cleanup" () void))
+
+(define (runtime-init)
+   (__cs_runtime_init))
+
+(define (runtime-cleanup)
+   (__cs_runtime_cleanup))
+
+(runtime-init)
+
 (include "pregexp.scm")
 (include "common.ss")
 (include "file.ss")
@@ -75,7 +86,8 @@
                 (set! ui-type 1))
                ((equal? a "-i")
                 (when (<= i alen)
-                   (set! init-script (path-last (list-ref args (+ i 1))))))))
+                   (set! init-script (path-last (list-ref args (+ i 1))))
+                   ))))
          (set! i (+ i 1)))
       (ui-init ui-type)
       (run-hooks 'init-hook)
@@ -94,7 +106,8 @@
          (load-init-script init-script))
       (register-signal-handler 15 sigterm-handle-func)
       (while is-running?
-         (ui-process))))
+         (ui-process))
+      (runtime-cleanup)))
 
 (define (__on-event-handler ev oid str)
    (define (__evt->symb ev)

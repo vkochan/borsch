@@ -73,7 +73,7 @@ static int scheme_run_init(int argc, char *argv[])
 /* Scheme foreign interface */
 void scheme_ui_init(int ui_type)
 {
-	runtime_init(ui_type);
+	setup_ui(ui_type);
 }
 
 ptr scheme_ui_size_changed(void)
@@ -1819,6 +1819,9 @@ void scheme_do_quit(void)
 
 static void scheme_export_symbols(void)
 {
+	Sregister_symbol("cs_runtime_init", runtime_init);
+	Sregister_symbol("cs_runtime_cleanup", runtime_cleanup);
+
 	Sregister_symbol("cs_ui_init", scheme_ui_init);
 	Sregister_symbol("cs_ui_size_changed", scheme_ui_size_changed);
 	Sregister_symbol("cs_ui_event_process", scheme_ui_event_process);
