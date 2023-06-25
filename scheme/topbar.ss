@@ -13,8 +13,11 @@
    (fields
       index
       (mutable name)
-      (mutable frame-list)
+      (mutable frame-stack)
       (mutable current-frame)))
+
+(define (tab-frame-list t)
+   (stack-list (tab-frame-stack t)))
 
 (define topbar-draw
    (lambda ()
@@ -53,14 +56,16 @@
          (text-insert (format "[~a]" (current-cwd)) '(style: (fg: "bright-yellow"))))))
 
 (define (tab-switch-frame fr)
-   (tab-current-frame-set! (current-tab) fr)
-   (frame-switch fr))
+   (let ([t (current-tab)])
+      (tab-current-frame-set! t fr)
+      (stack-remove! (tab-frame-stack t) fr)
+      (stack-push! (tab-frame-stack t) fr)
+      (frame-switch fr)))
 
 (define (tab-create-frame)
    (let ([t (current-tab)]
          [f (frame-create)])
-      (tab-frame-list-set! t (append (tab-frame-list t)
-                                     (list f)))
+      (stack-push! (tab-frame-stack t) f)
       (tab-switch-frame f)))
 
 (define (tab-find-frame)
@@ -79,7 +84,7 @@
          [t (current-tab)])
       (when (> (length (tab-frame-list t))
                1)
-         (tab-frame-list-set! t (remove f (tab-frame-list t)))
+         (stack-remove (tab-frame-stack t) f)
          (when (not (null? (tab-frame-list t)))
             (tab-switch-frame (first (tab-frame-list t))))
          (frame-delete f))))
@@ -97,11 +102,11 @@
 
 (define (tab-create)
    (let* ([n (+ 1 (hashtable-size tabs-ht))]
-          [t (make-tab n "" '() #f)]
+          [t (make-tab n "" (make-stack) #f)]
           [f (frame-create "main")])
       (or (current-tab)
           (tab-set-current t))
-      (tab-frame-list-set! t (list f))
+      (stack-push! (tab-frame-stack t) f)
       (tab-current-frame-set! t f)
       (hashtable-set! tabs-ht n t)))
 
