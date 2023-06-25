@@ -412,7 +412,10 @@
 
 (define-syntax (define* x)
   (syntax-case x ()
-    [(_ name ([field default] ...) b1 b2 ...)
+    [(_ (name ([field default] ...)) b1 b2 ...)
+     #`(define* (name () ([field default] ...)) b1 b2 ...)]
+
+    [(_ (name (req ...) ([field default] ...)) b1 b2 ...)
      (and (identifier? #'name)
           (let valid-fields? ([fields #'(field ...)] [seen '()])
             (syntax-case fields ()
@@ -463,8 +466,8 @@
                     #'rest
                     #`((fn fv) #,@(remove-binding f #'rest)))]))
            (syntax-case x ()
-             [(name . bindings)
+             [(name req ... . bindings)
               (valid-bindings? #'bindings '())
-              #`(defaults-proc #,@(build-args #'(field ...) #'(default ...) #'bindings))]))
-         (define (defaults-proc field ...)
+              #`(defaults-proc req ... #,@(build-args #'(field ...) #'(default ...) #'bindings))]))
+         (define (defaults-proc req ... field ...)
            b1 b2 ...))]))
