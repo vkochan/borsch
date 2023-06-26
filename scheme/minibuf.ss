@@ -140,22 +140,12 @@
       (enable-insert #f))
    (minibuf-interactive-func 'minibuf-ask-map (format "~a y/n" str) #f fn))
 
-(define (try-eval->string s)
-    (let ([code (open-string-input-port s)]
-          [ret '()]
-          [out ""])
-       (set! out (with-output-to-string
-                    (lambda ()
-                       (set! ret (try eval-port->str code)))))
-       (close-port code)
-       (string-append out (second ret))))
-
 (define (minibuf-eval)
    (with-current-buffer minibuf-buffer
       (enable-insert #t))
    (minibuf-interactive-func 'minibuf-prompt-map "Eval:" #f
       (lambda (val)
-         (message (try-eval->string val)))))
+         (scheme-eval val))))
 
 (define (minibuf-clear)
    (let ([b (get-local orig-buf)]

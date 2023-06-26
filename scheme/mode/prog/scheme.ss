@@ -1,12 +1,18 @@
 (define (scheme-eval s)
    (let ([code (open-string-input-port (format "(begin ~a)" s))]
-         [ret '()]
+         [ret ""]
          [out ""])
       (set! out (with-output-to-string
                    (lambda ()
-                      (set! ret (try eval-port->str code)))))
+                      (try
+                         (begin
+                            (set! ret (eval-port->str code)))
+                         (catch
+                            (lambda (ex)
+                               (set! ret (err->str ex)))))
+                   )))
       (close-port code)
-      (set! out (string-append out (second ret)))
+      (set! out (string-append out ret))
       (message out)))
 
 (define (scheme-eval-buffer)

@@ -299,37 +299,43 @@
       (display-condition e op)
       (g)))
 
-(define (try fn . args)
-   (let ([fn fn]
-         [args args])
-      (let ([ret (append '()
-                    (call/cc
-                       (lambda (k)
-                          (with-exception-handler
-                             (lambda (x)
-                                (k (list 1 (err->str x))))
-                             (lambda ()
-	                        (k (list 0 (apply fn args))))))))])
-         (when (= (car ret) 1)
-            (run-hooks 'error-hook (cadr ret)))
-         ret)))
+(define-syntax try
+   (syntax-rules (catch)
+      ((_ body)
+       (try body (catch #f)))
+
+      ((_ body (catch catcher))
+       (call-with-current-continuation
+          (lambda (exit)
+             (with-exception-handler
+                (lambda (condition)
+                   (run-hooks 'error-hook (err->str condition))
+                   (catcher condition)
+                   (exit condition))
+                (lambda () body)))))))
 
 (define (__do-eval-file in out)
    (let* ([ip (open-input-file in)]
           [op (open-output-file out 'truncate)]
           [out ""]
+          [err? #f]
           [ret '()])
       (set! out (with-output-to-string
                    (lambda ()
-                      (set! ret (try eval-port->str ip)))))
+                      (try
+                         (set! ret (eval-port->str ip))
+                         (catch
+                            (lambda (ex)
+                               (set! ret (err->str ex))
+                               (set! err? #t))) ))))
       (put-string op out)
-      (put-string op (second ret))
-      (if (not (= (first ret) 0))
+      (put-string op ret)
+      (if err?
          (put-string op "\n"))
       (flush-output-port op)
       (close-port ip)
       (close-port op)
-      (first ret)))
+      (if err? 1 0)))
 
 (define (run-hooks symb . args)
    (if (top-level-bound? symb)
@@ -337,7 +343,7 @@
          (for-each
             (lambda (h)
                (let ([fn (if (symbol? h) (eval h) h)])
-                  (apply try (append (list fn) args))))
+                  (try (apply fn args))))
             hook-list))))
 
 (define (add-hook h f)

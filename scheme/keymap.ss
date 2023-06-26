@@ -1,5 +1,5 @@
 (define (key-cb p)
-   (let ([code (foreign-callable (lambda () (try p)) () void)])
+   (let ([code (foreign-callable (lambda () (try (p) )) () void)])
       (lock-object code)
       (foreign-callable-entry-point code) ))
 

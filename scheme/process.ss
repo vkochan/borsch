@@ -439,11 +439,10 @@
             )
             (when (process-on-exit proc)
                (try
-                  (process-on-exit proc)
+                  ((process-on-exit proc)
                      (process-status pid)
                      (process-buffer-out proc)
-                     (process-buffer-err proc)
-               )
+                     (process-buffer-err proc)))
             )
             (when (process-port-reader proc)
                (unlock-object (process-port-reader proc))
@@ -463,8 +462,8 @@
       (when proc
          (when (process-filter proc)
             (try
-               (process-filter proc)
+               ((process-filter proc)
                   proc
-                  str
+                  str)
             )))))
 (add-hook 'process-filter-hook process-filter-func)

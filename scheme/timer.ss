@@ -7,7 +7,7 @@
 
 (define timer-cb
    (lambda (p)
-      (let ([code (foreign-callable (lambda (obj) (try p)) (void*) void)])
+      (let ([code (foreign-callable (lambda (obj) (try (p) )) (void*) void)])
 	 (lock-object code)
 	 code
       )

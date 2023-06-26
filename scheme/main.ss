@@ -60,7 +60,7 @@
                          ;; else
                          init)])
       (when (file-exists? init-script)
-         (try load init-script))))
+         (try (load init-script) ))))
 
 (define is-running? #t)
 
