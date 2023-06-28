@@ -310,7 +310,8 @@
              (with-exception-handler
                 (lambda (condition)
                    (run-hooks 'error-hook (err->str condition))
-                   (catcher condition)
+		   (when catcher
+                      (catcher condition))
                    (exit condition))
                 (lambda () body)))))))
 
