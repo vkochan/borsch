@@ -1,13 +1,3 @@
-(define (file-open p)
-   (let ([p (path-expand p)])
-      (if (file-regular? p)
-         (buffer-open-file p)
-         ;; else
-         (if (file-directory? p)
-            (dirb p)
-            ;; else
-            (message (format "path does not exist: ~a" p))))))
-
 (define (path-expand f)
    (let ([root (path-first f)])
       (if (equal? root "/")
