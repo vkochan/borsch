@@ -59,11 +59,6 @@
                           #\newline))
          (append dl fl))]))
 
-(define is-file? file-regular?)
-(define is-link? file-symbolic-link?)
-(define (is-file-or-link? p)
-   (or (is-link? p) (is-file? p))) 
-
 (define (mkdir-p path)
    (system (format "mkdir -p ~a" path)))
 

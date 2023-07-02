@@ -21,6 +21,12 @@
 (define (path-exists? f)
    (file-exists? (path-expand f)))
 
+(define file-is-regular? file-regular?)
+(define file-is-link? file-symbolic-link?)
+
+(define (file-is-regular/link? p)
+   (or (file-is-link? p) (file-is-regular? p))) 
+
 (define (file-delete f)
    (if (file-directory? f)
       (delete-directory f)
@@ -31,7 +37,7 @@
    (cond
       (recur?               (file-list-recursive p))
       ((file-directory? p)  (directory-list p))
-      ((is-file-or-link? p) (list p))
+      ((file-is-regular/link? p) (list p))
       (else '() )))
 
 (define (file-list-recursive path)
@@ -54,7 +60,7 @@
                   (let ([lst (path-parent+ (file-list p) p)])
                      (for-each
                         (lambda (f)
-                           (if (is-file-or-link? f)
+                           (if (file-is-regular/link? f)
                               (file-delete f)
                               ;; else
                               (if (file-directory? f)
