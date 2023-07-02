@@ -1,6 +1,6 @@
 (define grep-fmt-cmd
    (lambda (word dir)
-      (let ([cmd (format "grep -H -rnI --exclude-dir=.git --exclude-dir=output ~a ~a" word dir)])
+      (let ([cmd (format "grep -H -rnI --exclude-dir=.git --exclude-dir=output '~a' ~a" word dir)])
          cmd)))
 
 (define grep-reload-buffer
