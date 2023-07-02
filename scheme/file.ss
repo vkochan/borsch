@@ -21,33 +21,48 @@
 (define (path-exists? f)
    (file-exists? (path-expand f)))
 
-(define (rm f)
-   (if (is-dir? f)
+(define (file-delete f)
+   (if (file-directory? f)
       (delete-directory f)
       ;; else
       (delete-file f)))
 
-(define (path->file-list p)
+(define* (file-list (p) ([recur? #f]))
    (cond
-      ((is-dir? p) (directory-list p))
+      (recur?               (file-list-recursive p))
+      ((file-directory? p)  (directory-list p))
       ((is-file-or-link? p) (list p))
-      (else '())))
+      (else '() )))
 
-(define (rm-rf p)
+(define (file-list-recursive path)
+   (let loop ([path path])
+      (let ([ls '()])
+         (for-each
+            (lambda (p)
+               (let ([path (string-append path "/" p)])
+                  (if (file-regular? path)
+                     (set! ls (append ls (list path)))
+                     ;; else
+                     (when (file-directory? path)
+                        (set! ls (append ls (loop path)))))))
+            (directory-list path))
+         ls)))
+
+(define (file-delete-recursive p)
    (letrec ([rm-recur 
                (lambda (p)
-                  (let ([lst (path-parent+ (path->file-list p) p)])
+                  (let ([lst (path-parent+ (file-list p) p)])
                      (for-each
                         (lambda (f)
                            (if (is-file-or-link? f)
-                              (rm f)
+                              (file-delete f)
                               ;; else
-                              (if (is-dir? f)
+                              (if (file-directory? f)
                                  (begin
                                     (rm-recur f)
-                                    (rm f)))))
+                                    (file-delete f)))))
                         lst))
-                     (rm p))])
+                     (file-delete p))])
       (rm-recur p)))
 
 (define (file> file str)

@@ -59,21 +59,6 @@
                           #\newline))
          (append dl fl))]))
 
-(define (directory-list-files* path)
-   (let loop ([path path])
-      (let ([ls '()])
-         (for-each
-            (lambda (p)
-               (let ([path (string-append path "/" p)])
-                  (if (file-regular? path)
-                     (set! ls (append ls (list path)))
-                     ;; else
-                     (when (file-directory? path)
-                        (set! ls (append ls (loop path)))))))
-            (directory-list path))
-         ls)))
-
-(define is-dir? file-directory?)
 (define is-file? file-regular?)
 (define is-link? file-symbolic-link?)
 (define (is-file-or-link? p)
@@ -404,59 +389,6 @@
                                      rest)))
 
 ;; taken from https://github.com/laqrix/raytracer.git
-(define (snull? x) (syntax-case x () [() #t] [_ #f]))
-(define (scar x) (syntax-case x () [(x . _) #'x]))
-(define (scdr x) (syntax-case x () [(_ . y) #'y]))
-
-(define (syntax-datum-eq? x y)
-  (eq? (syntax->datum x) (syntax->datum y)))
-
-(define (bad-syntax msg form subform)
-  (raise
-   (condition
-    (make-message-condition msg)
-    (make-syntax-violation form subform))))
-
-(define (define*-remove-binding f bindings)
-   (syntax-case bindings ()
-      [((fn fv) . rest)
-        (if (syntax-datum-eq? #'fn f)
-           #'rest
-           #`((fn fv) #,@(define*-remove-binding f #'rest)))]))
-           
-(define (define*-find-binding f bindings)
-   (syntax-case bindings ()
-      [((fn fv) . rest)
-         (if (syntax-datum-eq? #'fn f)
-            #'fv
-            (define*-find-binding f #'rest))]
-      [() #f]))
-
-(define (define*-build-args fields defaults bindings)
-   (if (snull? fields)
-      '()
-       (let* ([f (scar fields)]
-              [v (define*-find-binding f bindings)])
-         (if v
-            (cons v (define*-build-args (scdr fields) (scdr defaults)
-                    (define*-remove-binding f bindings)))
-            (cons (scar defaults)
-               (define*-build-args (scdr fields) (scdr defaults)
-                  bindings))))))
-
-(define (define*-valid-bindings? fields bindings seen)
-   (syntax-case bindings ()
-     [((fn fv) . rest)
-      (and (identifier? #'fn)
-           (let ([f (datum fn)])
-              (when (memq f seen)
-                 (bad-syntax "duplicate field" #'x #'fn))
-              (unless (memq f fields)
-                 (bad-syntax "unknown field" #'x #'fn))
-              (define*-valid-bindings? fields #'rest (cons f seen))))]
-     [() #t]
-     [_ #f]))
-
 (define-syntax (define* x)
   (syntax-case x ()
     [(_ (name ([field default] ...)) b1 b2 ...)
@@ -475,10 +407,63 @@
               [() #t]
               [_ #f])))
      #'(begin
-         (define-syntax (name x)
+          (define-syntax (name x)
+             (define (snull? x) (syntax-case x () [() #t] [_ #f]))
+             (define (scar x) (syntax-case x () [(x . _) #'x]))
+             (define (scdr x) (syntax-case x () [(_ . y) #'y]))
+
+             (define (syntax-datum-eq? x y)
+                (eq? (syntax->datum x) (syntax->datum y)))
+
+             (define (bad-syntax msg form subform)
+                (raise
+                   (condition
+                      (make-message-condition msg)
+                      (make-syntax-violation form subform))))
+
+             (define (define*-remove-binding f bindings)
+                (syntax-case bindings ()
+                   [((fn fv) . rest)
+                    (if (syntax-datum-eq? #'fn f)
+                       #'rest
+                       #`((fn fv) #,@(define*-remove-binding f #'rest)))]))
+           
+             (define (define*-find-binding f bindings)
+                (syntax-case bindings ()
+                   [((fn fv) . rest)
+                    (if (syntax-datum-eq? #'fn f)
+                       #'fv
+                       (define*-find-binding f #'rest))]
+                   [() #f]))
+
+            (define (build-args fields defaults bindings)
+               (if (snull? fields)
+                  '()
+                   (let* ([f (scar fields)]
+                          [v (define*-find-binding f bindings)])
+                     (if v
+                        (cons v (build-args (scdr fields) (scdr defaults)
+                                (define*-remove-binding f bindings)))
+                        (cons (scar defaults)
+                           (build-args (scdr fields) (scdr defaults)
+                              bindings))))))
+
+            (define (valid-bindings? fields bindings seen)
+               (syntax-case bindings ()
+                  [((fn fv) . rest)
+                   (and (identifier? #'fn)
+                      (let ([f (datum fn)])
+                         (when (memq f seen)
+                            (bad-syntax "duplicate field" #'x #'fn))
+                         (unless (memq f fields)
+                            (bad-syntax "unknown field" #'x #'fn))
+                         (valid-bindings? fields #'rest (cons f seen))))]
+                  [() #t]
+                  [_ #f]))
+
            (syntax-case x ()
              [(name req ... . bindings)
-              (define*-valid-bindings? '(field ...) #'bindings '())
-              #`(defaults-proc req ... #,@(define*-build-args #'(field ...) #'(default ...) #'bindings))]))
+              (valid-bindings? '(field ...) #'bindings '())
+              #`(defaults-proc req ... #,@(build-args #'(field ...) #'(default ...) #'bindings))]))
          (define (defaults-proc req ... field ...)
            b1 b2 ...))]))

@@ -37,7 +37,7 @@
    (system (format "cp -r ~a ~a" from to)))
 
 (define (dirb-delete-local path opts)
-   (rm-rf path))
+   (file-delete-recursive path))
 
 (define (dirb-list-local dir)
    (sort string-ci<? (directory-list dir)))
@@ -261,7 +261,7 @@
          (when (eq? v 'yes)
             (for-each
                (lambda (p)
-                  (rm-rf p))
+                  (file-delete-recursive p))
                (dirb-get-selection))
             (dirb-clear-selection)
             (dirb-reload)))))
