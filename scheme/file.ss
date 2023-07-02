@@ -33,43 +33,35 @@
       ;; else
       (delete-file f)))
 
-(define* (file-list (p) ([recur? #f]))
+(define (file-list p)
    (cond
-      (recur?               (file-list-recursive p))
       ((file-directory? p)  (directory-list p))
       ((file-is-regular/link? p) (list p))
       (else '() )))
 
-(define (file-list-recursive path)
+(define* (file-find (path) ([for-each: #f]))
    (let loop ([path path])
       (let ([ls '()])
          (for-each
             (lambda (p)
-               (let ([path (string-append path "/" p)])
-                  (if (file-regular? path)
-                     (set! ls (append ls (list path)))
+               (let ([path (string-append path "/" p)]
+                     [child-ls '()])
+                  (when (file-directory? path)
+                     (set! child-ls (loop path))) 
+                  (if for-each:
+                     (for-each: path)
                      ;; else
-                     (when (file-directory? path)
-                        (set! ls (append ls (loop path)))))))
-            (directory-list path))
+                     (set! ls (append ls (list path) child-ls)) )))
+            (cond
+               ((file-directory? path) (directory-list path))
+               (else (list path)) ))
+         (when for-each:
+            (for-each: path))
          ls)))
 
 (define (file-delete-recursive p)
-   (letrec ([rm-recur 
-               (lambda (p)
-                  (let ([lst (path-parent+ (file-list p) p)])
-                     (for-each
-                        (lambda (f)
-                           (if (file-is-regular/link? f)
-                              (file-delete f)
-                              ;; else
-                              (if (file-directory? f)
-                                 (begin
-                                    (rm-recur f)
-                                    (file-delete f)))))
-                        lst))
-                     (file-delete p))])
-      (rm-recur p)))
+   (file-find p [for-each: (lambda (f)
+                              (file-delete f) )]))
 
 (define (file> file str)
    (let ([p (open-output-file file 'truncate)])
