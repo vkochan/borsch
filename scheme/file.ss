@@ -1,3 +1,12 @@
+(define (path-join p0 p1)
+   (define (has-delim?)
+      (not (or (equal? p0 "")
+               (equal? p1 "")
+               (equal? (string-ref p0 (- (string-length p0) 1)) #\/)
+               (equal? (string-ref p1 0) #\/) )))
+
+   (string-append p0 (if (has-delim?) "/" "") p1) )
+
 (define (path-expand f)
    (let ([root (path-first f)])
       (if (equal? root "/")
@@ -33,6 +42,25 @@
               (not (file-exists? (path-parent to))) )
       (error 'file-copy "Destination file folder does not exist" to))
    (system (format "cp ~a ~a ~a" (if recur?: "-r" "") from to)) )
+
+(define* (file-mkdir (path) ([recur?: #f][mode: #f]))
+   (define (mkdir-try path)
+      (if (not (file-exists? path))
+         (mkdir path) ))
+
+   (if (not recur?:)
+      (mkdir path)
+      ;; else
+      (let loop ([parent (path-first path)]
+                 [rest   (string-trim-right path '(#\/)) ])
+         (if (equal? (path-first rest) "")
+            (mkdir-try (path-join parent rest))
+            ;; else
+            (let ([rest (path-rest rest)])
+               (when (not (equal? parent "/"))
+                  (mkdir-try parent))
+               (loop (path-join parent (path-first rest))
+                     rest) )))))
 
 (define (file-list p)
    (cond
