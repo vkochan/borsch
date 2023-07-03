@@ -30,9 +30,10 @@
       (else '() )))
 
 (define* (file-find (path) ([for-each: #f] [match: #f]))
+   (define px (if match: (pregexp match:) #f))
+
    (let loop ([path path])
-      (let ([px (if match: (pregexp match:) #f)]
-            [ls '()])
+      (let ([ls '()])
          (for-each
             (lambda (p)
                (let ([path (string-append path "/" p)]
