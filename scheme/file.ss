@@ -11,6 +11,7 @@
 (define (path-exists? f)
    (file-exists? (path-expand f)))
 
+(define file-is-directory? file-directory?)
 (define file-is-regular? file-regular?)
 (define file-is-link? file-symbolic-link?)
 
@@ -18,14 +19,24 @@
    (or (file-is-link? p) (file-is-regular? p))) 
 
 (define (file-delete f)
-   (if (file-directory? f)
+   (if (file-is-directory? f)
       (delete-directory f)
       ;; else
       (delete-file f)))
 
+(define* (file-copy (from to) ([recur?: #f]))
+   (when (equal? from to)
+      (error 'file-copy "Files are the same" from))
+   (when (not (file-exists? from))
+      (error 'file-copy "Source file does not exist" from) )
+   (when (and (not (file-exists? to))
+              (not (file-exists? (path-parent to))) )
+      (error 'file-copy "Destination file folder does not exist" to))
+   (system (format "cp ~a ~a ~a" (if recur?: "-r" "") from to)) )
+
 (define (file-list p)
    (cond
-      ((file-directory? p)  (directory-list p))
+      ((file-is-directory? p)  (directory-list p))
       ((file-is-regular/link? p) (list p))
       (else '() )))
 
@@ -41,14 +52,14 @@
                   (when (or (not match:)
                             (and (file-is-regular/link? path)
                                  (pregexp-match px path)))
-                     (when (file-directory? path)
+                     (when (file-is-directory? path)
                         (set! child-ls (loop path))) 
                      (if for-each:
                         (for-each: path)
                         ;; else
                         (set! ls (append ls (list path) child-ls)) ))))
             (cond
-               ((file-directory? path) (directory-list path))
+               ((file-is-directory? path) (directory-list path))
                (else (list path)) ))
          (when for-each:
             (for-each: path))

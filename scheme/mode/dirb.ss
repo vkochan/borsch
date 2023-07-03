@@ -34,7 +34,7 @@
    (system (format "mv ~a ~a" from to)))
 
 (define (dirb-copy-local from to opts)
-   (system (format "cp -r ~a ~a" from to)))
+   (file-copy from to [recur?: #t]))
 
 (define (dirb-delete-local path opts)
    (file-delete-recursive path))
