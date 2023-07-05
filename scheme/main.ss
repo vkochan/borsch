@@ -4,14 +4,18 @@
 
 (define __cs_runtime_init (foreign-procedure "cs_runtime_init" () int))
 (define __cs_runtime_cleanup (foreign-procedure "cs_runtime_cleanup" () void))
+(define __cs_library_directory (foreign-procedure "cs_library_directory" () scheme-object))
 
 (define (runtime-init)
+   (library-directories (list (__cs_library_directory)))
    (__cs_runtime_init))
 
 (define (runtime-cleanup)
    (__cs_runtime_cleanup))
 
 (runtime-init)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (include "pregexp.scm")
 (include "common.ss")

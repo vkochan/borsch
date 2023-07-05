@@ -73,11 +73,30 @@ ifeq ($(DEBUG),1)
 CFLAGS += -UNDEBUG -O0 -g -ggdb -Wall -Wextra -Wno-unused-parameter
 endif
 
-.PHONY: libtext libui ${PROGNAME}.boot
+.PHONY: libtext libui scheme_libs clean_scheme_libs install_scheme_libs ${PROGNAME}.boot
 
-all: ${PROGNAME} ${PROGNAME}.boot
+all: ${PROGNAME} scheme_libs ${PROGNAME}.boot
 
-${PROGNAME}.boot:
+scheme_libs:
+	@echo "Compiling scheme libraries ..."
+	@for s in $$(find scheme/ -type f -name '*.sls' | sed -e 's|scheme/||'); do \
+		echo "(reset-handler abort) (compile-library \"scheme/$$s\")" | $(SCHEME) --libdirs scheme -q; \
+	done
+
+clean_scheme_libs:
+	@for s in $$(find scheme/ -type f -name '*.so' | sed -e 's|scheme/||'); do \
+		rm scheme/$$s; \
+	done
+
+install_scheme_libs:
+	@echo "Installing scheme libraries into ${DESTDIR}${LIB_PREFIX} ..."
+	@mkdir -p ${DESTDIR}${LIB_PREFIX}
+	@for s in $$(find scheme/ -type f -name '*.so' | sed -e 's|scheme/||'); do \
+		echo "installing ${DESTDIR}${LIB_PREFIX}/$$s"; \
+		install -D -m 0644 "scheme/$$s" "${DESTDIR}${LIB_PREFIX}/$$s"; \
+	done
+
+${PROGNAME}.boot: scheme_libs
 	cat mkboot.ss | $(SCHEME) -q
 
 ${PROGNAME}: ${OBJS} libui libtext
@@ -101,7 +120,7 @@ man:
 debug: clean
 	@$(MAKE) CFLAGS='${DEBUG_CFLAGS}'
 
-clean:
+clean: clean_scheme_libs
 	@echo cleaning
 	@$(MAKE) -C text/ clean
 	@$(MAKE) -C ui/ clean
@@ -113,7 +132,7 @@ dist: clean
 	@echo creating dist tarball
 	@git archive --prefix=${PROGNAME}-${VERSION}/ -o ${PROGNAME}-${VERSION}.tar.gz HEAD
 
-install: all
+install: all install_scheme_libs
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
 	@for b in ${BIN}; do \
 		echo "installing ${DESTDIR}${PREFIX}/bin/$$b"; \
@@ -138,5 +157,6 @@ uninstall:
 	@rm -f ${SCH_PATH}/${PROGNAME}.boot
 	@echo removing manual page from ${DESTDIR}${MANPREFIX}/man1
 	@rm -f ${DESTDIR}${MANPREFIX}/man1/${PROGNAME}.1
+	@rm -fr ${DESTDIR}${LIB_PREFIX}
 
 .PHONY: all clean dist install uninstall debug

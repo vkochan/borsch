@@ -1817,8 +1817,14 @@ void scheme_do_quit(void)
 	do_quit();
 }
 
+ptr scheme_library_directory(void)
+{
+	return Sstring(LIB_PATH);
+}
+
 static void scheme_export_symbols(void)
 {
+	Sregister_symbol("cs_library_directory", scheme_library_directory);
 	Sregister_symbol("cs_runtime_init", runtime_init);
 	Sregister_symbol("cs_runtime_cleanup", runtime_cleanup);
 
@@ -2008,8 +2014,6 @@ int scheme_init(int argc, char *argv[])
 	Sregister_boot_file("/usr/lib/csv"VERSION"/"MACHINE_TYPE"/scheme.boot");
 	Sregister_boot_file("/usr/lib/csv"VERSION"/"MACHINE_TYPE"/borsch.boot");
 	Sbuild_heap(NULL, scheme_export_symbols);
-
-	CALL1("source-directories", Scons(Sstring(LIB_PATH), Snil));
 
 	err = fifo_create();
 	if (err) {
