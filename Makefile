@@ -6,6 +6,7 @@ MANPREFIX = ${PREFIX}/share/man
 # leave empty to install into your home folder
 TERMINFO := ${DESTDIR}${PREFIX}/share/terminfo
 LIB_PREFIX = ${PREFIX}/lib/${PROGNAME}
+SCHEME_LIB_PREFIX = ${LIB_PREFIX}/scheme
 
 INCS = -I.
 LIBS = -lc -lutil -lncursesw -ltinfo
@@ -59,7 +60,7 @@ SRCS += syntax/c/parser.c \
 
 CFLAGS += -I$(SCH_PATH) \
    -DPROGNAME='"${PROGNAME}"' \
-   -DLIB_PATH='"'"${DESTDIR}${LIB_PREFIX}"'"'
+   -DLIB_PATH='"'"${DESTDIR}${SCHEME_LIB_PREFIX}"'"'
 
 OBJS += ${SRCS:.c=.o}
 
@@ -89,11 +90,11 @@ clean_scheme_libs:
 	done
 
 install_scheme_libs:
-	@echo "Installing scheme libraries into ${DESTDIR}${LIB_PREFIX} ..."
-	@mkdir -p ${DESTDIR}${LIB_PREFIX}
+	@echo "Installing scheme libraries into ${DESTDIR}${SCHEME_LIB_PREFIX}/${PROGNAME} ..."
+	@mkdir -p ${DESTDIR}${SCHEME_LIB_PREFIX}/${PROGNAME}
 	@for s in $$(find scheme/ -type f -name '*.so' | sed -e 's|scheme/||'); do \
-		echo "installing ${DESTDIR}${LIB_PREFIX}/$$s"; \
-		install -D -m 0644 "scheme/$$s" "${DESTDIR}${LIB_PREFIX}/$$s"; \
+		echo "installing $$s"; \
+		install -D -m 0644 "scheme/$$s" "${DESTDIR}${SCHEME_LIB_PREFIX}/${PROGNAME}/$$s"; \
 	done
 
 ${PROGNAME}.boot: scheme_libs
