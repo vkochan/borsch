@@ -1,13 +1,16 @@
 (define *config-dir* #f)
 (define (config-dir)
    *config-dir*)
-
+   
 (define __cs_runtime_init (foreign-procedure "cs_runtime_init" () int))
 (define __cs_runtime_cleanup (foreign-procedure "cs_runtime_cleanup" () void))
 (define __cs_library_directory (foreign-procedure "cs_library_directory" () scheme-object))
 
 (define (runtime-init)
-   (library-directories (list (__cs_library_directory)))
+   (set! *config-dir* (string-append (getenv "HOME") "/.config/borsch"))
+   (library-directories (list (__cs_library_directory)
+                              (config-dir)))
+   (compile-imported-libraries #t)
    (__cs_runtime_init))
 
 (define (runtime-cleanup)
@@ -80,10 +83,6 @@
       (while (< i (length args))
          (let ([a (list-ref args i)])
             (cond
-               ((= i 0)
-                (set! *config-dir* (string-append (getenv "HOME")
-                                                  "/.config/"
-                                                  (path-last a))))
                ((equal? a "-n")
                 (set! do-init? #f))
                ((equal? a "-g")
