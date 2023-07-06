@@ -37,9 +37,24 @@
       while
       run-hooks
       add-hook
-      remove-hook)
+      remove-hook
+
+      file-is-directory?
+      file-is-regular?
+      file-is-link?
+      file-is-regular/link?
+      file-delete
+      file-copy 
+      file-mkdir 
+      file-list
+      file-find
+      file-delete-recursive 
+      file>
+      file>>
+      file-is-executable?)
    (import
       (borsch keyword)
       (borsch strings)
       (borsch lists)
-      (borsch base)))
+      (borsch base)
+      (borsch file)))

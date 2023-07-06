@@ -1,3 +1,24 @@
+(library (borsch file)
+   (export
+      file-is-directory?
+      file-is-regular?
+      file-is-link?
+      file-is-regular/link?
+      file-delete
+      file-copy 
+      file-mkdir 
+      file-list
+      file-find
+      file-delete-recursive 
+      file>
+      file>>
+      file-is-executable?)
+   (import
+      (borsch keyword)
+      (borsch strings)
+      (pregexp)
+      (chezscheme))
+
 (define (path-join p0 p1)
    (define (has-delim?)
       (not (or (equal? p0 "")
@@ -6,19 +27,6 @@
                (equal? (string-ref p1 0) #\/) )))
 
    (string-append p0 (if (has-delim?) "/" "") p1) )
-
-(define (path-expand f)
-   (let ([root (path-first f)])
-      (if (equal? root "/")
-         f
-         ;; else
-         (if (equal? root "~")
-            (format "~a/~a" (getenv "HOME") (path-rest f))
-            ;; else
-            (string-append (current-cwd) "/" f)))))
-
-(define (path-exists? f)
-   (file-exists? (path-expand f)))
 
 (define file-is-directory? file-directory?)
 (define file-is-regular? file-regular?)
@@ -109,3 +117,4 @@
 
 (define (file-is-executable? path)
    (= 1 (fxbit-field (get-mode path) 6 7)))
+)

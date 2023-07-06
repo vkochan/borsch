@@ -68,6 +68,20 @@
 (define (path-parent+ p x)
    (prefix+ p (suffix+ x "/")))
 
+(define (path-expand f)
+   (let ([root (path-first f)])
+      (if (equal? root "/")
+         f
+         ;; else
+         (if (equal? root "~")
+            (format "~a/~a" (getenv "HOME") (path-rest f))
+            ;; else
+            (string-append (current-cwd) "/" f)))))
+
+(define (path-exists? f)
+   (file-exists? (path-expand f)))
+
+
 (define % modulo)
 
 (define fmt format)
