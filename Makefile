@@ -90,11 +90,11 @@ clean_scheme_libs:
 	done
 
 install_scheme_libs:
-	@echo "Installing scheme libraries into ${DESTDIR}${SCHEME_LIB_PREFIX}/${PROGNAME} ..."
-	@mkdir -p ${DESTDIR}${SCHEME_LIB_PREFIX}/${PROGNAME}
+	@echo "Installing scheme libraries into ${DESTDIR}${SCHEME_LIB_PREFIX} ..."
+	@mkdir -p ${DESTDIR}${SCHEME_LIB_PREFIX}
 	@for s in $$(find scheme/ -type f -name '*.so' | sed -e 's|scheme/||'); do \
 		echo "installing $$s"; \
-		install -D -m 0644 "scheme/$$s" "${DESTDIR}${SCHEME_LIB_PREFIX}/${PROGNAME}/$$s"; \
+		install -D -m 0644 "scheme/$$s" "${DESTDIR}${SCHEME_LIB_PREFIX}/$$s"; \
 	done
 
 ${PROGNAME}.boot: scheme_libs

@@ -20,6 +20,10 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(include "borsch.ss")
+
+(import (borsch))
+
 (include "pregexp.scm")
 (include "common.ss")
 (include "file.ss")
