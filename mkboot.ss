@@ -1,3 +1,5 @@
+(reset-handler abort)
+
 (source-directories '("scheme"))
 (library-directories '("scheme"))
 
