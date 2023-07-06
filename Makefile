@@ -74,15 +74,9 @@ ifeq ($(DEBUG),1)
 CFLAGS += -UNDEBUG -O0 -g -ggdb -Wall -Wextra -Wno-unused-parameter
 endif
 
-.PHONY: libtext libui scheme_libs clean_scheme_libs install_scheme_libs ${PROGNAME}.boot
+.PHONY: libtext libui clean_scheme_libs install_scheme_libs ${PROGNAME}.boot
 
-all: ${PROGNAME} scheme_libs ${PROGNAME}.boot
-
-scheme_libs:
-	@echo "Compiling scheme libraries ..."
-	@for s in $$(find scheme/ -type f -name '*.sls' | sed -e 's|scheme/||'); do \
-		echo "(reset-handler abort) (compile-library \"scheme/$$s\")" | $(SCHEME) --libdirs scheme -q; \
-	done
+all: ${PROGNAME} ${PROGNAME}.boot
 
 clean_scheme_libs:
 	@for s in $$(find scheme/ -type f -name '*.so' | sed -e 's|scheme/||'); do \
@@ -97,7 +91,7 @@ install_scheme_libs:
 		install -D -m 0644 "scheme/$$s" "${DESTDIR}${SCHEME_LIB_PREFIX}/$$s"; \
 	done
 
-${PROGNAME}.boot: scheme_libs
+${PROGNAME}.boot:
 	cat mkboot.ss | $(SCHEME) -q
 
 ${PROGNAME}: ${OBJS} libui libtext
