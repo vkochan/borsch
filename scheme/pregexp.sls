@@ -1,9 +1,19 @@
-;pregexp.scm
+;pregexp.sls
 ;Portable regular expressions for Scheme
 ;Dorai Sitaram
 ;http://www.ccs.neu.edu/~dorai
 ;dorai AT ccs DOT neu DOT edu
 ;Oct 2, 1999
+
+(library (pregexp)
+   (export
+      pregexp
+      pregexp-match
+      pregexp-split
+      pregexp-replace
+      pregexp-replace*
+      pregexp-quote)
+   (import (chezscheme))
 
 (define *pregexp-version* 20200130) ;last change
 
@@ -754,5 +764,6 @@
                       (cons #\\ (cons c r))
                       (cons c r))))))))
 
+)
 ;(trace pregexp-read-pattern pregexp-read-char-list pregexp-read-piece)
 ;eof

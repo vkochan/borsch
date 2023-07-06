@@ -22,9 +22,9 @@
 
 (include "borsch.ss")
 
+(import (pregexp))
 (import (borsch))
 
-(include "pregexp.scm")
 (include "common.ss")
 (include "file.ss")
 (include "style.ss")
