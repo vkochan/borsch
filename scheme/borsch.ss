@@ -27,8 +27,19 @@
       stack-list
       stack-remove!
       stack-pop!
-      add-to-list)
+      add-to-list
+
+      bit
+      count-digits-num
+      try
+      error->string
+      call-foreign
+      while
+      run-hooks
+      add-hook
+      remove-hook)
    (import
       (borsch keyword)
       (borsch strings)
-      (borsch lists)))
+      (borsch lists)
+      (borsch base)))

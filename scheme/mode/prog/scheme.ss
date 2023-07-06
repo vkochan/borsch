@@ -7,9 +7,8 @@
                       (try
                          (begin
                             (set! ret (eval-port->str code)))
-                         (catch
-                            (lambda (ex)
-                               (set! ret (err->str ex)))))
+                      (lambda (ex)
+                         (set! ret (error->string ex))))
                    )))
       (close-port code)
       (set! out (string-append out ret))
