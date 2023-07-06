@@ -12,7 +12,23 @@
       string-trim-right
       string-trim
       string-pad-right
-      string-join)
+      string-join
+
+      first
+      second
+      plist-get
+      plist-put
+      plist-for-each
+      list-empty?
+      make-stack
+      stack-empty?
+      stack-push!
+      stack-top
+      stack-list
+      stack-remove!
+      stack-pop!
+      add-to-list)
    (import
       (borsch keyword)
-      (borsch strings)))
+      (borsch strings)
+      (borsch lists)))
