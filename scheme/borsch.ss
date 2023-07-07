@@ -51,10 +51,16 @@
       file-delete-recursive 
       file>
       file>>
-      file-is-executable?)
+      file-is-executable?
+
+      timer-set-time
+      timer-set-interval
+      make-timer
+      timer-delete)
    (import
       (borsch keyword)
       (borsch strings)
       (borsch lists)
       (borsch base)
-      (borsch file)))
+      (borsch file)
+      (borsch timer)))

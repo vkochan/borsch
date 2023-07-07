@@ -1,3 +1,13 @@
+(library (borsch timer)
+   (export
+      timer-set-time
+      timer-set-interval
+      make-timer
+      timer-delete)
+   (import
+      (chezscheme)
+      (borsch base))
+
 (define __cs_timer_add (foreign-procedure "cs_timer_add" (void*) scheme-object))
 (define __cs_timer_del (foreign-procedure "cs_timer_del" (int) void))
 (define __cs_timer_interval_set (foreign-procedure "cs_timer_interval_set" (int long) void))
@@ -83,4 +93,5 @@
          )
       )
    )
+)
 )

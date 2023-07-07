@@ -42,7 +42,6 @@
 (include "vterm.ss")
 (include "minibuf.ss")
 (include "os.ss")
-(include "timer.ss")
 (include "syntax.ss")
 (include "ssh.ss")
 (include "git.ss")
