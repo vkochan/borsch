@@ -71,6 +71,20 @@
       (when (file-exists? init-script)
          (try (load init-script) ))))
 
+(define (run-script path)
+   (define (exit-script ret)
+      (runtime-cleanup)
+      (exit ret))
+
+   (set! *current-frame* (frame-create))
+   (try
+      (begin
+         (load path)
+         (exit-script 0))
+   (lambda (ex)
+      (display-condition ex)
+      (exit-script 1) )))
+
 (define is-running? #t)
 
 (define (sigterm-handle-func num)
@@ -89,6 +103,8 @@
                 (set! do-init? #f))
                ((equal? a "-g")
                 (set! ui-type 1))
+               ((equal? a "--script")
+                (run-script (list-ref args (+ i 1))) )
                ((equal? a "-i")
                 (when (<= i alen)
                    (set! init-script (path-last (list-ref args (+ i 1))))

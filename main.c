@@ -270,7 +270,8 @@ cleanup(void) {
 	vt_shutdown();
 	syntax_cleanup();
 	style_cleanup();
-	ui_free(g_ui);
+	if (g_ui)
+	   ui_free(g_ui);
 	if (cmdfifo.fd > 0)
 		close(cmdfifo.fd);
 	if (cmdfifo.file)
