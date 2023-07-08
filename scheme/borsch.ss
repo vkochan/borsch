@@ -81,6 +81,13 @@
       buffer-is-readonly?
       buffer-is-modified?
       buffer-is-dirty?
+      set-text-style
+      add-text-property
+      remove-text-property
+      get-text-property
+      set-text-property
+      highlight-range
+      highlight-clear
 
       style-add
       style-modify

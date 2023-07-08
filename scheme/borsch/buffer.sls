@@ -19,9 +19,18 @@
       buffer-set-readonly
       buffer-is-readonly?
       buffer-is-modified?
-      buffer-is-dirty?)
+      buffer-is-dirty?
+      set-text-style
+      add-text-property
+      remove-text-property
+      get-text-property
+      set-text-property
+      highlight-range
+      highlight-clear)
    (import (chezscheme)
-           (borsch base))
+           (borsch base)
+           (borsch style)
+           (borsch lists))
 
 (define __cs_buf_current_get (foreign-procedure "cs_buf_current_get" () scheme-object))
 
@@ -46,6 +55,20 @@
 (define __cs_buf_readonly_get (foreign-procedure "cs_buf_readonly_get" (int) scheme-object))
 (define __cs_buf_is_modified (foreign-procedure "cs_buf_is_modified" (int) scheme-object))
 (define __cs_buf_is_dirty (foreign-procedure "cs_buf_is_dirty" (int) scheme-object))
+
+(define __cs_buf_text_fg_set (foreign-procedure "cs_buf_text_fg_set" (int int) void))
+(define __cs_buf_text_bg_set (foreign-procedure "cs_buf_text_bg_set" (int int) void))
+(define __cs_buf_text_style_set (foreign-procedure "cs_buf_text_style_set" (int int) void))
+(define __cs_buf_text_fg_get (foreign-procedure "cs_buf_text_fg_get" (int) scheme-object))
+(define __cs_buf_text_bg_get (foreign-procedure "cs_buf_text_bg_get" (int) scheme-object))
+(define __cs_buf_text_style_get (foreign-procedure "cs_buf_text_style_get" (int) scheme-object))
+
+(define __cs_buf_prop_style_add (foreign-procedure "cs_buf_prop_style_add" (int int int int int int string int int string string boolean wchar) scheme-object))
+(define __cs_buf_prop_kmap_add (foreign-procedure "cs_buf_prop_kmap_add" (int int int int string string) scheme-object))
+(define __cs_buf_prop_symbol_add (foreign-procedure "cs_buf_prop_symbol_add" (int string int int string string) scheme-object))
+(define __cs_buf_prop_data_add (foreign-procedure "cs_buf_prop_data_add" (int scheme-object int int string string) scheme-object))
+(define __cs_buf_prop_del (foreign-procedure "cs_buf_prop_del" (int int int int string string) void))
+(define __cs_buf_prop_get (foreign-procedure "cs_buf_prop_get" (int int int int string) scheme-object))
 
 (define current-buffer-tmp (make-parameter #f))
 
@@ -166,5 +189,166 @@
 
       [(buf)
        (call-foreign (__cs_buf_is_dirty buf))]))
+
+(define (set-text-style s . e)
+   (let ([a (append (list s) e)])
+      (for-each
+         (lambda (o)
+            (cond
+               [(equal? (car o) 'fg:)
+                (call-foreign (__cs_buf_text_fg_set (current-buffer) (color-name->number (cadr o))))]
+               [(equal? (car o) 'bg:)
+                (call-foreign (__cs_buf_text_bg_set (current-buffer) (color-name->number (cadr o))))]
+               [(equal? (car o) 'attr:)
+                (call-foreign (__cs_buf_text_style_set (current-buffer) (style-name->number (cadr o))))]))
+         a)))
+
+(define (symbol->text-property-type s)
+   (case s
+      ['style:     1]
+      ['highlight: 2]
+      ['keymap:    3]
+      ['symbol:    4]
+      ['data:      5]
+      ['all:       10000]
+      [else         0]))
+
+(define __add-style-property
+   (case-lambda
+      [(style regex)
+       (__add-style-property style -1 -1 regex)]
+
+      [(style start end)
+       (__add-style-property style start end #f)]
+
+      [(style start end regex)
+       (__add-style-property style start end #f #f)]
+      
+      [(style start end regex name)
+       (let ([l (if (symbol? style)
+                    (list -1 -1 -1)
+                    (style->list style))])
+         (call-foreign
+            (__cs_buf_prop_style_add
+               (current-buffer)
+               1
+               (list-ref l 0)
+               (list-ref l 1)
+               (list-ref l 2)
+               (list-ref l 4)
+               (if (symbol? style)
+                  (symbol->string style)
+                  ;; else
+                  #f)
+               start
+               end
+               regex
+               name
+               (plist-get style 'expand:)
+               (list-ref l 3))))]))
+
+(define __add-keymap-property
+   (case-lambda
+      [(kmap regex)
+       (__add-keymap-property kmap -1 -1 regex)]
+
+      [(kmap start end)
+       (__add-keymap-property kmap start end #f)]
+
+      [(kmap start end regex)
+       (__add-keymap-property kmap start end #f #f)]
+      
+      [(kmap start end regex name)
+       (call-foreign (__cs_buf_prop_kmap_add (current-buffer) kmap start end regex name))]))
+
+(define __add-symbol-property
+   (case-lambda
+      [(symbol start end)
+       (__add-symbol-property symbol start end #f)]
+
+      [(symbol start end regex)
+       (__add-symbol-property symbol start end #f #f)]
+      
+      [(symbol start end regex name)
+       (call-foreign (__cs_buf_prop_symbol_add (current-buffer) (symbol->string symbol) start end regex name))]))
+
+(define __add-data-property
+   (case-lambda
+      [(data start end)
+       (__add-data-property data start end #f)]
+
+      [(data start end regex)
+       (__add-data-property data start end #f #f)]
+      
+      [(data start end regex name)
+       (call-foreign (__cs_buf_prop_data_add (current-buffer) data start end regex name))]))
+
+(define add-text-property
+   (case-lambda
+      [(regex plist)
+       (add-text-property -1 -1 regex plist)]
+
+      [(start end plist)
+       (let ([name (plist-get plist ':name)]
+             [regex (plist-get plist ':regex)])
+          (plist-for-each plist
+             (lambda (prop val)
+                (case prop
+                   ['style: (__add-style-property val start end regex name)]
+                   ['keymap: (__add-keymap-property val start end regex name)]
+                   ['symbol: (__add-symbol-property val start end regex name)]
+                   ['data: (__add-data-property val start end regex name)]))))]))
+
+(define remove-text-property
+   (case-lambda
+      [()
+       (remove-text-property 'all: -1 -1 #f)]
+    
+      [(name)
+       (remove-text-property 'all: -1 -1 name)]
+    
+      [(start end)
+       (remove-text-property 'all: start end #f)]
+
+      [(type start end)
+       (remove-text-property type start end #f)]
+
+      [(type start end name)
+       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type type) start end #f name))]))
+
+(define get-text-property
+   (case-lambda
+      [(name)
+       (get-text-property 'all: -1 -1 name)]
+    
+      [(start end)
+       (get-text-property 'all: start end #f)]
+
+      [(type start end)
+       (get-text-property type start end #f)]
+
+      [(type start end name)
+       (call-foreign (__cs_buf_prop_get (current-buffer) (symbol->text-property-type type) start end name))]))
+
+(define set-text-property
+   (case-lambda
+      [(start end plist)
+       (set-text-property start end #f plist)]
+      
+      [(start end name plist)
+       (let ([type #f])
+          (plist-for-each plist
+             (lambda (prop val)
+                (when (member prop '(style: data: symbol: keymap:))
+                   (set! type prop))))
+          (when type
+             (remove-text-property type start end name)
+             (add-text-property start end plist)))]))
+
+(define (highlight-range s e)
+   (call-foreign (__cs_buf_prop_style_add (current-buffer) 2 -1 -1 -1 0 "highlight" s e #f #f #f)))
+
+(define (highlight-clear)
+   (call-foreign (__cs_buf_prop_del (current-buffer) 2 -1 -1 #f #f)))
 
 )
