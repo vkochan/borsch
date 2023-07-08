@@ -1,3 +1,17 @@
+(library (borsch syntax)
+   (export
+      syntax-set-lang
+      syntax-add-style
+      syntax-delete-style
+      syntax-set-style
+      syntax-delete-all-styles
+      syntax-highlight)
+   (import
+      (chezscheme)
+      (borsch base)
+      (borsch buffer)
+      (borsch style))
+
 (define __cs_buf_parser_set (foreign-procedure "cs_buf_parser_set" (int string) scheme-object))
 (define __cs_stx_lang_style_add (foreign-procedure "cs_stx_lang_style_add" (string int int int string string) scheme-object))
 (define __cs_stx_lang_style_del (foreign-procedure "cs_stx_lang_style_del" (string string) void))
@@ -71,3 +85,4 @@
 (define-style syntax-number           '(fg: "blue"   attr: "bold"))
 (define-style syntax-constant         '(fg: "blue"   attr: "bold"))
 (define-style syntax-constant-builtin '(fg: "red"    attr: "bold"))
+)

@@ -90,7 +90,14 @@
       color-number->name
       style-name->bit
       style-name->number
-      style->list)
+      style->list
+
+      syntax-set-lang
+      syntax-add-style
+      syntax-delete-style
+      syntax-set-style
+      syntax-delete-all-styles
+      syntax-highlight)
    (import
       (borsch keyword)
       (borsch strings)
@@ -99,4 +106,5 @@
       (borsch file)
       (borsch timer)
       (borsch buffer)
-      (borsch style)))
+      (borsch style)
+      (borsch syntax)))
