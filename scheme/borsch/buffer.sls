@@ -10,6 +10,7 @@
       buffer-snapshot
       buffer-undo
       buffer-redo
+      buffer-save
       buffer-filename
       buffer-set-filename
       buffer-env
@@ -26,7 +27,8 @@
       get-text-property
       set-text-property
       highlight-range
-      highlight-clear)
+      highlight-clear
+      buffer-get)
    (import (chezscheme)
            (borsch base)
            (borsch style)
@@ -43,6 +45,7 @@
 (define __cs_buf_snapshot (foreign-procedure "cs_buf_snapshot" (int) void))
 (define __cs_buf_undo (foreign-procedure "cs_buf_undo" (int) void))
 (define __cs_buf_redo (foreign-procedure "cs_buf_redo" (int) void))
+(define __cs_buf_save (foreign-procedure "cs_buf_save" (int) scheme-object))
 
 (define __cs_buf_file_set (foreign-procedure "cs_buf_file_set" (int string) void))
 (define __cs_buf_file_get (foreign-procedure "cs_buf_file_get" (int) scheme-object))
@@ -69,6 +72,8 @@
 (define __cs_buf_prop_data_add (foreign-procedure "cs_buf_prop_data_add" (int scheme-object int int string string) scheme-object))
 (define __cs_buf_prop_del (foreign-procedure "cs_buf_prop_del" (int int int int string string) void))
 (define __cs_buf_prop_get (foreign-procedure "cs_buf_prop_get" (int int int int string) scheme-object))
+
+(define __cs_buf_by_name (foreign-procedure "cs_buf_by_name" (string) scheme-object))
 
 (define current-buffer-tmp (make-parameter #f))
 
@@ -115,6 +120,9 @@
 
 (define (buffer-redo)
    (call-foreign (__cs_buf_redo (current-buffer))))
+
+(define (buffer-save)
+   (call-foreign (__cs_buf_save (current-buffer))))
 
 (define buffer-filename
    (case-lambda
@@ -350,5 +358,8 @@
 
 (define (highlight-clear)
    (call-foreign (__cs_buf_prop_del (current-buffer) 2 -1 -1 #f #f)))
+
+(define (buffer-get n)
+   (call-foreign (__cs_buf_by_name n)))
 
 )

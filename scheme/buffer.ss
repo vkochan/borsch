@@ -6,11 +6,9 @@
 (define __cs_buf_del (foreign-procedure "cs_buf_del" (int) void))
 (define __cs_buf_kmap_get (foreign-procedure "cs_buf_kmap_get" (int) scheme-object))
 (define __cs_buf_kmap_set (foreign-procedure "cs_buf_kmap_set" (int string) scheme-object))
-(define __cs_buf_by_name (foreign-procedure "cs_buf_by_name" (string) scheme-object))
 (define __cs_buf_text_input_enable (foreign-procedure "cs_buf_text_input_enable" (int boolean) void))
 
 (define __cs_buf_file_open (foreign-procedure "cs_buf_file_open" (int string) scheme-object))
-(define __cs_buf_save (foreign-procedure "cs_buf_save" (int) scheme-object))
 
 (define __cs_buf_is_visible (foreign-procedure "cs_buf_is_visible" (int) scheme-object))
 (define __cs_buf_is_term (foreign-procedure "cs_buf_is_term" (int) scheme-object))
@@ -225,9 +223,6 @@
        (call-foreign (__cs_buf_del b))
        (buffer-remove b)]))
 
-(define (buffer-get n)
-   (call-foreign (__cs_buf_by_name n)))
-
 (define (buffer-get-or-create name)
    (or (buffer-get name)
        (buffer-create name)))
@@ -268,9 +263,6 @@
 (define (buffer-reload)
    (when (local-bound? buffer-reload-func)
       ((get-local buffer-reload-func))))
-
-(define (buffer-save)
-   (call-foreign (__cs_buf_save (current-buffer))))
 
 (define (buffer-list)
    %buffer-list%)

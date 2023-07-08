@@ -71,6 +71,7 @@
       buffer-snapshot
       buffer-undo
       buffer-redo
+      buffer-save
       buffer-filename
       buffer-set-filename
       buffer-env
@@ -88,6 +89,7 @@
       set-text-property
       highlight-range
       highlight-clear
+      buffer-get
 
       style-add
       style-modify
