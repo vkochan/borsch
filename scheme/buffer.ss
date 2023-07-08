@@ -135,7 +135,8 @@
       (keymap-set-parent lmap sym)))
 
 (define (current-buffer)
-   (call-foreign (__cs_buf_current_get)))
+   (or (current-buffer-tmp)
+       (call-foreign (__cs_buf_current_get))))
 
 (define *buffer-enable-eof* #t)
 

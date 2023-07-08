@@ -1,14 +1,13 @@
 ;; FFI
 (define __cs_do_quit (foreign-procedure "cs_do_quit" () void))
 
+(define current-buffer-tmp (make-parameter #f))
+
 (define-syntax (with-current-buffer stx)
    (syntax-case stx ()
       ((_ buf exp ...)
-       #`(let ([b buf])
-            (fluid-let ([current-buffer (lambda () b)])
-               (begin
-                  exp
-                  ...))))))
+       #`(parameterize ([current-buffer-tmp buf])
+            exp ... ))))
 
 (define (message s)
    (let ([b (buffer-get "*Messages*")])
