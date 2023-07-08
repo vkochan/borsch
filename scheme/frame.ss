@@ -46,6 +46,7 @@
                                  0.5
                                  (make-stack)
                                  #f)])
+            (current-cwd-handler frame-cwd-handler)
             (hashtable-set! frames-ht id fr)
             fr))]))
 
@@ -125,6 +126,14 @@
       [(fr c)
        (%frame%-cwd-set! fr c)
        (run-hooks 'change-cwd-hook)]))
+
+(define frame-cwd-handler
+   (case-lambda
+      [()
+       (frame-cwd)]
+
+      [(cwd)
+       (frame-set-cwd cwd)]))
 
 (define frame-prev-layout
    (case-lambda

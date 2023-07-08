@@ -510,18 +510,6 @@
              ;; else
              (first win-lst)))]))
 
-(define (current-cwd)
-   (frame-cwd))
-
-(define-syntax (with-current-cwd stx)
-   (syntax-case stx ()
-      ((_ cwd exp ...)
-       #`(let ([c cwd])
-            (fluid-let ([current-cwd (lambda () c)])
-               (begin
-                  exp
-                  ...))))))
-
 (define (buffer-set-cwd cwd)
    (define-local current-cwd cwd))
 

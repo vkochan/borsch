@@ -38,6 +38,9 @@
       run-hooks
       add-hook
       remove-hook
+      current-cwd
+      with-current-cwd
+      current-cwd-handler
 
       file-is-directory?
       file-is-regular?

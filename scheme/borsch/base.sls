@@ -8,7 +8,10 @@
       while
       run-hooks
       add-hook
-      remove-hook)
+      remove-hook
+      current-cwd
+      with-current-cwd
+      current-cwd-handler)
    (import (chezscheme))
 
 (define (bit n)
@@ -82,4 +85,35 @@
                     expression
                     ...))))
 
+(define current-cwd-handler (make-parameter #f))
+(define current-cwd-val (current-directory))
+(define current-cwd-tmp (make-parameter #f))
+
+(define current-cwd
+   (case-lambda
+      [()
+       (if (current-cwd-tmp)
+          (current-cwd-tmp)
+          ;; else
+          (let ([handler (current-cwd-handler)])
+             (if handler
+                (handler)
+                ;; else
+                current-cwd-val )))]
+
+      [(cwd)
+       (if (current-cwd-tmp)
+          (current-cwd-tmp cwd)
+          ;; else
+          (let ([handler (current-cwd-handler)])
+             (if handler
+                (handler cwd)
+                ;; else
+                (set! current-cwd-val cwd) )))]))
+
+(define-syntax (with-current-cwd stx)
+   (syntax-case stx ()
+      ((_ cwd exp ...)
+       #`(parameterize ([current-cwd-tmp cwd])
+            exp ... ))))
 )
