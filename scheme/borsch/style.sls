@@ -1,3 +1,20 @@
+(library (borsch style)
+   (export
+      style-add
+      style-modify
+      define-style
+      style-set
+      color-name->number
+      color-number->name
+      style-name->bit
+      style-name->number
+      style->list
+   )
+   (import
+      (chezscheme)
+      (borsch base)
+      (borsch strings))
+
 (define __cs_style_add (foreign-procedure "cs_style_add" (string int int int) scheme-object))
 (define __cs_style_set (foreign-procedure "cs_style_set" (string int int int) scheme-object))
 (define __cs_style_get (foreign-procedure "cs_style_get" (string) scheme-object))
@@ -122,15 +139,4 @@
          (or a (bit 0))
          c
          is-set)))
-
-(define (colors-show)
-   (let ([cls '("default" "black" "red" "green" "yellow" "blue" "magenta" "cyan" "white"
-                "bright-black" "bright-red" "bright-green" "bright-yellow" "bright-magenta"
-                "bright-cyan" "bright-white")])
-      (with-current-buffer (buffer-create)
-         (text-mode)
-         (for-each
-            (lambda (c)
-               (text-insert (format "~a\n" c) `(style: (fg: ,c))))
-            cls)
-         (cursor-to-begin))))
+)

@@ -26,7 +26,6 @@
 (import (borsch))
 
 (include "common.ss")
-(include "style.ss")
 (include "keymap.ss")
 (include "ui.ss")
 (include "frame.ss")
@@ -59,6 +58,18 @@
 
 (define message-recent "")
 (define message-buf #f)
+
+(define (colors-show)
+   (let ([cls '("default" "black" "red" "green" "yellow" "blue" "magenta" "cyan" "white"
+                "bright-black" "bright-red" "bright-green" "bright-yellow" "bright-magenta"
+                "bright-cyan" "bright-white")])
+      (with-current-buffer (buffer-create)
+         (text-mode)
+         (for-each
+            (lambda (c)
+               (text-insert (format "~a\n" c) `(style: (fg: ,c))))
+            cls)
+         (cursor-to-begin))))
 
 (define (open-repl)
    (vterm "borsch-eval -i" "eval"))

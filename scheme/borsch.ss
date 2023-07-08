@@ -77,7 +77,17 @@
       buffer-set-readonly
       buffer-is-readonly?
       buffer-is-modified?
-      buffer-is-dirty?)
+      buffer-is-dirty?
+
+      style-add
+      style-modify
+      define-style
+      style-set
+      color-name->number
+      color-number->name
+      style-name->bit
+      style-name->number
+      style->list)
    (import
       (borsch keyword)
       (borsch strings)
@@ -85,4 +95,5 @@
       (borsch base)
       (borsch file)
       (borsch timer)
-      (borsch buffer)))
+      (borsch buffer)
+      (borsch style)))
