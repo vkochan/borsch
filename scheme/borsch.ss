@@ -56,11 +56,33 @@
       timer-set-time
       timer-set-interval
       make-timer
-      timer-delete)
+      timer-delete
+
+      current-buffer
+      with-current-buffer
+      buffer-line-num
+      buffer-set-mode-name
+      buffer-mode-name
+      buffer-set-state-name
+      buffer-state-name
+      buffer-snapshot
+      buffer-undo
+      buffer-redo
+      buffer-filename
+      buffer-set-filename
+      buffer-env
+      define-local
+      buffer-name
+      buffer-set-name
+      buffer-set-readonly
+      buffer-is-readonly?
+      buffer-is-modified?
+      buffer-is-dirty?)
    (import
       (borsch keyword)
       (borsch strings)
       (borsch lists)
       (borsch base)
       (borsch file)
-      (borsch timer)))
+      (borsch timer)
+      (borsch buffer)))
