@@ -77,6 +77,7 @@
       (exit ret))
 
    (set! *current-frame* (frame-create))
+   (current-buffer-tmp (buffer-new))
    (try
       (begin
          (load path)
