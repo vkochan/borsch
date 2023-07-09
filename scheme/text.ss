@@ -1,5 +1,3 @@
-(define __cs_buf_text_insert_nl (foreign-procedure "cs_buf_text_insert_nl" (int int) scheme-object))
-(define __cs_buf_text_insert_file (foreign-procedure "cs_buf_text_insert_file" (int string) scheme-object))
 (define __cs_buf_text_obj_range (foreign-procedure "cs_buf_text_obj_range" (int int char boolean) scheme-object))
 (define __cs_buf_text_range_del (foreign-procedure "cs_buf_text_range_del" (int int int) scheme-object))
 (define __cs_buf_mark_set (foreign-procedure "cs_buf_mark_set" (int int) void))
@@ -9,37 +7,6 @@
 (define __cs_win_mark_highlight (foreign-procedure "cs_win_mark_highlight" (int boolean) void))
 (define __cs_buf_text_get (foreign-procedure "cs_buf_text_get" (int int int) scheme-object))
 (define __cs_buf_search_regex (foreign-procedure "cs_buf_search_regex" (int int string int) scheme-object))
-
-(define-syntax (text-modify stx)
-   (syntax-case stx ()
-      ((_ exp ...)
-       #`(if (buffer-is-readonly?)
-            (begin
-               (message "buffer is readonly")
-               (cursor))
-            ;; else
-            (begin
-               exp
-               ...)))))
-
-(define (text-insert-nl)
-   (text-modify (call-foreign (__cs_buf_text_insert_nl (current-buffer) (cursor)))))
-
-(define (text-insert-empty-line-up)
-   (text-modify
-      (cursor-to-prev-line-end)
-      (if (equal? (cursor) 0)
-         (with-saved-cursor (text-insert-nl))
-         ;; else
-         (text-insert-nl))))
-
-(define (text-insert-empty-line)
-   (text-modify
-      (cursor-to-line-end)
-      (text-insert-nl)))
-
-(define (text-insert-file t)
-   (text-modify (call-foreign (__cs_buf_text_insert_file (current-buffer) t))))
 
 (define text-string
    (case-lambda

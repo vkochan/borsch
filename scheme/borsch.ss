@@ -135,9 +135,14 @@
       cursor-to-end
       is-last-line?
       cursor-to-each-line
+      text-modify
       text-insert
       text-append
       text-insert-char
+      text-insert-nl
+      text-insert-empty-line-up
+      text-insert-empty-line
+      text-insert-file
       text-end-pos
       text-begin-pos
       text-line-end-pos

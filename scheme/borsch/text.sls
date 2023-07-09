@@ -24,9 +24,14 @@
       cursor-to-end
       is-last-line?
       cursor-to-each-line
+      text-modify
       text-insert
       text-append
       text-insert-char
+      text-insert-nl
+      text-insert-empty-line-up
+      text-insert-empty-line
+      text-insert-file
       text-end-pos
       text-begin-pos
       text-line-end-pos
@@ -56,6 +61,8 @@
 
 (define __cs_buf_text_insert (foreign-procedure "cs_buf_text_insert" (int string) scheme-object))
 (define __cs_buf_text_insert_char (foreign-procedure "cs_buf_text_insert_char" (int int) scheme-object))
+(define __cs_buf_text_insert_nl (foreign-procedure "cs_buf_text_insert_nl" (int int) scheme-object))
+(define __cs_buf_text_insert_file (foreign-procedure "cs_buf_text_insert_file" (int string) scheme-object))
 
 (define __cs_buf_text_obj_pos (foreign-procedure "cs_buf_text_obj_pos" (int int char int) scheme-object))
 
@@ -170,6 +177,37 @@
 
 (define (text-insert-char char)
    (call-foreign (__cs_buf_text_insert_char (current-buffer) char)))
+
+(define-syntax (text-modify stx)
+   (syntax-case stx ()
+      ((_ exp ...)
+       #`(if (buffer-is-readonly?)
+            (begin
+               (error 'edit "buffer is readonly")
+               (cursor))
+            ;; else
+            (begin
+               exp
+               ...)))))
+
+(define (text-insert-nl)
+   (text-modify (call-foreign (__cs_buf_text_insert_nl (current-buffer) (cursor)))))
+
+(define (text-insert-empty-line-up)
+   (text-modify
+      (cursor-to-prev-line-end)
+      (if (equal? (cursor) 0)
+         (with-saved-cursor (text-insert-nl))
+         ;; else
+         (text-insert-nl))))
+
+(define (text-insert-empty-line)
+   (text-modify
+      (cursor-to-line-end)
+      (text-insert-nl)))
+
+(define (text-insert-file t)
+   (text-modify (call-foreign (__cs_buf_text_insert_file (current-buffer) t))))
 
 (define (text-obj-pos buf curs obj num)
    (call-foreign (__cs_buf_text_obj_pos buf curs obj num)))
