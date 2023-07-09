@@ -6,7 +6,7 @@
       make-empty-keymap
       make-keymap
       keymap-set-parent
-   )
+      keymap-parent)
    (import
       (borsch base)
       (chezscheme))

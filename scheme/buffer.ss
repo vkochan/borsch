@@ -4,8 +4,6 @@
 (define __cs_buf_ref (foreign-procedure "cs_buf_ref" (int) scheme-object))
 (define __cs_buf_is_valid (foreign-procedure "cs_buf_is_valid" (int) scheme-object))
 (define __cs_buf_del (foreign-procedure "cs_buf_del" (int) void))
-(define __cs_buf_kmap_get (foreign-procedure "cs_buf_kmap_get" (int) scheme-object))
-(define __cs_buf_kmap_set (foreign-procedure "cs_buf_kmap_set" (int string) scheme-object))
 (define __cs_buf_text_input_enable (foreign-procedure "cs_buf_text_input_enable" (int boolean) void))
 
 (define __cs_buf_file_open (foreign-procedure "cs_buf_file_open" (int string) scheme-object))
@@ -62,19 +60,6 @@
                   ...
                   (run-hooks
                      (mode-gen-hook-symb 'mode))))))))
-
-(define (%buffer-local-keymap)
-   (call-foreign (__cs_buf_kmap_get (current-buffer))))
-
-(define (buffer-keymap)
-   (keymap-parent (%buffer-local-keymap)))
-
-(define (buffer-set-keymap sym)
-   (let ([lmap (%buffer-local-keymap)])
-      (keymap-set-parent lmap sym)))
-
-(define (bind-key-local k p)
-   (bind-key (%buffer-local-keymap) k p))
 
 (define (buffer-insert b)
    (set! %buffer-list% (append %buffer-list% (list b)))

@@ -34,11 +34,15 @@
       set-text-property
       highlight-range
       highlight-clear
-      buffer-get)
+      buffer-get
+      buffer-keymap
+      buffer-set-keymap
+      bind-key-local)
    (import (chezscheme)
            (borsch base)
            (borsch style)
-           (borsch lists))
+           (borsch lists)
+           (borsch keymap))
 
 (define __cs_buf_current_get (foreign-procedure "cs_buf_current_get" () scheme-object))
 
@@ -80,6 +84,8 @@
 (define __cs_buf_prop_get (foreign-procedure "cs_buf_prop_get" (int int int int string) scheme-object))
 
 (define __cs_buf_by_name (foreign-procedure "cs_buf_by_name" (string) scheme-object))
+
+(define __cs_buf_kmap_get (foreign-procedure "cs_buf_kmap_get" (int) scheme-object))
 
 (define %dir-locals-ht (make-hashtable string-hash string=?))
 
@@ -431,5 +437,18 @@
 
 (define (buffer-get n)
    (call-foreign (__cs_buf_by_name n)))
+
+(define (%buffer-local-keymap)
+   (call-foreign (__cs_buf_kmap_get (current-buffer))))
+
+(define (buffer-keymap)
+   (keymap-parent (%buffer-local-keymap)))
+
+(define (buffer-set-keymap sym)
+   (let ([lmap (%buffer-local-keymap)])
+      (keymap-set-parent lmap sym)))
+
+(define (bind-key-local k p)
+   (bind-key (%buffer-local-keymap) k p))
 
 )

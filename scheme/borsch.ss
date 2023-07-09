@@ -6,6 +6,7 @@
       make-empty-keymap
       make-keymap
       keymap-set-parent
+      keymap-parent
 
       do-quit
       message
@@ -106,6 +107,9 @@
       highlight-range
       highlight-clear
       buffer-get
+      buffer-keymap
+      buffer-set-keymap
+      bind-key-local
 
       style-add
       style-modify
