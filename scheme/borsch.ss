@@ -106,7 +106,52 @@
       syntax-delete-style
       syntax-set-style
       syntax-delete-all-styles
-      syntax-highlight)
+      syntax-highlight
+      
+      cursor
+      cursor-set
+      with-saved-cursor
+      cursor-to-next-char
+      cursor-to-prev-char
+      cursor-to-next-word
+      cursor-to-prev-word
+      cursor-to-word-end
+      cursor-to-next-longword
+      cursor-to-prev-longword
+      cursor-to-longword-end
+      cursor-to-line
+      cursor-to-line-up
+      cursor-to-line-down
+      cursor-to-next-line
+      cursor-to-prev-line-end
+      cursor-to-line-start
+      cursor-to-line-finish
+      cursor-to-line-begin
+      cursor-to-line-end
+      cursor-to-begin
+      cursor-to-end
+      is-last-line?
+      cursor-to-each-line
+      text-insert
+      text-append
+      text-end-pos
+      text-begin-pos
+      text-line-end-pos
+      text-line-begin-pos
+      text-line-finish-pos
+      text-line-start-pos
+      text-prev-line-end-pos
+      text-next-line-begin-pos
+      text-next-line-pos
+      text-prev-line-pos
+      text-longword-end-pos
+      text-prev-longword-pos
+      text-next-longword-pos
+      text-word-end-pos
+      text-prev-word-pos
+      text-next-word-pos
+      text-prev-char-pos
+      text-next-char-pos)
    (import
       (borsch keyword)
       (borsch strings)
@@ -116,4 +161,5 @@
       (borsch timer)
       (borsch buffer)
       (borsch style)
-      (borsch syntax)))
+      (borsch syntax)
+      (borsch text)))

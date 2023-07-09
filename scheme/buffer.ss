@@ -75,8 +75,6 @@
    (let ([lmap (%buffer-local-keymap)])
       (keymap-set-parent lmap sym)))
 
-(define *buffer-enable-eof* #t)
-
 (define dir-local-symbol-bound?
    (case-lambda
       [(sym)
