@@ -134,6 +134,7 @@
       cursor-to-each-line
       text-insert
       text-append
+      text-insert-char
       text-end-pos
       text-begin-pos
       text-line-end-pos
