@@ -83,6 +83,7 @@
       buffer-undo
       buffer-redo
       buffer-save
+      buffer-reload
       buffer-filename
       buffer-set-filename
       buffer-env
@@ -110,6 +111,14 @@
       buffer-keymap
       buffer-set-keymap
       bind-key-local
+      define-mode
+      enable-insert
+      buffer-is-valid?
+      buffer-is-visible?
+      buffer-set-vterm
+      buffer-is-vterm?
+      buffer-set-cwd
+      buffer-cwd
 
       style-add
       style-modify

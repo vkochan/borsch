@@ -11,6 +11,7 @@
       buffer-undo
       buffer-redo
       buffer-save
+      buffer-reload
       buffer-filename
       buffer-set-filename
       buffer-env
@@ -37,7 +38,15 @@
       buffer-get
       buffer-keymap
       buffer-set-keymap
-      bind-key-local)
+      bind-key-local
+      define-mode
+      enable-insert
+      buffer-is-valid?
+      buffer-is-visible?
+      buffer-set-vterm
+      buffer-is-vterm?
+      buffer-set-cwd
+      buffer-cwd)
    (import (chezscheme)
            (borsch base)
            (borsch style)
@@ -86,6 +95,12 @@
 (define __cs_buf_by_name (foreign-procedure "cs_buf_by_name" (string) scheme-object))
 
 (define __cs_buf_kmap_get (foreign-procedure "cs_buf_kmap_get" (int) scheme-object))
+
+(define __cs_buf_text_input_enable (foreign-procedure "cs_buf_text_input_enable" (int boolean) void))
+(define __cs_buf_is_valid (foreign-procedure "cs_buf_is_valid" (int) scheme-object))
+(define __cs_buf_is_visible (foreign-procedure "cs_buf_is_visible" (int) scheme-object))
+(define __cs_buf_is_term (foreign-procedure "cs_buf_is_term" (int) scheme-object))
+(define __cs_buf_term_set (foreign-procedure "cs_buf_term_set" (int int) void))
 
 (define %dir-locals-ht (make-hashtable string-hash string=?))
 
@@ -137,6 +152,10 @@
 
 (define (buffer-save)
    (call-foreign (__cs_buf_save (current-buffer))))
+
+(define (buffer-reload)
+   (when (local-bound? buffer-reload-func)
+      ((get-local buffer-reload-func))))
 
 (define buffer-filename
    (case-lambda
@@ -450,5 +469,89 @@
 
 (define (bind-key-local k p)
    (bind-key (%buffer-local-keymap) k p))
+
+(define (mode-gen-map-symb m)
+   (string->symbol
+      (string-append (symbol->string m) "-map")))
+
+(define (mode-gen-map-value m)
+   (let ([s (mode-gen-map-symb m)])
+      (if (top-level-bound? s)
+         (top-level-value s)
+         ;; else
+         #f)))
+
+(define (mode-gen-hook-symb m)
+   (string->symbol
+      (string-append (symbol->string m) "-hook")))
+
+(define (mode-gen-hook-value h)
+   (let ([s (mode-gen-hook-symb h)])
+      (if (top-level-bound? s)
+         (top-level-value s)
+         ;; else
+         #f)))
+
+(define-syntax (define-mode stx)
+   (syntax-case stx ()
+      ((_ mode name parent exp ...)
+       #`(define-top-level-value 'mode
+            (lambda ()
+               (when parent
+                  ((top-level-value 'parent)))
+               (define-local major-mode 'mode)
+               (let ([m-map (mode-gen-map-symb 'mode)])
+                  (when (top-level-bound? m-map)
+                     (when parent
+                        (let ([p-map (mode-gen-map-symb 'parent)])
+                           (if (local-symbol-bound? p-map)
+                              (keymap-set-parent (top-level-value m-map) (get-local-symbol p-map))
+                              ;; else
+                              (keymap-set-parent (top-level-value m-map) p-map))))
+                     (buffer-set-keymap m-map))
+                  (buffer-set-mode-name name)
+                  exp
+                  ...
+                  (run-hooks
+                     (mode-gen-hook-symb 'mode))))))))
+
+(define (enable-insert e)
+   (call-foreign (__cs_buf_text_input_enable (current-buffer) e)))
+
+(define (buffer-is-valid? bid)
+   (call-foreign (__cs_buf_is_valid bid)))
+
+(define buffer-is-visible?
+   (case-lambda
+      [()
+       (call-foreign (__cs_buf_is_visible (current-buffer)))]
+
+      [(b)
+       (call-foreign (__cs_buf_is_visible b))]))
+
+(define buffer-set-vterm
+   (case-lambda
+      [(pid)
+       (buffer-set-vterm (current-buffer) pid)]
+
+      [(b pid)
+       (call-foreign (__cs_buf_term_set b pid))]))
+
+(define buffer-is-vterm?
+   (case-lambda
+      [()
+       (call-foreign (__cs_buf_is_term (current-buffer)))]
+
+      [(b)
+       (call-foreign (__cs_buf_is_term b))]))
+
+(define (buffer-set-cwd cwd)
+   (define-local current-cwd cwd))
+
+(define (buffer-cwd)
+   (if (and (local-bound? current-cwd) (get-local current-cwd))
+      (get-local current-cwd)
+      ;; else
+      (current-cwd)))
 
 )
