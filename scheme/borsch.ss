@@ -78,6 +78,12 @@
       buffer-filename
       buffer-set-filename
       buffer-env
+      local-symbol-bound?
+      get-local-symbol
+      set-local-symbol!
+      get-local
+      set-local!
+      local-bound?
       define-local
       buffer-name
       buffer-set-name
