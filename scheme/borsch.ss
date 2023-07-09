@@ -1,5 +1,12 @@
 (library (borsch)
    (export
+      bind-key
+      unbind-key
+      global-keymap
+      make-empty-keymap
+      make-keymap
+      keymap-set-parent
+
       do-quit
       message
 
@@ -168,6 +175,7 @@
       text-prev-char-pos
       text-next-char-pos)
    (import
+      (borsch keymap)
       (borsch runtime)
       (borsch keyword)
       (borsch strings)

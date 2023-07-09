@@ -73,6 +73,9 @@
    (let ([lmap (%buffer-local-keymap)])
       (keymap-set-parent lmap sym)))
 
+(define (bind-key-local k p)
+   (bind-key (%buffer-local-keymap) k p))
+
 (define (buffer-insert b)
    (set! %buffer-list% (append %buffer-list% (list b)))
    (frame-insert-buffer b))

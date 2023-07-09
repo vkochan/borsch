@@ -26,7 +26,6 @@
 (import (borsch))
 
 (include "common.ss")
-(include "keymap.ss")
 (include "ui.ss")
 (include "frame.ss")
 (include "layout.ss")
