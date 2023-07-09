@@ -1,5 +1,8 @@
 (library (borsch)
    (export
+      do-quit
+      message
+
       define*
 
       any->string
@@ -154,6 +157,7 @@
       text-prev-char-pos
       text-next-char-pos)
    (import
+      (borsch runtime)
       (borsch keyword)
       (borsch strings)
       (borsch lists)
