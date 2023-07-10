@@ -48,7 +48,7 @@
       (buffer-delete c)))
 
 (define (vterm-mode-paste)
-   (vterm-send-text copybuf-reg))
+   (vterm-send-text (copybuf-reg)))
 
 (define (vterm-mode-paste-clipboard)
    (vterm-send-text (copybuf-clip-get)))

@@ -296,7 +296,15 @@
       git-cmd-read
       git-cmd-list
       git-checkout-branch
-      git-branch-list)
+      git-branch-list
+      
+      copybuf-is-linewise?
+      copybuf-reg
+      copybuf-put
+      copybuf-copy
+      copybuf-append
+      copybuf-clip-get
+      copybuf-clip-put)
    (import
       (borsch keymap)
       (borsch runtime)
@@ -312,4 +320,5 @@
       (borsch text)
       (borsch process)
       (borsch command)
-      (borsch git)))
+      (borsch git)
+      (borsch copybuf)))

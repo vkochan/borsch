@@ -1,12 +1,29 @@
+(library (borsch copybuf)
+   (export
+      copybuf-is-linewise?
+      copybuf-reg
+      copybuf-put
+      copybuf-copy
+      copybuf-append
+      copybuf-clip-get
+      copybuf-clip-put)
+   (import
+      (chezscheme)
+      (borsch base)
+      (borsch process))
+
 (define copybuf-clip-app #f)
 (define copybuf-clip-arg-get "")
 (define copybuf-clip-arg-put "")
 (define copybuf-sync-with-clip #t)
 (define copybuf-is-linewise #f)
-(define copybuf-reg "")
+(define copybuf-reg (make-parameter ""))
+
+(define (copybuf-is-linewise?)
+   copybuf-is-linewise)
 
 (define (copybuf-put str)
-   (set! copybuf-reg str)
+   (copybuf-reg str)
    (when copybuf-sync-with-clip
       (copybuf-clip-put str)))
 
@@ -24,33 +41,11 @@
    (case-lambda
       [(s)
        (set! copybuf-is-linewise #f)
-       (copybuf-put (string-append copybuf-reg " " s))]
+       (copybuf-put (string-append (copybuf-reg) " " s))]
 
       [(s l)
        (set! copybuf-is-linewise #t)
-       (copybuf-put (string-append copybuf-reg "\n" s))]))
-
-(define (copybuf-paste-inplace)
-   (text-insert copybuf-reg))
-
-(define (copybuf-paste)
-   (if (not copybuf-is-linewise)
-      (begin
-         (when (not (equal? #\newline (text-char)))
-            (cursor-to-next-char))
-         (copybuf-paste-inplace)
-         (cursor-to-prev-char))
-      ;; else
-      (begin
-         (cursor-to-line-end)
-         (text-insert "\n")
-         (with-saved-cursor
-            (copybuf-paste-inplace)
-            (text-delete-char)))))
-
-(define (copybuf-paste-before)
-   (copybuf-paste-inplace)
-   (cursor-to-prev-char))
+       (copybuf-put (string-append (copybuf-reg) "\n" s))]))
 
 (define (copybuf-check-clip-app)
    (cond
@@ -93,3 +88,5 @@
                (put-string-some in str)
                (close-port out)
                (close-port in))))))
+
+)

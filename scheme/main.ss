@@ -25,7 +25,6 @@
 (include "buffer.ss")
 (include "text.ss")
 (include "complete.ss")
-(include "copybuf.ss")
 (include "topbar.ss")
 (include "vterm.ss")
 (include "minibuf.ss")

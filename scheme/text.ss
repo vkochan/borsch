@@ -1,5 +1,27 @@
 (define __cs_buf_search_regex (foreign-procedure "cs_buf_search_regex" (int int string int) scheme-object))
 
+(define (text-paste-inplace)
+   (text-insert (copybuf-reg)))
+
+(define (text-paste)
+   (if (not (copybuf-is-linewise?))
+      (begin
+         (when (not (equal? #\newline (text-char)))
+            (cursor-to-next-char))
+         (text-paste-inplace)
+         (cursor-to-prev-char))
+      ;; else
+      (begin
+         (cursor-to-line-end)
+         (text-insert "\n")
+         (with-saved-cursor
+            (text-paste-inplace)
+            (text-delete-char)))))
+
+(define (text-paste-before)
+   (text-paste-inplace)
+   (cursor-to-prev-char))
+
 (define (text-copy-line)
    (copybuf-copy (text-string (text-line-begin-pos) (1+ (text-line-end-pos))) #t))
 

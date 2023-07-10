@@ -40,7 +40,7 @@
    (cursor-to-next-char))
 
 (define (minibuf-prompt-copybuf-paste)
-   (copybuf-paste)
+   (text-paste)
    (cursor-to-next-char))
 
 (define minibuf-prompt-map
