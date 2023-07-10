@@ -50,10 +50,38 @@
       text-next-word-pos
       text-prev-char-pos
       text-next-char-pos
-   )
+      text-set-selection
+      text-get-selection
+      text-is-selection-set?
+      text-selection-range
+      text-selection
+      text-clear-selection
+      text-highlight-selection
+      text-string
+      text-char
+      text-word
+      text-longword
+      text-object
+      text-line
+      text-line-inner
+      text-square-brackets
+      text-square-brackets-inner
+      text-curly-brackets
+      text-curly-brackets-inner
+      text-angle-brackets
+      text-angle-brackets-inner
+      text-parens
+      text-parens-inner
+      text-quote
+      text-quote-inner
+      text-single-quote
+      text-single-quote-inner
+      text-back-quote
+      text-back-quote-inner)
    (import
       (borsch base)
       (borsch buffer)
+      (borsch strings)
       (chezscheme))
 
 (define __cs_buf_cursor_get (foreign-procedure "cs_buf_cursor_get" (int) scheme-object))
@@ -65,6 +93,16 @@
 (define __cs_buf_text_insert_file (foreign-procedure "cs_buf_text_insert_file" (int string) scheme-object))
 
 (define __cs_buf_text_obj_pos (foreign-procedure "cs_buf_text_obj_pos" (int int char int) scheme-object))
+
+(define __cs_buf_text_get (foreign-procedure "cs_buf_text_get" (int int int) scheme-object))
+(define __cs_buf_text_obj_range (foreign-procedure "cs_buf_text_obj_range" (int int char boolean) scheme-object))
+(define __cs_buf_mark_set (foreign-procedure "cs_buf_mark_set" (int int) void))
+(define __cs_buf_mark_get (foreign-procedure "cs_buf_mark_get" (int) scheme-object))
+(define __cs_buf_mark_clear (foreign-procedure "cs_buf_mark_clear" (int) void))
+(define __cs_buf_mark_is_set (foreign-procedure "cs_buf_mark_is_set" (int) scheme-object))
+(define __cs_win_mark_highlight (foreign-procedure "cs_win_mark_highlight" (int boolean) void))
+
+(define __cs_win_current_get (foreign-procedure "cs_win_current_get" () scheme-object))
 
 (define *buffer-enable-eof* #t)
 
@@ -299,5 +337,247 @@
 
 (define (text-end-pos)
    (text-obj-pos (current-buffer) (cursor) #\g -1))
+
+(define text-set-selection
+   (case-lambda
+      [()
+       (call-foreign (__cs_buf_mark_set (current-buffer) (cursor)))]
+
+      [(s)
+       (call-foreign (__cs_buf_mark_set (current-buffer) s))]))
+
+(define (text-get-selection)
+   (call-foreign (__cs_buf_mark_get (current-buffer))))
+
+(define (text-is-selection-set?)
+   (call-foreign (__cs_buf_mark_is_set (current-buffer))))
+
+(define (text-selection-range)
+   (let ([m (text-get-selection)]
+         [c (cursor)])
+     (let ([s (min m c)]
+           [e (max m c)])
+        (list s (text-next-char-pos e)))))
+
+(define (text-selection)
+   (let ([r (text-selection-range)])
+      (text-string (car r) (cadr r))))
+
+(define (text-clear-selection)
+   (when (local-bound? text-clear-selection-hook)
+      ((get-local text-clear-selection-hook)))
+   (call-foreign (__cs_buf_mark_clear (current-buffer))))
+
+(define text-highlight-selection
+   (case-lambda
+      [(e)
+       (text-highlight-selection (__cs_win_current_get) e)]
+
+      [(wid e)
+       (when wid (call-foreign (__cs_win_mark_highlight wid e)))]))
+
+(define text-string
+   (case-lambda
+      [()
+       (call-foreign (__cs_buf_text_get (current-buffer)
+                          (text-begin-pos)
+                          (- (text-end-pos) (text-begin-pos))))]
+
+      [(start end)
+       (let ([start (min start end)] [end (max start end)])
+          (call-foreign (__cs_buf_text_get (current-buffer) start (- end start))))]))
+
+(define text-char
+   (case-lambda
+      [()
+         (text-char (cursor))]
+
+      [(s)
+         (let ([str (text-string s (text-next-char-pos s))])
+            (if (> (string-length str) 0)
+               (string-ref str 0)
+               ;; else
+               #f))]))
+
+(define (text-obj-range buf curs obj t?)
+   (call-foreign (__cs_buf_text_obj_range buf curs obj t?)))
+
+(define text-word
+   (case-lambda
+      [()
+       (text-word (cursor))]
+
+      [(s)
+       (if (local-bound? text-word-func)
+          ((get-local text-word-func))
+          ;; else
+          (let ([r (text-obj-range (current-buffer) s #\w #t)])
+             (text-string (car r) (cdr r))))]))
+
+(define text-longword
+   (case-lambda
+      [()
+       (text-longword (cursor))]
+
+      [(s)
+       (let ([r (text-obj-range (current-buffer) s #\W #t)])
+          (text-string (car r) (cdr r)))]))
+
+(define text-object
+   (case-lambda
+      [()
+       (text-object (cursor))]
+
+      [(s)
+       (let ([obj (if (text-is-selection-set?)
+                      (let ([sel (text-selection)])
+                         (text-clear-selection)
+                         sel)
+                      ;else
+                      (text-longword s))])
+          (string-trim (text-longword s)
+                       '(#\space #\< #\> #\( #\) #\[ #\] #\" #\')))]))
+
+(define text-line
+   (case-lambda
+      [()
+       (text-line (cursor))]
+
+      [(s)
+       (text-string (text-line-begin-pos) (text-line-end-pos))]))
+
+(define text-line-inner
+   (case-lambda
+      [()
+       (text-line-inner (cursor))]
+
+      [(s)
+       (text-string (text-line-start-pos) (text-line-end-pos))]))
+
+(define text-square-brackets
+   (case-lambda
+      [()
+       (text-square-brackets (cursor))]
+
+      [(s)
+       (let ([r (text-obj-range (current-buffer) s #\[ #f)])
+          (text-string (car r) (cdr r)))]))
+
+(define text-square-brackets-inner
+   (case-lambda
+      [()
+       (text-square-brackets-inner (cursor))]
+
+      [(s)
+       (let ([r (text-obj-range (current-buffer) s #\[ #t)])
+          (text-string (car r) (cdr r)))]))
+
+(define text-curly-brackets
+   (case-lambda
+      [()
+       (text-curly-brackets (cursor))]
+
+      [(s)
+       (let ([r (text-obj-range (current-buffer) s #\{ #f)])
+          (text-string (car r) (cdr r)))]))
+
+(define text-curly-brackets-inner
+   (case-lambda
+      [()
+       (text-curly-brackets-inner (cursor))]
+
+      [(s)
+       (let ([r (text-obj-range (current-buffer) s #\{ #t)])
+          (text-string (car r) (cdr r)))]))
+
+(define text-angle-brackets
+   (case-lambda
+      [()
+       (text-angle-brackets (cursor))]
+
+      [(s)
+       (let ([r (text-obj-range (current-buffer) s #\< #f)])
+          (text-string (car r) (cdr r)))]))
+
+(define text-angle-brackets-inner
+   (case-lambda
+      [()
+       (text-angle-brackets-inner (cursor))]
+
+      [(s)
+       (let ([r (text-obj-range (current-buffer) s #\< #t)])
+          (text-string (car r) (cdr r)))]))
+
+(define text-parens
+   (case-lambda
+      [()
+       (text-parens (cursor))]
+
+      [(s)
+       (let ([r (text-obj-range (current-buffer) s #\( #f)])
+          (text-string (car r) (cdr r)))]))
+
+(define text-parens-inner
+   (case-lambda
+      [()
+       (text-parens-inner (cursor))]
+
+      [(s)
+       (let ([r (text-obj-range (current-buffer) s #\( #t)])
+          (text-string (car r) (cdr r)))]))
+
+(define text-quote
+   (case-lambda
+      [()
+       (text-quote (cursor))]
+
+      [(s)
+       (let ([r (text-obj-range (current-buffer) s #\" #f)])
+          (text-string (car r) (cdr r)))]))
+
+(define text-quote-inner
+   (case-lambda
+      [()
+       (text-quote-inner (cursor))]
+
+      [(s)
+       (let ([r (text-obj-range (current-buffer) s #\" #t)])
+          (text-string (car r) (cdr r)))]))
+
+(define text-single-quote
+   (case-lambda
+      [()
+       (text-single-quote (cursor))]
+
+      [(s)
+       (let ([r (text-obj-range (current-buffer) s #\' #f)])
+          (text-string (car r) (cdr r)))]))
+
+(define text-single-quote-inner
+   (case-lambda
+      [()
+       (text-single-quote-inner (cursor))]
+
+      [(s)
+       (let ([r (text-obj-range (current-buffer) s #\' #t)])
+          (text-string (car r) (cdr r)))]))
+
+(define text-back-quote
+   (case-lambda
+      [()
+       (text-back-quote (cursor))]
+
+      [(s)
+       (let ([r (text-obj-range (current-buffer) s #\` #f)])
+          (text-string (car r) (cdr r)))]))
+
+(define text-back-quote-inner
+   (case-lambda
+      [()
+       (text-back-quote-inner (cursor))]
+
+      [(s)
+       (let ([r (text-obj-range (current-buffer) s #\` #t)])
+          (text-string (car r) (cdr r)))]))
 
 )

@@ -4,7 +4,6 @@
 (define __cs_win_first_set (foreign-procedure "cs_win_first_set" (int) scheme-object))
 (define __cs_win_prev_set (foreign-procedure "cs_win_prev_set" (int int) scheme-object))
 (define __cs_win_next_set (foreign-procedure "cs_win_next_set" (int int) scheme-object))
-(define __cs_win_current_get (foreign-procedure "cs_win_current_get" () scheme-object))
 (define __cs_win_current_set (foreign-procedure "cs_win_current_set" (int) int))
 (define __cs_widget_create (foreign-procedure "cs_widget_create" (string int int int int) scheme-object))
 (define __cs_win_new (foreign-procedure "cs_win_new" (int int int int int) scheme-object))

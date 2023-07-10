@@ -199,6 +199,34 @@
       text-next-word-pos
       text-prev-char-pos
       text-next-char-pos
+      text-set-selection
+      text-get-selection
+      text-is-selection-set?
+      text-selection-range
+      text-selection
+      text-clear-selection
+      text-highlight-selection
+      text-string
+      text-char
+      text-word
+      text-longword
+      text-object
+      text-line
+      text-line-inner
+      text-square-brackets
+      text-square-brackets-inner
+      text-curly-brackets
+      text-curly-brackets-inner
+      text-angle-brackets
+      text-angle-brackets-inner
+      text-parens
+      text-parens-inner
+      text-quote
+      text-quote-inner
+      text-single-quote
+      text-single-quote-inner
+      text-back-quote
+      text-back-quote-inner
       
       process-environment
       process-set-environment
