@@ -75,6 +75,15 @@
       make-timer
       timer-delete
 
+      buffer-ref-count
+      buffer-ref-get
+      buffer-ref-put
+      buffer-new
+      buffer-delete
+      buffer-list
+      buffer-for-each
+      buffer-find
+      buffer-get-by-file
       current-buffer
       with-current-buffer
       buffer-line-num

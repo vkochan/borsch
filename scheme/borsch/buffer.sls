@@ -1,5 +1,14 @@
 (library (borsch buffer)
    (export
+      buffer-ref-count
+      buffer-ref-get
+      buffer-ref-put
+      buffer-new
+      buffer-delete
+      buffer-list
+      buffer-for-each
+      buffer-find
+      buffer-get-by-file
       current-buffer
       with-current-buffer
       buffer-line-num
@@ -53,6 +62,12 @@
            (borsch lists)
            (borsch keymap))
 
+(define __cs_buf_new (foreign-procedure "cs_buf_new" (string) scheme-object))
+(define __cs_buf_ref_get (foreign-procedure "cs_buf_ref_get" (int) scheme-object))
+(define __cs_buf_ref_put (foreign-procedure "cs_buf_ref_put" (int) scheme-object))
+(define __cs_buf_ref (foreign-procedure "cs_buf_ref" (int) scheme-object))
+(define __cs_buf_del (foreign-procedure "cs_buf_del" (int) void))
+
 (define __cs_buf_current_get (foreign-procedure "cs_buf_current_get" () scheme-object))
 
 (define __cs_buf_line_num (foreign-procedure "cs_buf_line_num" (int int) scheme-object))
@@ -105,6 +120,84 @@
 (define %dir-locals-ht (make-hashtable string-hash string=?))
 
 (define current-buffer-tmp (make-parameter #f))
+
+(define %buffer-list% (list))
+
+(define (buffer-insert b)
+   (set! %buffer-list% (append %buffer-list% (list b)))
+   (run-hooks 'buffer-insert-hook b))
+
+(define (buffer-remove b)
+   (set! %buffer-list% (remove b %buffer-list%))
+   (run-hooks 'buffer-remove-hook b))
+
+(define buffer-ref-count
+   (case-lambda
+      [()
+       (buffer-ref-count (current-buffer))]
+
+      [(buf)
+       (call-foreign (__cs_buf_ref buf))]))
+
+(define buffer-ref-get
+   (case-lambda
+      [()
+       (buffer-ref-get (current-buffer))]
+
+      [(buf)
+       (call-foreign (__cs_buf_ref_get buf))]))
+
+(define buffer-ref-put
+   (case-lambda
+      [()
+       (buffer-ref-put (current-buffer))]
+
+      [(buf)
+       (when (= 1 (buffer-ref-count buf))
+          (buffer-remove buf))
+       (call-foreign (__cs_buf_ref_put buf))]))
+
+(define buffer-new
+   (case-lambda
+      [() 
+       (buffer-new "")]
+
+      [(n) 
+       (let ([b (call-foreign (__cs_buf_new n))])
+          (buffer-insert b)
+          (with-current-buffer b
+             (set-text-style '(fg: "white")))
+          b)]))
+
+(define buffer-delete
+   (case-lambda
+      [()
+       (buffer-delete (current-buffer))]
+
+      [(b)
+       (call-foreign (__cs_buf_del b))
+       (buffer-remove b)]))
+
+(define (buffer-list)
+   %buffer-list%)
+
+(define (buffer-for-each fn)
+   (for-each
+      (lambda (b)
+         (fn b))
+      (buffer-list)))
+
+(define (buffer-find fn)
+   (let ([b (find
+               (lambda (b)
+                  (fn b))
+               (buffer-list))])
+      b))
+
+(define (buffer-get-by-file file)
+   (buffer-find
+      (lambda (b)
+         (equal? file (buffer-filename b)))))
 
 (define-syntax (with-current-buffer stx)
    (syntax-case stx ()
