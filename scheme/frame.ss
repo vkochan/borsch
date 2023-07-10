@@ -309,3 +309,11 @@
       [(fr w)
        (let ([st (%frame%-focus-stack fr)])
           (stack-remove! st w))]))
+
+(add-hook 'buffer-insert-hook
+          (lambda (b)
+             (frame-insert-buffer b) ))
+
+(add-hook 'buffer-remove-hook
+          (lambda (b)
+             (frame-remove-buffer b) ))

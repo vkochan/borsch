@@ -12,11 +12,11 @@
 
 (define (buffer-insert b)
    (set! %buffer-list% (append %buffer-list% (list b)))
-   (frame-insert-buffer b))
+   (run-hooks 'buffer-insert-hook b))
 
 (define (buffer-remove b)
    (set! %buffer-list% (remove b %buffer-list%))
-   (frame-remove-buffer b))
+   (run-hooks 'buffer-remove-hook b))
 
 (define buffer-ref-count
    (case-lambda
