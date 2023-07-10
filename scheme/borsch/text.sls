@@ -77,7 +77,31 @@
       text-single-quote
       text-single-quote-inner
       text-back-quote
-      text-back-quote-inner)
+      text-back-quote-inner
+      text-track-deletion
+      text-delete-range
+      text-replace-range
+      text-delete-to-next-char
+      text-delete-char
+      text-delete-to-prev-char
+      text-delete-to-next-word
+      text-delete-word
+      text-delete-to-prev-word
+      text-delete-to-word-end
+      text-delete-to-next-longword
+      text-delete-longword
+      text-delete-to-prev-longword
+      text-delete-to-longword-end
+      text-delete-to-next-line-begin
+      text-delete-to-prev-line-end
+      text-delete-to-line-start
+      text-delete-to-line-finish
+      text-delete-to-line-begin
+      text-delete-to-line-end
+      text-delete-line
+      text-delete-to-begin
+      text-delete-to-end
+      text-delete)
    (import
       (borsch base)
       (borsch buffer)
@@ -103,6 +127,8 @@
 (define __cs_win_mark_highlight (foreign-procedure "cs_win_mark_highlight" (int boolean) void))
 
 (define __cs_win_current_get (foreign-procedure "cs_win_current_get" () scheme-object))
+
+(define __cs_buf_text_range_del (foreign-procedure "cs_buf_text_range_del" (int int int) scheme-object))
 
 (define *buffer-enable-eof* #t)
 
@@ -579,5 +605,114 @@
       [(s)
        (let ([r (text-obj-range (current-buffer) s #\` #t)])
           (text-string (car r) (cdr r)))]))
+
+(define-syntax (text-track-deletion stx)
+   (syntax-case stx ()
+      ((_ exp ...)
+       #`(let ([del-text ""])
+            (let ([del-hook (lambda (start end)
+                               (let ([text (text-string start end)])
+                                  (set! del-text (string-append del-text text))))])
+               (define-local text-delete-hook del-hook)
+               (begin
+                  exp
+                  ...)
+               (set-local! text-delete-hook #f)
+               del-text)))))
+
+(define (text-delete-range s e)
+   (text-modify
+      (let ([del-hook (get-local text-delete-hook #f)])
+         (when del-hook 
+            (del-hook s e)))
+      (call-foreign (__cs_buf_text_range_del (current-buffer) s e))))
+
+(define (text-replace-range s e t)
+   (text-delete-range s e)
+   (cursor-set s)
+   (text-insert t))
+
+(define (cursor-obj-delete fn)
+   (text-modify
+      (let ([end (fn)]
+            [start (cursor)])
+         (text-delete-range start end))))
+
+(define (cursor-obj-delete-inclusive fn)
+   (text-modify
+      (let ([end (text-next-char-pos (fn))]
+            [start (cursor)])
+         (text-delete-range start end))))
+
+(define (text-delete-to-next-char)
+   (cursor-obj-delete cursor-to-next-char))
+
+(define text-delete-char text-delete-to-next-char)
+
+(define (text-delete-to-prev-char)
+   (cursor-obj-delete cursor-to-prev-char))
+
+(define (text-delete-to-next-word)
+   (cursor-obj-delete cursor-to-next-word))
+
+(define text-delete-word text-delete-to-next-word)
+
+(define (text-delete-to-prev-word)
+   (cursor-obj-delete cursor-to-prev-word))
+
+(define (text-delete-to-word-end)
+   (cursor-obj-delete-inclusive cursor-to-word-end))
+
+(define (text-delete-to-next-longword)
+   (cursor-obj-delete cursor-to-next-longword))
+
+(define text-delete-longword text-delete-to-next-longword)
+
+(define (text-delete-to-prev-longword)
+   (cursor-obj-delete cursor-to-prev-longword))
+
+(define (text-delete-to-longword-end)
+   (cursor-obj-delete-inclusive cursor-to-longword-end))
+
+(define (text-delete-to-next-line-begin)
+   (cursor-obj-delete cursor-to-next-line))
+
+(define (text-delete-to-prev-line-end)
+   (cursor-obj-delete cursor-to-prev-line-end))
+
+(define (text-delete-to-line-start)
+   (cursor-obj-delete cursor-to-line-start))
+
+(define (text-delete-to-line-finish)
+   (cursor-obj-delete cursor-to-line-finish))
+
+(define (text-delete-to-line-begin)
+   (cursor-obj-delete cursor-to-line-begin))
+
+(define (text-delete-to-line-end)
+   (cursor-obj-delete cursor-to-line-end))
+
+(define (text-delete-line)
+   (cursor-to-line-end)
+   (text-delete-to-prev-line-end)
+   (if (equal? (cursor) 0)
+      (text-delete-char)
+      ;; else
+      (if (equal? (text-end-pos) (+ 1 (text-line-end-pos)))
+         (cursor-to-line-begin)
+         ;; else
+         (cursor-to-next-line))))
+
+(define (text-delete-to-begin)
+   (cursor-obj-delete cursor-to-begin))
+
+(define (text-delete-to-end)
+   (cursor-obj-delete cursor-to-end))
+
+(define (text-delete)
+   (let ([s (text-begin-pos)]
+         [e (text-end-pos)])
+      (remove-text-property)
+      (text-delete-range s e)))
 
 )

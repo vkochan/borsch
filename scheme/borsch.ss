@@ -227,6 +227,30 @@
       text-single-quote-inner
       text-back-quote
       text-back-quote-inner
+      text-track-deletion
+      text-delete-range
+      text-replace-range
+      text-delete-to-next-char
+      text-delete-char
+      text-delete-to-prev-char
+      text-delete-to-next-word
+      text-delete-word
+      text-delete-to-prev-word
+      text-delete-to-word-end
+      text-delete-to-next-longword
+      text-delete-longword
+      text-delete-to-prev-longword
+      text-delete-to-longword-end
+      text-delete-to-next-line-begin
+      text-delete-to-prev-line-end
+      text-delete-to-line-start
+      text-delete-to-line-finish
+      text-delete-to-line-begin
+      text-delete-to-line-end
+      text-delete-line
+      text-delete-to-begin
+      text-delete-to-end
+      text-delete
       
       process-environment
       process-set-environment
