@@ -227,7 +227,15 @@
       process-with-input/output
       program-exists?
       process-initialize
-      process-destroy-dead)
+      process-destroy-dead
+      
+      command-name
+      command-func
+      command-list
+      find-command
+      add-command
+      match-command
+      remove-command)
    (import
       (borsch keymap)
       (borsch runtime)
@@ -241,4 +249,5 @@
       (borsch style)
       (borsch syntax)
       (borsch text)
-      (borsch process)))
+      (borsch process)
+      (borsch command)))

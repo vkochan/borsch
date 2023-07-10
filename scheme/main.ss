@@ -24,7 +24,6 @@
 (include "window.ss")
 (include "buffer.ss")
 (include "text.ss")
-(include "command.ss")
 (include "complete.ss")
 (include "copybuf.ss")
 (include "topbar.ss")
@@ -250,7 +249,7 @@
    (minibuf-complete
       (map (lambda (c)
               (cons (command-name c) c))
-           command-list)
+           (command-list))
       (lambda (c)
          ((command-func c)))
       "Cmd"))
