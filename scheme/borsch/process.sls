@@ -1,3 +1,40 @@
+(library (borsch process)
+   (export
+      process-environment
+      process-set-environment
+      process-get-environment
+      with-process-environment
+      process-port-in
+      process-port-out
+      process-port-err
+      process-pid
+      process-buffer-out
+      process-buffer-err
+      process-is-alive?
+      process-is-async?
+      process-kill
+      process-wait
+      process-send-text
+      process-status
+      process-set-filter
+      process-create
+      process-create-plist
+      make-process
+      with-process-temp-buffer
+      with-process-buffer
+      process-get-output
+      process-with-input
+      process-with-input/output
+      program-exists?
+      process-initialize
+      process-destroy-dead)
+   (import
+      (chezscheme)
+      (borsch base)
+      (borsch buffer)
+      (borsch text)
+      (borsch lists))
+
 (define __cs_process_create (foreign-procedure "cs_process_create"
 				(string string boolean boolean boolean scheme-object boolean boolean) scheme-object))
 
@@ -75,7 +112,7 @@
    )
 )
 
-(define-record-type (process make-process-entry process?)
+(define-record-type process-entry
    (fields
       port-in
       port-out
@@ -91,6 +128,36 @@
 
 (define %process-pid-ht (make-eq-hashtable))
 (define %process-fd-ht (make-eq-hashtable))
+
+(define (process-port-in proc)
+   (process-entry-port-in proc))
+
+(define (process-port-out proc)
+   (process-entry-port-out proc))
+
+(define (process-port-err proc)
+   (process-entry-port-err proc))
+
+(define (process-pid proc)
+   (process-entry-pid proc))
+
+(define (process-buffer-out proc)
+   (process-entry-buffer-out proc))
+
+(define (process-buffer-err proc)
+   (process-entry-buffer-err proc))
+
+(define (process-on-exit proc)
+   (process-entry-on-exit proc))
+
+(define (process-port-reader proc)
+   (process-entry-port-reader proc))
+
+(define (process-filter proc)
+   (process-entry-filter proc))
+
+(define (process-filter-set! proc filter)
+   (process-entry-filter-set! proc filter))
 
 (define process-is-alive?
    (lambda (pid)
@@ -412,7 +479,7 @@
    )
 )
 
-(define on-process-exit
+(define process-exit-handler
    (lambda (pid)
       (let (
             [proc (hashtable-ref %process-pid-ht pid #f)]
@@ -455,9 +522,8 @@
       )
    )
 )
-(add-hook 'process-exit-hook on-process-exit)
 
-(define (process-filter-func pid str)
+(define (process-filter-handler pid str)
    (let ([proc (hashtable-ref %process-pid-ht pid #f)])
       (when proc
          (when (process-filter proc)
@@ -466,4 +532,9 @@
                   proc
                   str)
             )))))
-(add-hook 'process-filter-hook process-filter-func)
+
+(define (process-initialize)
+   (add-hook 'process-exit-hook process-exit-handler)
+   (add-hook 'process-filter-hook process-filter-handler))
+
+)

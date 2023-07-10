@@ -15,6 +15,8 @@
 
 (runtime-init)
 
+(process-initialize)
+
 (include "common.ss")
 (include "ui.ss")
 (include "frame.ss")
@@ -26,7 +28,6 @@
 (include "complete.ss")
 (include "copybuf.ss")
 (include "topbar.ss")
-(include "process.ss")
 (include "vterm.ss")
 (include "minibuf.ss")
 (include "os.ss")

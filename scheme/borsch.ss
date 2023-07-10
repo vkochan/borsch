@@ -198,7 +198,36 @@
       text-prev-word-pos
       text-next-word-pos
       text-prev-char-pos
-      text-next-char-pos)
+      text-next-char-pos
+      
+      process-environment
+      process-set-environment
+      process-get-environment
+      with-process-environment
+      process-port-in
+      process-port-out
+      process-port-err
+      process-pid
+      process-buffer-out
+      process-buffer-err
+      process-is-alive?
+      process-is-async?
+      process-kill
+      process-wait
+      process-send-text
+      process-status
+      process-set-filter
+      process-create
+      process-create-plist
+      make-process
+      with-process-temp-buffer
+      with-process-buffer
+      process-get-output
+      process-with-input
+      process-with-input/output
+      program-exists?
+      process-initialize
+      process-destroy-dead)
    (import
       (borsch keymap)
       (borsch runtime)
@@ -211,4 +240,5 @@
       (borsch buffer)
       (borsch style)
       (borsch syntax)
-      (borsch text)))
+      (borsch text)
+      (borsch process)))
