@@ -31,7 +31,6 @@
 (include "minibuf.ss")
 (include "os.ss")
 (include "ssh.ss")
-(include "git.ss")
 (include "mode/text.ss")
 (include "mode/dirb.ss")
 (include "mode/git.ss")

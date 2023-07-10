@@ -263,7 +263,16 @@
       find-command
       add-command
       match-command
-      remove-command)
+      remove-command
+      
+      git-branch-name
+      git-short-status-string
+      git-cmd-format
+      git-repo?
+      git-cmd-read
+      git-cmd-list
+      git-checkout-branch
+      git-branch-list)
    (import
       (borsch keymap)
       (borsch runtime)
@@ -278,4 +287,5 @@
       (borsch syntax)
       (borsch text)
       (borsch process)
-      (borsch command)))
+      (borsch command)
+      (borsch git)))

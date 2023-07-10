@@ -1,3 +1,20 @@
+(library (borsch git)
+   (export
+      git-branch-name
+      git-short-status-string
+      git-cmd-format
+      git-repo?
+      git-cmd-read
+      git-cmd-list
+      git-checkout-branch
+      git-branch-list)
+   (import
+      (chezscheme)
+      (borsch process)
+      (borsch strings)
+      (borsch base)
+      (borsch runtime))
+   
 (define git-exists?
    (lambda ()
       (delay (program-exists? "git"))
@@ -117,4 +134,6 @@
        )
       ]
    )
+)
+
 )
