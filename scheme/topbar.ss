@@ -84,7 +84,7 @@
          [t (current-tab)])
       (when (> (length (tab-frame-list t))
                1)
-         (stack-remove (tab-frame-stack t) f)
+         (stack-remove! (tab-frame-stack t) f)
          (when (not (null? (tab-frame-list t)))
             (tab-switch-frame (first (tab-frame-list t))))
          (frame-delete f))))
