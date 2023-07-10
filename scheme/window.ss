@@ -811,3 +811,7 @@
                [wh (window-height w)])
             (and (and (>= x wx) (< x (+ wx ww)))
                  (and (>= y wy) (< y (+ wy wh))))))))
+
+(add-hook 'frame-switch-hook
+          (lambda (f)
+             (window-layout-set-changed #t) ))
