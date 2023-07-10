@@ -10,6 +10,9 @@
 
       do-quit
       message
+      config-dir
+      runtime-init
+      runtime-cleanup
 
       define*
 

@@ -1,7 +1,10 @@
 (library (borsch runtime)
    (export
       do-quit
-      message)
+      message
+      config-dir
+      runtime-init
+      runtime-cleanup)
    (import
       (borsch base)
       (borsch buffer)
@@ -20,5 +23,20 @@
 (define (do-quit)
    (run-hooks 'exit-hook)
    (call-foreign (__cs_do_quit)))
+
+(define *config-dir* #f)
+
+(define (config-dir)
+   *config-dir*)
+   
+(define __cs_runtime_init (foreign-procedure "cs_runtime_init" () int))
+(define __cs_runtime_cleanup (foreign-procedure "cs_runtime_cleanup" () void))
+
+(define (runtime-init)
+   (set! *config-dir* (string-append (getenv "HOME") "/.config/borsch"))
+   (__cs_runtime_init))
+
+(define (runtime-cleanup)
+   (__cs_runtime_cleanup))
 
 )
