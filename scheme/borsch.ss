@@ -327,7 +327,45 @@
       copybuf-copy
       copybuf-append
       copybuf-clip-get
-      copybuf-clip-put)
+      copybuf-clip-put
+      
+      frame-delete
+      frame-create
+      frame-list
+      current-frame
+      frame-set-var!
+      frame-get-var
+      with-current-frame
+      frame-switch
+      frame-id
+      frame-name
+      frame-set-name
+      frame-cwd
+      frame-set-cwd
+      frame-cwd-handler
+      frame-prev-layout
+      frame-set-prev-layout
+      frame-layout
+      frame-set-layout
+      frame-buffer-list
+      frame-insert-buffer
+      frame-remove-buffer
+      frame-for-each-buffer
+      frame-find-buffer
+      frame-get-buffer-by-file
+      frame-get-buffer
+      frame-is-sticky?
+      frame-set-sticky
+      frame-n-master
+      frame-set-n-master
+      frame-%-master
+      frame-set-%-master
+      frame-set-prev-focused-window
+      frame-prev-focused-window
+      frame-current-window
+      frame-set-current-window
+      frame-delete-window
+      frame-initialize)
    (import
       (borsch keymap)
       (borsch runtime)
@@ -344,4 +382,5 @@
       (borsch process)
       (borsch command)
       (borsch git)
-      (borsch copybuf)))
+      (borsch copybuf)
+      (borsch frame)))

@@ -16,10 +16,10 @@
 (runtime-init)
 
 (process-initialize)
+(frame-initialize)
 
 (include "common.ss")
 (include "ui.ss")
-(include "frame.ss")
 (include "layout.ss")
 (include "window.ss")
 (include "buffer.ss")

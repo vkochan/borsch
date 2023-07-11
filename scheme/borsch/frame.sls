@@ -1,3 +1,48 @@
+(library (borsch frame)
+   (export
+      frame-delete
+      frame-create
+      frame-list
+      current-frame
+      frame-set-var!
+      frame-get-var
+      with-current-frame
+      frame-switch
+      frame-id
+      frame-name
+      frame-set-name
+      frame-cwd
+      frame-set-cwd
+      frame-cwd-handler
+      frame-prev-layout
+      frame-set-prev-layout
+      frame-layout
+      frame-set-layout
+      frame-buffer-list
+      frame-insert-buffer
+      frame-remove-buffer
+      frame-for-each-buffer
+      frame-find-buffer
+      frame-get-buffer-by-file
+      frame-get-buffer
+      frame-is-sticky?
+      frame-set-sticky
+      frame-n-master
+      frame-set-n-master
+      frame-%-master
+      frame-set-%-master
+      frame-set-prev-focused-window
+      frame-prev-focused-window
+      frame-current-window
+      frame-set-current-window
+      frame-delete-window
+      frame-initialize)
+   (import
+      (chezscheme)
+      (borsch base)
+      (borsch lists)
+      (borsch buffer))
+
 (define __cs_frame_current_set (foreign-procedure "cs_frame_current_set" (int) void))
 (define __cs_frame_create (foreign-procedure "cs_frame_create" () scheme-object))
 (define __cs_frame_delete (foreign-procedure "cs_frame_delete" (int) void))
@@ -46,7 +91,6 @@
                                  0.5
                                  (make-stack)
                                  #f)])
-            (current-cwd-handler frame-cwd-handler)
             (hashtable-set! frames-ht id fr)
             fr))]))
 
@@ -213,10 +257,6 @@
       (lambda (b)
          (equal? name (buffer-name b)))))
 
-(define (frame-get-or-create-buffer name)
-   (or (frame-get-buffer name)
-       (buffer-create name)))
-
 (define frame-is-sticky?
    (case-lambda
       [()
@@ -310,10 +350,12 @@
        (let ([st (%frame%-focus-stack fr)])
           (stack-remove! st w))]))
 
-(add-hook 'buffer-insert-hook
-          (lambda (b)
-             (frame-insert-buffer b) ))
-
-(add-hook 'buffer-remove-hook
-          (lambda (b)
-             (frame-remove-buffer b) ))
+(define (frame-initialize)
+   (current-cwd-handler frame-cwd-handler)
+   (add-hook 'buffer-insert-hook
+             (lambda (b)
+                (frame-insert-buffer b) ))
+   (add-hook 'buffer-remove-hook
+             (lambda (b)
+                (frame-remove-buffer b) )))
+)
