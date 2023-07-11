@@ -18,9 +18,6 @@
                           #\newline))
          (append dl fl))]))
 
-(define (mkdir-p path)
-   (system (format "mkdir -p ~a" path)))
-
 (define (suffix+ str sfx)
    (cond
       ([list? str]

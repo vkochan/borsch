@@ -637,7 +637,7 @@
 (define mail-init
    (lambda ()
       (let ()
-         (mkdir-p (mail-config-dir))
+         (file-mkdir (mail-config-dir) [recur?: #t])
          (file> (mail-notmuch-config)
             (with-output-to-string
                (lambda ()
