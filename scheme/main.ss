@@ -27,7 +27,6 @@
 (include "vterm.ss")
 (include "minibuf.ss")
 (include "os.ss")
-(include "ssh.ss")
 (include "mode/text.ss")
 (include "mode/dirb.ss")
 (include "mode/git.ss")

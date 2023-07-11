@@ -1,3 +1,15 @@
+(library (borsch ssh)
+   (export
+      make-ssh-address
+      ssh-address-user
+      ssh-address-host
+      ssh-address-port
+      ssh-address-path
+      ssh-parse-address)
+   (import
+      (chezscheme)
+      (pregexp))
+
 (define ssh-address-regex "^(\\w+\\@)?((?:\\w|\\.|\\-)+)(?:\\:([0-9]+)?(\\/\\w*)?)?$")
 
 (define-record-type ssh-address
@@ -24,3 +36,4 @@
                path))   
          ;; else
          #f)))
+)

@@ -376,7 +376,14 @@
       ui-clear
       ui-draw-char
       ui-draw-char-vert
-      ui-draw-text)
+      ui-draw-text
+
+      make-ssh-address
+      ssh-address-user
+      ssh-address-host
+      ssh-address-port
+      ssh-address-path
+      ssh-parse-address)
    (import
       (borsch keymap)
       (borsch runtime)
@@ -395,4 +402,5 @@
       (borsch git)
       (borsch copybuf)
       (borsch frame)
-      (borsch ui)))
+      (borsch ui)
+      (borsch ssh)))
