@@ -32,7 +32,6 @@
       (chezscheme)
       (borsch base)
       (borsch buffer)
-      (borsch text)
       (borsch lists))
 
 (define __cs_process_create (foreign-procedure "cs_process_create"
@@ -177,6 +176,12 @@
    )
 )
 
+(define (__process_append_buffer b s)
+   (let ([curs (buffer-cursor b)])
+      (buffer-set-cursor b (buffer-end-pos b))
+      (buffer-insert-text b s)
+      (buffer-set-cursor b curs) ))
+
 (define __process-on-read-async
    (lambda (proc)
       (let (
@@ -186,16 +191,9 @@
          (let ([s (get-string-some proc-out)])
             (when (not (eof-object? s))
                (if (buffer-is-valid? buf)
-                  (with-current-buffer buf
-                     (with-saved-cursor
-                        (cursor-to-end)
-                        (text-insert s)
-                     )
-                  )
+                  (__process_append_buffer buf s)
                   ;; else
-                  (begin
-                     (process-kill (process-pid proc))
-                  )
+                  (process-kill (process-pid proc))
                )
             )
          )
@@ -212,12 +210,7 @@
          (when (buffer-is-valid? buf)
             (let ([s (get-string-some proc-out)])
                (while (not (eof-object? s))
-                  (with-current-buffer buf
-                     (with-saved-cursor
-                        (cursor-to-end)
-                        (text-insert s)
-                     )
-                  )
+                  (__process_append_buffer buf s)
                   (set! s (get-string-some proc-out))
                )
             )

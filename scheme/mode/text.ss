@@ -129,6 +129,13 @@
    (let ([pos (fn)])
       (cursor-set pos)))
 
+(define (text-search-regex-read)
+   (when (not (buffer-is-vterm?))
+      (minibuf-read "/"
+         (lambda (r)
+            (text-search-reg r)
+            (cursor-set (text-search-regex r))))))
+
 (define text-mode-normal-map
    (let ([map (make-keymap)])
       (bind-key map "h" (lambda () (cursor-to-prev-char)))

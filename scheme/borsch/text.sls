@@ -101,11 +101,30 @@
       text-delete-line
       text-delete-to-begin
       text-delete-to-end
-      text-delete)
+      text-delete
+      text-paste-inplace
+      text-paste
+      text-paste-before
+      text-copy-line
+      text-delete-selection
+      text-copy-selection
+      text-append-selection
+      text-copy-selection-linewise
+      text-append-selection-linewise
+      text-reload-file
+      text-eval
+      text-search-reg
+      text-search-regex
+      text-search-next
+      text-search-prev
+      text-search-word-direction
+      text-search-word-forward
+      text-search-word-backward)
    (import
       (borsch base)
       (borsch buffer)
       (borsch strings)
+      (borsch copybuf)
       (chezscheme))
 
 (define __cs_buf_cursor_get (foreign-procedure "cs_buf_cursor_get" (int) scheme-object))
@@ -129,6 +148,8 @@
 (define __cs_win_current_get (foreign-procedure "cs_win_current_get" () scheme-object))
 
 (define __cs_buf_text_range_del (foreign-procedure "cs_buf_text_range_del" (int int int) scheme-object))
+
+(define __cs_buf_search_regex (foreign-procedure "cs_buf_search_regex" (int int string int) scheme-object))
 
 (define *buffer-enable-eof* #t)
 
@@ -714,5 +735,107 @@
          [e (text-end-pos)])
       (remove-text-property)
       (text-delete-range s e)))
+
+(define (text-paste-inplace)
+   (text-insert (copybuf-reg)))
+
+(define (text-paste)
+   (if (not (copybuf-is-linewise?))
+      (begin
+         (when (not (equal? #\newline (text-char)))
+            (cursor-to-next-char))
+         (text-paste-inplace)
+         (cursor-to-prev-char))
+      ;; else
+      (begin
+         (cursor-to-line-end)
+         (text-insert "\n")
+         (with-saved-cursor
+            (text-paste-inplace)
+            (text-delete-char)))))
+
+(define (text-paste-before)
+   (text-paste-inplace)
+   (cursor-to-prev-char))
+
+(define (text-copy-line)
+   (copybuf-copy (text-string (text-line-begin-pos) (+ 1 (text-line-end-pos))) #t))
+
+(define (text-delete-selection)
+   (let ([r (text-selection-range)])
+      (text-delete-range (car r) (cadr r))))
+
+(define (text-copy-selection)
+   (let ([r (text-selection-range)])
+      (copybuf-copy (text-string (car r) (cadr r)))))
+
+(define (text-append-selection)
+   (let ([r (text-selection-range)])
+      (copybuf-append (text-string (car r) (cadr r)))))
+
+(define (text-copy-selection-linewise)
+   (let ([r (text-selection-range)])
+      (copybuf-copy (text-string (car r) (cadr r)) #t)))
+
+(define (text-append-selection-linewise)
+   (let ([r (text-selection-range)])
+      (copybuf-append (text-string (car r) (cadr r)) #t)))
+
+(define (text-reload-file)
+   (with-saved-cursor
+      (text-delete)
+      (text-insert-file (buffer-filename))
+      (buffer-save)))
+
+(define text-eval
+   (case-lambda
+      [()
+       (text-eval (current-buffer))]
+
+      [(buf)
+       (with-current-buffer buf
+          (with-input-from-string (string-append (string #\') (text-string))
+             (lambda ()
+                (eval (read)))))]))
+
+(define text-search-reg (make-parameter ""))
+
+(define text-search-regex
+   (case-lambda
+      [(rx)
+       (text-search-regex rx (cursor))]
+
+      [(rx pos)
+       (text-search-regex rx (cursor) +1)]
+
+      [(rx pos dir)
+       (call-foreign (__cs_buf_search_regex (current-buffer) pos rx dir))]))
+
+(define (text-search-next)
+   (text-search-regex (text-search-reg) (cursor) +1))
+
+(define (text-search-prev)
+   (text-search-regex (text-search-reg) (cursor) -1))
+
+(define (text-search-word-direction word dir)
+   (let ([pattern (format "\\<~a\\>" word)])
+      (text-search-reg pattern)
+      (text-search-regex pattern (cursor) dir)))
+
+(define text-search-word-forward
+   (case-lambda
+      [()
+       (text-search-word-forward (text-word))]
+
+      [(w)
+       (text-search-word-direction w +1)]))
+
+(define text-search-word-backward
+   (case-lambda
+      [()
+       (text-search-word-backward (text-word))]
+
+      [(w)
+       (text-search-word-direction w -1)]))
 
 )

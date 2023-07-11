@@ -23,7 +23,6 @@
 (include "layout.ss")
 (include "window.ss")
 (include "buffer.ss")
-(include "text.ss")
 (include "complete.ss")
 (include "topbar.ss")
 (include "vterm.ss")

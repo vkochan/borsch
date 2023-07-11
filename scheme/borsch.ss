@@ -75,6 +75,11 @@
       make-timer
       timer-delete
 
+      buffer-insert-text
+      buffer-begin-pos
+      buffer-end-pos
+      buffer-cursor
+      buffer-set-cursor
       buffer-ref-count
       buffer-ref-get
       buffer-ref-put
@@ -251,6 +256,24 @@
       text-delete-to-begin
       text-delete-to-end
       text-delete
+      text-paste-inplace
+      text-paste
+      text-paste-before
+      text-copy-line
+      text-delete-selection
+      text-copy-selection
+      text-append-selection
+      text-copy-selection-linewise
+      text-append-selection-linewise
+      text-reload-file
+      text-eval
+      text-search-reg
+      text-search-regex
+      text-search-next
+      text-search-prev
+      text-search-word-direction
+      text-search-word-forward
+      text-search-word-backward
       
       process-environment
       process-set-environment

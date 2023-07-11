@@ -1,5 +1,11 @@
 (library (borsch buffer)
    (export
+      buffer-insert-text
+      buffer-begin-pos
+      buffer-end-pos
+      buffer-cursor
+      buffer-set-cursor
+
       buffer-ref-count
       buffer-ref-get
       buffer-ref-put
@@ -117,11 +123,35 @@
 (define __cs_buf_is_term (foreign-procedure "cs_buf_is_term" (int) scheme-object))
 (define __cs_buf_term_set (foreign-procedure "cs_buf_term_set" (int int) void))
 
+(define __cs_buf_cursor_get (foreign-procedure "cs_buf_cursor_get" (int) scheme-object))
+(define __cs_buf_cursor_set (foreign-procedure "cs_buf_cursor_set" (int int) void))
+(define __cs_buf_text_insert (foreign-procedure "cs_buf_text_insert" (int string) scheme-object))
+(define __cs_buf_text_obj_pos (foreign-procedure "cs_buf_text_obj_pos" (int int char int) scheme-object))
+(define __cs_buf_text_get (foreign-procedure "cs_buf_text_get" (int int int) scheme-object))
+
 (define %dir-locals-ht (make-hashtable string-hash string=?))
 
 (define current-buffer-tmp (make-parameter #f))
 
 (define %buffer-list% (list))
+
+(define (buffer-obj-pos buf curs obj num)
+   (call-foreign (__cs_buf_text_obj_pos buf curs obj num)))
+
+(define (buffer-insert-text b text)
+   (call-foreign (__cs_buf_text_insert b text)))
+
+(define (buffer-begin-pos b)
+   (buffer-obj-pos b -1 #\g 1))
+
+(define (buffer-end-pos b)
+   (buffer-obj-pos b -1 #\g -1))
+
+(define (buffer-cursor b)
+   (call-foreign (__cs_buf_cursor_get (current-buffer))) )
+
+(define (buffer-set-cursor b pos)
+   (call-foreign (__cs_buf_cursor_set b pos)) )
 
 (define (buffer-insert b)
    (set! %buffer-list% (append %buffer-list% (list b)))
