@@ -302,6 +302,18 @@
 (define (text-mode-insert-char char)
    (text-insert-char char))
 
+(define buffer-create-text
+   (case-lambda
+      [() 
+       (let ([b (buffer-create)])
+          (text-mode)
+          b)]
+
+      [(n) 
+       (let ([b (buffer-create n)])
+          (text-mode)
+          b)]))
+
 (define-mode text-mode "Text" #f
    (when (not (local-bound? text-mode-map))
       (let ([map (make-keymap)])

@@ -16,18 +16,6 @@
 (define (buffer-open b)
    (or (buffer-is-visible? b) (window-create b)))
 
-(define buffer-create-text
-   (case-lambda
-      [() 
-       (let ([b (buffer-create)])
-          (text-mode)
-          b)]
-
-      [(n) 
-       (let ([b (buffer-create n)])
-          (text-mode)
-          b)]))
-
 (define (buffer-get-or-create name)
    (or (buffer-get name)
        (buffer-create name)))
