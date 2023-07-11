@@ -383,7 +383,9 @@
       ssh-address-host
       ssh-address-port
       ssh-address-path
-      ssh-parse-address)
+      ssh-parse-address
+
+      os-environment)
    (import
       (borsch keymap)
       (borsch runtime)
@@ -403,4 +405,5 @@
       (borsch copybuf)
       (borsch frame)
       (borsch ui)
-      (borsch ssh)))
+      (borsch ssh)
+      (borsch os)))
