@@ -13,8 +13,7 @@
 (import (pregexp))
 (import (borsch))
 
-(runtime-init)
-
+(runtime-initialize)
 (process-initialize)
 (frame-initialize)
 

@@ -11,7 +11,7 @@
       do-quit
       message
       config-dir
-      runtime-init
+      runtime-initialize
       runtime-cleanup
 
       define*

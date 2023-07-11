@@ -3,7 +3,7 @@
       do-quit
       message
       config-dir
-      runtime-init
+      runtime-initialize
       runtime-cleanup)
    (import
       (borsch base)
@@ -32,7 +32,7 @@
 (define __cs_runtime_init (foreign-procedure "cs_runtime_init" () int))
 (define __cs_runtime_cleanup (foreign-procedure "cs_runtime_cleanup" () void))
 
-(define (runtime-init)
+(define (runtime-initialize)
    (set! *config-dir* (string-append (getenv "HOME") "/.config/borsch"))
    (__cs_runtime_init))
 
