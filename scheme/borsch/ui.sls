@@ -1,3 +1,22 @@
+(library (borsch ui)
+   (export
+      ui-size-changed
+      ui-init
+      ui-process
+      ui-screen-width
+      ui-screen-height
+      ui-update
+      ui-clear
+      ui-draw-char
+      ui-draw-char-vert
+      ui-draw-text)
+   (import
+      (chezscheme)
+      (borsch base)
+      (borsch lists)
+      (borsch style)
+      (borsch process))
+
 (define __cs_screen_width_get (foreign-procedure "cs_screen_width_get" () scheme-object))
 (define __cs_screen_height_get (foreign-procedure "cs_screen_height_get" () scheme-object))
 (define __cs_ui_init (foreign-procedure "cs_ui_init" (int) void))
@@ -16,7 +35,6 @@
 (define (ui-process)
    (process-destroy-dead)
    (ui-process-event)
-   (window-draw-all)
    (run-hooks 'ui-update-hook)
    (ui-update))
 
@@ -75,3 +93,4 @@
                 (when (not (null? chars))
                    (call-foreign (__cs_ui_draw_char x y (first chars) 1 fg-num bg-num style-num))
                    (loop (+ x 1) (cdr chars))))))]))
+)

@@ -814,3 +814,6 @@
 (add-hook 'frame-switch-hook
           (lambda (f)
              (window-layout-set-changed #t) ))
+(add-hook 'ui-update-hook
+          (lambda ()
+             (window-draw-all)) )

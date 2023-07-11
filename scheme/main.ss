@@ -19,7 +19,6 @@
 (frame-initialize)
 
 (include "common.ss")
-(include "ui.ss")
 (include "layout.ss")
 (include "window.ss")
 (include "buffer.ss")

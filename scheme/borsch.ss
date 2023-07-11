@@ -365,7 +365,18 @@
       frame-current-window
       frame-set-current-window
       frame-delete-window
-      frame-initialize)
+      frame-initialize
+      
+      ui-size-changed
+      ui-init
+      ui-process
+      ui-screen-width
+      ui-screen-height
+      ui-update
+      ui-clear
+      ui-draw-char
+      ui-draw-char-vert
+      ui-draw-text)
    (import
       (borsch keymap)
       (borsch runtime)
@@ -383,4 +394,5 @@
       (borsch command)
       (borsch git)
       (borsch copybuf)
-      (borsch frame)))
+      (borsch frame)
+      (borsch ui)))
