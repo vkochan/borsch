@@ -617,7 +617,7 @@ void window_buffer_switch(Window *w, Buffer *b)
 	}
 }
 
-Window *__window_create(Buffer *buf, bool is_widget, int x, int y, int width, int height)
+Window *__window_create(Buffer *buf, bool is_widget)
 {
 	Window *w;
 
@@ -654,19 +654,17 @@ Window *__window_create(Buffer *buf, bool is_widget, int x, int y, int width, in
 		window_insert_new(w);
 	}
 
-	ui_window_resize(w->win, width, height);
-	ui_window_move(w->win, x, y);
 	return w;
 }
 
-Window *window_create(Buffer *buf, int x, int y, int width, int height)
+Window *window_create(Buffer *buf)
 {
-	return __window_create(buf, false, x, y, width, height);
+	return __window_create(buf, false);
 }
 
-Window *widget_create(Buffer *buf, int x, int y, int width, int height)
+Window *widget_create(Buffer *buf)
 {
-	Window *w = __window_create(buf, true, x, y, width, height);
+	Window *w = __window_create(buf, true);
 
 	if (!w)
 		return w;

@@ -219,7 +219,7 @@ int scheme_win_current_set(int wid)
 	return 0;
 }
 
-ptr scheme_win_new(int bid, int x, int y, int width, int height)
+ptr scheme_win_new(int bid)
 {
 	Buffer *buf;
 	Window *w;
@@ -227,7 +227,7 @@ ptr scheme_win_new(int bid, int x, int y, int width, int height)
 	buf = buffer_by_id(bid);
 	buffer_dirty_set(buf, true);
 
-	w = window_create(buf, x, y, width, height);
+	w = window_create(buf);
 	if (!w)
  		return Sfalse;
 	return Sinteger(w->id);
@@ -1444,7 +1444,7 @@ static Buffer *__buf_new(const char *name, KeyMap *kmap)
 	return NULL;
 }
 
-ptr scheme_widget_create(const char *name, int x, int y, int width, int height)
+ptr scheme_widget_create(const char *name)
 {
 	Window *w;
 	Buffer *b;
@@ -1454,7 +1454,7 @@ ptr scheme_widget_create(const char *name, int x, int y, int width, int height)
 		return Sfalse;
 	}
 
-	w = widget_create(b, x, y, width, height);
+	w = widget_create(b);
 	if (!w) {
 		buffer_del(b);
 		return Sfalse;
