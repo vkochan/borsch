@@ -5,8 +5,7 @@
 (define __cs_win_prev_set (foreign-procedure "cs_win_prev_set" (int int) scheme-object))
 (define __cs_win_next_set (foreign-procedure "cs_win_next_set" (int int) scheme-object))
 (define __cs_win_current_set (foreign-procedure "cs_win_current_set" (int) int))
-(define __cs_widget_create (foreign-procedure "cs_widget_create" (string) scheme-object))
-(define __cs_win_new (foreign-procedure "cs_win_new" (int) scheme-object))
+(define __cs_win_new (foreign-procedure "cs_win_new" (int boolean) scheme-object))
 (define __cs_win_del (foreign-procedure "cs_win_del" (int) int))
 (define __cs_win_title_get (foreign-procedure "cs_win_title_get" (int) scheme-object))
 (define __cs_win_title_set (foreign-procedure "cs_win_title_set" (int string) int))
@@ -428,7 +427,7 @@
                      (window-first))))
 
 (define (window-create b)
-   (let ([w (call-foreign (__cs_win_new b))])
+   (let ([w (call-foreign (__cs_win_new b #f))])
       (when w
          (buffer-ref-get b)
          (if (layout-is-sticky?)
@@ -763,7 +762,8 @@
         (call-foreign (__cs_win_update w))]))
 
 (define (widget-create name x y w h type)
-   (let ([wid (call-foreign (__cs_widget_create name))])
+   (let*([bid (buffer-new name #f)]
+         [wid (call-foreign (__cs_win_new bid #t))])
       (when (> wid 0)
          (case type
             ['top    (set! %widget-list-top% (append %widget-list-top% (list wid)))]

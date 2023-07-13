@@ -219,7 +219,7 @@ int scheme_win_current_set(int wid)
 	return 0;
 }
 
-ptr scheme_win_new(int bid)
+ptr scheme_win_new(int bid, bool is_widget)
 {
 	Buffer *buf;
 	Window *w;
@@ -227,7 +227,7 @@ ptr scheme_win_new(int bid)
 	buf = buffer_by_id(bid);
 	buffer_dirty_set(buf, true);
 
-	w = window_create(buf);
+	w = window_create(buf, is_widget);
 	if (!w)
  		return Sfalse;
 	return Sinteger(w->id);
@@ -1452,24 +1452,6 @@ ptr scheme_style_get(const char *name)
 	return Sfalse;
 }
 
-ptr scheme_widget_create(const char *name)
-{
-	Window *w;
-	Buffer *b;
-
-	b = __buf_new(name, NULL);
-	if (!b) {
-		return Sfalse;
-	}
-
-	w = widget_create(b);
-	if (!w) {
-		buffer_del(b);
-		return Sfalse;
-	}
-	return Sinteger(w->id);
-}
-
 static char *scheme_string_to_cptr(ptr str)
 {
 	size_t str_len;
@@ -1966,8 +1948,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_style_add",  scheme_style_add);
 	Sregister_symbol("cs_style_set",  scheme_style_set);
 	Sregister_symbol("cs_style_get",  scheme_style_get);
-
-	Sregister_symbol("cs_widget_create", scheme_widget_create);
 
 	Sregister_symbol("cs_term_keys_send", scheme_term_keys_send);
 	Sregister_symbol("cs_term_text_get", scheme_term_text_get);

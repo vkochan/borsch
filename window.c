@@ -617,7 +617,7 @@ void window_buffer_switch(Window *w, Buffer *b)
 	}
 }
 
-Window *__window_create(Buffer *buf, bool is_widget)
+Window *window_create(Buffer *buf, bool is_widget)
 {
 	Window *w;
 
@@ -653,21 +653,6 @@ Window *__window_create(Buffer *buf, bool is_widget)
 		ui_window_has_title_set(w->win, true);
 		window_insert_new(w);
 	}
-
-	return w;
-}
-
-Window *window_create(Buffer *buf)
-{
-	return __window_create(buf, false);
-}
-
-Window *widget_create(Buffer *buf)
-{
-	Window *w = __window_create(buf, true);
-
-	if (!w)
-		return w;
 
 	return w;
 }

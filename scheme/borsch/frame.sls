@@ -224,7 +224,8 @@
        (frame-insert-buffer (current-frame) b)]
 
       [(fr b)
-       (%frame%-buffers-set! fr (append (%frame%-buffers fr) (list b)))]))
+       (when fr
+          (%frame%-buffers-set! fr (append (%frame%-buffers fr) (list b))) )]))
 
 (define frame-remove-buffer
    (case-lambda

@@ -70,7 +70,6 @@ int window_scroll(Window *w, char type, int n);
 void window_focus(Window *c);
 void window_delete(Window *w);
 void window_buffer_switch(Window *w, Buffer *b);
-Window *window_create(Buffer *buf);
-Window *widget_create(Buffer *buf);
+Window *window_create(Buffer *buf, bool is_widget);
 
 #endif /* WINDOW_H */
