@@ -199,7 +199,8 @@ ptr scheme_win_coord_get(int wid)
 	if (!w)
 		return Sfalse;
 
-	window_coord(w, &x, &y);
+	x = ui_window_x_get(w->win);
+	y = ui_window_y_get(w->win);
 	return Scons(Sinteger(x), Sinteger(y));
 }
 
