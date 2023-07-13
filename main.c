@@ -231,20 +231,6 @@ void setup_ui(int ui_type)
 		event_fd_handler_register(cmdfifo.fd, handle_cmdfifo, NULL);
 }
 
-static Buffer *__buf_new(const char *name, KeyMap *kmap)
-{
-	Buffer *buf = buffer_new(name);
-
-	if (buf) {
-		keymap_parent_set(buffer_keymap_get(buf), kmap);
-		buffer_env_set(buf, scheme_env_alloc());
-		buffer_ref_get(buf);
-		return buf;
-	}
-
-	return NULL;
-}
-
 static void
 cleanup(void) {
 	Buffer *b;
@@ -574,15 +560,6 @@ int runtime_init(void)
 void runtime_cleanup(void)
 {
 	cleanup();
-}
-
-int buf_new(char *name)
-{
-	Buffer *buf = __buf_new(name, global_kmap);
-
-	if (buf)
-		return buffer_id_get(buf);
-	return 0;
 }
 
 size_t buf_text_insert(int bid, const char *text)

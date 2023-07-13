@@ -25,7 +25,6 @@ extern Ui *g_ui;
 int runtime_init(void);
 void runtime_cleanup(void);
 
-int buf_new(char *name);
 size_t buf_text_insert(int bid, const char *text);
 size_t buf_text_insert_char(int bid, char ch);
 size_t buf_text_insert_nl(int bid, int pos);

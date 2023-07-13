@@ -68,7 +68,7 @@
            (borsch lists)
            (borsch keymap))
 
-(define __cs_buf_new (foreign-procedure "cs_buf_new" (string) scheme-object))
+(define __cs_buf_new (foreign-procedure "cs_buf_new" (string int) scheme-object))
 (define __cs_buf_ref_get (foreign-procedure "cs_buf_ref_get" (int) scheme-object))
 (define __cs_buf_ref_put (foreign-procedure "cs_buf_ref_put" (int) scheme-object))
 (define __cs_buf_ref (foreign-procedure "cs_buf_ref" (int) scheme-object))
@@ -192,8 +192,11 @@
       [() 
        (buffer-new "")]
 
-      [(n) 
-       (let ([b (call-foreign (__cs_buf_new n))])
+      [(name) 
+       (buffer-new name global-keymap)]
+
+      [(name kmap) 
+       (let ([b (call-foreign (__cs_buf_new name (or kmap -1)))])
           (buffer-insert b)
           (with-current-buffer b
              (set-text-style '(fg: "white")))

@@ -554,13 +554,35 @@ void scheme_kmap_del(int kid)
 	kmap_del(kid);
 }
 
-ptr scheme_buf_new(char *name)
+static Buffer *__buf_new(const char *name, KeyMap *kmap)
 {
-	int ret = buf_new(name);
+	Buffer *buf = buffer_new(name);
 
-	if (ret)
-		return Sinteger(ret);
-	return Sfalse;
+	if (buf) {
+		keymap_parent_set(buffer_keymap_get(buf), kmap);
+		buffer_env_set(buf, scheme_env_alloc());
+		buffer_ref_get(buf);
+		return buf;
+	}
+
+	return NULL;
+}
+
+ptr scheme_buf_new(char *name, int kmap_id)
+{
+	KeyMap *kmap = NULL;
+
+	if (kmap_id != -1) {
+		kmap = keymap_by_id(kmap_id);
+		if (!kmap)
+			return Sfalse;
+	}
+
+	Buffer *buf = __buf_new(name, kmap);
+	if (!buf)
+		return Sfalse;
+
+	return Sinteger(buffer_id_get(buf));
 }
 
 ptr scheme_buf_ref_get(int bid)
@@ -1428,20 +1450,6 @@ ptr scheme_style_get(const char *name)
 	}
 
 	return Sfalse;
-}
-
-static Buffer *__buf_new(const char *name, KeyMap *kmap)
-{
-	Buffer *buf = buffer_new(name);
-
-	if (buf) {
-		keymap_parent_set(buffer_keymap_get(buf), kmap);
-		buffer_env_set(buf, scheme_env_alloc());
-		buffer_ref_get(buf);
-		return buf;
-	}
-
-	return NULL;
 }
 
 ptr scheme_widget_create(const char *name)
