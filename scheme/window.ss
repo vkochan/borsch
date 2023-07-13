@@ -769,6 +769,7 @@
             ['top    (set! %widget-list-top% (append %widget-list-top% (list wid)))]
             ['bottom (set! %widget-list-bottom% (append %widget-list-bottom% (list wid)))])
          (set! %widget-list% (append %widget-list% (list wid)))
+         (frame-remove-buffer bid)
          (window-set-width wid w)
          (window-set-height wid h)
          (window-move wid x y)

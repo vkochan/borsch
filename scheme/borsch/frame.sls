@@ -233,7 +233,8 @@
        (frame-remove-buffer (current-frame) b)]
 
       [(fr b)
-       (%frame%-buffers-set! fr (remove b (%frame%-buffers fr)))]))
+       (when fr
+          (%frame%-buffers-set! fr (remove b (%frame%-buffers fr))))]))
 
 (define (frame-for-each-buffer fn)
    (for-each
