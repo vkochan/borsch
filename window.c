@@ -19,9 +19,6 @@
 #define for_each_widget(__w) \
 	for (__w = widgets; __w; __w = __w->next)
 
-#define for_each_new_window(__w) \
-	for (__w = new_windows; __w; __w = __w->next)
-
 static Window *widgets;
 static Window *new_windows;
 static int win_id;
@@ -30,6 +27,11 @@ static Frame *frame_list;
 static int frame_id;
 static char *title;
 static Ui *ui;
+
+Window *window_new_list(void)
+{
+	return new_windows;
+}
 
 int frame_current_id(void)
 {
@@ -88,9 +90,6 @@ Frame *frame_create(void)
 
 void frame_delete(Frame *f)
 {
-	while (f->windows) {
-		window_delete(f->windows);
-	}
 	frame_remove(f);
 	free(f);
 }
@@ -170,10 +169,6 @@ Window *window_get_by_id(int id)
 {
 	Window *c;
 
-	for_each_new_window(c) {
-		if (c->id == id)
-			return c;
-	}
 	for_each_window(c) {
 		if (c->id == id)
 			return c;
@@ -186,68 +181,6 @@ Window *window_get_by_id(int id)
 	return NULL;
 }
 
-Window *windows_list(Frame *f)
-{
-	return f->windows;
-}
-
-Window *window_first(void)
-{
-	if (!frame_current())
-		return NULL;
-
-	return frame_current()->windows;
-}
-
-void window_next_set(Window *w, Window *n)
-{
-	window_remove(n);
-
-	if (w->next)
-		w->next->prev = n;
-	n->next = w->next;
-	w->next = n;
-	n->prev = w;
-}
-
-void window_prev_set(Window *w, Window *p)
-{
-	window_remove(p);
-
-	if (w->prev)
-		w->prev->next = p;
-	p->prev = w->prev;
-	w->prev = p;
-	p->next = w;
-}
-
-Window *window_prev(Window *w)
-{
-	if (w)
-		return w->prev;
-	return NULL;
-}
-
-Window *window_next(Window *w)
-{
-	if (w)
-		return w->next;
-	return NULL;
-}
-
-void window_insert_first(Window *c)
-{
-	window_remove(c);
-
-	if (c->frame->windows)
-		c->frame->windows->prev = c;
-
-	c->next = c->frame->windows;
-	c->prev = NULL;
-
-	c->frame->windows = c;
-}
-
 void window_insert_new(Window *w)
 {
 	w->prev = NULL;
@@ -258,7 +191,7 @@ void window_insert_new(Window *w)
 	w->is_new = true;
 }
 
-void window_remove_new(Window *w)
+void window_remove(Window *w)
 {
 	if (w->prev)
 		w->prev->next = w->next;
@@ -268,25 +201,6 @@ void window_remove_new(Window *w)
 		new_windows = w->next;
 	w->next = w->prev = NULL;
 	w->is_new = false;
-}
-
-void window_remove(Window *c)
-{
-	Window *d;
-
-	if (c->is_new) {
-		window_remove_new(c);
-		return;
-	}
-
-	if (c->prev)
-		c->prev->next = c->next;
-	if (c->next) {
-		c->next->prev = c->prev;
-	}
-	if (c == c->frame->windows)
-		c->frame->windows = c->next;
-	c->next = c->prev = NULL;
 }
 
 bool window_is_widget(Window *w)

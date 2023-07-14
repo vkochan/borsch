@@ -35,6 +35,10 @@
       frame-prev-focused-window
       frame-current-window
       frame-set-current-window
+      frame-first-window
+      frame-set-first-window
+      frame-last-window
+      frame-set-last-window
       frame-delete-window
       frame-initialize)
    (import
@@ -60,7 +64,9 @@
       (mutable n-master)
       (mutable %-master)
       (mutable focus-stack)
-      (mutable current-window)))
+      (mutable current-window)
+      (mutable first-window)
+      (mutable last-window)))
 
 (define frames-ht (make-eq-hashtable))
 
@@ -90,6 +96,8 @@
                                  1
                                  0.5
                                  (make-stack)
+                                 #f
+                                 #f
                                  #f)])
             (hashtable-set! frames-ht id fr)
             fr))]))
@@ -342,6 +350,39 @@
 
       [(fr w)
        (%frame%-current-window-set! fr w)]))
+
+
+(define frame-first-window
+   (case-lambda
+      [()
+       (frame-first-window (current-frame))]
+
+      [(fr)
+       (%frame%-first-window fr)]))
+
+(define frame-set-first-window
+   (case-lambda
+      [(w)
+       (frame-set-first-window (current-frame) w)]
+
+      [(fr w)
+       (%frame%-first-window-set! fr w)]))
+
+(define frame-last-window
+   (case-lambda
+      [()
+       (frame-last-window (current-frame))]
+
+      [(fr)
+       (%frame%-last-window fr)]))
+
+(define frame-set-last-window
+   (case-lambda
+      [(w)
+       (frame-set-last-window (current-frame) w)]
+
+      [(fr w)
+       (%frame%-last-window-set! fr w)]))
 
 (define frame-delete-window
    (case-lambda

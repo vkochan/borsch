@@ -937,8 +937,9 @@ int buf_file_open(int bid, const char *file)
 
 	if (buf) {
 		err = buffer_file_open(buf, file);
-		if (err)
+		if (err) {
 			return -1;
+		}
 
 		/* update view with new text */
 		Window *c;

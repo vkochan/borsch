@@ -28,7 +28,6 @@ typedef struct _Frame {
 	struct _Frame *prev;
 	int id;
 	Window *sel;
-	Window *windows;
 } Frame;
 
 Frame *frame_current(void);
@@ -39,22 +38,17 @@ void frame_delete(Frame *f);
 Frame *frame_by_id(int fid);
 
 #define for_each_window(__w) \
-	for (__w = window_first(); __w; __w = __w->next)
+	for (__w = window_new_list(); __w; __w = __w->next)
 
 #define WIN_DRAW_F_FORCE	(1 << 0)
+
+Window *window_new_list(void);
 
 void window_init(Ui *ui);
 void window_cleanup(void);
 
 Window *window_current(void);
 Window *window_get_by_id(int id);
-Window *windows_list(Frame *f);
-Window *window_first(void);
-void window_next_set(Window *w, Window *n);
-void window_prev_set(Window *w, Window *n);
-Window *window_prev(Window *w);
-Window *window_next(Window *w);
-void window_insert_first(Window *c);
 void window_remove(Window *c);
 bool window_is_master(Window *w);
 bool window_is_widget(Window *w);

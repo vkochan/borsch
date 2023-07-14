@@ -1,9 +1,3 @@
-(define __cs_win_first_get (foreign-procedure "cs_win_first_get" (int) scheme-object))
-(define __cs_win_prev_get (foreign-procedure "cs_win_prev_get" (int) scheme-object))
-(define __cs_win_next_get (foreign-procedure "cs_win_next_get" (int) scheme-object))
-(define __cs_win_first_set (foreign-procedure "cs_win_first_set" (int) scheme-object))
-(define __cs_win_prev_set (foreign-procedure "cs_win_prev_set" (int int) scheme-object))
-(define __cs_win_next_set (foreign-procedure "cs_win_next_set" (int int) scheme-object))
 (define __cs_win_current_set (foreign-procedure "cs_win_current_set" (int) int))
 (define __cs_win_new (foreign-procedure "cs_win_new" (int boolean) scheme-object))
 (define __cs_win_del (foreign-procedure "cs_win_del" (int) int))
@@ -29,6 +23,15 @@
 (define __cs_win_coord_get (foreign-procedure "cs_win_coord_get" (int) scheme-object))
 (define __cs_win_draw (foreign-procedure "cs_win_draw" (int boolean) void))
 (define __cs_win_has_title (foreign-procedure "cs_win_has_title" (int) boolean))
+
+(define-record-type %window%
+   (fields
+      id
+      (mutable prev)
+      (mutable next)) )
+
+(define (window-id w)
+   (%window%-id w) )
 
 (define %window-layout-changed% #f)
 
@@ -108,8 +111,8 @@
       [()
        (window-has-title? (current-window))]
 
-      [(wid)
-       (call-foreign (__cs_win_has_title wid))]))
+      [(win)
+       (call-foreign (__cs_win_has_title (window-id win)))]))
 
 (define window-is-dirty?
    (case-lambda
@@ -124,9 +127,9 @@
       [(start end style)
        (window-set-text-style (current-window) style)]
 
-      [(wid start end style)
+      [(win start end style)
        (let ([ls-style (style->list style)])
-          (call-foreign (__cs_win_viewport_cell_set wid start end
+          (call-foreign (__cs_win_viewport_cell_set (window-id win) start end
                                                     (list-ref ls-style 0)
                                                     (list-ref ls-style 1)
                                                     (list-ref ls-style 2)
@@ -195,16 +198,16 @@
       [(w)
        (window-draw w #f)]
 
-      [(w enforce?)
-       (when (and w (or enforce? (window-is-dirty? w)) (window-is-visible? w))
-          (when (equal? w (current-window))
-             (window-update-cursor w))
-          (window-update w) 
-          (run-hooks 'text-draw-hook w)
-          (call-foreign (__cs_win_draw w enforce?))
-          (run-hooks 'window-draw-hook w)
-          (when (window-has-title? w)
-             (window-draw-title w)))]))
+      [(win enforce?)
+       (when (and win (or enforce? (window-is-dirty? win)) (window-is-visible? win))
+          (when (equal? win (current-window))
+             (window-update-cursor win))
+          (window-update win) 
+          (run-hooks 'text-draw-hook win)
+          (call-foreign (__cs_win_draw (window-id win) enforce?))
+          (run-hooks 'window-draw-hook win)
+          (when (window-has-title? win)
+             (window-draw-title win)))]))
 
 (define window-is-widget?
    (case-lambda
@@ -279,31 +282,72 @@
       (window-first (current-frame))]
 
      [(fr)
-      (call-foreign (__cs_win_first_get (frame-id fr)))]))
+      (frame-first-window) ]))
 
 (define window-next
    (case-lambda
       [()
        (window-next (current-window))]
 
-      [(wid)
-       (call-foreign (__cs_win_next_get wid))]))
+      [(w)
+       (%window%-next w)]))
 
 (define window-prev
    (case-lambda
       [()
        (window-prev (current-window))]
 
-      [(wid)
-       (call-foreign (__cs_win_prev_get wid))]))
+      [(w)
+       (%window%-prev w)]))
+
+(define (%window-remove% w)
+   (when w
+      (when (equal? w (frame-first-window))
+         (frame-set-first-window (%window%-next w)))
+      (when (equal? w (frame-last-window))
+         (frame-set-last-window (%window%-prev w)))
+      (let ([prev (%window%-prev w)]
+            [next (%window%-next w)])
+         (when prev
+            (%window%-next-set! prev next))
+         (when next
+            (%window%-prev-set! next prev)) )
+      (%window%-prev-set! w #f)
+      (%window%-next-set! w #f) ))
+
+(define (%window-insert-at% w at)
+   (when at
+      (cond
+         ((equal? at (frame-first-window))
+          (%window%-next-set! w at)
+          (%window%-prev-set! w #f)
+          (%window%-prev-set! at w)
+          (frame-set-first-window w))
+         ((equal? at (frame-last-window))
+          (%window%-next-set! at w)
+          (%window%-prev-set! w at)
+          (%window%-next-set! w #f)
+          (frame-set-last-window w))
+         (else
+          (let ([prev (%window%-prev at)])
+             (%window%-next-set! prev w)
+             (%window%-prev-set! at w)
+             (%window%-next-set! w at)
+             (%window%-prev-set! w prev) ))))
+   (when (not (frame-first-window))
+      (frame-set-first-window w))
+   (when (not (frame-last-window))
+      (frame-set-last-window w))
+)
 
 (define window-set-first
    (case-lambda
       [()
        (window-set-first (current-window))]
 
-      [(wid)
-       (call-foreign (__cs_win_first_set wid))
+      [(w)
+       (%window-remove% w)
+       (%window-insert-at% w (frame-first-window))
        (window-layout-set-changed #t)]))
 
 (define window-set-prev
@@ -311,8 +355,9 @@
       [(prev)
        (window-set-prev (current-window) prev)]
 
-      [(wid prev)
-       (call-foreign (__cs_win_prev_set wid prev))
+      [(w prev)
+       (%window-remove% prev)
+       (%window-insert-at% prev (window-prev w))
        (window-layout-set-changed #t)]))
 
 (define window-set-next
@@ -320,17 +365,19 @@
       [(next)
        (window-set-next (current-window) next)]
 
-      [(wid next)
-       (call-foreign (__cs_win_next_set wid next))
-       (window-layout-set-changed #t)]))
+      [(w next)
+      (%window-remove% next)
+      (%window-insert-at% next (window-next w))
+      (window-layout-set-changed #t)]))
 
 (define (%window-list% fr)
-   (let ([win (window-first fr)]
-         [lst   '()])
-      (while win
-         (set! lst (append lst (list win)))
-         (set! win (window-next win)))
-      lst))
+   (let loop ([next (window-first fr)]
+              [ls   (list)])
+      (if next
+         (loop (window-next next)
+               (append ls (list next)) )
+         ;; else
+         ls )))
 
 (define window-list
    (case-lambda
@@ -341,7 +388,7 @@
       (%window-list% fr)]))
 
 (define (window-last)
-   (list-ref (window-list) (- (length (window-list)) 1)))
+   (frame-last-window))
 
 (define (window-for-each fn)
    (let ([ls (window-list)])
@@ -400,15 +447,15 @@
 (define (window-prev-selected)
     (frame-prev-focused-window))
 
-(define (window-focus wid)
-   (when (and wid
-              (not (equal? wid (current-window))))
+(define (window-focus win)
+   (when (and win
+              (not (equal? win (current-window))))
       (when (and (current-window)
                  (not (window-is-widget? (current-window))))
          (frame-set-prev-focused-window (current-window)))
-      (frame-set-current-window wid)
-      (call-foreign (__cs_win_current_set wid))
-      (run-hooks 'window-focus-hook wid)))
+      (frame-set-current-window win)
+      (call-foreign (__cs_win_current_set (window-id win)))
+      (run-hooks 'window-focus-hook win)))
 
 (define (window-focus-left)
    (window-focus (window-left)))
@@ -426,31 +473,35 @@
                      (window-next)
                      (window-first))))
 
+(define (%window-new% b widget?)
+   (make-%window% (__cs_win_new b widget?) #f #f) )
+
 (define (window-create b)
-   (let ([w (call-foreign (__cs_win_new b #f))])
-      (when w
+   (let ([win (%window-new% b #f)])
+      (when win
          (buffer-ref-get b)
          (if (layout-is-sticky?)
             (let ([m (window-last-master)])
-               (when m (window-set-next m w)))
+               (when m (window-set-next m win)))
             ;; else
             (let ()
-               (window-set-first w)))
-         (run-hooks 'window-create-hook w)
+               (window-set-first win)))
+         (run-hooks 'window-create-hook win)
          (window-layout-set-changed #t)
-         (window-focus w))
-      w))
+         (window-focus win))
+      win))
 
-(define (%window-delete% w)
-   (frame-delete-window w)
-   (when (equal? w (current-window))
+(define (%window-delete% win)
+   (frame-delete-window win)
+   (%window-remove% win)
+   (when (equal? win (current-window))
       (let ([focus (or (frame-prev-focused-window)
-                       (window-next w)
-                       (window-prev w))])
+                       (window-next win)
+                       (window-prev win))])
          (when focus
             (frame-set-current-window #f)
             (window-focus focus))))
-   (call-foreign (__cs_win_del w)))
+   (call-foreign (__cs_win_del (window-id win))))
 
 (define window-delete
     (case-lambda
@@ -481,16 +532,16 @@
       [()
        (window-name (current-window))]
 
-      [(wid)
-       (call-foreign (__cs_win_title_get wid))]))
+      [(win)
+       (call-foreign (__cs_win_title_get (window-id win)))]))
 
 (define window-set-name
    (case-lambda
       [(title)
        (window-set-name (current-window) title)]
 
-      [(wid title)
-       (call-foreign (__cs_win_title_set wid title))]))
+      [(win title)
+       (call-foreign (__cs_win_title_set (window-id win) title))]))
 
 (define window-is-maximized?
    (case-lambda
@@ -548,38 +599,38 @@
       [()
        (window-buffer (current-window))]
 
-      [(wid)
-       (call-foreign (__cs_win_buf_get wid))]))
+      [(win)
+       (call-foreign (__cs_win_buf_get (window-id win)))]))
 
 (define window-width
    (case-lambda
       [()
        (window-width (current-window))]
 
-      [(wid)
-       (call-foreign (__cs_win_width_get wid))]))
+      [(win)
+       (call-foreign (__cs_win_width_get (window-id win))) ]))
 
 (define window-height
    (case-lambda
       [()
        (window-height (current-window))]
 
-      [(wid)
-       (call-foreign (__cs_win_height_get wid))]))
+      [(win)
+       (call-foreign (__cs_win_height_get (window-id win)))]))
 
 (define window-set-size
    (case-lambda
       [(w h)
        (window-set-size (current-window) w h)]
 
-      [(wid w h)
-       (let ([old-w (window-width w)]
-             [old-h (window-height w)])
+      [(win w h)
+       (let ([old-w (window-width win)]
+             [old-h (window-height win)])
           (when (or (and (positive? w)
                          (not (eq? w old-w)))
                     (and (positive? h)
                          (not (eq? h old-h))))
-             (call-foreign (__cs_win_size_set wid w h))
+             (call-foreign (__cs_win_size_set (window-id win) w h))
              (window-layout-set-changed #t)))]))
 
 (define window-set-width
@@ -587,66 +638,66 @@
       [(w)
        (window-set-width (current-window) w)]
 
-      [(wid w)
-       (window-set-size wid w -1)]))
+      [(win w)
+       (window-set-size win w -1)]))
 
 (define window-move
    (case-lambda
       [(x y)
        (window-move (current-window) x y)]
 
-      [(wid x y)
-       (call-foreign (__cs_win_move wid x y))]))
+      [(win x y)
+       (call-foreign (__cs_win_move (window-id win) x y))]))
 
 (define window-set-height
    (case-lambda
       [(h)
        (window-set-height (current-window) h)]
 
-      [(wid h)
-       (window-set-size wid -1 h)]))
+      [(win h)
+       (window-set-size win -1 h)]))
 
 (define window-set-border
    (case-lambda
       [(h)
        (window-set-border (current-window) h)]
 
-      [(wid h)
-       (call-foreign (__cs_win_border_set wid -1 h))]))
+      [(win h)
+       (call-foreign (__cs_win_border_set (window-id win) -1 h))]))
 
 (define window-switch-buffer
    (case-lambda
       [(b)
        (window-switch-buffer (current-window) b)]
 
-      [(wid b)
-       (buffer-ref-put (window-buffer wid))
-       (call-foreign (__cs_win_buf_switch wid b))
-       (buffer-ref-get (window-buffer wid))]))
+      [(win b)
+       (buffer-ref-put (window-buffer win))
+       (call-foreign (__cs_win_buf_switch (window-id win) b))
+       (buffer-ref-get (window-buffer win))]))
 
 (define window-begin-pos
    (case-lambda
       [()
        (window-begin-pos (current-window))]
 
-      [(w)
-       (call-foreign (__cs_win_viewport_pos w #\H))]))
+      [(win)
+       (call-foreign (__cs_win_viewport_pos (window-id win) #\H))]))
 
 (define window-end-pos
    (case-lambda
       [()
        (window-end-pos (current-window))]
 
-      [(w)
-       (call-foreign (__cs_win_viewport_pos w #\L))]))
+      [(win)
+       (call-foreign (__cs_win_viewport_pos (window-id win) #\L))]))
 
 (define window-pos->coord
    (case-lambda
       [(p)
        (window-pos->coord (current-window) p)]
 
-      [(w p)
-       (call-foreign (__cs_win_viewport_coord w p))]))
+      [(win p)
+       (call-foreign (__cs_win_viewport_coord (window-id win) p))]))
 
 (define (window-lines-coord w)
    (when (not (buffer-is-vterm? (window-buffer w)))
@@ -670,119 +721,118 @@
       [()
        (window-inner-width (current-window))]
 
-      [(wid)
-       (call-foreign (__cs_win_viewport_width_get wid))]))
+      [(win)
+       (call-foreign (__cs_win_viewport_width_get (window-id win)))]))
 
 (define window-inner-height
    (case-lambda
       [()
        (window-inner-height (current-window))]
 
-      [(wid)
-       (call-foreign (__cs_win_viewport_height_get wid))]))
+      [(win)
+       (call-foreign (__cs_win_viewport_height_get (window-id win))) ]))
 
 (define window-scroll-page-down
    (case-lambda
       [()
        (window-scroll-page-down (current-window))]
 
-      [(w)
-       (call-foreign (__cs_win_scroll w #\f 0))]))
+      [(win)
+       (call-foreign (__cs_win_scroll (window-id win) #\f 0))]))
 
 (define window-scroll-page-up
    (case-lambda
       [()
        (window-scroll-page-up (current-window))]
 
-      [(w)
-       (call-foreign (__cs_win_scroll w #\b 0))]))
+      [(win)
+       (call-foreign (__cs_win_scroll (window-id win) #\b 0))]))
 
 (define window-scroll-halfpage-down
    (case-lambda
       [()
        (window-scroll-halfpage-down (current-window))]
 
-      [(w)
-       (call-foreign (__cs_win_scroll w #\d 0))]))
+      [(win)
+       (call-foreign (__cs_win_scroll (window-id win) #\d 0))]))
 
 (define window-scroll-halfpage-up
    (case-lambda
       [()
        (window-scroll-halfpage-up (current-window))]
 
-      [(w)
-       (call-foreign (__cs_win_scroll w #\u 0))]))
+      [(win)
+       (call-foreign (__cs_win_scroll (window-id win) #\u 0))]))
 
 (define window-scroll-down
    (case-lambda
       [(n)
        (window-scroll-down (current-window))]
 
-      [(w n)
-       (call-foreign (__cs_win_scroll w #\l n))]))
+      [(win n)
+       (call-foreign (__cs_win_scroll (window-id win) #\l n))]))
 
 (define window-scroll-up
    (case-lambda
       [(n)
        (window-scroll-down (current-window))]
 
-      [(w n)
-       (call-foreign (__cs_win_scroll w #\L n))]))
+      [(win n)
+       (call-foreign (__cs_win_scroll (window-id win) #\L n))]))
 
 (define window-set-sidebar-width
    (case-lambda
       [(l)
        (window-set-sidebar-width (current-window) l)]
 
-      [(w l)
-       (call-foreign (__cs_win_sidebar_set w l))]))
+      [(win l)
+       (call-foreign (__cs_win_sidebar_set (window-id win) l))]))
 
 (define window-sidebar-width
    (case-lambda
       [()
        (window-sidebar-width (current-window))]
 
-      [(w)
-       (call-foreign (__cs_win_sidebar_get w))]))
+      [(win)
+       (call-foreign (__cs_win_sidebar_get (window-id win)))]))
 
 (define window-update-cursor
     (case-lambda 
        [()
         (window-update-cursor (current-window))]
 
-       [(w)
-        (call-foreign (__cs_win_update_cursor w))]))
+       [(win)
+        (call-foreign (__cs_win_update_cursor (window-id win)))]))
 
 (define window-update
     (case-lambda 
        [()
         (window-update (current-window))]
 
-       [(w)
-        (call-foreign (__cs_win_update w))]))
+       [(win)
+        (call-foreign (__cs_win_update (window-id win)))]))
 
 (define (widget-create name x y w h type)
    (let*([bid (buffer-new name #f)]
-         [wid (call-foreign (__cs_win_new bid #t))])
-      (when (> wid 0)
-         (case type
-            ['top    (set! %widget-list-top% (append %widget-list-top% (list wid)))]
-            ['bottom (set! %widget-list-bottom% (append %widget-list-bottom% (list wid)))])
-         (set! %widget-list% (append %widget-list% (list wid)))
-         (frame-remove-buffer bid)
-         (window-set-width wid w)
-         (window-set-height wid h)
-         (window-move wid x y)
-         (window-layout-set-changed #t))
-      wid))
+         [win (%window-new% bid #t)])
+      (case type
+         ['top    (set! %widget-list-top% (append %widget-list-top% (list win)))]
+         ['bottom (set! %widget-list-bottom% (append %widget-list-bottom% (list win)))])
+      (set! %widget-list% (append %widget-list% (list win)))
+      (frame-remove-buffer bid)
+      (window-set-width win w)
+      (window-set-height win h)
+      (window-move win x y)
+      (window-layout-set-changed #t)
+      win))
 
 (define window-x
    (case-lambda
       [()
        (window-x (current-window))]
 
-      [(wid)
-       (let ([pos (call-foreign (__cs_win_coord_get wid))])
+      [(win)
+       (let ([pos (call-foreign (__cs_win_coord_get (window-id win)))])
           (car pos))]))
 
 (define window-y
@@ -790,8 +840,8 @@
       [()
        (window-y (current-window))]
 
-      [(wid)
-       (let ([pos (call-foreign (__cs_win_coord_get wid))])
+      [(win)
+       (let ([pos (call-foreign (__cs_win_coord_get (window-id win)))])
           (cdr pos))]))
 
 (define (window-find fn)

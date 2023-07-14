@@ -23,19 +23,19 @@
 (define (buffer-open-file f)
    (let ([bid (buffer-get-by-file f)]
          [in-frame? #f]
-         [wid 0])
+         [win #f])
       (if bid
          (let ()
-            (set! wid (buffer-window bid))
+            (set! win (buffer-window bid))
             (for-all
                (lambda (w)
-                  (when (equal? w wid)
+                  (when (equal? w win)
                      (set! in-frame? #t)
                      #f))
                (window-list))
             (if in-frame?
                (begin
-                  (window-focus wid))
+                  (window-focus win))
                ;; else
                (window-create bid))
             bid)

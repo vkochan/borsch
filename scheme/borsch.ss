@@ -364,6 +364,10 @@
       frame-prev-focused-window
       frame-current-window
       frame-set-current-window
+      frame-first-window
+      frame-set-first-window
+      frame-last-window
+      frame-set-last-window
       frame-delete-window
       frame-initialize
       
