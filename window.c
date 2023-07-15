@@ -389,7 +389,6 @@ void window_focus(Window *c)
 
 	if (c) {
 		Process *proc = buffer_proc_get(c->buf);
-		Selection *s;
 
 		c->urgent = false;
 
