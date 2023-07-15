@@ -600,14 +600,9 @@ void scheme_buf_name_set(int bid, const char *name)
 	Buffer *buf = buffer_by_id(bid);
 
 	if (buf) {
+		buffer_dirty_set(buf, true);
 		buffer_name_lock(buf, true);
 		buffer_name_set(buf, name);
-
-		Window *c;
-		for_each_window(c) {
-			if (c->buf == buf)
-				buffer_dirty_set(c->buf, true);
-		}
 	}
 }
 
@@ -644,12 +639,7 @@ void scheme_buf_readonly_set(int bid, bool is_readonly)
 
 	if (buf) {
 		buffer_readonly_set(buf, is_readonly);
-
-		Window *w;
-		for_each_window(w) {
-			if (w->buf == buf)
-				buffer_dirty_set(w->buf, true);
-		}
+		buffer_dirty_set(buf, true);
 	}
 }
 
