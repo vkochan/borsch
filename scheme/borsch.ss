@@ -117,7 +117,6 @@
       buffer-is-readonly?
       buffer-is-modified?
       buffer-is-dirty?
-      set-text-style
       add-text-property
       remove-text-property
       get-text-property

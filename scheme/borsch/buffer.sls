@@ -43,7 +43,6 @@
       buffer-is-readonly?
       buffer-is-modified?
       buffer-is-dirty?
-      set-text-style
       add-text-property
       remove-text-property
       get-text-property
@@ -98,13 +97,6 @@
 (define __cs_buf_readonly_get (foreign-procedure "cs_buf_readonly_get" (int) scheme-object))
 (define __cs_buf_is_modified (foreign-procedure "cs_buf_is_modified" (int) scheme-object))
 (define __cs_buf_is_dirty (foreign-procedure "cs_buf_is_dirty" (int) scheme-object))
-
-(define __cs_buf_text_fg_set (foreign-procedure "cs_buf_text_fg_set" (int int) void))
-(define __cs_buf_text_bg_set (foreign-procedure "cs_buf_text_bg_set" (int int) void))
-(define __cs_buf_text_style_set (foreign-procedure "cs_buf_text_style_set" (int int) void))
-(define __cs_buf_text_fg_get (foreign-procedure "cs_buf_text_fg_get" (int) scheme-object))
-(define __cs_buf_text_bg_get (foreign-procedure "cs_buf_text_bg_get" (int) scheme-object))
-(define __cs_buf_text_style_get (foreign-procedure "cs_buf_text_style_get" (int) scheme-object))
 
 (define __cs_buf_prop_style_add (foreign-procedure "cs_buf_prop_style_add" (int int int int int int string int int string string boolean wchar) scheme-object))
 (define __cs_buf_prop_kmap_add (foreign-procedure "cs_buf_prop_kmap_add" (int int int int string string) scheme-object))
@@ -198,8 +190,6 @@
       [(name kmap) 
        (let ([b (call-foreign (__cs_buf_new name (or kmap -1)))])
           (buffer-insert b)
-          (with-current-buffer b
-             (set-text-style '(fg: "white")))
           b)]))
 
 (define buffer-delete
@@ -418,19 +408,6 @@
 
       [(buf)
        (call-foreign (__cs_buf_is_dirty buf))]))
-
-(define (set-text-style s . e)
-   (let ([a (append (list s) e)])
-      (for-each
-         (lambda (o)
-            (cond
-               [(equal? (car o) 'fg:)
-                (call-foreign (__cs_buf_text_fg_set (current-buffer) (color-name->number (cadr o))))]
-               [(equal? (car o) 'bg:)
-                (call-foreign (__cs_buf_text_bg_set (current-buffer) (color-name->number (cadr o))))]
-               [(equal? (car o) 'attr:)
-                (call-foreign (__cs_buf_text_style_set (current-buffer) (style-name->number (cadr o))))]))
-         a)))
 
 (define (symbol->text-property-type s)
    (case s
