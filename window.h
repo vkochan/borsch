@@ -40,8 +40,6 @@ Frame *frame_by_id(int fid);
 #define for_each_window(__w) \
 	for (__w = window_new_list(); __w; __w = __w->next)
 
-#define WIN_DRAW_F_FORCE	(1 << 0)
-
 Window *window_new_list(void);
 
 void window_init(Ui *ui);
