@@ -3,7 +3,6 @@
 (define __cs_win_del (foreign-procedure "cs_win_del" (int) int))
 (define __cs_win_title_get (foreign-procedure "cs_win_title_get" (int) scheme-object))
 (define __cs_win_title_set (foreign-procedure "cs_win_title_set" (int string) int))
-(define __cs_win_buf_get (foreign-procedure "cs_win_buf_get" (int) scheme-object))
 (define __cs_win_width_get (foreign-procedure "cs_win_width_get" (int) scheme-object))
 (define __cs_win_height_get (foreign-procedure "cs_win_height_get" (int) scheme-object))
 (define __cs_win_viewport_width_get (foreign-procedure "cs_win_viewport_width_get" (int) scheme-object))
@@ -27,6 +26,7 @@
 (define-record-type %window%
    (fields
       id
+      (mutable buffer)
       (mutable prev)
       (mutable next)) )
 
@@ -474,7 +474,7 @@
                      (window-first))))
 
 (define (%window-new% b widget?)
-   (make-%window% (__cs_win_new b widget?) #f #f) )
+   (make-%window% (__cs_win_new b widget?) b #f #f) )
 
 (define (window-create b)
    (let ([win (%window-new% b #f)])
@@ -600,7 +600,7 @@
        (window-buffer (current-window))]
 
       [(win)
-       (call-foreign (__cs_win_buf_get (window-id win)))]))
+       (%window%-buffer win)]))
 
 (define window-width
    (case-lambda
@@ -673,6 +673,7 @@
       [(win b)
        (buffer-ref-put (window-buffer win))
        (call-foreign (__cs_win_buf_switch (window-id win) b))
+       (%window%-buffer-set! win b)
        (buffer-ref-get (window-buffer win))]))
 
 (define window-begin-pos
