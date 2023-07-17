@@ -30,6 +30,7 @@
 (include "mode/git.ss")
 (include "mode/grep.ss")
 (include "mode/org.ss")
+(include "mode/markdown.ss")
 (include "mode/mail.ss")
 (include "mode/prog/c.ss")
 (include "mode/prog/dts.ss")

@@ -52,6 +52,10 @@
    (call-foreign
       (__cs_stx_highlight_qry (symbol->string lang) qry)))
 
+(define-style syntax-title        '(fg: "blue" attr: "bold"))
+(define-style syntax-uri            '(fg: "magenta" attr: "italic"))
+(define-style syntax-reference      '(fg: "cyan"))
+
 (define-style syntax-headline1    '(fg: "blue" attr: "bold"))
 (define-style syntax-headline2    '(fg: "magenta" attr: "bold"))
 (define-style syntax-headline3    '(fg: "cyan" attr: "bold"))

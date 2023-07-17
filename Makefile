@@ -56,7 +56,9 @@ SRCS += syntax/c/parser.c \
        syntax/scheme/parser.c \
        syntax/make/parser.c \
        syntax/org/scanner.c \
-       syntax/org/parser.c
+       syntax/org/parser.c \
+       syntax/markdown/parser.c \
+       syntax/markdown/scanner.c
 
 CFLAGS += -I$(SCH_PATH) \
    -DPROGNAME='"${PROGNAME}"' \
