@@ -41,7 +41,7 @@
             bid)
          ;; else
          (let* ([b (buffer-create)]
-                [ok (call-foreign (__cs_buf_file_open b f))])
+                [ok (call-foreign (__cs_buf_file_open (buffer-id b) f))])
             (with-current-buffer b
                (text-mode)
                (when ok

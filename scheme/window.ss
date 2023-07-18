@@ -475,7 +475,7 @@
                      (window-first))))
 
 (define ($window-new b widget?)
-   (make-$window (__cs_win_new b widget?) b #f #f) )
+   (make-$window (__cs_win_new (buffer-id b) widget?) b #f #f) )
 
 (define (window-create b)
    (let ([win ($window-new b #f)])
@@ -673,7 +673,7 @@
 
       [(win b)
        (buffer-ref-put (window-buffer win))
-       (call-foreign (__cs_win_buf_switch (window-id win) b))
+       (call-foreign (__cs_win_buf_switch (window-id win) (buffer-id b)))
        ($window-buffer-set! win b)
        (buffer-ref-get (window-buffer win))
        (when (equal? win (current-window))

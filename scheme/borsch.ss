@@ -75,6 +75,7 @@
       make-timer
       timer-delete
 
+      buffer-id
       buffer-insert-text
       buffer-begin-pos
       buffer-end-pos

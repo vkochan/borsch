@@ -159,7 +159,7 @@
          (when (and (not *buffer-enable-eof*)
                     (and (> c 0) (>= c (text-end-pos))))
             (set! c (- (text-end-pos) 1)))
-         (call-foreign (__cs_buf_cursor_set (current-buffer) c))
+         (call-foreign (__cs_buf_cursor_set (buffer-id (current-buffer)) c))
          c)))
 
 (define-syntax (with-saved-cursor stx)
@@ -172,7 +172,7 @@
             (cursor-set curs)))))
 
 (define (cursor)
-   (call-foreign (__cs_buf_cursor_get (current-buffer))))
+   (call-foreign (__cs_buf_cursor_get (buffer-id (current-buffer)))))
 
 (define (cursor-to-next-char)
    (cursor-set (text-next-char-pos)))
@@ -245,11 +245,11 @@
 
 (define (text-insert t . s)
    (if (equal? (length s) 0)
-      (call-foreign (__cs_buf_text_insert (current-buffer) t))
+      (call-foreign (__cs_buf_text_insert (buffer-id (current-buffer)) t))
       ;; else
       (begin
          (let ([c (cursor)])
-            (let ([p (- (call-foreign (__cs_buf_text_insert (current-buffer) t)) 1)])
+            (let ([p (- (call-foreign (__cs_buf_text_insert (buffer-id (current-buffer)) t)) 1)])
                (for-each
                   (lambda (a)
                      (add-text-property c p a))
@@ -261,7 +261,7 @@
    (apply text-insert t s))
 
 (define (text-insert-char char)
-   (call-foreign (__cs_buf_text_insert_char (current-buffer) char)))
+   (call-foreign (__cs_buf_text_insert_char (buffer-id (current-buffer)) char)))
 
 (define-syntax (text-modify stx)
    (syntax-case stx ()
@@ -276,7 +276,7 @@
                ...)))))
 
 (define (text-insert-nl)
-   (text-modify (call-foreign (__cs_buf_text_insert_nl (current-buffer) (cursor)))))
+   (text-modify (call-foreign (__cs_buf_text_insert_nl (buffer-id (current-buffer)) (cursor)))))
 
 (define (text-insert-empty-line-up)
    (text-modify
@@ -292,10 +292,10 @@
       (text-insert-nl)))
 
 (define (text-insert-file t)
-   (text-modify (call-foreign (__cs_buf_text_insert_file (current-buffer) t))))
+   (text-modify (call-foreign (__cs_buf_text_insert_file (buffer-id (current-buffer)) t))))
 
 (define (text-obj-pos buf curs obj num)
-   (call-foreign (__cs_buf_text_obj_pos buf curs obj num)))
+   (call-foreign (__cs_buf_text_obj_pos (buffer-id buf) curs obj num)))
 
 (define text-next-char-pos
    (case-lambda
@@ -388,16 +388,16 @@
 (define text-set-selection
    (case-lambda
       [()
-       (call-foreign (__cs_buf_mark_set (current-buffer) (cursor)))]
+       (call-foreign (__cs_buf_mark_set (buffer-id (current-buffer)) (cursor)))]
 
       [(s)
-       (call-foreign (__cs_buf_mark_set (current-buffer) s))]))
+       (call-foreign (__cs_buf_mark_set (buffer-id (current-buffer)) s))]))
 
 (define (text-get-selection)
-   (call-foreign (__cs_buf_mark_get (current-buffer))))
+   (call-foreign (__cs_buf_mark_get (buffer-id (current-buffer)))))
 
 (define (text-is-selection-set?)
-   (call-foreign (__cs_buf_mark_is_set (current-buffer))))
+   (call-foreign (__cs_buf_mark_is_set (buffer-id (current-buffer)))))
 
 (define (text-selection-range)
    (let ([m (text-get-selection)]
@@ -413,7 +413,7 @@
 (define (text-clear-selection)
    (when (local-bound? text-clear-selection-hook)
       ((get-local text-clear-selection-hook)))
-   (call-foreign (__cs_buf_mark_clear (current-buffer))))
+   (call-foreign (__cs_buf_mark_clear (buffer-id (current-buffer)))))
 
 (define text-highlight-selection
    (case-lambda
@@ -426,13 +426,13 @@
 (define text-string
    (case-lambda
       [()
-       (call-foreign (__cs_buf_text_get (current-buffer)
+       (call-foreign (__cs_buf_text_get (buffer-id (current-buffer))
                           (text-begin-pos)
                           (- (text-end-pos) (text-begin-pos))))]
 
       [(start end)
        (let ([start (min start end)] [end (max start end)])
-          (call-foreign (__cs_buf_text_get (current-buffer) start (- end start))))]))
+          (call-foreign (__cs_buf_text_get (buffer-id (current-buffer)) start (- end start))))]))
 
 (define text-char
    (case-lambda
@@ -447,7 +447,7 @@
                #f))]))
 
 (define (text-obj-range buf curs obj t?)
-   (call-foreign (__cs_buf_text_obj_range buf curs obj t?)))
+   (call-foreign (__cs_buf_text_obj_range (buffer-id buf) curs obj t?)))
 
 (define text-word
    (case-lambda
@@ -646,7 +646,7 @@
       (let ([del-hook (get-local text-delete-hook #f)])
          (when del-hook 
             (del-hook s e)))
-      (call-foreign (__cs_buf_text_range_del (current-buffer) s e))))
+      (call-foreign (__cs_buf_text_range_del (buffer-id (current-buffer)) s e))))
 
 (define (text-replace-range s e t)
    (text-delete-range s e)
@@ -809,7 +809,7 @@
        (text-search-regex rx (cursor) +1)]
 
       [(rx pos dir)
-       (call-foreign (__cs_buf_search_regex (current-buffer) pos rx dir))]))
+       (call-foreign (__cs_buf_search_regex (buffer-id (current-buffer)) pos rx dir))]))
 
 (define (text-search-next)
    (text-search-regex (text-search-reg) (cursor) +1))

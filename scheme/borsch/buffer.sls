@@ -6,6 +6,7 @@
       buffer-cursor
       buffer-set-cursor
 
+      buffer-id
       buffer-ref-count
       buffer-ref-get
       buffer-ref-put
@@ -125,11 +126,18 @@
 
 (define $buffer-list (list))
 
+(define-record-type $buffer
+   (fields
+      id))
+
+(define (buffer-id buf)
+   ($buffer-id buf) )
+
 (define (buffer-obj-pos buf curs obj num)
-   (call-foreign (__cs_buf_text_obj_pos buf curs obj num)))
+   (call-foreign (__cs_buf_text_obj_pos (buffer-id buf) curs obj num)))
 
 (define (buffer-insert-text b text)
-   (call-foreign (__cs_buf_text_insert b text)))
+   (call-foreign (__cs_buf_text_insert (buffer-id b) text)))
 
 (define (buffer-begin-pos b)
    (buffer-obj-pos b -1 #\g 1))
@@ -138,10 +146,10 @@
    (buffer-obj-pos b -1 #\g -1))
 
 (define (buffer-cursor b)
-   (call-foreign (__cs_buf_cursor_get (current-buffer))) )
+   (call-foreign (__cs_buf_cursor_get (buffer-id (current-buffer)))) )
 
 (define (buffer-set-cursor b pos)
-   (call-foreign (__cs_buf_cursor_set b pos)) )
+   (call-foreign (__cs_buf_cursor_set (buffer-id b) pos)) )
 
 (define (buffer-insert b)
    (set! $buffer-list (append $buffer-list (list b)))
@@ -157,7 +165,7 @@
        (buffer-ref-count (current-buffer))]
 
       [(buf)
-       (call-foreign (__cs_buf_ref buf))]))
+       (call-foreign (__cs_buf_ref (buffer-id buf)))]))
 
 (define buffer-ref-get
    (case-lambda
@@ -165,7 +173,7 @@
        (buffer-ref-get (current-buffer))]
 
       [(buf)
-       (call-foreign (__cs_buf_ref_get buf))]))
+       (call-foreign (__cs_buf_ref_get (buffer-id buf)))]))
 
 (define buffer-ref-put
    (case-lambda
@@ -175,7 +183,10 @@
       [(buf)
        (when (= 1 (buffer-ref-count buf))
           (buffer-remove buf))
-       (call-foreign (__cs_buf_ref_put buf))]))
+       (call-foreign (__cs_buf_ref_put (buffer-id buf)))]))
+
+(define ($buffer-new name kmap)
+   (make-$buffer (call-foreign (__cs_buf_new name (or kmap -1)))))
 
 (define buffer-new
    (case-lambda
@@ -186,7 +197,7 @@
        (buffer-new name global-keymap)]
 
       [(name kmap) 
-       (let ([b (call-foreign (__cs_buf_new name (or kmap -1)))])
+       (let ([b ($buffer-new name kmap)])
           (buffer-insert b)
           b)]))
 
@@ -196,7 +207,7 @@
        (buffer-delete (current-buffer))]
 
       [(b)
-       (call-foreign (__cs_buf_del b))
+       (call-foreign (__cs_buf_del (buffer-id b)))
        (buffer-remove b)]))
 
 (define (buffer-list)
@@ -227,10 +238,10 @@
             exp ... ))))
 
 (define (buffer-line-num pos)
-   (call-foreign (__cs_buf_line_num (current-buffer) pos)))
+   (call-foreign (__cs_buf_line_num (buffer-id (current-buffer)) pos)))
 
 (define (buffer-set-mode-name n)
-   (call-foreign (__cs_buf_mode_name_set (current-buffer) (format "~a" n))))
+   (call-foreign (__cs_buf_mode_name_set (buffer-id (current-buffer)) (format "~a" n))))
 
 (define buffer-mode-name
    (case-lambda
@@ -238,10 +249,10 @@
        (buffer-mode-name (current-buffer))]
 
       [(b)
-       (call-foreign (__cs_buf_mode_name_get b))]))
+       (call-foreign (__cs_buf_mode_name_get (buffer-id b)))]))
 
 (define (buffer-set-state-name n)
-   (call-foreign (__cs_buf_state_name_set (current-buffer) (format "~a" n))))
+   (call-foreign (__cs_buf_state_name_set (buffer-id (current-buffer)) (format "~a" n))))
 
 (define buffer-state-name
    (case-lambda
@@ -249,19 +260,19 @@
        (buffer-state-name (current-buffer))]
 
       [(b)
-       (call-foreign (__cs_buf_state_name_get b))]))
+       (call-foreign (__cs_buf_state_name_get (buffer-id b)))]))
 
 (define (buffer-snapshot)
-   (call-foreign (__cs_buf_snapshot (current-buffer))))
+   (call-foreign (__cs_buf_snapshot (buffer-id (current-buffer)))))
 
 (define (buffer-undo)
-   (call-foreign (__cs_buf_undo (current-buffer))))
+   (call-foreign (__cs_buf_undo (buffer-id (current-buffer)))))
 
 (define (buffer-redo)
-   (call-foreign (__cs_buf_redo (current-buffer))))
+   (call-foreign (__cs_buf_redo (buffer-id (current-buffer)))))
 
 (define (buffer-save)
-   (call-foreign (__cs_buf_save (current-buffer))))
+   (call-foreign (__cs_buf_save (buffer-id (current-buffer)))))
 
 (define (buffer-reload)
    (when (local-bound? buffer-reload-func)
@@ -273,7 +284,7 @@
       (buffer-filename (current-buffer))]
 
      [(b)
-      (call-foreign (__cs_buf_file_get b))]))
+      (call-foreign (__cs_buf_file_get (buffer-id b)))]))
 
 (define (buffer-set-filename f)
    (let ([first-path (path-first f)]
@@ -283,10 +294,10 @@
             (format "~a/~a"
                (getenv "HOME")
                (path-rest f))))
-      (call-foreign (__cs_buf_file_set (current-buffer) path))))
+      (call-foreign (__cs_buf_file_set (buffer-id (current-buffer)) path))))
 
 (define (buffer-env)
-   (call-foreign (__cs_buf_env_get (current-buffer))))
+   (call-foreign (__cs_buf_env_get (buffer-id (current-buffer)))))
 
 (define dir-local-symbol-bound?
    (case-lambda
@@ -358,10 +369,10 @@
 (define buffer-name
    (case-lambda
       [()
-       (call-foreign (__cs_buf_name_get (current-buffer)))]
+       (call-foreign (__cs_buf_name_get (buffer-id (current-buffer))))]
 
       [(b)
-       (call-foreign (__cs_buf_name_get b))]))
+       (call-foreign (__cs_buf_name_get (buffer-id b)))]))
 
 (define buffer-set-name
    (case-lambda
@@ -369,7 +380,7 @@
       (buffer-set-name (current-buffer) n)]
 
      [(b n)
-      (call-foreign (__cs_buf_name_set b n))]))
+      (call-foreign (__cs_buf_name_set (buffer-id b) n))]))
 
 (define buffer-set-readonly
    (case-lambda
@@ -377,7 +388,7 @@
        (buffer-set-readonly (current-buffer) read-only?)]
 
       [(buf read-only?)
-       (call-foreign (__cs_buf_readonly_set buf read-only?))]))
+       (call-foreign (__cs_buf_readonly_set (buffer-id buf) read-only?))]))
 
 (define buffer-is-readonly?
    (case-lambda
@@ -385,7 +396,7 @@
        (buffer-is-readonly? (current-buffer))]
 
       [(buf)
-       (call-foreign (__cs_buf_readonly_get buf))]))
+       (call-foreign (__cs_buf_readonly_get (buffer-id buf)))]))
 
 (define buffer-is-modified?
    (case-lambda
@@ -393,7 +404,7 @@
        (buffer-is-modified? (current-buffer))]
 
       [(buf)
-       (call-foreign (__cs_buf_is_modified buf))]))
+       (call-foreign (__cs_buf_is_modified (buffer-id buf)))]))
 
 (define buffer-is-dirty?
    (case-lambda
@@ -401,7 +412,7 @@
        (buffer-is-dirty? (current-buffer))]
 
       [(buf)
-       (call-foreign (__cs_buf_is_dirty buf))]))
+       (call-foreign (__cs_buf_is_dirty (buffer-id buf)))]))
 
 (define (symbol->text-property-type s)
    (case s
@@ -430,7 +441,7 @@
                     (style->list style))])
          (call-foreign
             (__cs_buf_prop_style_add
-               (current-buffer)
+               (buffer-id (current-buffer))
                1
                (list-ref l 0)
                (list-ref l 1)
@@ -459,7 +470,7 @@
        (__add-keymap-property kmap start end #f #f)]
       
       [(kmap start end regex name)
-       (call-foreign (__cs_buf_prop_kmap_add (current-buffer) kmap start end regex name))]))
+       (call-foreign (__cs_buf_prop_kmap_add (buffer-id (current-buffer)) kmap start end regex name))]))
 
 (define __add-symbol-property
    (case-lambda
@@ -470,7 +481,7 @@
        (__add-symbol-property symbol start end #f #f)]
       
       [(symbol start end regex name)
-       (call-foreign (__cs_buf_prop_symbol_add (current-buffer) (symbol->string symbol) start end regex name))]))
+       (call-foreign (__cs_buf_prop_symbol_add (buffer-id (current-buffer)) (symbol->string symbol) start end regex name))]))
 
 (define __add-data-property
    (case-lambda
@@ -481,7 +492,7 @@
        (__add-data-property data start end #f #f)]
       
       [(data start end regex name)
-       (call-foreign (__cs_buf_prop_data_add (current-buffer) data start end regex name))]))
+       (call-foreign (__cs_buf_prop_data_add (buffer-id (current-buffer)) data start end regex name))]))
 
 (define add-text-property
    (case-lambda
@@ -514,7 +525,7 @@
        (remove-text-property type start end #f)]
 
       [(type start end name)
-       (call-foreign (__cs_buf_prop_del (current-buffer) (symbol->text-property-type type) start end #f name))]))
+       (call-foreign (__cs_buf_prop_del (buffer-id (current-buffer)) (symbol->text-property-type type) start end #f name))]))
 
 (define get-text-property
    (case-lambda
@@ -528,7 +539,7 @@
        (get-text-property type start end #f)]
 
       [(type start end name)
-       (call-foreign (__cs_buf_prop_get (current-buffer) (symbol->text-property-type type) start end name))]))
+       (call-foreign (__cs_buf_prop_get (buffer-id (current-buffer)) (symbol->text-property-type type) start end name))]))
 
 (define set-text-property
    (case-lambda
@@ -546,16 +557,22 @@
              (add-text-property start end plist)))]))
 
 (define (highlight-range s e)
-   (call-foreign (__cs_buf_prop_style_add (current-buffer) 2 -1 -1 -1 0 "highlight" s e #f #f #f)))
+   (call-foreign (__cs_buf_prop_style_add (buffer-id (current-buffer)) 2 -1 -1 -1 0 "highlight" s e #f #f #f)))
 
 (define (highlight-clear)
-   (call-foreign (__cs_buf_prop_del (current-buffer) 2 -1 -1 #f #f)))
+   (call-foreign (__cs_buf_prop_del (buffer-id (current-buffer)) 2 -1 -1 #f #f)))
 
-(define (buffer-get n)
-   (call-foreign (__cs_buf_by_name n)))
+(define (buffer-get name)
+   (call/cc
+      (lambda (return)
+         (for-each
+            (lambda (b)
+               (when (equal? name (buffer-name b))
+                  (return b)))
+            (buffer-list)))))
 
 (define ($buffer-local-keymap)
-   (call-foreign (__cs_buf_kmap_get (current-buffer))))
+   (call-foreign (__cs_buf_kmap_get (buffer-id (current-buffer)))))
 
 (define (buffer-keymap)
    (keymap-parent ($buffer-local-keymap)))
@@ -613,18 +630,18 @@
                      (mode-gen-hook-symb 'mode))))))))
 
 (define (enable-insert e)
-   (call-foreign (__cs_buf_text_input_enable (current-buffer) e)))
+   (call-foreign (__cs_buf_text_input_enable (buffer-id (current-buffer)) e)))
 
 (define (buffer-is-valid? bid)
-   (call-foreign (__cs_buf_is_valid bid)))
+   (call-foreign (__cs_buf_is_valid (buffer-id bid))))
 
 (define buffer-is-visible?
    (case-lambda
       [()
-       (call-foreign (__cs_buf_is_visible (current-buffer)))]
+       (call-foreign (__cs_buf_is_visible (buffer-id (current-buffer))))]
 
       [(b)
-       (call-foreign (__cs_buf_is_visible b))]))
+       (call-foreign (__cs_buf_is_visible (buffer-id b)))]))
 
 (define buffer-set-vterm
    (case-lambda
@@ -632,15 +649,15 @@
        (buffer-set-vterm (current-buffer) pid)]
 
       [(b pid)
-       (call-foreign (__cs_buf_term_set b pid))]))
+       (call-foreign (__cs_buf_term_set (buffer-id b) pid))]))
 
 (define buffer-is-vterm?
    (case-lambda
       [()
-       (call-foreign (__cs_buf_is_term (current-buffer)))]
+       (call-foreign (__cs_buf_is_term (buffer-id (current-buffer))))]
 
       [(b)
-       (call-foreign (__cs_buf_is_term b))]))
+       (call-foreign (__cs_buf_is_term (buffer-id b)))]))
 
 (define (buffer-set-cwd cwd)
    (define-local current-cwd cwd))
