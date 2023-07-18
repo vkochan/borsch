@@ -50,7 +50,6 @@ typedef struct Buffer {
 	char state[32];
 	char mode[32];
 	size_t ref_count;
-	bool is_input_enabled;
 	bool is_dirty;
 	File file;
 	Process *proc;
@@ -513,16 +512,6 @@ size_t buffer_text_delete(Buffer *buf, size_t start, size_t end)
 char *buffer_text_extract(Buffer *buf, size_t pos, size_t len)
 {
 	return text_bytes_alloc0(buf->text, pos, len);
-}
-
-void buffer_text_input_enable(Buffer *buf, bool enable)
-{
-	buf->is_input_enabled = enable;
-}
-
-bool buffer_text_input_is_enabled(Buffer *buf)
-{
-	return buf->is_input_enabled;
 }
 
 bool buffer_is_dirty(Buffer *buf)

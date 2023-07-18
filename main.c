@@ -159,7 +159,7 @@ static void keypress(int code)
 		Vt *term = process_term_get(buffer_proc_get(c->buf));
 
 		vt_keypress(term, code);
-	} else if (buffer_text_input_is_enabled(c->buf)) {
+	} else {
 		event_t evt = {};
 
 		evt.eid = EVT_TEXT_INSERT;

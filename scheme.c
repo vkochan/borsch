@@ -746,15 +746,6 @@ ptr scheme_buf_line_num(int bid, size_t pos)
 	return Sfalse;
 }
 
-void scheme_buf_text_input_enable(int bid, bool enable)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf) {
-		buffer_text_input_enable(buf, enable);
-	}
-}
-
 void scheme_buf_mode_name_set(int bid, char *name)
 {
 	Buffer *buf = buffer_by_id(bid);
@@ -1743,7 +1734,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_text_obj_range", scheme_buf_text_obj_range);
 	Sregister_symbol("cs_buf_text_get", scheme_buf_text_get);
 	Sregister_symbol("cs_buf_text_range_del", scheme_buf_text_range_del);
-	Sregister_symbol("cs_buf_text_input_enable", scheme_buf_text_input_enable);
 
 	Sregister_symbol("cs_buf_mode_name_set", scheme_buf_mode_name_set);
 	Sregister_symbol("cs_buf_mode_name_get", scheme_buf_mode_name_get);

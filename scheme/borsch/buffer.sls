@@ -57,6 +57,7 @@
       bind-key-local
       define-mode
       enable-insert
+      insert-enabled?
       buffer-is-valid?
       buffer-is-visible?
       buffer-set-vterm
@@ -108,7 +109,6 @@
 
 (define __cs_buf_kmap_get (foreign-procedure "cs_buf_kmap_get" (int) scheme-object))
 
-(define __cs_buf_text_input_enable (foreign-procedure "cs_buf_text_input_enable" (int boolean) void))
 (define __cs_buf_is_valid (foreign-procedure "cs_buf_is_valid" (int) scheme-object))
 (define __cs_buf_is_visible (foreign-procedure "cs_buf_is_visible" (int) scheme-object))
 (define __cs_buf_is_term (foreign-procedure "cs_buf_is_term" (int) scheme-object))
@@ -129,7 +129,8 @@
 (define-record-type $buffer
    (fields
       id
-      (mutable is-readonly)))
+      (mutable is-readonly)
+      (mutable is-input-enabled)))
 
 (define (buffer-id buf)
    ($buffer-id buf) )
@@ -188,7 +189,8 @@
 
 (define ($buffer-new name kmap)
    (make-$buffer (call-foreign (__cs_buf_new name (or kmap -1)))
-                 #f))
+                 #f
+                 #t))
 
 (define buffer-new
    (case-lambda
@@ -641,7 +643,10 @@
                      (mode-gen-hook-symb 'mode))))))))
 
 (define (enable-insert e)
-   (call-foreign (__cs_buf_text_input_enable (buffer-id (current-buffer)) e)))
+   ($buffer-is-input-enabled-set! (current-buffer) e))
+
+(define (insert-enabled?)
+   ($buffer-is-input-enabled (current-buffer)) )
 
 (define (buffer-is-valid? bid)
    (call-foreign (__cs_buf_is_valid (buffer-id bid))))

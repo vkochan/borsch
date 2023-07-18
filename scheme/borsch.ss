@@ -131,6 +131,7 @@
       bind-key-local
       define-mode
       enable-insert
+      insert-enabled?
       buffer-is-valid?
       buffer-is-visible?
       buffer-set-vterm

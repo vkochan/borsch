@@ -151,7 +151,7 @@
       (lambda (code)
          (let ([b (current-buffer)])
             (when b
-               (when (local-bound? text-insert-hook)
+               (when (and (insert-enabled?) (local-bound? text-insert-hook))
                   ((get-local text-insert-hook) code))))))
 
    (add-hook 'error-hook
