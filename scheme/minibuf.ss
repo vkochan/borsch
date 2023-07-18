@@ -14,8 +14,7 @@
 )
 
 (define (minibuf-send-value v)
-   (let ([fn (get-local func-value)]
-         [b  (get-local orig-buf)])
+   (let ([fn (get-local func-value)])
       (set-local! input-mode #f)
       (enable-insert #f)
       (text-delete)
@@ -80,7 +79,6 @@
          (define-local input-mode #f)
          (define-local func-value #f)
          (define-local prompt-pos 0)
-         (define-local orig-buf 0)
          (define-local orig-win 0)
          (enable-insert #t))))
 
@@ -111,7 +109,7 @@
 
 (define minibuf-interactive-func
    (lambda (map str def fn)
-      (let ([b (current-buffer)])
+      (let ()
          (with-current-buffer minibuf-buffer
             (text-delete)
             (text-insert str)
@@ -119,7 +117,6 @@
             (set-local! prompt-pos (cursor))
             (set-local! input-mode #t)
             (set-local! func-value fn)
-            (set-local! orig-buf b)
             (buffer-set-keymap map)
             (when def
                (text-insert def)))
@@ -148,8 +145,7 @@
          (scheme-eval val))))
 
 (define (minibuf-clear)
-   (let ([b (get-local orig-buf)]
-         [w (get-local orig-win)])
+   (let ([w (get-local orig-win)])
       (enable-insert #f)
       (text-delete)
       (set-local! input-mode #f)
@@ -171,15 +167,14 @@
       (minibuf-complete lst fn prompt #f)]
      
      [(lst fn prompt init)
-      (let ([b (current-buffer)])
-         (with-current-buffer minibuf-buffer
-            (set-local! input-mode #t)
-            (set-local! func-value fn)
-            (set-local! orig-buf (if (equal? minibuf-buffer (current-buffer)) #f (current-buffer)))
-            (set-local! orig-win (if (equal? minibuf-window (current-window)) #f (current-window)))
-            (window-set-height minibuf-window 11)
+      (let ()
+            (with-current-buffer minibuf-buffer
+               (set-local! input-mode #t)
+               (set-local! func-value fn)
+               (set-local! orig-win (if (equal? minibuf-window (current-window)) #f (current-window)))
+               (window-set-height minibuf-window 11))
             (window-focus minibuf-window)
-            (complete lst minibuf-complete-handle prompt init)))]))
+            (complete lst minibuf-complete-handle prompt init))]))
 
 (define minibuf-complete-path
    (case-lambda
