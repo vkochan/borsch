@@ -119,11 +119,11 @@
 (define __cs_buf_text_obj_pos (foreign-procedure "cs_buf_text_obj_pos" (int int char int) scheme-object))
 (define __cs_buf_text_get (foreign-procedure "cs_buf_text_get" (int int int) scheme-object))
 
-(define %dir-locals-ht (make-hashtable string-hash string=?))
+(define $dir-locals-ht (make-hashtable string-hash string=?))
 
 (define current-buffer (make-parameter #f))
 
-(define %buffer-list% (list))
+(define $buffer-list (list))
 
 (define (buffer-obj-pos buf curs obj num)
    (call-foreign (__cs_buf_text_obj_pos buf curs obj num)))
@@ -144,11 +144,11 @@
    (call-foreign (__cs_buf_cursor_set b pos)) )
 
 (define (buffer-insert b)
-   (set! %buffer-list% (append %buffer-list% (list b)))
+   (set! $buffer-list (append $buffer-list (list b)))
    (run-hooks 'buffer-insert-hook b))
 
 (define (buffer-remove b)
-   (set! %buffer-list% (remove b %buffer-list%))
+   (set! $buffer-list (remove b $buffer-list))
    (run-hooks 'buffer-remove-hook b))
 
 (define buffer-ref-count
@@ -200,7 +200,7 @@
        (buffer-remove b)]))
 
 (define (buffer-list)
-   %buffer-list%)
+   $buffer-list)
 
 (define (buffer-for-each fn)
    (for-each
@@ -294,24 +294,24 @@
        (dir-local-symbol-bound? (current-cwd) sym)]
 
       [(dir sym)
-       (let ([dir-env (hashtable-ref %dir-locals-ht dir #f)])
+       (let ([dir-env (hashtable-ref $dir-locals-ht dir #f)])
           (and dir-env (top-level-bound? sym dir-env)))]))
 
 (define (dir-get-local-symbol sym)
-   (let ([dir-env (hashtable-ref %dir-locals-ht (path-parent (buffer-filename)) #f)])
+   (let ([dir-env (hashtable-ref $dir-locals-ht (path-parent (buffer-filename)) #f)])
       (if (and dir-env (top-level-bound? sym dir-env))
          (top-level-value sym dir-env)
          ;; else
-         (let ([cwd-env (hashtable-ref %dir-locals-ht (current-cwd) #f)])
+         (let ([cwd-env (hashtable-ref $dir-locals-ht (current-cwd) #f)])
             (top-level-value sym cwd-env)))))
 
 (define (dir-set-local-symbol! dir sym val)
-   (let ([dir-env (hashtable-ref %dir-locals-ht dir #f)])
+   (let ([dir-env (hashtable-ref $dir-locals-ht dir #f)])
       (if dir-env
          (set-top-level-value! sym val dir-env)
          ;; else
          (let ([env (copy-environment (scheme-environment))])
-            (hashtable-set! %dir-locals-ht dir env)
+            (hashtable-set! $dir-locals-ht dir env)
             (define-top-level-value sym val env)))))
 
 (define-syntax (dir-set-local! stx)
@@ -554,18 +554,18 @@
 (define (buffer-get n)
    (call-foreign (__cs_buf_by_name n)))
 
-(define (%buffer-local-keymap)
+(define ($buffer-local-keymap)
    (call-foreign (__cs_buf_kmap_get (current-buffer))))
 
 (define (buffer-keymap)
-   (keymap-parent (%buffer-local-keymap)))
+   (keymap-parent ($buffer-local-keymap)))
 
 (define (buffer-set-keymap sym)
-   (let ([lmap (%buffer-local-keymap)])
+   (let ([lmap ($buffer-local-keymap)])
       (keymap-set-parent lmap sym)))
 
 (define (bind-key-local k p)
-   (bind-key (%buffer-local-keymap) k p))
+   (bind-key ($buffer-local-keymap) k p))
 
 (define (mode-gen-map-symb m)
    (string->symbol
