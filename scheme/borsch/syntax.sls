@@ -19,7 +19,7 @@
 (define __cs_stx_highlight_qry (foreign-procedure "cs_stx_highlight_qry" (string string) void))
 
 (define (syntax-set-lang lang)
-   (call-foreign (__cs_buf_parser_set (current-buffer) (symbol->string lang))))
+   (call-foreign (__cs_buf_parser_set (buffer-id (current-buffer)) (symbol->string lang))))
 
 (define (syntax-add-style lang qry style)
    (let ([lst (if (symbol? style)
