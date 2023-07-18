@@ -23,7 +23,7 @@
 (define __cs_win_draw (foreign-procedure "cs_win_draw" (int boolean) void))
 (define __cs_win_has_title (foreign-procedure "cs_win_has_title" (int) boolean))
 
-(define-record-type %window%
+(define-record-type $window
    (fields
       id
       (mutable buffer)
@@ -31,23 +31,23 @@
       (mutable next)) )
 
 (define (window-id w)
-   (%window%-id w) )
+   ($window-id w) )
 
-(define %window-layout-changed% #f)
+(define $window-layout-changed #f)
 
-(define %widget-list-top% (list))
-(define %widget-list-bottom% (list))
-(define %widget-list% (list))
+(define $widget-list-top (list))
+(define $widget-list-bottom (list))
+(define $widget-list (list))
 
 (define (widget-list)
-   %widget-list%)
+   $widget-list)
 
 (define (window-layout-is-changed)
-   (or %window-layout-changed%
+   (or $window-layout-changed
        (ui-size-changed)))
 
 (define (window-layout-set-changed changed?)
-   (set! %window-layout-changed% changed?))
+   (set! $window-layout-changed changed?))
 
 (define (window-update-layout-size)
    (let ([waw 0]
@@ -223,7 +223,7 @@
        (widget-is-top? (current-window))]
 
       [(w)
-       (member w %widget-list-top%)]))
+       (member w $widget-list-top)]))
 
 (define widget-is-bottom?
    (case-lambda
@@ -231,7 +231,7 @@
        (widget-is-top? (current-window))]
 
       [(w)
-       (member w %widget-list-bottom%)]))
+       (member w $widget-list-bottom)]))
 
 (define (window-draw-all)
    (let ([redraw? (window-layout-is-changed)])
@@ -290,7 +290,7 @@
        (window-next (current-window))]
 
       [(w)
-       (%window%-next w)]))
+       ($window-next w)]))
 
 (define window-prev
    (case-lambda
@@ -298,42 +298,42 @@
        (window-prev (current-window))]
 
       [(w)
-       (%window%-prev w)]))
+       ($window-prev w)]))
 
-(define (%window-remove% w)
+(define ($window-remove w)
    (when w
       (when (equal? w (frame-first-window))
-         (frame-set-first-window (%window%-next w)))
+         (frame-set-first-window ($window-next w)))
       (when (equal? w (frame-last-window))
-         (frame-set-last-window (%window%-prev w)))
-      (let ([prev (%window%-prev w)]
-            [next (%window%-next w)])
+         (frame-set-last-window ($window-prev w)))
+      (let ([prev ($window-prev w)]
+            [next ($window-next w)])
          (when prev
-            (%window%-next-set! prev next))
+            ($window-next-set! prev next))
          (when next
-            (%window%-prev-set! next prev)) )
-      (%window%-prev-set! w #f)
-      (%window%-next-set! w #f) ))
+            ($window-prev-set! next prev)) )
+      ($window-prev-set! w #f)
+      ($window-next-set! w #f) ))
 
-(define (%window-insert-at% w at)
+(define ($window-insert-at w at)
    (when at
       (cond
          ((equal? at (frame-first-window))
-          (%window%-next-set! w at)
-          (%window%-prev-set! w #f)
-          (%window%-prev-set! at w)
+          ($window-next-set! w at)
+          ($window-prev-set! w #f)
+          ($window-prev-set! at w)
           (frame-set-first-window w))
          ((equal? at (frame-last-window))
-          (%window%-next-set! at w)
-          (%window%-prev-set! w at)
-          (%window%-next-set! w #f)
+          ($window-next-set! at w)
+          ($window-prev-set! w at)
+          ($window-next-set! w #f)
           (frame-set-last-window w))
          (else
-          (let ([prev (%window%-prev at)])
-             (%window%-next-set! prev w)
-             (%window%-prev-set! at w)
-             (%window%-next-set! w at)
-             (%window%-prev-set! w prev) ))))
+          (let ([prev ($window-prev at)])
+             ($window-next-set! prev w)
+             ($window-prev-set! at w)
+             ($window-next-set! w at)
+             ($window-prev-set! w prev) ))))
    (when (not (frame-first-window))
       (frame-set-first-window w))
    (when (not (frame-last-window))
@@ -346,8 +346,8 @@
        (window-set-first (current-window))]
 
       [(w)
-       (%window-remove% w)
-       (%window-insert-at% w (frame-first-window))
+       ($window-remove w)
+       ($window-insert-at w (frame-first-window))
        (window-layout-set-changed #t)]))
 
 (define window-set-prev
@@ -356,8 +356,8 @@
        (window-set-prev (current-window) prev)]
 
       [(w prev)
-       (%window-remove% prev)
-       (%window-insert-at% prev (window-prev w))
+       ($window-remove prev)
+       ($window-insert-at prev (window-prev w))
        (window-layout-set-changed #t)]))
 
 (define window-set-next
@@ -366,11 +366,11 @@
        (window-set-next (current-window) next)]
 
       [(w next)
-      (%window-remove% next)
-      (%window-insert-at% next (window-next w))
+      ($window-remove next)
+      ($window-insert-at next (window-next w))
       (window-layout-set-changed #t)]))
 
-(define (%window-list% fr)
+(define ($window-list fr)
    (let loop ([next (window-first fr)]
               [ls   (list)])
       (if next
@@ -385,7 +385,7 @@
       (window-list (current-frame))]
 
      [(fr)
-      (%window-list% fr)]))
+      ($window-list fr)]))
 
 (define (window-last)
    (frame-last-window))
@@ -474,11 +474,11 @@
                      (window-next)
                      (window-first))))
 
-(define (%window-new% b widget?)
-   (make-%window% (__cs_win_new b widget?) b #f #f) )
+(define ($window-new b widget?)
+   (make-$window (__cs_win_new b widget?) b #f #f) )
 
 (define (window-create b)
-   (let ([win (%window-new% b #f)])
+   (let ([win ($window-new b #f)])
       (when win
          (buffer-ref-get b)
          (if (layout-is-sticky?)
@@ -492,9 +492,9 @@
          (window-focus win))
       win))
 
-(define (%window-delete% win)
+(define ($window-delete win)
    (frame-delete-window win)
-   (%window-remove% win)
+   ($window-remove win)
    (when (equal? win (current-window))
       (let ([focus (or (frame-prev-focused-window)
                        (window-next win)
@@ -512,7 +512,7 @@
        [(w)
         (let ([n (buffer-name (window-buffer w))])
            (let ([b (window-buffer w)])
-              (%window-delete% w)
+              ($window-delete w)
               (buffer-ref-put b)
 	      (when (>= 1 (buffer-ref-count b))
                  (buffer-ref-put b))
@@ -526,7 +526,7 @@
 
        [(w)
         (buffer-ref-put (window-buffer))
-        (%window-delete% w)]))
+        ($window-delete w)]))
 
 (define window-name
    (case-lambda
@@ -601,7 +601,7 @@
        (window-buffer (current-window))]
 
       [(win)
-       (%window%-buffer win)]))
+       ($window-buffer win)]))
 
 (define window-width
    (case-lambda
@@ -674,7 +674,7 @@
       [(win b)
        (buffer-ref-put (window-buffer win))
        (call-foreign (__cs_win_buf_switch (window-id win) b))
-       (%window%-buffer-set! win b)
+       ($window-buffer-set! win b)
        (buffer-ref-get (window-buffer win))
        (when (equal? win (current-window))
           (current-buffer b)) ]))
@@ -818,11 +818,11 @@
 
 (define (widget-create name x y w h type)
    (let*([bid (buffer-new name #f)]
-         [win (%window-new% bid #t)])
+         [win ($window-new bid #t)])
       (case type
-         ['top    (set! %widget-list-top% (append %widget-list-top% (list win)))]
-         ['bottom (set! %widget-list-bottom% (append %widget-list-bottom% (list win)))])
-      (set! %widget-list% (append %widget-list% (list win)))
+         ['top    (set! $widget-list-top (append $widget-list-top (list win)))]
+         ['bottom (set! $widget-list-bottom (append $widget-list-bottom (list win)))])
+      (set! $widget-list (append $widget-list (list win)))
       (frame-remove-buffer bid)
       (window-set-width win w)
       (window-set-height win h)
