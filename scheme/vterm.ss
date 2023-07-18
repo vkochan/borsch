@@ -38,9 +38,10 @@
          (bind-key-local "<Esc>" vterm-mode-copy-exit)
          (bind-key-local "q" vterm-mode-copy-exit)
          (buffer-set-name "Term Copy")
-         (define-local orig-buf c)
-         (window-switch-buffer b)
-         (text-insert s))))
+         (define-local orig-buf c))
+      (window-switch-buffer b)
+      (current-buffer b)
+      (text-insert s)))
 
 (define (vterm-mode-copy-exit)
    (let ([c (current-buffer)])

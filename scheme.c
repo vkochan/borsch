@@ -576,13 +576,6 @@ ptr scheme_buf_kmap_get(int bid)
 	return Sfalse;
 }
 
-ptr scheme_buf_current_get(void)
-{
-	if (window_current())
-		return Sinteger(buffer_id_get(window_current()->buf));
-	return Sfalse;
-}
-
 ptr scheme_buf_name_get(int bid)
 {
 	Buffer *buf = buffer_by_id(bid);
@@ -1748,7 +1741,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_del", scheme_buf_del);
 	Sregister_symbol("cs_buf_kmap_get", scheme_buf_kmap_get);
 	Sregister_symbol("cs_buf_kmap_set", scheme_buf_kmap_set);
-	Sregister_symbol("cs_buf_current_get", scheme_buf_current_get);
 	Sregister_symbol("cs_buf_name_get", scheme_buf_name_get);
 	Sregister_symbol("cs_buf_name_set", scheme_buf_name_set);
 	Sregister_symbol("cs_buf_readonly_get", scheme_buf_readonly_get);

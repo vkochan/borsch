@@ -240,4 +240,5 @@
                 (string-split (text-string) #\newline)
                 (lambda (f)
                    (file-open (string-append cwd "/" f)))
-                "Find file")))]))
+                "Find file"))
+          (current-buffer minibuf-buffer) )]))

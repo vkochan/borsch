@@ -454,6 +454,7 @@
                  (not (window-is-widget? (current-window))))
          (frame-set-prev-focused-window (current-window)))
       (frame-set-current-window win)
+      (current-buffer (window-buffer win))
       (call-foreign (__cs_win_current_set (window-id win)))
       (run-hooks 'window-focus-hook win)))
 
@@ -674,7 +675,9 @@
        (buffer-ref-put (window-buffer win))
        (call-foreign (__cs_win_buf_switch (window-id win) b))
        (%window%-buffer-set! win b)
-       (buffer-ref-get (window-buffer win))]))
+       (buffer-ref-get (window-buffer win))
+       (when (equal? win (current-window))
+          (current-buffer b)) ]))
 
 (define window-begin-pos
    (case-lambda
@@ -863,6 +866,8 @@
 
 (add-hook 'frame-switch-hook
           (lambda (f)
+             (when (current-window)
+                (current-buffer (window-buffer (current-window))))
              (window-layout-set-changed #t) ))
 (add-hook 'ui-update-hook
           (lambda ()

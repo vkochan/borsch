@@ -73,8 +73,6 @@
 (define __cs_buf_ref (foreign-procedure "cs_buf_ref" (int) scheme-object))
 (define __cs_buf_del (foreign-procedure "cs_buf_del" (int) void))
 
-(define __cs_buf_current_get (foreign-procedure "cs_buf_current_get" () scheme-object))
-
 (define __cs_buf_line_num (foreign-procedure "cs_buf_line_num" (int int) scheme-object))
 (define __cs_buf_mode_name_set (foreign-procedure "cs_buf_mode_name_set" (int string) void))
 (define __cs_buf_mode_name_get (foreign-procedure "cs_buf_mode_name_get" (int) scheme-object))
@@ -123,7 +121,7 @@
 
 (define %dir-locals-ht (make-hashtable string-hash string=?))
 
-(define current-buffer-tmp (make-parameter #f))
+(define current-buffer (make-parameter #f))
 
 (define %buffer-list% (list))
 
@@ -225,13 +223,9 @@
 (define-syntax (with-current-buffer stx)
    (syntax-case stx ()
       ((_ buf exp ...)
-       #`(parameterize ([current-buffer-tmp buf])
+       #`(parameterize ([current-buffer buf])
             exp ... ))))
 
-(define (current-buffer)
-   (or (current-buffer-tmp)
-       (call-foreign (__cs_buf_current_get))))
-       
 (define (buffer-line-num pos)
    (call-foreign (__cs_buf_line_num (current-buffer) pos)))
 
