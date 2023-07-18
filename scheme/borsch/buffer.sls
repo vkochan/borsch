@@ -44,6 +44,7 @@
       buffer-is-readonly?
       buffer-is-modified?
       buffer-is-dirty?
+      buffer-set-dirty
       add-text-property
       remove-text-property
       get-text-property
@@ -92,10 +93,9 @@
 
 (define __cs_buf_name_get (foreign-procedure "cs_buf_name_get" (int) scheme-object))
 (define __cs_buf_name_set (foreign-procedure "cs_buf_name_set" (int string) void))
-(define __cs_buf_readonly_set (foreign-procedure "cs_buf_readonly_set" (int boolean) void))
-(define __cs_buf_readonly_get (foreign-procedure "cs_buf_readonly_get" (int) scheme-object))
 (define __cs_buf_is_modified (foreign-procedure "cs_buf_is_modified" (int) scheme-object))
 (define __cs_buf_is_dirty (foreign-procedure "cs_buf_is_dirty" (int) scheme-object))
+(define __cs_buf_set_dirty (foreign-procedure "cs_buf_set_dirty" (int boolean) void))
 
 (define __cs_buf_prop_style_add (foreign-procedure "cs_buf_prop_style_add" (int int int int int int string int int string string boolean wchar) scheme-object))
 (define __cs_buf_prop_kmap_add (foreign-procedure "cs_buf_prop_kmap_add" (int int int int string string) scheme-object))
@@ -128,7 +128,8 @@
 
 (define-record-type $buffer
    (fields
-      id))
+      id
+      (mutable is-readonly)))
 
 (define (buffer-id buf)
    ($buffer-id buf) )
@@ -186,7 +187,8 @@
        (call-foreign (__cs_buf_ref_put (buffer-id buf)))]))
 
 (define ($buffer-new name kmap)
-   (make-$buffer (call-foreign (__cs_buf_new name (or kmap -1)))))
+   (make-$buffer (call-foreign (__cs_buf_new name (or kmap -1)))
+                 #f))
 
 (define buffer-new
    (case-lambda
@@ -388,7 +390,8 @@
        (buffer-set-readonly (current-buffer) read-only?)]
 
       [(buf read-only?)
-       (call-foreign (__cs_buf_readonly_set (buffer-id buf) read-only?))]))
+       ($buffer-is-readonly-set! buf read-only?)
+       (buffer-set-dirty buf #t)]))
 
 (define buffer-is-readonly?
    (case-lambda
@@ -396,7 +399,7 @@
        (buffer-is-readonly? (current-buffer))]
 
       [(buf)
-       (call-foreign (__cs_buf_readonly_get (buffer-id buf)))]))
+       ($buffer-is-readonly buf)]))
 
 (define buffer-is-modified?
    (case-lambda
@@ -413,6 +416,14 @@
 
       [(buf)
        (call-foreign (__cs_buf_is_dirty (buffer-id buf)))]))
+
+(define buffer-set-dirty
+   (case-lambda
+      [(dirty?)
+       (buffer-set-dirty (current-buffer) dirty?)]
+
+      [(buf dirty?)
+       (call-foreign (__cs_buf_set_dirty (buffer-id buf) dirty?))]))
 
 (define (symbol->text-property-type s)
    (case s

@@ -77,6 +77,7 @@
       (message (format "Can't save ~a" (buffer-filename)))))
 
 (define (text-mode-save-file)
+   (text-modify
    (let ([f (buffer-filename)])
       (if (not (equal? f ""))
          (text-mode-save)
@@ -95,7 +96,7 @@
                      ;; else
                      (begin
                         (buffer-set-filename f)
-                        (text-mode-save)))))))))
+                        (text-mode-save))))))))))
 
 (define (text-mode-command)
    (minibuf-read ":"

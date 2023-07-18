@@ -608,8 +608,6 @@ size_t buf_text_insert_file(int bid, const char *path)
 
 	if (!buf)
 		return EPOS;
-	if (buffer_is_readonly(buf))
-		return EPOS;
 
 	pos = buffer_cursor_get(buf);
 

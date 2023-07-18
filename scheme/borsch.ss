@@ -118,6 +118,7 @@
       buffer-is-readonly?
       buffer-is-modified?
       buffer-is-dirty?
+      buffer-set-dirty
       add-text-property
       remove-text-property
       get-text-property

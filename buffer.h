@@ -28,8 +28,6 @@ typedef enum {
 Buffer *buffer_new(const char *name);
 bool buffer_del(Buffer *buf);
 int buffer_file_open(Buffer *buf, const char *file);
-void buffer_readonly_set(Buffer *buf, bool is_readonly);
-bool buffer_is_readonly(Buffer *buf);
 char *buffer_filename_get(Buffer *buf);
 void buffer_filename_set(Buffer *buf, const char *name);
 bool buffer_save(Buffer *buf);
