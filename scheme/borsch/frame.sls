@@ -51,7 +51,7 @@
 (define __cs_frame_create (foreign-procedure "cs_frame_create" () scheme-object))
 (define __cs_frame_delete (foreign-procedure "cs_frame_delete" (int) void))
 
-(define-record-type %frame%
+(define-record-type $frame
    (fields
       id
       (mutable name)
@@ -84,7 +84,7 @@
 
      [(name)
       (let ([id (*frame-create*)])
-         (let ([fr (make-%frame% id
+         (let ([fr (make-$frame id
                                  (or name
                                      (format "frame~a" id))
                                  (current-directory)
@@ -113,12 +113,12 @@
 (define-syntax (frame-set-var! stx)
    (syntax-case stx ()
       ((_ f s v)
-         #`(hashtable-set! (%frame%-env f) 's v))))
+         #`(hashtable-set! ($frame-env f) 's v))))
 
 (define-syntax (frame-get-var stx)
    (syntax-case stx ()
       ((_ f s)
-         #`(hashtable-ref (%frame%-env f) 's #f))))
+         #`(hashtable-ref ($frame-env f) 's #f))))
 
 (define-syntax (with-current-frame stx)
    (syntax-case stx ()
@@ -142,7 +142,7 @@
        (frame-id (current-frame))]
 
       [(fr)
-       (%frame%-id fr)]))
+       ($frame-id fr)]))
 
 (define frame-name
    (case-lambda
@@ -150,7 +150,7 @@
        (frame-name (current-frame))]
 
       [(fr)
-       (%frame%-name fr)]))
+       ($frame-name fr)]))
 
 (define frame-set-name
    (case-lambda
@@ -158,7 +158,7 @@
        (frame-set-name (current-frame) name)]
 
       [(fr n)
-       (%frame%-name-set! fr n)
+       ($frame-name-set! fr n)
        (run-hooks 'change-frame-name-hook)]))
 
 (define frame-cwd
@@ -167,7 +167,7 @@
        (frame-cwd (current-frame))]
 
       [(fr)
-       (%frame%-cwd fr)]))
+       ($frame-cwd fr)]))
 
 (define frame-set-cwd
    (case-lambda
@@ -175,7 +175,7 @@
        (frame-set-cwd (current-frame) cwd)]
 
       [(fr c)
-       (%frame%-cwd-set! fr c)
+       ($frame-cwd-set! fr c)
        (run-hooks 'change-cwd-hook)]))
 
 (define frame-cwd-handler
@@ -192,7 +192,7 @@
        (frame-prev-layout (current-frame))]
 
       [(fr)
-       (%frame%-prev-layout fr)]))
+       ($frame-prev-layout fr)]))
 
 (define frame-set-prev-layout
    (case-lambda
@@ -200,7 +200,7 @@
        (frame-set-prev-layout (current-frame) l)]
 
       [(fr l)
-       (%frame%-prev-layout-set! fr l)]))
+       ($frame-prev-layout-set! fr l)]))
 
 (define frame-layout
    (case-lambda
@@ -208,7 +208,7 @@
        (frame-layout (current-frame))]
 
       [(fr)
-       (%frame%-layout fr)]))
+       ($frame-layout fr)]))
 
 (define frame-set-layout
    (case-lambda
@@ -216,7 +216,7 @@
        (frame-set-layout (current-frame) l)]
 
       [(fr l)
-       (%frame%-layout-set! fr l)]))
+       ($frame-layout-set! fr l)]))
 
 (define frame-buffer-list
    (case-lambda
@@ -224,7 +224,7 @@
        (frame-buffer-list (current-frame))]
 
       [(fr)
-       (%frame%-buffers fr)]))
+       ($frame-buffers fr)]))
 
 (define frame-insert-buffer
    (case-lambda
@@ -233,7 +233,7 @@
 
       [(fr b)
        (when fr
-          (%frame%-buffers-set! fr (append (%frame%-buffers fr) (list b))) )]))
+          ($frame-buffers-set! fr (append ($frame-buffers fr) (list b))) )]))
 
 (define frame-remove-buffer
    (case-lambda
@@ -242,7 +242,7 @@
 
       [(fr b)
        (when fr
-          (%frame%-buffers-set! fr (remove b (%frame%-buffers fr))))]))
+          ($frame-buffers-set! fr (remove b ($frame-buffers fr))))]))
 
 (define (frame-for-each-buffer fn)
    (for-each
@@ -273,7 +273,7 @@
        (frame-is-sticky? (current-frame))]
 
       [(fr)
-       (%frame%-sticky fr)]))
+       ($frame-sticky fr)]))
 
 (define frame-set-sticky
    (case-lambda
@@ -281,7 +281,7 @@
        (frame-set-sticky (current-frame) l)]
 
       [(fr l)
-       (%frame%-sticky-set! fr l)]))
+       ($frame-sticky-set! fr l)]))
 
 (define frame-n-master
    (case-lambda
@@ -289,7 +289,7 @@
        (frame-n-master (current-frame))]
 
       [(fr)
-       (%frame%-n-master fr)]))
+       ($frame-n-master fr)]))
 
 (define frame-set-n-master
    (case-lambda
@@ -297,7 +297,7 @@
        (frame-set-n-master (current-frame) n)]
 
       [(fr n)
-       (%frame%-n-master-set! fr n)]))
+       ($frame-n-master-set! fr n)]))
 
 (define frame-%-master
    (case-lambda
@@ -305,7 +305,7 @@
        (frame-%-master (current-frame))]
 
       [(fr)
-       (%frame%-%-master fr)]))
+       ($frame-%-master fr)]))
 
 (define frame-set-%-master
    (case-lambda
@@ -313,7 +313,7 @@
        (frame-set-%-master (current-frame) n)]
 
       [(fr n)
-       (%frame%-%-master-set! fr n)]))
+       ($frame-%-master-set! fr n)]))
 
 (define frame-set-prev-focused-window
    (case-lambda
@@ -322,7 +322,7 @@
 
       [(fr w)
        (when w
-          (let ([st (%frame%-focus-stack fr)])
+          (let ([st ($frame-focus-stack fr)])
              (stack-remove! st w)
              (stack-push! st w)))]))
 
@@ -332,7 +332,7 @@
        (frame-prev-focused-window (current-frame))]
 
       [(fr)
-       (let ([st (%frame%-focus-stack fr)])
+       (let ([st ($frame-focus-stack fr)])
           (stack-top st))]))
 
 (define frame-current-window
@@ -341,7 +341,7 @@
        (frame-current-window (current-frame))]
 
       [(fr)
-       (%frame%-current-window fr)]))
+       ($frame-current-window fr)]))
 
 (define frame-set-current-window
    (case-lambda
@@ -349,7 +349,7 @@
        (frame-set-current-window (current-frame) w)]
 
       [(fr w)
-       (%frame%-current-window-set! fr w)]))
+       ($frame-current-window-set! fr w)]))
 
 
 (define frame-first-window
@@ -358,7 +358,7 @@
        (frame-first-window (current-frame))]
 
       [(fr)
-       (%frame%-first-window fr)]))
+       ($frame-first-window fr)]))
 
 (define frame-set-first-window
    (case-lambda
@@ -366,7 +366,7 @@
        (frame-set-first-window (current-frame) w)]
 
       [(fr w)
-       (%frame%-first-window-set! fr w)]))
+       ($frame-first-window-set! fr w)]))
 
 (define frame-last-window
    (case-lambda
@@ -374,7 +374,7 @@
        (frame-last-window (current-frame))]
 
       [(fr)
-       (%frame%-last-window fr)]))
+       ($frame-last-window fr)]))
 
 (define frame-set-last-window
    (case-lambda
@@ -382,7 +382,7 @@
        (frame-set-last-window (current-frame) w)]
 
       [(fr w)
-       (%frame%-last-window-set! fr w)]))
+       ($frame-last-window-set! fr w)]))
 
 (define frame-delete-window
    (case-lambda
@@ -390,7 +390,7 @@
        (frame-delete-window (current-frame) w)]
 
       [(fr w)
-       (let ([st (%frame%-focus-stack fr)])
+       (let ([st ($frame-focus-stack fr)])
           (stack-remove! st w))]))
 
 (define (frame-initialize)
