@@ -203,6 +203,7 @@
           (when (equal? win (current-window))
              (window-update-cursor win))
           (window-update win) 
+          (buffer-set-dirty (window-buffer win) #f)
           (run-hooks 'text-draw-hook win)
           (call-foreign (__cs_win_draw (window-id win) enforce?))
           (run-hooks 'window-draw-hook win)
