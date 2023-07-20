@@ -350,10 +350,6 @@ static void process_handle_vt(int fd, void *arg)
 		evt.eid = EVT_PROC_EXIT;
 		evt.oid = process_pid_get(proc);
 		scheme_event_handle(evt);
-	} else {
-		if (buf) {
-			buffer_dirty_set(buf, true);
-		}
 	}
 }
 
