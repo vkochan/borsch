@@ -56,7 +56,6 @@
       text-selection-range
       text-selection
       text-clear-selection
-      text-highlight-selection
       text-string
       text-char
       text-word
@@ -143,9 +142,6 @@
 (define __cs_buf_mark_get (foreign-procedure "cs_buf_mark_get" (int) scheme-object))
 (define __cs_buf_mark_clear (foreign-procedure "cs_buf_mark_clear" (int) void))
 (define __cs_buf_mark_is_set (foreign-procedure "cs_buf_mark_is_set" (int) scheme-object))
-(define __cs_win_mark_highlight (foreign-procedure "cs_win_mark_highlight" (int boolean) void))
-
-(define __cs_win_current_get (foreign-procedure "cs_win_current_get" () scheme-object))
 
 (define __cs_buf_text_range_del (foreign-procedure "cs_buf_text_range_del" (int int int) scheme-object))
 
@@ -423,14 +419,6 @@
    (when (local-bound? text-clear-selection-hook)
       ((get-local text-clear-selection-hook)))
    (call-foreign (__cs_buf_mark_clear (buffer-id (current-buffer)))))
-
-(define text-highlight-selection
-   (case-lambda
-      [(e)
-       (text-highlight-selection (__cs_win_current_get) e)]
-
-      [(wid e)
-       (when wid (call-foreign (__cs_win_mark_highlight wid e)))]))
 
 (define text-string
    (case-lambda

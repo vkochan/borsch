@@ -194,17 +194,6 @@ int scheme_win_title_set(int wid, char *title)
 	return -1;
 }
 
-void scheme_win_mark_highlight(int wid, bool enable)
-{
-	Window *w = window_get_by_id(wid);
-
-	if (w) {
-		if (enable != w->highlight_mark)
-			buffer_dirty_set(w->buf, true);
-		w->highlight_mark = enable;
-	}
-}
-
 void scheme_win_size_set(int wid, int width, int height)
 {
 	Window *w = window_get_by_id(wid);
@@ -1634,7 +1623,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_del", scheme_win_del);
 	Sregister_symbol("cs_win_title_get", scheme_win_title_get);
 	Sregister_symbol("cs_win_title_set", scheme_win_title_set);
-	Sregister_symbol("cs_win_mark_highlight", scheme_win_mark_highlight);
 	Sregister_symbol("cs_win_size_set", scheme_win_size_set);
 	Sregister_symbol("cs_win_move", scheme_win_move);
 	Sregister_symbol("cs_win_width_get", scheme_win_width_get);

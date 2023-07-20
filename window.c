@@ -486,19 +486,6 @@ static void on_view_update_cb(UiWin *win)
 	buffer_properties_walk(w->buf, PROPERTY_TYPE_TEXT_HIGHLIGHT,
 			v.start, v.end, NULL, w->view, style_prop_draw);
 
-	if (w->highlight_mark) {
-		size_t start = buffer_mark_get(w->buf);
-		size_t end = buffer_cursor_get(w->buf);
-		Style *highlight_style = style_get_by_id(1);
-		CellStyle cell_style = {
-			.attr = highlight_style->attr,
-			.fg = highlight_style->fg,
-			.bg = highlight_style->bg,
-		};
-
-		view_style(w->view, cell_style, MIN(start, end), MAX(start, end), false, 0);
-	}
-
 	for (Line *l = view_lines_last(w->view)->next; l; l = l->next) {
 		l->cells[0].style.fg = default_style->fg;
 		l->cells[0].style.bg = default_style->bg;

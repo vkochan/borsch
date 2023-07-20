@@ -192,6 +192,15 @@
          (set! st (string-append st bn))
          (window-draw-text w 0 (- wh 1) st style))))
 
+(define (window-draw-selection win)
+   (let ([buf (window-buffer win)])
+      (with-current-buffer buf
+         (when (text-is-selection-set?)
+            (let* ([range (text-selection-range)]
+                   [start (first range)]
+                   [end (- (second range)
+                           1)])
+               (window-set-text-style win start end '(fg: "white" bg: "blue")) )))))
 
 (define window-draw
    (case-lambda
@@ -204,11 +213,12 @@
              (window-update-cursor win))
           (window-update win) 
           (buffer-set-dirty (window-buffer win) #f)
+          (window-draw-selection win)
           (run-hooks 'text-draw-hook win)
           (call-foreign (__cs_win_draw (window-id win) enforce?))
           (run-hooks 'window-draw-hook win)
           (when (window-has-title? win)
-             (window-draw-title win)))]))
+             (window-draw-title win)))] ))
 
 (define window-is-widget?
    (case-lambda

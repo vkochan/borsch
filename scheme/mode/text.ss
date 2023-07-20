@@ -29,8 +29,7 @@
    (text-mode-set-keymap 'text-mode-normal-local-map)
    (buffer-set-state-name "")
    (buffer-snapshot)
-   (enable-insert #f)
-   (text-highlight-selection #f))
+   (enable-insert #f) )
 
 (define (text-mode-insert)
    (text-modify
@@ -42,16 +41,14 @@
    (text-mode-set-keymap 'text-mode-visual-local-map)
    (buffer-set-state-name "<V>")
    (enable-insert #f)
-   (text-set-selection)
-   (text-highlight-selection #t))
+   (text-set-selection) )
 
 (define (text-mode-visual-linewise)
    (text-mode-set-keymap 'text-mode-visual-linewise-local-map)
    (buffer-set-state-name "<V *L*>")
    (enable-insert #f)
    (text-set-selection (text-line-begin-pos))
-   (cursor-to-line-end)
-   (text-highlight-selection #t))
+   (cursor-to-line-end) )
 
 (define (get-file-location s)
    (if (file-regular? s)

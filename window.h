@@ -18,7 +18,6 @@ struct Window {
 	bool urgent;
 	Window *next;
 	Window *prev;
-	bool highlight_mark;
 	bool is_widget;
 	bool is_new;
 };

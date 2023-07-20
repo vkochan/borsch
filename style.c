@@ -15,15 +15,9 @@ int style_init(void)
 		.bg = UI_TEXT_COLOR_BLACK,
 		.name = "default",
 	};
-	Style highlight_style = {
-		.fg = UI_TEXT_COLOR_WHITE,
-		.bg = UI_TEXT_COLOR_BLUE,
-		.name = "highlight",
-	};
 
 	array_init_sized(&style_array, sizeof(Style));
 	style_add(&default_style);
-	style_add(&highlight_style);
 }
 
 void style_cleanup(void)

@@ -212,7 +212,6 @@
       text-selection-range
       text-selection
       text-clear-selection
-      text-highlight-selection
       text-string
       text-char
       text-word
