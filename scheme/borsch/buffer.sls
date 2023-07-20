@@ -77,10 +77,6 @@
 (define __cs_buf_del (foreign-procedure "cs_buf_del" (int) void))
 
 (define __cs_buf_line_num (foreign-procedure "cs_buf_line_num" (int int) scheme-object))
-(define __cs_buf_mode_name_set (foreign-procedure "cs_buf_mode_name_set" (int string) void))
-(define __cs_buf_mode_name_get (foreign-procedure "cs_buf_mode_name_get" (int) scheme-object))
-(define __cs_buf_state_name_set (foreign-procedure "cs_buf_state_name_set" (int string) void))
-(define __cs_buf_state_name_get (foreign-procedure "cs_buf_state_name_get" (int) scheme-object))
 
 (define __cs_buf_snapshot (foreign-procedure "cs_buf_snapshot" (int) void))
 (define __cs_buf_undo (foreign-procedure "cs_buf_undo" (int) void))
@@ -128,7 +124,9 @@
    (fields
       id
       (mutable is-readonly)
-      (mutable is-input-enabled)))
+      (mutable is-input-enabled)
+      (mutable mode-name)
+      (mutable state-name)))
 
 (define (buffer-id buf)
    ($buffer-id buf) )
@@ -187,8 +185,7 @@
 
 (define ($buffer-new name kmap)
    (make-$buffer (call-foreign (__cs_buf_new name (or kmap -1)))
-                 #f
-                 #t))
+                 #f #t "" ""))
 
 (define buffer-new
    (case-lambda
@@ -242,8 +239,9 @@
 (define (buffer-line-num pos)
    (call-foreign (__cs_buf_line_num (buffer-id (current-buffer)) pos)))
 
-(define (buffer-set-mode-name n)
-   (call-foreign (__cs_buf_mode_name_set (buffer-id (current-buffer)) (format "~a" n))))
+(define (buffer-set-mode-name name)
+   ($buffer-mode-name-set! (current-buffer) name)
+   (buffer-set-dirty (current-buffer) #t) )
 
 (define buffer-mode-name
    (case-lambda
@@ -251,10 +249,11 @@
        (buffer-mode-name (current-buffer))]
 
       [(b)
-       (call-foreign (__cs_buf_mode_name_get (buffer-id b)))]))
+       ($buffer-mode-name b)]))
 
-(define (buffer-set-state-name n)
-   (call-foreign (__cs_buf_state_name_set (buffer-id (current-buffer)) (format "~a" n))))
+(define (buffer-set-state-name name)
+   ($buffer-state-name-set! (current-buffer) name)
+   (buffer-set-dirty (current-buffer) #t) )
 
 (define buffer-state-name
    (case-lambda
@@ -262,7 +261,7 @@
        (buffer-state-name (current-buffer))]
 
       [(b)
-       (call-foreign (__cs_buf_state_name_get (buffer-id b)))]))
+       ($buffer-state-name b)]))
 
 (define (buffer-snapshot)
    (call-foreign (__cs_buf_snapshot (buffer-id (current-buffer)))))

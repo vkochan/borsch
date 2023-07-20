@@ -47,8 +47,6 @@ typedef struct Buffer {
 	Text *text;
 	bool is_name_locked;
 	char name[256];
-	char state[32];
-	char mode[32];
 	size_t ref_count;
 	bool is_dirty;
 	File file;
@@ -510,26 +508,6 @@ bool buffer_is_dirty(Buffer *buf)
 void buffer_dirty_set(Buffer *buf, bool dirty)
 {
 	buf->is_dirty = dirty;
-}
-
-char *buffer_mode_name_get(Buffer *buf)
-{
-	return buf->mode;
-}
-
-void buffer_mode_name_set(Buffer *buf, char *name)
-{
-	strncpy(buf->mode, name, sizeof(buf->mode));
-}
-
-char *buffer_state_name_get(Buffer *buf)
-{
-	return buf->state;
-}
-
-void buffer_state_name_set(Buffer *buf, char *name)
-{
-	strncpy(buf->state, name, sizeof(buf->state));
 }
 
 bool buffer_is_mark_set(Buffer *buf)
