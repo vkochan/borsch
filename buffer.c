@@ -48,7 +48,6 @@ typedef struct Buffer {
 	bool is_name_locked;
 	char name[256];
 	size_t ref_count;
-	bool is_dirty;
 	File file;
 	Process *proc;
 	TextProperty *min_prop;
@@ -488,16 +487,6 @@ size_t buffer_text_delete(Buffer *buf, size_t start, size_t end)
 char *buffer_text_extract(Buffer *buf, size_t pos, size_t len)
 {
 	return text_bytes_alloc0(buf->text, pos, len);
-}
-
-bool buffer_is_dirty(Buffer *buf)
-{
-	return buf->is_dirty;
-}
-
-void buffer_dirty_set(Buffer *buf, bool dirty)
-{
-	buf->is_dirty = dirty;
 }
 
 void buffer_proc_set(Buffer *buf, Process *proc)
