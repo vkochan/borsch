@@ -736,7 +736,6 @@ size_t buf_text_obj_move(int bid, size_t pos, char obj, int n, bool move)
 		if (move) {
 			buffer_cursor_set(buf, pos);
 			/* just to make UI update */
-			buffer_dirty_set(buf, true);
 		}
 	}
 
@@ -902,7 +901,6 @@ int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, int is_set, 
 		return err;
 	}
 
-	buffer_dirty_set(buf, true);
 	return 0;
 }
 
@@ -973,7 +971,6 @@ void buf_prop_del(int bid, int type, int start, int end, const char *regex, char
 
 	buffer_property_remove(buf, type, start == -1 ? EPOS : start,
 			       end == -1 ? EPOS : end, regex, name);
-	buffer_dirty_set(buf, true);
 }
 
 void buf_prop_walk(int bid, int type, int start, int end, char *name, void *arg,

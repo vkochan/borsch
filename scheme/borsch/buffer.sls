@@ -521,7 +521,8 @@
                    ['style: (__add-style-property val start end regex name)]
                    ['keymap: (__add-keymap-property val start end regex name)]
                    ['symbol: (__add-symbol-property val start end regex name)]
-                   ['data: (__add-data-property val start end regex name)]))))]))
+                   ['data: (__add-data-property val start end regex name)])))
+          (buffer-set-dirty (current-buffer) #t) )]))
 
 (define remove-text-property
    (case-lambda
@@ -538,7 +539,8 @@
        (remove-text-property type start end #f)]
 
       [(type start end name)
-       (call-foreign (__cs_buf_prop_del (buffer-id (current-buffer)) (symbol->text-property-type type) start end #f name))]))
+       (call-foreign (__cs_buf_prop_del (buffer-id (current-buffer)) (symbol->text-property-type type) start end #f name))
+       (buffer-set-dirty (current-buffer) #t) ]))
 
 (define get-text-property
    (case-lambda

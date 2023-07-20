@@ -454,8 +454,11 @@
                  (not (window-is-widget? (current-window))))
          (frame-set-prev-focused-window (current-window)))
       (frame-set-current-window win)
+      (when (current-buffer)
+         (buffer-set-dirty (current-buffer)) )
       (current-buffer (window-buffer win))
       (call-foreign (__cs_win_current_set (window-id win)))
+      (buffer-set-dirty (current-buffer) #t)
       (run-hooks 'window-focus-hook win)))
 
 (define (window-focus-left)
@@ -790,7 +793,9 @@
        (window-set-sidebar-width (current-window) l)]
 
       [(win l)
-       (call-foreign (__cs_win_sidebar_set (window-id win) l))]))
+       (call-foreign (__cs_win_sidebar_set (window-id win) l))
+       (buffer-set-dirty (window-buffer) #t)
+       ]))
 
 (define window-sidebar-width
    (case-lambda
@@ -806,7 +811,11 @@
         (window-update-cursor (current-window))]
 
        [(win)
-        (call-foreign (__cs_win_update_cursor (window-id win)))]))
+        (let ([buf (window-buffer win)])
+           (when (buffer-is-dirty? buf)
+              (call-foreign (__cs_win_update_cursor (window-id win)))
+              (buffer-set-dirty buf #t)
+              ))]))
 
 (define window-update
     (case-lambda 

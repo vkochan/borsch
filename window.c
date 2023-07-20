@@ -309,7 +309,6 @@ int window_scroll(Window *w, char type, int n)
 void window_sidebar_width_set(Window *w, int width)
 {
 	ui_window_sidebar_width_set(w->win, width);
-	buffer_dirty_set(w->buf, true);
 }
 
 int window_sidebar_width(Window *w)
@@ -327,45 +326,40 @@ void window_update_cursor(Window *w)
 	Buffer *buf = w->buf;
 	UiWin *win = w->win;
 
-	if (buffer_is_dirty(buf)) {
-		size_t pos = buffer_cursor_get(buf);
-		int x, y;
+	size_t pos = buffer_cursor_get(buf);
+	int x, y;
 
-		view_invalidate(view);
+	view_invalidate(view);
 
-		if (w == window_current() || window_is_widget(w)) {
-			void (*scroll_fn)(View *, size_t) = view_scroll_to;
-			Filerange r = view_viewport_get(view);
-			Text *text = buffer_text_get(buf);
+	if (w == window_current() || window_is_widget(w)) {
+		void (*scroll_fn)(View *, size_t) = view_scroll_to;
+		Filerange r = view_viewport_get(view);
+		Text *text = buffer_text_get(buf);
 
-			if (pos < r.start || pos > r.end) {
-				size_t lines;
-				size_t start;
-				size_t end;
+		if (pos < r.start || pos > r.end) {
+			size_t lines;
+			size_t start;
+			size_t end;
 
-				if (pos < r.start) {
-					start = pos;
-					end = r.start;
-				} else if (pos > r.end) {
-					start = r.end;
-					end = pos;
-				}
-
-				lines = text_lines_count(text, start, end - start);
-				if (lines > (view_height_get(view) / 2))
-					scroll_fn = view_cursor_to;
+			if (pos < r.start) {
+				start = pos;
+				end = r.start;
+			} else if (pos > r.end) {
+				start = r.end;
+				end = pos;
 			}
 
-			scroll_fn(view, pos);
-
-			if (view_coord_get(view, pos, NULL, &y, &x)) {
-				if (w == window_current())
-					ui_window_cursor_set(win, x, y);
-			}
+			lines = text_lines_count(text, start, end - start);
+			if (lines > (view_height_get(view) / 2))
+				scroll_fn = view_cursor_to;
 		}
-		/* TODO: better to make buffer to know about it's
-		 * windows and mark them as dirty on text update */
-		buffer_dirty_set(buf, false);
+
+		scroll_fn(view, pos);
+
+		if (view_coord_get(view, pos, NULL, &y, &x)) {
+			if (w == window_current())
+				ui_window_cursor_set(win, x, y);
+		}
 	}
 }
 
@@ -383,7 +377,6 @@ void window_focus(Window *c)
 
 	if (prev) {
 		ui_window_focus(prev->win, false);
-		buffer_dirty_set(prev->buf, true);
 		prev->urgent = false;
 	}
 
@@ -408,7 +401,6 @@ void window_focus(Window *c)
 
 			buffer_cursor_set(c->buf, curs_view);
 		}
-		buffer_dirty_set(c->buf, true);
 	}
 }
 
