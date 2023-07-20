@@ -105,8 +105,6 @@
 (define __cs_buf_prop_del (foreign-procedure "cs_buf_prop_del" (int int int int string string) void))
 (define __cs_buf_prop_get (foreign-procedure "cs_buf_prop_get" (int int int int string) scheme-object))
 
-(define __cs_buf_by_name (foreign-procedure "cs_buf_by_name" (string) scheme-object))
-
 (define __cs_buf_kmap_get (foreign-procedure "cs_buf_kmap_get" (int) scheme-object))
 
 (define __cs_buf_is_valid (foreign-procedure "cs_buf_is_valid" (int) scheme-object))

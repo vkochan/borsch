@@ -331,18 +331,6 @@ bool buffer_name_is_locked(Buffer *buf)
 	return buf->is_name_locked;
 }
 
-Buffer *buffer_by_name(const char *name)
-{
-	Buffer *buf;
-
-	for (buf = buf_list.next; buf; buf = buf->next) {
-		if (strcmp(buffer_name_get(buf), name) == 0)
-			return buf;
-	}
-
-	return NULL;
-}
-
 void buffer_ref_get(Buffer *buf)
 {
 	buf->ref_count++;

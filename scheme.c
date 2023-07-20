@@ -624,16 +624,6 @@ void scheme_buf_set_dirty(int bid, bool dirty)
 		buffer_dirty_set(buf, dirty);
 }
 
-ptr scheme_buf_by_name(const char *name)
-{
-	Buffer *buf = buffer_by_name(name);
-
-	if (buf)
-		return Sinteger(buffer_id_get(buf));
-
-	return Sfalse;
-}
-
 ptr scheme_buf_text_insert(int bid, const char *text)
 {
 	size_t pos = buf_text_insert(bid, text);
@@ -1725,7 +1715,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_is_modified", scheme_buf_is_modified);
 	Sregister_symbol("cs_buf_is_dirty", scheme_buf_is_dirty);
 	Sregister_symbol("cs_buf_set_dirty", scheme_buf_set_dirty);
-	Sregister_symbol("cs_buf_by_name", scheme_buf_by_name);
 	Sregister_symbol("cs_buf_text_insert", scheme_buf_text_insert);
 	Sregister_symbol("cs_buf_text_insert_char", scheme_buf_text_insert_char);
 	Sregister_symbol("cs_buf_text_insert_nl", scheme_buf_text_insert_nl);
