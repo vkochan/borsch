@@ -56,10 +56,6 @@ size_t buffer_text_delete(Buffer *buf, size_t start, size_t end);
 char *buffer_text_extract(Buffer *buf, size_t pos, size_t len);
 bool buffer_is_dirty(Buffer *buf);
 void buffer_dirty_set(Buffer *buf, bool dirty);
-void buffer_mark_set(Buffer *buf, size_t pos);
-bool buffer_is_mark_set(Buffer *buf);
-void buffer_mark_clear(Buffer *buf);
-size_t buffer_mark_get(Buffer *buf);
 void buffer_proc_set(Buffer *buf, Process *proc);
 Process *buffer_proc_get(Buffer *buf);
 int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *data, const char *pattern,

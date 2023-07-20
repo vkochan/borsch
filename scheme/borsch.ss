@@ -138,6 +138,9 @@
       buffer-is-vterm?
       buffer-set-cwd
       buffer-cwd
+      buffer-set-mark
+      buffer-mark
+      buffer-is-mark-set?
 
       style-add
       style-modify

@@ -138,10 +138,6 @@
 
 (define __cs_buf_text_get (foreign-procedure "cs_buf_text_get" (int int int) scheme-object))
 (define __cs_buf_text_obj_range (foreign-procedure "cs_buf_text_obj_range" (int int char boolean) scheme-object))
-(define __cs_buf_mark_set (foreign-procedure "cs_buf_mark_set" (int int) void))
-(define __cs_buf_mark_get (foreign-procedure "cs_buf_mark_get" (int) scheme-object))
-(define __cs_buf_mark_clear (foreign-procedure "cs_buf_mark_clear" (int) void))
-(define __cs_buf_mark_is_set (foreign-procedure "cs_buf_mark_is_set" (int) scheme-object))
 
 (define __cs_buf_text_range_del (foreign-procedure "cs_buf_text_range_del" (int int int) scheme-object))
 
@@ -393,16 +389,16 @@
 (define text-set-selection
    (case-lambda
       [()
-       (call-foreign (__cs_buf_mark_set (buffer-id (current-buffer)) (cursor)))]
+       (text-set-selection (cursor))]
 
       [(s)
-       (call-foreign (__cs_buf_mark_set (buffer-id (current-buffer)) s))]))
+       (buffer-set-mark (current-buffer) s)] ))
 
 (define (text-get-selection)
-   (call-foreign (__cs_buf_mark_get (buffer-id (current-buffer)))))
+   (buffer-mark (current-buffer)))
 
 (define (text-is-selection-set?)
-   (call-foreign (__cs_buf_mark_is_set (buffer-id (current-buffer)))))
+   (buffer-is-mark-set? (current-buffer)))
 
 (define (text-selection-range)
    (let ([m (text-get-selection)]
@@ -418,7 +414,7 @@
 (define (text-clear-selection)
    (when (local-bound? text-clear-selection-hook)
       ((get-local text-clear-selection-hook)))
-   (call-foreign (__cs_buf_mark_clear (buffer-id (current-buffer)))))
+   (buffer-set-mark (current-buffer) #f))
 
 (define text-string
    (case-lambda

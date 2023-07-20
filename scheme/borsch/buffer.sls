@@ -63,7 +63,10 @@
       buffer-set-vterm
       buffer-is-vterm?
       buffer-set-cwd
-      buffer-cwd)
+      buffer-cwd
+      buffer-set-mark
+      buffer-mark
+      buffer-is-mark-set?)
    (import (chezscheme)
            (borsch base)
            (borsch style)
@@ -126,7 +129,8 @@
       (mutable is-readonly)
       (mutable is-input-enabled)
       (mutable mode-name)
-      (mutable state-name)))
+      (mutable state-name)
+      (mutable mark)))
 
 (define (buffer-id buf)
    ($buffer-id buf) )
@@ -185,7 +189,7 @@
 
 (define ($buffer-new name kmap)
    (make-$buffer (call-foreign (__cs_buf_new name (or kmap -1)))
-                 #f #t "" ""))
+                 #f #t "" "" #f))
 
 (define buffer-new
    (case-lambda
@@ -688,5 +692,14 @@
       (get-local current-cwd)
       ;; else
       (current-cwd)))
+
+(define (buffer-set-mark buf pos)
+   ($buffer-mark-set! buf pos) )
+
+(define (buffer-mark buf)
+   ($buffer-mark buf) )
+
+(define (buffer-is-mark-set? buf)
+   (if ($buffer-mark buf) #t #f) )
 
 )

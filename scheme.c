@@ -757,42 +757,6 @@ ptr scheme_buf_save(int bid)
 	return Sfalse;
 }
 
-ptr scheme_buf_mark_is_set(int bid)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf)
-		return Sboolean(buffer_is_mark_set(buf));
-
-	return Sfalse;
-}
-
-void scheme_buf_mark_set(int bid, size_t pos)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf)
-		buffer_mark_set(buf, pos);
-}
-
-ptr scheme_buf_mark_get(int bid)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf)
-		return Sinteger(buffer_mark_get(buf));
-
-	return Sinteger(EPOS);
-}
-
-void scheme_buf_mark_clear(int bid)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf)
-		buffer_mark_clear(buf);
-}
-
 ptr scheme_buf_is_term(int bid)
 {
 	Buffer *buf = buffer_by_id(bid);
@@ -1675,10 +1639,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_file_set", scheme_buf_file_set);
 	Sregister_symbol("cs_buf_file_get", scheme_buf_file_get);
 	Sregister_symbol("cs_buf_save", scheme_buf_save);
-	Sregister_symbol("cs_buf_mark_set", scheme_buf_mark_set);
-	Sregister_symbol("cs_buf_mark_is_set", scheme_buf_mark_is_set);
-	Sregister_symbol("cs_buf_mark_get", scheme_buf_mark_get);
-	Sregister_symbol("cs_buf_mark_clear", scheme_buf_mark_clear);
 	Sregister_symbol("cs_buf_is_term", scheme_buf_is_term);
 	Sregister_symbol("cs_buf_term_set", scheme_buf_term_set);
 	Sregister_symbol("cs_buf_is_visible", scheme_buf_is_visible);

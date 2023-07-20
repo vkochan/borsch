@@ -51,8 +51,6 @@ typedef struct Buffer {
 	bool is_dirty;
 	File file;
 	Process *proc;
-	size_t mark;
-	bool is_mark_set;
 	TextProperty *min_prop;
 	TextProperty *max_prop;
 	TextProperty props;
@@ -147,7 +145,6 @@ Buffer *buffer_new(const char *name)
 		return NULL;
 	}
 	buf->ref_count = 0;
-	buf->mark = EPOS;
 
 	buf_count++;
 	buf->buf_id = buffer_id_gen();
@@ -289,8 +286,6 @@ Buffer *buffer_by_id(int bid)
 
 void buffer_cursor_set(Buffer *buf, size_t pos)
 {
-	if (!buf->is_mark_set)
-		buf->mark = pos;
 	if (pos > text_end(buf->text, 0))
 		pos = text_end(buf->text, 0);
 	buf->cursor = pos;
@@ -503,28 +498,6 @@ bool buffer_is_dirty(Buffer *buf)
 void buffer_dirty_set(Buffer *buf, bool dirty)
 {
 	buf->is_dirty = dirty;
-}
-
-bool buffer_is_mark_set(Buffer *buf)
-{
-	return buf->is_mark_set;
-}
-
-void buffer_mark_set(Buffer *buf, size_t pos)
-{
-	buf->is_mark_set = true;
-	buf->mark = pos;
-}
-
-void buffer_mark_clear(Buffer *buf)
-{
-	buf->is_mark_set = false;
-	buf->mark = EPOS;
-}
-
-size_t buffer_mark_get(Buffer *buf)
-{
-	return buf->mark;
 }
 
 void buffer_proc_set(Buffer *buf, Process *proc)
