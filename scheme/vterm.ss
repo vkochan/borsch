@@ -77,7 +77,6 @@
              [b (buffer-new)])
           (with-current-buffer b
              (define-local major-mode 'vterm-mode)
-             (define-local vterm-filter-func #f)
              (define-local process p)
              (buffer-set-keymap 'vterm-mode-map)
              (buffer-set-mode-name "VTerm")
