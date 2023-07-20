@@ -381,7 +381,9 @@
       (buffer-set-name (current-buffer) n)]
 
      [(b n)
-      (call-foreign (__cs_buf_name_set (buffer-id b) n))]))
+      (call-foreign (__cs_buf_name_set (buffer-id b) n))
+      (buffer-set-dirty b #t)
+      ]))
 
 (define buffer-set-readonly
    (case-lambda

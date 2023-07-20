@@ -154,7 +154,6 @@ ptr scheme_win_new(int bid, bool is_widget)
 	Window *w;
 
 	buf = buffer_by_id(bid);
-	buffer_dirty_set(buf, true);
 
 	w = window_create(buf, is_widget);
 	if (!w)
@@ -189,7 +188,6 @@ int scheme_win_title_set(int wid, char *title)
 
 	if (w) {
 		ui_window_title_set(w->win, title);
-		buffer_dirty_set(w->buf, true);
 		return 0;
 	}
 
@@ -321,7 +319,6 @@ void scheme_win_buf_switch(int wid, int bid)
 	if (w && b && w->buf != b) {
 		window_buffer_switch(w, b);
 		view_reload(w->view, buffer_text_get(b));
-		buffer_dirty_set(b, true);
 	}
 }
 
@@ -593,7 +590,6 @@ void scheme_buf_name_set(int bid, const char *name)
 	Buffer *buf = buffer_by_id(bid);
 
 	if (buf) {
-		buffer_dirty_set(buf, true);
 		buffer_name_lock(buf, true);
 		buffer_name_set(buf, name);
 	}
@@ -722,7 +718,6 @@ void scheme_buf_cursor_set(int bid, size_t pos)
 	if (buf) {
 		buffer_cursor_set(buf, pos);
 		/* just to make UI update */
-		buffer_dirty_set(buf, true);
 	}
 }
 

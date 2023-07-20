@@ -455,7 +455,7 @@
          (frame-set-prev-focused-window (current-window)))
       (frame-set-current-window win)
       (when (current-buffer)
-         (buffer-set-dirty (current-buffer)) )
+         (buffer-set-dirty (current-buffer) #t) )
       (current-buffer (window-buffer win))
       (call-foreign (__cs_win_current_set (window-id win)))
       (buffer-set-dirty (current-buffer) #t)
@@ -477,8 +477,9 @@
                      (window-next)
                      (window-first))))
 
-(define ($window-new b widget?)
-   (make-$window (__cs_win_new (buffer-id b) widget?) b #f #f) )
+(define ($window-new buf widget?)
+   (buffer-set-dirty buf #t)
+   (make-$window (__cs_win_new (buffer-id buf) widget?) buf #f #f) )
 
 (define (window-create b)
    (let ([win ($window-new b #f)])
@@ -545,7 +546,9 @@
        (window-set-name (current-window) title)]
 
       [(win title)
-       (call-foreign (__cs_win_title_set (window-id win) title))]))
+       (call-foreign (__cs_win_title_set (window-id win) title))
+       (buffer-set-dirty (window-buffer win) #t)
+       ]))
 
 (define window-is-maximized?
    (case-lambda
@@ -674,13 +677,14 @@
       [(b)
        (window-switch-buffer (current-window) b)]
 
-      [(win b)
+      [(win buf)
        (buffer-ref-put (window-buffer win))
-       (call-foreign (__cs_win_buf_switch (window-id win) (buffer-id b)))
-       ($window-buffer-set! win b)
+       (call-foreign (__cs_win_buf_switch (window-id win) (buffer-id buf)))
+       ($window-buffer-set! win buf)
        (buffer-ref-get (window-buffer win))
+       (buffer-set-dirty buf #t)
        (when (equal? win (current-window))
-          (current-buffer b)) ]))
+          (current-buffer buf)) ]))
 
 (define window-begin-pos
    (case-lambda

@@ -160,6 +160,7 @@
                     (and (> c 0) (>= c (text-end-pos))))
             (set! c (- (text-end-pos) 1)))
          (call-foreign (__cs_buf_cursor_set (buffer-id (current-buffer)) c))
+         (buffer-set-dirty (current-buffer) #t)
          c)))
 
 (define-syntax (with-saved-cursor stx)
