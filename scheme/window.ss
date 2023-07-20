@@ -815,11 +815,8 @@
         (window-update-cursor (current-window))]
 
        [(win)
-        (let ([buf (window-buffer win)])
-           (when (buffer-is-dirty? buf)
-              (call-foreign (__cs_win_update_cursor (window-id win)))
-              (buffer-set-dirty buf #t)
-              ))]))
+        (call-foreign (__cs_win_update_cursor (window-id win)))
+        ]))
 
 (define window-update
     (case-lambda 
