@@ -251,6 +251,7 @@
       (begin
          (let ([c (cursor)])
             (let ([p (- (call-foreign (__cs_buf_text_insert (buffer-id (current-buffer)) t)) 1)])
+               (buffer-set-dirty (current-buffer) #t)
                (for-each
                   (lambda (a)
                      (add-text-property c p a))
@@ -262,6 +263,7 @@
    (apply text-insert t s))
 
 (define (text-insert-char char)
+   (buffer-set-dirty (current-buffer) #t)
    (call-foreign (__cs_buf_text_insert_char (buffer-id (current-buffer)) char)))
 
 (define-syntax (text-modify stx)
@@ -277,7 +279,10 @@
                ...)))))
 
 (define (text-insert-nl)
-   (text-modify (call-foreign (__cs_buf_text_insert_nl (buffer-id (current-buffer)) (cursor)))))
+   (text-modify
+      (call-foreign (__cs_buf_text_insert_nl (buffer-id (current-buffer)) (cursor)))
+      (buffer-set-dirty (current-buffer) #t)
+      ))
 
 (define (text-insert-empty-line-up)
    (text-modify
@@ -293,7 +298,10 @@
       (text-insert-nl)))
 
 (define (text-insert-file t)
-   (text-modify (call-foreign (__cs_buf_text_insert_file (buffer-id (current-buffer)) t))))
+   (text-modify
+      (call-foreign (__cs_buf_text_insert_file (buffer-id (current-buffer)) t))
+      (buffer-set-dirty (current-buffer) #t)
+      ))
 
 (define (text-obj-pos buf curs obj num)
    (call-foreign (__cs_buf_text_obj_pos (buffer-id buf) curs obj num)))
@@ -647,6 +655,7 @@
       (let ([del-hook (get-local text-delete-hook #f)])
          (when del-hook 
             (del-hook s e)))
+      (buffer-set-dirty (current-buffer) #t)
       (call-foreign (__cs_buf_text_range_del (buffer-id (current-buffer)) s e))))
 
 (define (text-replace-range s e t)

@@ -267,9 +267,11 @@
    (call-foreign (__cs_buf_snapshot (buffer-id (current-buffer)))))
 
 (define (buffer-undo)
+   (buffer-set-dirty (current-buffer) #t)
    (call-foreign (__cs_buf_undo (buffer-id (current-buffer)))))
 
 (define (buffer-redo)
+   (buffer-set-dirty (current-buffer) #t)
    (call-foreign (__cs_buf_redo (buffer-id (current-buffer)))))
 
 (define (buffer-save)
@@ -277,6 +279,7 @@
 
 (define (buffer-reload)
    (when (local-bound? buffer-reload-func)
+      (buffer-set-dirty (current-buffer) #t)
       ((get-local buffer-reload-func))))
 
 (define buffer-filename
@@ -295,6 +298,7 @@
             (format "~a/~a"
                (getenv "HOME")
                (path-rest f))))
+      (buffer-set-dirty (current-buffer) #t)
       (call-foreign (__cs_buf_file_set (buffer-id (current-buffer)) path))))
 
 (define (buffer-env)

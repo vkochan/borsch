@@ -293,7 +293,6 @@ void buffer_cursor_set(Buffer *buf, size_t pos)
 		buf->mark = pos;
 	if (pos > text_end(buf->text, 0))
 		pos = text_end(buf->text, 0);
-	buf->is_dirty = true;
 	buf->cursor = pos;
 }
 
@@ -397,7 +396,6 @@ size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text)
 	if (text_insert(buf->text, pos, text, len)) {
 		buffer_text_changed(buf, pos, len);
 		buffer_cursor_set(buf, pos + len);
-		buf->is_dirty = true;
 		pos += len;
 	} else {
 		pos = EPOS;
@@ -411,7 +409,6 @@ size_t buffer_text_insert_len(Buffer *buf, size_t pos, const char *text, size_t 
 	if (text_insert(buf->text, pos, text, len)) {
 		buffer_text_changed(buf, pos, len);
 		buffer_cursor_set(buf, pos + len);
-		buf->is_dirty = true;
 		pos += len;
 	} else {
 		pos = EPOS;
@@ -470,7 +467,6 @@ size_t buffer_text_insert_nl(Buffer *buf, size_t pos)
 
 	buffer_text_changed(buf, pos_orig, len);
 	buffer_cursor_set(buf, pos);
-	buf->is_dirty = true;
 
 	return pos;
 }
@@ -488,7 +484,6 @@ size_t buffer_text_delete(Buffer *buf, size_t start, size_t end)
 
 	if (text_delete(buf->text, start, end - start)) {
 		buffer_cursor_set(buf, start);
-		buf->is_dirty = true;
 	}
 
 	buffer_text_changed(buf, start, -(end - start));
@@ -643,7 +638,6 @@ int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *d
 			buf->min_prop = buf->max_prop;
 	}
 
-	buf->is_dirty = true;
 	return 0;
 }
 
@@ -712,7 +706,6 @@ static bool buffer_property_remove_range(Buffer *buf, size_t type, size_t start,
 bool buffer_property_remove(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern, char *name)
 {
 	if (buffer_property_remove_range(buf, type, start, end, pattern, name)) {
-		buf->is_dirty = true;
 		return true;
 	}
 
@@ -804,14 +797,12 @@ void buffer_snapshot(Buffer *buf)
 void buffer_undo(Buffer *buf)
 {
 	buffer_cursor_set(buf, text_undo(buf->text));
-	buf->is_dirty = true;
 	buffer_update_parser(buf, 0, text_size(buf->text));
 }
 
 void buffer_redo(Buffer *buf)
 {
 	buffer_cursor_set(buf, text_redo(buf->text));
-	buf->is_dirty = true;
 	buffer_update_parser(buf, 0, text_size(buf->text));
 }
 
