@@ -287,6 +287,7 @@
       process-port-out
       process-port-err
       process-pid
+      process-pty
       process-buffer-out
       process-buffer-err
       process-is-alive?

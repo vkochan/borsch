@@ -8,6 +8,7 @@
       process-port-out
       process-port-err
       process-pid
+      process-pty
       process-buffer-out
       process-buffer-err
       process-is-alive?
@@ -117,6 +118,7 @@
       port-out
       port-err
       pid
+      pty
       buffer-out
       buffer-err
       on-exit
@@ -139,6 +141,9 @@
 
 (define (process-pid proc)
    (process-entry-pid proc))
+
+(define (process-pty proc)
+   (process-entry-pty proc))
 
 (define (process-buffer-out proc)
    (process-entry-buffer-out proc))
@@ -306,6 +311,7 @@
                 [out-fd (list-ref p 1)]
                 [err-fd (list-ref p 2)]
                 [pid    (list-ref p 3)]
+                [pty    (list-ref p 4)]
                )
              (when (and pty? filter)
                 (call-foreign (__cs_process_filter_enable pid #t)))
@@ -314,7 +320,7 @@
                    [port-out (if (eq? out-fd -1) #f (open-fd-input-port out-fd (buffer-mode block) (native-transcoder)))]
                    [port-err (if (eq? err-fd -1) #f (open-fd-input-port err-fd (buffer-mode block) (native-transcoder)))]
                   )
-                (let ([proc (make-process-entry port-in port-out port-err pid buf-out buf-err on-exit reader filter)])
+                (let ([proc (make-process-entry port-in port-out port-err pid pty buf-out buf-err on-exit reader filter)])
                    (hashtable-set! %process-pid-ht pid proc)
                    (when buf-out
                       (hashtable-set! %process-fd-ht out-fd proc)

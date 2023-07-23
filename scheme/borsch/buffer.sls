@@ -201,6 +201,8 @@
       [(name kmap) 
        (let ([b ($buffer-new name kmap)])
           (buffer-insert b)
+          (with-current-buffer b
+             (define-local pre-draw-func #f) )
           b)]))
 
 (define buffer-delete

@@ -1569,48 +1569,6 @@ void vt_dirty(Vt *t)
 		row->dirty = true;
 }
 
-static void vt_sync_title(Vt *vt)
-{
-	Window *c = vt->w;
-	size_t len = 256;
-	char buf[128];
-	char path[64];
-	size_t blen;
-	char *eol;
-	pid_t pid;
-	int pty;
-	int ret;
-	int fd;
-
-	if (buffer_name_is_locked(c->buf))
-		return;
-
-	pty = vt_pty_get(vt);
-
-	pid = tcgetpgrp(pty);
-	if (pid == -1)
-		return;
-
-	snprintf(path, sizeof(path), "/proc/%d/cmdline", pid);
-
-	fd = open(path, O_RDONLY);
-	if (fd == -1)
-		return;
-
-	blen = MIN(sizeof(buf), len);
-
-	ret = read(fd, buf, blen);
-	if (ret <= 0)
-		goto done;
-
-	buf[ret - 1] = '\0';
-
-	buffer_name_set(c->buf, basename(buf));
-
-done:
-	close(fd);
-}
-
 void vt_draw(UiWin *win)
 {
 	View *view = win->view;
@@ -1626,9 +1584,6 @@ void vt_draw(UiWin *win)
 	}
 	view_resize(view, b->cols, b->rows);
 	view_clear(view);
-
-	if (t->w)
-		vt_sync_title(t);
 
 	for (i = 0; i < b->rows; i++) {
 		short curattrs = UI_TEXT_STYLE_NORMAL;

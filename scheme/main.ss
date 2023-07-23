@@ -4,7 +4,8 @@
 
    (library-directories (list (__cs_library_directory)
                               config-dir))
-   (compile-imported-libraries #t))
+   (compile-imported-libraries #t)
+   (load-shared-object "libc.so.6"))
 
 (library-init)
 

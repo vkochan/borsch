@@ -212,7 +212,11 @@
           (when (equal? win (current-window))
              (window-update-cursor win))
           (window-update win) 
-          (buffer-set-dirty (window-buffer win) #f)
+          (with-current-buffer (window-buffer win)
+             (let ([pre-draw (get-local pre-draw-func)])
+                (when pre-draw
+                   (pre-draw) ))
+             (buffer-set-dirty #f) )
           (window-draw-selection win)
           (run-hooks 'text-draw-hook win)
           (call-foreign (__cs_win_draw (window-id win) enforce?))
