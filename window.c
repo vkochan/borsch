@@ -281,35 +281,33 @@ void window_update_cursor(Window *w)
 
 	view_invalidate(view);
 
-	if (w == window_current()) {
-		void (*scroll_fn)(View *, size_t) = view_scroll_to;
-		Filerange r = view_viewport_get(view);
-		Text *text = buffer_text_get(buf);
+	void (*scroll_fn)(View *, size_t) = view_scroll_to;
+	Filerange r = view_viewport_get(view);
+	Text *text = buffer_text_get(buf);
 
-		if (pos < r.start || pos > r.end) {
-			size_t lines;
-			size_t start;
-			size_t end;
+	if (pos < r.start || pos > r.end) {
+		size_t lines;
+		size_t start;
+		size_t end;
 
-			if (pos < r.start) {
-				start = pos;
-				end = r.start;
-			} else if (pos > r.end) {
-				start = r.end;
-				end = pos;
-			}
-
-			lines = text_lines_count(text, start, end - start);
-			if (lines > (view_height_get(view) / 2))
-				scroll_fn = view_cursor_to;
+		if (pos < r.start) {
+			start = pos;
+			end = r.start;
+		} else if (pos > r.end) {
+			start = r.end;
+			end = pos;
 		}
 
-		scroll_fn(view, pos);
+		lines = text_lines_count(text, start, end - start);
+		if (lines > (view_height_get(view) / 2))
+			scroll_fn = view_cursor_to;
+	}
 
-		if (view_coord_get(view, pos, NULL, &y, &x)) {
-			if (w == window_current())
-				ui_window_cursor_set(win, x, y);
-		}
+	scroll_fn(view, pos);
+
+	if (view_coord_get(view, pos, NULL, &y, &x)) {
+		if (w == window_current())
+			ui_window_cursor_set(win, x, y);
 	}
 }
 
