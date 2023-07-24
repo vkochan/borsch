@@ -47,7 +47,6 @@ typedef struct Buffer {
 	Text *text;
 	bool is_name_locked;
 	char name[256];
-	size_t ref_count;
 	File file;
 	Process *proc;
 	TextProperty *min_prop;
@@ -142,7 +141,6 @@ Buffer *buffer_new(const char *name)
 		free(buf);
 		return NULL;
 	}
-	buf->ref_count = 0;
 
 	buf_count++;
 	buf->buf_id = buffer_id_gen();
@@ -318,24 +316,6 @@ void buffer_name_lock(Buffer *buf, bool lock)
 bool buffer_name_is_locked(Buffer *buf)
 {
 	return buf->is_name_locked;
-}
-
-void buffer_ref_get(Buffer *buf)
-{
-	buf->ref_count++;
-}
-
-void buffer_ref_put(Buffer *buf)
-{
-	if (buf->ref_count)
-		buf->ref_count--;
-	if (!buf->ref_count)
-		buffer_del(buf);
-}
-
-int buffer_ref_count(Buffer *buf)
-{
-	return buf->ref_count;
 }
 
 void buffer_keymap_set(Buffer *buf, char *name)

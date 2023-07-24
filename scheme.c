@@ -465,7 +465,6 @@ static Buffer *__buf_new(const char *name, KeyMap *kmap)
 
 	if (buf) {
 		keymap_parent_set(buffer_keymap_get(buf), kmap);
-		buffer_ref_get(buf);
 		return buf;
 	}
 
@@ -487,38 +486,6 @@ ptr scheme_buf_new(char *name, int kmap_id)
 		return Sfalse;
 
 	return Sinteger(buffer_id_get(buf));
-}
-
-ptr scheme_buf_ref_get(int bid)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf) {
-		buffer_ref_get(buf);
-		return Strue;
-	}
-	return Sfalse;
-}
-
-ptr scheme_buf_ref_put(int bid)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf) {
-		buffer_ref_put(buf);
-		return Strue;
-	}
-	return Sfalse;
-}
-
-ptr scheme_buf_ref(int bid)
-{
-	Buffer *buf = buffer_by_id(bid);
-
-	if (buf) {
-		return Sinteger(buffer_ref_count(buf));
-	}
-	return Sfalse;
 }
 
 ptr scheme_buf_is_valid(int bid)
@@ -1586,9 +1553,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_kmap_del", scheme_kmap_del);
 
 	Sregister_symbol("cs_buf_new", scheme_buf_new);
-	Sregister_symbol("cs_buf_ref_get", scheme_buf_ref_get);
-	Sregister_symbol("cs_buf_ref_put", scheme_buf_ref_put);
-	Sregister_symbol("cs_buf_ref", scheme_buf_ref);
 	Sregister_symbol("cs_buf_is_valid", scheme_buf_is_valid);
 	Sregister_symbol("cs_buf_del", scheme_buf_del);
 	Sregister_symbol("cs_buf_kmap_get", scheme_buf_kmap_get);

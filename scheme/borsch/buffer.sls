@@ -74,9 +74,6 @@
            (borsch keymap))
 
 (define __cs_buf_new (foreign-procedure "cs_buf_new" (string int) scheme-object))
-(define __cs_buf_ref_get (foreign-procedure "cs_buf_ref_get" (int) scheme-object))
-(define __cs_buf_ref_put (foreign-procedure "cs_buf_ref_put" (int) scheme-object))
-(define __cs_buf_ref (foreign-procedure "cs_buf_ref" (int) scheme-object))
 (define __cs_buf_del (foreign-procedure "cs_buf_del" (int) void))
 
 (define __cs_buf_line_num (foreign-procedure "cs_buf_line_num" (int int) scheme-object))
@@ -128,6 +125,7 @@
       (mutable state-name)
       (mutable mark)
       (mutable is-dirty)
+      (mutable ref-count)
       env))
 
 (define (buffer-id buf)
@@ -165,7 +163,7 @@
        (buffer-ref-count (current-buffer))]
 
       [(buf)
-       (call-foreign (__cs_buf_ref (buffer-id buf)))]))
+       ($buffer-ref-count buf)]))
 
 (define buffer-ref-get
    (case-lambda
@@ -173,7 +171,8 @@
        (buffer-ref-get (current-buffer))]
 
       [(buf)
-       (call-foreign (__cs_buf_ref_get (buffer-id buf)))]))
+       ($buffer-ref-count-set! buf (+ ($buffer-ref-count buf)
+                                      1))] ))
 
 (define buffer-ref-put
    (case-lambda
@@ -182,12 +181,13 @@
 
       [(buf)
        (when (= 1 (buffer-ref-count buf))
-          (buffer-remove buf))
-       (call-foreign (__cs_buf_ref_put (buffer-id buf)))]))
+          (buffer-delete buf))
+       ($buffer-ref-count-set! buf (- ($buffer-ref-count buf)
+                                      1))] ))
 
 (define ($buffer-new name kmap)
    (make-$buffer (call-foreign (__cs_buf_new name (or kmap -1)))
-                 #f #t "" "" #f #f
+                 #f #t "" "" #f #f 1
                  (copy-environment (scheme-environment))))
 
 (define buffer-new
