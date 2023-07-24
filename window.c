@@ -382,12 +382,6 @@ void window_focus(Window *c)
 	if (c) {
 		Process *proc = buffer_proc_get(c->buf);
 
-		if (proc && buffer_ref_count(c->buf) > 1) {
-			vt_resize(process_term_get(proc),
-					ui_window_height_get(c->win) - ui_window_has_title(c->win),
-					ui_window_width_get(c->win));
-		}
-
 		ui_window_focus(c->win, true);
 
 		if (proc) {
