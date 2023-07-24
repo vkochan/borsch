@@ -133,7 +133,6 @@ struct UiWin {
 	bool has_title;
 	unsigned curr_style;
 	short curr_fg, curr_bg;
-	char title[256];
 	bool has_border;
 	int sidebar_width;
 	bool is_focused;
@@ -174,8 +173,6 @@ void ui_window_draw_wchar(UiWin *win, int x, int y, wchar_t ch, int n,
 			  short fg, short bg, ui_text_style_t style);
 void ui_window_resize(UiWin *win, int width, int height);
 void ui_window_move(UiWin *win, int x, int y);
-void ui_window_title_set(UiWin *win, const char *title);
-char *ui_window_title_get(UiWin *win);
 void ui_window_width_set(UiWin *win, int width);
 int ui_window_width_get(UiWin *win);
 void ui_window_height_set(UiWin *win, int height);

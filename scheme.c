@@ -169,31 +169,6 @@ void scheme_win_del(int wid)
 		window_delete(w);
 }
 
-ptr scheme_win_title_get(int wid)
-{
-	Window *w = window_get_by_id(wid);
-	char *title = NULL;
-
-	if (w)
-		title = window_title_get(w);
-
-	if (title)
-		return Sstring(title);
-	return Sfalse;
-}
-
-int scheme_win_title_set(int wid, char *title)
-{
-	Window *w = window_get_by_id(wid);
-
-	if (w) {
-		ui_window_title_set(w->win, title);
-		return 0;
-	}
-
-	return -1;
-}
-
 void scheme_win_size_set(int wid, int width, int height)
 {
 	Window *w = window_get_by_id(wid);
@@ -1505,8 +1480,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_win_current_set", scheme_win_current_set);
 	Sregister_symbol("cs_win_new", scheme_win_new);
 	Sregister_symbol("cs_win_del", scheme_win_del);
-	Sregister_symbol("cs_win_title_get", scheme_win_title_get);
-	Sregister_symbol("cs_win_title_set", scheme_win_title_set);
 	Sregister_symbol("cs_win_size_set", scheme_win_size_set);
 	Sregister_symbol("cs_win_move", scheme_win_move);
 	Sregister_symbol("cs_win_width_get", scheme_win_width_get);

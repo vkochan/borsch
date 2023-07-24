@@ -214,18 +214,10 @@ void window_move_resize(Window *c, int x, int y, int w, int h)
 	ui_window_move(c->win, x, y);
 }
 
-char *window_title_get(Window *c)
-{
-	if (strlen(ui_window_title_get(c->win)))
-		return ui_window_title_get(c->win);
-
-	return "";
-}
-
 static void term_title_set(Window *c)
 {
 	char *term, *t = title;
-	char *ctitle = window_title_get(c);
+	char *ctitle = "";
 	if (!t && window_current() == c && ctitle && strlen(ctitle))
 		t = ctitle;
 	if (t && (term = getenv("TERM")) && !strstr(term, "linux")) {

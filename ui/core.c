@@ -241,16 +241,6 @@ void ui_window_draw_wchar(UiWin *win, int x, int y, wchar_t ch, int n,
 	ui_draw_wchar(win->ui, win->x + x + skip_x, win->y + y + skip_y, ch, n, fg, bg, style);
 }
 
-void ui_window_title_set(UiWin *win, const char *title)
-{
-	strncpy(win->title, title, sizeof(win->title));
-}
-
-char *ui_window_title_get(UiWin *win)
-{
-	return win->title;
-}
-
 void ui_window_width_set(UiWin *win, int width)
 {
 	ui_window_resize(win, width, -1);

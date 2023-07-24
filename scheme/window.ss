@@ -1,8 +1,6 @@
 (define __cs_win_current_set (foreign-procedure "cs_win_current_set" (int) int))
 (define __cs_win_new (foreign-procedure "cs_win_new" (int boolean) scheme-object))
 (define __cs_win_del (foreign-procedure "cs_win_del" (int) int))
-(define __cs_win_title_get (foreign-procedure "cs_win_title_get" (int) scheme-object))
-(define __cs_win_title_set (foreign-procedure "cs_win_title_set" (int string) int))
 (define __cs_win_width_get (foreign-procedure "cs_win_width_get" (int) scheme-object))
 (define __cs_win_height_get (foreign-procedure "cs_win_height_get" (int) scheme-object))
 (define __cs_win_viewport_width_get (foreign-procedure "cs_win_viewport_width_get" (int) scheme-object))
@@ -546,24 +544,6 @@
        [(w)
         (buffer-ref-put (window-buffer))
         ($window-delete w)]))
-
-(define window-name
-   (case-lambda
-      [()
-       (window-name (current-window))]
-
-      [(win)
-       (call-foreign (__cs_win_title_get (window-id win)))]))
-
-(define window-set-name
-   (case-lambda
-      [(title)
-       (window-set-name (current-window) title)]
-
-      [(win title)
-       (call-foreign (__cs_win_title_set (window-id win) title))
-       (buffer-set-dirty (window-buffer win) #t)
-       ]))
 
 (define window-is-maximized?
    (case-lambda
