@@ -7,10 +7,10 @@
 (define vterm-send-keys
    (case-lambda
       [(keys)
-       (call-foreign (__cs_term_keys_send (current-buffer) keys))]
+       (vterm-send-keys (current-buffer) keys)]
 
-      [(bid keys)
-       (call-foreign (__cs_term_keys_send bid keys))]))
+      [(buf keys)
+       (call-foreign (__cs_term_keys_send (buffer-id buf) keys)) ]))
 
 (define (vterm-send-text text)
    (process-send-text (get-local process) text))
@@ -20,16 +20,16 @@
       [()
        (vterm-string (current-buffer))]
 
-      [(b)
-       (call-foreign (__cs_term_text_get b))]))
+      [(buf)
+       (call-foreign (__cs_term_text_get (buffer-id buf))) ]))
 
 (define vterm-current-line
    (case-lambda
       [()
        (vterm-current-line (current-buffer))]
 
-      [(b)
-       (call-foreign (__cs_term_current_line_get b))]))
+      [(buf)
+       (call-foreign (__cs_term_current_line_get (buffer-id buf))) ]))
 
 (define (vterm-mode-copy-enter)
    (let* ([b (buffer-new)]
