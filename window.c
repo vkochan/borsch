@@ -16,10 +16,6 @@
 #define for_each_frame(__f) \
 	for (__f = frame_list; __f; __f = __f->next)
 
-#define for_each_widget(__w) \
-	for (__w = widgets; __w; __w = __w->next)
-
-static Window *widgets;
 static Window *new_windows;
 static int win_id;
 static Frame *current_frame;
@@ -112,29 +108,6 @@ static void frames_cleanup(void)
 	}
 }
 
-static void widget_insert(Window *w)
-{
-	if (widgets)
-		widgets->prev = w;
-
-	w->next = widgets;
-	w->prev = NULL;
-
-	widgets = w;
-}
-
-static void widget_remove(Window *w)
-{
-	if (w->prev)
-		w->prev->next = w->next;
-	if (w->next) {
-		w->next->prev = w->prev;
-	}
-	if (w == widgets)
-		widgets = w->next;
-	w->next = w->prev = NULL;
-}
-
 void window_init(Ui *_ui)
 {
 	ui = _ui;
@@ -144,12 +117,6 @@ void window_cleanup(void)
 {
 	while (new_windows) {
 		Window *w = new_windows;
-		Buffer *buf = w->buf;
-
-		window_delete(w);
-	}
-	while (widgets) {
-		Window *w = widgets;
 		Buffer *buf = w->buf;
 
 		window_delete(w);
@@ -170,10 +137,6 @@ Window *window_get_by_id(int id)
 	Window *c;
 
 	for_each_window(c) {
-		if (c->id == id)
-			return c;
-	}
-	for_each_widget(c) {
 		if (c->id == id)
 			return c;
 	}
@@ -201,11 +164,6 @@ void window_remove(Window *w)
 		new_windows = w->next;
 	w->next = w->prev = NULL;
 	w->is_new = false;
-}
-
-bool window_is_widget(Window *w)
-{
-	return w->is_widget;
 }
 
 void window_move_resize(Window *c, int x, int y, int w, int h)
@@ -323,7 +281,7 @@ void window_update_cursor(Window *w)
 
 	view_invalidate(view);
 
-	if (w == window_current() || window_is_widget(w)) {
+	if (w == window_current()) {
 		void (*scroll_fn)(View *, size_t) = view_scroll_to;
 		Filerange r = view_viewport_get(view);
 		Text *text = buffer_text_get(buf);
@@ -394,10 +352,7 @@ void window_delete(Window *w)
 	if (w == window_current())
 		window_current_set(NULL);
 	
-	if (w->is_widget)
-		widget_remove(w);
-	else
-		window_remove(w);
+	window_remove(w);
 
 	ui_window_free(w->win);
 	view_free(w->view);
@@ -522,12 +477,10 @@ Window *window_create(Buffer *buf, bool is_widget)
 
 	window_buffer_switch(w, buf);
 
-	if (is_widget) {
-		widget_insert(w);
-	} else {
+	if (!is_widget) {
 		ui_window_has_title_set(w->win, true);
-		window_insert_new(w);
 	}
 
+	window_insert_new(w);
 	return w;
 }
