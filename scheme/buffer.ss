@@ -9,7 +9,6 @@
 
       [(n) 
        (let ([b (buffer-new n)])
-          (buffer-set-name b n)
           (window-create b)
           b)]))
 
@@ -43,6 +42,7 @@
          (let* ([b (buffer-create)]
                 [ok (call-foreign (__cs_buf_file_open (buffer-id b) f))])
             (with-current-buffer b
+               (buffer-set-name (buffer-filename))
                (text-mode)
                (when ok
                   (for-each

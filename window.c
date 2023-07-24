@@ -219,7 +219,7 @@ char *window_title_get(Window *c)
 	if (strlen(ui_window_title_get(c->win)))
 		return ui_window_title_get(c->win);
 
-	return buffer_name_get(c->buf);
+	return "";
 }
 
 static void term_title_set(Window *c)

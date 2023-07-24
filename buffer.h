@@ -25,7 +25,7 @@ typedef enum {
 	SYNTAX_RULE_TYPE_STYLE = 1,
 } syntax_rule_type_t;
 
-Buffer *buffer_new(const char *name);
+Buffer *buffer_new(void);
 bool buffer_del(Buffer *buf);
 int buffer_file_open(Buffer *buf, const char *file);
 char *buffer_filename_get(Buffer *buf);
@@ -42,8 +42,6 @@ size_t buffer_cursor_get(Buffer *buf);
 size_t buffer_line_num(Buffer *buf, size_t pos);
 char *buffer_name_get(Buffer *buf);
 void buffer_name_set(Buffer *buf, const char *name);
-void buffer_name_lock(Buffer *buf, bool lock);
-bool buffer_name_is_locked(Buffer *buf);
 void buffer_keymap_set(Buffer *buf, char *name);
 KeyMap *buffer_keymap_get(Buffer *buf);
 size_t buffer_text_insert(Buffer *buf, size_t pos, const char *text);

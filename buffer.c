@@ -45,8 +45,6 @@ typedef struct Buffer {
 	KeyMap *keymap;
 	size_t cursor;
 	Text *text;
-	bool is_name_locked;
-	char name[256];
 	File file;
 	Process *proc;
 	TextProperty *min_prop;
@@ -84,22 +82,6 @@ static size_t buffer_parser_text_read(void *payload, size_t pos, size_t len, cha
 	return text_bytes_get(_buf->text, pos, len, buf);
 }
 
-static int buffer_id_gen(void)
-{
-	Buffer *buf;
-	int id;
-
-	for (id = 1; id <= buf_count; id++) {
-		for (buf = buf_list.next; buf && buf->buf_id != id; buf = buf->next)
-			;
-
-		if (!buf)
-			return id;
-	}
-
-	return buf_count;
-}
-
 static void buffer_list_add(Buffer *head, Buffer *buf)
 {
 	buf->prev = head;
@@ -121,7 +103,7 @@ static void buffer_list_del(Buffer *buf)
 	buf_count--;
 }
 
-Buffer *buffer_new(const char *name)
+Buffer *buffer_new(void)
 {
 	Buffer *buf;
 
@@ -142,15 +124,7 @@ Buffer *buffer_new(const char *name)
 		return NULL;
 	}
 
-	buf_count++;
-	buf->buf_id = buffer_id_gen();
-
-	if (name && strlen(name)) {
-		strncpy(buf->name, name, sizeof(buf->name));
-		buf->is_name_locked = true;
-	} else {
-		snprintf(buf->name, sizeof(buf->name), "new%d", buf->buf_id);
-	}
+	buf->buf_id = buf_count++;
 
 	buffer_list_add(&buf_list, buf);
 
@@ -181,7 +155,6 @@ int buffer_file_open(Buffer *buf, const char *file)
 {
 	bool exist = false;
 	struct stat st;
-	char tmp[256];
 	char *fname;
 	Text *text;
 	int err;
@@ -209,10 +182,6 @@ int buffer_file_open(Buffer *buf, const char *file)
 			return -1;
 	}
 
-	strncpy(tmp, file, sizeof(tmp));
-	fname = basename(tmp);
-	strncpy(buf->name, fname, sizeof(buf->name));
-
 	buf->file.path = strdup(file);
 	buffer_cursor_set(buf, 0);
 	buf->text = text;
@@ -229,7 +198,6 @@ void buffer_filename_set(Buffer *buf, const char *name)
 {
 	free(buf->file.path);
 	buf->file.path = strdup(name);
-	strncpy(buf->name, name, sizeof(buf->name));
 }
 
 bool buffer_save(Buffer *buf)
@@ -294,28 +262,6 @@ size_t buffer_cursor_get(Buffer *buf)
 size_t buffer_line_num(Buffer *buf, size_t pos)
 {
 	return text_lineno_by_pos(buf->text, pos);
-}
-
-char *buffer_name_get(Buffer *buf)
-{
-	if (buf->file.path)
-		return buf->file.path;
-	return buf->name;
-}
-
-void buffer_name_set(Buffer *buf, const char *name)
-{
-	strncpy(buf->name, name, sizeof(buf->name));
-}
-
-void buffer_name_lock(Buffer *buf, bool lock)
-{
-	buf->is_name_locked = lock;
-}
-
-bool buffer_name_is_locked(Buffer *buf)
-{
-	return buf->is_name_locked;
 }
 
 void buffer_keymap_set(Buffer *buf, char *name)

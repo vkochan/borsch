@@ -73,7 +73,7 @@
            (borsch lists)
            (borsch keymap))
 
-(define __cs_buf_new (foreign-procedure "cs_buf_new" (string int) scheme-object))
+(define __cs_buf_new (foreign-procedure "cs_buf_new" (int) scheme-object))
 (define __cs_buf_del (foreign-procedure "cs_buf_del" (int) void))
 
 (define __cs_buf_line_num (foreign-procedure "cs_buf_line_num" (int int) scheme-object))
@@ -86,8 +86,6 @@
 (define __cs_buf_file_set (foreign-procedure "cs_buf_file_set" (int string) void))
 (define __cs_buf_file_get (foreign-procedure "cs_buf_file_get" (int) scheme-object))
 
-(define __cs_buf_name_get (foreign-procedure "cs_buf_name_get" (int) scheme-object))
-(define __cs_buf_name_set (foreign-procedure "cs_buf_name_set" (int string) void))
 (define __cs_buf_is_modified (foreign-procedure "cs_buf_is_modified" (int) scheme-object))
 
 (define __cs_buf_prop_style_add (foreign-procedure "cs_buf_prop_style_add" (int int int int int int string int int string string boolean wchar) scheme-object))
@@ -119,6 +117,7 @@
 (define-record-type $buffer
    (fields
       id
+      (mutable name)
       (mutable is-readonly)
       (mutable is-input-enabled)
       (mutable mode-name)
@@ -186,9 +185,21 @@
                                       1))] ))
 
 (define ($buffer-new name kmap)
-   (make-$buffer (call-foreign (__cs_buf_new name (or kmap -1)))
-                 #f #t "" "" #f #f 1
-                 (copy-environment (scheme-environment))))
+   (define (bufname-gen)
+      (format "new~a"
+         (call/cc (lambda (return)
+            (let loop ([start 1])
+               (for-each
+                  (lambda (b)
+                     (when (eq? start (buffer-id b))
+                        (loop (+ start 1)) ))
+                  $buffer-list)
+               (return start) )))))
+
+   (let ([name (if (equal? "" name) (bufname-gen) name)])
+      (make-$buffer (call-foreign (__cs_buf_new (or kmap -1)))
+                    name #f #t "" "" #f #f 1
+                    (copy-environment (scheme-environment)))))
 
 (define buffer-new
    (case-lambda
@@ -379,19 +390,19 @@
 (define buffer-name
    (case-lambda
       [()
-       (call-foreign (__cs_buf_name_get (buffer-id (current-buffer))))]
+       (buffer-name (current-buffer))]
 
-      [(b)
-       (call-foreign (__cs_buf_name_get (buffer-id b)))]))
+      [(buf)
+       ($buffer-name buf)]))
 
 (define buffer-set-name
    (case-lambda
-     [(n)
-      (buffer-set-name (current-buffer) n)]
+     [(name)
+      (buffer-set-name (current-buffer) name)]
 
-     [(b n)
-      (call-foreign (__cs_buf_name_set (buffer-id b) n))
-      (buffer-set-dirty b #t)
+     [(buf name)
+      ($buffer-name-set! buf name)
+      (buffer-set-dirty buf #t)
       ]))
 
 (define buffer-set-readonly
