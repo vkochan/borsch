@@ -128,7 +128,7 @@
       (mutable state-name)
       (mutable mark)
       (mutable is-dirty)
-      (mutable env)))
+      env))
 
 (define (buffer-id buf)
    ($buffer-id buf) )
