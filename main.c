@@ -153,8 +153,6 @@ static void keypress(int code)
 	if (!c)
 		return;
 
-	c->urgent = false;
-
 	if (buffer_proc_get(c->buf)) {
 		Vt *term = process_term_get(buffer_proc_get(c->buf));
 

@@ -15,7 +15,6 @@ struct Window {
 	View *view;
 	UiWin *win;
 	unsigned short int id;
-	bool urgent;
 	Window *next;
 	Window *prev;
 	bool is_widget;

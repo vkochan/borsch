@@ -377,13 +377,10 @@ void window_focus(Window *c)
 
 	if (prev) {
 		ui_window_focus(prev->win, false);
-		prev->urgent = false;
 	}
 
 	if (c) {
 		Process *proc = buffer_proc_get(c->buf);
-
-		c->urgent = false;
 
 		if (proc && buffer_ref_count(c->buf) > 1) {
 			vt_resize(process_term_get(proc),
