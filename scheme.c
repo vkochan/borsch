@@ -465,7 +465,6 @@ static Buffer *__buf_new(const char *name, KeyMap *kmap)
 
 	if (buf) {
 		keymap_parent_set(buffer_keymap_get(buf), kmap);
-		buffer_env_set(buf, scheme_env_alloc());
 		buffer_ref_get(buf);
 		return buf;
 	}
@@ -962,20 +961,6 @@ ptr scheme_buf_prop_get(int bid, int type, int start, int end, char *name)
 	buf_prop_walk(bid, type, start, end, name, &plist, scheme_buf_prop_walk);
 
 	return plist.head ? plist.head : Scons(Snil, Snil);
-}
-
-ptr scheme_buf_env_get(int bid)
-{
-	Buffer *buf = buffer_by_id(bid);
-	void *env = NULL;
-
-	if (buf) {
-		env = buffer_env_get(buf);
-	}
-
-	if (env)
-		return (ptr)env;
-	return Sfalse;
 }
 
 void scheme_buf_snapshot(int bid)
@@ -1638,8 +1623,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_prop_del", scheme_buf_prop_del);
 	Sregister_symbol("cs_buf_prop_get", scheme_buf_prop_get);
 
-	Sregister_symbol("cs_buf_env_get", scheme_buf_env_get);
-
 	Sregister_symbol("cs_buf_snapshot", scheme_buf_snapshot);
 	Sregister_symbol("cs_buf_undo", scheme_buf_undo);
 	Sregister_symbol("cs_buf_redo", scheme_buf_redo);
@@ -1759,20 +1742,4 @@ int scheme_eval_file(const char *in, const char *out)
 	return Sinteger32_value(Scall2(Stop_level_value(Sstring_to_symbol("__do-eval-file")),
 				Sstring(in),
 				Sstring(out)));
-}
-
-void *scheme_env_alloc(void)
-{
-	ptr env;
-
-	env = CALL1("copy-environment", CALL0("scheme-environment"));
-	Slock_object(env);
-
-	return env;
-}
-
-void scheme_env_free(void *env)
-{
-	if (env)
-		Sunlock_object((ptr)env);
 }

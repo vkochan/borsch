@@ -60,8 +60,6 @@ int buffer_property_add(Buffer *buf, int type, size_t start, size_t end, void *d
 			char *name, void (*free_fn)(void *));
 void buffer_properties_walk(Buffer *buf, int type, size_t start, size_t end, char *name, void *arg, buffer_property_cb_t cb);
 bool buffer_property_remove(Buffer *buf, size_t type, size_t start, size_t end, const char *pattern, char *name);
-void buffer_env_set(Buffer *buf, void *env);
-void *buffer_env_get(Buffer *buf);
 
 void buffer_snapshot(Buffer *buf);
 void buffer_undo(Buffer *buf);

@@ -54,7 +54,6 @@ typedef struct Buffer {
 	TextProperty *max_prop;
 	TextProperty props;
 	SyntaxParser *parser;
-	void *env;
 } Buffer;
 
 static Buffer buf_list;
@@ -169,7 +168,6 @@ bool buffer_del(Buffer *buf)
 		evt.oid = process_pid_get(buffer_proc_get(buf));
 		scheme_event_handle(evt);
 	}
-	scheme_env_free(buffer_env_get(buf));
 	buffer_list_del(buf);
 	/* TODO: check if buffer is not saved and ask user to save it */
 	syntax_parser_delete(buf->parser);
@@ -739,16 +737,6 @@ static void buffer_properties_pos_update(Buffer *buf, size_t pos, int len)
 		}
 		it = it->next;
 	}
-}
-
-void buffer_env_set(Buffer *buf, void *env)
-{
-	buf->env = env;
-}
-
-void *buffer_env_get(Buffer *buf)
-{
-	return buf->env;
 }
 
 void buffer_snapshot(Buffer *buf)

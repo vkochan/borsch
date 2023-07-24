@@ -89,8 +89,6 @@
 (define __cs_buf_file_set (foreign-procedure "cs_buf_file_set" (int string) void))
 (define __cs_buf_file_get (foreign-procedure "cs_buf_file_get" (int) scheme-object))
 
-(define __cs_buf_env_get (foreign-procedure "cs_buf_env_get" (int) scheme-object))
-
 (define __cs_buf_name_get (foreign-procedure "cs_buf_name_get" (int) scheme-object))
 (define __cs_buf_name_set (foreign-procedure "cs_buf_name_set" (int string) void))
 (define __cs_buf_is_modified (foreign-procedure "cs_buf_is_modified" (int) scheme-object))
@@ -129,7 +127,8 @@
       (mutable mode-name)
       (mutable state-name)
       (mutable mark)
-      (mutable is-dirty)))
+      (mutable is-dirty)
+      (mutable env)))
 
 (define (buffer-id buf)
    ($buffer-id buf) )
@@ -188,7 +187,8 @@
 
 (define ($buffer-new name kmap)
    (make-$buffer (call-foreign (__cs_buf_new name (or kmap -1)))
-                 #f #t "" "" #f #f))
+                 #f #t "" "" #f #f
+                 (copy-environment (scheme-environment))))
 
 (define buffer-new
    (case-lambda
@@ -307,7 +307,7 @@
       (call-foreign (__cs_buf_file_set (buffer-id (current-buffer)) path))))
 
 (define (buffer-env)
-   (call-foreign (__cs_buf_env_get (buffer-id (current-buffer)))))
+   ($buffer-env (current-buffer)))
 
 (define dir-local-symbol-bound?
    (case-lambda

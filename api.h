@@ -65,7 +65,5 @@ int scheme_init(int argc, char *argv[]);
 void scheme_uninit(void);
 int scheme_event_handle(event_t evt);
 int scheme_eval_file(const char *scm_in, const char *out);
-void *scheme_env_alloc(void);
-void scheme_env_free(void *env);
 
 #endif /* API_H */
