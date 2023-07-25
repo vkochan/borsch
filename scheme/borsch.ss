@@ -382,7 +382,6 @@
       ui-screen-width
       ui-screen-height
       ui-update
-      ui-clear
       ui-draw-char
       ui-draw-char-vert
       ui-draw-text

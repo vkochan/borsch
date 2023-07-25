@@ -6,7 +6,6 @@
       ui-screen-width
       ui-screen-height
       ui-update
-      ui-clear
       ui-draw-char
       ui-draw-char-vert
       ui-draw-text
@@ -46,7 +45,10 @@
 (define (ui-process)
    (process-destroy-dead)
    (ui-process-event)
+   (when (ui-needs-update?)
+      (ui-clear) )
    (run-hooks 'ui-update-hook)
+   (ui-needs-update #f)
    (ui-update))
 
 (define (ui-process-event)

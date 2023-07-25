@@ -567,13 +567,11 @@
                (window-move w 0 (- (ui-screen-height)
                                    bot_h))))
          (widget-list)))
-   (layout-arrange)
-   (ui-needs-update #f))
+   (layout-arrange) )
 
 (define (layout-draw)
    (let ([redraw? (ui-needs-update?)])
       (when redraw?
-         (ui-clear)
          (layout-update))
       (for-each
          (lambda (w)
