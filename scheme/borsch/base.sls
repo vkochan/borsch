@@ -11,7 +11,8 @@
       remove-hook
       current-cwd
       with-current-cwd
-      current-cwd-handler)
+      current-cwd-handler
+      stack-trace->string)
    (import (chezscheme))
 
 (define (bit n)
@@ -40,7 +41,7 @@
           (lambda (exit)
              (with-exception-handler
                 (lambda (condition)
-                   (run-hooks 'error-hook (error->string condition))
+                   (run-hooks 'error-hook (stack-trace->string condition))
 		   (when catcher
                       (catcher condition))
                    (exit condition))
@@ -116,4 +117,26 @@
       ((_ cwd exp ...)
        #`(parameterize ([current-cwd-tmp cwd])
             exp ... ))))
+
+(define (stack-trace->string e)
+   (define (get-func c)
+      (let ((cc ((c 'code) 'name)))
+         (if cc cc "--main--")))
+
+   (with-output-to-string
+      (lambda ()
+         (display-condition e) (newline)
+  
+         (let p ((t (inspect/object (condition-continuation e))))
+            (call/cc
+               (lambda (ret)
+                  (if (> (t 'depth) 1)
+                      (begin
+                         (call-with-values
+                            (lambda () (t 'source-path))
+                            (case-lambda
+                               ((file line column)
+                                (printf "\tat ~a (~a:~a,~a)\n" (get-func t) file line column))
+                               (else (ret)) ))
+                         (p (t 'link)) ))))))))
 )

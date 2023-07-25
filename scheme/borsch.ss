@@ -55,6 +55,7 @@
       current-cwd
       with-current-cwd
       current-cwd-handler
+      stack-trace->string
 
       file-is-directory?
       file-is-regular?
