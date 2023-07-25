@@ -160,7 +160,7 @@
          (let ([m (buffer-get "*Messages*")])
             (when m
                (with-current-buffer m
-                  (text-insert (format "~a\n" e) '(style: (fg: "red"))))))))
+                  (text-append (format "~a\n" e) '(style: (fg: "red"))))))))
 
    (add-hook 'text-draw-hook
       (lambda (w)
