@@ -9,7 +9,9 @@
       ui-clear
       ui-draw-char
       ui-draw-char-vert
-      ui-draw-text)
+      ui-draw-text
+      ui-needs-update?
+      ui-needs-update)
    (import
       (chezscheme)
       (borsch base)
@@ -26,8 +28,17 @@
 (define __cs_ui_draw_char (foreign-procedure "cs_ui_draw_char" (int int wchar int int int int) void))
 (define __cs_ui_size_changed (foreign-procedure "cs_ui_size_changed" () scheme-object))
 
+(define $ui-needs-update #t)
+
 (define (ui-size-changed)
    (call-foreign (__cs_ui_size_changed)))
+
+(define (ui-needs-update?)
+   (or $ui-needs-update
+       (ui-size-changed) ))
+
+(define (ui-needs-update update?)
+   (set! $ui-needs-update update?) )
 
 (define (ui-init ui-type)
    (call-foreign (__cs_ui_init ui-type)))

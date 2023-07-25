@@ -347,7 +347,7 @@
       [(fr l)
        (frame-set-prev-layout fr (current-layout fr))
        (frame-set-layout fr l)
-       (window-layout-set-changed #t)
+       (ui-needs-update #t)
        (run-hooks 'layout-changed-hook)]))
 
 (define layout-set-tiled
@@ -440,7 +440,7 @@
 
       [(fr n)
        (frame-set-n-master fr n)
-       (window-layout-set-changed #t)]))
+       (ui-needs-update #t)]))
 
 (define layout-n-master+
    (case-lambda
@@ -481,7 +481,7 @@
 
       [(fr f)
        (frame-set-%-master fr f)
-       (window-layout-set-changed #t)]))
+       (ui-needs-update #t)]))
 
 (define layout-%-master+
    (case-lambda
@@ -514,7 +514,7 @@
 
       [(fr s)
        (frame-set-sticky fr s)
-       (window-layout-set-changed #t)]))
+       (ui-needs-update #t)]))
 
 (define layout-is-sticky?
    (case-lambda

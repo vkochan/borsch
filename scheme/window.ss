@@ -31,21 +31,12 @@
 (define (window-id w)
    ($window-id w) )
 
-(define $window-layout-changed #f)
-
 (define $widget-list-top (list))
 (define $widget-list-bottom (list))
 (define $widget-list (list))
 
 (define (widget-list)
    $widget-list)
-
-(define (window-layout-is-changed)
-   (or $window-layout-changed
-       (ui-size-changed)))
-
-(define (window-layout-set-changed changed?)
-   (set! $window-layout-changed changed?))
 
 (define (window-update-layout-size)
    (let ([waw 0]
@@ -83,7 +74,7 @@
                                    bot_h))))
          (widget-list)))
    (layout-arrange)
-   (window-layout-set-changed #f))
+   (ui-needs-update #f))
 
 (define window-draw-char
    (case-lambda
@@ -247,7 +238,7 @@
        (member w $widget-list-bottom)]))
 
 (define (window-draw-all)
-   (let ([redraw? (window-layout-is-changed)])
+   (let ([redraw? (ui-needs-update?)])
       (when redraw?
          (ui-clear)
          (window-update-layout-size))
@@ -361,7 +352,7 @@
       [(w)
        ($window-remove w)
        ($window-insert-at w (frame-first-window))
-       (window-layout-set-changed #t)]))
+       (ui-needs-update #t)]))
 
 (define window-set-prev
    (case-lambda
@@ -371,7 +362,7 @@
       [(w prev)
        ($window-remove prev)
        ($window-insert-at prev (window-prev w))
-       (window-layout-set-changed #t)]))
+       (ui-needs-update #t)]))
 
 (define window-set-next
    (case-lambda
@@ -381,7 +372,7 @@
       [(w next)
       ($window-remove next)
       ($window-insert-at next (window-next w))
-      (window-layout-set-changed #t)]))
+      (ui-needs-update #t)]))
 
 (define ($window-list fr)
    (let loop ([next (window-first fr)]
@@ -505,7 +496,7 @@
             (let ()
                (window-set-first win)))
          (run-hooks 'window-create-hook win)
-         (window-layout-set-changed #t)
+         (ui-needs-update #t)
          (window-focus win))
       win))
 
@@ -534,7 +525,7 @@
 	      (when (>= 1 (buffer-ref-count b))
                  (buffer-ref-put b))
               (run-hooks 'window-delete-hook w)
-              (window-layout-set-changed #t)))]))
+              (ui-needs-update #t)))]))
 
 (define window-close
     (case-lambda
@@ -633,7 +624,7 @@
                     (and (positive? h)
                          (not (eq? h old-h))))
              (call-foreign (__cs_win_size_set (window-id win) w h))
-             (window-layout-set-changed #t)))]))
+             (ui-needs-update #t)))]))
 
 (define window-set-width
    (case-lambda
@@ -832,7 +823,7 @@
       (window-set-width win w)
       (window-set-height win h)
       (window-move win x y)
-      (window-layout-set-changed #t)
+      (ui-needs-update #t)
       win))
 
 (define window-x
@@ -873,7 +864,7 @@
           (lambda (f)
              (when (current-window)
                 (current-buffer (window-buffer (current-window))))
-             (window-layout-set-changed #t) ))
+             (ui-needs-update #t) ))
 (add-hook 'ui-update-hook
           (lambda ()
              (window-draw-all)) )

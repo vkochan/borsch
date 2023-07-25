@@ -386,6 +386,8 @@
       ui-draw-char
       ui-draw-char-vert
       ui-draw-text
+      ui-needs-update?
+      ui-needs-update
 
       make-ssh-address
       ssh-address-user
