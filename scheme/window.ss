@@ -207,14 +207,14 @@
       [(w)
        (or
           (window-is-widget? w)
-          (if (layout-is-maximized?)
+          (if (frame-is-maximized?)
              (or (equal? w (current-window))
                  (equal? w (window-prev-selected)))
              ;; else
              #t))]))
 
 (define (window-last-master)
-   (let ([nm (layout-n-master)]
+   (let ([nm (frame-n-master)]
          [m #f])
       (window-for-all
          (lambda (w)
@@ -434,7 +434,7 @@
    (let ([win ($window-new b #f)])
       (when win
          (buffer-ref-get b)
-         (if (layout-is-sticky?)
+         (if (frame-is-sticky?)
             (let ([m (window-last-master)])
                (when m (window-set-next m win)))
             ;; else
@@ -488,7 +488,7 @@
 
       [(wid)
        (and (equal? (current-window) wid)
-            (layout-is-maximized?))]))
+            (frame-is-maximized?))]))
 
 (define window-is-master?
    (case-lambda
@@ -496,7 +496,7 @@
        (window-is-master? (current-window))]
 
       [(wid)
-       (let ([nm (layout-n-master)]
+       (let ([nm (frame-n-master)]
              [m? #f])
           (window-for-all
              (lambda (w)
@@ -530,7 +530,7 @@
        (window-is-sticky? (current-window))]
 
       [(wid)
-       (and (window-is-master? wid) (layout-is-sticky?))]))
+       (and (window-is-master? wid) (frame-is-sticky?))]))
 
 (define window-buffer
    (case-lambda

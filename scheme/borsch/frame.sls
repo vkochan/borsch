@@ -25,6 +25,7 @@
       frame-find-buffer
       frame-get-buffer-by-file
       frame-get-buffer
+      frame-is-maximized?
       frame-is-sticky?
       frame-set-sticky
       frame-n-master
@@ -266,6 +267,14 @@
    (frame-find-buffer
       (lambda (b)
          (equal? name (buffer-name b)))))
+
+(define frame-is-maximized?
+   (case-lambda
+      [()
+       (frame-is-maximized? (current-frame))]
+
+      [(fr)
+       (equal? (frame-layout fr) 'maximized) ]))
 
 (define frame-is-sticky?
    (case-lambda

@@ -359,6 +359,7 @@
       frame-find-buffer
       frame-get-buffer-by-file
       frame-get-buffer
+      frame-is-maximized?
       frame-is-sticky?
       frame-set-sticky
       frame-n-master
