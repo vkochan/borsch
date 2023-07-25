@@ -38,44 +38,6 @@
 (define (widget-list)
    $widget-list)
 
-(define (window-update-layout-size)
-   (let ([waw 0]
-         [wah 0]
-         [wax 0]
-         [way 0]
-         [top_h 0]
-         [bot_h 0])
-      (for-each
-         (lambda (w)
-            (cond
-               [(widget-is-top? w)
-                (set! top_h (+ top_h
-                               (window-height w)))]
-               [(widget-is-bottom? w)
-                (set! bot_h (+ bot_h
-                               (window-height w)))]))
-         (widget-list))
-      (set! wah (- (ui-screen-height)
-                   bot_h))
-      (set! waw (ui-screen-width))
-      (set! wah (- wah
-                   top_h))
-      (set! way (+ way
-                   top_h))
-      (layout-set-x wax)
-      (layout-set-y way)
-      (layout-set-width waw)
-      (layout-set-height wah)
-      (for-each
-         (lambda (w)
-            (window-set-width w (ui-screen-width))
-            (when (widget-is-bottom? w)
-               (window-move w 0 (- (ui-screen-height)
-                                   bot_h))))
-         (widget-list)))
-   (layout-arrange)
-   (ui-needs-update #f))
-
 (define window-draw-char
    (case-lambda
       [(w x y ch)
@@ -236,23 +198,6 @@
 
       [(w)
        (member w $widget-list-bottom)]))
-
-(define (window-draw-all)
-   (let ([redraw? (ui-needs-update?)])
-      (when redraw?
-         (ui-clear)
-         (window-update-layout-size))
-      (for-each
-         (lambda (w)
-            (when (not (equal? w (current-window)))
-               (window-draw w redraw?)))
-         (widget-list))
-      (for-each
-         (lambda (w)
-            (when (not (equal? w (current-window)))
-               (window-draw w redraw?)))
-         (window-list))
-      (window-draw (current-window) redraw?)))
 
 (define window-is-visible?
    (case-lambda
@@ -865,6 +810,3 @@
              (when (current-window)
                 (current-buffer (window-buffer (current-window))))
              (ui-needs-update #t) ))
-(add-hook 'ui-update-hook
-          (lambda ()
-             (window-draw-all)) )
