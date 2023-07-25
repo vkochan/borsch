@@ -288,7 +288,12 @@ void scheme_win_buf_switch(int wid, int bid)
 
 ptr scheme_win_viewport_pos(int wid, char type)
 {
-	return Sinteger(window_viewport_pos(window_get_by_id(wid), type));
+	Window *w = window_get_by_id(wid);
+
+	if (w)
+		return Sinteger(window_viewport_pos(w, type));
+	else
+		return Sinteger(0);
 }
 
 ptr scheme_win_viewport_coord(int wid, int pos)
@@ -306,17 +311,29 @@ ptr scheme_win_viewport_coord(int wid, int pos)
 
 ptr scheme_win_scroll(int wid, char type, int n)
 {
-	return Sinteger(window_scroll(window_get_by_id(wid), type, n));
+	Window *w = window_get_by_id(wid);
+	if (w)
+		return Sinteger(window_scroll(w, type, n));
+	else
+		return Sinteger(0);
 }
 
 void scheme_win_sidebar_set(int wid, int width)
 {
-	window_sidebar_width_set(window_get_by_id(wid), width);
+	Window *w = window_get_by_id(wid);
+
+	if (w)
+		window_sidebar_width_set(w, width);
 }
 
 ptr scheme_win_sidebar_get(int wid)
 {
-	return Sinteger(window_sidebar_width(window_get_by_id(wid)));
+	Window *w = window_get_by_id(wid);
+
+	if (w)
+		return Sinteger(window_sidebar_width(w));
+	else
+		return Sinteger(0);
 }
 
 void scheme_win_update_cursor(int wid)
