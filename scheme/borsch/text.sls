@@ -126,9 +126,6 @@
       (borsch copybuf)
       (chezscheme))
 
-(define __cs_buf_cursor_get (foreign-procedure "cs_buf_cursor_get" (int) scheme-object))
-(define __cs_buf_cursor_set (foreign-procedure "cs_buf_cursor_set" (int int) void))
-
 (define __cs_buf_text_insert (foreign-procedure "cs_buf_text_insert" (int string) scheme-object))
 (define __cs_buf_text_insert_char (foreign-procedure "cs_buf_text_insert_char" (int int) scheme-object))
 (define __cs_buf_text_insert_nl (foreign-procedure "cs_buf_text_insert_nl" (int int) scheme-object))
@@ -151,7 +148,7 @@
          (when (and (not *buffer-enable-eof*)
                     (and (> c 0) (>= c (text-end-pos))))
             (set! c (- (text-end-pos) 1)))
-         (call-foreign (__cs_buf_cursor_set (buffer-id (current-buffer)) c))
+         (buffer-set-cursor (current-buffer) c)
          (buffer-set-dirty (current-buffer) #t)
          c)))
 
@@ -165,7 +162,7 @@
             (cursor-set curs)))))
 
 (define (cursor)
-   (call-foreign (__cs_buf_cursor_get (buffer-id (current-buffer)))))
+   (buffer-cursor (current-buffer)))
 
 (define (cursor-to-next-char)
    (cursor-set (text-next-char-pos)))
