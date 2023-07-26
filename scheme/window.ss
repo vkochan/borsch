@@ -463,14 +463,13 @@
 	(window-delete (current-window))]
 
        [(w)
-        (let ([n (buffer-name (window-buffer w))])
-           (let ([b (window-buffer w)])
-              ($window-delete w)
-              (buffer-ref-put b)
-	      (when (>= 1 (buffer-ref-count b))
-                 (buffer-ref-put b))
-              (run-hooks 'window-delete-hook w)
-              (ui-needs-update #t)))]))
+        (let ([b (window-buffer w)])
+           ($window-delete w)
+           (buffer-ref-put b)
+	   (when (>= 1 (buffer-ref-count b))
+              (buffer-ref-put b))
+           (run-hooks 'window-delete-hook w)
+           (ui-needs-update #t))]))
 
 (define window-close
     (case-lambda
