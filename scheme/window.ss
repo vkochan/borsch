@@ -452,8 +452,8 @@
       (let ([focus (or (frame-prev-focused-window)
                        (window-next win)
                        (window-prev win))])
+         (frame-set-current-window #f)
          (when focus
-            (frame-set-current-window #f)
             (window-focus focus))))
    (call-foreign (__cs_win_del (window-id win))))
 
