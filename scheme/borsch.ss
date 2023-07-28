@@ -13,6 +13,8 @@
       config-dir
       runtime-initialize
       runtime-cleanup
+      gc-add-handler
+      gc-remove-handler
 
       define*
 
