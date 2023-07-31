@@ -264,30 +264,31 @@
       ($window-prev-set! w #f)
       ($window-next-set! w #f) ))
 
-(define ($window-insert-at w at)
-   (when at
-      (cond
-         ((equal? at (frame-first-window))
-          ($window-next-set! w at)
-          ($window-prev-set! w #f)
-          ($window-prev-set! at w)
-          (frame-set-first-window w))
-         ((equal? at (frame-last-window))
-          ($window-next-set! at w)
-          ($window-prev-set! w at)
-          ($window-next-set! w #f)
-          (frame-set-last-window w))
-         (else
-          (let ([prev ($window-prev at)])
-             ($window-next-set! prev w)
-             ($window-prev-set! at w)
-             ($window-next-set! w at)
-             ($window-prev-set! w prev) ))))
+(define ($window-insert-next win next)
+   (if ($window-next win)
+      ($window-prev-set! ($window-next win) next)
+      ;; else
+      (frame-set-last-window next))
+   ($window-next-set! next ($window-next win))
+   ($window-prev-set! next win)
+   ($window-next-set! win next)
    (when (not (frame-first-window))
-      (frame-set-first-window w))
+      (frame-set-first-window win))
    (when (not (frame-last-window))
-      (frame-set-last-window w))
-)
+      (frame-set-last-window win)) )
+
+(define ($window-insert-prev win prev)
+   (if ($window-prev win)
+      ($window-next-set! ($window-prev win) prev)
+      ;; else
+      (frame-set-first-window prev))
+   ($window-prev-set! prev ($window-prev win))
+   ($window-next-set! prev win)
+   ($window-prev-set! win prev)
+   (when (not (frame-first-window))
+      (frame-set-first-window win))
+   (when (not (frame-last-window))
+      (frame-set-last-window win)) )
 
 (define window-set-first
    (case-lambda
@@ -295,8 +296,14 @@
        (window-set-first (current-window))]
 
       [(w)
-       ($window-remove w)
-       ($window-insert-at w (frame-first-window))
+       (if (not (frame-first-window))
+          (begin
+             (frame-set-first-window w)
+             (frame-set-last-window w))
+          ;; else
+          (begin
+             ($window-remove w)
+             ($window-insert-prev (frame-first-window) w)))
        (ui-needs-update #t)]))
 
 (define window-set-prev
@@ -306,7 +313,7 @@
 
       [(w prev)
        ($window-remove prev)
-       ($window-insert-at prev (window-prev w))
+       ($window-insert-prev  w prev)
        (ui-needs-update #t)]))
 
 (define window-set-next
@@ -316,14 +323,14 @@
 
       [(w next)
       ($window-remove next)
-      ($window-insert-at next (window-next w))
+      ($window-insert-next w next)
       (ui-needs-update #t)]))
 
 (define ($window-list fr)
    (let loop ([next (window-first fr)]
               [ls   (list)])
       (if next
-         (loop (window-next next)
+         (loop ($window-next next)
                (append ls (list next)) )
          ;; else
          ls )))
@@ -520,8 +527,8 @@
       [()
        (window-set-master (current-window))]
 
-      [(wid)
-       (window-set-first wid)]))
+      [(win)
+       (window-set-first win)]))
 
 (define window-is-sticky?
    (case-lambda
