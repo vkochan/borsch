@@ -59,7 +59,6 @@
       enable-insert
       insert-enabled?
       buffer-is-valid?
-      buffer-is-visible?
       buffer-set-vterm
       buffer-is-vterm?
       buffer-set-cwd
@@ -98,7 +97,6 @@
 (define __cs_buf_kmap_get (foreign-procedure "cs_buf_kmap_get" (int) scheme-object))
 
 (define __cs_buf_is_valid (foreign-procedure "cs_buf_is_valid" (int) scheme-object))
-(define __cs_buf_is_visible (foreign-procedure "cs_buf_is_visible" (int) scheme-object))
 (define __cs_buf_is_term (foreign-procedure "cs_buf_is_term" (int) scheme-object))
 (define __cs_buf_term_set (foreign-procedure "cs_buf_term_set" (int int) void))
 
@@ -671,14 +669,6 @@
 
 (define (buffer-is-valid? bid)
    (call-foreign (__cs_buf_is_valid (buffer-id bid))))
-
-(define buffer-is-visible?
-   (case-lambda
-      [()
-       (call-foreign (__cs_buf_is_visible (buffer-id (current-buffer))))]
-
-      [(b)
-       (call-foreign (__cs_buf_is_visible (buffer-id b)))]))
 
 (define buffer-set-vterm
    (case-lambda

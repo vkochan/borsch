@@ -38,6 +38,15 @@
 (define (widget-list)
    $widget-list)
 
+(define (buffer-is-visible? buf)
+   (call/cc
+      (lambda (return)
+         (window-for-each
+            (lambda (win)
+               (when (equal? (window-buffer win) buf)
+                  (return #t) )))
+         (return #f) )))
+
 (define window-draw-char
    (case-lambda
       [(w x y ch)

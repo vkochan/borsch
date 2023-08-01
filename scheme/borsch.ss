@@ -136,7 +136,6 @@
       enable-insert
       insert-enabled?
       buffer-is-valid?
-      buffer-is-visible?
       buffer-set-vterm
       buffer-is-vterm?
       buffer-set-cwd

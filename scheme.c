@@ -698,19 +698,6 @@ void scheme_buf_term_set(int bid, pid_t pid)
 	buffer_proc_set(buf, proc);
 }
 
-ptr scheme_buf_is_visible(int bid)
-{
-	Buffer *buf = buffer_by_id(bid);
-	if (buf) {
-		Window *w;
-		for_each_window(w) {
-			if (w->buf == buf)
-				return Strue;
-		}
-	}
-	return Sfalse;
-}
-
 ptr scheme_buf_prop_style_add(int bid, int type, int fg, int bg, int attr, int is_set, const char *style_name, int start, int end,
 			      const char *regex, char *name, bool expand, wchar_t ch)
 {
@@ -1544,7 +1531,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_buf_save", scheme_buf_save);
 	Sregister_symbol("cs_buf_is_term", scheme_buf_is_term);
 	Sregister_symbol("cs_buf_term_set", scheme_buf_term_set);
-	Sregister_symbol("cs_buf_is_visible", scheme_buf_is_visible);
 
 	Sregister_symbol("cs_buf_prop_style_add", scheme_buf_prop_style_add);
 	Sregister_symbol("cs_buf_prop_kmap_add", scheme_buf_prop_kmap_add);
