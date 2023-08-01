@@ -853,18 +853,9 @@ int buf_file_open(int bid, const char *file)
 		if (err) {
 			return -1;
 		}
-
-		/* update view with new text */
-		Window *c;
-		for_each_window(c) {
-			if (buf == c->buf) {
-				Text *txt = buffer_text_get(buf);
-
-				if (view_text(c->view) != txt)
-					view_reload(c->view, txt);
-			}
-		}
+		return 0;
 	}
+	return -1;
 }
 
 int buf_prop_style_add(int bid, int type, int fg, int bg, int attr, int is_set, const char *style_name, int start, int end,

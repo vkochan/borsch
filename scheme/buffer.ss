@@ -41,6 +41,7 @@
          ;; else
          (let* ([b (buffer-create)]
                 [ok (call-foreign (__cs_buf_file_open (buffer-id b) f))])
+            (window-reload-buffer b)
             (with-current-buffer b
                (buffer-set-name (buffer-filename))
                (text-mode)

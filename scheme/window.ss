@@ -20,6 +20,7 @@
 (define __cs_win_coord_get (foreign-procedure "cs_win_coord_get" (int) scheme-object))
 (define __cs_win_draw (foreign-procedure "cs_win_draw" (int boolean) void))
 (define __cs_win_has_title (foreign-procedure "cs_win_has_title" (int) boolean))
+(define __cs_win_view_reload (foreign-procedure "cs_win_view_reload" (int int) void))
 
 (define-record-type $window
    (fields
@@ -37,6 +38,12 @@
 
 (define (widget-list)
    $widget-list)
+
+(define (window-reload-buffer buf)
+   (window-for-each
+      (lambda (win)
+         (when (equal? buf (window-buffer win))
+            (call-foreign (__cs_win_view_reload (window-id win) (buffer-id buf))) ))))
 
 (define (buffer-is-visible? buf)
    (call/cc
