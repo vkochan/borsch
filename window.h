@@ -14,11 +14,6 @@ struct Window {
 	Frame *frame;
 	View *view;
 	UiWin *win;
-	unsigned short int id;
-	Window *next;
-	Window *prev;
-	bool is_widget;
-	bool is_new;
 };
 
 typedef struct _Frame {
@@ -35,17 +30,10 @@ Frame *frame_create(void);
 void frame_delete(Frame *f);
 Frame *frame_by_id(int fid);
 
-#define for_each_window(__w) \
-	for (__w = window_new_list(); __w; __w = __w->next)
-
-Window *window_new_list(void);
-
 void window_init(Ui *ui);
 void window_cleanup(void);
 
 Window *window_current(void);
-Window *window_get_by_id(int id);
-void window_remove(Window *c);
 bool window_is_master(Window *w);
 void window_move_resize(Window *c, int x, int y, int w, int h);
 int window_viewport_pos(Window *w, char type);

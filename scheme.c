@@ -111,40 +111,23 @@ ptr scheme_screen_height_get(void)
 	return Sinteger(ui_height_get(g_ui));
 }
 
-void scheme_win_draw(int wid, bool enforce)
+void scheme_win_draw(Window *w, bool enforce)
 {
-	Window *w = window_get_by_id(wid);
-
-	if (w) {
-		ui_window_draw(w->win);
-	}
+	ui_window_draw(w->win);
 }
 
-ptr scheme_win_coord_get(int wid)
+ptr scheme_win_coord_get(Window *w)
 {
-	Window *w = window_get_by_id(wid);
 	int x, y;
-
-	if (!w)
-		return Sfalse;
 
 	x = ui_window_x_get(w->win);
 	y = ui_window_y_get(w->win);
 	return Scons(Sinteger(x), Sinteger(y));
 }
 
-ptr scheme_win_current_get(void)
+int scheme_win_current_set(Window *w)
 {
-	if (window_current())
-		return Sinteger(window_current()->id);
-	return Sfalse;
-}
-
-int scheme_win_current_set(int wid)
-{
-	Window *w = window_get_by_id(wid);
-	if (w)
-		window_focus(w);
+	window_focus(w);
 	return 0;
 }
 
@@ -158,150 +141,120 @@ ptr scheme_win_new(int bid, bool is_widget)
 	w = window_create(buf, is_widget);
 	if (!w)
  		return Sfalse;
-	return Sinteger(w->id);
+	return Sinteger(w);
 }
 
-void scheme_win_del(int wid)
+void scheme_win_del(Window *w)
 {
-	Window *w = window_get_by_id(wid);
-
-	if (w)
-		window_delete(w);
+	window_delete(w);
 }
 
-void scheme_win_size_set(int wid, int width, int height)
+void scheme_win_size_set(Window *w, int width, int height)
 {
-	Window *w = window_get_by_id(wid);
-
-	if (w) {
-		if (width > 0) {
-			ui_window_width_set(w->win, width);
-		}
-		if (height > 0) {
-			ui_window_height_set(w->win, height);
-		}
+	if (width > 0) {
+		ui_window_width_set(w->win, width);
+	}
+	if (height > 0) {
+		ui_window_height_set(w->win, height);
 	}
 }
 
-void scheme_win_move(int wid, int x, int y)
+void scheme_win_move(Window *w, int x, int y)
 {
-	Window *w = window_get_by_id(wid);
-
-	if (w) {
-		ui_window_move(w->win, x, y);
-	}
+	ui_window_move(w->win, x, y);
 }
 
-static int win_size_get(int wid, int *width, int *height)
+static int win_size_get(Window *w, int *width, int *height)
 {
-	Window *w = window_get_by_id(wid);
-
-	if (w) {
-		if (width)
-			*width = ui_window_width_get(w->win);
-		if (height)
-			*height = ui_window_height_get(w->win);
-		return 0;
-	}
-
-	return -1;
+	if (width)
+		*width = ui_window_width_get(w->win);
+	if (height)
+		*height = ui_window_height_get(w->win);
+	return 0;
 }
 
-ptr scheme_win_width_get(int wid)
+ptr scheme_win_width_get(Window *w)
 {
 	int width;
 	int err;
 
-	err = win_size_get(wid, &width, NULL);
+	err = win_size_get(w, &width, NULL);
 	if (err)
 		return Sfalse;
 	return Sinteger(width);
 }
 
-ptr scheme_win_height_get(int wid)
+ptr scheme_win_height_get(Window *w)
 {
 	int height;
 	int err;
 
-	err = win_size_get(wid, NULL, &height);
+	err = win_size_get(w, NULL, &height);
 	if (err)
 		return Sfalse;
 	return Sinteger(height);
 }
 
-ptr scheme_win_viewport_width_get(int wid)
+ptr scheme_win_viewport_width_get(Window *w)
 {
 	int width;
 	int err;
 
-	err = window_viewport_size(window_get_by_id(wid), &width, NULL);
+	err = window_viewport_size(w, &width, NULL);
 	if (err)
 		return Sfalse;
 	return Sinteger(width);
 }
 
-ptr scheme_win_viewport_height_get(int wid)
+ptr scheme_win_viewport_height_get(Window *w)
 {
 	int height;
 	int err;
 
-	err = window_viewport_size(window_get_by_id(wid), NULL, &height);
+	err = window_viewport_size(w, NULL, &height);
 	if (err)
 		return Sfalse;
 	return Sinteger(height);
 }
 
-void scheme_win_viewport_cell_set(int wid, size_t start, size_t end, short fg, short bg, int attr, wchar_t ch, int set)
+void scheme_win_viewport_cell_set(Window *w, size_t start, size_t end, short fg, short bg, int attr, wchar_t ch, int set)
 {
-	Window *w = window_get_by_id(wid);
 	CellStyle style = {0};
 
-	if (w) {
-		style.fg = fg;
-		style.bg = bg;
-		style.attr = attr;
-		style.ch = ch;
+	style.fg = fg;
+	style.bg = bg;
+	style.attr = attr;
+	style.ch = ch;
 
-		view_style(w->view, style, start, end, false, set);
-	}
+	view_style(w->view, style, start, end, false, set);
 }
 
-void scheme_win_border_set(int wid, bool enable)
+void scheme_win_border_set(Window *w, bool enable)
 {
-	Window *w = window_get_by_id(wid);
-
-	if (w) {
-		ui_window_border_enable(w->win, enable);
-	}
+	ui_window_border_enable(w->win, enable);
 }
 
-void scheme_win_buf_switch(int wid, int bid)
+void scheme_win_buf_switch(Window *w, int bid)
 {
-	Window *w = window_get_by_id(wid);
 	Buffer *b = buffer_by_id(bid);
 
-	if (w && b && w->buf != b) {
+	if (b && w->buf != b) {
 		window_buffer_switch(w, b);
 		view_reload(w->view, buffer_text_get(b));
 	}
 }
 
-ptr scheme_win_viewport_pos(int wid, char type)
+ptr scheme_win_viewport_pos(Window *w, char type)
 {
-	Window *w = window_get_by_id(wid);
-
-	if (w)
-		return Sinteger(window_viewport_pos(w, type));
-	else
-		return Sinteger(0);
+	return Sinteger(window_viewport_pos(w, type));
 }
 
-ptr scheme_win_viewport_coord(int wid, int pos)
+ptr scheme_win_viewport_coord(Window *w, int pos)
 {
 	int l, x, y;
 	int err;
 
-	err = window_viewport_pos_to_coord(window_get_by_id(wid), pos, &l, &x, &y);
+	err = window_viewport_pos_to_coord(w, pos, &l, &x, &y);
 	if (!err) {
 		return Scons(Sinteger(x), Scons(Sinteger(y), Scons(Sinteger(l), Snil)));
 	}
@@ -309,65 +262,41 @@ ptr scheme_win_viewport_coord(int wid, int pos)
 	return Sfalse;
 }
 
-ptr scheme_win_scroll(int wid, char type, int n)
+ptr scheme_win_scroll(Window *w, char type, int n)
 {
-	Window *w = window_get_by_id(wid);
-	if (w)
-		return Sinteger(window_scroll(w, type, n));
-	else
-		return Sinteger(0);
+	return Sinteger(window_scroll(w, type, n));
 }
 
-void scheme_win_sidebar_set(int wid, int width)
+void scheme_win_sidebar_set(Window *w, int width)
 {
-	Window *w = window_get_by_id(wid);
-
-	if (w)
-		window_sidebar_width_set(w, width);
+	window_sidebar_width_set(w, width);
 }
 
-ptr scheme_win_sidebar_get(int wid)
+ptr scheme_win_sidebar_get(Window *w)
 {
-	Window *w = window_get_by_id(wid);
-
-	if (w)
-		return Sinteger(window_sidebar_width(w));
-	else
-		return Sinteger(0);
+	return Sinteger(window_sidebar_width(w));
 }
 
-void scheme_win_update_cursor(int wid)
+void scheme_win_update_cursor(Window *w)
 {
-	Window *w = window_get_by_id(wid);
-
-	if (w)
-		window_update_cursor(w);
+	window_update_cursor(w);
 }
 
-ptr scheme_win_update(int wid)
+ptr scheme_win_update(Window *w)
 {
-	Window *w = window_get_by_id(wid);
-
-	if (w)
-		return Sboolean(ui_window_update(w->win, true));
-	return Sfalse;
+	return Sboolean(ui_window_update(w->win, true));
 }
 
-bool scheme_win_has_title(int wid)
+bool scheme_win_has_title(Window *w)
 {
-	Window *w = window_get_by_id(wid);
-
-	if (w)
-		return ui_window_has_title(w->win);
-	return false;
+	return ui_window_has_title(w->win);
 }
 
-void scheme_win_view_reload(int wid, int bid)
+void scheme_win_view_reload(Window *w, int bid)
 {
-	Window *w = window_get_by_id(wid);
 	Buffer *b = buffer_by_id(bid);
 
-	if (w && b)
+	if (b)
 		view_reload(w->view, buffer_text_get(b));
 }
 
@@ -1489,7 +1418,6 @@ static void scheme_export_symbols(void)
 
 	Sregister_symbol("cs_win_draw", scheme_win_draw);
 	Sregister_symbol("cs_win_coord_get", scheme_win_coord_get);
-	Sregister_symbol("cs_win_current_get", scheme_win_current_get);
 	Sregister_symbol("cs_win_current_set", scheme_win_current_set);
 	Sregister_symbol("cs_win_new", scheme_win_new);
 	Sregister_symbol("cs_win_del", scheme_win_del);

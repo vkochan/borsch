@@ -16,18 +16,11 @@
 #define for_each_frame(__f) \
 	for (__f = frame_list; __f; __f = __f->next)
 
-static Window *new_windows;
-static int win_id;
 static Frame *current_frame;
 static Frame *frame_list;
 static int frame_id;
 static char *title;
 static Ui *ui;
-
-Window *window_new_list(void)
-{
-	return new_windows;
-}
 
 int frame_current_id(void)
 {
@@ -115,12 +108,6 @@ void window_init(Ui *_ui)
 
 void window_cleanup(void)
 {
-	while (new_windows) {
-		Window *w = new_windows;
-		Buffer *buf = w->buf;
-
-		window_delete(w);
-	}
 	frames_cleanup();
 }
 
@@ -130,40 +117,6 @@ Window *window_current(void)
 		return NULL;
 
 	return frame_current()->sel;
-}
-
-Window *window_get_by_id(int id)
-{
-	Window *c;
-
-	for_each_window(c) {
-		if (c->id == id)
-			return c;
-	}
-
-	return NULL;
-}
-
-void window_insert_new(Window *w)
-{
-	w->prev = NULL;
-	w->next = new_windows;
-	if (new_windows)
-		new_windows->prev = w;
-	new_windows = w;
-	w->is_new = true;
-}
-
-void window_remove(Window *w)
-{
-	if (w->prev)
-		w->prev->next = w->next;
-	if (w->next)
-		w->next->prev = w->prev;
-	if (w == new_windows)
-		new_windows = w->next;
-	w->next = w->prev = NULL;
-	w->is_new = false;
 }
 
 void window_move_resize(Window *c, int x, int y, int w, int h)
@@ -350,8 +303,6 @@ void window_delete(Window *w)
 	if (w == window_current())
 		window_current_set(NULL);
 	
-	window_remove(w);
-
 	ui_window_free(w->win);
 	view_free(w->view);
 	free(w);
@@ -455,8 +406,6 @@ Window *window_create(Buffer *buf, bool is_widget)
 	w = calloc(1, sizeof(Window));
 	if (!w)
 		return NULL;
-	w->id = ++win_id;
-	w->is_widget = is_widget;
 	w->buf = buf;
 	w->frame = frame_current();
 
@@ -479,6 +428,5 @@ Window *window_create(Buffer *buf, bool is_widget)
 		ui_window_has_title_set(w->win, true);
 	}
 
-	window_insert_new(w);
 	return w;
 }
