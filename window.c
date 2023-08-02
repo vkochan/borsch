@@ -16,6 +16,7 @@
 #define for_each_frame(__f) \
 	for (__f = frame_list; __f; __f = __f->next)
 
+static Window *current_window;
 static Frame *current_frame;
 static Frame *frame_list;
 static int frame_id;
@@ -113,10 +114,7 @@ void window_cleanup(void)
 
 Window *window_current(void)
 {
-	if (!frame_current())
-		return NULL;
-
-	return frame_current()->sel;
+	return current_window;
 }
 
 void window_move_resize(Window *c, int x, int y, int w, int h)
@@ -266,8 +264,7 @@ void window_update_cursor(Window *w)
 
 static void window_current_set(Window *w)
 {
-	if (frame_current())
-		frame_current()->sel = w;
+	current_window = w;
 }
 
 void window_focus(Window *c)

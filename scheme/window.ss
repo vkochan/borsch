@@ -830,5 +830,6 @@
 (add-hook 'frame-switch-hook
           (lambda (f)
              (when (current-window)
+                (call-foreign (__cs_win_current_set (window-id (current-window))))
                 (current-buffer (window-buffer (current-window))))
              (ui-needs-update #t) ))

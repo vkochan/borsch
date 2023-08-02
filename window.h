@@ -20,7 +20,6 @@ typedef struct _Frame {
 	struct _Frame *next;
 	struct _Frame *prev;
 	int id;
-	Window *sel;
 } Frame;
 
 Frame *frame_current(void);
