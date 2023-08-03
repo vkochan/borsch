@@ -96,8 +96,13 @@
 
 (define *current-frame* #f)
 
-(define (current-frame)
-   *current-frame*)
+(define current-frame
+   (case-lambda
+      [()
+       *current-frame*]
+
+      [(fr)
+       (set! *current-frame* fr) ] ))
 
 (define-syntax (frame-set-var! stx)
    (syntax-case stx ()
@@ -114,14 +119,14 @@
       ((_ frame exp ...)
        #`(let ([from (current-frame)]
                [to frame])
-            (frame-switch to)
+            (current-frame to)
             (begin
                exp
                ...)
-            (frame-switch from)))))
+            (current-frame from)))))
 
 (define (frame-switch fr)
-   (set! *current-frame* fr)
+   (current-frame fr)
    (run-hooks 'frame-switch-hook fr))
 
 (define frame-name

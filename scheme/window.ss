@@ -247,7 +247,7 @@
       (window-first (current-frame))]
 
      [(fr)
-      (frame-first-window) ]))
+      (frame-first-window fr) ]))
 
 (define window-next
    (case-lambda
@@ -831,7 +831,8 @@
           (lambda (f)
              (for-each
                 (lambda (w)
-                   (window-delete w))
+                   (with-current-frame f
+                      (window-delete w)))
                 (window-list f) )))
 
 (add-hook 'frame-switch-hook
