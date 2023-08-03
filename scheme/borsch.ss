@@ -344,7 +344,6 @@
       frame-get-var
       with-current-frame
       frame-switch
-      frame-id
       frame-name
       frame-set-name
       frame-cwd

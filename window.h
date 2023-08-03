@@ -6,28 +6,12 @@
 #include "buffer.h"
 #include "view.h"
 
-typedef struct _Frame Frame;
-
 typedef struct Window Window;
 struct Window {
 	Buffer *buf;
-	Frame *frame;
 	View *view;
 	UiWin *win;
 };
-
-typedef struct _Frame {
-	struct _Frame *next;
-	struct _Frame *prev;
-	int id;
-} Frame;
-
-Frame *frame_current(void);
-int frame_current_id(void);
-int frame_current_set(Frame *f);
-Frame *frame_create(void);
-void frame_delete(Frame *f);
-Frame *frame_by_id(int fid);
 
 void window_init(Ui *ui);
 void window_cleanup(void);

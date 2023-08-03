@@ -1112,32 +1112,6 @@ ptr scheme_term_current_line_get(int bid)
 	return s;
 }
 
-void scheme_frame_current_set(int fid)
-{
-	Frame *f = frame_by_id(fid);
-
-	if (f)
-		frame_current_set(f);
-}
-
-ptr scheme_frame_create(void)
-{
-	Frame *f = frame_create();
-
-	if (f)
-		return Sinteger(f->id);
-	return Sfalse;
-}
-
-void scheme_frame_delete(int fid)
-{
-	Frame *f = frame_by_id(fid);
-
-	if (f) {
-		frame_delete(f);
-	}
-}
-
 static int bind_key(char *key, void (*act)(void), int kid, char *tname)
 {
 	KeyMap *kmap = keymap_by_id(kid);
@@ -1501,10 +1475,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_term_keys_send", scheme_term_keys_send);
 	Sregister_symbol("cs_term_text_get", scheme_term_text_get);
 	Sregister_symbol("cs_term_current_line_get", scheme_term_current_line_get);
-
-	Sregister_symbol("cs_frame_current_set", scheme_frame_current_set);
-	Sregister_symbol("cs_frame_create", scheme_frame_create);
-	Sregister_symbol("cs_frame_delete", scheme_frame_delete);
 
 	Sregister_symbol("cs_bind_key", scheme_bind_key);
 	Sregister_symbol("cs_unbind_key", scheme_unbind_key);

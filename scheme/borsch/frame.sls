@@ -8,7 +8,6 @@
       frame-get-var
       with-current-frame
       frame-switch
-      frame-id
       frame-name
       frame-set-name
       frame-cwd
@@ -48,13 +47,8 @@
       (borsch lists)
       (borsch buffer))
 
-(define __cs_frame_current_set (foreign-procedure "cs_frame_current_set" (int) void))
-(define __cs_frame_create (foreign-procedure "cs_frame_create" () scheme-object))
-(define __cs_frame_delete (foreign-procedure "cs_frame_delete" (int) void))
-
 (define-record-type $frame
    (fields
-      id
       (mutable name)
       (mutable cwd)
       (mutable prev-layout)
@@ -69,14 +63,10 @@
       (mutable first-window)
       (mutable last-window)))
 
-(define frames-ht (make-eq-hashtable))
-
-(define (*frame-create*)
-   (call-foreign (__cs_frame_create)))
+(define frames-list (list))
 
 (define (frame-delete fr)
-   (call-foreign (__cs_frame_delete (frame-id fr)))
-   (hashtable-delete! frames-ht (frame-id fr)))
+   (set! frames-list (remove fr frames-list)))
 
 (define frame-create
    (case-lambda
@@ -84,27 +74,24 @@
       (frame-create #f)]
 
      [(name)
-      (let ([id (*frame-create*)])
-         (let ([fr (make-$frame id
-                                 (or name
-                                     (format "frame~a" id))
-                                 (current-directory)
-                                 #f
-                                 'tiled
-                                 (make-eq-hashtable)
-                                 (list)
-                                 #f
-                                 1
-                                 0.5
-                                 (make-stack)
-                                 #f
-                                 #f
-                                 #f)])
-            (hashtable-set! frames-ht id fr)
-            fr))]))
+      (let ([fr (make-$frame (or name "*frame*")
+                             (current-directory)
+                             #f
+                             'tiled
+                             (make-eq-hashtable)
+                             (list)
+                             #f
+                             1
+                             0.5
+                             (make-stack)
+                             #f
+                             #f
+                             #f)])
+         (set! frames-list (append frames-list (list fr)))
+         fr)]))
 
 (define (frame-list)
-   (vector->list (hashtable-values frames-ht)))
+   frames-list)
 
 (define *current-frame* #f)
 
@@ -134,16 +121,7 @@
 
 (define (frame-switch fr)
    (set! *current-frame* fr)
-   (call-foreign (__cs_frame_current_set (frame-id fr)))
    (run-hooks 'frame-switch-hook fr))
-
-(define frame-id
-   (case-lambda
-      [()
-       (frame-id (current-frame))]
-
-      [(fr)
-       ($frame-id fr)]))
 
 (define frame-name
    (case-lambda

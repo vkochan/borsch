@@ -13,94 +13,9 @@
 #include "ui/ui.h"
 #include "xstr.h"
 
-#define for_each_frame(__f) \
-	for (__f = frame_list; __f; __f = __f->next)
-
 static Window *current_window;
-static Frame *current_frame;
-static Frame *frame_list;
-static int frame_id;
 static char *title;
 static Ui *ui;
-
-int frame_current_id(void)
-{
-	if (frame_current())
-		return frame_current()->id;
-	return 0;
-}
-
-Frame *frame_current(void)
-{
-	return current_frame;
-}
-
-int frame_current_set(Frame *f)
-{
-	current_frame = f;
-}
-
-static frame_insert(Frame *f)
-{
-	f->prev = NULL;
-	f->next = frame_list;
-	if (frame_list)
-		frame_list->prev = f;
-	frame_list = f;
-}
-
-static frame_remove(Frame *f)
-{
-	if (f->prev)
-		f->prev->next = f->next;
-	if (f->next)
-		f->next->prev = f->prev;
-	if (f == frame_list)
-		frame_list = f->next;
-	f->next = f->prev = NULL;
-}
-
-Frame *frame_create(void)
-{
-	Frame *f;
-
-	f = calloc(1, sizeof(Frame));
-	if (!f)
-		return NULL;
-
-	f->id = ++frame_id;
-
-	frame_insert(f);
-
-	if (!current_frame)
-		current_frame = f;
-
-	return f;
-}
-
-void frame_delete(Frame *f)
-{
-	frame_remove(f);
-	free(f);
-}
-
-Frame *frame_by_id(int fid)
-{
-	Frame *f;
-
-	for_each_frame(f)
-		if (f->id == fid)
-			return f;
-
-	return NULL;
-}
-
-static void frames_cleanup(void)
-{
-	while (frame_list) {
-		frame_delete(frame_list);
-	}
-}
 
 void window_init(Ui *_ui)
 {
@@ -109,7 +24,6 @@ void window_init(Ui *_ui)
 
 void window_cleanup(void)
 {
-	frames_cleanup();
 }
 
 Window *window_current(void)
@@ -404,7 +318,6 @@ Window *window_create(Buffer *buf, bool is_widget)
 	if (!w)
 		return NULL;
 	w->buf = buf;
-	w->frame = frame_current();
 
 	w->view = view_new(buffer_text_get(w->buf));
 	if (!w->view) {
