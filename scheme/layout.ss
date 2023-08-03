@@ -399,7 +399,7 @@
        (equal? 'tiled (current-layout))]
 
       [(fr)
-       (equal? 'tiled (current-layout (frame-id fr)))]))
+       (equal? 'tiled (current-layout fr))]))
 
 (define layout-is-grid?
    (case-lambda
@@ -407,7 +407,7 @@
        (equal? 'grid (current-layout))]
 
       [(fr)
-       (equal? 'grid (current-layout (frame-id fr)))]))
+       (equal? 'grid (current-layout fr))]))
 
 (define layout-is-bstack?
    (case-lambda
@@ -415,7 +415,7 @@
        (equal? 'bstack (current-layout))]
 
       [(fr)
-       (equal? 'bstack (current-layout (frame-id fr)))]))
+       (equal? 'bstack (current-layout fr))]))
 
 (define layout-is-maximized?
    (case-lambda
@@ -423,7 +423,7 @@
        (equal? 'maximized (current-layout))]
 
       [(fr)
-       (equal? 'maximized (current-layout (frame-id fr)))]))
+       (equal? 'maximized (current-layout fr))]))
 
 (define layout-n-master
    (case-lambda
