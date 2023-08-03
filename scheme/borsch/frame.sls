@@ -66,6 +66,7 @@
 (define frames-list (list))
 
 (define (frame-delete fr)
+   (run-hooks 'frame-delete-hook fr)
    (set! frames-list (remove fr frames-list)))
 
 (define frame-create

@@ -827,6 +827,13 @@
             (and (and (>= x wx) (< x (+ wx ww)))
                  (and (>= y wy) (< y (+ wy wh))))))))
 
+(add-hook 'frame-delete-hook
+          (lambda (f)
+             (for-each
+                (lambda (w)
+                   (window-delete w))
+                (window-list f) )))
+
 (add-hook 'frame-switch-hook
           (lambda (f)
              (when (current-window)
