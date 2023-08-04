@@ -74,8 +74,7 @@
       window-x
       window-y
       window-find
-      window-by-pos
-      window-initialize)
+      window-by-pos)
    (import (chezscheme)
            (borsch base)
            (borsch lists)
@@ -914,19 +913,18 @@
             (and (and (>= x wx) (< x (+ wx ww)))
                  (and (>= y wy) (< y (+ wy wh))))))))
 
-(define (window-initialize)
-   (add-hook 'frame-delete-hook
-             (lambda (f)
-                (for-each
-                   (lambda (w)
-                      (with-current-frame f
-                         (window-delete w)))
-                   (window-list f) )))
+(add-hook 'frame-delete-hook
+           (lambda (f)
+              (for-each
+                 (lambda (w)
+                    (with-current-frame f
+                       (window-delete w)))
+                 (window-list f) )))
 
-   (add-hook 'frame-switch-hook
-             (lambda (f)
-                (when (current-window)
-                   (call-foreign (__cs_win_current_set (window-id (current-window))))
-                   (current-buffer (window-buffer (current-window))))
-                (ui-needs-update #t) )))
+(add-hook 'frame-switch-hook
+           (lambda (f)
+              (when (current-window)
+                 (call-foreign (__cs_win_current_set (window-id (current-window))))
+                 (current-buffer (window-buffer (current-window))))
+              (ui-needs-update #t) ))
 )

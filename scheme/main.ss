@@ -16,7 +16,6 @@
 
 (runtime-initialize)
 (process-initialize)
-(window-initialize)
 (frame-initialize)
 
 (include "common.ss")

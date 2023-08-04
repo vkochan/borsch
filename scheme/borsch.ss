@@ -473,8 +473,7 @@
       window-x
       window-y
       window-find
-      window-by-pos
-      window-initialize)
+      window-by-pos)
    (import
       (borsch keymap)
       (borsch runtime)
