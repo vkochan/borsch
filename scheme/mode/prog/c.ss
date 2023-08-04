@@ -7,7 +7,7 @@
        (c-compile-buffer "-c" #f)]
 
       [(ext-opts fn)
-       (let ([buf-out (buffer-new)] [buf-err (buffer-new)] [fn fn])
+       (let ([buf-out (make-buffer)] [buf-err (make-buffer)] [fn fn])
           (process-create
              (format "gcc ~a ~a ~a" (c-compile-options) (buffer-filename) ext-opts)
              buf-out
@@ -16,11 +16,11 @@
                 (if (eq? status 0)
                    (begin
                       (message "Compilation is successful")
-                      (buffer-delete out)
-                      (buffer-delete err))
+                      (delete-buffer out)
+                      (delete-buffer err))
                    ;; else
                    (begin
-                      (buffer-delete out)
+                      (delete-buffer out)
                       (window-create err)
                       (text-mode)
                       (message "Compilation failed")))
@@ -86,7 +86,7 @@
 
    (let* ([prog (format "/tmp/borsch-c-eval-~a" (random 65000))]
           [cmd (format "gcc -x c -o ~a - && ~a" prog prog)]
-          [buf (or (frame-get-buffer "c-eval-output") (buffer-new "c-eval-output"))])
+          [buf (or (frame-get-buffer "c-eval-output") (make-buffer "c-eval-output"))])
       (let* ([p (process-create cmd buf (lambda (status out err)
                                            (delete-file prog)
                                            (on-eval-exit status out err)))]
@@ -101,7 +101,7 @@
       (window-create buf-out))
 
    (let ([cmd "gcc -x c -masm=intel -fverbose-asm -O0 -S -o- -"]
-         [buf (buffer-new)])
+         [buf (make-buffer)])
       (let* ([p (process-create cmd buf on-gcc-exit)]
              [port-in (process-port-in p)])
          (put-string port-in (text-string))

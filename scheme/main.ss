@@ -69,7 +69,7 @@
       (exit ret))
 
    (set! *current-frame* (frame-create))
-   (current-buffer-tmp (buffer-new))
+   (current-buffer-tmp (make-buffer))
    (try
       (begin
          (load path)
@@ -108,7 +108,7 @@
       (minibuf-create)
       (topbar-create)
       (init-key-bindings)
-      (let ([m (buffer-new "*Messages*")])
+      (let ([m (make-buffer "*Messages*")])
          (buffer-ref-get m)
          (set! message-buf m)
          (frame-remove-buffer m)

@@ -866,7 +866,7 @@
         (call-foreign (__cs_win_update (window-id win)))]))
 
 (define (widget-create name x y w h type)
-   (let*([bid (buffer-new name #f)]
+   (let*([bid (make-buffer name #f)]
          [win ($window-new bid #t)])
       (case type
          ['top    (set! $widget-list-top (append $widget-list-top (list win)))]

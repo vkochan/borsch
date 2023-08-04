@@ -10,8 +10,8 @@
       buffer-ref-count
       buffer-ref-get
       buffer-ref-put
-      buffer-new
-      buffer-delete
+      make-buffer
+      delete-buffer
       buffer-list
       buffer-for-each
       buffer-find
@@ -178,11 +178,11 @@
 
       [(buf)
        (when (= 1 (buffer-ref-count buf))
-          (buffer-delete buf))
+          (delete-buffer buf))
        ($buffer-ref-count-set! buf (- ($buffer-ref-count buf)
                                       1))] ))
 
-(define ($buffer-new name kmap)
+(define ($make-buffer name kmap)
    (define (bufname-gen)
       (format "new~a"
          (call/cc (lambda (return)
@@ -199,25 +199,25 @@
                     name #f #t "" "" #f #f 1
                     (copy-environment (scheme-environment)))))
 
-(define buffer-new
+(define make-buffer
    (case-lambda
       [() 
-       (buffer-new "")]
+       (make-buffer "")]
 
       [(name) 
-       (buffer-new name global-keymap)]
+       (make-buffer name global-keymap)]
 
       [(name kmap) 
-       (let ([b ($buffer-new name kmap)])
+       (let ([b ($make-buffer name kmap)])
           (buffer-insert b)
           (with-current-buffer b
              (define-local pre-draw-func #f) )
           b)]))
 
-(define buffer-delete
+(define delete-buffer
    (case-lambda
       [()
-       (buffer-delete (current-buffer))]
+       (delete-buffer (current-buffer))]
 
       [(b)
        (call-foreign (__cs_buf_del (buffer-id b)))

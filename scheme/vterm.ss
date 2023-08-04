@@ -32,7 +32,7 @@
        (call-foreign (__cs_term_current_line_get (buffer-id buf))) ]))
 
 (define (vterm-mode-copy-enter)
-   (let* ([b (buffer-new)]
+   (let* ([b (make-buffer)]
           [c (current-buffer)]
           [s (vterm-string c)])
       (with-current-buffer b
@@ -48,7 +48,7 @@
 (define (vterm-mode-copy-exit)
    (let ([c (current-buffer)])
       (window-switch-buffer (get-local orig-buf))
-      (buffer-delete c)))
+      (delete-buffer c)))
 
 (define (vterm-mode-paste)
    (vterm-send-text (copybuf-reg)))
@@ -85,7 +85,7 @@
 
       [(prog title cwd)
        (let ([p (with-current-cwd cwd (process-create prog #f #f #f #t #t))]
-             [b (buffer-new)])
+             [b (make-buffer)])
           (with-current-buffer b
              (define-local major-mode 'vterm-mode)
              (define-local process p)

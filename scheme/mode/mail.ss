@@ -412,12 +412,12 @@
       (let ([plist (get-text-property 'data: (cursor) (+ 1 (cursor)))])
          (letrec (
                [tid (plist-get (first plist) 'data:)]
-               [buf-ret (buffer-new)]
+               [buf-ret (make-buffer)]
               )
             (process-create (mail-notmuch-cmd (format "show --entire-thread=true --format=sexp --body=false thread:~a" tid)) buf-ret
                (lambda (status buf-out buf-err)
                   (mail-render-thread tid buf-out)
-                  (buffer-delete buf-out)
+                  (delete-buffer buf-out)
                )
             )
          )
@@ -674,7 +674,7 @@
        (let (
              [buf-draw (buffer-get-or-create "Mail")]
              [cmd (mail-notmuch-cmd (format "search --format=sexp --limit=500 '~a'" qry))]
-             [buf-ret (buffer-new)]
+             [buf-ret (make-buffer)]
             )
          (process-create cmd buf-ret
             (lambda (status buf-out buf-err)
@@ -682,7 +682,7 @@
                   (mail-render-thread-list qry buf-draw buf-out)
                   (cursor-to-line-begin)
                )
-               (buffer-delete buf-out)
+               (delete-buffer buf-out)
             )
          )
        )

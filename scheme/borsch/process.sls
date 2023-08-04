@@ -368,7 +368,7 @@
 (define-syntax (with-process-temp-buffer stx)
    (syntax-case stx ()
       ((_ cmd exp ...)
-       #`(let ([b (buffer-new)])
+       #`(let ([b (make-buffer)])
             (process-create cmd b
                (lambda (proc-status buf-out buf-err)
                   (with-current-buffer buf-out
@@ -377,7 +377,7 @@
 		        ...
                      )
                   )
-                  (buffer-delete buf-out)
+                  (delete-buffer buf-out)
                )
             )
          )

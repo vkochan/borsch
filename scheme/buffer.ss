@@ -8,7 +8,7 @@
        (buffer-create "")]
 
       [(n) 
-       (let ([b (buffer-new n)])
+       (let ([b (make-buffer n)])
           (window-create b)
           b)]))
 

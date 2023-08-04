@@ -87,8 +87,8 @@
       buffer-ref-count
       buffer-ref-get
       buffer-ref-put
-      buffer-new
-      buffer-delete
+      make-buffer
+      delete-buffer
       buffer-list
       buffer-for-each
       buffer-find
