@@ -1,3 +1,15 @@
+(library (borsch complete)
+   (export
+      complete)
+   (import (chezscheme)
+      (borsch lists)
+      (borsch strings)
+      (borsch copybuf)
+      (borsch keymap)
+      (borsch buffer)
+      (borsch text)
+      (borsch window) )
+   
 (define (complete-item-name i)
    (if (pair? i)
       (car i)
@@ -28,7 +40,7 @@
                            (for-each
                               (lambda (t)
                                  (when (string-contains? (complete-item-name x) t)
-                                    (set! nmatch (1+ nmatch))))
+                                    (set! nmatch (+ 1 nmatch))))
                               text-lst)
                            (eq? nmatch (length text-lst))))
                      (if (procedure? lst) (lst) lst)))))
@@ -41,7 +53,7 @@
       (with-saved-cursor
          (let* ([lst-idx (get-local complete-index)]
                 [lst (get-local complete-result)]
-                [sel (% lst-idx (get-local complete-max-lines))]
+                [sel (modulo lst-idx (get-local complete-max-lines))]
                 [line-idx 0])
             (when (< lst-idx (length lst))
                (let* ([max-lines (get-local complete-max-lines)]
@@ -56,7 +68,7 @@
                            (text-insert (format "\n> ~a" name) '(style: (attr: "bold" fg: "blue")))
                            ;; else
                            (text-insert (format "\n  ~a" name))))
-                     (set! line-idx (1+ line-idx)))
+                     (set! line-idx (+ 1 line-idx)))
                   lst)))))
 
 (define (complete-update-text)
@@ -128,7 +140,7 @@
          [idx (get-local complete-index)])
       (when (and (not (null? result))
                  (< idx (- (length result) 1)))
-         (set-local! complete-index (1+ idx))
+         (set-local! complete-index (+ 1 idx))
          (complete-draw))))
 
 (define (complete-list-move-up)
@@ -136,7 +148,7 @@
          [idx (get-local complete-index)])
       (when (and (not (null? result))
                  (> idx 0))
-         (set-local! complete-index (1- idx))
+         (set-local! complete-index (- idx 1))
          (complete-draw))))
 
 (define complete-map
@@ -152,7 +164,7 @@
       (bind-key map "C-l" complete-prompt-move-next-char)
       (bind-key map "C-j" complete-list-move-down)
       (bind-key map "C-k" complete-list-move-up)
-      (bind-key map "C-g q q" do-quit)
+      ;;(bind-key map "C-g q q" do-quit)
       map))
 
 (define complete
@@ -171,7 +183,7 @@
          (define-local complete-prompt (format "~a:" prompt))
          (define-local complete-text "")
          (define-local complete-index 0)
-         (define-local complete-max-lines (1- (window-inner-height)))
+         (define-local complete-max-lines (- (window-inner-height) 1))
          (define-local complete-result '())
          (define-local complete-list ls)
          (define-local complete-fn fn)
@@ -185,3 +197,4 @@
          (complete-draw)
          (cursor-set (get-local complete-prompt-pos))
          (set-local! complete-prompt-cursor (cursor)))]))
+)

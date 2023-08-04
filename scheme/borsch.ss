@@ -473,7 +473,9 @@
       window-x
       window-y
       window-find
-      window-by-pos)
+      window-by-pos
+      
+      complete)
    (import
       (borsch keymap)
       (borsch runtime)
@@ -495,4 +497,5 @@
       (borsch ui)
       (borsch ssh)
       (borsch os)
-      (borsch window)))
+      (borsch window)
+      (borsch complete)))
