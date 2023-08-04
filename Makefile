@@ -1,7 +1,6 @@
 PROGNAME = borsch
 
 PREFIX ?= /usr
-MANPREFIX = ${PREFIX}/share/man
 # specify your systems terminfo directory
 # leave empty to install into your home folder
 TERMINFO := ${DESTDIR}${PREFIX}/share/terminfo
@@ -67,7 +66,6 @@ CFLAGS += -I$(SCH_PATH) \
 OBJS += ${SRCS:.c=.o}
 
 BIN += ${PROGNAME}
-MANUALS = ${PROGNAME}.1
 
 VERSION = $(shell git describe --always --dirty 2>/dev/null || echo "0.15-git")
 CFLAGS += -DVERSION=\"${VERSION}\"
@@ -108,12 +106,6 @@ libtext:
 libui:
 	$(MAKE) -C ui/
 
-man:
-	@for m in ${MANUALS}; do \
-		echo "Generating $$m"; \
-		sed -e "s/VERSION/${VERSION}/" "$$m" | mandoc -W warning -T utf8 -T xhtml -O man=%N.%S.html -O style=mandoc.css 1> "$$m.html" || true; \
-	done
-
 debug: clean
 	@$(MAKE) CFLAGS='${DEBUG_CFLAGS}'
 
@@ -137,12 +129,6 @@ install: all install_scheme_libs
 		chmod 755 "${DESTDIR}${PREFIX}/bin/$$b"; \
 	done
 	@cp -f ${PROGNAME}.boot ${SCH_PATH}
-	@echo installing manual page to ${DESTDIR}${MANPREFIX}/man1
-	@mkdir -p ${DESTDIR}${MANPREFIX}/man1
-	@for m in ${MANUALS}; do \
-		sed -e "s/VERSION/${VERSION}/" < "$$m" >  "${DESTDIR}${MANPREFIX}/man1/$$m" && \
-		chmod 644 "${DESTDIR}${MANPREFIX}/man1/$$m"; \
-	done
 	@echo installing terminfo description
 	@TERMINFO=${TERMINFO} tic -s ${PROGNAME}.info
 
@@ -152,8 +138,6 @@ uninstall:
 		rm -f "${DESTDIR}${PREFIX}/bin/$$b"; \
 	done
 	@rm -f ${SCH_PATH}/${PROGNAME}.boot
-	@echo removing manual page from ${DESTDIR}${MANPREFIX}/man1
-	@rm -f ${DESTDIR}${MANPREFIX}/man1/${PROGNAME}.1
 	@rm -fr ${DESTDIR}${LIB_PREFIX}
 
 .PHONY: all clean dist install uninstall debug
