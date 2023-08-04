@@ -16,11 +16,11 @@
 
 (runtime-initialize)
 (process-initialize)
+(window-initialize)
 (frame-initialize)
 
 (include "common.ss")
 (include "layout.ss")
-(include "window.ss")
 (include "buffer.ss")
 (include "complete.ss")
 (include "topbar.ss")

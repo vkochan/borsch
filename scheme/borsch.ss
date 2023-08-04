@@ -397,7 +397,84 @@
       ssh-address-path
       ssh-parse-address
 
-      os-environment)
+      os-environment
+      
+      window-id
+      widget-list
+      window-reload-buffer
+      buffer-is-visible?
+      window-draw-char
+      window-draw-text
+      window-has-title?
+      window-is-dirty?
+      window-set-text-style
+      window-draw-title
+      window-draw-selection
+      window-draw
+      window-is-widget?
+      widget-is-top?
+      widget-is-bottom?
+      window-is-visible?
+      window-last-master
+      window-first
+      window-next
+      window-prev
+      window-set-first
+      window-set-prev
+      window-set-next
+      window-list
+      window-last
+      window-for-each
+      window-for-all
+      window-upper
+      window-lower
+      window-right
+      window-left
+      current-window
+      window-prev-selected
+      window-focus
+      window-focus-left
+      window-focus-right
+      window-focus-upper
+      window-focus-lower
+      window-create
+      window-delete
+      window-close
+      window-is-maximized?
+      window-is-master?
+      window-set-master
+      window-is-sticky?
+      window-buffer
+      window-width
+      window-height
+      window-set-size
+      window-set-width
+      window-move
+      window-set-height
+      window-set-border
+      window-switch-buffer
+      window-begin-pos
+      window-end-pos
+      window-pos->coord
+      window-lines-coord
+      window-inner-width
+      window-inner-height
+      window-scroll-page-down
+      window-scroll-page-up
+      window-scroll-halfpage-down
+      window-scroll-halfpage-up
+      window-scroll-down
+      window-scroll-up
+      window-set-sidebar-width
+      window-sidebar-width
+      window-update-cursor
+      window-update
+      widget-create
+      window-x
+      window-y
+      window-find
+      window-by-pos
+      window-initialize)
    (import
       (borsch keymap)
       (borsch runtime)
@@ -418,4 +495,5 @@
       (borsch frame)
       (borsch ui)
       (borsch ssh)
-      (borsch os)))
+      (borsch os)
+      (borsch window)))

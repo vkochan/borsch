@@ -1,3 +1,90 @@
+(library (borsch window)
+   (export
+      window-id
+      widget-list
+      window-reload-buffer
+      buffer-is-visible?
+      window-draw-char
+      window-draw-text
+      window-has-title?
+      window-is-dirty?
+      window-set-text-style
+      window-draw-title
+      window-draw-selection
+      window-draw
+      window-is-widget?
+      widget-is-top?
+      widget-is-bottom?
+      window-is-visible?
+      window-last-master
+      window-first
+      window-next
+      window-prev
+      window-set-first
+      window-set-prev
+      window-set-next
+      window-list
+      window-last
+      window-for-each
+      window-for-all
+      window-upper
+      window-lower
+      window-right
+      window-left
+      current-window
+      window-prev-selected
+      window-focus
+      window-focus-left
+      window-focus-right
+      window-focus-upper
+      window-focus-lower
+      window-create
+      window-delete
+      window-close
+      window-is-maximized?
+      window-is-master?
+      window-set-master
+      window-is-sticky?
+      window-buffer
+      window-width
+      window-height
+      window-set-size
+      window-set-width
+      window-move
+      window-set-height
+      window-set-border
+      window-switch-buffer
+      window-begin-pos
+      window-end-pos
+      window-pos->coord
+      window-lines-coord
+      window-inner-width
+      window-inner-height
+      window-scroll-page-down
+      window-scroll-page-up
+      window-scroll-halfpage-down
+      window-scroll-halfpage-up
+      window-scroll-down
+      window-scroll-up
+      window-set-sidebar-width
+      window-sidebar-width
+      window-update-cursor
+      window-update
+      widget-create
+      window-x
+      window-y
+      window-find
+      window-by-pos
+      window-initialize)
+   (import (chezscheme)
+           (borsch base)
+           (borsch lists)
+           (borsch ui)
+           (borsch buffer)
+           (borsch text)
+           (borsch frame)
+           (borsch style))
+
 (define __cs_win_current_set (foreign-procedure "cs_win_current_set" (void*) int))
 (define __cs_win_new (foreign-procedure "cs_win_new" (int boolean) scheme-object))
 (define __cs_win_del (foreign-procedure "cs_win_del" (void*) int))
@@ -529,7 +616,7 @@
                            m?))
                    (begin
                       (set! nm (- nm 1))
-                      (set! m w)
+                      (set! m? w)
                       #t))))
           m?)]))
 
@@ -827,17 +914,19 @@
             (and (and (>= x wx) (< x (+ wx ww)))
                  (and (>= y wy) (< y (+ wy wh))))))))
 
-(add-hook 'frame-delete-hook
-          (lambda (f)
-             (for-each
-                (lambda (w)
-                   (with-current-frame f
-                      (window-delete w)))
-                (window-list f) )))
+(define (window-initialize)
+   (add-hook 'frame-delete-hook
+             (lambda (f)
+                (for-each
+                   (lambda (w)
+                      (with-current-frame f
+                         (window-delete w)))
+                   (window-list f) )))
 
-(add-hook 'frame-switch-hook
-          (lambda (f)
-             (when (current-window)
-                (call-foreign (__cs_win_current_set (window-id (current-window))))
-                (current-buffer (window-buffer (current-window))))
-             (ui-needs-update #t) ))
+   (add-hook 'frame-switch-hook
+             (lambda (f)
+                (when (current-window)
+                   (call-foreign (__cs_win_current_set (window-id (current-window))))
+                   (current-buffer (window-buffer (current-window))))
+                (ui-needs-update #t) )))
+)
