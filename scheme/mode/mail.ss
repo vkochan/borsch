@@ -191,7 +191,7 @@
      ]
 
      [(id)
-      (let ([buf (buffer-create (format "Reply:~a" id))])
+      (let ([buf (create-buffer (format "Reply:~a" id))])
          (with-current-buffer buf
             (text-mode)
             (bind-key-local "C-c C-c" mail-send-buffer)
@@ -212,7 +212,7 @@
    (lambda ()
       (let ([plist (get-text-property 'data: (cursor) (+ 1 (cursor)))])
          (let ([entry (plist-get (first plist) 'data:)])
-            (let ([b (buffer-create (format "Message-dump:~a" (if (mail-entry? entry) (mail-entry-id entry) entry)))])
+            (let ([b (create-buffer (format "Message-dump:~a" (if (mail-entry? entry) (mail-entry-id entry) entry)))])
                (text-mode)
                (process-create
                   (if (mail-entry? entry)
@@ -271,7 +271,7 @@
    (lambda ()
       (let ([plist (get-text-property 'data: (cursor) (+ 1 (cursor)))])
          (let ([entry (plist-get (first plist) 'data:)])
-            (let ([b (buffer-create (format "Message:~a" (mail-entry-id entry)))])
+            (let ([b (create-buffer (format "Message:~a" (mail-entry-id entry)))])
                (define-local mail-message-id (mail-entry-id entry))
                (bind-key-local "r" mail-reply-message)
                (text-mode)
@@ -354,7 +354,7 @@
    (lambda (tid buf-out)
       (with-current-buffer buf-out
          (let ([sexp (text-eval)])
-            (with-current-buffer (buffer-create)
+            (with-current-buffer (create-buffer)
                (buffer-set-name (format "Thread:~a" tid))
                (mail-thread-mode)
                (buffer-set-readonly #f)
@@ -459,7 +459,7 @@
 
 (define mail-new-message
    (lambda ()
-      (let ([buf (buffer-create "*New Message*")])
+      (let ([buf (create-buffer "*New Message*")])
          (text-insert "Subject:\n")
 	 (text-insert (format "From: ~a <~a>\n" (mail-fullname) (mail-username)))
 	 (text-insert "To: \n")

@@ -44,7 +44,7 @@
    (let ([cls '("default" "black" "red" "green" "yellow" "blue" "magenta" "cyan" "white"
                 "bright-black" "bright-red" "bright-green" "bright-yellow" "bright-magenta"
                 "bright-cyan" "bright-white")])
-      (with-current-buffer (buffer-create)
+      (with-current-buffer (create-buffer)
          (text-mode)
          (for-each
             (lambda (c)
@@ -180,7 +180,7 @@
          (set! message-recent m))))
 
 (define (new-text-buffer)
-   (let ([b (buffer-create)])
+   (let ([b (create-buffer)])
       (with-current-buffer b
          (text-mode))))
 

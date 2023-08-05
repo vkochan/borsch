@@ -407,7 +407,7 @@
       ]
 
       [(dir)
-       (let ([b (buffer-create)])
+       (let ([b (create-buffer)])
           (with-current-buffer b
              (buffer-set-readonly #t)
              (dirb-mode)

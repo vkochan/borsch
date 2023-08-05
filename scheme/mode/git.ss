@@ -35,7 +35,7 @@
    (git-insert-branch-list))
 
 (define (git-show-branch)
-   (let ([b (buffer-create)])
+   (let ([b (create-buffer)])
       (git-branch-mode)))
 
 (define (git-cmd-file-status f)
@@ -137,7 +137,7 @@
    (git-cmd-read (format "rm --cached ~a" (string-join f " "))))
 
 (define (git-status-diff status)
-   (let ([b (buffer-create)])
+   (let ([b (create-buffer)])
       (with-current-buffer b
          (diff-mode)
          (buffer-set-mode-name (if (eq? status 'staged) "Diff Staged" "Diff Unstaged"))
@@ -149,7 +149,7 @@
          (cursor-to-begin))))
 
 (define (git-status-diff-file status file)
-   (let ([b (buffer-create file)])
+   (let ([b (create-buffer file)])
       (with-current-buffer b
          (diff-mode)
          (buffer-set-mode-name "Diff")
@@ -169,7 +169,7 @@
       [(mode)
        (let ([c (current-buffer)])
           (let ([opt (if (eq? mode 'amend) "--amend" "")]
-                [b (buffer-create)])
+                [b (create-buffer)])
              (with-current-buffer b
                 (define-local status-buffer c)
                 (text-mode)
@@ -194,7 +194,7 @@
       (git-status-draw)))
 
 (define (git-pull-changes-and-show)
-   (let ([b (buffer-create)])
+   (let ([b (create-buffer)])
       (text-mode)
       (process-create (git-cmd-format "pull") b)))
 
@@ -229,7 +229,7 @@
 
 (define (git-show-commit)
    (let ([id (text-object)])
-      (let ([b (buffer-create)])
+      (let ([b (create-buffer)])
          (diff-mode)
          (buffer-set-name (format "commit: ~a" id))
          (text-insert (git-cmd-read (format "show ~a" id)))
@@ -252,7 +252,7 @@
        (git-show-log (git-branch-name))]
 
       [(obj)
-       (let ([b (buffer-create obj)])
+       (let ([b (create-buffer obj)])
           (with-current-buffer b
             (git-log-mode)
             (cursor-to-begin)
@@ -288,7 +288,7 @@
    (let ([start (buffer-line-num (text-get-selection))]
          [end   (buffer-line-num (cursor))])
       (text-clear-selection)
-      (let ([b (buffer-create (buffer-filename))])
+      (let ([b (create-buffer (buffer-filename))])
          (with-current-buffer b
             (define-local git-blame-start start)
             (define-local git-blame-end end)
@@ -532,7 +532,7 @@
    (cursor-to-begin))
 
 (define (git-status)
-   (buffer-create)
+   (create-buffer)
    (git-status-mode))
 
 (define (git-rename-dirb-entry old new)

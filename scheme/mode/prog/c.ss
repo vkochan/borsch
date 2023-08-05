@@ -82,7 +82,7 @@
    (define (on-eval-exit status buf-out buf-err)
       (with-current-buffer buf-out
          (text-append "------------------------------\n"))
-      (buffer-open buf-out))
+      (open-buffer buf-out))
 
    (let* ([prog (format "/tmp/borsch-c-eval-~a" (random 65000))]
           [cmd (format "gcc -x c -o ~a - && ~a" prog prog)]

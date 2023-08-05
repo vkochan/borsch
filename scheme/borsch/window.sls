@@ -38,6 +38,8 @@
       window-focus-right
       window-focus-upper
       window-focus-lower
+      open-buffer
+      create-buffer
       window-create
       window-delete
       window-close
@@ -538,6 +540,19 @@
 (define ($window-new buf widget?)
    (buffer-set-dirty buf #t)
    (make-$window (__cs_win_new (buffer-id buf) widget?) buf #f #f) )
+
+(define (open-buffer b)
+   (or (buffer-is-visible? b) (window-create b)))
+
+(define create-buffer
+   (case-lambda
+      [() 
+       (create-buffer "")]
+
+      [(n) 
+       (let ([b (make-buffer n)])
+          (window-create b)
+          b)]))
 
 (define (window-create b)
    (let ([win ($window-new b #f)])

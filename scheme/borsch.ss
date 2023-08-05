@@ -437,6 +437,8 @@
       window-focus-right
       window-focus-upper
       window-focus-lower
+      create-buffer
+      open-buffer
       window-create
       window-delete
       window-close

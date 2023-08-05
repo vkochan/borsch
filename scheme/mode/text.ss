@@ -303,12 +303,12 @@
 (define buffer-create-text
    (case-lambda
       [() 
-       (let ([b (buffer-create)])
+       (let ([b (create-buffer)])
           (text-mode)
           b)]
 
       [(n) 
-       (let ([b (buffer-create n)])
+       (let ([b (create-buffer n)])
           (text-mode)
           b)]))
 

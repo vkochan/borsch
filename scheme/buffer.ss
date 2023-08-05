@@ -2,22 +2,9 @@
 
 (define file-match-mode (list))
 
-(define buffer-create
-   (case-lambda
-      [() 
-       (buffer-create "")]
-
-      [(n) 
-       (let ([b (make-buffer n)])
-          (window-create b)
-          b)]))
-
-(define (buffer-open b)
-   (or (buffer-is-visible? b) (window-create b)))
-
 (define (buffer-get-or-create name)
    (or (buffer-get name)
-       (buffer-create name)))
+       (create-buffer name)))
 
 (define (buffer-open-file f)
    (let ([bid (buffer-get-by-file f)]
@@ -39,7 +26,7 @@
                (window-create bid))
             bid)
          ;; else
-         (let* ([b (buffer-create)]
+         (let* ([b (create-buffer)]
                 [ok (call-foreign (__cs_buf_file_open (buffer-id b) f))])
             (window-reload-buffer b)
             (with-current-buffer b
