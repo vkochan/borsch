@@ -18,8 +18,7 @@
        (create-buffer name)))
 
 (define (buffer-open-file f)
-   (let ([buf (get-buffer-by-file f)]
-         [in-frame? #f])
+   (let ([buf (get-buffer-by-file f)])
       (if buf
          (let ()
             (if (buffer-is-visible? buf)
