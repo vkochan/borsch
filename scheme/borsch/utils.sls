@@ -14,7 +14,7 @@
 (define __cs_buf_file_open (foreign-procedure "cs_buf_file_open" (int string) scheme-object))
 
 (define (buffer-get-or-create name)
-   (or (buffer-get name)
+   (or (get-buffer name)
        (create-buffer name)))
 
 (define (buffer-open-file f)

@@ -154,7 +154,7 @@
 
    (add-hook 'error-hook
       (lambda (e)
-         (let ([m (buffer-get "*Messages*")])
+         (let ([m (get-buffer "*Messages*")])
             (when m
                (with-current-buffer m
                   (text-append (format "~a\n" e) '(style: (fg: "red"))))))))

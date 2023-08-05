@@ -14,7 +14,7 @@
       delete-buffer
       buffer-list
       buffer-for-each
-      buffer-find
+      find-buffer
       buffer-get-by-file
       buffer-default-mode
       current-buffer
@@ -52,7 +52,7 @@
       set-text-property
       highlight-range
       highlight-clear
-      buffer-get
+      get-buffer
       buffer-keymap
       buffer-set-keymap
       bind-key-local
@@ -239,7 +239,7 @@
          (fn b))
       (buffer-list)))
 
-(define (buffer-find fn)
+(define (find-buffer fn)
    (let ([b (find
                (lambda (b)
                   (fn b))
@@ -247,7 +247,7 @@
       b))
 
 (define (buffer-get-by-file file)
-   (buffer-find
+   (find-buffer
       (lambda (b)
          (equal? file (buffer-filename b)))))
 
@@ -601,7 +601,7 @@
 (define (highlight-clear)
    (call-foreign (__cs_buf_prop_del (buffer-id (current-buffer)) 2 -1 -1 #f #f)))
 
-(define (buffer-get name)
+(define (get-buffer name)
    (call/cc
       (lambda (return)
          (for-each

@@ -18,7 +18,7 @@
 (define __cs_do_quit (foreign-procedure "cs_do_quit" () void))
 
 (define (message s)
-   (let ([b (buffer-get "*Messages*")])
+   (let ([b (get-buffer "*Messages*")])
       (when b
          (with-current-buffer b
             (text-insert (format "~a\n" s))))

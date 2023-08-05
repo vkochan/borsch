@@ -91,7 +91,7 @@
       delete-buffer
       buffer-list
       buffer-for-each
-      buffer-find
+      find-buffer
       buffer-get-by-file
       buffer-default-mode
       current-buffer
@@ -129,7 +129,7 @@
       set-text-property
       highlight-range
       highlight-clear
-      buffer-get
+      get-buffer
       buffer-keymap
       buffer-set-keymap
       bind-key-local
