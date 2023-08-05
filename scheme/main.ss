@@ -20,7 +20,6 @@
 
 (include "common.ss")
 (include "layout.ss")
-(include "buffer.ss")
 (include "topbar.ss")
 (include "vterm.ss")
 (include "minibuf.ss")

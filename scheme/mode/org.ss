@@ -2,7 +2,7 @@
    (syntax-set-lang 'org)
 )
 
-(add-to-list 'file-match-mode '(".*\\.org$" . org-mode))
+(file-match-mode-add '(".*\\.org$" . org-mode))
 
 (define org-syntax-headline1-match
    "(headline (stars) @OrgStars1 (#match? @OrgStars1 \"^(\\\\*{3})*\\\\*$\") (item) @headline1)"

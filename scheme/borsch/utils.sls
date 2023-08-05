@@ -1,6 +1,17 @@
-(define __cs_buf_file_open (foreign-procedure "cs_buf_file_open" (int string) scheme-object))
+(library (borsch utils)
+   (export
+      buffer-get-or-create
+      buffer-open-file)
+   (import
+      (chezscheme)
+      (borsch base)
+      (borsch file)
+      (borsch lists)
+      (borsch buffer)
+      (borsch window)
+      (pregexp) )
 
-(define file-match-mode (list))
+(define __cs_buf_file_open (foreign-procedure "cs_buf_file_open" (int string) scheme-object))
 
 (define (buffer-get-or-create name)
    (or (buffer-get name)
@@ -31,15 +42,7 @@
             (window-reload-buffer b)
             (with-current-buffer b
                (buffer-set-name (buffer-filename))
-               (when (buffer-default-mode)
-                  ((buffer-default-mode)) )
-               (when ok
-                  (for-each
-                     (lambda (match)
-                        (let ([fname (buffer-filename)])
-                           (when (pregexp-match (car match) fname)
-                              ((top-level-value (cdr match))))))
-                     file-match-mode)))
+               (buffer-init-file-mode))
             b))))
 
 (define buffer-window
@@ -57,20 +60,4 @@
              ;; else
              (first win-lst)))]))
 
-(define (buffer-run)
-   (let ([fname (buffer-filename)])
-      (if (file-is-executable? fname)
-         (vterm (format "~a ; read" fname))
-         ;; else
-         (message (format "File is not executable: ~a" fname))
-      )))
-
-(define (file-open p)
-   (let ([p (path-expand p)])
-      (if (file-regular? p)
-         (buffer-open-file p)
-         ;; else
-         (if (file-directory? p)
-            (dirb p)
-            ;; else
-            (message (format "path does not exist: ~a" p))))))
+)

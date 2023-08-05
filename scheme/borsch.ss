@@ -144,6 +144,9 @@
       buffer-set-mark
       buffer-mark
       buffer-is-mark-set?
+      buffer-init-file-mode
+      file-match-mode-add
+      file-match-mode-remove
 
       style-add
       style-modify
@@ -478,7 +481,10 @@
       window-find
       window-by-pos
       
-      complete)
+      complete
+      
+      buffer-get-or-create
+      buffer-open-file)
    (import
       (borsch keymap)
       (borsch runtime)
@@ -501,4 +507,5 @@
       (borsch ssh)
       (borsch os)
       (borsch window)
-      (borsch complete)))
+      (borsch complete)
+      (borsch utils)))

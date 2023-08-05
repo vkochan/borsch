@@ -116,3 +116,20 @@
       (close-port op)
       (if err? 1 0)))
 
+(define (file-open p)
+   (let ([p (path-expand p)])
+      (if (file-regular? p)
+         (buffer-open-file p)
+         ;; else
+         (if (file-directory? p)
+            (dirb p)
+            ;; else
+            (message (format "path does not exist: ~a" p))))))
+
+(define (buffer-run)
+   (let ([fname (buffer-filename)])
+      (if (file-is-executable? fname)
+         (vterm (format "~a ; read" fname))
+         ;; else
+         (message (format "File is not executable: ~a" fname))
+      )))

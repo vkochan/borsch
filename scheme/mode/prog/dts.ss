@@ -2,8 +2,8 @@
    (syntax-set-lang 'dts)
 )
 
-(add-to-list 'file-match-mode '(".*\\.dts$" . dts-mode))
-(add-to-list 'file-match-mode '(".*\\.dtsi$" . dts-mode))
+(file-match-mode-add '(".*\\.dts$" . dts-mode))
+(file-match-mode-add '(".*\\.dtsi$" . dts-mode))
 
 (define dts-syntax-keyword-match
    "[

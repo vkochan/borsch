@@ -30,11 +30,11 @@
    (syntax-set-lang 'scheme)
    (define-local text-word-func scheme-extract-word))
 
-(add-to-list 'file-match-mode '(".*\\.scm$" . scheme-mode))
-(add-to-list 'file-match-mode '(".*\\.sls$" . scheme-mode))
-(add-to-list 'file-match-mode '(".*\\.sps$" . scheme-mode))
-(add-to-list 'file-match-mode '(".*\\.ss$" . scheme-mode))
-(add-to-list 'file-match-mode '(".*\\.el$" . scheme-mode))
+(file-match-mode-add '(".*\\.scm$" . scheme-mode))
+(file-match-mode-add '(".*\\.sls$" . scheme-mode))
+(file-match-mode-add '(".*\\.sps$" . scheme-mode))
+(file-match-mode-add '(".*\\.ss$" . scheme-mode))
+(file-match-mode-add '(".*\\.el$" . scheme-mode))
 
 (define scheme-syntax-function-match "(list . (symbol) @function)")
 (define scheme-syntax-number-match "(number) @number")

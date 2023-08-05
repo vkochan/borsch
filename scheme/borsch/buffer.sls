@@ -67,8 +67,11 @@
       buffer-set-mark
       buffer-mark
       buffer-is-mark-set?
-      buffer-default-mode)
+      buffer-init-file-mode
+      file-match-mode-add
+      file-match-mode-remove)
    (import (chezscheme)
+           (pregexp)
            (borsch base)
            (borsch style)
            (borsch lists)
@@ -110,6 +113,7 @@
 
 (define $dir-locals-ht (make-hashtable string-hash string=?))
 
+(define file-match-mode-list (list))
 (define buffer-default-mode (make-parameter #f))
 (define current-buffer (make-parameter #f))
 
@@ -707,4 +711,19 @@
 (define (buffer-is-mark-set? buf)
    (if ($buffer-mark buf) #t #f) )
 
+(define (file-match-mode-add m)
+   (set! file-match-mode-list (append file-match-mode-list (list m))))
+
+(define (file-match-mode-remove m)
+   (set! file-match-mode-list (remove m file-match-mode-list)) )
+
+(define (buffer-init-file-mode)
+   (when (buffer-default-mode)
+      ((buffer-default-mode)) )
+   (for-each
+      (lambda (match)
+         (let ([fname (buffer-filename)])
+            (when (pregexp-match (car match) fname)
+               ((top-level-value (cdr match))))))
+      file-match-mode-list))
 )

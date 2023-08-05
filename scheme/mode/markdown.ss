@@ -2,7 +2,7 @@
    (syntax-set-lang 'markdown)
 )
 
-(add-to-list 'file-match-mode '(".*\\.md$" . markdown-mode))
+(file-match-mode-add '(".*\\.md$" . markdown-mode))
 
 
 (syntax-highlight 'markdown

@@ -114,8 +114,8 @@
    (bind-key-local "C-c C-a" c-assembler-output)
    (syntax-set-lang 'c))
 
-(add-to-list 'file-match-mode '(".*\\.h$" . c-mode))
-(add-to-list 'file-match-mode '(".*\\.c$" . c-mode))
+(file-match-mode-add '(".*\\.h$" . c-mode))
+(file-match-mode-add '(".*\\.c$" . c-mode))
 
 (define c-syntax-keywords-match
    "[

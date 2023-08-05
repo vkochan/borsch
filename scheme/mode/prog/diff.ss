@@ -1,8 +1,8 @@
 (define-mode diff-mode "Diff" text-mode
    (syntax-set-lang 'diff))
 
-(add-to-list 'file-match-mode '(".*\\.patch$" . diff-mode))
-(add-to-list 'file-match-mode '(".*\\.diff$" . diff-mode))
+(file-match-mode-add '(".*\\.patch$" . diff-mode))
+(file-match-mode-add '(".*\\.diff$" . diff-mode))
 
 (define diff-syntax-addition-match "(addition) @diff-addition")
 (define diff-syntax-deletion-match "(deletion) @diff-deletion")
