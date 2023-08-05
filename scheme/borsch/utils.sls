@@ -18,32 +18,23 @@
        (create-buffer name)))
 
 (define (buffer-open-file f)
-   (let ([bid (get-buffer-by-file f)]
-         [in-frame? #f]
-         [win #f])
-      (if bid
+   (let ([buf (get-buffer-by-file f)]
+         [in-frame? #f])
+      (if buf
          (let ()
-            (set! win (buffer-window bid))
-            (for-all
-               (lambda (w)
-                  (when (equal? w win)
-                     (set! in-frame? #t)
-                     #f))
-               (window-list))
-            (if in-frame?
-               (begin
-                  (window-focus win))
+            (if (buffer-is-visible? buf)
+               (window-focus (buffer-window buf))
                ;; else
-               (window-create bid))
-            bid)
+               (window-create buf))
+            buf)
          ;; else
-         (let* ([b (create-buffer)]
-                [ok (call-foreign (__cs_buf_file_open (buffer-id b) f))])
-            (window-reload-buffer b)
-            (with-current-buffer b
+         (let* ([buf (create-buffer)]
+                [ok (call-foreign (__cs_buf_file_open (buffer-id buf) f))])
+            (window-reload-buffer buf)
+            (with-current-buffer buf
                (buffer-set-name (buffer-filename))
                (buffer-init-file-mode))
-            b))))
+            buf))))
 
 (define buffer-window
    (case-lambda

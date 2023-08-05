@@ -73,7 +73,8 @@
       buffer-is-mark-set?
       buffer-init-file-mode
       file-match-mode-add
-      file-match-mode-remove)
+      file-match-mode-remove
+      buffer-is-visible?)
    (import
       (chezscheme)
       (pregexp)
@@ -755,4 +756,8 @@
             (when (pregexp-match (car match) fname)
                ((top-level-value (cdr match))))))
       file-match-mode-list))
+
+(define (buffer-is-visible? buf)
+   (member buf (frame-buffer-list)) )
+
 )

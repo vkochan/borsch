@@ -3,7 +3,6 @@
       window-id
       widget-list
       window-reload-buffer
-      buffer-is-visible?
       window-draw-char
       window-draw-text
       window-has-title?
@@ -132,15 +131,6 @@
       (lambda (win)
          (when (equal? buf (window-buffer win))
             (call-foreign (__cs_win_view_reload (window-id win) (buffer-id buf))) ))))
-
-(define (buffer-is-visible? buf)
-   (call/cc
-      (lambda (return)
-         (window-for-each
-            (lambda (win)
-               (when (equal? (window-buffer win) buf)
-                  (return #t) )))
-         (return #f) )))
 
 (define window-draw-char
    (case-lambda

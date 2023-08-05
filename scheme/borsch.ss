@@ -151,6 +151,7 @@
       buffer-init-file-mode
       file-match-mode-add
       file-match-mode-remove
+      buffer-is-visible?
 
       style-add
       style-modify
@@ -406,7 +407,6 @@
       window-id
       widget-list
       window-reload-buffer
-      buffer-is-visible?
       window-draw-char
       window-draw-text
       window-has-title?
