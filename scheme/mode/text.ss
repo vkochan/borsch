@@ -332,3 +332,5 @@
    (define-local text-clear-selection-hook text-mode-normal)
    (define-local linenum-enable #t)
    (text-mode-normal))
+
+(buffer-default-mode text-mode)

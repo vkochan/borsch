@@ -93,6 +93,7 @@
       buffer-for-each
       buffer-find
       buffer-get-by-file
+      buffer-default-mode
       current-buffer
       with-current-buffer
       buffer-line-num

@@ -16,6 +16,7 @@
       buffer-for-each
       buffer-find
       buffer-get-by-file
+      buffer-default-mode
       current-buffer
       with-current-buffer
       buffer-line-num
@@ -65,7 +66,8 @@
       buffer-cwd
       buffer-set-mark
       buffer-mark
-      buffer-is-mark-set?)
+      buffer-is-mark-set?
+      buffer-default-mode)
    (import (chezscheme)
            (borsch base)
            (borsch style)
@@ -108,6 +110,7 @@
 
 (define $dir-locals-ht (make-hashtable string-hash string=?))
 
+(define buffer-default-mode (make-parameter #f))
 (define current-buffer (make-parameter #f))
 
 (define $buffer-list (list))

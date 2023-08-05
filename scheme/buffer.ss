@@ -31,7 +31,8 @@
             (window-reload-buffer b)
             (with-current-buffer b
                (buffer-set-name (buffer-filename))
-               (text-mode)
+               (when (buffer-default-mode)
+                  ((buffer-default-mode)) )
                (when ok
                   (for-each
                      (lambda (match)
