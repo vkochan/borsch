@@ -18,7 +18,7 @@
        (create-buffer name)))
 
 (define (buffer-open-file f)
-   (let ([bid (buffer-get-by-file f)]
+   (let ([bid (get-buffer-by-file f)]
          [in-frame? #f]
          [win #f])
       (if bid

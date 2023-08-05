@@ -20,10 +20,6 @@
       frame-buffer-list
       frame-insert-buffer
       frame-remove-buffer
-      frame-for-each-buffer
-      frame-find-buffer
-      frame-get-buffer-by-file
-      frame-get-buffer
       frame-is-maximized?
       frame-is-sticky?
       frame-set-sticky
@@ -44,8 +40,7 @@
    (import
       (chezscheme)
       (borsch base)
-      (borsch lists)
-      (borsch buffer))
+      (borsch lists))
 
 (define-record-type $frame
    (fields
@@ -228,29 +223,6 @@
       [(fr b)
        (when fr
           ($frame-buffers-set! fr (remove b ($frame-buffers fr))))]))
-
-(define (frame-for-each-buffer fn)
-   (for-each
-      (lambda (b)
-         (fn b))
-      (frame-buffer-list)))
-
-(define (frame-find-buffer fn)
-   (let ([b (find
-               (lambda (b)
-                  (fn b))
-               (frame-buffer-list))])
-      b))
-
-(define (frame-get-buffer-by-file file)
-   (frame-find-buffer
-      (lambda (b)
-         (equal? file (buffer-filename b)))))
-
-(define (frame-get-buffer name)
-   (frame-find-buffer
-      (lambda (b)
-         (equal? name (buffer-name b)))))
 
 (define frame-is-maximized?
    (case-lambda

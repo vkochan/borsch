@@ -13,9 +13,14 @@
       make-buffer
       delete-buffer
       buffer-list
-      buffer-for-each
+      for-each-buffer
+      get-buffer
       find-buffer
-      buffer-get-by-file
+      get-buffer-by-file
+      for-each-buffer-in-frame
+      find-buffer-in-frame
+      get-buffer-by-file-in-frame
+      get-buffer-in-frame
       buffer-default-mode
       current-buffer
       with-current-buffer
@@ -52,7 +57,6 @@
       set-text-property
       highlight-range
       highlight-clear
-      get-buffer
       buffer-keymap
       buffer-set-keymap
       bind-key-local
@@ -70,12 +74,14 @@
       buffer-init-file-mode
       file-match-mode-add
       file-match-mode-remove)
-   (import (chezscheme)
-           (pregexp)
-           (borsch base)
-           (borsch style)
-           (borsch lists)
-           (borsch keymap))
+   (import
+      (chezscheme)
+      (pregexp)
+      (borsch base)
+      (borsch style)
+      (borsch lists)
+      (borsch frame)
+      (borsch keymap))
 
 (define __cs_buf_new (foreign-procedure "cs_buf_new" (int) scheme-object))
 (define __cs_buf_del (foreign-procedure "cs_buf_del" (int) void))
@@ -233,7 +239,7 @@
 (define (buffer-list)
    $buffer-list)
 
-(define (buffer-for-each fn)
+(define (for-each-buffer fn)
    (for-each
       (lambda (b)
          (fn b))
@@ -246,10 +252,33 @@
                (buffer-list))])
       b))
 
-(define (buffer-get-by-file file)
+(define (get-buffer-by-file file)
    (find-buffer
       (lambda (b)
          (equal? file (buffer-filename b)))))
+
+(define (for-each-buffer-in-frame fn)
+   (for-each
+      (lambda (b)
+         (fn b))
+      (frame-buffer-list)))
+
+(define (find-buffer-in-frame fn)
+   (let ([b (find
+               (lambda (b)
+                  (fn b))
+               (frame-buffer-list))])
+      b))
+
+(define (get-buffer-by-file-in-frame file)
+   (find-buffer-in-frame
+      (lambda (b)
+         (equal? file (buffer-filename b)))))
+
+(define (get-buffer-in-frame name)
+   (find-buffer-in-frame
+      (lambda (b)
+         (equal? name (buffer-name b)))))
 
 (define-syntax (with-current-buffer stx)
    (syntax-case stx ()

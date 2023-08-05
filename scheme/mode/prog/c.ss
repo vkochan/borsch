@@ -86,7 +86,7 @@
 
    (let* ([prog (format "/tmp/borsch-c-eval-~a" (random 65000))]
           [cmd (format "gcc -x c -o ~a - && ~a" prog prog)]
-          [buf (or (frame-get-buffer "c-eval-output") (make-buffer "c-eval-output"))])
+          [buf (or (get-buffer-in-frame "c-eval-output") (make-buffer "c-eval-output"))])
       (let* ([p (process-create cmd buf (lambda (status out err)
                                            (delete-file prog)
                                            (on-eval-exit status out err)))]

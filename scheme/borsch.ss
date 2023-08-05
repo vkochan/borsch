@@ -90,9 +90,13 @@
       make-buffer
       delete-buffer
       buffer-list
-      buffer-for-each
+      for-each-buffer
       find-buffer
-      buffer-get-by-file
+      get-buffer-by-file
+      for-each-buffer-in-frame
+      find-buffer-in-frame
+      get-buffer-by-file-in-frame
+      get-buffer-in-frame
       buffer-default-mode
       current-buffer
       with-current-buffer
@@ -360,10 +364,6 @@
       frame-buffer-list
       frame-insert-buffer
       frame-remove-buffer
-      frame-for-each-buffer
-      frame-find-buffer
-      frame-get-buffer-by-file
-      frame-get-buffer
       frame-is-maximized?
       frame-is-sticky?
       frame-set-sticky
