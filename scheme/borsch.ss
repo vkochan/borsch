@@ -484,7 +484,13 @@
       complete
       
       buffer-get-or-create
-      buffer-open-file)
+      buffer-open-file
+      
+      vterm-send-keys
+      vterm-string
+      vterm-current-line
+      vterm
+      vterm-mode-map)
    (import
       (borsch keymap)
       (borsch runtime)
@@ -508,4 +514,5 @@
       (borsch os)
       (borsch window)
       (borsch complete)
-      (borsch utils)))
+      (borsch utils)
+      (borsch vterm)))

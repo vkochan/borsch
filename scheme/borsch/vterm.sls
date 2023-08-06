@@ -1,3 +1,21 @@
+(library (borsch vterm)
+   (export
+      vterm-send-keys
+      vterm-string
+      vterm-current-line
+      vterm
+      vterm-mode-map)
+   (import
+      (chezscheme)
+      (borsch base)
+      (borsch buffer)
+      (borsch copybuf)
+      (borsch window)
+      (borsch keymap)
+      (borsch process)
+      (borsch text)
+      (borsch strings))
+
 (define c_tcgetpgrp (foreign-procedure "tcgetpgrp" (int) int))
 
 (define __cs_term_keys_send (foreign-procedure "cs_term_keys_send" (int string) int))
@@ -97,3 +115,4 @@
                 (buffer-set-name title)))
           (window-create b)
           b)]))
+)

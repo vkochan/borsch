@@ -21,7 +21,6 @@
 (include "common.ss")
 (include "layout.ss")
 (include "topbar.ss")
-(include "vterm.ss")
 (include "minibuf.ss")
 (include "mode/text.ss")
 (include "mode/dirb.ss")
