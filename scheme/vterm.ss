@@ -36,7 +36,6 @@
           [c (current-buffer)]
           [s (vterm-string c)])
       (with-current-buffer b
-         (text-mode)
          (bind-key-local "<Esc>" vterm-mode-copy-exit)
          (bind-key-local "q" vterm-mode-copy-exit)
          (buffer-set-name "Term Copy")
@@ -88,6 +87,7 @@
              [b (make-buffer)])
           (with-current-buffer b
              (define-local major-mode 'vterm-mode)
+             (define-local linenum-enable #f)
              (define-local process p)
              (set-local! pre-draw-func vterm-sync-title)
              (buffer-set-keymap 'vterm-mode-map)

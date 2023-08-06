@@ -172,7 +172,6 @@
                 [b (create-buffer)])
              (with-current-buffer b
                 (define-local status-buffer c)
-                (text-mode)
                 (if (eq? mode 'amend)
                    (text-insert (git-cmd-read "log --format=%B -n 1 HEAD")))
                 (with-saved-cursor
@@ -195,7 +194,6 @@
 
 (define (git-pull-changes-and-show)
    (let ([b (create-buffer)])
-      (text-mode)
       (process-create (git-cmd-format "pull") b)))
 
 (define (git-switch-branch)

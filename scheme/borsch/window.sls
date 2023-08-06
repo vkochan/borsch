@@ -871,13 +871,15 @@
         (call-foreign (__cs_win_update (window-id win)))]))
 
 (define (widget-create name x y w h type)
-   (let*([bid (make-buffer name #f)]
-         [win ($window-new bid #t)])
+   (let*([buf (make-buffer name #f)]
+         [win ($window-new buf #t)])
       (case type
          ['top    (set! $widget-list-top (append $widget-list-top (list win)))]
          ['bottom (set! $widget-list-bottom (append $widget-list-bottom (list win)))])
       (set! $widget-list (append $widget-list (list win)))
-      (frame-remove-buffer bid)
+      (with-current-buffer buf
+         (define-local linenum-enable #f) )
+      (frame-remove-buffer buf)
       (window-set-width win w)
       (window-set-height win h)
       (window-move win x y)

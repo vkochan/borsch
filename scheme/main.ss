@@ -44,7 +44,6 @@
                 "bright-black" "bright-red" "bright-green" "bright-yellow" "bright-magenta"
                 "bright-cyan" "bright-white")])
       (with-current-buffer (create-buffer)
-         (text-mode)
          (for-each
             (lambda (c)
                (text-insert (format "~a\n" c) `(style: (fg: ,c))))
@@ -104,15 +103,13 @@
          (set! i (+ i 1)))
       (ui-init ui-type)
       (run-hooks 'init-hook)
-      (minibuf-create)
       (topbar-create)
+      (minibuf-create)
       (init-key-bindings)
       (let ([m (make-buffer "*Messages*")])
          (buffer-ref-get m)
          (set! message-buf m)
-         (frame-remove-buffer m)
-         (with-current-buffer m
-            (text-mode)))
+         (frame-remove-buffer m))
       (init-hooks)
       (vterm)
       (when do-init?
@@ -179,9 +176,7 @@
          (set! message-recent m))))
 
 (define (new-text-buffer)
-   (let ([b (create-buffer)])
-      (with-current-buffer b
-         (text-mode))))
+   (create-buffer))
 
 (define (open-file-prompt)
    (minibuf-complete-path

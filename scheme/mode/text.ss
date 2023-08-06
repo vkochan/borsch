@@ -304,12 +304,10 @@
    (case-lambda
       [() 
        (let ([b (create-buffer)])
-          (text-mode)
           b)]
 
       [(n) 
        (let ([b (create-buffer n)])
-          (text-mode)
           b)]))
 
 (define-mode text-mode "Text" #f

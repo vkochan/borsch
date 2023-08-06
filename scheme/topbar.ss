@@ -145,14 +145,14 @@
 
 (define topbar-create
    (lambda ()
-      (let ([w (widget-create "*topbar*" 0 0 (ui-screen-width) 1 'top)])
-         (set! topbar-buffer (window-buffer w))
-         (set! topbar-window w))
       (for-each
          (lambda (n)
             (tab-create))
          '(1 2 3 4 5 6 7 8 9))
       (tab-switch 1)
+      (let ([w (widget-create "*topbar*" 0 0 (ui-screen-width) 1 'top)])
+         (set! topbar-buffer (window-buffer w))
+         (set! topbar-window w))
       (add-hook 'frame-switch-hook
          (lambda (frame)
             (topbar-draw)))

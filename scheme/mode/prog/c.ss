@@ -22,7 +22,6 @@
                    (begin
                       (delete-buffer out)
                       (window-create err)
-                      (text-mode)
                       (message "Compilation failed")))
                 (when fn
                    (fn status out err)))))]))
@@ -96,8 +95,6 @@
 
 (define (c-assembler-output)
    (define (on-gcc-exit status buf-out buf-err)
-      (with-current-buffer buf-out
-         (text-mode))
       (window-create buf-out))
 
    (let ([cmd "gcc -x c -masm=intel -fverbose-asm -O0 -S -o- -"]

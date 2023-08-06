@@ -193,7 +193,6 @@
      [(id)
       (let ([buf (create-buffer (format "Reply:~a" id))])
          (with-current-buffer buf
-            (text-mode)
             (bind-key-local "C-c C-c" mail-send-buffer)
          )
          (process-create (mail-notmuch-cmd (format "reply id:~a" id)) buf)
@@ -213,7 +212,6 @@
       (let ([plist (get-text-property 'data: (cursor) (+ 1 (cursor)))])
          (let ([entry (plist-get (first plist) 'data:)])
             (let ([b (create-buffer (format "Message-dump:~a" (if (mail-entry? entry) (mail-entry-id entry) entry)))])
-               (text-mode)
                (process-create
                   (if (mail-entry? entry)
                      (mail-notmuch-cmd (format "show --format=sexp --entire-thread=false id:~a" (mail-entry-id entry)))
@@ -274,7 +272,6 @@
             (let ([b (create-buffer (format "Message:~a" (mail-entry-id entry)))])
                (define-local mail-message-id (mail-entry-id entry))
                (bind-key-local "r" mail-reply-message)
-               (text-mode)
                (message "Loading mail ...")
 
                (process-create (mail-notmuch-cmd (format "show --format=sexp --entire-thread=false id:~a" (mail-entry-id entry))) b
@@ -464,7 +461,6 @@
 	 (text-insert (format "From: ~a <~a>\n" (mail-fullname) (mail-username)))
 	 (text-insert "To: \n")
 	 (text-insert "\n")
-         (text-mode)
          (bind-key-local "C-c C-c" mail-send-buffer)
       )
    )

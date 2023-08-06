@@ -225,6 +225,8 @@
        (let ([b ($make-buffer name kmap)])
           (buffer-insert b)
           (with-current-buffer b
+             (when (buffer-default-mode)
+                ((buffer-default-mode)) )
              (define-local pre-draw-func #f) )
           b)]))
 
@@ -748,8 +750,6 @@
    (set! file-match-mode-list (remove m file-match-mode-list)) )
 
 (define (buffer-init-file-mode)
-   (when (buffer-default-mode)
-      ((buffer-default-mode)) )
    (for-each
       (lambda (match)
          (let ([fname (buffer-filename)])
