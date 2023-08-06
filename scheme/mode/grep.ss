@@ -22,7 +22,7 @@
 
       [(s d)
        (let ([cwd (get-local current-dir (current-cwd))])
-          (grep s cwd (buffer-create-text)))]
+          (grep s cwd (create-buffer)))]
 
       [(s d b)
        (let ([cmd (grep-fmt-cmd s d)])
