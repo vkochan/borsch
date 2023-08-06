@@ -175,9 +175,6 @@
       (lambda (m)
          (set! message-recent m))))
 
-(define (new-text-buffer)
-   (create-buffer))
-
 (define (open-file-prompt)
    (minibuf-complete-path
       (lambda (f)
@@ -273,7 +270,7 @@
    (bind-key "M-w b"       layout-set-bstack)
    (bind-key "M-w m"       layout-toggle-maximized)
    (bind-key "M-w <Enter>" window-set-master)
-   (bind-key "M-b n"       new-text-buffer)
+   (bind-key "M-b n"       create-buffer)
    (bind-key "M-b S"       minibuf-switch-buffer-all)
    (bind-key "M-b s"       minibuf-switch-buffer-in-frame)
    (bind-key "M-b c"       window-close)
@@ -328,7 +325,7 @@
    (bind-key "C-g w g"   layout-set-grid)
    (bind-key "C-g w b"   layout-set-bstack)
    (bind-key "C-g m"   layout-toggle-maximized)
-   (bind-key "C-g n"   new-text-buffer)
+   (bind-key "C-g n"   create-buffer)
    (bind-key "C-g o"   open-file-prompt)
 
    (bind-key "C-x b S" minibuf-switch-buffer-all)
