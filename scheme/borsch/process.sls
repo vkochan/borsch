@@ -26,7 +26,6 @@
       process-with-input
       process-with-input/output
       program-exists?
-      process-initialize
       process-destroy-dead)
    (import
       (chezscheme)
@@ -509,8 +508,7 @@
                   str)
             )))))
 
-(define (process-initialize)
-   (add-hook 'process-exit-hook process-exit-handler)
-   (add-hook 'process-filter-hook process-filter-handler))
+(add-hook 'process-exit-hook process-exit-handler)
+(add-hook 'process-filter-hook process-filter-handler)
 
 )

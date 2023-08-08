@@ -15,7 +15,6 @@
 (import (borsch))
 
 (runtime-initialize)
-(process-initialize)
 (frame-initialize)
 
 (include "common.ss")

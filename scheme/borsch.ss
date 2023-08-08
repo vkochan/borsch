@@ -316,7 +316,6 @@
       process-with-input
       process-with-input/output
       program-exists?
-      process-initialize
       process-destroy-dead
       
       command-name
