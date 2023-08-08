@@ -32,6 +32,7 @@
 (include "mode/prog/diff.ss")
 (include "mode/prog/scheme.ss")
 (include "mode/prog/gnumake.ss")
+(include "mode/prog/python.ss")
 
 (define message-recent "")
 (define message-buf #f)

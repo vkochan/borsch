@@ -88,6 +88,7 @@ TSLanguage *tree_sitter_scheme();
 TSLanguage *tree_sitter_make();
 TSLanguage *tree_sitter_org();
 TSLanguage *tree_sitter_markdown();
+TSLanguage *tree_sitter_python();
 
 static SyntaxLang langs[] = {
 	{ "c", tree_sitter_c, },
@@ -97,6 +98,7 @@ static SyntaxLang langs[] = {
 	{ "gnumake", tree_sitter_make, },
 	{ "org", tree_sitter_org, },
 	{ "markdown", tree_sitter_markdown, },
+	{ "python", tree_sitter_python, },
 	{ NULL, NULL, NULL, 0 }
 };
 

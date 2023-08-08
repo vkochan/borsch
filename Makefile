@@ -57,7 +57,9 @@ SRCS += syntax/c/parser.c \
        syntax/org/scanner.c \
        syntax/org/parser.c \
        syntax/markdown/parser.c \
-       syntax/markdown/scanner.c
+       syntax/markdown/scanner.c \
+       syntax/python/parser.c \
+       syntax/python/scanner.c
 
 CFLAGS += -I$(SCH_PATH) \
    -DPROGNAME='"${PROGNAME}"' \
