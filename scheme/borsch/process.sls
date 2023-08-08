@@ -19,7 +19,6 @@
       process-status
       process-set-filter
       process-create
-      process-create-plist
       make-process
       with-process-temp-buffer
       with-process-buffer
@@ -33,7 +32,8 @@
       (chezscheme)
       (borsch base)
       (borsch buffer)
-      (borsch lists))
+      (borsch lists)
+      (borsch keyword))
 
 (define __cs_process_create (foreign-procedure "cs_process_create"
 				(string string boolean boolean boolean scheme-object boolean boolean) scheme-object))
@@ -339,31 +339,8 @@
    )
 )
 
-(define (process-create-plist plist)
-   (let ([cmd     (plist-get plist 'cmd:)]
-         [buf-out (plist-get plist 'stdout:)]
-         [buf-err (plist-get plist 'stderr:)]
-         [on-exit (plist-get plist 'on-exit:)]
-         [async?  (plist-get plist 'async?: #t)]
-         [pty?    (plist-get plist 'pty?: #t)]
-         [filter    (plist-get plist 'filter:)])
-      (process-create cmd buf-out buf-err on-exit async? pty? filter)))
-
-(define-syntax make-process
-   (lambda (x)
-      (syntax-case x ()
-         ((_)
-          #'(make-process "sh"))
-         ((_ cmd e* ...)
-          (let loop ([ret (list)]
-                     [e #'(e* ...)])
-             (syntax-case e ()
-                (() #`(process-create-plist (list #,@(append (list #''cmd: #'cmd) ret))))
-
-                ((k v kv* ...)
-                 (and (identifier? #'k)
-                      (member (syntax->datum #'k) '(stdout: stderr: on-exit: async?: pty?: filter:)))
-                 (loop (append ret (list #''k #'v)) #'(kv* ...)))))))))
+(define* (make-process ([cmd: "sh"] [stdout: #f] [stderr: #f] [on-exit: #f] [async?: #t] [pty?: #f] [filter: #f]))
+   (process-create cmd: stdout: stderr: on-exit: async?: pty?: filter:) )
 
 (define-syntax (with-process-temp-buffer stx)
    (syntax-case stx ()

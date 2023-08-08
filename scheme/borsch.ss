@@ -309,7 +309,6 @@
       process-status
       process-set-filter
       process-create
-      process-create-plist
       make-process
       with-process-temp-buffer
       with-process-buffer
