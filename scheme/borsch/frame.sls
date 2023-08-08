@@ -12,7 +12,6 @@
       frame-set-name
       frame-cwd
       frame-set-cwd
-      frame-cwd-handler
       frame-prev-layout
       frame-set-prev-layout
       frame-layout
@@ -35,8 +34,7 @@
       frame-set-first-window
       frame-last-window
       frame-set-last-window
-      frame-delete-window
-      frame-initialize)
+      frame-delete-window)
    (import
       (chezscheme)
       (borsch base)
@@ -358,12 +356,12 @@
        (let ([st ($frame-focus-stack fr)])
           (stack-remove! st w))]))
 
-(define (frame-initialize)
-   (current-cwd-handler frame-cwd-handler)
-   (add-hook 'buffer-insert-hook
-             (lambda (b)
-                (frame-insert-buffer b) ))
-   (add-hook 'buffer-remove-hook
-             (lambda (b)
-                (frame-remove-buffer b) )))
+(current-cwd-handler frame-cwd-handler)
+(add-hook 'buffer-insert-hook
+          (lambda (b)
+             (frame-insert-buffer b) ))
+(add-hook 'buffer-remove-hook
+          (lambda (b)
+             (frame-remove-buffer b) ))
+
 )

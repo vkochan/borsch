@@ -15,7 +15,6 @@
 (import (borsch))
 
 (runtime-initialize)
-(frame-initialize)
 
 (include "common.ss")
 (include "layout.ss")

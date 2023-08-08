@@ -355,7 +355,6 @@
       frame-set-name
       frame-cwd
       frame-set-cwd
-      frame-cwd-handler
       frame-prev-layout
       frame-set-prev-layout
       frame-layout
@@ -379,7 +378,6 @@
       frame-last-window
       frame-set-last-window
       frame-delete-window
-      frame-initialize
       
       ui-size-changed
       ui-init
