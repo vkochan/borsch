@@ -101,7 +101,7 @@
        (vterm prog title (current-cwd))]
 
       [(prog title cwd)
-       (let ([p (with-current-cwd cwd (process-create prog #f #f #f #t #t))]
+       (let ([p (with-current-cwd cwd (make-process [cmd: prog] [pty?: #t]))]
              [b (make-buffer)])
           (with-current-buffer b
              (define-local major-mode 'vterm-mode)
