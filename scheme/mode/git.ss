@@ -492,9 +492,9 @@
       (set-local! git-status-cursor (cursor))
       (text-delete)
       (process-create "git status" (current-buffer)
-         (lambda (status buf-out buf-err)
-            (with-current-buffer buf-out
-               (if (not (eq? 0 status))
+         (lambda (proc)
+            (with-current-buffer (process-stdout-buffer proc)
+               (if (not (eq? 0 (process-exit-status proc)))
                   #f
                   ;; else
                   (let ()

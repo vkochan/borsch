@@ -12,16 +12,16 @@
              (format "gcc ~a ~a ~a" (c-compile-options) (buffer-filename) ext-opts)
              buf-out
              buf-err
-             (lambda (status out err)
-                (if (eq? status 0)
+             (lambda (proc)
+                (if (eq? (process-exit-status proc) 0)
                    (begin
                       (message "Compilation is successful")
-                      (delete-buffer out)
-                      (delete-buffer err))
+                      (delete-buffer (process-stdout-buffer proc))
+                      (delete-buffer (process-stderr-buffer err)))
                    ;; else
                    (begin
-                      (delete-buffer out)
-                      (window-create err)
+                      (delete-buffer (process-stdout-buffer proc))
+                      (window-create (process-stderr-buffer proc))
                       (message "Compilation failed")))
                 (when fn
                    (fn status out err)))))]))
@@ -86,16 +86,16 @@
    (let* ([prog (format "/tmp/borsch-c-eval-~a" (random 65000))]
           [cmd (format "gcc -x c -o ~a - && ~a" prog prog)]
           [buf (or (get-buffer-in-frame "c-eval-output") (make-buffer "c-eval-output"))])
-      (let* ([p (process-create cmd buf (lambda (status out err)
+      (let* ([p (process-create cmd buf (lambda (proc)
                                            (delete-file prog)
-                                           (on-eval-exit status out err)))]
+                                           (on-eval-exit (process-exit-status proc) (process-stdout-buffer proc) (process-stderr-buffer proc))))]
              [port-in (process-port-in p)])
          (put-string port-in (wrap-expr (text-string)))
          (close-port port-in))))
 
 (define (c-assembler-output)
-   (define (on-gcc-exit status buf-out buf-err)
-      (window-create buf-out))
+   (define (on-gcc-exit proc)
+      (window-create (process-stdout-buffer proc)))
 
    (let ([cmd "gcc -x c -masm=intel -fverbose-asm -O0 -S -o- -"]
          [buf (make-buffer)])

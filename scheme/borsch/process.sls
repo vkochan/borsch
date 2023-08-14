@@ -9,14 +9,14 @@
       process-port-err
       process-pid
       process-pty
-      process-buffer-out
-      process-buffer-err
+      process-stdout-buffer
+      process-stderr-buffer
       process-is-alive?
       process-is-async?
       process-kill
       process-wait
       process-send-text
-      process-status
+      process-exit-status
       process-set-filter
       process-create
       make-process
@@ -123,6 +123,7 @@
       on-exit
       (mutable port-reader)
       (mutable filter)
+      (mutable status)
     )
 )
 
@@ -144,10 +145,10 @@
 (define (process-pty proc)
    (process-entry-pty proc))
 
-(define (process-buffer-out proc)
+(define (process-stdout-buffer proc)
    (process-entry-buffer-out proc))
 
-(define (process-buffer-err proc)
+(define (process-stderr-buffer proc)
    (process-entry-buffer-err proc))
 
 (define (process-on-exit proc)
@@ -190,7 +191,7 @@
    (lambda (proc)
       (let (
             [proc-out (process-port-out proc)]
-            [buf      (process-buffer-out proc)]
+            [buf      (process-stdout-buffer proc)]
            )
          (let ([s (get-string-some proc-out)])
             (when (not (eof-object? s))
@@ -254,11 +255,8 @@
 (define (process-send-text proc text)
    (call-foreign (__cs_process_text_send (process-pid proc) text)))
 
-(define process-status
-   (lambda (pid)
-      (call-foreign (__cs_process_status_get pid))
-   )
-)
+(define (process-exit-status proc)
+   (process-entry-status proc))
 
 (define (process-set-filter proc func)
    (process-filter-set! proc func)
@@ -319,7 +317,7 @@
                    [port-out (if (eq? out-fd -1) #f (open-fd-input-port out-fd (buffer-mode block) (native-transcoder)))]
                    [port-err (if (eq? err-fd -1) #f (open-fd-input-port err-fd (buffer-mode block) (native-transcoder)))]
                   )
-                (let ([proc (make-process-entry port-in port-out port-err pid pty buf-out buf-err on-exit reader filter)])
+                (let ([proc (make-process-entry port-in port-out port-err pid pty buf-out buf-err on-exit reader filter #f)])
                    (hashtable-set! %process-pid-ht pid proc)
                    (when buf-out
                       (hashtable-set! %process-fd-ht out-fd proc)
@@ -346,14 +344,14 @@
       ((_ cmd exp ...)
        #`(let ([b (make-buffer)])
             (process-create cmd b
-               (lambda (proc-status buf-out buf-err)
-                  (with-current-buffer buf-out
+               (lambda (proc)
+                  (with-current-buffer (process-stdout-buffer proc)
                      (begin
                         exp
 		        ...
                      )
                   )
-                  (delete-buffer buf-out)
+                  (delete-buffer (process-stdout-buffer proc))
                )
             )
          )
@@ -366,7 +364,7 @@
       ((_ cmd buf exp ...)
        #`(let ([b buf])
             (process-create cmd b
-               (lambda (proc-status buf-out buf-err)
+               (lambda (proc)
                   (begin
                      exp
 		     ...
@@ -460,16 +458,17 @@
             [proc (hashtable-ref %process-pid-ht pid #f)]
            )
          (when proc
-            (when (process-buffer-out proc)
-               (__process-on-read-sync (process-port-out proc) (process-buffer-out proc))
+            (process-entry-status-set! proc (call-foreign (__cs_process_status_get pid)))
+            (when (process-stdout-buffer proc)
+               (__process-on-read-sync (process-port-out proc) (process-stdout-buffer proc))
                (let ([fd (port-file-descriptor (process-port-out proc))])
                   (hashtable-delete! %process-fd-ht fd)
                   (call-foreign (__cs_evt_fd_handler_del fd))
                )
                (close-port (process-port-out proc))
             )
-            (when (process-buffer-err proc)
-               (__process-on-read-sync (process-port-err proc) (process-buffer-err proc))
+            (when (process-stderr-buffer proc)
+               (__process-on-read-sync (process-port-err proc) (process-stderr-buffer proc))
                (let ([fd (port-file-descriptor (process-port-err proc))])
                   (hashtable-delete! %process-fd-ht fd)
                   (call-foreign (__cs_evt_fd_handler_del fd))
@@ -481,10 +480,7 @@
             )
             (when (process-on-exit proc)
                (try
-                  ((process-on-exit proc)
-                     (process-status pid)
-                     (process-buffer-out proc)
-                     (process-buffer-err proc)))
+                  ((process-on-exit proc) proc) )
             )
             (when (process-port-reader proc)
                (unlock-object (process-port-reader proc))

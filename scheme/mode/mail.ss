@@ -92,7 +92,7 @@
              (message "Syncing mail ...")
              (process-create
                 (format "~a ; ~a" (mail-sync-cmd) (mail-notmuch-cmd "new")) #f #f
-                (lambda (status buf-out buf-err)
+                (lambda (proc)
                    (set! mail-is-syncing? #f)
                    (message "Mail synced")
                    (when func (func))
@@ -156,8 +156,8 @@
    (lambda (msg)
       (let (
             [proc (process-create "msmtp -t --read-envelope-from" #f
-                     (lambda (status buf-out buf-err)
-                        (if (eq? 0 status)
+                     (lambda (proc)
+                        (if (eq? 0 (process-exit-status proc))
                            (message "Mail sent successfully")
                            ;; else
                            (message "Mail sending failed")
@@ -275,8 +275,8 @@
                (message "Loading mail ...")
 
                (process-create (mail-notmuch-cmd (format "show --format=sexp --entire-thread=false id:~a" (mail-entry-id entry))) b
-                  (lambda (status buf-out buf-err)
-                     (let ([sexp (text-eval buf-out)])
+                  (lambda (proc)
+                     (let ([sexp (text-eval (process-stdout-buffer proc))])
                         (with-current-buffer b
                            (text-delete)
                            (mail-for-each-message
@@ -412,9 +412,9 @@
                [buf-ret (make-buffer)]
               )
             (process-create (mail-notmuch-cmd (format "show --entire-thread=true --format=sexp --body=false thread:~a" tid)) buf-ret
-               (lambda (status buf-out buf-err)
-                  (mail-render-thread tid buf-out)
-                  (delete-buffer buf-out)
+               (lambda (proc)
+                  (mail-render-thread tid (process-stdout-buffer proc))
+                  (delete-buffer (process-stdout-buffer proc))
                )
             )
          )
@@ -673,12 +673,12 @@
              [buf-ret (make-buffer)]
             )
          (process-create cmd buf-ret
-            (lambda (status buf-out buf-err)
+            (lambda (proc)
                (with-saved-cursor
-                  (mail-render-thread-list qry buf-draw buf-out)
+                  (mail-render-thread-list qry buf-draw (process-stdout-buffer proc))
                   (cursor-to-line-begin)
                )
-               (delete-buffer buf-out)
+               (delete-buffer (process-stdout-buffer proc))
             )
          )
        )

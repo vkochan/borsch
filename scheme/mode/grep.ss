@@ -35,8 +35,8 @@
              (buffer-set-mode-name "Grep")
              (text-delete))
           (process-create cmd b
-             (lambda (status buf-out buf-err)
-                (with-current-buffer buf-out
+             (lambda (proc)
+                (with-current-buffer (process-stdout-buffer proc)
                    (buffer-set-name (format "Finished: ~a" (get-local grep-search-word))))))
           #t)]))
 

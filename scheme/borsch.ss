@@ -299,14 +299,14 @@
       process-port-err
       process-pid
       process-pty
-      process-buffer-out
-      process-buffer-err
+      process-stdout-buffer
+      process-stderr-buffer
       process-is-alive?
       process-is-async?
       process-kill
       process-wait
       process-send-text
-      process-status
+      process-exit-status
       process-set-filter
       process-create
       make-process
