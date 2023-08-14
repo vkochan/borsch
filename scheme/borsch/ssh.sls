@@ -10,7 +10,7 @@
       (chezscheme)
       (pregexp))
 
-(define ssh-address-regex "^(\\w+\\@)?((?:\\w|\\.|\\-)+)(?:\\:([0-9]+)?(\\/\\w*)?)?$")
+(define ssh-address-regex "^([A-Za-z.-]+\\@)?((?:\\w|\\.|\\-)+)(?:\\:([0-9]+)?(\\/\\w*)?)?$")
 
 (define-record-type ssh-address
    (fields
