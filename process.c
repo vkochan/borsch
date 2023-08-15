@@ -98,11 +98,6 @@ void process_remove(Process *proc)
 		proc->next->prev = proc->prev;
 }
 
-bool process_is_async(Process *proc)
-{
-	return proc->async;
-}
-
 void process_died_set(Process *proc, bool is_died)
 {
 	proc->is_died = is_died;
@@ -449,7 +444,7 @@ static pid_t __process_fork(const char *p, const char *argv[], const char *cwd, 
 	return pid;
 }
 
-Process *process_create(const char *prog, const char *cwd, int *in, int *out, int *err, const char **env, bool pty, bool async)
+Process *process_create(const char *prog, const char *cwd, int *in, int *out, int *err, const char **env, bool pty)
 {
 	const char *pargs[4] = { shell, NULL };
 	Vt *term = NULL;
@@ -477,7 +472,6 @@ Process *process_create(const char *prog, const char *cwd, int *in, int *out, in
 		proc->prog = strdup(prog);
 	if (cwd)
 		proc->cwd = strdup(cwd);
-	proc->async = async;
 	proc->term = term;
 	proc->env = env;
 

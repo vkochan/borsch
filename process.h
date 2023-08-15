@@ -23,7 +23,6 @@ typedef struct Process
 	pid_t 			pid;
 	Buffer 			*buf;
 	volatile sig_atomic_t 	is_died;
-	bool			async;
 } Process;
 
 Process *process_first(void);
@@ -32,7 +31,6 @@ Process *process_alloc(void);
 void process_free(Process *proc);
 void process_insert(Process *proc);
 void process_remove(Process *proc);
-bool process_is_async(Process *proc);
 void process_died_set(Process *proc, bool is_died);
 bool process_is_died(Process *proc);
 int process_status_get(Process *proc);
@@ -50,6 +48,6 @@ void process_destroy_dead(void);
 void process_cleanup(void);
 const char* process_shell(void);
 void process_init(void);
-Process *process_create(const char *prog, const char *cwd, int *in, int *out, int *err, const char **env, bool pty, bool async);
+Process *process_create(const char *prog, const char *cwd, int *in, int *out, int *err, const char **env, bool pty);
 
 #endif /* PROCESS_H */

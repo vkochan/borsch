@@ -35,13 +35,11 @@
       (borsch keyword))
 
 (define __cs_process_create (foreign-procedure "cs_process_create"
-				(string string boolean boolean boolean scheme-object boolean boolean) scheme-object))
+				(string string boolean boolean boolean scheme-object boolean) scheme-object))
 
 (define __cs_process_wait (foreign-procedure "cs_process_wait" (int) scheme-object))
 
 (define __cs_process_is_alive (foreign-procedure "cs_process_is_alive" (int) scheme-object))
-
-(define __cs_process_is_async (foreign-procedure "cs_process_is_async" (int) scheme-object))
 
 (define __cs_process_status_get (foreign-procedure "cs_process_status_get" (int) scheme-object))
 
@@ -124,6 +122,7 @@
       (mutable port-reader)
       (mutable filter)
       (mutable status)
+      async?
     )
 )
 
@@ -169,11 +168,8 @@
    )
 )
 
-(define process-is-async?
-   (lambda (proc)
-      (call-foreign (__cs_process_is_async (process-pid proc)))
-   )
-)
+(define (process-is-async? proc)
+   (process-entry-async? proc))
 
 (define process-kill
    (lambda (pid)
@@ -299,7 +295,7 @@
                                  (not (not buf-err))
                                  env
                                  pty?
-                                 async?))
+                                 ))
              ]
             )
           (let (
@@ -317,7 +313,7 @@
                    [port-out (if (eq? out-fd -1) #f (open-fd-input-port out-fd (buffer-mode block) (native-transcoder)))]
                    [port-err (if (eq? err-fd -1) #f (open-fd-input-port err-fd (buffer-mode block) (native-transcoder)))]
                   )
-                (let ([proc (make-process-entry port-in port-out port-err pid pty buf-out buf-err on-exit reader filter #f)])
+                (let ([proc (make-process-entry port-in port-out port-err pid pty buf-out buf-err on-exit reader filter #f async?)])
                    (hashtable-set! %process-pid-ht pid proc)
                    (when buf-out
                       (hashtable-set! %process-fd-ht out-fd proc)

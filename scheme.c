@@ -1192,7 +1192,7 @@ void scheme_process_destroy_dead(void)
 	process_destroy_dead();
 }
 
-ptr scheme_process_create(const char *prog, const char *cwd, bool redir_in, bool redir_out, bool redir_err, ptr env, bool pty, bool async)
+ptr scheme_process_create(const char *prog, const char *cwd, bool redir_in, bool redir_out, bool redir_err, ptr env, bool pty)
 {
 	int *in_ptr = NULL, *out_ptr = NULL, *err_ptr = NULL;
 	int in = -1, out = -1, err = -1;
@@ -1208,7 +1208,7 @@ ptr scheme_process_create(const char *prog, const char *cwd, bool redir_in, bool
 	if (redir_err)
 		err_ptr = &err;
 
-	proc = process_create(prog, cwd, in_ptr, out_ptr, err_ptr, scheme_list_to_env(env, NULL, 0), pty, async);
+	proc = process_create(prog, cwd, in_ptr, out_ptr, err_ptr, scheme_list_to_env(env, NULL, 0), pty);
 	if (!proc)
 		return Sfalse;
 
@@ -1268,16 +1268,6 @@ ptr scheme_process_is_alive(int pid)
 	} else {
 		return Sboolean(true);
 	}
-}
-
-ptr scheme_process_is_async(int pid)
-{
-	Process *proc = process_by_pid(pid);
-
-	if (proc) {
-		return Sboolean(process_is_async(proc));
-	}
-	return Sboolean(false);
 }
 
 ptr scheme_process_status_get(int pid)
@@ -1488,7 +1478,6 @@ static void scheme_export_symbols(void)
 	Sregister_symbol("cs_timer_time_set", scheme_timer_time_set);
 
 	Sregister_symbol("cs_process_is_alive", scheme_process_is_alive);
-	Sregister_symbol("cs_process_is_async", scheme_process_is_async);
 	Sregister_symbol("cs_process_status_get", scheme_process_status_get);
 	Sregister_symbol("cs_process_filter_enable", scheme_process_filter_enable);
 	Sregister_symbol("cs_process_text_send", scheme_process_text_send);
