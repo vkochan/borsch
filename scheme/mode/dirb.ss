@@ -212,7 +212,7 @@
                            (lambda (v)
                               (let ([old (string-append (dirb-current-dir) "/" (get-local defval))]
                                     [new (string-append (dirb-current-dir) "/" v)])
-                                 (dirb-copy old new)
+                                 (dirb-move old new)
                                  (dirb-reload)
                                  (dirb-clear-selection)))))
                      ;; else
