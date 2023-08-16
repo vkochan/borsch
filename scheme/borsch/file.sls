@@ -16,6 +16,7 @@
    (import
       (borsch keyword)
       (borsch strings)
+      (borsch process)
       (pregexp)
       (chezscheme))
 
@@ -41,7 +42,11 @@
       ;; else
       (delete-file f)))
 
-(define* (file-copy (from to) ([recur?: #f]))
+(define* (file-copy (from to) ([recur?: #f] [async?: #f] [on-ready: #f]))
+   (define (copy-exit-handler proc)
+      (when on-ready:
+         (on-ready: from to) ))
+
    (when (equal? from to)
       (error 'file-copy "Files are the same" from))
    (when (not (file-exists? from))
@@ -49,7 +54,9 @@
    (when (and (not (file-exists? to))
               (not (file-exists? (path-parent to))) )
       (error 'file-copy "Destination file folder does not exist" to))
-   (system (format "cp ~a ~a ~a" (if recur?: "-r" "") from to)) )
+   (let ([cmd (format "cp ~a ~a ~a" (if recur?: "-r" "") from to)])
+      (make-process [cmd: cmd] [async?: async?:] [on-exit: copy-exit-handler])
+      (void)))
 
 (define* (file-mkdir (path) ([recur?: #f][mode: #f]))
    (define (mkdir-try path)
