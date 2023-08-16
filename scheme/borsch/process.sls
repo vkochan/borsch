@@ -323,6 +323,8 @@
                       (hashtable-set! %process-fd-ht err-fd proc)
                       (call-foreign (__cs_evt_fd_handler_add err-fd (foreign-callable-entry-point reader)))
                    )
+                   (when (not async?)
+                      (process-wait proc) )
                    proc
                 )
              )
