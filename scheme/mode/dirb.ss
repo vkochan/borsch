@@ -195,13 +195,28 @@
                (dirb-reload))))))
 
 (define (dirb-paste-selection)
+   (define (copy-async from to)
+      (file-copy from to [recur?: #t] [async?: #t]
+                 [on-ready: (lambda (from to)
+                               (let ([total (get-local dirb-copy-total)]
+                                     [left (- (get-local dirb-copy-left)
+                                              1)])
+                                  (set-local! dirb-copy-left left)
+                                  (if (eq? left 0)
+                                     (begin
+                                        (message (format "~d files were copied" total))
+                                        (when (equal? to (dirb-current-dir))
+                                           (dirb-reload) )))) )] ))
+
    (let ([count (length (dirb-get-selection))])
       (if (> count 0)
          (begin
+            (define-local dirb-copy-total count)
+            (define-local dirb-copy-left count)
             (if (> count 1)
                (for-each
                   (lambda (p)
-                     (dirb-copy p (dirb-current-dir)))
+                     (copy-async p (dirb-current-dir)))
                   (dirb-get-selection))
                ;; else - single file, check if copy to same dir
                (let ([p (first (dirb-get-selection))])
@@ -217,13 +232,9 @@
                                  (dirb-clear-selection)))))
                      ;; else
                      (begin
-                        (dirb-reload)
                         (dirb-clear-selection)
-                        (dirb-copy p (dirb-current-dir))
-                        (message (format "~d files were copied" count))))))
-            (dirb-reload)
-            (dirb-clear-selection)
-            (message (format "~d files were copied" count)))
+                        (copy-async p (dirb-current-dir)) ))))
+            (dirb-clear-selection) )
          ;; else
          (begin
             (message "No files were selected")))))
