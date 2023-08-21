@@ -33,8 +33,18 @@
 (define (dirb-move-local from to)
    (system (format "mv ~a ~a" from to)))
 
-(define (dirb-copy-local from to opts)
-   (file-copy from to [recur?: #t]))
+(define (dirb-copy-local from to)
+   (file-copy from to [recur?: #t] [async?: #t]
+              [on-ready: (lambda (from to)
+                            (let ([total (get-local dirb-copy-total)]
+                                  [left (- (get-local dirb-copy-left)
+                                           1)])
+                               (set-local! dirb-copy-left left)
+                               (if (eq? left 0)
+                                  (begin
+                                     (message (format "~d files were copied" total))
+                                     (when (equal? to (dirb-current-dir))
+                                        (dirb-reload) )))) )] ))
 
 (define (dirb-delete-local path opts)
    (file-delete-recursive path))
@@ -49,7 +59,7 @@
    ((get-local dirb-move-func) from to))
 
 (define (dirb-copy from to)
-   ((get-local dirb-copy-func) from to '()))
+   ((get-local dirb-copy-func) from to))
 
 (define (dirb-mkdir dir)
    ((get-local dirb-mkdir-func) dir))
@@ -195,19 +205,6 @@
                (dirb-reload))))))
 
 (define (dirb-paste-selection)
-   (define (copy-async from to)
-      (file-copy from to [recur?: #t] [async?: #t]
-                 [on-ready: (lambda (from to)
-                               (let ([total (get-local dirb-copy-total)]
-                                     [left (- (get-local dirb-copy-left)
-                                              1)])
-                                  (set-local! dirb-copy-left left)
-                                  (if (eq? left 0)
-                                     (begin
-                                        (message (format "~d files were copied" total))
-                                        (when (equal? to (dirb-current-dir))
-                                           (dirb-reload) )))) )] ))
-
    (let ([count (length (dirb-get-selection))])
       (if (> count 0)
          (begin
@@ -216,7 +213,7 @@
             (if (> count 1)
                (for-each
                   (lambda (p)
-                     (copy-async p (dirb-current-dir)))
+                     (dirb-copy p (dirb-current-dir)))
                   (dirb-get-selection))
                ;; else - single file, check if copy to same dir
                (let ([p (first (dirb-get-selection))])
@@ -233,7 +230,7 @@
                      ;; else
                      (begin
                         (dirb-clear-selection)
-                        (copy-async p (dirb-current-dir)) ))))
+                        (dirb-copy p (dirb-current-dir)) ))))
             (dirb-clear-selection) )
          ;; else
          (begin
