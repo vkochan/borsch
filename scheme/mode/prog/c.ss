@@ -17,22 +17,22 @@
                    (begin
                       (message "Compilation is successful")
                       (delete-buffer (process-stdout-buffer proc))
-                      (delete-buffer (process-stderr-buffer err)))
+                      (delete-buffer (process-stderr-buffer proc)))
                    ;; else
                    (begin
                       (delete-buffer (process-stdout-buffer proc))
                       (window-create (process-stderr-buffer proc))
                       (message "Compilation failed")))
                 (when fn
-                   (fn status out err)))))]))
+                   (fn proc)))))]))
 
 (define (c-compile-and-run-buffer)
    (let ([prog (path-root (buffer-filename))]
          [file (buffer-filename)])
       (c-compile-buffer
          (format "-o ~a" prog)
-         (lambda (status out err)
-            (when (eq? status 0)
+         (lambda (proc)
+            (when (eq? (process-exit-status proc) 0)
                (vterm (format "~a ; read" prog)))))))
 
 (define (c-compile-and-eval-buffer)
