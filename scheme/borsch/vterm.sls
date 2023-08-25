@@ -1,6 +1,7 @@
 (library (borsch vterm)
    (export
       vterm-send-keys
+      vterm-send-text
       vterm-string
       vterm-current-line
       vterm

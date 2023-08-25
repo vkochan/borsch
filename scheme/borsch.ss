@@ -483,6 +483,7 @@
       buffer-open-file
       
       vterm-send-keys
+      vterm-send-text
       vterm-string
       vterm-current-line
       vterm
