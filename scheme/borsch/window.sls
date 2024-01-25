@@ -260,7 +260,7 @@
           (with-current-buffer (window-buffer win)
              (let ([pre-draw (get-local pre-draw-func)])
                 (when pre-draw
-                   (pre-draw) ))
+                   (try (pre-draw)) ))
              (buffer-set-dirty #f) )
           (window-draw-selection win)
           (run-hooks 'text-draw-hook win)
